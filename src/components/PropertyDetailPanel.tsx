@@ -22,7 +22,7 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
   return (
-    <div className="absolute right-0 top-0 bottom-0 z-[900] w-[360px] bg-white border-l border-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250">
+    <div className="absolute left-0 top-0 bottom-0 z-[900] w-[360px] bg-white border-l border-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250">
 
       {/* ── Image ── */}
       <div className="relative flex-shrink-0 h-48 overflow-hidden">
