@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Search, Menu, X, MapPin, Bell, User } from "lucide-react";
+import { Search, Menu, X, MapPin, Bell, User, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isMap = location.pathname === "/map";
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
@@ -32,6 +36,15 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <Button
+              variant={isMap ? "default" : "outline"}
+              size="sm"
+              className="hidden md:flex gap-1.5 font-medium"
+              onClick={() => navigate(isMap ? "/" : "/map")}
+            >
+              <Map className="w-4 h-4" />
+              {isMap ? "목록 보기" : "지도 검색"}
+            </Button>
             <Button variant="ghost" size="icon" className="hidden md:flex text-muted-foreground hover:text-primary">
               <Bell className="w-5 h-5" />
             </Button>
