@@ -1,5 +1,5 @@
-import { MapPin, Phone, ChevronRight, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Phone, ChevronRight, ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { useState, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 const TYPE_BG: Record<string, string> = {
@@ -8,6 +8,57 @@ const TYPE_BG: Record<string, string> = {
   "식당·카페": "bg-orange-50 text-accent",
   "공장·창고": "bg-green-50 text-green-700",
   "병원·학원": "bg-red-50 text-red-700",
+};
+
+/* Daily-limit helpers — key: "contact_reveal_{propId}_{type}" → "YYYY-MM-DD" */
+const today = () => new Date().toISOString().slice(0, 10);
+const revealKey = (id: number, type: string) => `contact_reveal_${id}_${type}`;
+const hasRevealedToday = (id: number, type: string) => localStorage.getItem(revealKey(id, type)) === today();
+const markRevealed = (id: number, type: string) => localStorage.setItem(revealKey(id, type), today());
+
+interface ContactRowProps {
+  propId: number;
+  type: "owner" | "manager";
+  number: string;
+}
+
+const ContactRow = ({ propId, type, number }: ContactRowProps) => {
+  const label = type === "owner" ? "건물주" : "관리인";
+  const [revealed, setRevealed] = useState(() => hasRevealedToday(propId, type));
+
+  const handleReveal = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (revealed) return;
+    markRevealed(propId, type);
+    setRevealed(true);
+  }, [revealed, propId, type]);
+
+  return (
+    <div className="flex items-center justify-between gap-1 mt-1">
+      <div className="flex items-center gap-1">
+        <Phone className="w-3 h-3 text-primary flex-shrink-0" />
+        <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
+      </div>
+      {revealed ? (
+        <a
+          href={`tel:${number}`}
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs font-bold text-primary hover:underline"
+        >
+          {number}
+        </a>
+      ) : (
+        <button
+          type="button"
+          onClick={handleReveal}
+          className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border rounded-lg px-2 py-0.5 transition-all"
+        >
+          <Eye className="w-3 h-3" />
+          번호 보기
+        </button>
+      )}
+    </div>
+  );
 };
 
 interface MapSidebarProps {
@@ -37,7 +88,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
         }}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0"
+        <div
+          className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0"
           style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
         >
           <div className="flex items-center gap-2">
@@ -92,16 +144,20 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       <span className="text-sm font-extrabold text-accent">{prop.monthly}</span>
                     </div>
 
-                    {/* 전화번호 */}
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Phone className="w-3 h-3 text-primary flex-shrink-0" />
-                      <a
-                        href={`tel:${prop.contact}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-xs font-bold text-primary hover:underline"
-                      >
-                        {prop.contact}
-                      </a>
+                    {/* 연락처 */}
+                    <div className="border-t border-border/50 pt-1.5 mt-0.5 flex flex-col gap-0.5">
+                      {prop.contactOwner && (
+                        <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />
+                      )}
+                      {prop.contactManager && (
+                        <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />
+                      )}
+                      {!prop.contactOwner && !prop.contactManager && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="w-3 h-3 text-primary flex-shrink-0" />
+                          <span className="text-xs font-bold text-primary">{prop.contact}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </button>
