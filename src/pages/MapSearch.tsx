@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
-import MapFilterBar, { FilterState } from "@/components/MapFilterBar";
+import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const MapSearch = () => {
@@ -10,12 +10,7 @@ const MapSearch = () => {
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
-  const [filters, setFilters] = useState<FilterState>({
-    dealType: "전체",
-    depositRange: "전체",
-    monthlyRange: "전체",
-    areaRange: "전체",
-  });
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const filtered = MAP_PROPERTIES.filter((p) => {
     if (activeType !== "전체" && p.type !== activeType) return false;
