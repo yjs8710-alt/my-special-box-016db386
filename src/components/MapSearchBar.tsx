@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
 
 const TYPES = [
   { label: "전체", icon: "🗺" },
@@ -17,17 +17,17 @@ interface MapSearchBarProps {
 }
 
 const MapSearchBar = ({ query, onQueryChange, activeType, onTypeChange }: MapSearchBarProps) => (
-  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-2xl px-4 pointer-events-none">
-    <div className="pointer-events-auto bg-white rounded-xl shadow-2xl border border-border overflow-hidden">
+  <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-xl px-4 pointer-events-none">
+    <div className="pointer-events-auto rounded-2xl overflow-hidden"
+      style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.18), 0 2px 8px rgba(0,0,0,0.12)" }}
+    >
       {/* Search row */}
-      <div className="flex items-center gap-0">
-        {/* Region */}
-        <div className="flex items-center gap-1.5 px-4 border-r border-border h-12 flex-shrink-0 cursor-pointer hover:bg-muted/50 transition-colors">
-          <span className="text-xs font-semibold text-primary whitespace-nowrap">서울 전체</span>
-          <svg className="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+      <div className="flex items-center bg-white">
+        {/* Region selector */}
+        <button className="flex items-center gap-1 px-4 border-r border-border h-12 flex-shrink-0 hover:bg-muted/40 transition-colors">
+          <span className="text-xs font-bold text-primary whitespace-nowrap">서울 전체</span>
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        </button>
 
         {/* Input */}
         <div className="flex items-center flex-1 px-3 gap-2">
@@ -40,33 +40,35 @@ const MapSearchBar = ({ query, onQueryChange, activeType, onTypeChange }: MapSea
             className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground h-12"
           />
           {query && (
-            <button onClick={() => onQueryChange("")} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => onQueryChange("")} className="text-muted-foreground hover:text-foreground transition-colors">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Filter + Search button */}
-        <div className="flex items-center gap-0 flex-shrink-0">
-          <button className="flex items-center gap-1.5 px-3 h-12 border-l border-border text-muted-foreground hover:text-primary transition-colors">
-            <SlidersHorizontal className="w-4 h-4" />
-            <span className="text-xs font-medium hidden sm:block">필터</span>
-          </button>
-          <button className="h-12 px-5 bg-primary hover:bg-primary/90 text-white text-sm font-bold transition-colors rounded-r-xl">
-            검색
-          </button>
-        </div>
+        {/* Filter */}
+        <button className="flex items-center gap-1.5 px-3 h-12 border-l border-border text-muted-foreground hover:text-primary transition-colors">
+          <SlidersHorizontal className="w-4 h-4" />
+          <span className="text-xs font-medium hidden sm:block">필터</span>
+        </button>
+
+        {/* Search button */}
+        <button className="h-12 px-5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold transition-colors rounded-r-none"
+          style={{ borderRadius: "0" }}
+        >
+          검색
+        </button>
       </div>
 
       {/* Type filter chips */}
-      <div className="flex gap-1 px-3 py-2 bg-muted/30 border-t border-border overflow-x-auto scrollbar-none">
+      <div className="flex gap-1.5 px-3 py-2.5 bg-primary/5 border-t border-border overflow-x-auto scrollbar-none">
         {TYPES.map((t) => (
           <button
             key={t.label}
             onClick={() => onTypeChange(t.label)}
-            className={`flex items-center gap-1 flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1 flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 ${
               activeType === t.label
-                ? "bg-primary text-white shadow-sm"
+                ? "bg-primary text-primary-foreground shadow-md scale-105"
                 : "bg-white text-foreground border border-border hover:border-primary hover:text-primary"
             }`}
           >
