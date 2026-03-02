@@ -22,6 +22,8 @@ export interface MapProperty {
   image: string;
   description: string;
   contact: string;
+  contactOwner?: string;
+  contactManager?: string;
   agentName: string;
   manageFee: string;
   parking: string;
@@ -49,6 +51,8 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property1,
     description: "강남역 2번 출구 도보 1분 거리의 초역세권 1층 상가입니다. 유동인구가 매우 많으며 현재 인테리어가 잘 되어있어 즉시 입점 가능합니다. 전면 유리창으로 가시성이 뛰어납니다.",
     contact: "02-1234-5678",
+    contactOwner: "010-1111-2222",
+    contactManager: "010-3333-4444",
     agentName: "강남부동산중개",
     manageFee: "30만원",
     parking: "2대",
@@ -74,6 +78,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property2,
     description: "여의도 IFC몰 바로 인근 고층 오피스 빌딩입니다. 한강 뷰가 가능하며 회의실 공용 사용 가능. 최신 시스템 에어컨, 이중창 설치 완료. 금융기관, 증권사 밀집 지역으로 비즈니스 환경 최적입니다.",
     contact: "02-2345-6789",
+    contactOwner: "010-2222-3333",
     agentName: "여의도공실박스",
     manageFee: "80만원",
     parking: "4대",
@@ -99,6 +104,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property3,
     description: "홍대 걷고싶은거리 인근 유동인구 최상위 상권입니다. 전 임차인 카페 운영으로 주방 후드, 에어컨 기본 설치. 외국인 관광객 및 대학생 유입이 많아 F&B 업종에 최적화된 공간입니다.",
     contact: "02-3456-7890",
+    contactManager: "010-5555-6666",
     agentName: "마포공실중개",
     manageFee: "20만원",
     parking: "없음",
@@ -124,6 +130,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property4,
     description: "이태원 세계음식거리 핵심 위치의 대형 식당 공실입니다. 주방 시설 일부 잔류, 대형 환기 시설 완비. 외국인 관광 특수 지역으로 다국적 음식 브랜드 입점 문의 다수.",
     contact: "02-4567-8901",
+    contactOwner: "010-4444-5555",
     agentName: "용산부동산",
     manageFee: "40만원",
     parking: "3대",
@@ -149,6 +156,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property5,
     description: "판교 테크노밸리 IT 기업 밀집 지역 대형 오피스입니다. 분리된 회의실 4개, 탕비실, 서버룸 구성 가능. 신분당선 판교역 도보 5분, 주차장 넉넉. IT·스타트업·벤처기업에 최적입니다.",
     contact: "031-1234-5678",
+    contactManager: "010-6666-7777",
     agentName: "판교테크빌딩",
     manageFee: "150만원",
     parking: "10대",
@@ -174,6 +182,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property6,
     description: "신촌 로데오거리 소형 상가로 대학생 유동인구가 풍부합니다. 소자본 창업에 최적화된 크기이며 인테리어 공사 허용. 연세대·이화여대 인근으로 젊은 층 타겟 업종 추천.",
     contact: "02-5678-9012",
+    contactOwner: "010-7777-8888",
     agentName: "신촌공실랩",
     manageFee: "10만원",
     parking: "없음",
