@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X, Bell, User, ChevronDown, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 
 const NAV_ITEMS = [
   { label: "상가임대", sub: ["1층 상가", "2층 이상", "지하 상가"] },
@@ -13,9 +14,11 @@ const NAV_ITEMS = [
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<string | null>(null);
+  const [showRegister, setShowRegister] = useState(false);
 
   return (
     <header className="sticky top-0 z-[950]" style={{ background: "hsl(var(--header-bg))" }}>
+      {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
       {/* Top bar */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
@@ -83,6 +86,7 @@ const Header = () => {
               </button>
               <Button
                 size="sm"
+                onClick={() => setShowRegister(true)}
                 className="hidden md:flex bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-4 rounded-full"
               >
                 매물 등록
@@ -106,7 +110,7 @@ const Header = () => {
               {item.label}
             </a>
           ))}
-          <Button size="sm" className="bg-accent text-white w-full mt-2 rounded-full font-semibold">
+          <Button size="sm" onClick={() => setShowRegister(true)} className="bg-accent text-white w-full mt-2 rounded-full font-semibold">
             매물 등록
           </Button>
         </div>
