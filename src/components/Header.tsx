@@ -26,10 +26,10 @@ const Header = () => {
                 <div className="w-7 h-7 rounded bg-accent flex items-center justify-center">
                   <Home className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-lg font-extrabold text-white tracking-tight">공실박스</span>
+                <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
               </div>
               <span className="hidden sm:block text-xs text-white/40 font-light pl-2 border-l border-white/20">
-                전국 공실 정보 플랫폼
+                집을 찾다, 집다
               </span>
             </div>
 

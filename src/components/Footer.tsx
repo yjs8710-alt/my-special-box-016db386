@@ -39,19 +39,19 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">공</span>
+                <span className="text-white font-bold text-sm">집</span>
               </div>
-              <span className="text-xl font-bold text-white">공실박스</span>
+              <span className="text-xl font-bold text-white">집다</span>
             </div>
             <p className="text-sm text-white/50 max-w-sm leading-relaxed">
-              전국 상가·사무실 공실 매물을 한 곳에서. 직접 등록부터 전문 중개까지 공실박스와 함께하세요.
+              전국 상가·사무실 공실 매물을 한 곳에서. 직접 등록부터 전문 중개까지 집다와 함께하세요.
             </p>
             <div className="flex gap-4 mt-4">
               <a href="#" className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors">
                 <Phone className="w-3.5 h-3.5" /> 1588-0000
               </a>
               <a href="#" className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors">
-                <Mail className="w-3.5 h-3.5" /> help@gongsilbox.kr
+                <Mail className="w-3.5 h-3.5" /> help@jipda.kr
               </a>
             </div>
           </div>
@@ -79,7 +79,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-2">
-          <p className="text-xs text-white/30">© 2024 공실박스. All rights reserved.</p>
+          <p className="text-xs text-white/30">© 2024 집다. All rights reserved.</p>
           <p className="text-xs text-white/30">사업자등록번호: 123-45-67890 | 대표: 홍길동</p>
         </div>
       </div>
