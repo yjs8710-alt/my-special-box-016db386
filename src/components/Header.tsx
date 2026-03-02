@@ -2,6 +2,16 @@ import { useState } from "react";
 import { Menu, X, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const NAV_ITEMS = [
+  { label: "주거형 임대" },
+  { label: "주거형 외 임대" },
+  { label: "매매" },
+  { label: "아파트" },
+  { label: "오피스텔" },
+  { label: "빌라" },
+  { label: "토지" },
+];
+
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -18,14 +28,14 @@ const Header = () => {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {["상가", "사무실", "공장·창고", "토지", "경매"].map((item) => (
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_ITEMS.map((item) => (
               <a
-                key={item}
+                key={item.label}
                 href="#"
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                className="text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
               >
-                {item}
+                {item.label}
               </a>
             ))}
           </nav>
@@ -56,9 +66,9 @@ const Header = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-card border-t border-border px-4 py-3 flex flex-col gap-3">
-          {["상가", "사무실", "공장·창고", "토지", "경매"].map((item) => (
-            <a key={item} href="#" className="text-sm font-medium text-foreground py-1">
-              {item}
+          {NAV_ITEMS.map((item) => (
+            <a key={item.label} href="#" className="text-sm font-medium text-foreground py-1">
+              {item.label}
             </a>
           ))}
           <Button variant="default" size="sm" className="bg-primary text-primary-foreground w-full mt-2">
