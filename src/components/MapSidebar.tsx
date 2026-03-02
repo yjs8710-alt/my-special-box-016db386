@@ -78,9 +78,9 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
 }
 
-const MIN_WIDTH = 260;
-const MAX_WIDTH = 600;
-const DEFAULT_WIDTH = 320;
+const MIN_WIDTH = 300;
+const MAX_WIDTH = 700;
+const DEFAULT_WIDTH = 460;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -169,10 +169,10 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                   }`}
                 >
-                  {/* Compact horizontal layout: thumbnail left, info right */}
-                  <div className="flex gap-0">
+                  {/* Full-width horizontal card */}
+                  <div className="flex gap-0 items-stretch">
                     {/* Thumbnail */}
-                    <div className="w-20 h-20 flex-shrink-0 overflow-hidden relative">
+                    <div className="w-24 flex-shrink-0 overflow-hidden relative self-stretch">
                       <img
                         src={prop.image}
                         alt={prop.title}
@@ -183,90 +183,77 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       </span>
                     </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 px-2 py-1.5 flex flex-col gap-0.5">
-                      {/* 건물명 + 호수 + 매물종류 */}
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          {prop.roomType && (
-                            <span className="text-[9px] font-semibold text-muted-foreground bg-muted rounded px-1 py-0.5">{prop.roomType}</span>
-                          )}
-                          {prop.unitNumber && (
-                            <span className="text-[9px] font-semibold text-primary bg-primary/10 px-1 py-0.5 rounded">{prop.unitNumber}</span>
-                          )}
-                        </div>
+                    {/* Center info block */}
+                    <div className="flex-1 min-w-0 px-2.5 py-2 flex flex-col justify-between gap-0.5">
+                      {/* Row1: 건물명 + 호수 + 종류 */}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-xs font-bold text-foreground truncate max-w-[140px] leading-tight">{prop.buildingName ?? prop.title}</p>
+                        {prop.unitNumber && <span className="text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">{prop.unitNumber}</span>}
+                        {prop.roomType && <span className="text-[9px] font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 flex-shrink-0">{prop.roomType}</span>}
                       </div>
-
-                      {/* 주소 */}
+                      {/* Row2: 주소 */}
                       <p className="text-[10px] text-muted-foreground truncate">{prop.address}</p>
-
-                      {/* 건축년도 + 층 + 면적 */}
-                      <div className="flex items-center gap-1">
-                        <span className="text-[9px] bg-muted/70 text-muted-foreground rounded px-1 py-0.5">{prop.buildYear}</span>
-                        <span className="text-[9px] bg-muted/70 text-muted-foreground rounded px-1 py-0.5">{prop.floor}</span>
-                        <span className="text-[9px] bg-muted/70 text-muted-foreground rounded px-1 py-0.5">{prop.area.split(" ")[1] ?? prop.area}</span>
+                      {/* Row3: 건축년도·층·면적 */}
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.buildYear}</span>
+                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.floor}</span>
+                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.area}</span>
                       </div>
-
-                      {/* 가격 */}
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] text-muted-foreground">보증 {prop.deposit} /</span>
-                        <span className="text-xs font-extrabold text-accent">{prop.monthly}</span>
-                      </div>
-
-                      {/* 옵션 (이모지만) */}
+                      {/* Row4: 옵션 이모지 */}
                       {prop.options && prop.options.length > 0 && (
-                        <div className="flex items-center gap-0.5 flex-wrap">
-                          {prop.options.slice(0, 7).map((opt) => (
+                        <div className="flex items-center gap-0.5">
+                          {prop.options.slice(0, 10).map((opt) => (
                             <span key={opt} title={opt} className="text-[11px]">{OPTION_ICONS[opt] ?? "•"}</span>
                           ))}
-                          {prop.options.length > 7 && (
-                            <span className="text-[9px] text-muted-foreground">+{prop.options.length - 7}</span>
-                          )}
+                          {prop.options.length > 10 && <span className="text-[9px] text-muted-foreground">+{prop.options.length - 10}</span>}
                         </div>
                       )}
+                    </div>
 
+                    {/* Right column: price + contact + meta */}
+                    <div className="flex-shrink-0 w-[130px] px-2 py-2 border-l border-border/40 flex flex-col justify-between gap-1">
+                      {/* 가격 */}
+                      <div>
+                        <p className="text-[9px] text-muted-foreground">보증금</p>
+                        <p className="text-[10px] font-bold text-foreground leading-tight">{prop.deposit}</p>
+                        <p className="text-xs font-extrabold text-accent leading-tight">{prop.monthly}</p>
+                      </div>
                       {/* 비번 + 날짜 */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col gap-0.5">
                         {prop.password && (
                           <div className="flex items-center gap-0.5">
-                            <KeyRound className="w-2.5 h-2.5 text-muted-foreground" />
-                            <span className="text-[9px] text-muted-foreground font-mono">{prop.password}</span>
+                            <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                            <span className="text-[9px] text-muted-foreground font-mono truncate">{prop.password}</span>
                           </div>
                         )}
                         {prop.checkedDate && (
                           <div className="flex items-center gap-0.5">
-                            <CalendarCheck className="w-2.5 h-2.5 text-muted-foreground" />
+                            <CalendarCheck className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
                             <span className="text-[9px] text-muted-foreground">{prop.checkedDate}</span>
+                          </div>
+                        )}
+                      </div>
+                      {/* 연락처 */}
+                      <div className="flex flex-col gap-0.5">
+                        {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
+                        {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
+                        {!prop.contactOwner && !prop.contactManager && (
+                          <div className="flex items-center gap-1">
+                            <Phone className="w-2.5 h-2.5 text-primary flex-shrink-0" />
+                            <span className="text-[10px] font-bold text-primary truncate">{prop.contact}</span>
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* 메모 + 연락처 (하단 펼침) */}
-                  <div className="px-2 pb-2 flex flex-col gap-1 border-t border-border/30">
-                    {prop.memo && (
-                      <div className="flex items-start gap-1 pt-1">
-                        <StickyNote className="w-2.5 h-2.5 text-accent flex-shrink-0 mt-0.5" />
-                        <p className="text-[10px] text-muted-foreground line-clamp-1">{prop.memo}</p>
-                      </div>
-                    )}
-                    <div className="flex items-center justify-between gap-2">
-                      {prop.contactOwner && (
-                        <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />
-                      )}
-                      {prop.contactManager && (
-                        <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />
-                      )}
-                      {!prop.contactOwner && !prop.contactManager && (
-                        <div className="flex items-center gap-1">
-                          <Phone className="w-2.5 h-2.5 text-primary flex-shrink-0" />
-                          <span className="text-[10px] font-bold text-primary">{prop.contact}</span>
-                        </div>
-                      )}
+                  {/* 메모 (하단 한 줄) */}
+                  {prop.memo && (
+                    <div className="flex items-center gap-1 px-2 py-1.5 border-t border-border/30 bg-muted/20">
+                      <StickyNote className="w-2.5 h-2.5 text-accent flex-shrink-0" />
+                      <p className="text-[10px] text-muted-foreground line-clamp-1">{prop.memo}</p>
                     </div>
-                  </div>
+                  )}
                 </button>
               ))}
             </div>
