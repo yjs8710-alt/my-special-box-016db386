@@ -119,20 +119,20 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
           collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
         }`}
         style={{
-          width: collapsed ? 0 : Math.min(width, window.innerWidth - 60),
+          width: collapsed ? 0 : width,
           marginTop: "106px",
           height: "calc(100% - 106px)",
           boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
         }}
       >
-        {/* Drag handle */}
+        {/* Drag handle — wider, always visible */}
         {!collapsed && (
           <div
             onMouseDown={onMouseDown}
-            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/20 transition-colors flex items-center justify-center z-10 group"
+            className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 group flex items-center justify-center"
             title="드래그하여 너비 조절"
           >
-            <GripVertical className="w-3 h-3 text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors" />
+            <div className="w-1 h-12 rounded-full bg-border group-hover:bg-primary transition-colors" />
           </div>
         )}
 
@@ -147,7 +147,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
             </span>
             <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
           </div>
-          <span className="text-[10px] text-muted-foreground">← 드래그로 크기 조절</span>
+          <span className="text-[10px] text-muted-foreground">◀ 좌측 가장자리 드래그로 크기 조절</span>
         </div>
 
         {/* List */}
