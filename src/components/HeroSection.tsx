@@ -19,7 +19,7 @@ const HeroSection = () => {
             집을 찾다, <span className="text-accent">집다</span>
           </h1>
           <p className="text-base sm:text-lg text-white/80 font-light">
-            전국 상가·사무실 공실 정보를 한 번에. 허위매물 없는 검증된 매물만 제공합니다.
+            청주 공실 임대 · 매매 정보를 한 번에. 허위매물 없는 검증된 매물만 제공합니다.
           </p>
         </div>
 
