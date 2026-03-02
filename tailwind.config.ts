@@ -50,6 +50,7 @@ export default {
         "hero-overlay": "hsl(var(--hero-overlay))",
         "badge-new": "hsl(var(--badge-new))",
         "badge-hot": "hsl(var(--badge-hot))",
+        "header-bg": "hsl(var(--header-bg))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
