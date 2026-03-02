@@ -78,8 +78,8 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
 }
 
-const MIN_WIDTH = 400;
-const MAX_WIDTH = 2800;
+const MIN_WIDTH = 200;
+const MAX_WIDTH = 99999;
 const DEFAULT_WIDTH = 2800;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
