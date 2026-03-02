@@ -7,9 +7,6 @@ const NAV_ITEMS = [
   { label: "주거형 임대" },
   { label: "주거형 외 임대" },
   { label: "매매" },
-  { label: "아파트" },
-  { label: "오피스텔" },
-  { label: "빌라" },
   { label: "토지" },
 ];
 
