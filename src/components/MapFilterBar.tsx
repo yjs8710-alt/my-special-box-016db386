@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw } from "lucide-react";
+import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const TYPES = [
@@ -72,6 +72,7 @@ interface MapFilterBarProps {
   onPropertyIdChange: (v: string) => void;
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
+  onLandlordClick?: () => void;
 }
 
 function formatManwon(v: number, max: number) {
@@ -132,6 +133,7 @@ const MapFilterBar = ({
   onPropertyIdChange,
   filters,
   onFiltersChange,
+  onLandlordClick,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -167,22 +169,34 @@ const MapFilterBar = ({
       style={{ top: 16, left: 16, width: 320 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
-        {/* 매물번호 검색 */}
-        <div
-          className="flex items-center gap-2 bg-white rounded-xl px-3 h-10 border border-border"
-          style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
-        >
-          <Hash className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
-          <input
-            type="text"
-            value={propertyId}
-            onChange={(e) => onPropertyIdChange(e.target.value)}
-            placeholder="매물번호 검색 (예: 1023)"
-            className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-          />
-          {propertyId && (
-            <button onClick={() => onPropertyIdChange("")} className="text-muted-foreground hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
+        {/* 매물번호 검색 + 임대인 번호 찾기 */}
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2 bg-white rounded-xl px-3 h-10 border border-border flex-1"
+            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
+          >
+            <Hash className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
+            <input
+              type="text"
+              value={propertyId}
+              onChange={(e) => onPropertyIdChange(e.target.value)}
+              placeholder="매물번호 검색 (예: 1023)"
+              className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+            />
+            {propertyId && (
+              <button onClick={() => onPropertyIdChange("")} className="text-muted-foreground hover:text-foreground">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          {onLandlordClick && (
+            <button
+              onClick={onLandlordClick}
+              className="flex items-center gap-1.5 h-10 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
+            >
+              <Phone className="w-3.5 h-3.5" />
+              임대인 번호
             </button>
           )}
         </div>

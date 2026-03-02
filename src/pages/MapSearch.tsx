@@ -5,7 +5,6 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
-import { Phone } from "lucide-react";
 
 const MapSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -57,16 +56,8 @@ const MapSearch = () => {
             onPropertyIdChange={setPropertyId}
             filters={filters}
             onFiltersChange={setFilters}
+            onLandlordClick={() => setShowLandlord(true)}
           />
-          {/* 임대인 번호 찾기 버튼 */}
-          <button
-            onClick={() => setShowLandlord(true)}
-            className="absolute bottom-20 right-4 z-[1000] flex items-center gap-2 px-4 py-2.5 rounded-full text-white text-sm font-bold shadow-lg hover:scale-105 transition-all"
-            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 20px rgba(10,45,110,0.35)" }}
-          >
-            <Phone className="w-4 h-4" />
-            임대인 번호 찾기
-          </button>
         </div>
       </main>
     </div>
