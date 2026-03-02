@@ -3,6 +3,7 @@ import { Menu, X, Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
+  { label: "상가임대" },
   { label: "주거형 임대" },
   { label: "주거형 외 임대" },
   { label: "매매" },
