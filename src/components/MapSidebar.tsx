@@ -45,22 +45,28 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
     <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
       {/* Panel */}
       <aside
-        className={`pointer-events-auto bg-white border-l border-border flex flex-col shadow-xl transition-all duration-300 ${
+        className={`pointer-events-auto bg-white border-l border-border flex flex-col transition-all duration-300 ${
           collapsed ? "w-0 overflow-hidden opacity-0" : "w-[340px] opacity-100"
         }`}
-        style={{ marginTop: "106px", height: "calc(100% - 106px)" }}
+        style={{
+          marginTop: "106px",
+          height: "calc(100% - 106px)",
+          boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
+        }}
       >
         {/* Header */}
-        <div className="px-4 py-2.5 border-b border-border flex items-center justify-between bg-muted/40 flex-shrink-0">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0"
+          style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            <span className="text-xs font-extrabold text-primary-foreground bg-primary px-2.5 py-0.5 rounded-full shadow-sm">
               {properties.length}
             </span>
-            <span className="text-xs text-muted-foreground font-medium">개 매물</span>
+            <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>정렬:</span>
-            <select className="text-xs bg-transparent outline-none font-medium text-foreground cursor-pointer">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-medium">정렬</span>
+            <select className="text-xs bg-white border border-border rounded-lg px-2 py-1 outline-none font-semibold text-foreground cursor-pointer hover:border-primary transition-colors">
               <option>최신순</option>
               <option>낮은 월세순</option>
               <option>조회순</option>
@@ -69,7 +75,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
           {properties.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
               <MapPin className="w-10 h-10 mb-3 opacity-20" />
@@ -77,65 +83,68 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
               <p className="text-xs mt-1 opacity-70">다른 조건으로 검색해보세요</p>
             </div>
           ) : (
-            properties.map((prop) => (
-              <button
-                key={prop.id}
-                onClick={() => onSelect(prop.id)}
-                className={`w-full text-left transition-all flex gap-0 group border-b border-border ${
-                  selectedId === prop.id
-                    ? "bg-primary/5 border-l-[3px] border-l-primary"
-                    : "hover:bg-muted/40 border-l-[3px] border-l-transparent"
-                }`}
-              >
-                {/* Thumbnail */}
-                <div className="w-20 h-20 flex-shrink-0 overflow-hidden m-3 rounded-lg">
-                  <img
-                    src={prop.image}
-                    alt={prop.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0 py-3 pr-3">
-                  {/* Type + badges */}
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
-                      {prop.type}
-                    </span>
-                    {prop.isNew && (
-                      <span className="text-[10px] font-bold text-badge-new">NEW</span>
-                    )}
-                    {prop.isHot && (
-                      <span className="text-[10px] font-bold text-badge-hot">HOT</span>
-                    )}
-                  </div>
-
-                  <p className="text-sm font-bold text-foreground line-clamp-1 leading-tight">{prop.title}</p>
-
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    <p className="text-xs text-muted-foreground line-clamp-1">{prop.address}</p>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-1.5">
-                    <div>
-                      <span className="text-xs text-muted-foreground">보증 </span>
-                      <span className="text-xs font-bold text-foreground">{prop.deposit}</span>
-                      <span className="text-xs text-muted-foreground mx-1">/</span>
-                      <span className="text-sm font-extrabold text-accent">{prop.monthly}</span>
+            <div className="p-2 flex flex-col gap-2">
+              {properties.map((prop) => (
+                <button
+                  key={prop.id}
+                  onClick={() => onSelect(prop.id)}
+                  className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
+                    selectedId === prop.id
+                      ? "ring-2 ring-primary shadow-lg"
+                      : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
+                  }`}
+                >
+                  <div className="flex gap-0">
+                    {/* Thumbnail */}
+                    <div className="w-[88px] h-[88px] flex-shrink-0 overflow-hidden relative">
+                      <img
+                        src={prop.image}
+                        alt={prop.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      {selectedId === prop.id && (
+                        <div className="absolute inset-0 bg-primary/20" />
+                      )}
                     </div>
-                    <button
-                      onClick={(e) => toggleLike(prop.id, e)}
-                      className="w-6 h-6 flex items-center justify-center"
-                    >
-                      <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(prop.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                    </button>
-                  </div>
 
-                  <p className="text-[11px] text-muted-foreground mt-0.5">{prop.area} · {prop.floor}</p>
-                </div>
-              </button>
-            ))
+                    <div className="flex-1 min-w-0 p-3">
+                      {/* Type + badges */}
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
+                          {prop.type}
+                        </span>
+                        {prop.isNew && (
+                          <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">NEW</span>
+                        )}
+                        {prop.isHot && (
+                          <span className="text-[9px] font-extrabold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md">HOT 🔥</span>
+                        )}
+                      </div>
+
+                      <p className="text-sm font-bold text-foreground line-clamp-1 leading-tight">{prop.title}</p>
+
+                      <div className="flex items-center gap-0.5 mt-0.5">
+                        <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <p className="text-[11px] text-muted-foreground line-clamp-1">{prop.address}</p>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-1.5">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-[11px] text-muted-foreground">보증 {prop.deposit} /</span>
+                          <span className="text-sm font-extrabold text-accent">{prop.monthly}</span>
+                        </div>
+                        <button
+                          onClick={(e) => toggleLike(prop.id, e)}
+                          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors"
+                        >
+                          <Heart className={`w-3.5 h-3.5 transition-all ${liked.has(prop.id) ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground"}`} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </aside>
@@ -143,13 +152,13 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
       {/* Toggle tab */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="pointer-events-auto self-start bg-white border border-r-0 border-border rounded-l-lg px-1 py-4 shadow-md hover:bg-muted/50 transition-colors"
+        className="pointer-events-auto self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
         style={{ marginTop: "138px" }}
       >
         {collapsed ? (
-          <ChevronLeft className="w-3.5 h-3.5 text-foreground" />
+          <ChevronLeft className="w-3.5 h-3.5" />
         ) : (
-          <ChevronRight className="w-3.5 h-3.5 text-foreground" />
+          <ChevronRight className="w-3.5 h-3.5" />
         )}
       </button>
     </div>
