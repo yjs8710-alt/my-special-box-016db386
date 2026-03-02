@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Menu, X, Bell, User, ChevronDown, Home } from "lucide-react";
+import { Menu, X, Bell, User, ChevronDown, Home, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 
 const NAV_ITEMS = [
@@ -15,6 +16,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<string | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-[950]" style={{ background: "hsl(var(--header-bg))" }}>
@@ -24,7 +26,7 @@ const Header = () => {
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
               <div className="flex items-center gap-1.5">
                 <div className="w-7 h-7 rounded bg-accent flex items-center justify-center">
                   <Home className="w-4 h-4 text-white" />
@@ -38,6 +40,14 @@ const Header = () => {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center">
+              {/* 지도검색 */}
+              <button
+                onClick={() => navigate("/map")}
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-4 text-white/80 hover:text-accent transition-colors whitespace-nowrap"
+              >
+                <Map className="w-3.5 h-3.5" />
+                지도 검색
+              </button>
               {NAV_ITEMS.map((item) => (
                 <div
                   key={item.label}
