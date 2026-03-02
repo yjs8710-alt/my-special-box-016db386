@@ -80,7 +80,7 @@ interface MapSidebarProps {
 
 const MIN_WIDTH = 400;
 const MAX_WIDTH = 1800;
-const DEFAULT_WIDTH = 1200;
+const DEFAULT_WIDTH = 1400;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -169,10 +169,10 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                   }`}
                 >
-                  {/* Ultra-compact single-row card */}
-                  <div className="flex items-center gap-0 h-10">
+                  {/* Horizontal card */}
+                  <div className="flex items-center gap-0 h-16">
                     {/* Thumbnail */}
-                    <div className="w-14 h-10 flex-shrink-0 overflow-hidden relative">
+                    <div className="w-20 h-16 flex-shrink-0 overflow-hidden relative">
                       <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
 
@@ -182,8 +182,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                     </div>
 
                     {/* 건물명 + 호수 */}
-                    <div className="w-[160px] flex-shrink-0 flex flex-col justify-center px-1 border-l border-border/30">
-                      <p className="text-[10px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                    <div className="w-[200px] flex-shrink-0 flex flex-col justify-center px-2 border-l border-border/30">
+                      <p className="text-xs font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
                       <div className="flex items-center gap-1">
                         {prop.unitNumber && <span className="text-[8px] text-primary font-semibold">{prop.unitNumber}</span>}
                         {prop.roomType && <span className="text-[8px] text-muted-foreground">{prop.roomType}</span>}
@@ -211,13 +211,13 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                     )}
 
                     {/* 가격 */}
-                    <div className="w-[110px] flex-shrink-0 flex flex-col justify-center px-1.5 border-l border-border/30">
-                      <p className="text-[8px] text-muted-foreground truncate">{prop.deposit}</p>
-                      <p className="text-[11px] font-extrabold text-accent leading-tight">{prop.monthly}</p>
+                    <div className="w-[140px] flex-shrink-0 flex flex-col justify-center px-2 border-l border-border/30">
+                      <p className="text-[10px] text-muted-foreground truncate">{prop.deposit}</p>
+                      <p className="text-sm font-extrabold text-accent leading-tight">{prop.monthly}</p>
                     </div>
 
                     {/* 비번·날짜 */}
-                    <div className="w-[90px] flex-shrink-0 flex flex-col justify-center px-1 border-l border-border/30">
+                    <div className="w-[120px] flex-shrink-0 flex flex-col justify-center px-2 border-l border-border/30">
                       {prop.password && (
                         <div className="flex items-center gap-0.5">
                           <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
@@ -239,7 +239,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                     </div>
 
                     {/* 연락처 */}
-                    <div className="w-[110px] flex-shrink-0 flex flex-col justify-center gap-0.5 px-1.5 border-l border-border/30">
+                    <div className="w-[150px] flex-shrink-0 flex flex-col justify-center gap-0.5 px-2 border-l border-border/30">
                       {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
                       {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
                       {!prop.contactOwner && !prop.contactManager && (
