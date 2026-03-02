@@ -78,9 +78,9 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
 }
 
-const MIN_WIDTH = 300;
-const MAX_WIDTH = 700;
-const DEFAULT_WIDTH = 460;
+const MIN_WIDTH = 400;
+const MAX_WIDTH = 1200;
+const DEFAULT_WIDTH = 920;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -169,91 +169,87 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                   }`}
                 >
-                  {/* Full-width horizontal card */}
-                  <div className="flex gap-0 items-stretch">
+                  {/* Ultra-compact single-row card */}
+                  <div className="flex items-center gap-0 h-10">
                     {/* Thumbnail */}
-                    <div className="w-24 flex-shrink-0 overflow-hidden relative self-stretch">
-                      <img
-                        src={prop.image}
-                        alt={prop.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <span className={`absolute bottom-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"} shadow-sm leading-none`}>
-                        {prop.type}
-                      </span>
+                    <div className="w-14 h-10 flex-shrink-0 overflow-hidden relative">
+                      <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
 
-                    {/* Center info block */}
-                    <div className="flex-1 min-w-0 px-2.5 py-2 flex flex-col justify-between gap-0.5">
-                      {/* Row1: 건물명 + 호수 + 종류 */}
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-xs font-bold text-foreground truncate max-w-[140px] leading-tight">{prop.buildingName ?? prop.title}</p>
-                        {prop.unitNumber && <span className="text-[9px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded flex-shrink-0">{prop.unitNumber}</span>}
-                        {prop.roomType && <span className="text-[9px] font-semibold text-muted-foreground bg-muted rounded px-1.5 py-0.5 flex-shrink-0">{prop.roomType}</span>}
+                    {/* 종류 뱃지 */}
+                    <div className="w-12 flex-shrink-0 flex items-center justify-center px-1">
+                      <span className={`text-[8px] font-bold px-1 py-0.5 rounded text-center leading-tight ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>{prop.type}</span>
+                    </div>
+
+                    {/* 건물명 + 호수 */}
+                    <div className="w-[160px] flex-shrink-0 flex flex-col justify-center px-1 border-l border-border/30">
+                      <p className="text-[10px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                      <div className="flex items-center gap-1">
+                        {prop.unitNumber && <span className="text-[8px] text-primary font-semibold">{prop.unitNumber}</span>}
+                        {prop.roomType && <span className="text-[8px] text-muted-foreground">{prop.roomType}</span>}
                       </div>
-                      {/* Row2: 주소 */}
-                      <p className="text-[10px] text-muted-foreground truncate">{prop.address}</p>
-                      {/* Row3: 건축년도·층·면적 */}
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.buildYear}</span>
-                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.floor}</span>
-                        <span className="text-[9px] bg-muted/60 text-muted-foreground rounded px-1 py-0.5">{prop.area}</span>
+                    </div>
+
+                    {/* 주소 + 건축년도·층 */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-center px-1.5 border-l border-border/30">
+                      <p className="text-[9px] text-muted-foreground truncate">{prop.address}</p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[8px] text-muted-foreground">{prop.buildYear}</span>
+                        <span className="text-[8px] text-muted-foreground">{prop.floor}</span>
+                        <span className="text-[8px] text-muted-foreground">{prop.area}</span>
                       </div>
-                      {/* Row4: 옵션 이모지 */}
-                      {prop.options && prop.options.length > 0 && (
+                    </div>
+
+                    {/* 옵션 */}
+                    {prop.options && prop.options.length > 0 && (
+                      <div className="w-20 flex-shrink-0 flex items-center gap-0.5 px-1 border-l border-border/30 flex-wrap overflow-hidden h-full">
+                        {prop.options.slice(0, 8).map((opt) => (
+                          <span key={opt} title={opt} className="text-[10px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
+                        ))}
+                        {prop.options.length > 8 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 8}</span>}
+                      </div>
+                    )}
+
+                    {/* 가격 */}
+                    <div className="w-[110px] flex-shrink-0 flex flex-col justify-center px-1.5 border-l border-border/30">
+                      <p className="text-[8px] text-muted-foreground truncate">{prop.deposit}</p>
+                      <p className="text-[11px] font-extrabold text-accent leading-tight">{prop.monthly}</p>
+                    </div>
+
+                    {/* 비번·날짜 */}
+                    <div className="w-[90px] flex-shrink-0 flex flex-col justify-center px-1 border-l border-border/30">
+                      {prop.password && (
                         <div className="flex items-center gap-0.5">
-                          {prop.options.slice(0, 10).map((opt) => (
-                            <span key={opt} title={opt} className="text-[11px]">{OPTION_ICONS[opt] ?? "•"}</span>
-                          ))}
-                          {prop.options.length > 10 && <span className="text-[9px] text-muted-foreground">+{prop.options.length - 10}</span>}
+                          <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[8px] text-muted-foreground font-mono truncate">{prop.password}</span>
+                        </div>
+                      )}
+                      {prop.checkedDate && (
+                        <div className="flex items-center gap-0.5">
+                          <CalendarCheck className="w-2 h-2 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[8px] text-muted-foreground">{prop.checkedDate}</span>
+                        </div>
+                      )}
+                      {prop.memo && (
+                        <div className="flex items-center gap-0.5">
+                          <StickyNote className="w-2 h-2 text-accent flex-shrink-0" />
+                          <span className="text-[8px] text-muted-foreground truncate">{prop.memo}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Right column: price + contact + meta */}
-                    <div className="flex-shrink-0 w-[130px] px-2 py-2 border-l border-border/40 flex flex-col justify-between gap-1">
-                      {/* 가격 */}
-                      <div>
-                        <p className="text-[9px] text-muted-foreground">보증금</p>
-                        <p className="text-[10px] font-bold text-foreground leading-tight">{prop.deposit}</p>
-                        <p className="text-xs font-extrabold text-accent leading-tight">{prop.monthly}</p>
-                      </div>
-                      {/* 비번 + 날짜 */}
-                      <div className="flex flex-col gap-0.5">
-                        {prop.password && (
-                          <div className="flex items-center gap-0.5">
-                            <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
-                            <span className="text-[9px] text-muted-foreground font-mono truncate">{prop.password}</span>
-                          </div>
-                        )}
-                        {prop.checkedDate && (
-                          <div className="flex items-center gap-0.5">
-                            <CalendarCheck className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
-                            <span className="text-[9px] text-muted-foreground">{prop.checkedDate}</span>
-                          </div>
-                        )}
-                      </div>
-                      {/* 연락처 */}
-                      <div className="flex flex-col gap-0.5">
-                        {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
-                        {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
-                        {!prop.contactOwner && !prop.contactManager && (
-                          <div className="flex items-center gap-1">
-                            <Phone className="w-2.5 h-2.5 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-primary truncate">{prop.contact}</span>
-                          </div>
-                        )}
-                      </div>
+                    {/* 연락처 */}
+                    <div className="w-[110px] flex-shrink-0 flex flex-col justify-center gap-0.5 px-1.5 border-l border-border/30">
+                      {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
+                      {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
+                      {!prop.contactOwner && !prop.contactManager && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="w-2 h-2 text-primary flex-shrink-0" />
+                          <span className="text-[9px] font-bold text-primary truncate">{prop.contact}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  {/* 메모 (하단 한 줄) */}
-                  {prop.memo && (
-                    <div className="flex items-center gap-1 px-2 py-1.5 border-t border-border/30 bg-muted/20">
-                      <StickyNote className="w-2.5 h-2.5 text-accent flex-shrink-0" />
-                      <p className="text-[10px] text-muted-foreground line-clamp-1">{prop.memo}</p>
-                    </div>
-                  )}
                 </button>
               ))}
             </div>
