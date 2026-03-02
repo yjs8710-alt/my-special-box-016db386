@@ -44,7 +44,7 @@ const Footer = () => {
               <span className="text-xl font-bold text-white">집다</span>
             </div>
             <p className="text-sm text-white/50 max-w-sm leading-relaxed">
-              전국 상가·사무실 공실 매물을 한 곳에서. 직접 등록부터 전문 중개까지 집다와 함께하세요.
+              중개사만을 위한 청주 공실 전문 플랫폼. 검증된 실매물 정보로 빠르고 정확한 중개 서비스를 제공하세요.
             </p>
             <div className="flex gap-4 mt-4">
               <a href="#" className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors">

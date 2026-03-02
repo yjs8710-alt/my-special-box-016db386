@@ -13,13 +13,13 @@ const HeroSection = () => {
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-16 w-full">
         <div className="text-center mb-10">
           <span className="inline-block bg-accent/20 text-accent text-xs font-bold px-3 py-1 rounded-full mb-4 border border-accent/30">
-            100% 실매물 보장 플랫폼
+            중개사 전용 플랫폼
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 leading-tight">
             집을 찾다, <span className="text-accent">집다</span>
           </h1>
           <p className="text-base sm:text-lg text-white/80 font-light">
-            청주 공실 임대 · 매매 정보를 한 번에. 허위매물 없는 검증된 매물만 제공합니다.
+            청주 공실 임대 · 매매 정보를 중개사만을 위해. 허위매물 없는 검증된 매물만 제공합니다.
           </p>
         </div>
 

@@ -34,7 +34,7 @@ const Header = () => {
                 <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
               </div>
               <span className="hidden sm:block text-xs text-white/40 font-light pl-2 border-l border-white/20">
-                집을 찾다, 집다
+                중개사 전용 플랫폼
               </span>
             </div>
 
