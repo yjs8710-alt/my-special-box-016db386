@@ -8,8 +8,11 @@ import property6 from "@/assets/property6.jpg";
 export interface MapProperty {
   id: number;
   title: string;
+  buildingName?: string;
   address: string;
   type: string;
+  roomType?: string; // 원룸, 투베이, 투룸, 쓰리룸 등
+  unitNumber?: string; // 호수
   area: string;
   floor: string;
   deposit: string;
@@ -21,6 +24,10 @@ export interface MapProperty {
   lng: number;
   image: string;
   description: string;
+  memo?: string; // 건물 메모
+  checkedDate?: string; // 확인한 날
+  options?: string[]; // 냉장고, 세탁기 등
+  password?: string; // 현관 비번
   contact: string;
   contactOwner?: string;
   contactManager?: string;
@@ -37,8 +44,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 1,
     title: "강남역 초역세권 1층 상가",
+    buildingName: "강남역 상가빌딩",
     address: "서울특별시 강남구 역삼동 123-4",
     type: "상가",
+    roomType: "상가",
+    unitNumber: "101호",
     area: "85㎡ (25평)",
     floor: "1층",
     deposit: "5,000만원",
@@ -50,6 +60,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 127.0277,
     image: property1,
     description: "강남역 2번 출구 도보 1분 거리의 초역세권 1층 상가입니다. 유동인구가 매우 많으며 현재 인테리어가 잘 되어있어 즉시 입점 가능합니다. 전면 유리창으로 가시성이 뛰어납니다.",
+    memo: "건물주 직거래 가능, 인테리어 협의 가능",
+    checkedDate: "2024-01-20",
+    options: ["에어컨", "전자키"],
+    password: "1234#",
     contact: "02-1234-5678",
     contactOwner: "010-1111-2222",
     contactManager: "010-3333-4444",
@@ -64,8 +78,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 2,
     title: "여의도 IFC몰 인근 프리미엄 사무실",
+    buildingName: "여의도 파크원타워",
     address: "서울특별시 영등포구 여의도동 31",
     type: "사무실",
+    roomType: "사무실",
+    unitNumber: "1201호",
     area: "165㎡ (50평)",
     floor: "12층",
     deposit: "1억원",
@@ -77,6 +94,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9243,
     image: property2,
     description: "여의도 IFC몰 바로 인근 고층 오피스 빌딩입니다. 한강 뷰가 가능하며 회의실 공용 사용 가능. 최신 시스템 에어컨, 이중창 설치 완료. 금융기관, 증권사 밀집 지역으로 비즈니스 환경 최적입니다.",
+    memo: "한강뷰, 회의실 4개 포함",
+    checkedDate: "2024-01-22",
+    options: ["에어컨", "전자키", "주차"],
+    password: "9988*",
     contact: "02-2345-6789",
     contactOwner: "010-2222-3333",
     agentName: "여의도공실박스",
@@ -90,8 +111,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 3,
     title: "홍대 상권 중심 1층 빈 상가",
+    buildingName: "홍대 메인스트리트 빌딩",
     address: "서울특별시 마포구 서교동 353",
     type: "상가",
+    roomType: "상가",
+    unitNumber: "1층 전체",
     area: "66㎡ (20평)",
     floor: "1층",
     deposit: "3,000만원",
@@ -103,6 +127,9 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9231,
     image: property3,
     description: "홍대 걷고싶은거리 인근 유동인구 최상위 상권입니다. 전 임차인 카페 운영으로 주방 후드, 에어컨 기본 설치. 외국인 관광객 및 대학생 유입이 많아 F&B 업종에 최적화된 공간입니다.",
+    memo: "전 카페 인테리어 잔류, 즉시영업 가능",
+    checkedDate: "2024-01-18",
+    options: ["에어컨", "가스레인지", "전자레인지"],
     contact: "02-3456-7890",
     contactManager: "010-5555-6666",
     agentName: "마포공실중개",
@@ -116,8 +143,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 4,
     title: "이태원 세계음식거리 식당 공실",
+    buildingName: "이태원 월드푸드센터",
     address: "서울특별시 용산구 이태원동 129-3",
     type: "식당·카페",
+    roomType: "식당",
+    unitNumber: "1층 전체",
     area: "132㎡ (40평)",
     floor: "1층",
     deposit: "8,000만원",
@@ -129,6 +159,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9943,
     image: property4,
     description: "이태원 세계음식거리 핵심 위치의 대형 식당 공실입니다. 주방 시설 일부 잔류, 대형 환기 시설 완비. 외국인 관광 특수 지역으로 다국적 음식 브랜드 입점 문의 다수.",
+    memo: "주방후드 대형 잔류, 환기 완비",
+    checkedDate: "2024-01-15",
+    options: ["에어컨", "가스레인지", "주차"],
+    password: "5678#",
     contact: "02-4567-8901",
     contactOwner: "010-4444-5555",
     agentName: "용산부동산",
@@ -142,8 +176,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 5,
     title: "판교 테크노밸리 대형 오피스",
+    buildingName: "판교 테크센터 A동",
     address: "경기도 성남시 분당구 판교역로 166",
     type: "사무실",
+    roomType: "사무실",
+    unitNumber: "801~805호",
     area: "330㎡ (100평)",
     floor: "8층",
     deposit: "2억원",
@@ -155,6 +192,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 127.1111,
     image: property5,
     description: "판교 테크노밸리 IT 기업 밀집 지역 대형 오피스입니다. 분리된 회의실 4개, 탕비실, 서버룸 구성 가능. 신분당선 판교역 도보 5분, 주차장 넉넉. IT·스타트업·벤처기업에 최적입니다.",
+    memo: "회의실 4개, 서버룸 별도, 구내식당 있음",
+    checkedDate: "2024-01-25",
+    options: ["에어컨", "전자키", "주차", "냉장고"],
+    password: "1357*",
     contact: "031-1234-5678",
     contactManager: "010-6666-7777",
     agentName: "판교테크빌딩",
@@ -168,8 +209,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 6,
     title: "신촌 로데오거리 소형 상가 임대",
+    buildingName: "신촌 로데오빌딩",
     address: "서울특별시 서대문구 창천동 52",
     type: "상가",
+    roomType: "소형상가",
+    unitNumber: "102호",
     area: "33㎡ (10평)",
     floor: "1층",
     deposit: "2,000만원",
@@ -181,6 +225,9 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9367,
     image: property6,
     description: "신촌 로데오거리 소형 상가로 대학생 유동인구가 풍부합니다. 소자본 창업에 최적화된 크기이며 인테리어 공사 허용. 연세대·이화여대 인근으로 젊은 층 타겟 업종 추천.",
+    memo: "인테리어 공사 허용, 업종 제한 없음",
+    checkedDate: "2024-01-10",
+    options: ["에어컨"],
     contact: "02-5678-9012",
     contactOwner: "010-7777-8888",
     agentName: "신촌공실랩",
@@ -194,8 +241,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 7,
     title: "을지로 인쇄거리 카페 임대",
+    buildingName: "을지로 레트로빌딩",
     address: "서울특별시 중구 을지로3가 299",
     type: "식당·카페",
+    roomType: "카페",
+    unitNumber: "1층 전체",
     area: "49㎡ (15평)",
     floor: "1층",
     deposit: "4,000만원",
@@ -207,6 +257,9 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9919,
     image: property1,
     description: "힙한 을지로 인쇄거리 감성 카페 임대입니다. 노출 콘크리트 인테리어 그대로 활용 가능, 전기 용량 충분. 을지로 특유의 레트로 감성으로 SNS 핫플레이스 창업에 이상적.",
+    memo: "노출콘크리트 인테리어 유지, 전기용량 충분",
+    checkedDate: "2024-01-28",
+    options: ["에어컨", "전자레인지", "냉장고"],
     contact: "02-6789-0123",
     agentName: "을지로중개사",
     manageFee: "15만원",
@@ -219,8 +272,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 8,
     title: "성수동 카페거리 트렌디 공실",
+    buildingName: "성수 크리에이티브센터",
     address: "서울특별시 성동구 성수2가 325",
     type: "식당·카페",
+    roomType: "카페/플래그십",
+    unitNumber: "1층 전체",
     area: "99㎡ (30평)",
     floor: "1층",
     deposit: "6,000만원",
@@ -232,6 +288,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 127.0567,
     image: property2,
     description: "성수동 카페 거리 핵심 위치의 대형 공실입니다. 천장고 4.5m의 독특한 공간감, 전면 통유리. 성수동 팝업스토어·플래그십 스토어 수요 급증으로 높은 임대 가치를 가집니다.",
+    memo: "천장고 4.5m, 팝업/플래그십 최적",
+    checkedDate: "2024-01-30",
+    options: ["에어컨", "전자키"],
+    password: "2468#",
     contact: "02-7890-1234",
     agentName: "성수공간중개",
     manageFee: "50만원",
@@ -244,8 +304,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 9,
     title: "종로 사직동 소형 사무실",
+    buildingName: "광화문 사직빌딩",
     address: "서울특별시 종로구 사직동 8-1",
     type: "사무실",
+    roomType: "소형사무실",
+    unitNumber: "301호",
     area: "66㎡ (20평)",
     floor: "3층",
     deposit: "3,000만원",
@@ -257,6 +320,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 126.9704,
     image: property3,
     description: "경복궁 인근 조용한 업무환경의 소형 사무실입니다. 자연채광이 풍부하며 인테리어 상태 양호. 광화문·종로 업무지구 인접으로 관공서·법무·회계 사무소에 적합.",
+    memo: "자연채광 풍부, 인테리어 양호",
+    checkedDate: "2024-01-12",
+    options: ["에어컨", "전자키", "냉장고"],
+    password: "7777#",
     contact: "02-8901-2345",
     agentName: "종로부동산",
     manageFee: "20만원",
@@ -269,8 +336,11 @@ export const MAP_PROPERTIES: MapProperty[] = [
   {
     id: 10,
     title: "잠실 롯데월드몰 인근 상가",
+    buildingName: "잠실 스타필드빌딩",
     address: "서울특별시 송파구 신천동 7-21",
     type: "상가",
+    roomType: "대형상가",
+    unitNumber: "1층 전체",
     area: "115㎡ (35평)",
     floor: "1층",
     deposit: "1억원",
@@ -282,6 +352,10 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 127.1028,
     image: property4,
     description: "잠실 롯데월드몰 인근 초대형 상권의 핵심 위치입니다. 주말·휴일 유동인구 최상위, 관광객 방문 다수. 현재 인테리어 양호하며 다양한 업종 운영 가능. 잠실역 2호선·8호선 환승역 인근.",
+    memo: "주말 유동인구 최상위, 관광객 방문 다수",
+    checkedDate: "2024-01-29",
+    options: ["에어컨", "전자키", "주차"],
+    password: "3690*",
     contact: "02-9012-3456",
     agentName: "잠실공실박스",
     manageFee: "60만원",
