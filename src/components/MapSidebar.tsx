@@ -1,5 +1,5 @@
-import { MapPin, Phone, ChevronRight, ChevronLeft, Eye, EyeOff } from "lucide-react";
-import { useState, useCallback } from "react";
+import { MapPin, Phone, ChevronRight, ChevronLeft, Eye, Building2, CalendarCheck, KeyRound, StickyNote, Home, GripVertical } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 const TYPE_BG: Record<string, string> = {
@@ -10,7 +10,14 @@ const TYPE_BG: Record<string, string> = {
   "병원·학원": "bg-red-50 text-red-700",
 };
 
-/* Daily-limit helpers — key: "contact_reveal_{propId}_{type}" → "YYYY-MM-DD" */
+const OPTION_ICONS: Record<string, string> = {
+  "냉장고": "🧊", "세탁기": "🫧", "드럼세탁기": "🌀", "건조기": "💨",
+  "스타일러": "👔", "TV": "📺", "에어컨": "❄️", "가스레인지": "🔥",
+  "인덕션": "⚡", "전자레인지": "📡", "침대": "🛏", "책상": "🪑",
+  "옷장": "🚪", "전자키": "🔑", "주차": "🅿️",
+};
+
+/* Daily-limit helpers */
 const today = () => new Date().toISOString().slice(0, 10);
 const revealKey = (id: number, type: string) => `contact_reveal_${id}_${type}`;
 const hasRevealedToday = (id: number, type: string) => localStorage.getItem(revealKey(id, type)) === today();
@@ -34,7 +41,7 @@ const ContactRow = ({ propId, type, number }: ContactRowProps) => {
   }, [revealed, propId, type]);
 
   return (
-    <div className="flex items-center justify-between gap-1 mt-1">
+    <div className="flex items-center justify-between gap-1">
       <div className="flex items-center gap-1">
         <Phone className="w-3 h-3 text-primary flex-shrink-0" />
         <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
@@ -71,22 +78,64 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
 }
 
+const MIN_WIDTH = 260;
+const MAX_WIDTH = 600;
+const DEFAULT_WIDTH = 320;
+
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(DEFAULT_WIDTH);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = width;
+
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      // sidebar is on the right, dragging left = expand
+      const delta = startX.current - ev.clientX;
+      const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
+      setWidth(newW);
+    };
+    const onUp = () => {
+      dragging.current = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [width]);
 
   return (
     <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
       {/* Panel */}
       <aside
-        className={`pointer-events-auto bg-white border-l border-border flex flex-col transition-all duration-300 ${
-          collapsed ? "w-0 overflow-hidden opacity-0" : "w-[300px] opacity-100"
+        className={`pointer-events-auto bg-white border-l border-border flex flex-col transition-[opacity] duration-300 ${
+          collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
         }`}
         style={{
+          width: collapsed ? 0 : width,
           marginTop: "106px",
           height: "calc(100% - 106px)",
           boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
         }}
       >
+        {/* Drag handle */}
+        {!collapsed && (
+          <div
+            onMouseDown={onMouseDown}
+            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/20 transition-colors flex items-center justify-center z-10 group"
+            title="드래그하여 너비 조절"
+          >
+            <GripVertical className="w-3 h-3 text-muted-foreground/0 group-hover:text-muted-foreground/50 transition-colors" />
+          </div>
+        )}
+
         {/* Header */}
         <div
           className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0"
@@ -98,6 +147,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
             </span>
             <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
           </div>
+          <span className="text-[10px] text-muted-foreground">← 드래그로 크기 조절</span>
         </div>
 
         {/* List */}
@@ -129,23 +179,87 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                     <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"} shadow-sm`}>
                       {prop.type}
                     </span>
+                    {prop.roomType && (
+                      <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/50 text-white shadow-sm">
+                        {prop.roomType}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="px-3 py-2.5 flex flex-col gap-1">
+                  <div className="px-3 py-2.5 flex flex-col gap-1.5">
+
+                    {/* 건물명 + 호수 */}
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="flex items-center gap-1 min-w-0">
+                        <Building2 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <p className="text-xs font-bold text-foreground truncate">{prop.buildingName ?? prop.title}</p>
+                      </div>
+                      {prop.unitNumber && (
+                        <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-md flex-shrink-0">
+                          {prop.unitNumber}
+                        </span>
+                      )}
+                    </div>
+
                     {/* 주소 */}
                     <div className="flex items-start gap-1">
                       <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-foreground font-semibold line-clamp-1">{prop.address}</p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">{prop.address}</p>
+                    </div>
+
+                    {/* 건축년도 + 층 + 면적 */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] bg-muted/70 text-muted-foreground rounded px-1.5 py-0.5">건축 {prop.buildYear}</span>
+                      <span className="text-[10px] bg-muted/70 text-muted-foreground rounded px-1.5 py-0.5">{prop.floor}</span>
+                      <span className="text-[10px] bg-muted/70 text-muted-foreground rounded px-1.5 py-0.5">{prop.area}</span>
                     </div>
 
                     {/* 가격 */}
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[11px] text-muted-foreground">보증 {prop.deposit} /</span>
+                    <div className="flex items-baseline gap-1 border-t border-border/40 pt-1.5">
+                      <span className="text-[11px] text-muted-foreground">보증금 {prop.deposit} /</span>
                       <span className="text-sm font-extrabold text-accent">{prop.monthly}</span>
                     </div>
 
+                    {/* 옵션 */}
+                    {prop.options && prop.options.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {prop.options.slice(0, 6).map((opt) => (
+                          <span key={opt} className="text-[10px] bg-primary/5 text-primary border border-primary/20 rounded px-1.5 py-0.5">
+                            {OPTION_ICONS[opt] ?? "•"} {opt}
+                          </span>
+                        ))}
+                        {prop.options.length > 6 && (
+                          <span className="text-[10px] text-muted-foreground px-1">+{prop.options.length - 6}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 비번 + 확인날짜 */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {prop.password && (
+                        <div className="flex items-center gap-1">
+                          <KeyRound className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[11px] text-muted-foreground font-mono">{prop.password}</span>
+                        </div>
+                      )}
+                      {prop.checkedDate && (
+                        <div className="flex items-center gap-1">
+                          <CalendarCheck className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[11px] text-muted-foreground">{prop.checkedDate} 확인</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 메모 */}
+                    {prop.memo && (
+                      <div className="flex items-start gap-1 bg-secondary/40 border border-border rounded-lg px-2 py-1.5">
+                        <StickyNote className="w-3 h-3 text-accent flex-shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">{prop.memo}</p>
+                      </div>
+                    )}
+
                     {/* 연락처 */}
-                    <div className="border-t border-border/50 pt-1.5 mt-0.5 flex flex-col gap-0.5">
+                    <div className="border-t border-border/50 pt-1.5 flex flex-col gap-0.5">
                       {prop.contactOwner && (
                         <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />
                       )}
