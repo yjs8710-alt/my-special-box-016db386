@@ -36,7 +36,7 @@ const FeaturesSection = () => {
     <section className="py-16 bg-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10">
-          <h2 className="text-2xl font-bold text-foreground">왜 공실박스인가요?</h2>
+          <h2 className="text-2xl font-bold text-foreground">왜 집다인가요?</h2>
           <p className="text-muted-foreground mt-2 text-sm">빠르고 정확한 공실 매물 플랫폼</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
