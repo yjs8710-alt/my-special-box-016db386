@@ -80,14 +80,14 @@ interface MapSidebarProps {
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 99999;
-const DEFAULT_WIDTH = 2800;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
+  const defaultWidth = Math.round(window.innerWidth / 3);
   const [collapsed, setCollapsed] = useState(false);
-  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const [width, setWidth] = useState(defaultWidth);
   const dragging = useRef(false);
   const startX = useRef(0);
-  const startWidth = useRef(DEFAULT_WIDTH);
+  const startWidth = useRef(defaultWidth);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
