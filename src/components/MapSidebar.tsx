@@ -79,8 +79,8 @@ interface MapSidebarProps {
 }
 
 const MIN_WIDTH = 400;
-const MAX_WIDTH = 1800;
-const DEFAULT_WIDTH = 1400;
+const MAX_WIDTH = 2800;
+const DEFAULT_WIDTH = 2800;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -119,7 +119,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
           collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
         }`}
         style={{
-          width: collapsed ? 0 : width,
+          width: collapsed ? 0 : Math.min(width, window.innerWidth - 60),
           marginTop: "106px",
           height: "calc(100% - 106px)",
           boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
