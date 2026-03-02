@@ -90,9 +90,9 @@ const Header = () => {
                 <Bell className="w-4 h-4" />
                 <span>알림</span>
               </button>
-              <button className="hidden md:flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors">
+              <button className="hidden md:flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors" onClick={() => navigate("/signup")}>
                 <User className="w-4 h-4" />
-                <span>로그인</span>
+                <span>로그인 / 회원가입</span>
               </button>
               <Button
                 size="sm"
