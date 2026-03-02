@@ -1,141 +1,135 @@
 import { useState } from "react";
-import { X, Upload, MapPin, Building2, ChevronDown, Plus, Trash2, Phone } from "lucide-react";
-import { z } from "zod";
+import {
+  X, Upload, MapPin, Building2, Plus, Trash2, Phone, ChevronDown,
+} from "lucide-react";
 
-/* ─── Constants ─── */
-const DEAL_TYPES = ["월세", "전세", "매매"] as const;
-type DealType = typeof DEAL_TYPES[number];
-
+/* ─── Types & Constants ─── */
 const BROKER_TYPES = ["일반중개", "공동중개"] as const;
-type BrokerType = typeof BROKER_TYPES[number];
-
 const TRADE_TYPES = ["임대", "매매"] as const;
-type TradeType = typeof TRADE_TYPES[number];
-
 const BUILDING_TYPES = ["일반건물", "집합건물", "토지"] as const;
-type BuildingType = typeof BUILDING_TYPES[number];
-
 const DETAIL_TYPES = [
-  "원룸", "미투(1.5룸)", "두룸", "정투룸", "미쓰(미니쓰리룸)", "쓰리룸",
-  "포룸", "주인", "고시원", "상가", "사무실", "창고/공장", "숙박/펜션",
+  "원룸", "투베이", "투룸", "정투룸", "쓰리룸", "포룸",
+  "주인", "고시원", "상가", "사무실", "창고/공장",
 ] as const;
-type DetailType = typeof DETAIL_TYPES[number];
+const ROOM_OPTIONS = [
+  "냉장고", "세탁기", "드럼세탁기", "건조기", "스타일러", "TV",
+  "에어컨", "가스레인지", "인덕션", "전자레인지", "침대", "책상",
+  "옷장", "전자키", "복층", "옥탑", "테라스", "주차",
+] as const;
+const LH_TYPES = ["관계없음", "LH가능", "LH불가"] as const;
+const VACANCY_TYPES = ["공실", "세입자 거주중"] as const;
 
-const schema = z.object({
-  address: z.string().trim().min(5, "주소를 입력해주세요").max(200),
-  contact: z.string().trim().regex(/^[0-9\-]{9,14}$/, "올바른 연락처를 입력해주세요"),
-  description: z.string().trim().min(10, "설명을 10자 이상 입력해주세요").max(1000),
-});
-type FormData = z.infer<typeof schema>;
+type BrokerType = typeof BROKER_TYPES[number];
+type TradeType = typeof TRADE_TYPES[number];
+type BuildingType = typeof BUILDING_TYPES[number];
+type DetailType = typeof DETAIL_TYPES[number] | "";
+type VacancyType = typeof VACANCY_TYPES[number];
+type LhType = typeof LH_TYPES[number];
 
-interface UnitEntry {
-  id: number;
-  floor: string;
-  unitNo: string;
-  dealType: DealType;
-  deposit: string;
-  price: string;
-}
-
-interface Step1Data {
+interface FormState {
+  // Step 1
   brokerType: BrokerType;
   tradeType: TradeType;
   buildingType: BuildingType;
-  detailType: DetailType | "";
+  detailType: DetailType;
+  address: string;
+  floor: string;
+  unitNo: string;
+  area: string;
+  // Step 2
+  options: string[];
+  vacancy: VacancyType;
+  deposit: string;
+  monthlyRent: string;
+  managementFee: string;
+  shortTerm: boolean;
+  lhType: LhType;
+  exitCleanFee: string;
+  brokerFee: string;
+  // Step 3
+  description: string;
+  contactBroker: string;
+  contactOwner: string;
+  contactTenant: string;
+  contactManager: string;
+  expose: boolean;
+  allowAddressView: boolean;
 }
 
+const INITIAL: FormState = {
+  brokerType: "일반중개", tradeType: "임대", buildingType: "일반건물",
+  detailType: "", address: "", floor: "", unitNo: "", area: "",
+  options: [], vacancy: "공실",
+  deposit: "", monthlyRent: "", managementFee: "",
+  shortTerm: false, lhType: "관계없음",
+  exitCleanFee: "", brokerFee: "",
+  description: "", contactBroker: "", contactOwner: "",
+  contactTenant: "", contactManager: "",
+  expose: true, allowAddressView: false,
+};
+
+const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 노출"];
+
 interface Props { onClose: () => void; }
-let unitIdSeq = 1;
 
-/* ─── Main Component ─── */
-const PropertyRegisterModal = ({ onClose }: Props) => {
-  const [step, setStep] = useState<1 | 2>(1);
-  const [step1, setStep1] = useState<Step1Data>({
-    brokerType: "일반중개",
-    tradeType: "임대",
-    buildingType: "일반건물",
-    detailType: "",
-  });
-  const [step1Error, setStep1Error] = useState("");
-
-  const [form, setForm] = useState<Partial<FormData>>({});
-  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
-  const [units, setUnits] = useState<UnitEntry[]>([
-    { id: unitIdSeq++, floor: "", unitNo: "", dealType: "월세", deposit: "", price: "" },
-  ]);
-  const [unitErrors, setUnitErrors] = useState<Record<number, string>>({});
+/* ─── Main ─── */
+export default function PropertyRegisterModal({ onClose }: Props) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [form, setForm] = useState<FormState>(INITIAL);
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const setF = (key: keyof FormData, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
+  const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setErrors((p) => { const n = { ...p }; delete n[key]; return n; });
   };
 
-  const autoTitle = (address: string, unit: UnitEntry) => {
-    const base = address.replace("충청북도 청주시 ", "").replace("충청북도 ", "");
-    const parts = [base, unit.floor && `${unit.floor}층`, unit.unitNo && `${unit.unitNo}호`].filter(Boolean);
-    return parts.join(" ");
+  const toggleOption = (opt: string) =>
+    set("options", form.options.includes(opt)
+      ? form.options.filter((o) => o !== opt)
+      : [...form.options, opt]);
+
+  const validateStep1 = () => {
+    const e: Record<string, string> = {};
+    if (!form.address.trim()) e.address = "주소를 입력해주세요";
+    if (!form.detailType) e.detailType = "세부 종류를 선택해주세요";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const addUnit = () =>
-    setUnits((prev) => [...prev, { id: unitIdSeq++, floor: "", unitNo: "", dealType: "월세", deposit: "", price: "" }]);
-
-  const removeUnit = (id: number) => {
-    if (units.length === 1) return;
-    setUnits((prev) => prev.filter((u) => u.id !== id));
+  const validateStep2 = () => {
+    const e: Record<string, string> = {};
+    if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const updateUnit = (id: number, field: keyof Omit<UnitEntry, "id">, value: string) => {
-    setUnits((prev) => prev.map((u) => u.id === id ? { ...u, [field]: value } : u));
-    setUnitErrors((prev) => { const n = { ...prev }; delete n[id]; return n; });
+  const validateStep3 = () => {
+    const e: Record<string, string> = {};
+    if (!form.contactBroker.trim()) e.contactBroker = "부동산 연락처를 입력해주세요";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleStep1Next = () => {
-    if (!step1.detailType) { setStep1Error("세부 종류를 선택해주세요"); return; }
-    setStep1Error("");
-    setStep(2);
+  const goNext = () => {
+    if (step === 1 && validateStep1()) setStep(2);
+    else if (step === 2 && validateStep2()) setStep(3);
+    else if (step === 3 && validateStep3()) setSubmitted(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = schema.safeParse(form);
-    const fieldErrors: Partial<Record<keyof FormData, string>> = {};
-    if (!result.success) {
-      result.error.errors.forEach((err) => {
-        const key = err.path[0] as keyof FormData;
-        if (!fieldErrors[key]) fieldErrors[key] = err.message;
-      });
-      setErrors(fieldErrors);
-    }
-    const uErrors: Record<number, string> = {};
-    units.forEach((u) => {
-      if (!u.floor) uErrors[u.id] = "층수를 입력하세요";
-      else if (!u.price) uErrors[u.id] = "금액을 입력하세요";
-    });
-    setUnitErrors(uErrors);
-    if (Object.keys(fieldErrors).length > 0 || Object.keys(uErrors).length > 0) return;
-    setSubmitted(true);
+  const goPrev = () => {
+    if (step > 1) setStep((s) => (s - 1) as 1 | 2 | 3);
   };
-
-  const priceLabel = (dealType: DealType) =>
-    dealType === "매매" ? "매매가" : dealType === "전세" ? "전세금" : "월세";
-
-  const STEP_LABELS = ["기본 설정 및 주소", "상세 정보"];
 
   return (
-    <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
-      style={{ background: "rgba(10,20,50,0.55)", backdropFilter: "blur(4px)" }}
-    >
-      <div
-        className="bg-card w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
-        style={{ boxShadow: "0 24px 64px rgba(10,45,110,0.25)" }}
-      >
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4"
+      style={{ background: "rgba(10,20,50,0.55)", backdropFilter: "blur(4px)" }}>
+      <div className="bg-card w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        style={{ boxShadow: "0 24px 64px rgba(10,45,110,0.25)" }}>
+
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0"
-          style={{ background: "hsl(var(--header-bg))" }}
-        >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0"
+          style={{ background: "hsl(var(--header-bg))" }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center">
               <Building2 className="w-4 h-4 text-accent" />
@@ -150,333 +144,336 @@ const PropertyRegisterModal = ({ onClose }: Props) => {
           </button>
         </div>
 
-        {/* Step Indicator */}
+        {/* Step indicator */}
         {!submitted && (
           <div className="px-6 pt-4 pb-2 flex-shrink-0">
             <div className="flex gap-1.5 mb-2">
-              {[1, 2].map((s) => (
-                <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? "bg-primary" : "bg-muted"}`} />
+              {[1, 2, 3].map((s) => (
+                <div key={s} className={`h-1 flex-1 rounded-full transition-all duration-300 ${s <= step ? "bg-primary" : "bg-muted"}`} />
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">{step}/2 {STEP_LABELS[step - 1]}</p>
+            <p className="text-xs text-muted-foreground">{step}/3 {STEP_LABELS[step - 1]}</p>
           </div>
         )}
 
-        {/* Content */}
-        {submitted ? (
-          <div className="flex flex-col items-center justify-center py-16 px-8 gap-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
-              <span className="text-3xl">🎉</span>
-            </div>
-            <h3 className="text-lg font-extrabold text-foreground">등록 신청 완료!</h3>
-            <p className="text-sm text-muted-foreground text-center">
-              매물 검토 후 1~2 영업일 내에 게시됩니다.<br />궁금한 점은 고객센터로 문의해주세요.
-            </p>
-            <button onClick={onClose} className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-              확인
-            </button>
-          </div>
-        ) : step === 1 ? (
-          /* ── STEP 1 ── */
-          <div className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
-
-            {/* 거래 방식 */}
-            <section>
-              <SectionLabel>거래 방식</SectionLabel>
-              <div className="flex gap-4">
-                {BROKER_TYPES.map((bt) => (
-                  <RadioOption key={bt} checked={step1.brokerType === bt} onClick={() => setStep1((p) => ({ ...p, brokerType: bt }))}>
-                    {bt}
-                  </RadioOption>
-                ))}
-              </div>
-            </section>
-
-            {/* 거래 종류 */}
-            <section>
-              <SectionLabel>거래 종류</SectionLabel>
-              <div className="flex gap-4">
-                {TRADE_TYPES.map((tt) => (
-                  <RadioOption key={tt} checked={step1.tradeType === tt} onClick={() => setStep1((p) => ({ ...p, tradeType: tt }))}>
-                    {tt}
-                  </RadioOption>
-                ))}
-              </div>
-            </section>
-
-            {/* 매물 종류 */}
-            <section>
-              <SectionLabel>매물 종류 <Tag>단독건물 (집합건물 아님)</Tag></SectionLabel>
-              <div className="flex gap-4">
-                {BUILDING_TYPES.map((bt) => (
-                  <RadioOption key={bt} checked={step1.buildingType === bt} onClick={() => setStep1((p) => ({ ...p, buildingType: bt }))}>
-                    {bt}
-                  </RadioOption>
-                ))}
-              </div>
-            </section>
-
-            {/* 세부 종류 */}
-            <section>
-              <SectionLabel>세부 종류</SectionLabel>
-              <div className="flex flex-wrap gap-x-5 gap-y-2.5">
-                {DETAIL_TYPES.map((dt) => (
-                  <RadioOption key={dt} checked={step1.detailType === dt} onClick={() => { setStep1((p) => ({ ...p, detailType: dt })); setStep1Error(""); }}>
-                    {dt}
-                  </RadioOption>
-                ))}
-              </div>
-              {step1Error && <p className="text-xs text-destructive mt-2">{step1Error}</p>}
-            </section>
-
-            {/* 주소 */}
-            <section>
-              <SectionLabel>주소 입력</SectionLabel>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="예) 청주시 흥덕구 가경동 123-4"
-                    value={form.address ?? ""}
-                    onChange={(e) => setF("address", e.target.value)}
-                    className={inputCls(!!errors.address) + " pl-9"}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors whitespace-nowrap"
-                >
-                  주소검색
-                </button>
-              </div>
-              {errors.address && <p className="text-xs text-destructive mt-1">{errors.address}</p>}
-            </section>
-
-            {/* Next */}
-            <div className="flex gap-3 pt-2 pb-1 sticky bottom-0 bg-card">
-              <button type="button" onClick={onClose}
-                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors"
-              >
-                취소
-              </button>
-              <button type="button" onClick={handleStep1Next}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors"
-                style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}
-              >
-                다음
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* ── STEP 2 ── */
-          <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
-
-            {/* 선택 요약 */}
-            <div className="flex gap-1.5 flex-wrap">
-              {[step1.brokerType, step1.tradeType, step1.buildingType, step1.detailType].filter(Boolean).map((v) => (
-                <span key={v} className="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-1 rounded-full">{v}</span>
-              ))}
-            </div>
-
-            {/* 호수별 임대조건 */}
-            <section>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">호수별 임대 조건</h3>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">같은 주소에 여러 호실이 있으면 추가하세요</p>
-                </div>
-                <button
-                  type="button" onClick={addUnit}
-                  className="flex items-center gap-1 text-xs font-bold text-primary border border-primary/30 px-2.5 py-1.5 rounded-lg hover:bg-primary/5 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" /> 호실 추가
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-3">
-                {units.map((unit, idx) => (
-                  <div key={unit.id}
-                    className={`border rounded-xl p-4 relative transition-all ${unitErrors[unit.id] ? "border-destructive bg-destructive/5" : "border-border bg-muted/20"}`}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        {idx + 1}번 호실
-                        {unit.floor && unit.unitNo && ` · ${unit.floor}층 ${unit.unitNo}호`}
-                      </span>
-                      {units.length > 1 && (
-                        <button type="button" onClick={() => removeUnit(unit.id)}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-foreground/70">층수 <span className="text-accent">*</span></label>
-                        <input type="text" placeholder="예) 2" value={unit.floor}
-                          onChange={(e) => updateUnit(unit.id, "floor", e.target.value)}
-                          className={inputCls(false) + " text-sm py-2"} />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-foreground/70">호수</label>
-                        <input type="text" placeholder="예) 201" value={unit.unitNo}
-                          onChange={(e) => updateUnit(unit.id, "unitNo", e.target.value)}
-                          className={inputCls(false) + " text-sm py-2"} />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-semibold text-foreground/70">거래 유형 <span className="text-accent">*</span></label>
-                        <div className="flex gap-1">
-                          {DEAL_TYPES.map((dt) => (
-                            <button key={dt} type="button" onClick={() => updateUnit(unit.id, "dealType", dt)}
-                              className={`flex-1 py-2 rounded-lg text-xs font-bold border transition-all ${
-                                unit.dealType === dt
-                                  ? dt === "월세" ? "bg-primary text-primary-foreground border-primary"
-                                    : dt === "전세" ? "bg-purple-600 text-white border-purple-600"
-                                    : "bg-accent text-accent-foreground border-accent"
-                                  : "bg-background text-foreground border-border hover:border-primary"
-                              }`}
-                            >{dt}</button>
-                          ))}
-                        </div>
-                      </div>
-                      {unit.dealType !== "매매" && (
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-semibold text-foreground/70">보증금</label>
-                          <input type="text" placeholder="예) 500만원" value={unit.deposit}
-                            onChange={(e) => updateUnit(unit.id, "deposit", e.target.value)}
-                            className={inputCls(false) + " text-sm py-2"} />
-                        </div>
-                      )}
-                      <div className={`flex flex-col gap-1 ${unit.dealType === "매매" ? "col-span-2" : ""}`}>
-                        <label className="text-[11px] font-semibold text-foreground/70">{priceLabel(unit.dealType)} <span className="text-accent">*</span></label>
-                        <input type="text"
-                          placeholder={unit.dealType === "매매" ? "예) 3억 5,000만원" : unit.dealType === "전세" ? "예) 1억원" : "예) 80만원"}
-                          value={unit.price}
-                          onChange={(e) => updateUnit(unit.id, "price", e.target.value)}
-                          className={inputCls(false) + " text-sm py-2"} />
-                      </div>
-                    </div>
-
-                    {form.address && unit.floor && (
-                      <p className="text-[11px] text-muted-foreground mt-2 bg-muted/50 px-2 py-1 rounded-lg">
-                        📌 {autoTitle(form.address, unit)}
-                        {unit.dealType === "매매" ? ` · 매매 ${unit.price}` : ` · ${unit.dealType} ${unit.deposit ? unit.deposit + " / " : ""}${unit.price}`}
-                      </p>
-                    )}
-                    {unitErrors[unit.id] && <p className="text-xs text-destructive mt-1">{unitErrors[unit.id]}</p>}
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* 사진 업로드 */}
-            <section>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">사진 업로드</h3>
-              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl py-6 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
-                <Upload className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="text-sm text-muted-foreground group-hover:text-primary font-medium">사진을 드래그하거나 클릭해서 업로드</span>
-                <span className="text-xs text-muted-foreground/60">최대 10장 · JPG, PNG, WEBP</span>
-                <input type="file" accept="image/*" multiple className="hidden" />
-              </label>
-            </section>
-
-            {/* 매물 설명 */}
-            <section>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">매물 설명</h3>
-              <Field label="" error={errors.description}>
-                <textarea
-                  placeholder="매물의 특징, 주변 환경, 입주 가능일 등을 자세히 적어주세요. (10자 이상)"
-                  value={form.description ?? ""}
-                  onChange={(e) => setF("description", e.target.value)}
-                  maxLength={1000} rows={3}
-                  className={inputCls(!!errors.description) + " resize-none"}
-                />
-                <p className="text-right text-[11px] text-muted-foreground mt-1">{(form.description ?? "").length} / 1000</p>
-              </Field>
-            </section>
-
-            {/* 연락처 */}
-            <section>
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">연락처</h3>
-              <Field label="전화번호" error={errors.contact} required>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="tel" placeholder="예) 043-123-4567"
-                    value={form.contact ?? ""}
-                    onChange={(e) => setF("contact", e.target.value)}
-                    maxLength={14}
-                    className={inputCls(!!errors.contact) + " pl-9"}
-                  />
-                </div>
-              </Field>
-            </section>
+        {/* Body */}
+        {submitted ? <SuccessView onClose={onClose} /> : (
+          <div className="overflow-y-auto flex-1 px-6 py-4">
+            {step === 1 && <Step1 form={form} set={set} errors={errors} />}
+            {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
+            {step === 3 && <Step3 form={form} set={set} errors={errors} />}
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2 pb-1 flex-shrink-0 sticky bottom-0 bg-card">
-              <button type="button" onClick={() => setStep(1)}
-                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors"
-              >
-                이전
+            <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
+              <button type="button" onClick={step === 1 ? onClose : goPrev}
+                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors">
+                {step === 1 ? "취소" : "이전"}
               </button>
-              <button type="submit"
+              <button type="button" onClick={goNext}
                 className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors"
-                style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}
-              >
-                매물 등록 신청
+                style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}>
+                {step === 3 ? "매물 등록 신청" : "다음"}
               </button>
             </div>
-          </form>
+          </div>
         )}
       </div>
     </div>
   );
-};
+}
 
-/* ─── Helpers ─── */
-const inputCls = (hasError: boolean) =>
+/* ─── Step 1 ─── */
+function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+  return (
+    <div className="flex flex-col gap-5">
+      <Section label="거래 방식">
+        <div className="flex gap-5">
+          {BROKER_TYPES.map((t) => <Radio key={t} checked={form.brokerType === t} onClick={() => set("brokerType", t)}>{t}</Radio>)}
+        </div>
+      </Section>
+
+      <Section label="거래 종류">
+        <div className="flex gap-5">
+          {TRADE_TYPES.map((t) => <Radio key={t} checked={form.tradeType === t} onClick={() => set("tradeType", t)}>{t}</Radio>)}
+        </div>
+      </Section>
+
+      <Section label="매물 종류">
+        <div className="flex gap-5">
+          {BUILDING_TYPES.map((t) => <Radio key={t} checked={form.buildingType === t} onClick={() => set("buildingType", t)}>{t}</Radio>)}
+        </div>
+      </Section>
+
+      <Section label="세부 종류" error={errors.detailType}>
+        <div className="flex flex-wrap gap-x-5 gap-y-2.5">
+          {DETAIL_TYPES.map((t) => (
+            <Radio key={t} checked={form.detailType === t} onClick={() => set("detailType", t)}>{t}</Radio>
+          ))}
+        </div>
+      </Section>
+
+      <Section label="주소 입력" error={errors.address}>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text" placeholder="예) 청주시 흥덕구 가경동 123-4"
+              value={form.address}
+              onChange={(e) => set("address", e.target.value)}
+              className={ic(!!errors.address) + " pl-9"}
+            />
+          </div>
+          <button type="button" className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors whitespace-nowrap">
+            주소검색
+          </button>
+        </div>
+      </Section>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-foreground/70">층수</label>
+          <input type="text" placeholder="예) 2" value={form.floor} onChange={(e) => set("floor", e.target.value)} className={ic(false)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-foreground/70">호수</label>
+          <input type="text" placeholder="예) 201" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-foreground/70">평수</label>
+          <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Step 2 ─── */
+function Step2({
+  form, set, toggleOption, errors,
+}: {
+  form: FormState;
+  set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  toggleOption: (opt: string) => void;
+  errors: Record<string, string>;
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      {/* 요약 칩 */}
+      <div className="flex gap-1.5 flex-wrap">
+        {[form.brokerType, form.tradeType, form.buildingType, form.detailType].filter(Boolean).map((v) => (
+          <span key={v} className="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-1 rounded-full">{v}</span>
+        ))}
+      </div>
+
+      {/* 방 옵션 */}
+      <Section label="방 옵션">
+        <div className="flex flex-wrap gap-2">
+          {ROOM_OPTIONS.map((opt) => (
+            <button key={opt} type="button" onClick={() => toggleOption(opt)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                form.options.includes(opt)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:border-primary/50"
+              }`}>
+              {opt}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* 공실 여부 */}
+      <Section label="현재 공실 여부">
+        <div className="flex gap-3">
+          {VACANCY_TYPES.map((t) => (
+            <button key={t} type="button" onClick={() => set("vacancy", t)}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                form.vacancy === t
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:border-primary/50"
+              }`}>
+              {t}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* 금액 */}
+      <Section label="금액 입력" error={errors.amount}>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">보증금</label>
+            <input type="text" placeholder="예) 500만원" value={form.deposit} onChange={(e) => set("deposit", e.target.value)} className={ic(false)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">월세</label>
+            <input type="text" placeholder="예) 50만원" value={form.monthlyRent} onChange={(e) => set("monthlyRent", e.target.value)} className={ic(false)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">관리비</label>
+            <input type="text" placeholder="예) 5만원" value={form.managementFee} onChange={(e) => set("managementFee", e.target.value)} className={ic(false)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">퇴실 청소비</label>
+            <input type="text" placeholder="예) 10만원" value={form.exitCleanFee} onChange={(e) => set("exitCleanFee", e.target.value)} className={ic(false)} />
+          </div>
+          <div className="flex flex-col gap-1 col-span-2">
+            <label className="text-xs font-semibold text-foreground/70">중개 보수</label>
+            <input type="text" placeholder="예) 협의" value={form.brokerFee} onChange={(e) => set("brokerFee", e.target.value)} className={ic(false)} />
+          </div>
+        </div>
+      </Section>
+
+      {/* 단기 임대 */}
+      <Section label="">
+        <div className="flex items-center gap-3">
+          <Toggle checked={form.shortTerm} onClick={() => set("shortTerm", !form.shortTerm)} />
+          <span className="text-sm font-semibold text-foreground">단기 임대 가능</span>
+        </div>
+      </Section>
+
+      {/* LH 전세대출 */}
+      <Section label="LH 전세대출">
+        <div className="flex gap-3">
+          {LH_TYPES.map((t) => (
+            <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ─── Step 3 ─── */
+function Step3({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+  const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
+    { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567", required: true },
+    { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678" },
+    { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
+    { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* 매물 소개 */}
+      <Section label="매물 소개">
+        <textarea
+          placeholder="매물의 특징, 주변 환경, 입주 가능일, 특이사항 등을 자세히 적어주세요."
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+          maxLength={1000} rows={4}
+          className={ic(false) + " resize-none"}
+        />
+        <p className="text-right text-[11px] text-muted-foreground mt-1">{form.description.length} / 1000</p>
+      </Section>
+
+      {/* 사진 업로드 */}
+      <Section label="사진 업로드">
+        <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-xl py-5 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group">
+          <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          <span className="text-sm text-muted-foreground group-hover:text-primary font-medium">사진 업로드 (최대 10장)</span>
+          <span className="text-xs text-muted-foreground/60">JPG, PNG, WEBP</span>
+          <input type="file" accept="image/*" multiple className="hidden" />
+        </label>
+      </Section>
+
+      {/* 연락처 */}
+      <Section label="연락처">
+        <div className="flex flex-col gap-3">
+          {contacts.map(({ key, label, placeholder, required }) => (
+            <div key={key} className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">
+                {label} {required && <span className="text-accent">*</span>}
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="tel" placeholder={placeholder}
+                  value={form[key] as string}
+                  onChange={(e) => set(key, e.target.value)}
+                  className={ic(!!(errors[key])) + " pl-9"}
+                />
+              </div>
+              {errors[key] && <p className="text-xs text-destructive">{errors[key]}</p>}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* 노출 설정 */}
+      <Section label="노출 설정">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
+            <div>
+              <p className="text-sm font-semibold text-foreground">매물 노출</p>
+              <p className="text-xs text-muted-foreground">플랫폼에 매물을 공개합니다</p>
+            </div>
+            <Toggle checked={form.expose} onClick={() => set("expose", !form.expose)} />
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-xl border border-border bg-muted/20">
+            <div>
+              <p className="text-sm font-semibold text-foreground">번지·호수 열람 허용</p>
+              <p className="text-xs text-muted-foreground">상세 주소를 방문자에게 공개합니다</p>
+            </div>
+            <Toggle checked={form.allowAddressView} onClick={() => set("allowAddressView", !form.allowAddressView)} />
+          </div>
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ─── Success ─── */
+function SuccessView({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-8 gap-4">
+      <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+        <span className="text-3xl">🎉</span>
+      </div>
+      <h3 className="text-lg font-extrabold text-foreground">등록 신청 완료!</h3>
+      <p className="text-sm text-muted-foreground text-center">
+        매물 검토 후 1~2 영업일 내에 게시됩니다.<br />궁금한 점은 고객센터로 문의해주세요.
+      </p>
+      <button onClick={onClose} className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
+        확인
+      </button>
+    </div>
+  );
+}
+
+/* ─── Shared UI ─── */
+const ic = (hasError: boolean) =>
   `w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground ${
     hasError
       ? "border-destructive focus:ring-2 focus:ring-destructive/20"
       : "border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
   }`;
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-sm font-bold text-foreground mb-2.5 flex items-center gap-2">{children}</p>
-);
+function Section({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {label && <p className="text-sm font-bold text-foreground">{label}</p>}
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
 
-const Tag = ({ children }: { children: React.ReactNode }) => (
-  <span className="text-[10px] font-bold text-destructive border border-destructive/40 px-1.5 py-0.5 rounded-full">{children}</span>
-);
+function Radio({ checked, onClick, children }: { checked: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <label className="flex items-center gap-1.5 cursor-pointer select-none" onClick={onClick}>
+      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${checked ? "border-primary" : "border-muted-foreground/40"}`}>
+        {checked && <span className="w-2 h-2 rounded-full bg-primary" />}
+      </span>
+      <span className={`text-sm ${checked ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{children}</span>
+    </label>
+  );
+}
 
-const RadioOption = ({ checked, onClick, children }: { checked: boolean; onClick: () => void; children: React.ReactNode }) => (
-  <label className="flex items-center gap-1.5 cursor-pointer select-none" onClick={onClick}>
-    <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-      checked ? "border-primary" : "border-muted-foreground/40"
-    }`}>
-      {checked && <span className="w-2 h-2 rounded-full bg-primary" />}
-    </span>
-    <span className={`text-sm ${checked ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{children}</span>
-  </label>
-);
-
-const Field = ({
-  label, error, required, children,
-}: {
-  label: string; error?: string; required?: boolean; children: React.ReactNode;
-}) => (
-  <div className="flex flex-col gap-1">
-    {label && (
-      <label className="text-xs font-semibold text-foreground/80">
-        {label} {required && <span className="text-accent">*</span>}
-      </label>
-    )}
-    {children}
-    {error && <p className="text-xs text-destructive">{error}</p>}
-  </div>
-);
-
-export default PropertyRegisterModal;
+function Toggle({ checked, onClick }: { checked: boolean; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick}
+      className={`relative w-11 h-6 rounded-full transition-all duration-200 flex-shrink-0 ${checked ? "bg-primary" : "bg-muted"}`}>
+      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-200 ${checked ? "left-[22px]" : "left-0.5"}`} />
+    </button>
+  );
+}
