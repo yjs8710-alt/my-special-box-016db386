@@ -1,4 +1,4 @@
-import { MapPin, Phone, ChevronRight, ChevronLeft, Eye, Building2, CalendarCheck, KeyRound, StickyNote, Home, GripVertical } from "lucide-react";
+import { MapPin, Phone, ChevronRight, ChevronLeft, Eye, Building2, CalendarCheck, KeyRound, StickyNote, Home, GripVertical, X, ZoomIn } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -85,6 +85,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const defaultWidth = Math.round(window.innerWidth / 3);
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(defaultWidth);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
@@ -112,6 +113,27 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   }, [width]);
 
   return (
+    <>
+    {/* Lightbox */}
+    {lightboxSrc && (
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        onClick={() => setLightboxSrc(null)}
+      >
+        <button
+          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+        <img
+          src={lightboxSrc}
+          alt="매물 사진 확대"
+          className="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-2xl object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )}
     <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
       {/* Panel */}
       <aside
@@ -172,10 +194,17 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                   {/* Horizontal card — 2x height */}
                   <div className="flex items-stretch gap-0 h-32">
                     {/* Thumbnail */}
-                    <div className="w-28 h-32 flex-shrink-0 overflow-hidden relative">
+                    <div className="w-28 h-32 flex-shrink-0 overflow-hidden relative group/thumb">
                       <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       {/* 종류 뱃지 오버레이 */}
                       <span className={`absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>{prop.type}</span>
+                      {/* 확대 버튼 */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
+                        className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
+                      >
+                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
+                      </button>
                     </div>
 
                     {/* 건물명 + 호수 + 주소 */}
@@ -265,6 +294,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
         )}
       </button>
     </div>
+    </>
   );
 };
 
