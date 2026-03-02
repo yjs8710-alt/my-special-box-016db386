@@ -79,8 +79,8 @@ interface MapSidebarProps {
 }
 
 const MIN_WIDTH = 400;
-const MAX_WIDTH = 1200;
-const DEFAULT_WIDTH = 920;
+const MAX_WIDTH = 1800;
+const DEFAULT_WIDTH = 1200;
 
 const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
