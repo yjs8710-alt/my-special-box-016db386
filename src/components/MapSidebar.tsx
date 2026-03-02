@@ -42,10 +42,10 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
   };
 
   return (
-    <div className="absolute left-0 top-0 bottom-0 z-[900] flex pointer-events-none">
+    <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
       {/* Panel */}
       <aside
-        className={`pointer-events-auto bg-white border-r border-border flex flex-col shadow-xl transition-all duration-300 ${
+        className={`pointer-events-auto bg-white border-l border-border flex flex-col shadow-xl transition-all duration-300 ${
           collapsed ? "w-0 overflow-hidden opacity-0" : "w-[340px] opacity-100"
         }`}
         style={{ marginTop: "106px", height: "calc(100% - 106px)" }}
@@ -143,13 +143,13 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
       {/* Toggle tab */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="pointer-events-auto self-start bg-white border border-l-0 border-border rounded-r-lg px-1 py-4 shadow-md hover:bg-muted/50 transition-colors"
+        className="pointer-events-auto self-start bg-white border border-r-0 border-border rounded-l-lg px-1 py-4 shadow-md hover:bg-muted/50 transition-colors"
         style={{ marginTop: "138px" }}
       >
         {collapsed ? (
-          <ChevronRight className="w-3.5 h-3.5 text-foreground" />
-        ) : (
           <ChevronLeft className="w-3.5 h-3.5 text-foreground" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5 text-foreground" />
         )}
       </button>
     </div>
