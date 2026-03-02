@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapSearchBar from "@/components/MapSearchBar";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const Index = () => {
@@ -16,11 +17,13 @@ const Index = () => {
       !query || p.title.includes(query) || p.address.includes(query) || p.type.includes(query)
     );
 
+  const selected = MAP_PROPERTIES.find((p) => p.id === selectedId) ?? null;
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
       <div className="flex-1 relative flex overflow-hidden">
-        {/* Full-screen map behind everything */}
+        {/* Full-screen map */}
         <div className="absolute inset-0">
           <MapView
             properties={filtered}
@@ -29,7 +32,7 @@ const Index = () => {
           />
         </div>
 
-        {/* Floating search bar on top of map */}
+        {/* Floating search bar */}
         <MapSearchBar
           query={query}
           onQueryChange={setQuery}
@@ -37,7 +40,7 @@ const Index = () => {
           onTypeChange={setActiveType}
         />
 
-        {/* Sidebar overlaid on left */}
+        {/* Left sidebar */}
         <MapSidebar
           properties={filtered}
           selectedId={selectedId}
@@ -47,6 +50,14 @@ const Index = () => {
           query={query}
           onQueryChange={setQuery}
         />
+
+        {/* Right detail panel */}
+        {selected && (
+          <PropertyDetailPanel
+            property={selected}
+            onClose={() => setSelectedId(null)}
+          />
+        )}
       </div>
     </div>
   );

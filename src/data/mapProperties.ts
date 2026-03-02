@@ -1,3 +1,10 @@
+import property1 from "@/assets/property1.jpg";
+import property2 from "@/assets/property2.jpg";
+import property3 from "@/assets/property3.jpg";
+import property4 from "@/assets/property4.jpg";
+import property5 from "@/assets/property5.jpg";
+import property6 from "@/assets/property6.jpg";
+
 export interface MapProperty {
   id: number;
   title: string;
@@ -12,6 +19,16 @@ export interface MapProperty {
   views: number;
   lat: number;
   lng: number;
+  image: string;
+  description: string;
+  contact: string;
+  agentName: string;
+  manageFee: string;
+  parking: string;
+  elevator: boolean;
+  availableFrom: string;
+  totalFloors: string;
+  buildYear: string;
 }
 
 export const MAP_PROPERTIES: MapProperty[] = [
@@ -29,6 +46,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 3241,
     lat: 37.4981,
     lng: 127.0277,
+    image: property1,
+    description: "강남역 2번 출구 도보 1분 거리의 초역세권 1층 상가입니다. 유동인구가 매우 많으며 현재 인테리어가 잘 되어있어 즉시 입점 가능합니다. 전면 유리창으로 가시성이 뛰어납니다.",
+    contact: "02-1234-5678",
+    agentName: "강남부동산중개",
+    manageFee: "30만원",
+    parking: "2대",
+    elevator: false,
+    availableFrom: "2024-02-01",
+    totalFloors: "지상 5층",
+    buildYear: "2010년",
   },
   {
     id: 2,
@@ -44,6 +71,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 1872,
     lat: 37.5256,
     lng: 126.9243,
+    image: property2,
+    description: "여의도 IFC몰 바로 인근 고층 오피스 빌딩입니다. 한강 뷰가 가능하며 회의실 공용 사용 가능. 최신 시스템 에어컨, 이중창 설치 완료. 금융기관, 증권사 밀집 지역으로 비즈니스 환경 최적입니다.",
+    contact: "02-2345-6789",
+    agentName: "여의도공실박스",
+    manageFee: "80만원",
+    parking: "4대",
+    elevator: true,
+    availableFrom: "2024-03-01",
+    totalFloors: "지상 22층",
+    buildYear: "2015년",
   },
   {
     id: 3,
@@ -59,6 +96,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 5610,
     lat: 37.5563,
     lng: 126.9231,
+    image: property3,
+    description: "홍대 걷고싶은거리 인근 유동인구 최상위 상권입니다. 전 임차인 카페 운영으로 주방 후드, 에어컨 기본 설치. 외국인 관광객 및 대학생 유입이 많아 F&B 업종에 최적화된 공간입니다.",
+    contact: "02-3456-7890",
+    agentName: "마포공실중개",
+    manageFee: "20만원",
+    parking: "없음",
+    elevator: false,
+    availableFrom: "즉시 입주",
+    totalFloors: "지상 4층",
+    buildYear: "2005년",
   },
   {
     id: 4,
@@ -74,6 +121,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 2103,
     lat: 37.5344,
     lng: 126.9943,
+    image: property4,
+    description: "이태원 세계음식거리 핵심 위치의 대형 식당 공실입니다. 주방 시설 일부 잔류, 대형 환기 시설 완비. 외국인 관광 특수 지역으로 다국적 음식 브랜드 입점 문의 다수.",
+    contact: "02-4567-8901",
+    agentName: "용산부동산",
+    manageFee: "40만원",
+    parking: "3대",
+    elevator: false,
+    availableFrom: "2024-02-15",
+    totalFloors: "지상 3층",
+    buildYear: "1998년",
   },
   {
     id: 5,
@@ -89,6 +146,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 987,
     lat: 37.3948,
     lng: 127.1111,
+    image: property5,
+    description: "판교 테크노밸리 IT 기업 밀집 지역 대형 오피스입니다. 분리된 회의실 4개, 탕비실, 서버룸 구성 가능. 신분당선 판교역 도보 5분, 주차장 넉넉. IT·스타트업·벤처기업에 최적입니다.",
+    contact: "031-1234-5678",
+    agentName: "판교테크빌딩",
+    manageFee: "150만원",
+    parking: "10대",
+    elevator: true,
+    availableFrom: "2024-04-01",
+    totalFloors: "지상 15층",
+    buildYear: "2018년",
   },
   {
     id: 6,
@@ -104,6 +171,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 1456,
     lat: 37.5557,
     lng: 126.9367,
+    image: property6,
+    description: "신촌 로데오거리 소형 상가로 대학생 유동인구가 풍부합니다. 소자본 창업에 최적화된 크기이며 인테리어 공사 허용. 연세대·이화여대 인근으로 젊은 층 타겟 업종 추천.",
+    contact: "02-5678-9012",
+    agentName: "신촌공실랩",
+    manageFee: "10만원",
+    parking: "없음",
+    elevator: false,
+    availableFrom: "즉시 입주",
+    totalFloors: "지상 3층",
+    buildYear: "2002년",
   },
   {
     id: 7,
@@ -119,6 +196,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 2890,
     lat: 37.5663,
     lng: 126.9919,
+    image: property1,
+    description: "힙한 을지로 인쇄거리 감성 카페 임대입니다. 노출 콘크리트 인테리어 그대로 활용 가능, 전기 용량 충분. 을지로 특유의 레트로 감성으로 SNS 핫플레이스 창업에 이상적.",
+    contact: "02-6789-0123",
+    agentName: "을지로중개사",
+    manageFee: "15만원",
+    parking: "없음",
+    elevator: false,
+    availableFrom: "즉시 입주",
+    totalFloors: "지상 5층",
+    buildYear: "1985년",
   },
   {
     id: 8,
@@ -134,6 +221,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 7230,
     lat: 37.5448,
     lng: 127.0567,
+    image: property2,
+    description: "성수동 카페 거리 핵심 위치의 대형 공실입니다. 천장고 4.5m의 독특한 공간감, 전면 통유리. 성수동 팝업스토어·플래그십 스토어 수요 급증으로 높은 임대 가치를 가집니다.",
+    contact: "02-7890-1234",
+    agentName: "성수공간중개",
+    manageFee: "50만원",
+    parking: "2대",
+    elevator: false,
+    availableFrom: "2024-03-15",
+    totalFloors: "지상 4층",
+    buildYear: "2012년",
   },
   {
     id: 9,
@@ -149,6 +246,16 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 1023,
     lat: 37.5762,
     lng: 126.9704,
+    image: property3,
+    description: "경복궁 인근 조용한 업무환경의 소형 사무실입니다. 자연채광이 풍부하며 인테리어 상태 양호. 광화문·종로 업무지구 인접으로 관공서·법무·회계 사무소에 적합.",
+    contact: "02-8901-2345",
+    agentName: "종로부동산",
+    manageFee: "20만원",
+    parking: "1대",
+    elevator: true,
+    availableFrom: "즉시 입주",
+    totalFloors: "지상 6층",
+    buildYear: "2000년",
   },
   {
     id: 10,
@@ -164,5 +271,15 @@ export const MAP_PROPERTIES: MapProperty[] = [
     views: 4512,
     lat: 37.5133,
     lng: 127.1028,
+    image: property4,
+    description: "잠실 롯데월드몰 인근 초대형 상권의 핵심 위치입니다. 주말·휴일 유동인구 최상위, 관광객 방문 다수. 현재 인테리어 양호하며 다양한 업종 운영 가능. 잠실역 2호선·8호선 환승역 인근.",
+    contact: "02-9012-3456",
+    agentName: "잠실공실박스",
+    manageFee: "60만원",
+    parking: "5대",
+    elevator: false,
+    availableFrom: "2024-02-20",
+    totalFloors: "지상 7층",
+    buildYear: "2008년",
   },
 ];
