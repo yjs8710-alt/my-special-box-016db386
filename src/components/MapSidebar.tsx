@@ -209,19 +209,19 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                         </button>
                       </div>
 
-                      {/* 건물명 + 주소 */}
-                      <div className="w-[150px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
-                        <p className="text-[11px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {prop.unitNumber && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded">{prop.unitNumber}</span>}
-                          {prop.roomType && <span className="text-[9px] text-muted-foreground">{prop.roomType}</span>}
-                        </div>
-                        <p className="text-[9px] text-muted-foreground truncate">{prop.address}</p>
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <span className="text-[9px] text-muted-foreground">{prop.floor}</span>
-                          <span className="text-[9px] text-muted-foreground">{prop.area}</span>
-                        </div>
-                      </div>
+                       {/* 건물명 + 주소 */}
+                       <div className="w-[150px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
+                         <div className="flex items-center gap-1 flex-wrap min-w-0">
+                           <p className="text-[11px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                           {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0">{prop.roomType}</span>}
+                           {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0">{prop.unitNumber}</span>}
+                         </div>
+                         <p className="text-[9px] text-muted-foreground truncate">{prop.address}</p>
+                         <div className="flex items-center gap-1 flex-wrap">
+                           <span className="text-[9px] text-muted-foreground">{prop.floor}</span>
+                           <span className="text-[9px] text-muted-foreground">{prop.area}</span>
+                         </div>
+                       </div>
 
                       {/* 가격: 보증금 / 월세 나란히 */}
                       <div className="w-[110px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
