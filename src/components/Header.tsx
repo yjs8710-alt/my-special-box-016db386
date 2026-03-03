@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 
 const NAV_ITEMS = [
-  { label: "주거형 임대", path: null, sub: ["원룸", "투룸", "쓰리룸+"] },
-  { label: "상가임대", path: "/commercial", sub: [] },
-  { label: "주거형 외 임대", path: null, sub: ["사무실", "공장·창고", "병원·학원", "상가 매매", "사무실 매매", "토지 매매"] },
-  { label: "토지", path: null, sub: ["대지", "임야", "농지"] },
+  { label: "주거형 임대", path: "/residential" },
+  { label: "상가임대", path: "/commercial" },
+  { label: "주거형 외 임대", path: null },
+  { label: "토지", path: "/land" },
 ];
 
 const Header = () => {

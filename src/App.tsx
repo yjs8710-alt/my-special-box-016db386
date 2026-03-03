@@ -8,6 +8,8 @@ import MapSearch from "./pages/MapSearch";
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
 import CommercialRental from "./pages/CommercialRental";
+import ResidentialRental from "./pages/ResidentialRental";
+import LandSearch from "./pages/LandSearch";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/community" element={<Community />} />
           <Route path="/commercial" element={<CommercialRental />} />
+          <Route path="/residential" element={<ResidentialRental />} />
+          <Route path="/land" element={<LandSearch />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
