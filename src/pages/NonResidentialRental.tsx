@@ -338,6 +338,7 @@ const NonResidentialRental = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             nonResidentialSubtypes={NON_RESIDENTIAL_SUBTYPES}
+            showRoomTypes={false}
           />
         </div>
       </main>

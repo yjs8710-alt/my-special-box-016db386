@@ -85,6 +85,9 @@ interface MapFilterBarProps {
   showCategoryChips?: boolean;
   showResidentialTypes?: boolean;
   nonResidentialSubtypes?: { label: string; group: string }[];
+  showRoomTypes?: boolean;
+  showFloor?: boolean;
+  showBuildYear?: boolean;
 }
 
 function makeFormatManwon(max: number) {
@@ -271,6 +274,9 @@ const MapFilterBar = ({
   showCategoryChips = false,
   showResidentialTypes = false,
   nonResidentialSubtypes,
+  showRoomTypes = true,
+  showFloor = true,
+  showBuildYear = true,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -504,6 +510,7 @@ const MapFilterBar = ({
               </div>
 
               {/* 방 종류 */}
+              {showRoomTypes && (
               <div>
                 <SectionLabel>방 종류</SectionLabel>
                 <div className="flex flex-wrap gap-1">
@@ -525,6 +532,7 @@ const MapFilterBar = ({
                   })}
                 </div>
               </div>
+              )}
 
               {/* 보증금 */}
               <RangeInput
@@ -563,6 +571,7 @@ const MapFilterBar = ({
               />
 
               {/* 층수 */}
+              {showFloor && (
               <RangeInput
                 label="층수"
                 min={-2} max={30} step={1}
@@ -574,6 +583,7 @@ const MapFilterBar = ({
                 ticks={["-2층", "0층", "10층", "20층", "무제한"]}
                 unit="층"
               />
+              )}
 
               {/* 면적 */}
               <RangeInput
@@ -589,6 +599,7 @@ const MapFilterBar = ({
               />
 
               {/* 준공년도 */}
+              {showBuildYear && (
               <div>
                 <SectionLabel>준공년도</SectionLabel>
                 <div className="flex flex-wrap gap-1">
@@ -597,6 +608,7 @@ const MapFilterBar = ({
                   ))}
                 </div>
               </div>
+              )}
 
 
             </div>

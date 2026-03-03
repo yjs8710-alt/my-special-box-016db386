@@ -251,6 +251,9 @@ const LandSearch = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            showRoomTypes={false}
+            showFloor={false}
+            showBuildYear={false}
           />
         </div>
       </main>
