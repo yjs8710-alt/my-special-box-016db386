@@ -5,10 +5,9 @@ import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 
 const NAV_ITEMS = [
-  { label: "상가임대", sub: ["1층 상가", "2층 이상", "지하 상가"] },
   { label: "주거형 임대", sub: ["원룸", "투룸", "쓰리룸+"] },
-  { label: "주거형 외 임대", sub: ["사무실", "공장·창고", "병원·학원"] },
-  { label: "매매", sub: ["상가 매매", "사무실 매매", "토지 매매"] },
+  { label: "상가임대", sub: ["1층 상가", "2층 이상", "지하 상가"] },
+  { label: "주거형 외 임대", sub: ["사무실", "공장·창고", "병원·학원", "상가 매매", "사무실 매매", "토지 매매"] },
   { label: "토지", sub: ["대지", "임야", "농지"] },
 ];
 
