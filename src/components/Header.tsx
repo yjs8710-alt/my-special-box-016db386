@@ -47,14 +47,6 @@ const Header = () => {
                 <Map className="w-3.5 h-3.5" />
                 지도 검색
               </button>
-              {/* 커뮤니티 */}
-              <button
-                onClick={() => navigate("/community")}
-                className="flex items-center gap-1.5 text-sm font-medium px-4 py-4 text-white/80 hover:text-accent transition-colors whitespace-nowrap"
-              >
-                <Users className="w-3.5 h-3.5" />
-                커뮤니티
-              </button>
               {NAV_ITEMS.map((item) => (
                 <div
                   key={item.label}
@@ -89,6 +81,14 @@ const Header = () => {
                   )}
                 </div>
               ))}
+              {/* 커뮤니티 */}
+              <button
+                onClick={() => navigate("/community")}
+                className="flex items-center gap-1.5 text-sm font-medium px-4 py-4 text-white/80 hover:text-accent transition-colors whitespace-nowrap"
+              >
+                <Users className="w-3.5 h-3.5" />
+                커뮤니티
+              </button>
             </nav>
 
             {/* Actions */}
