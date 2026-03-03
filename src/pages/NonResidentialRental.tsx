@@ -175,9 +175,71 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     totalFloors: "지상 10층",
     buildYear: "2014년",
   },
+  // 매매 매물
+  {
+    id: 411,
+    title: "구로 IT밸리 사무실 매매",
+    buildingName: "구로 IT밸리",
+    address: "서울특별시 구로구 구로동 222-10",
+    type: "사무실매매",
+    roomType: "사무실",
+    area: "165㎡ (50평)",
+    floor: "7층",
+    deposit: "18억원",
+    monthly: "-",
+    isNew: true,
+    isHot: false,
+    views: 980,
+    lat: 37.4870,
+    lng: 126.9010,
+    image: property1,
+    description: "구로디지털단지 내 사무실 구분 매매. 임대 수익형 투자 가능.",
+    contact: "02-1111-9999",
+    agentName: "구로IT부동산",
+    manageFee: "40만원",
+    parking: "3대",
+    elevator: true,
+    availableFrom: "협의",
+    totalFloors: "지상 12층",
+    buildYear: "2016년",
+  },
+  {
+    id: 412,
+    title: "인천 남동 공장 건물 매매",
+    buildingName: "남동산단 A동",
+    address: "인천광역시 남동구 고잔동 800",
+    type: "공장·창고매매",
+    roomType: "공장",
+    area: "1,320㎡ (400평)",
+    floor: "1층",
+    deposit: "30억원",
+    monthly: "-",
+    isNew: false,
+    isHot: true,
+    views: 1500,
+    lat: 37.4140,
+    lng: 126.7350,
+    image: property2,
+    description: "남동공단 대형 공장 건물 매매. 토지 포함, 물류/제조 사업자에 적합.",
+    contact: "032-2222-8888",
+    agentName: "인천공업부동산",
+    manageFee: "-",
+    parking: "15대",
+    elevator: false,
+    availableFrom: "협의",
+    totalFloors: "2층",
+    buildYear: "2003년",
+  },
 ];
 
-const NON_RESIDENTIAL_SUBTYPES = ["전체", "사무실", "공장·창고", "병원·학원"];
+const NON_RESIDENTIAL_SUBTYPES = [
+  { label: "전체", group: "전체" },
+  { label: "사무실", group: "임대" },
+  { label: "공장·창고", group: "임대" },
+  { label: "병원·학원", group: "임대" },
+  { label: "사무실매매", group: "매매" },
+  { label: "공장·창고매매", group: "매매" },
+];
 
 const NonResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -197,8 +259,6 @@ const NonResidentialRental = () => {
     return true;
   });
 
-  const selected = NON_RESIDENTIAL_PROPERTIES.find(p => p.id === selectedId) ?? null;
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -209,19 +269,40 @@ const NonResidentialRental = () => {
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        <span className="text-white/50 text-xs font-semibold whitespace-nowrap">임대 유형</span>
-        {NON_RESIDENTIAL_SUBTYPES.map(t => (
+        {/* 임대 그룹 */}
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">임대</span>
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => (
           <button
-            key={t}
-            onClick={() => setActiveType(t)}
+            key={t.label}
+            onClick={() => setActiveType(t.label)}
             className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
             style={
-              activeType === t
+              activeType === t.label
                 ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
                 : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
             }
           >
-            {t}
+            {t.label}
+          </button>
+        ))}
+
+        {/* 구분선 */}
+        <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
+
+        {/* 매매 그룹 */}
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => (
+          <button
+            key={t.label}
+            onClick={() => setActiveType(t.label)}
+            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+            style={
+              activeType === t.label
+                ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                : { background: "transparent", color: "rgba(255,255,255,0.6)", borderColor: "rgba(255,255,255,0.15)" }
+            }
+          >
+            {t.label}
           </button>
         ))}
       </div>

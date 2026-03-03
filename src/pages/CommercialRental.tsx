@@ -26,8 +26,6 @@ const CommercialRental = () => {
     return true;
   });
 
-  const selected = MAP_PROPERTIES.find(p => p.id === selectedId) ?? null;
-
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
