@@ -283,64 +283,69 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                           </div>
                         </div>
 
-                        {/* 가격 + 메모 이모티콘 */}
-                        <div className="flex-1 flex flex-col justify-center px-1.5 gap-0.5 border-l border-border/30 min-w-0">
-                          {/* 보증금 / 월세 */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[9px] text-muted-foreground whitespace-nowrap">보증금</span>
-                            <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
+                        {/* 가격 + 우측 정보 */}
+                        <div className="flex-1 flex flex-row items-stretch border-l border-border/30 min-w-0">
+                          {/* 보증금/월세 */}
+                          <div className="flex flex-col justify-center px-1.5 gap-0.5 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] text-muted-foreground whitespace-nowrap">보증금</span>
+                              <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-[9px] text-muted-foreground whitespace-nowrap">월세</span>
+                              <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-[9px] text-muted-foreground whitespace-nowrap">월세</span>
-                            <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
-                          </div>
-                          {/* 메모 이모티콘 */}
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {buildingMemo && <MemoPopup emoji="🏢" label="건물메모" text={buildingMemo} />}
-                            {roomMemo && <MemoPopup emoji="🚪" label="방메모" text={roomMemo} />}
+                          {/* 우측: 메모/날짜/비번/옵션 */}
+                          <div className="flex flex-col justify-center gap-0.5 px-1 border-l border-border/20 min-w-0 flex-1">
+                            {/* 메모 이모티콘 */}
+                            {(buildingMemo || roomMemo) && (
+                              <div className="flex items-center gap-1">
+                                {buildingMemo && <MemoPopup emoji="🏢" label="건물메모" text={buildingMemo} />}
+                                {roomMemo && <MemoPopup emoji="🚪" label="방메모" text={roomMemo} />}
+                              </div>
+                            )}
+                            {/* 등록일 / 확인일 */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {regDate && (
+                                <div className="flex items-center gap-0.5" title="등록일">
+                                  <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-[8px] text-muted-foreground">{regDate}</span>
+                                </div>
+                              )}
+                              {chkDate && (
+                                <div className="flex items-center gap-0.5" title="확인일">
+                                  <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
+                                  <span className="text-[8px] text-primary font-semibold">{chkDate}</span>
+                                </div>
+                              )}
+                            </div>
+                            {/* 건물비번 / 방비번 */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {buildingPw && (
+                                <div className="flex items-center gap-0.5" title="건물 비밀번호">
+                                  <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
+                                  <span className="text-[8px] text-muted-foreground font-mono">건{buildingPw}</span>
+                                </div>
+                              )}
+                              {roomPw && (
+                                <div className="flex items-center gap-0.5" title="방 비밀번호">
+                                  <KeyRound className="w-2 h-2 text-accent flex-shrink-0" />
+                                  <span className="text-[8px] text-accent font-mono">방{roomPw}</span>
+                                </div>
+                              )}
+                            </div>
+                            {/* 옵션 아이콘 */}
+                            {prop.options && prop.options.length > 0 && (
+                              <div className="flex items-center gap-0.5 flex-wrap">
+                                {prop.options.slice(0, 6).map((opt) => (
+                                  <span key={opt} title={opt} className="text-[11px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
+                                ))}
+                                {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 6}</span>}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-
-                      {/* Row 2: 등록일 / 확인일 / 비번 / 옵션 */}
-                      <div className="flex items-center gap-2 px-2 py-1 border-t border-border/20 bg-muted/10 flex-wrap">
-                        {/* 등록일 */}
-                        {regDate && (
-                          <div className="flex items-center gap-0.5" title="등록일">
-                            <CalendarPlus className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
-                            <span className="text-[8px] text-muted-foreground">{regDate}</span>
-                          </div>
-                        )}
-                        {/* 확인일 */}
-                        {chkDate && (
-                          <div className="flex items-center gap-0.5" title="확인일">
-                            <CalendarCheck className="w-2.5 h-2.5 text-primary flex-shrink-0" />
-                            <span className="text-[8px] text-primary font-semibold">{chkDate}</span>
-                          </div>
-                        )}
-                        {/* 건물비번 */}
-                        {buildingPw && (
-                          <div className="flex items-center gap-0.5" title="건물 비밀번호">
-                            <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
-                            <span className="text-[8px] text-muted-foreground font-mono">건{buildingPw}</span>
-                          </div>
-                        )}
-                        {/* 방비번 */}
-                        {roomPw && (
-                          <div className="flex items-center gap-0.5" title="방 비밀번호">
-                            <KeyRound className="w-2.5 h-2.5 text-accent flex-shrink-0" />
-                            <span className="text-[8px] text-accent font-mono">방{roomPw}</span>
-                          </div>
-                        )}
-                        {/* 옵션 아이콘 */}
-                        {prop.options && prop.options.length > 0 && (
-                          <div className="flex items-center gap-0.5 flex-wrap ml-auto">
-                            {prop.options.slice(0, 8).map((opt) => (
-                              <span key={opt} title={opt} className="text-xs leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
-                            ))}
-                            {prop.options.length > 8 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 8}</span>}
-                          </div>
-                        )}
                       </div>
                     </button>
                   );
