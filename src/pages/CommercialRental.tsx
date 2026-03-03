@@ -81,6 +81,7 @@ const CommercialRental = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             showCategoryChips={true}
+            showRoomTypes={false}
           />
         </div>
       </main>
