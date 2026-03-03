@@ -66,6 +66,57 @@ const ContactRow = ({ propId, type, number }: ContactRowProps) => {
   );
 };
 
+interface ContactEmojiRowProps {
+  propId: number;
+  type: "owner" | "manager";
+  number: string | null;
+}
+
+const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
+  const emoji = type === "owner" ? "🏠" : "👤";
+  const label = type === "owner" ? "건물주" : "관리인";
+  const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
+  const [showPopup, setShowPopup] = useState(false);
+
+  if (!number) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-20 select-none">
+        <span className="text-sm leading-none">{emoji}</span>
+      </div>
+    );
+  }
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!revealed) { markRevealed(propId, type); setRevealed(true); }
+    setShowPopup(v => !v);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative">
+      <button
+        type="button"
+        onClick={handleClick}
+        title={label}
+        className="flex flex-col items-center justify-center w-full h-full hover:bg-primary/10 transition-colors"
+      >
+        <span className="text-sm leading-none">{emoji}</span>
+        <span className="text-[7px] text-muted-foreground mt-0.5 leading-none">{label}</span>
+      </button>
+      {showPopup && (
+        <div
+          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-lg shadow-xl px-2 py-1.5 flex items-center gap-1.5 whitespace-nowrap"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="text-[9px] text-muted-foreground font-semibold">{label}</span>
+          <a href={`tel:${number}`} className="text-[11px] font-bold text-primary hover:underline">{number}</a>
+          <button onClick={(e) => { e.stopPropagation(); setShowPopup(false); }} className="text-muted-foreground hover:text-foreground ml-0.5 text-xs leading-none">✕</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface MapSidebarProps {
   properties: MapProperty[];
   selectedId: number | null;
@@ -191,22 +242,38 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                   >
                     {/* Horizontal card — h-20 (절반 높이) */}
                     <div className="flex items-stretch gap-0 h-20">
-                      {/* Thumbnail */}
-                      <div className="w-20 h-20 flex-shrink-0 overflow-hidden relative group/thumb">
-                        <img
-                          src={prop.image}
-                          alt={prop.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <span className={`absolute top-1 left-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
-                          {prop.type}
-                        </span>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
-                          className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
-                        >
-                          <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
-                        </button>
+                      {/* Thumbnail + 연락처 이모티콘 */}
+                      <div className="flex-shrink-0 flex flex-row items-stretch">
+                        {/* 썸네일 */}
+                        <div className="w-20 h-20 overflow-hidden relative group/thumb">
+                          <img
+                            src={prop.image}
+                            alt={prop.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <span className={`absolute top-1 left-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
+                            {prop.type}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
+                            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
+                          >
+                            <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
+                          </button>
+                        </div>
+                        {/* 건물주 / 관리인 이모티콘 버튼 */}
+                        <div className="w-[38px] flex flex-col border-l border-border/30">
+                          <ContactEmojiRow
+                            propId={prop.id}
+                            type="owner"
+                            number={prop.contactOwner ?? null}
+                          />
+                          <ContactEmojiRow
+                            propId={prop.id}
+                            type="manager"
+                            number={prop.contactManager ?? prop.contact ?? null}
+                          />
+                        </div>
                       </div>
 
                        {/* 건물명 + 주소 */}
@@ -265,20 +332,6 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                             <span className="text-[9px] text-muted-foreground line-clamp-2">{prop.memo}</span>
                           </div>
                         )}
-                      </div>
-
-                      {/* 연락처: 건물주 + 관리인 항상 두 버튼 표시 */}
-                      <div className="w-[72px] flex-shrink-0 flex flex-col justify-center gap-1 px-1 border-l border-border/30">
-                        {prop.contactOwner
-                          ? <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />
-                          : <span className="text-[8px] text-muted-foreground/40 text-center">건물주없음</span>
-                        }
-                        {prop.contactManager
-                          ? <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />
-                          : prop.contact
-                            ? <ContactRow propId={prop.id} type="manager" number={prop.contact} />
-                            : <span className="text-[8px] text-muted-foreground/40 text-center">관리인없음</span>
-                        }
                       </div>
                     </div>
                   </button>
