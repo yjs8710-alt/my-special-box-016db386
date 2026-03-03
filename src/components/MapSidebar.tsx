@@ -223,21 +223,21 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                          </div>
                        </div>
 
-                      {/* 가격: 보증금 / 월세 나란히 */}
-                      <div className="w-[110px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
+                      {/* 가격: 보증금 / 월세 */}
+                      <div className="w-[95px] flex-shrink-0 flex flex-col justify-center px-1.5 gap-0.5 border-l border-border/30">
                         <div className="flex items-center gap-1">
                           <span className="text-[9px] text-muted-foreground whitespace-nowrap">보증금</span>
-                          <span className="text-[11px] font-bold text-foreground truncate">{prop.deposit}</span>
+                          <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-[9px] text-muted-foreground whitespace-nowrap">월세</span>
-                          <span className="text-[13px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
+                          <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
                         </div>
                       </div>
 
                       {/* 옵션 */}
                       {prop.options && prop.options.length > 0 && (
-                        <div className="w-[50px] flex-shrink-0 flex items-center flex-wrap gap-0.5 px-1.5 border-l border-border/30">
+                        <div className="w-[44px] flex-shrink-0 flex items-center flex-wrap gap-0.5 px-1 border-l border-border/30">
                           {prop.options.slice(0, 6).map((opt) => (
                             <span key={opt} title={opt} className="text-sm leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
                           ))}
@@ -246,7 +246,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       )}
 
                       {/* 비번·날짜·메모 */}
-                      <div className="w-[85px] flex-shrink-0 flex flex-col justify-center gap-1 px-1.5 border-l border-border/30 min-w-0">
+                      <div className="w-[75px] flex-shrink-0 flex flex-col justify-center gap-0.5 px-1 border-l border-border/30 min-w-0">
                         {prop.password && (
                           <div className="flex items-center gap-0.5">
                             <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
@@ -267,16 +267,18 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                         )}
                       </div>
 
-                      {/* 연락처 */}
-                      <div className="flex-1 min-w-[70px] flex flex-col justify-center gap-1 px-1.5 border-l border-border/30">
-                        {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
-                        {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
-                        {!prop.contactOwner && !prop.contactManager && prop.contact && (
-                          <div className="flex items-center gap-1 text-[11px] font-bold text-primary">
-                            <Phone className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{prop.contact}</span>
-                          </div>
-                        )}
+                      {/* 연락처: 건물주 + 관리인 항상 두 버튼 표시 */}
+                      <div className="w-[72px] flex-shrink-0 flex flex-col justify-center gap-1 px-1 border-l border-border/30">
+                        {prop.contactOwner
+                          ? <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />
+                          : <span className="text-[8px] text-muted-foreground/40 text-center">건물주없음</span>
+                        }
+                        {prop.contactManager
+                          ? <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />
+                          : prop.contact
+                            ? <ContactRow propId={prop.id} type="manager" number={prop.contact} />
+                            : <span className="text-[8px] text-muted-foreground/40 text-center">관리인없음</span>
+                        }
                       </div>
                     </div>
                   </button>
