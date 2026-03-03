@@ -77,33 +77,67 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
 };
 
 /* ── MemoPopup ── (건물메모 / 방메모 이모티콘 클릭 팝업) */
-interface MemoPopupProps {
+/* ── MemoNotepad ── 클릭 시 메모장(편집 가능) 팝업 */
+interface MemoNotepadProps {
+  propId: number;
+  memoKey: string; // "building" | "room"
   emoji: string;
   label: string;
-  text: string;
+  initialText: string;
 }
-const MemoPopup = ({ emoji, label, text }: MemoPopupProps) => {
+const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepadProps) => {
+  const storageKey = `memo_${propId}_${memoKey}`;
   const [open, setOpen] = useState(false);
+  const [text, setText] = useState(() => localStorage.getItem(storageKey) ?? initialText);
+
+  const handleChange = (v: string) => {
+    setText(v);
+    localStorage.setItem(storageKey, v);
+  };
+
   return (
     <div className="relative flex items-center">
       <button
         type="button"
         title={label}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="text-base leading-none hover:scale-125 transition-transform"
+        className="text-base leading-none hover:scale-125 transition-transform select-none"
       >
         {emoji}
       </button>
       {open && (
         <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-[9000] bg-white border border-border rounded-lg shadow-xl px-2.5 py-2 min-w-[140px] max-w-[220px]"
+          className="absolute bottom-full left-0 mb-1.5 z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[220px]"
           onClick={(e) => e.stopPropagation()}
+          style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.18)" }}
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-foreground">{label}</span>
-            <button onClick={(e) => { e.stopPropagation(); setOpen(false); }} className="text-muted-foreground hover:text-foreground text-xs leading-none ml-2">✕</button>
+          {/* 메모장 헤더 */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/40 rounded-t-xl">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm leading-none">{emoji}</span>
+              <span className="text-[11px] font-bold text-foreground">{label}</span>
+            </div>
+            <button
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              className="w-4 h-4 rounded-full bg-destructive hover:bg-destructive/80 transition-colors flex items-center justify-center"
+            >
+              <X className="w-2.5 h-2.5 text-white" />
+            </button>
           </div>
-          <p className="text-[10px] text-muted-foreground leading-snug whitespace-pre-wrap">{text}</p>
+          {/* 메모 입력창 */}
+          <div className="p-2">
+            <textarea
+              value={text}
+              onChange={(e) => handleChange(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              placeholder={`${label}를 입력하세요...`}
+              rows={4}
+            className="w-full text-[11px] text-foreground leading-relaxed resize-none outline-none bg-muted/60 border border-border rounded-lg px-2.5 py-2 placeholder:text-muted-foreground/50"
+            />
+            <div className="flex justify-end mt-1">
+              <span className="text-[8px] text-muted-foreground">{text.length}자 · 자동저장</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -301,8 +335,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                             {/* 메모 이모티콘 */}
                             {(buildingMemo || roomMemo) && (
                               <div className="flex items-center gap-1">
-                                {buildingMemo && <MemoPopup emoji="🏢" label="건물메모" text={buildingMemo} />}
-                                {roomMemo && <MemoPopup emoji="🚪" label="방메모" text={roomMemo} />}
+                                {buildingMemo && <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo} />}
+                                {roomMemo && <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo} />}
                               </div>
                             )}
                             {/* 등록일 / 확인일 */}
