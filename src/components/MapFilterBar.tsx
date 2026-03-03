@@ -17,6 +17,7 @@ const CATEGORY_TYPES = [
 ];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층"];
+const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라"];
 const DEAL_TYPES = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이상"];
 
@@ -79,6 +80,7 @@ interface MapFilterBarProps {
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
   showCategoryChips?: boolean;
+  showResidentialTypes?: boolean;
 }
 
 function formatManwon(v: number, max: number) {
@@ -241,6 +243,7 @@ const MapFilterBar = ({
   onFiltersChange,
   onLandlordClick,
   showCategoryChips = false,
+  showResidentialTypes = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -403,6 +406,28 @@ const MapFilterBar = ({
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 주거 유형 - showResidentialTypes 일 때만 */}
+              {showResidentialTypes && (
+                <div>
+                  <SectionLabel>임대 유형</SectionLabel>
+                  <div className="flex flex-wrap gap-1">
+                    {RESIDENTIAL_TYPES.map((v) => {
+                      const isAll = v === "전체";
+                      const active = isAll ? activeType === "전체" : activeType === v;
+                      return (
+                        <Chip
+                          key={v}
+                          active={active}
+                          onClick={() => onTypeChange(v)}
+                        >
+                          {v}
+                        </Chip>
+                      );
+                    })}
                   </div>
                 </div>
               )}
