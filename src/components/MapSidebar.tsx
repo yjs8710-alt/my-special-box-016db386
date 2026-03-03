@@ -320,64 +320,68 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                         {/* 가격 + 우측 정보 */}
                         <div className="flex-1 flex flex-row items-stretch border-l border-border/30 min-w-0">
                           {/* 보증금/월세 */}
-                          <div className="flex flex-col justify-center px-1.5 gap-0.5 min-w-0">
-                            <div className="flex items-center gap-1">
-                              <span className="text-[9px] text-muted-foreground whitespace-nowrap">보증금</span>
+                          <div className="flex flex-col justify-center px-1.5 gap-1 min-w-0 flex-shrink-0">
+                            <div className="flex items-center gap-1 h-4">
+                              <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">보증금</span>
                               <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[9px] text-muted-foreground whitespace-nowrap">월세</span>
+                            <div className="flex items-center gap-1 h-4">
+                              <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">월세</span>
                               <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
                             </div>
                           </div>
-                          {/* 우측: 메모/날짜/비번/옵션 */}
-                          <div className="flex flex-col justify-center gap-0.5 px-1 border-l border-border/20 min-w-0 flex-1">
-                            {/* 메모 이모티콘 */}
-                            {(buildingMemo || roomMemo) && (
-                              <div className="flex items-center gap-1">
-                                {buildingMemo && <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo} />}
-                                {roomMemo && <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo} />}
-                              </div>
-                            )}
-                            {/* 등록일 / 확인일 */}
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {regDate && (
+                          {/* 우측: 메모/날짜/비번/옵션 — 항상 4줄 고정 */}
+                          <div className="flex flex-col justify-center px-1.5 border-l border-border/20 min-w-0 flex-1 gap-[3px]">
+                            {/* 줄1: 메모 이모티콘 */}
+                            <div className="flex items-center gap-1 h-4">
+                              {buildingMemo
+                                ? <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo} />
+                                : <span className="w-4 h-4 opacity-0 select-none">🏢</span>}
+                              {roomMemo
+                                ? <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo} />
+                                : <span className="w-4 h-4 opacity-0 select-none">🚪</span>}
+                            </div>
+                            {/* 줄2: 등록일 / 확인일 */}
+                            <div className="flex items-center gap-1.5 h-4">
+                              {regDate ? (
                                 <div className="flex items-center gap-0.5" title="등록일">
                                   <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
                                   <span className="text-[8px] text-muted-foreground">{regDate}</span>
                                 </div>
-                              )}
-                              {chkDate && (
+                              ) : <span className="w-4 h-2 opacity-0" />}
+                              {chkDate ? (
                                 <div className="flex items-center gap-0.5" title="확인일">
                                   <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
                                   <span className="text-[8px] text-primary font-semibold">{chkDate}</span>
                                 </div>
-                              )}
+                              ) : null}
                             </div>
-                            {/* 건물비번 / 방비번 */}
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {buildingPw && (
+                            {/* 줄3: 건물비번 / 방비번 */}
+                            <div className="flex items-center gap-1.5 h-4">
+                              {buildingPw ? (
                                 <div className="flex items-center gap-0.5" title="건물 비밀번호">
                                   <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
                                   <span className="text-[8px] text-muted-foreground font-mono">건{buildingPw}</span>
                                 </div>
-                              )}
-                              {roomPw && (
+                              ) : <span className="w-4 h-2 opacity-0" />}
+                              {roomPw ? (
                                 <div className="flex items-center gap-0.5" title="방 비밀번호">
                                   <KeyRound className="w-2 h-2 text-accent flex-shrink-0" />
                                   <span className="text-[8px] text-accent font-mono">방{roomPw}</span>
                                 </div>
-                              )}
+                              ) : null}
                             </div>
-                            {/* 옵션 아이콘 */}
-                            {prop.options && prop.options.length > 0 && (
-                              <div className="flex items-center gap-0.5 flex-wrap">
-                                {prop.options.slice(0, 6).map((opt) => (
-                                  <span key={opt} title={opt} className="text-[11px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
-                                ))}
-                                {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 6}</span>}
-                              </div>
-                            )}
+                            {/* 줄4: 옵션 아이콘 */}
+                            <div className="flex items-center gap-0.5 h-4">
+                              {prop.options && prop.options.length > 0 ? (
+                                <>
+                                  {prop.options.slice(0, 6).map((opt) => (
+                                    <span key={opt} title={opt} className="text-[11px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
+                                  ))}
+                                  {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 6}</span>}
+                                </>
+                              ) : null}
+                            </div>
                           </div>
                         </div>
                       </div>
