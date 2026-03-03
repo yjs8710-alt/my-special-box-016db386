@@ -56,10 +56,10 @@ const ContactRow = ({ propId, type, number }: ContactRowProps) => {
         <button
           type="button"
           onClick={handleReveal}
-          className="flex items-center gap-1 w-full text-[11px] font-semibold text-muted-foreground bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border rounded-lg px-2 py-1 transition-all"
+          className="flex items-center justify-center gap-1 w-full text-[10px] font-semibold text-muted-foreground bg-muted/60 hover:bg-primary/10 hover:text-primary border border-border rounded-md px-1.5 py-0.5 transition-all"
         >
-          <Phone className="w-3 h-3 flex-shrink-0" />
-          {label} 번호 보기
+          <Phone className="w-2.5 h-2.5 flex-shrink-0" />
+          {label}
         </button>
       )}
     </div>
@@ -224,7 +224,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       </div>
 
                       {/* 가격: 보증금 / 월세 나란히 */}
-                      <div className="w-[160px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
+                      <div className="w-[110px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
                         <div className="flex items-center gap-1">
                           <span className="text-[9px] text-muted-foreground whitespace-nowrap">보증금</span>
                           <span className="text-[11px] font-bold text-foreground truncate">{prop.deposit}</span>
@@ -268,7 +268,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       </div>
 
                       {/* 연락처 */}
-                      <div className="flex-1 min-w-[110px] flex flex-col justify-center gap-1 px-2 border-l border-border/30">
+                      <div className="flex-1 min-w-[70px] flex flex-col justify-center gap-1 px-1.5 border-l border-border/30">
                         {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
                         {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
                         {!prop.contactOwner && !prop.contactManager && prop.contact && (
