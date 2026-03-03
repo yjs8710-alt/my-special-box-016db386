@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, User, ChevronDown, Home, Map, Users } from "lucide-react";
+import { Menu, X, Bell, User, Home, Map, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -13,7 +13,6 @@ const NAV_ITEMS = [
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState<string | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const navigate = useNavigate();
 
@@ -48,38 +47,13 @@ const Header = () => {
                 지도 검색
               </button>
               {NAV_ITEMS.map((item) => (
-                <div
+                <a
                   key={item.label}
-                  className="relative"
-                  onMouseEnter={() => setActiveNav(item.label)}
-                  onMouseLeave={() => setActiveNav(null)}
+                  href="#"
+                  className="text-sm font-medium px-4 py-4 text-white/80 hover:text-white transition-colors whitespace-nowrap"
                 >
-                  <a
-                    href="#"
-                    className={`flex items-center gap-0.5 text-sm font-medium px-4 py-4 transition-colors whitespace-nowrap ${
-                      activeNav === item.label
-                        ? "text-accent"
-                        : "text-white/80 hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                    <ChevronDown className="w-3 h-3 opacity-60" />
-                  </a>
-                  {/* Dropdown */}
-                  {activeNav === item.label && (
-                    <div className="absolute top-full left-0 bg-card border border-border rounded-lg shadow-xl py-1 min-w-[140px] z-50">
-                      {item.sub.map((s) => (
-                        <a
-                          key={s}
-                          href="#"
-                          className="block px-4 py-2 text-sm text-foreground hover:bg-primary/5 hover:text-primary transition-colors"
-                        >
-                          {s}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  {item.label}
+                </a>
               ))}
               {/* 커뮤니티 */}
               <button
