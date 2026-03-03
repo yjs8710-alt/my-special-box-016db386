@@ -191,85 +191,83 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                       : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                   }`}
                 >
-                  {/* Horizontal card — 2x height */}
-                  <div className="flex items-stretch gap-0 h-32">
+                  {/* Horizontal card */}
+                  <div className="flex items-stretch gap-0 h-28">
                     {/* Thumbnail */}
-                    <div className="w-28 h-32 flex-shrink-0 overflow-hidden relative group/thumb">
+                    <div className="w-20 h-28 flex-shrink-0 overflow-hidden relative group/thumb">
                       <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      {/* 종류 뱃지 오버레이 */}
-                      <span className={`absolute top-1.5 left-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>{prop.type}</span>
-                      {/* 확대 버튼 */}
+                      <span className={`absolute top-1 left-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>{prop.type}</span>
                       <button
                         onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
                         className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                       >
-                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
+                        <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
                       </button>
                     </div>
 
                     {/* 건물명 + 호수 + 주소 */}
-                    <div className="w-[190px] flex-shrink-0 flex flex-col justify-center px-3 gap-1 border-l border-border/30">
-                      <p className="text-xs font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {prop.unitNumber && <span className="text-[10px] text-primary font-semibold bg-primary/8 px-1 rounded">{prop.unitNumber}</span>}
-                        {prop.roomType && <span className="text-[10px] text-muted-foreground">{prop.roomType}</span>}
+                    <div className="w-[140px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
+                      <p className="text-[11px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {prop.unitNumber && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded">{prop.unitNumber}</span>}
+                        {prop.roomType && <span className="text-[9px] text-muted-foreground">{prop.roomType}</span>}
                       </div>
-                      <p className="text-[10px] text-muted-foreground truncate">{prop.address}</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] text-muted-foreground">{prop.buildYear}</span>
-                        <span className="text-[10px] text-muted-foreground">{prop.floor}</span>
-                        <span className="text-[10px] text-muted-foreground">{prop.area}</span>
+                      <p className="text-[9px] text-muted-foreground truncate">{prop.address}</p>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <span className="text-[9px] text-muted-foreground">{prop.buildYear}</span>
+                        <span className="text-[9px] text-muted-foreground">{prop.floor}</span>
+                        <span className="text-[9px] text-muted-foreground">{prop.area}</span>
                       </div>
                     </div>
 
                     {/* 가격 */}
-                    <div className="w-[130px] flex-shrink-0 flex flex-col justify-center px-3 gap-1 border-l border-border/30">
-                      <p className="text-[10px] text-muted-foreground">보증금</p>
-                      <p className="text-xs font-bold text-foreground truncate">{prop.deposit}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">월세</p>
-                      <p className="text-base font-extrabold text-accent leading-tight">{prop.monthly}</p>
+                    <div className="w-[95px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
+                      <p className="text-[9px] text-muted-foreground">보증금</p>
+                      <p className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">월세</p>
+                      <p className="text-sm font-extrabold text-accent leading-tight">{prop.monthly}</p>
                     </div>
 
                     {/* 옵션 */}
                     {prop.options && prop.options.length > 0 && (
-                      <div className="w-24 flex-shrink-0 flex items-start flex-wrap gap-0.5 px-2 pt-3 border-l border-border/30">
-                        {prop.options.slice(0, 12).map((opt) => (
-                          <span key={opt} title={opt} className="text-sm leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
+                      <div className="w-[52px] flex-shrink-0 flex items-start flex-wrap gap-0.5 px-1.5 pt-2 border-l border-border/30">
+                        {prop.options.slice(0, 9).map((opt) => (
+                          <span key={opt} title={opt} className="text-xs leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
                         ))}
-                        {prop.options.length > 12 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 12}</span>}
+                        {prop.options.length > 9 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 9}</span>}
                       </div>
                     )}
 
                     {/* 비번·날짜·메모 */}
-                    <div className="w-[120px] flex-shrink-0 flex flex-col justify-center gap-1.5 px-2 border-l border-border/30">
+                    <div className="w-[90px] flex-shrink-0 flex flex-col justify-center gap-1 px-1.5 border-l border-border/30 min-w-0">
                       {prop.password && (
-                        <div className="flex items-center gap-1">
-                          <KeyRound className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-[10px] text-muted-foreground font-mono truncate">{prop.password}</span>
+                        <div className="flex items-center gap-0.5">
+                          <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[9px] text-muted-foreground font-mono truncate">{prop.password}</span>
                         </div>
                       )}
                       {prop.checkedDate && (
-                        <div className="flex items-center gap-1">
-                          <CalendarCheck className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-[10px] text-muted-foreground">{prop.checkedDate}</span>
+                        <div className="flex items-center gap-0.5">
+                          <CalendarCheck className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                          <span className="text-[9px] text-muted-foreground truncate">{prop.checkedDate}</span>
                         </div>
                       )}
                       {prop.memo && (
-                        <div className="flex items-start gap-1">
-                          <StickyNote className="w-3 h-3 text-accent flex-shrink-0 mt-0.5" />
-                          <span className="text-[10px] text-muted-foreground line-clamp-2">{prop.memo}</span>
+                        <div className="flex items-start gap-0.5">
+                          <StickyNote className="w-2.5 h-2.5 text-accent flex-shrink-0 mt-0.5" />
+                          <span className="text-[9px] text-muted-foreground line-clamp-2">{prop.memo}</span>
                         </div>
                       )}
                     </div>
 
                     {/* 연락처 */}
-                    <div className="flex-1 min-w-[130px] flex flex-col justify-center gap-2 px-2 border-l border-border/30">
+                    <div className="flex-1 min-w-[100px] flex flex-col justify-center gap-1.5 px-1.5 border-l border-border/30 min-w-0">
                       {prop.contactOwner && <ContactRow propId={prop.id} type="owner" number={prop.contactOwner} />}
                       {prop.contactManager && <ContactRow propId={prop.id} type="manager" number={prop.contactManager} />}
                       {!prop.contactOwner && !prop.contactManager && (
                         <div className="flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-primary flex-shrink-0" />
-                          <span className="text-xs font-bold text-primary truncate">{prop.contact}</span>
+                          <Phone className="w-2.5 h-2.5 text-primary flex-shrink-0" />
+                          <span className="text-[10px] font-bold text-primary truncate">{prop.contact}</span>
                         </div>
                       )}
                     </div>
