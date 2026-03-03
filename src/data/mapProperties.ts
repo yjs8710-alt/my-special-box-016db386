@@ -24,10 +24,15 @@ export interface MapProperty {
   lng: number;
   image: string;
   description: string;
-  memo?: string; // 건물 메모
-  checkedDate?: string; // 확인한 날
-  options?: string[]; // 냉장고, 세탁기 등
-  password?: string; // 현관 비번
+  buildingMemo?: string; // 건물 메모
+  roomMemo?: string;     // 방 메모
+  memo?: string;         // 레거시 호환
+  registeredDate?: string; // 등록일
+  checkedDate?: string;    // 확인일
+  options?: string[];      // 옵션 아이콘
+  buildingPassword?: string; // 건물 비번
+  password?: string;         // 레거시 호환 (현관 비번)
+  roomPassword?: string;     // 방 비번
   contact: string;
   contactOwner?: string;
   contactManager?: string;
@@ -60,10 +65,13 @@ export const MAP_PROPERTIES: MapProperty[] = [
     lng: 127.0277,
     image: property1,
     description: "강남역 2번 출구 도보 1분 거리의 초역세권 1층 상가입니다. 유동인구가 매우 많으며 현재 인테리어가 잘 되어있어 즉시 입점 가능합니다. 전면 유리창으로 가시성이 뛰어납니다.",
-    memo: "건물주 직거래 가능, 인테리어 협의 가능",
+    buildingMemo: "건물주 직거래 가능, 인테리어 협의 가능",
+    roomMemo: "에어컨 신형 교체 완료, 방향 남향",
+    registeredDate: "2024-01-10",
     checkedDate: "2024-01-20",
     options: ["에어컨", "전자키"],
-    password: "1234#",
+    buildingPassword: "1234#",
+    roomPassword: "5678*",
     contact: "02-1234-5678",
     contactOwner: "010-1111-2222",
     contactManager: "010-3333-4444",
