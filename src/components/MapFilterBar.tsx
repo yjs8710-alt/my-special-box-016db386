@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
-const TYPES: { label: string; icon: string }[] = [];
-
 const CATEGORY_TYPES = [
   { label: "임대전체", group: "임대" },
   { label: "상가임대", group: "임대" },
@@ -49,10 +47,10 @@ const ROOM_OPTIONS = [
 export interface FilterState {
   dealType: string;
   roomTypes: string[];
-  depositRange: [number, number]; // 만원 단위, 0~50000
-  monthlyRange: [number, number]; // 만원 단위, 0~1000
-  floorRange: [number, number];   // 1~30
-  areaRange: [number, number];    // 평, 0~200
+  depositRange: [number, number];
+  monthlyRange: [number, number];
+  floorRange: [number, number];
+  areaRange: [number, number];
   buildYear: string;
   buildingOptions: string[];
   roomOptions: string[];
@@ -98,6 +96,18 @@ function formatFloor(v: number, max: number) {
   return `${v}층`;
 }
 
+// 입력 문자열 → 만원 단위 숫자
+function parseManwon(s: string): number | null {
+  const t = s.replace(/,/g, "").replace(/\s/g, "");
+  if (t === "" || t === "무제한") return null;
+  // 억 단위
+  const uk = t.match(/^(\d+(?:\.\d+)?)억$/);
+  if (uk) return Math.round(parseFloat(uk[1]) * 10000);
+  const mk = t.match(/^(\d+(?:\.\d+)?)만?$/);
+  if (mk) return Math.round(parseFloat(mk[1]));
+  return null;
+}
+
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <p className="text-[10px] font-bold tracking-wide mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>
     {children}
@@ -130,6 +140,94 @@ function Chip({
 
 function toggleArr(arr: string[], val: string) {
   return arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
+}
+
+// 범위 입력 (슬라이더 + 텍스트 입력 두 칸)
+function RangeInput({
+  label,
+  min,
+  max,
+  step,
+  value,
+  onChange,
+  format,
+  parse,
+  ticks,
+  unit,
+}: {
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  value: [number, number];
+  onChange: (v: [number, number]) => void;
+  format: (v: number, max: number) => string;
+  parse: (s: string) => number | null;
+  ticks: string[];
+  unit?: string;
+}) {
+  const [minText, setMinText] = useState("");
+  const [maxText, setMaxText] = useState("");
+
+  const applyMin = () => {
+    const n = parse(minText);
+    if (n !== null) {
+      const clamped = Math.max(min, Math.min(n, value[1]));
+      onChange([clamped, value[1]]);
+    }
+    setMinText("");
+  };
+  const applyMax = () => {
+    const n = parse(maxText);
+    if (n !== null) {
+      const clamped = Math.min(max, Math.max(n, value[0]));
+      onChange([value[0], clamped]);
+    }
+    setMaxText("");
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <SectionLabel>{label}</SectionLabel>
+        <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
+          {format(value[0], max)} ~ {format(value[1], max)}
+        </span>
+      </div>
+      {/* 텍스트 직접 입력 */}
+      <div className="flex items-center gap-1 mb-2">
+        <input
+          type="text"
+          value={minText}
+          onChange={(e) => setMinText(e.target.value)}
+          onBlur={applyMin}
+          onKeyDown={(e) => e.key === "Enter" && applyMin()}
+          placeholder={format(value[0], max)}
+          className="flex-1 h-7 px-2 rounded-lg border border-border text-[11px] bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+        />
+        <span className="text-[10px] text-muted-foreground">~</span>
+        <input
+          type="text"
+          value={maxText}
+          onChange={(e) => setMaxText(e.target.value)}
+          onBlur={applyMax}
+          onKeyDown={(e) => e.key === "Enter" && applyMax()}
+          placeholder={format(value[1], max)}
+          className="flex-1 h-7 px-2 rounded-lg border border-border text-[11px] bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
+        />
+        {unit && <span className="text-[10px] text-muted-foreground whitespace-nowrap">{unit}</span>}
+      </div>
+      <Slider
+        min={min} max={max} step={step}
+        value={value}
+        onValueChange={(v) => onChange(v as [number, number])}
+        className="w-full"
+      />
+      <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
+        {ticks.map((t, i) => <span key={i}>{t}</span>)}
+      </div>
+    </div>
+  );
 }
 
 const MapFilterBar = ({
@@ -254,40 +352,14 @@ const MapFilterBar = ({
           </button>
         </div>
 
-
-        {/* 매물 유형 칩 - 상가임대에서만 표시 */}
-        {showCategoryChips && (
-          <div
-            className="bg-white rounded-xl border border-border px-3 py-2 flex flex-wrap gap-1.5"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.10)" }}
-          >
-            {CATEGORY_TYPES.map((t) => (
-              <button
-                key={t.label}
-                onClick={() => onTypeChange(t.label)}
-                className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
-                style={
-                  activeType === t.label
-                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                }
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* 상세 필터 패널 */}
         {showFilter && (
           <div
             className="bg-white rounded-xl border border-border flex flex-col overflow-hidden"
-            style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.15)", maxHeight: "calc(100vh - 260px)", overflowY: "auto" }}
+            style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.15)", maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
           >
             {/* Header */}
-            <div
-              className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-white z-10"
-            >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-white z-10">
               <span className="text-xs font-bold text-foreground">상세 필터</span>
               {!isDefault(filters) && (
                 <button
@@ -302,6 +374,38 @@ const MapFilterBar = ({
             </div>
 
             <div className="px-4 py-3 flex flex-col gap-4">
+
+              {/* 상가 카테고리 - showCategoryChips 일 때만 */}
+              {showCategoryChips && (
+                <div>
+                  <SectionLabel>매물 유형</SectionLabel>
+                  <div className="flex flex-wrap gap-1">
+                    {["임대", "매매"].map((group) => (
+                      <div key={group} className="w-full">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {group}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {CATEGORY_TYPES.filter((t) => t.group === group).map((t) => (
+                            <button
+                              key={t.label}
+                              onClick={() => onTypeChange(t.label)}
+                              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                              style={
+                                activeType === t.label
+                                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                              }
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 거래 유형 */}
               <div>
@@ -336,81 +440,62 @@ const MapFilterBar = ({
                 </div>
               </div>
 
-              {/* 보증금 슬라이더 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <SectionLabel>보증금</SectionLabel>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
-                    {formatManwon(filters.depositRange[0], 50000)} ~ {formatManwon(filters.depositRange[1], 50000)}
-                  </span>
-                </div>
-                <Slider
-                  min={0} max={50000} step={500}
-                  value={filters.depositRange}
-                  onValueChange={(v) => set("depositRange", v as [number, number])}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                  <span>0</span><span>1억</span><span>2억</span><span>3억</span><span>무제한</span>
-                </div>
-              </div>
+              {/* 보증금 */}
+              <RangeInput
+                label="보증금"
+                min={0} max={50000} step={500}
+                value={filters.depositRange}
+                onChange={(v) => set("depositRange", v)}
+                format={formatManwon}
+                parse={parseManwon}
+                ticks={["0", "1억", "2억", "3억", "무제한"]}
+              />
 
-              {/* 월세 슬라이더 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <SectionLabel>월세</SectionLabel>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
-                    {formatManwon(filters.monthlyRange[0], 1000)} ~ {formatManwon(filters.monthlyRange[1], 1000)}
-                  </span>
-                </div>
-                <Slider
-                  min={0} max={1000} step={10}
-                  value={filters.monthlyRange}
-                  onValueChange={(v) => set("monthlyRange", v as [number, number])}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                  <span>0</span><span>250만</span><span>500만</span><span>750만</span><span>무제한</span>
-                </div>
-              </div>
+              {/* 월세 */}
+              <RangeInput
+                label="월세"
+                min={0} max={1000} step={10}
+                value={filters.monthlyRange}
+                onChange={(v) => set("monthlyRange", v)}
+                format={formatManwon}
+                parse={parseManwon}
+                ticks={["0", "250만", "500만", "750만", "무제한"]}
+              />
 
-              {/* 층수 슬라이더 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <SectionLabel>층수</SectionLabel>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
-                    {formatFloor(filters.floorRange[0], 30)} ~ {formatFloor(filters.floorRange[1], 30)}
-                  </span>
-                </div>
-                <Slider
-                  min={1} max={30} step={1}
-                  value={filters.floorRange}
-                  onValueChange={(v) => set("floorRange", v as [number, number])}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                  <span>1층</span><span>8층</span><span>15층</span><span>22층</span><span>30층+</span>
-                </div>
-              </div>
+              {/* 매매가 (보증금과 동일 슬라이더지만 별도 라벨) */}
+              <RangeInput
+                label="매매가"
+                min={0} max={50000} step={500}
+                value={filters.depositRange}
+                onChange={(v) => set("depositRange", v)}
+                format={formatManwon}
+                parse={parseManwon}
+                ticks={["0", "1억", "2억", "3억", "무제한"]}
+              />
 
-              {/* 면적 슬라이더 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <SectionLabel>면적 (평)</SectionLabel>
-                  <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
-                    {formatArea(filters.areaRange[0], 200)} ~ {formatArea(filters.areaRange[1], 200)}
-                  </span>
-                </div>
-                <Slider
-                  min={0} max={200} step={5}
-                  value={filters.areaRange}
-                  onValueChange={(v) => set("areaRange", v as [number, number])}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                  <span>0</span><span>50평</span><span>100평</span><span>150평</span><span>무제한</span>
-                </div>
-              </div>
+              {/* 층수 */}
+              <RangeInput
+                label="층수"
+                min={1} max={30} step={1}
+                value={filters.floorRange}
+                onChange={(v) => set("floorRange", v)}
+                format={formatFloor}
+                parse={(s) => { const n = parseInt(s); return isNaN(n) ? null : n; }}
+                ticks={["1층", "8층", "15층", "22층", "30층+"]}
+                unit="층"
+              />
+
+              {/* 면적 */}
+              <RangeInput
+                label="면적 (평)"
+                min={0} max={200} step={5}
+                value={filters.areaRange}
+                onChange={(v) => set("areaRange", v)}
+                format={formatArea}
+                parse={(s) => { const n = parseFloat(s.replace("평", "")); return isNaN(n) ? null : n; }}
+                ticks={["0", "50평", "100평", "150평", "무제한"]}
+                unit="평"
+              />
 
               {/* 준공년도 */}
               <div>
