@@ -16,9 +16,10 @@ const CATEGORY_TYPES = [
   { label: "숙박/펜션매매", group: "매매" },
 ];
 
-const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층"];
+const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층", "주인세대"];
 const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라"];
-const DEAL_TYPES = ["전체", "임대", "매매"];
+const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세"];
+const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이상"];
 
 const BUILDING_OPTIONS = [
@@ -436,7 +437,7 @@ const MapFilterBar = ({
               <div>
                 <SectionLabel>거래 유형</SectionLabel>
                 <div className="flex flex-wrap gap-1">
-                  {DEAL_TYPES.map((v) => (
+                  {(showResidentialTypes ? DEAL_TYPES_RESIDENTIAL : DEAL_TYPES_COMMERCIAL).map((v) => (
                     <Chip key={v} active={filters.dealType === v} onClick={() => set("dealType", v)}>{v}</Chip>
                   ))}
                 </div>
