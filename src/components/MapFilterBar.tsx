@@ -2,14 +2,7 @@ import { useState } from "react";
 import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
-const TYPES = [
-  { label: "전체", icon: "🗺" },
-  { label: "상가", icon: "🏪" },
-  { label: "사무실", icon: "🏢" },
-  { label: "식당·카페", icon: "🍽" },
-  { label: "공장·창고", icon: "🏭" },
-  { label: "병원·학원", icon: "🏥" },
-];
+const TYPES: { label: string; icon: string }[] = [];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층"];
 const DEAL_TYPES = ["전체", "임대", "매매"];
@@ -245,27 +238,6 @@ const MapFilterBar = ({
           </button>
         </div>
 
-        {/* 매물 유형 칩 */}
-        <div
-          className="flex gap-1.5 px-3 py-2 bg-white rounded-xl border border-border overflow-x-auto scrollbar-none"
-          style={{ boxShadow: "0 2px 8px rgba(10,45,110,0.08)" }}
-        >
-          {TYPES.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => onTypeChange(t.label)}
-              className="flex items-center gap-1 flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-bold transition-all border"
-              style={
-                activeType === t.label
-                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                  : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
-              }
-            >
-              <span>{t.icon}</span>
-              <span>{t.label}</span>
-            </button>
-          ))}
-        </div>
 
         {/* 상세 필터 패널 */}
         {showFilter && (
