@@ -598,37 +598,6 @@ const MapFilterBar = ({
                 </div>
               </div>
 
-              {/* 건물 옵션 */}
-              <div>
-                <SectionLabel>건물 옵션</SectionLabel>
-                <div className="flex flex-wrap gap-1">
-                  {BUILDING_OPTIONS.map(({ key, label }) => (
-                    <Chip
-                      key={key}
-                      active={filters.buildingOptions.includes(key)}
-                      onClick={() => set("buildingOptions", toggleArr(filters.buildingOptions, key))}
-                    >
-                      {label}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-
-              {/* 방 옵션 */}
-              <div>
-                <SectionLabel>방 옵션 (가구·가전)</SectionLabel>
-                <div className="flex flex-wrap gap-1">
-                  {ROOM_OPTIONS.map(({ key, label }) => (
-                    <Chip
-                      key={key}
-                      active={filters.roomOptions.includes(key)}
-                      onClick={() => set("roomOptions", toggleArr(filters.roomOptions, key))}
-                    >
-                      {label}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
 
             </div>
 
