@@ -10,6 +10,7 @@ import Community from "./pages/Community";
 import CommercialRental from "./pages/CommercialRental";
 import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
+import NonResidentialRental from "./pages/NonResidentialRental";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/commercial" element={<CommercialRental />} />
           <Route path="/residential" element={<ResidentialRental />} />
           <Route path="/land" element={<LandSearch />} />
+          <Route path="/non-residential" element={<NonResidentialRental />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

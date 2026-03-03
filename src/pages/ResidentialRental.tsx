@@ -1,358 +1,263 @@
 import { useState } from "react";
-import {
-  Search, SlidersHorizontal, MapPin, Eye, Heart, Phone,
-  ChevronDown, X, RotateCcw, Home, Building2, Layers, BedDouble, KeyRound
-} from "lucide-react";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { MAP_PROPERTIES } from "@/data/mapProperties";
-import { useNavigate } from "react-router-dom";
+import MapView from "@/components/MapView";
+import MapSidebar from "@/components/MapSidebar";
+import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
+import LandlordSearchModal from "@/components/LandlordSearchModal";
+import { MapProperty } from "@/data/mapProperties";
+import property1 from "@/assets/property1.jpg";
+import property2 from "@/assets/property2.jpg";
+import property3 from "@/assets/property3.jpg";
+import property4 from "@/assets/property4.jpg";
+import property5 from "@/assets/property5.jpg";
+import property6 from "@/assets/property6.jpg";
 
-const SUBTYPES = [
-  { key: "전체", label: "전체", icon: Home },
-  { key: "원룸", label: "원룸", icon: KeyRound },
-  { key: "투룸", label: "투룸", icon: BedDouble },
-  { key: "쓰리룸+", label: "쓰리룸+", icon: Layers },
-  { key: "오피스텔", label: "오피스텔", icon: Building2 },
-];
-
-const DEAL_TYPES = ["전체", "월세", "전세", "매매"];
-const AREAS = ["전체", "10평 이하", "10~20평", "20~33평", "33~50평", "50평+"];
-const DEPOSITS = ["전체", "1천만 이하", "1천~3천만", "3천~5천만", "5천~1억", "1억+"];
-const MONTHLYS = ["전체", "30만 이하", "30~60만", "60~100만", "100~150만", "150만+"];
-const FLOORS = ["전체", "1층", "2~5층", "6~10층", "11층+", "최고층"];
-const REGIONS = ["전체", "강남·서초", "종로·중구", "마포·홍대", "여의도", "성수·건대", "신촌·연남", "잠실·송파", "판교·분당"];
-const OPTIONS = ["에어컨", "세탁기", "냉장고", "인터넷", "주차", "엘리베이터", "반려동물", "신축"];
-const SORT_OPTIONS = ["최신순", "조회수 높은순", "보증금 낮은순", "월세 낮은순", "면적 넓은순"];
-
-// 주거형 임대 mock 데이터 (기존 + 복수 확장)
-const BASE = MAP_PROPERTIES.slice(0, 6);
-const PROPERTIES = [
-  ...BASE,
-  ...BASE.map((p, i) => ({
-    ...p, id: p.id + 20 + i,
-    title: p.title + " (유사매물)",
-    isNew: i % 3 === 0,
-    isHot: i % 4 === 0,
-    views: Math.floor(Math.random() * 3000) + 200,
-  })),
-  ...BASE.map((p, i) => ({
-    ...p, id: p.id + 40 + i,
-    title: p.title + " 인근",
+const RESIDENTIAL_PROPERTIES: MapProperty[] = [
+  {
+    id: 301,
+    title: "강남 역삼동 신축 원룸",
+    buildingName: "역삼 신축빌라",
+    address: "서울특별시 강남구 역삼동 801-5",
+    type: "원룸",
+    roomType: "원룸",
+    area: "20㎡ (6평)",
+    floor: "3층",
+    deposit: "1,000만원",
+    monthly: "75만원",
+    isNew: true,
+    isHot: true,
+    views: 2341,
+    lat: 37.4985,
+    lng: 127.0315,
+    image: property1,
+    description: "역삼역 도보 5분. 신축 원룸, 풀옵션. 에어컨, 세탁기, 냉장고, 전자레인지 포함.",
+    contact: "02-1111-2222",
+    agentName: "역삼부동산",
+    manageFee: "5만원",
+    parking: "없음",
+    elevator: true,
+    availableFrom: "즉시",
+    totalFloors: "지상 5층",
+    buildYear: "2022년",
+  },
+  {
+    id: 302,
+    title: "마포 합정 투룸 전세",
+    buildingName: "합정역세권 오피스텔",
+    address: "서울특별시 마포구 합정동 402",
+    type: "투룸",
+    roomType: "투룸",
+    area: "49㎡ (15평)",
+    floor: "7층",
+    deposit: "1억 2,000만원",
+    monthly: "-",
+    isNew: true,
+    isHot: false,
+    views: 1820,
+    lat: 37.5495,
+    lng: 126.9119,
+    image: property2,
+    description: "합정역 도보 3분 전세 투룸. 깨끗한 상태, 주차 1대 가능.",
+    contact: "02-2222-3333",
+    agentName: "합정공인중개",
+    manageFee: "8만원",
+    parking: "1대",
+    elevator: true,
+    availableFrom: "즉시",
+    totalFloors: "지상 10층",
+    buildYear: "2018년",
+  },
+  {
+    id: 303,
+    title: "성수동 쓰리룸 아파트",
+    buildingName: "성수 자이아파트",
+    address: "서울특별시 성동구 성수동1가 685",
+    type: "쓰리룸+",
+    roomType: "쓰리룸",
+    area: "84㎡ (25평)",
+    floor: "12층",
+    deposit: "5,000만원",
+    monthly: "220만원",
     isNew: false,
-    isHot: i % 5 === 0,
-    views: Math.floor(Math.random() * 1500) + 100,
-  })),
+    isHot: true,
+    views: 4300,
+    lat: 37.5437,
+    lng: 127.0542,
+    image: property3,
+    description: "성수역 도보 7분. 아파트 쓰리룸, 한강뷰. 리모델링 완료, 즉시 입주 가능.",
+    contact: "02-3333-4444",
+    agentName: "성수공인",
+    manageFee: "15만원",
+    parking: "2대",
+    elevator: true,
+    availableFrom: "즉시",
+    totalFloors: "지상 22층",
+    buildYear: "2015년",
+  },
+  {
+    id: 304,
+    title: "여의도 오피스텔 풀옵션",
+    buildingName: "여의도 더클래식",
+    address: "서울특별시 영등포구 여의도동 14",
+    type: "오피스텔",
+    roomType: "오피스텔",
+    area: "33㎡ (10평)",
+    floor: "15층",
+    deposit: "3,000만원",
+    monthly: "130만원",
+    isNew: false,
+    isHot: false,
+    views: 980,
+    lat: 37.5258,
+    lng: 126.9223,
+    image: property4,
+    description: "여의도역 초역세권 오피스텔. 풀옵션, 한강뷰. 관리비 별도.",
+    contact: "02-4444-5555",
+    agentName: "여의도부동산",
+    manageFee: "12만원",
+    parking: "1대",
+    elevator: true,
+    availableFrom: "2024-03-01",
+    totalFloors: "지상 30층",
+    buildYear: "2019년",
+  },
+  {
+    id: 305,
+    title: "판교 원룸 월세",
+    buildingName: "판교 스마트빌",
+    address: "경기도 성남시 분당구 백현동 534",
+    type: "원룸",
+    roomType: "원룸",
+    area: "23㎡ (7평)",
+    floor: "4층",
+    deposit: "500만원",
+    monthly: "65만원",
+    isNew: true,
+    isHot: false,
+    views: 740,
+    lat: 37.3918,
+    lng: 127.1110,
+    image: property5,
+    description: "판교역 인근 원룸. 신축 건물, 에어컨, 세탁기 포함. IT 종사자 선호.",
+    contact: "031-5555-6666",
+    agentName: "판교공인",
+    manageFee: "5만원",
+    parking: "없음",
+    elevator: true,
+    availableFrom: "즉시",
+    totalFloors: "지상 7층",
+    buildYear: "2021년",
+  },
+  {
+    id: 306,
+    title: "신촌 투룸 반전세",
+    buildingName: "신촌 하우스",
+    address: "서울특별시 서대문구 창천동 56-2",
+    type: "투룸",
+    roomType: "투룸",
+    area: "43㎡ (13평)",
+    floor: "2층",
+    deposit: "5,000만원",
+    monthly: "50만원",
+    isNew: false,
+    isHot: false,
+    views: 550,
+    lat: 37.5548,
+    lng: 126.9370,
+    image: property6,
+    description: "신촌역 도보 5분 투룸. 대학가 인근, 반전세. 인테리어 상태 양호.",
+    contact: "02-6666-7777",
+    agentName: "신촌공인중개",
+    manageFee: "7만원",
+    parking: "없음",
+    elevator: false,
+    availableFrom: "즉시",
+    totalFloors: "지상 4층",
+    buildYear: "2010년",
+  },
 ];
 
-export default function ResidentialRental() {
-  const navigate = useNavigate();
-  const [activeSubtype, setActiveSubtype] = useState("전체");
-  const [activeDeal, setActiveDeal] = useState("전체");
-  const [activeArea, setActiveArea] = useState("전체");
-  const [activeDeposit, setActiveDeposit] = useState("전체");
-  const [activeMonthly, setActiveMonthly] = useState("전체");
-  const [activeFloor, setActiveFloor] = useState("전체");
-  const [activeRegion, setActiveRegion] = useState("전체");
-  const [activeOptions, setActiveOptions] = useState<string[]>([]);
-  const [sort, setSort] = useState("최신순");
-  const [search, setSearch] = useState("");
-  const [showFilter, setShowFilter] = useState(false);
-  const [liked, setLiked] = useState<Set<number>>(new Set());
+const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔"];
 
-  const toggleLike = (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setLiked(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
-  };
-  const toggleOption = (opt: string) =>
-    setActiveOptions(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]);
+const ResidentialRental = () => {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [activeType, setActiveType] = useState("전체");
+  const [query, setQuery] = useState("");
+  const [propertyId, setPropertyId] = useState("");
+  const [showLandlord, setShowLandlord] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  const filtered = PROPERTIES.filter(p => {
-    if (search && !p.title.includes(search) && !p.address.includes(search)) return false;
+  const filtered = RESIDENTIAL_PROPERTIES.filter(p => {
+    if (activeType !== "전체" && p.type !== activeType) return false;
+    if (propertyId && !String(p.id).includes(propertyId)) return false;
+    if (query) {
+      const q = query.toLowerCase();
+      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q)) return false;
+    }
     return true;
   });
 
-  const activeFilterCount = [activeDeal, activeArea, activeDeposit, activeMonthly, activeFloor, activeRegion]
-    .filter(v => v !== "전체").length + activeOptions.length;
-
-  const resetFilters = () => {
-    setActiveDeal("전체"); setActiveArea("전체"); setActiveDeposit("전체");
-    setActiveMonthly("전체"); setActiveFloor("전체"); setActiveRegion("전체");
-    setActiveOptions([]);
-  };
+  const selected = RESIDENTIAL_PROPERTIES.find(p => p.id === selectedId) ?? null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col">
       <Header />
+      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 페이지 헤더 */}
+      {/* 주거 유형 탭 */}
       <div
-        className="relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, hsl(220 60% 28%) 0%, hsl(220 80% 18%) 100%)" }}
+        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
+        style={{ background: "hsl(var(--header-bg))" }}
       >
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "radial-gradient(circle at 30% 60%, white 1px, transparent 1px)", backgroundSize: "48px 48px" }} />
-        <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 py-10">
-          <div className="flex items-center gap-2 text-white/60 text-xs mb-3">
-            <span className="cursor-pointer hover:text-white" onClick={() => navigate("/")}>홈</span>
-            <ChevronDown className="w-3 h-3 -rotate-90" />
-            <span className="text-white font-medium">주거형 임대</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">주거형 임대</h1>
-          <p className="text-white/70 text-sm">원룸·투룸·오피스텔·아파트 등 주거형 공인중개 매물 전체</p>
-          <div className="flex items-center gap-4 mt-4">
-            {[
-              { label: "전체 매물", value: PROPERTIES.length },
-              { label: "신규 등록", value: PROPERTIES.filter(p => p.isNew).length },
-              { label: "인기 매물", value: PROPERTIES.filter(p => p.isHot).length },
-            ].map(({ label, value }) => (
-              <div key={label} className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-center">
-                <p className="text-white/60 text-xs">{label}</p>
-                <p className="text-white font-bold text-lg">{value}건</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 검색 + 필터 sticky bar */}
-      <div className="sticky top-14 z-40 border-b border-border bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-3">
-          {/* 방 유형 탭 */}
-          <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
-            {SUBTYPES.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveSubtype(key)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all flex-shrink-0"
-                style={
-                  activeSubtype === key
-                    ? { background: "hsl(220 80% 28%)", color: "#fff", borderColor: "hsl(220 80% 28%)" }
-                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                }
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
-            <div className="ml-2 flex items-center gap-1 border-l border-border pl-3">
-              {DEAL_TYPES.map(v => (
-                <button
-                  key={v}
-                  onClick={() => setActiveDeal(v)}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border whitespace-nowrap transition-all"
-                  style={
-                    activeDeal === v
-                      ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                      : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                  }
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 검색 + 버튼 */}
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 bg-muted rounded-xl px-3 h-10 border border-border">
-              <Search className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="지역, 건물명, 키워드 검색"
-                className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-              />
-              {search && <button onClick={() => setSearch("")}><X className="w-3.5 h-3.5 text-muted-foreground" /></button>}
-            </div>
-            <button
-              onClick={() => setShowFilter(v => !v)}
-              className="relative flex items-center gap-1.5 px-4 h-10 rounded-xl border text-sm font-medium transition-colors"
-              style={
-                showFilter || activeFilterCount > 0
-                  ? { background: "hsl(220 80% 28%)", color: "#fff", borderColor: "hsl(220 80% 28%)" }
-                  : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
-              }
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              상세필터
-              {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
-                  style={{ background: "hsl(var(--accent))" }}>
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => navigate("/map")}
-              className="flex items-center gap-1.5 px-4 h-10 rounded-xl text-sm font-medium"
-              style={{ background: "hsl(var(--accent))", color: "#fff" }}
-            >
-              <MapPin className="w-3.5 h-3.5" />
-              지도 보기
-            </button>
-          </div>
-        </div>
-
-        {/* 상세 필터 패널 */}
-        {showFilter && (
-          <div className="border-t border-border bg-white px-4 sm:px-6 py-4">
-            <div className="max-w-screen-xl mx-auto flex flex-col gap-4">
-              {[
-                { label: "지역", options: REGIONS, active: activeRegion, set: setActiveRegion },
-                { label: "층수", options: FLOORS, active: activeFloor, set: setActiveFloor },
-                { label: "면적", options: AREAS, active: activeArea, set: setActiveArea },
-                { label: "보증금", options: DEPOSITS, active: activeDeposit, set: setActiveDeposit },
-                { label: "월세", options: MONTHLYS, active: activeMonthly, set: setActiveMonthly },
-              ].map(({ label, options, active, set }) => (
-                <div key={label} className="flex items-start gap-3">
-                  <span className="text-xs font-bold text-muted-foreground w-10 pt-1.5 flex-shrink-0">{label}</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {options.map(opt => (
-                      <button
-                        key={opt}
-                        onClick={() => set(opt)}
-                        className="px-3 py-1 rounded-full text-xs font-medium border transition-all"
-                        style={
-                          active === opt
-                            ? { background: "hsl(220 80% 28%)", color: "#fff", borderColor: "hsl(220 80% 28%)" }
-                            : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
-                        }
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {/* 옵션 */}
-              <div className="flex items-start gap-3">
-                <span className="text-xs font-bold text-muted-foreground w-10 pt-1.5 flex-shrink-0">옵션</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {OPTIONS.map(opt => (
-                    <button
-                      key={opt}
-                      onClick={() => toggleOption(opt)}
-                      className="px-3 py-1 rounded-full text-xs font-medium border transition-all"
-                      style={
-                        activeOptions.includes(opt)
-                          ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                          : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
-                      }
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {activeFilterCount > 0 && (
-                <button onClick={resetFilters} className="flex items-center gap-1 text-xs text-destructive self-start">
-                  <RotateCcw className="w-3 h-3" /> 필터 초기화
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 매물 목록 */}
-      <main className="flex-1 max-w-screen-xl mx-auto px-4 sm:px-6 py-6 w-full">
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-sm text-muted-foreground">
-            총 <span className="font-bold text-foreground">{filtered.length}건</span>의 매물
-          </p>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value)}
-            className="text-xs border border-border rounded-lg px-3 py-1.5 bg-background text-foreground outline-none cursor-pointer"
+        <span className="text-white/50 text-xs font-semibold whitespace-nowrap">주거 유형</span>
+        {RESIDENTIAL_SUBTYPES.map(t => (
+          <button
+            key={t}
+            onClick={() => setActiveType(t)}
+            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+            style={
+              activeType === t
+                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+            }
           >
-            {SORT_OPTIONS.map(s => <option key={s}>{s}</option>)}
-          </select>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <main
+        className="flex-1 flex flex-col md:flex-row overflow-hidden"
+        style={{ height: "calc(100vh - 56px - 41px)" }}
+      >
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={setActiveType}
+        />
+        <div className="flex-1 relative">
+          <MapView
+            properties={filtered}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+          <MapFilterBar
+            activeType={activeType}
+            onTypeChange={setActiveType}
+            query={query}
+            onQueryChange={setQuery}
+            propertyId={propertyId}
+            onPropertyIdChange={setPropertyId}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onLandlordClick={() => setShowLandlord(true)}
+          />
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map(property => (
-            <div
-              key={property.id}
-              className="bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
-              style={{ boxShadow: "0 2px 12px rgba(10,45,110,0.07)" }}
-            >
-              <div className="relative overflow-hidden aspect-[4/3]">
-                <img src={property.image} alt={property.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute top-3 left-3 flex gap-1.5">
-                  {property.isNew && <span className="bg-badge-new text-white text-xs font-bold px-2 py-0.5 rounded-full">NEW</span>}
-                  {property.isHot && <span className="bg-badge-hot text-white text-xs font-bold px-2 py-0.5 rounded-full">HOT</span>}
-                </div>
-                <button onClick={e => toggleLike(property.id, e)}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white transition-colors">
-                  <Heart className={`w-4 h-4 ${liked.has(property.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                </button>
-                <div className="absolute bottom-3 left-3">
-                  <span className="bg-primary/90 text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm">
-                    {property.type}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">{property.title}</h3>
-                <div className="flex items-center gap-1 mb-3">
-                  <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                  <span className="text-xs text-muted-foreground line-clamp-1">{property.address}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  <div className="bg-muted rounded-lg px-3 py-2">
-                    <p className="text-xs text-muted-foreground">면적</p>
-                    <p className="text-sm font-semibold text-foreground">{property.area}</p>
-                  </div>
-                  <div className="bg-muted rounded-lg px-3 py-2">
-                    <p className="text-xs text-muted-foreground">층수</p>
-                    <p className="text-sm font-semibold text-foreground">{property.floor}</p>
-                  </div>
-                </div>
-                <div className="border-t border-border pt-3 flex items-end justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">보증금 / 월세</p>
-                    <p className="font-bold text-primary text-sm">
-                      {property.deposit} / <span className="text-accent">{property.monthly}</span>
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Eye className="w-3.5 h-3.5" />
-                    <span className="text-xs">{property.views.toLocaleString()}</span>
-                  </div>
-                </div>
-                <button
-                  className="mt-3 w-full flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-semibold transition-colors"
-                  style={{ background: "hsl(220 80% 28% / 0.08)", color: "hsl(220 80% 28%)" }}
-                >
-                  <Phone className="w-3 h-3" />
-                  중개사 문의
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-20 text-muted-foreground">
-            <Home className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="font-semibold">검색 결과가 없습니다</p>
-            <p className="text-xs mt-1">조건을 변경하여 다시 검색해보세요</p>
-          </div>
-        )}
-
-        {filtered.length > 0 && (
-          <div className="text-center mt-10">
-            <Button variant="outline" className="px-8 rounded-full">더 보기</Button>
-          </div>
-        )}
       </main>
-
-      <Footer />
     </div>
   );
-}
+};
+
+export default ResidentialRental;
