@@ -80,6 +80,7 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  showCategoryChips?: boolean;
 }
 
 function formatManwon(v: number, max: number) {
@@ -141,6 +142,7 @@ const MapFilterBar = ({
   filters,
   onFiltersChange,
   onLandlordClick,
+  showCategoryChips = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -253,28 +255,28 @@ const MapFilterBar = ({
         </div>
 
 
-        {/* 매물 유형 칩 */}
-        <div
-          className="bg-white rounded-xl border border-border px-3 py-2 flex flex-wrap gap-1.5"
-          style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.10)" }}
-        >
-          {CATEGORY_TYPES.map((t) => (
-            <button
-              key={t.label}
-              onClick={() => onTypeChange(t.label)}
-              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
-              style={
-                activeType === t.label
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : t.group === "매매"
-                  ? { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-              }
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        {/* 매물 유형 칩 - 상가임대에서만 표시 */}
+        {showCategoryChips && (
+          <div
+            className="bg-white rounded-xl border border-border px-3 py-2 flex flex-wrap gap-1.5"
+            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.10)" }}
+          >
+            {CATEGORY_TYPES.map((t) => (
+              <button
+                key={t.label}
+                onClick={() => onTypeChange(t.label)}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                style={
+                  activeType === t.label
+                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 상세 필터 패널 */}
         {showFilter && (

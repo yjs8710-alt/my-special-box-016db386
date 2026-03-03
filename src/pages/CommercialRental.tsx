@@ -80,6 +80,7 @@ const CommercialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            showCategoryChips={true}
           />
         </div>
       </main>
