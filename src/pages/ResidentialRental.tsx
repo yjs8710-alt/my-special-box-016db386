@@ -204,31 +204,10 @@ const ResidentialRental = () => {
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 주거 유형 탭 */}
-      <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
-        style={{ background: "hsl(var(--header-bg))" }}
-      >
-        <span className="text-white/50 text-xs font-semibold whitespace-nowrap">주거 유형</span>
-        {RESIDENTIAL_SUBTYPES.map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveType(t)}
-            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-            style={
-              activeType === t
-                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-            }
-          >
-            {t}
-          </button>
-        ))}
-      </div>
 
       <main
         className="flex-1 flex flex-col md:flex-row overflow-hidden"
-        style={{ height: "calc(100vh - 56px - 41px)" }}
+        style={{ height: "calc(100vh - 56px)" }}
       >
         <MapSidebar
           properties={filtered}
