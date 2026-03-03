@@ -233,6 +233,7 @@ const ResidentialRental = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             showResidentialTypes={true}
+            showBuildingOptions={true}
           />
         </div>
       </main>
