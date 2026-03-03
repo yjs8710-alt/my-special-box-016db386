@@ -13,14 +13,14 @@ const CATEGORY_TYPES = [
   { label: "상가건물매매", group: "매매" },
   { label: "구분상가매매", group: "매매" },
   { label: "창고/공장매매", group: "매매" },
-  { label: "숙박/펜션매매", group: "매매" },
+  { label: "숙박/팬션매매", group: "매매" },
 ];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층", "주인세대"];
 const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라"];
 const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세"];
 const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
-const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이상"];
+const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이내", "20년 이상"];
 
 const BUILDING_OPTIONS = [
   { key: "신축", label: "신축" },
@@ -51,6 +51,7 @@ export interface FilterState {
   roomTypes: string[];
   depositRange: [number, number];
   monthlyRange: [number, number];
+  saleRange: [number, number];
   floorRange: [number, number];
   areaRange: [number, number];
   buildYear: string;
@@ -63,7 +64,8 @@ export const DEFAULT_FILTERS: FilterState = {
   roomTypes: [],
   depositRange: [0, 50000],
   monthlyRange: [0, 1000],
-  floorRange: [1, 30],
+  saleRange: [0, 200000],
+  floorRange: [-2, 30],
   areaRange: [0, 200],
   buildYear: "전체",
   buildingOptions: [],
@@ -82,21 +84,29 @@ interface MapFilterBarProps {
   onLandlordClick?: () => void;
   showCategoryChips?: boolean;
   showResidentialTypes?: boolean;
+  nonResidentialSubtypes?: { label: string; group: string }[];
 }
 
-function formatManwon(v: number, max: number) {
-  if (v >= max) return "무제한";
-  if (v === 0) return "0";
-  if (v >= 10000) return `${(v / 10000).toFixed(v % 10000 === 0 ? 0 : 1)}억`;
-  return `${v.toLocaleString()}만`;
+function makeFormatManwon(max: number) {
+  return (v: number) => {
+    if (v >= max) return "무제한";
+    if (v === 0) return "0";
+    if (v >= 10000) return `${(v / 10000).toFixed(v % 10000 === 0 ? 0 : 1)}억`;
+    return `${v.toLocaleString()}만`;
+  };
 }
-function formatArea(v: number, max: number) {
-  if (v >= max) return "무제한";
-  return `${v}평`;
+function makeFormatArea(max: number) {
+  return (v: number) => {
+    if (v >= max) return "무제한";
+    const sqm = (v * 3.30579).toFixed(2);
+    return `${v}평(${sqm}㎡)`;
+  };
 }
-function formatFloor(v: number, max: number) {
-  if (v >= max) return "30층+";
-  return `${v}층`;
+function makeFormatFloor(min: number, max: number) {
+  return (v: number) => {
+    if (v >= max) return "무제한";
+    return `${v}층`;
+  };
 }
 
 // 입력 문자열 → 만원 단위 숫자
@@ -152,6 +162,7 @@ function RangeInput({
   max,
   step,
   value,
+  defaultValue,
   onChange,
   format,
   parse,
@@ -163,14 +174,17 @@ function RangeInput({
   max: number;
   step: number;
   value: [number, number];
+  defaultValue: [number, number];
   onChange: (v: [number, number]) => void;
-  format: (v: number, max: number) => string;
+  format: (v: number) => string;
   parse: (s: string) => number | null;
   ticks: string[];
   unit?: string;
 }) {
   const [minText, setMinText] = useState("");
   const [maxText, setMaxText] = useState("");
+
+  const isDefault = value[0] === defaultValue[0] && value[1] === defaultValue[1];
 
   const applyMin = () => {
     const n = parse(minText);
@@ -193,9 +207,20 @@ function RangeInput({
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <SectionLabel>{label}</SectionLabel>
-        <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
-          {format(value[0], max)} ~ {format(value[1], max)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--primary))" }}>
+            {format(value[0])} ~ {format(value[1])}
+          </span>
+          {!isDefault && (
+            <button
+              onClick={() => onChange(defaultValue)}
+              className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+              style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+            >
+              조건삭제
+            </button>
+          )}
+        </div>
       </div>
       {/* 텍스트 직접 입력 */}
       <div className="flex items-center gap-1 mb-2">
@@ -205,7 +230,7 @@ function RangeInput({
           onChange={(e) => setMinText(e.target.value)}
           onBlur={applyMin}
           onKeyDown={(e) => e.key === "Enter" && applyMin()}
-          placeholder={format(value[0], max)}
+          placeholder={format(value[0])}
           className="flex-1 h-7 px-2 rounded-lg border border-border text-[11px] bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
         />
         <span className="text-[10px] text-muted-foreground">~</span>
@@ -215,7 +240,7 @@ function RangeInput({
           onChange={(e) => setMaxText(e.target.value)}
           onBlur={applyMax}
           onKeyDown={(e) => e.key === "Enter" && applyMax()}
-          placeholder={format(value[1], max)}
+          placeholder={format(value[1])}
           className="flex-1 h-7 px-2 rounded-lg border border-border text-[11px] bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
         />
         {unit && <span className="text-[10px] text-muted-foreground whitespace-nowrap">{unit}</span>}
@@ -245,6 +270,7 @@ const MapFilterBar = ({
   onLandlordClick,
   showCategoryChips = false,
   showResidentialTypes = false,
+  nonResidentialSubtypes,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -256,7 +282,8 @@ const MapFilterBar = ({
     f.roomTypes.length === 0 &&
     f.depositRange[0] === 0 && f.depositRange[1] === 50000 &&
     f.monthlyRange[0] === 0 && f.monthlyRange[1] === 1000 &&
-    f.floorRange[0] === 1 && f.floorRange[1] === 30 &&
+    f.saleRange[0] === 0 && f.saleRange[1] === 200000 &&
+    f.floorRange[0] === -2 && f.floorRange[1] === 30 &&
     f.areaRange[0] === 0 && f.areaRange[1] === 200 &&
     f.buildYear === "전체" &&
     f.buildingOptions.length === 0 &&
@@ -267,7 +294,8 @@ const MapFilterBar = ({
     filters.roomTypes.length > 0,
     filters.depositRange[0] !== 0 || filters.depositRange[1] !== 50000,
     filters.monthlyRange[0] !== 0 || filters.monthlyRange[1] !== 1000,
-    filters.floorRange[0] !== 1 || filters.floorRange[1] !== 30,
+    filters.saleRange[0] !== 0 || filters.saleRange[1] !== 200000,
+    filters.floorRange[0] !== -2 || filters.floorRange[1] !== 30,
     filters.areaRange[0] !== 0 || filters.areaRange[1] !== 200,
     filters.buildYear !== "전체",
     filters.buildingOptions.length > 0,
@@ -411,6 +439,38 @@ const MapFilterBar = ({
                 </div>
               )}
 
+              {/* 비주거형 카테고리 - nonResidentialSubtypes 있을 때만 */}
+              {nonResidentialSubtypes && nonResidentialSubtypes.length > 0 && (
+                <div>
+                  <SectionLabel>매물 유형</SectionLabel>
+                  <div className="flex flex-wrap gap-1">
+                    {["임대", "매매"].map((group) => (
+                      <div key={group} className="w-full">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {group}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {nonResidentialSubtypes.filter((t) => t.group === group || (group === "임대" && t.group === "전체")).map((t) => (
+                            <button
+                              key={t.label}
+                              onClick={() => onTypeChange(t.label)}
+                              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                              style={
+                                activeType === t.label
+                                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                              }
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* 주거 유형 - showResidentialTypes 일 때만 */}
               {showResidentialTypes && (
                 <div>
@@ -471,8 +531,9 @@ const MapFilterBar = ({
                 label="보증금"
                 min={0} max={50000} step={500}
                 value={filters.depositRange}
+                defaultValue={[0, 50000]}
                 onChange={(v) => set("depositRange", v)}
-                format={formatManwon}
+                format={makeFormatManwon(50000)}
                 parse={parseManwon}
                 ticks={["0", "1억", "2억", "3억", "무제한"]}
               />
@@ -482,32 +543,35 @@ const MapFilterBar = ({
                 label="월세"
                 min={0} max={1000} step={10}
                 value={filters.monthlyRange}
+                defaultValue={[0, 1000]}
                 onChange={(v) => set("monthlyRange", v)}
-                format={formatManwon}
+                format={makeFormatManwon(1000)}
                 parse={parseManwon}
                 ticks={["0", "250만", "500만", "750만", "무제한"]}
               />
 
-              {/* 매매가 (보증금과 동일 슬라이더지만 별도 라벨) */}
+              {/* 매매가 */}
               <RangeInput
                 label="매매가"
-                min={0} max={50000} step={500}
-                value={filters.depositRange}
-                onChange={(v) => set("depositRange", v)}
-                format={formatManwon}
+                min={0} max={200000} step={1000}
+                value={filters.saleRange}
+                defaultValue={[0, 200000]}
+                onChange={(v) => set("saleRange", v)}
+                format={makeFormatManwon(200000)}
                 parse={parseManwon}
-                ticks={["0", "1억", "2억", "3억", "무제한"]}
+                ticks={["0", "5억", "10억", "15억", "무제한"]}
               />
 
               {/* 층수 */}
               <RangeInput
                 label="층수"
-                min={1} max={30} step={1}
+                min={-2} max={30} step={1}
                 value={filters.floorRange}
+                defaultValue={[-2, 30]}
                 onChange={(v) => set("floorRange", v)}
-                format={formatFloor}
+                format={makeFormatFloor(-2, 30)}
                 parse={(s) => { const n = parseInt(s); return isNaN(n) ? null : n; }}
-                ticks={["1층", "8층", "15층", "22층", "30층+"]}
+                ticks={["-2층", "0층", "10층", "20층", "무제한"]}
                 unit="층"
               />
 
@@ -516,9 +580,10 @@ const MapFilterBar = ({
                 label="면적 (평)"
                 min={0} max={200} step={5}
                 value={filters.areaRange}
+                defaultValue={[0, 200]}
                 onChange={(v) => set("areaRange", v)}
-                format={formatArea}
-                parse={(s) => { const n = parseFloat(s.replace("평", "")); return isNaN(n) ? null : n; }}
+                format={makeFormatArea(200)}
+                parse={(s) => { const n = parseFloat(s.replace(/[평㎡()]/g, "")); return isNaN(n) ? null : n; }}
                 ticks={["0", "50평", "100평", "150평", "무제한"]}
                 unit="평"
               />
