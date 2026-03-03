@@ -4,6 +4,20 @@ import { Slider } from "@/components/ui/slider";
 
 const TYPES: { label: string; icon: string }[] = [];
 
+const CATEGORY_TYPES = [
+  { label: "임대전체", group: "임대" },
+  { label: "상가임대", group: "임대" },
+  { label: "기타임대", group: "임대" },
+  { label: "매매전체", group: "매매" },
+  { label: "원룸건물매매", group: "매매" },
+  { label: "주택매매", group: "매매" },
+  { label: "상가주택매매", group: "매매" },
+  { label: "상가건물매매", group: "매매" },
+  { label: "구분상가매매", group: "매매" },
+  { label: "창고/공장매매", group: "매매" },
+  { label: "숙박/펜션매매", group: "매매" },
+];
+
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층"];
 const DEAL_TYPES = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이상"];
@@ -238,6 +252,29 @@ const MapFilterBar = ({
           </button>
         </div>
 
+
+        {/* 매물 유형 칩 */}
+        <div
+          className="bg-white rounded-xl border border-border px-3 py-2 flex flex-wrap gap-1.5"
+          style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.10)" }}
+        >
+          {CATEGORY_TYPES.map((t) => (
+            <button
+              key={t.label}
+              onClick={() => onTypeChange(t.label)}
+              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+              style={
+                activeType === t.label
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : t.group === "매매"
+                  ? { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+              }
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
         {/* 상세 필터 패널 */}
         {showFilter && (
