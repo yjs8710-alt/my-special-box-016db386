@@ -112,6 +112,7 @@ interface MapFilterBarProps {
   showFloor?: boolean;
   showBuildYear?: boolean;
   showBuildingOptions?: boolean;
+  showLandFilters?: boolean;
 }
 
 function makeFormatManwon(max: number) {
