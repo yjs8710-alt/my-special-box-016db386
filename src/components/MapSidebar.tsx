@@ -344,7 +344,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                           {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등 */}
                           <div
                             className="border-l border-border/20 min-w-0 flex-1"
-                            style={{ display: "grid", gridTemplateRows: "1fr 1fr 1fr 1fr", padding: "3px 6px", height: "100%" }}
+                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px", height: "80px", alignContent: "stretch" }}
                           >
                             {/* 줄1: 메모 이모티콘 */}
                             <div className="flex items-center gap-1 overflow-visible">
