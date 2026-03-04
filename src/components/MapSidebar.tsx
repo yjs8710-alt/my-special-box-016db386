@@ -496,8 +496,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                 </div>
                               ) : null}
                             </div>
-                            {/* 줄4: 옵션 아이콘 + 건물/토지대장 버튼 */}
-                            <div className="flex items-center gap-0.5 overflow-hidden justify-between">
+                            {/* 줄4: 옵션 아이콘 */}
+                            <div className="flex items-center gap-0.5 overflow-hidden">
                               <div className="flex items-center gap-0.5 overflow-hidden flex-1">
                                 {prop.options && prop.options.length > 0 ? (
                                   <>
@@ -508,15 +508,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                   </>
                                 ) : null}
                               </div>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
-                                title="건물/토지대장 열람 (세움터)"
-                                className="flex items-center gap-0.5 px-1 h-4 rounded bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
-                              >
-                                <FileText className="w-2 h-2 text-primary" />
-                                <span className="text-[8px] text-primary font-semibold whitespace-nowrap">건물/토지대장</span>
-                              </button>
                             </div>
                           </div>
                         </div>
