@@ -251,7 +251,7 @@ const LandSearch = () => {
           selectedId={selectedId}
           onSelect={setSelectedId}
           activeType={activeType}
-          onTypeChange={setActiveType}
+          onTypeChange={(t) => toggleType(t)}
         />
         <div className="flex-1 relative">
           <MapView
@@ -261,7 +261,7 @@ const LandSearch = () => {
           />
           <MapFilterBar
             activeType={activeType}
-            onTypeChange={setActiveType}
+            onTypeChange={(t) => toggleType(t)}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}
