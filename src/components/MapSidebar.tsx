@@ -957,7 +957,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); alert(`[오류제보] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          onClick={(e) => { e.stopPropagation(); setErrorReportProp(prop); }}
                           className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors"
                         >
                           <AlertCircle className="w-3 h-3 text-red-500" />
