@@ -789,7 +789,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
               className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
               title="드래그하여 너비 조절"
             >
-              <div className="w-1 h-12 rounded-full bg-primary/40 hover:bg-primary transition-colors" />
+              <div className="w-1.5 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow" />
             </div>
           )}
 
