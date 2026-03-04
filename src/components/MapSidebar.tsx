@@ -407,7 +407,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="pointer-events-auto self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
-          style={{ marginTop: "88px" }}
+          style={{ marginTop: "129px" }}
         >
           {collapsed ? (
             <ChevronLeft className="w-3.5 h-3.5" />
