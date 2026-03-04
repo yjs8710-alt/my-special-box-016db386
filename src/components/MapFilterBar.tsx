@@ -473,20 +473,24 @@ const MapFilterBar = ({
                           {group}
                         </span>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {CATEGORY_TYPES.filter((t) => t.group === group).map((t) => (
-                            <button
-                              key={t.label}
-                              onClick={() => onTypeChange(t.label)}
-                              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
-                              style={
-                                activeType === t.label
-                                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                              }
-                            >
-                              {t.label}
-                            </button>
-                          ))}
+                          {CATEGORY_TYPES.filter((t) => t.group === group).map((t) => {
+                            const arr = activeTypes ?? [activeType];
+                            const active = arr.includes(t.label);
+                            return (
+                              <button
+                                key={t.label}
+                                onClick={() => onTypeChange(t.label)}
+                                className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                                style={
+                                  active
+                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                                }
+                              >
+                                {t.label}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
@@ -505,20 +509,24 @@ const MapFilterBar = ({
                           {group}
                         </span>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {nonResidentialSubtypes.filter((t) => t.group === group || (group === "임대" && t.group === "전체")).map((t) => (
-                            <button
-                              key={t.label}
-                              onClick={() => onTypeChange(t.label)}
-                              className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
-                              style={
-                                activeType === t.label
-                                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                                  : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                              }
-                            >
-                              {t.label}
-                            </button>
-                          ))}
+                          {nonResidentialSubtypes.filter((t) => t.group === group || (group === "임대" && t.group === "전체")).map((t) => {
+                            const arr = activeTypes ?? [activeType];
+                            const active = arr.includes(t.label);
+                            return (
+                              <button
+                                key={t.label}
+                                onClick={() => onTypeChange(t.label)}
+                                className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                                style={
+                                  active
+                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                                }
+                              >
+                                {t.label}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
