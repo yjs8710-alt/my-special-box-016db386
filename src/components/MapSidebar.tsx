@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
