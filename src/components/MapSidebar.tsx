@@ -162,12 +162,15 @@ interface BuildingRegisterModalProps {
 }
 const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
   const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
-  const [pos, setPos] = useState({ x: window.innerWidth / 2 - 450, y: window.innerHeight / 2 - 350 });
+  const [pos, setPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
+  const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   const onHeaderMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     draggingModal.current = true;
+    setIsDragging(true);
     dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     const onMove = (ev: MouseEvent) => {
       if (!draggingModal.current) return;
@@ -175,6 +178,7 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
     };
     const onUp = () => {
       draggingModal.current = false;
+      setIsDragging(false);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
@@ -225,12 +229,16 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
           </div>
         </div>
         {/* iframe */}
-        <iframe
-          src={url}
-          className="flex-1 w-full border-0"
-          title="건물/토지대장"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-        />
+          {/* iframe - 드래그 중 마우스 이벤트 차단용 오버레이 포함 */}
+          <div className="flex-1 relative min-h-0">
+            {isDragging && <div className="absolute inset-0 z-10" />}
+            <iframe
+              src={url}
+              className="w-full h-full border-0"
+              title="건물/토지대장"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            />
+          </div>
         {/* Fallback notice */}
         <div className="px-4 py-2 bg-muted/30 border-t border-border flex-shrink-0">
           <p className="text-[10px] text-muted-foreground text-center">
