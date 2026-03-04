@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -382,16 +382,29 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                 </div>
                               ) : null}
                             </div>
-                            {/* 줄4: 옵션 아이콘 */}
-                            <div className="flex items-center gap-0.5 overflow-hidden">
-                              {prop.options && prop.options.length > 0 ? (
-                                <>
-                                  {prop.options.slice(0, 6).map((opt) => (
-                                    <span key={opt} title={opt} className="text-[11px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
-                                  ))}
-                                  {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 6}</span>}
-                                </>
-                              ) : null}
+                            {/* 줄4: 옵션 아이콘 + 건축물대장 버튼 */}
+                            <div className="flex items-center gap-0.5 overflow-hidden justify-between">
+                              <div className="flex items-center gap-0.5 overflow-hidden flex-1">
+                                {prop.options && prop.options.length > 0 ? (
+                                  <>
+                                    {prop.options.slice(0, 4).map((opt) => (
+                                      <span key={opt} title={opt} className="text-[11px] leading-none">{OPTION_ICONS[opt] ?? "•"}</span>
+                                    ))}
+                                    {prop.options.length > 4 && <span className="text-[8px] text-muted-foreground">+{prop.options.length - 4}</span>}
+                                  </>
+                                ) : null}
+                              </div>
+                              <a
+                                href={`https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(prop.address)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                title="건축물대장 열람 (세움터)"
+                                className="flex items-center gap-0.5 px-1 h-4 rounded bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
+                              >
+                                <FileText className="w-2 h-2 text-primary" />
+                                <span className="text-[8px] text-primary font-semibold whitespace-nowrap">건축물대장</span>
+                              </a>
                             </div>
                           </div>
                         </div>
