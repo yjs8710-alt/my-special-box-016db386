@@ -332,15 +332,11 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                           </div>
                           {/* 우측: 메모/날짜/비번/옵션 — 항상 4줄 고정 */}
                            <div className="flex flex-col justify-between px-1.5 border-l border-border/20 min-w-0 flex-1 py-1.5">
-                            {/* 줄1: 메모 이모티콘 */}
-                            <div className="flex items-center gap-1 h-4">
-                              {buildingMemo
-                                ? <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo} />
-                                : <span className="w-4 h-4 opacity-0 select-none">🏢</span>}
-                              {roomMemo
-                                ? <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo} />
-                                : <span className="w-4 h-4 opacity-0 select-none">🚪</span>}
-                            </div>
+                             {/* 줄1: 메모 이모티콘 — 항상 표시 */}
+                             <div className="flex items-center gap-1 h-4">
+                               <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
+                               <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
+                             </div>
                             {/* 줄2: 등록일 / 확인일 */}
                             <div className="flex items-center gap-1.5 h-4">
                               {regDate ? (
