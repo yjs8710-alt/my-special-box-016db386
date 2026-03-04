@@ -231,14 +231,29 @@ const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리
 
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeType, setActiveType] = useState("전체");
+  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  const toggleType = (t: string) => {
+    if (t === "전체") {
+      setActiveTypes(["전체"]);
+      return;
+    }
+    setActiveTypes(prev => {
+      const without전체 = prev.filter(x => x !== "전체");
+      if (without전체.includes(t)) {
+        const next = without전체.filter(x => x !== t);
+        return next.length === 0 ? ["전체"] : next;
+      }
+      return [...without전체, t];
+    });
+  };
+
   const filtered = RESIDENTIAL_PROPERTIES.filter(p => {
-    if (activeType !== "전체" && p.type !== activeType) return false;
+    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
@@ -247,33 +262,36 @@ const ResidentialRental = () => {
     return true;
   });
 
-  const selected = RESIDENTIAL_PROPERTIES.find(p => p.id === selectedId) ?? null;
+  const activeType = activeTypes[0] ?? "전체";
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 주거 유형 탭 */}
+      {/* 주거 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         <span className="text-white/50 text-xs font-semibold whitespace-nowrap flex-shrink-0">주거 유형</span>
-        {RESIDENTIAL_SUBTYPES.map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveType(t)}
-            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-            style={
-              activeType === t
-                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-            }
-          >
-            {t}
-          </button>
-        ))}
+        {RESIDENTIAL_SUBTYPES.map(t => {
+          const isActive = activeTypes.includes(t);
+          return (
+            <button
+              key={t}
+              onClick={() => toggleType(t)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
+            >
+              {t}
+            </button>
+          );
+        })}
       </div>
 
       <main
@@ -285,7 +303,7 @@ const ResidentialRental = () => {
           selectedId={selectedId}
           onSelect={setSelectedId}
           activeType={activeType}
-          onTypeChange={setActiveType}
+          onTypeChange={(t) => toggleType(t)}
         />
         <div className="flex-1 relative">
           <MapView
@@ -295,7 +313,7 @@ const ResidentialRental = () => {
           />
           <MapFilterBar
             activeType={activeType}
-            onTypeChange={setActiveType}
+            onTypeChange={(t) => toggleType(t)}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}

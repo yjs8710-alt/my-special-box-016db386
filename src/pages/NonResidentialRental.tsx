@@ -175,7 +175,6 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     totalFloors: "지상 10층",
     buildYear: "2014년",
   },
-  // 매매 매물
   {
     id: 411,
     title: "구로 IT밸리 사무실 매매",
@@ -246,14 +245,29 @@ const NON_RESIDENTIAL_SUBTYPES = [
 
 const NonResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeType, setActiveType] = useState("전체");
+  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  const toggleType = (t: string) => {
+    if (t === "전체") {
+      setActiveTypes(["전체"]);
+      return;
+    }
+    setActiveTypes(prev => {
+      const without전체 = prev.filter(x => x !== "전체");
+      if (without전체.includes(t)) {
+        const next = without전체.filter(x => x !== t);
+        return next.length === 0 ? ["전체"] : next;
+      }
+      return [...without전체, t];
+    });
+  };
+
   const filtered = NON_RESIDENTIAL_PROPERTIES.filter(p => {
-    if (activeType !== "전체" && p.type !== activeType) return false;
+    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
@@ -262,52 +276,59 @@ const NonResidentialRental = () => {
     return true;
   });
 
+  const activeType = activeTypes[0] ?? "전체";
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 유형 탭 */}
+      {/* 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         {/* 임대 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">임대</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => (
-          <button
-            key={t.label}
-            onClick={() => setActiveType(t.label)}
-            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-            style={
-              activeType === t.label
-                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-            }
-          >
-            {t.label}
-          </button>
-        ))}
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => {
+          const isActive = activeTypes.includes(t.label);
+          return (
+            <button
+              key={t.label}
+              onClick={() => toggleType(t.label)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
+            >
+              {t.label}
+            </button>
+          );
+        })}
 
-        {/* 구분선 */}
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
         {/* 매매 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => (
-          <button
-            key={t.label}
-            onClick={() => setActiveType(t.label)}
-            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-            style={
-              activeType === t.label
-                ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.6)", borderColor: "rgba(255,255,255,0.15)" }
-            }
-          >
-            {t.label}
-          </button>
-        ))}
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
+          const isActive = activeTypes.includes(t.label);
+          return (
+            <button
+              key={t.label}
+              onClick={() => toggleType(t.label)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.6)", borderColor: "rgba(255,255,255,0.15)" }
+              }
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       <main
@@ -319,7 +340,7 @@ const NonResidentialRental = () => {
           selectedId={selectedId}
           onSelect={setSelectedId}
           activeType={activeType}
-          onTypeChange={setActiveType}
+          onTypeChange={(t) => toggleType(t)}
         />
         <div className="flex-1 relative">
           <MapView
@@ -327,9 +348,9 @@ const NonResidentialRental = () => {
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
-        <MapFilterBar
+          <MapFilterBar
             activeType={activeType}
-            onTypeChange={setActiveType}
+            onTypeChange={(t) => toggleType(t)}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}
