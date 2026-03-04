@@ -690,30 +690,46 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                     </button>
                     {/* 선택 시 액션 버튼들 */}
                     {selectedId === prop.id && (
-                      <div className="grid grid-cols-3 border-t border-primary/20">
+                      <div className="grid grid-cols-5 border-t border-primary/20">
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
-                          className="flex items-center justify-center gap-1 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-r border-primary/20"
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-r border-primary/20"
                         >
                           <FileText className="w-3 h-3 text-primary" />
-                          <span className="text-[10px] font-bold text-primary">건물/토지대장</span>
+                          <span className="text-[9px] font-bold text-primary">건물/토지대장</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20"
+                        >
+                          <Camera className="w-3 h-3 text-blue-600" />
+                          <span className="text-[9px] font-bold text-blue-700">사진등록</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setLeaseProposalProp(prop); }}
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20"
+                        >
+                          <ClipboardList className="w-3 h-3 text-purple-600" />
+                          <span className="text-[9px] font-bold text-purple-700">임대제안서</span>
                         </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); alert(`[거래완료] 매물 ID: ${prop.id}\n${prop.address}`); }}
-                          className="flex items-center justify-center gap-1 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
                         >
                           <CheckCircle className="w-3 h-3 text-green-600" />
-                          <span className="text-[10px] font-bold text-green-700">거래완료</span>
+                          <span className="text-[9px] font-bold text-green-700">거래완료</span>
                         </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); alert(`[오류제보] 매물 ID: ${prop.id}\n${prop.address}`); }}
-                          className="flex items-center justify-center gap-1 py-2 bg-red-50 hover:bg-red-100 transition-colors"
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors"
                         >
                           <AlertCircle className="w-3 h-3 text-red-500" />
-                          <span className="text-[10px] font-bold text-red-600">오류제보</span>
+                          <span className="text-[9px] font-bold text-red-600">오류제보</span>
                         </button>
                       </div>
                     )}
