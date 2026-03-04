@@ -323,6 +323,7 @@ const ResidentialRental = () => {
             onLandlordClick={() => setShowLandlord(true)}
             showResidentialTypes={true}
             showBuildingOptions={true}
+            showRoomTypes={false}
           />
         </div>
       </main>
