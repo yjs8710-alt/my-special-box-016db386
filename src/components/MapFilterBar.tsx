@@ -303,6 +303,7 @@ const MapFilterBar = ({
   showFloor = true,
   showBuildYear = true,
   showBuildingOptions = false,
+  showLandFilters = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -319,7 +320,9 @@ const MapFilterBar = ({
     f.areaRange[0] === 0 && f.areaRange[1] === 200 &&
     f.buildYear === "전체" &&
     f.buildingOptions.length === 0 &&
-    f.roomOptions.length === 0;
+    f.roomOptions.length === 0 &&
+    f.landCategory.length === 0 &&
+    f.zoneType.length === 0;
 
   const activeFilterCount = [
     filters.dealType !== "전체",
@@ -332,6 +335,8 @@ const MapFilterBar = ({
     filters.buildYear !== "전체",
     filters.buildingOptions.length > 0,
     filters.roomOptions.length > 0,
+    filters.landCategory.length > 0,
+    filters.zoneType.length > 0,
   ].filter(Boolean).length;
 
   return (
