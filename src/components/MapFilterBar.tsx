@@ -305,6 +305,7 @@ function RangeInput({
 
 const MapFilterBar = ({
   activeType,
+  activeTypes,
   onTypeChange,
   query,
   onQueryChange,
