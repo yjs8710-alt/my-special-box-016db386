@@ -237,10 +237,11 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "공장·창고", group: "임대" },
   { label: "병원·학원", group: "임대" },
   { label: "기타임대", group: "임대" },
-  { label: "사무실매매", group: "매매" },
-  { label: "공장·창고매매", group: "매매" },
-  { label: "상가건물매매", group: "매매" },
-  { label: "창고/공장매매", group: "매매" },
+  { label: "사무실", group: "매매" },
+  { label: "다가구", group: "매매" },
+  { label: "공장·창고", group: "매매" },
+  { label: "상가건물", group: "매매" },
+  { label: "창고/공장", group: "매매" },
 ];
 
 const NonResidentialRental = () => {
