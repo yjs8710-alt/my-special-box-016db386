@@ -12,6 +12,7 @@ const CATEGORIES = [
   { key: "info", label: "정보공유", icon: TrendingUp },
   { key: "qna", label: "Q&A", icon: HelpCircle },
   { key: "free", label: "자유게시판", icon: MessageSquare },
+  { key: "improvement", label: "개선사항", icon: TrendingUp },
 ];
 
 const POSTS = [
