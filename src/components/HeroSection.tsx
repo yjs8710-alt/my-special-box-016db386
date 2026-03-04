@@ -34,19 +34,6 @@ const HeroSection = () => {
           </button>
         </div>
 
-        {/* Quick Stats */}
-        <div className="flex justify-center gap-8 mt-10">
-          {[
-            { label: "매물", value: "12,430+" },
-            { label: "오늘 신규", value: "284" },
-            { label: "이번 주 계약", value: "1,021" },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-xl font-bold text-white">{stat.value}</p>
-              <p className="text-xs text-white/70 mt-0.5">{stat.label}</p>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40">
