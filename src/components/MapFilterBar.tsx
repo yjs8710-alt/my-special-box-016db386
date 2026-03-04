@@ -82,14 +82,14 @@ const ROOM_OPTIONS = [
 ];
 
 export interface FilterState {
-  dealType: string;
+  dealType: string[];
   roomTypes: string[];
   depositRange: [number, number];
   monthlyRange: [number, number];
   saleRange: [number, number];
   floorRange: [number, number];
   areaRange: [number, number];
-  buildYear: string;
+  buildYear: string[];
   buildingOptions: string[];
   roomOptions: string[];
   landCategory: string[];
@@ -97,14 +97,14 @@ export interface FilterState {
 }
 
 export const DEFAULT_FILTERS: FilterState = {
-  dealType: "전체",
+  dealType: [],
   roomTypes: [],
   depositRange: [0, 50000],
   monthlyRange: [0, 1000],
   saleRange: [0, 200000],
   floorRange: [-2, 30],
   areaRange: [0, 200],
-  buildYear: "전체",
+  buildYear: [],
   buildingOptions: [],
   roomOptions: [],
   landCategory: [],
@@ -327,28 +327,28 @@ const MapFilterBar = ({
     onFiltersChange({ ...filters, [key]: val });
 
   const isDefault = (f: FilterState) =>
-    f.dealType === "전체" &&
+    f.dealType.length === 0 &&
     f.roomTypes.length === 0 &&
     f.depositRange[0] === 0 && f.depositRange[1] === 50000 &&
     f.monthlyRange[0] === 0 && f.monthlyRange[1] === 1000 &&
     f.saleRange[0] === 0 && f.saleRange[1] === 200000 &&
     f.floorRange[0] === -2 && f.floorRange[1] === 30 &&
     f.areaRange[0] === 0 && f.areaRange[1] === 200 &&
-    f.buildYear === "전체" &&
+    f.buildYear.length === 0 &&
     f.buildingOptions.length === 0 &&
     f.roomOptions.length === 0 &&
     f.landCategory.length === 0 &&
     f.zoneType.length === 0;
 
   const activeFilterCount = [
-    filters.dealType !== "전체",
+    filters.dealType.length > 0,
     filters.roomTypes.length > 0,
     filters.depositRange[0] !== 0 || filters.depositRange[1] !== 50000,
     filters.monthlyRange[0] !== 0 || filters.monthlyRange[1] !== 1000,
     filters.saleRange[0] !== 0 || filters.saleRange[1] !== 200000,
     filters.floorRange[0] !== -2 || filters.floorRange[1] !== 30,
     filters.areaRange[0] !== 0 || filters.areaRange[1] !== 200,
-    filters.buildYear !== "전체",
+    filters.buildYear.length > 0,
     filters.buildingOptions.length > 0,
     filters.roomOptions.length > 0,
     filters.landCategory.length > 0,
@@ -550,11 +550,19 @@ const MapFilterBar = ({
               <div>
                 <SectionLabel>거래 유형</SectionLabel>
                 <div className="flex flex-wrap gap-1">
-                  {(showResidentialTypes ? DEAL_TYPES_RESIDENTIAL : DEAL_TYPES_COMMERCIAL).map((v) => (
-                    <Chip key={v} active={filters.dealType === v} onClick={() => set("dealType", v)}>{v}</Chip>
-                  ))}
+                  {(showResidentialTypes ? DEAL_TYPES_RESIDENTIAL : DEAL_TYPES_COMMERCIAL).map((v) => {
+                    const isAll = v === "전체";
+                    const active = isAll ? filters.dealType.length === 0 : filters.dealType.includes(v);
+                    return (
+                      <Chip key={v} active={active} onClick={() => {
+                        if (isAll) set("dealType", []);
+                        else set("dealType", toggleArr(filters.dealType, v));
+                      }}>{v}</Chip>
+                    );
+                  })}
                 </div>
               </div>
+
 
               {/* 방 종류 */}
               {showRoomTypes && (
@@ -650,9 +658,16 @@ const MapFilterBar = ({
               <div>
                 <SectionLabel>준공년도</SectionLabel>
                 <div className="flex flex-wrap gap-1">
-                  {BUILD_YEARS.map((v) => (
-                    <Chip key={v} active={filters.buildYear === v} onClick={() => set("buildYear", v)}>{v}</Chip>
-                  ))}
+                  {BUILD_YEARS.map((v) => {
+                    const isAll = v === "전체";
+                    const active = isAll ? filters.buildYear.length === 0 : filters.buildYear.includes(v);
+                    return (
+                      <Chip key={v} active={active} onClick={() => {
+                        if (isAll) set("buildYear", []);
+                        else set("buildYear", toggleArr(filters.buildYear, v));
+                      }}>{v}</Chip>
+                    );
+                  })}
                 </div>
               </div>
               )}
