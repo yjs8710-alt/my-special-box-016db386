@@ -643,13 +643,11 @@ interface MapSidebarProps {
   topOffset?: number;
 }
 
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 99999;
+const SIDEBAR_WIDTH = 380;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSidebarProps) => {
-  const defaultWidth = Math.round(window.innerWidth / 3);
+  const width = SIDEBAR_WIDTH;
   const [collapsed, setCollapsed] = useState(false);
-  const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
