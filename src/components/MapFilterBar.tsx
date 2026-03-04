@@ -421,18 +421,28 @@ const MapFilterBar = ({
               onClick={() => setShowCategoryDrop(v => !v)}
               className="flex items-center gap-1 h-10 px-2.5 text-[11px] font-bold text-foreground hover:bg-muted/40 transition-colors whitespace-nowrap"
             >
-              <span className="max-w-[70px] truncate">{selectedCategory.short}</span>
+              <span className="max-w-[80px] truncate">{currentCategory ? currentCategory.short : "전체"}</span>
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="flex-shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </button>
             {showCategoryDrop && (
               <>
                 <div className="fixed inset-0 z-[1100]" onClick={() => setShowCategoryDrop(false)} />
                 <div className="absolute left-0 top-full mt-1 z-[1101] bg-white border border-border rounded-xl shadow-2xl min-w-[220px] overflow-hidden">
+                  {/* 전체 항목 */}
+                  <button
+                    onClick={() => { setSelectedCategory(null); setShowCategoryDrop(false); navigate("/map"); }}
+                    className="w-full text-left px-3 py-2.5 hover:bg-primary/5 transition-colors border-b border-border/50"
+                    style={!currentCategory ? { background: "hsl(var(--primary)/0.07)" } : {}}
+                  >
+                    <p className="text-[11px] font-bold text-foreground">전체</p>
+                    <p className="text-[9px] text-muted-foreground mt-0.5 leading-relaxed">모든 매물 유형</p>
+                  </button>
                   {SEARCH_CATEGORIES.map((cat) => (
                     <button
                       key={cat.value}
                       onClick={() => { setSelectedCategory(cat); setShowCategoryDrop(false); navigate(cat.route); }}
                       className="w-full text-left px-3 py-2.5 hover:bg-primary/5 transition-colors border-b border-border/50 last:border-b-0"
+                      style={currentCategory?.value === cat.value ? { background: "hsl(var(--primary)/0.07)" } : {}}
                     >
                       <p className="text-[11px] font-bold text-foreground">{cat.label}</p>
                       <p className="text-[9px] text-muted-foreground mt-0.5 leading-relaxed">{cat.desc}</p>
