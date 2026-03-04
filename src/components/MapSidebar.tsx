@@ -341,21 +341,21 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
                             </div>
                           </div>
-                          {/* 우측: 메모/날짜/비번/옵션 — 항상 4줄 고정 */}
-                           <div className="flex flex-col justify-between px-1.5 border-l border-border/20 min-w-0 flex-1 py-1.5">
-                             {/* 줄1: 메모 이모티콘 — 항상 표시 */}
-                             <div className="flex items-center gap-1 h-4">
-                               <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
-                               <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
-                             </div>
+                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 균등 분배 */}
+                          <div className="flex flex-col border-l border-border/20 min-w-0 flex-1" style={{ padding: "4px 6px", gap: 0 }}>
+                            {/* 줄1: 메모 이모티콘 — 항상 표시, overflow:visible */}
+                            <div className="flex-1 flex items-center gap-1 overflow-visible">
+                              <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
+                              <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
+                            </div>
                             {/* 줄2: 등록일 / 확인일 */}
-                            <div className="flex items-center gap-1.5 h-4">
+                            <div className="flex-1 flex items-center gap-1.5 overflow-hidden">
                               {regDate ? (
                                 <div className="flex items-center gap-0.5" title="등록일">
                                   <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
                                   <span className="text-[8px] text-muted-foreground">{regDate}</span>
                                 </div>
-                              ) : <span className="w-4 h-2 opacity-0" />}
+                              ) : <span className="opacity-0 text-[8px]">-</span>}
                               {chkDate ? (
                                 <div className="flex items-center gap-0.5" title="확인일">
                                   <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
@@ -364,13 +364,13 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               ) : null}
                             </div>
                             {/* 줄3: 건물비번 / 방비번 */}
-                            <div className="flex items-center gap-1.5 h-4">
+                            <div className="flex-1 flex items-center gap-1.5 overflow-hidden">
                               {buildingPw ? (
                                 <div className="flex items-center gap-0.5" title="건물 비밀번호">
                                   <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
                                   <span className="text-[8px] text-muted-foreground font-mono">건{buildingPw}</span>
                                 </div>
-                              ) : <span className="w-4 h-2 opacity-0" />}
+                              ) : <span className="opacity-0 text-[8px]">-</span>}
                               {roomPw ? (
                                 <div className="flex items-center gap-0.5" title="방 비밀번호">
                                   <KeyRound className="w-2 h-2 text-accent flex-shrink-0" />
@@ -379,7 +379,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               ) : null}
                             </div>
                             {/* 줄4: 옵션 아이콘 */}
-                            <div className="flex items-center gap-0.5 h-4">
+                            <div className="flex-1 flex items-center gap-0.5 overflow-hidden">
                               {prop.options && prop.options.length > 0 ? (
                                 <>
                                   {prop.options.slice(0, 6).map((opt) => (
