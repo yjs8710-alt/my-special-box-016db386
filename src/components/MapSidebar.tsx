@@ -159,10 +159,11 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
 interface BuildingRegisterModalProps {
   address: string;
   onClose: () => void;
+  pos: { x: number; y: number };
+  onPosChange: (pos: { x: number; y: number }) => void;
 }
-const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
+const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingRegisterModalProps) => {
   const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
-  const [pos, setPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -174,7 +175,7 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
     dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     const onMove = (ev: MouseEvent) => {
       if (!draggingModal.current) return;
-      setPos({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
+      onPosChange({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
     };
     const onUp = () => {
       draggingModal.current = false;
