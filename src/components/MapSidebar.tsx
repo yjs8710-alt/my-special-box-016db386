@@ -288,8 +288,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       const delta = startX.current - ev.clientX;
       const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
       setWidth(newW);
-      // 모달도 너비 변화 delta만큼 x축 이동
-      setModalPos(prev => ({ ...prev, x: prev.x - (ev.clientX - startX.current) + (startX.current - ev.clientX) / 2 * 0 }));
+      // 사이드바 너비 변화(delta)만큼 모달 x도 함께 이동
+      const widthDelta = newW - (startWidth.current + (startX.current - ev.clientX));
+      setModalPos(prev => ({ ...prev, x: prev.x + (startX.current - ev.clientX) - delta + delta - (newW - startWidth.current - delta) }));
     };
     const onUp = () => {
       dragging.current = false;
