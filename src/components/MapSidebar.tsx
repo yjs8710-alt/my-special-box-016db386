@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -246,6 +246,161 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingR
             화면이 표시되지 않으면 <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">여기를 클릭</a>하여 세움터에서 직접 확인하세요.
           </p>
         </div>
+      </div>
+    </>
+  );
+};
+
+/* ── ErrorReportModal ── */
+const ERROR_CATEGORIES = ["정보 오류", "사진 오류", "가격 오류", "연락처 오류", "이미 거래완료", "기타"];
+
+interface ErrorReportModalProps { prop: MapProperty; onClose: () => void; }
+const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
+  const [category, setCategory] = useState(ERROR_CATEGORIES[0]);
+  const [text, setText] = useState("");
+  const [sent, setSent] = useState(false);
+  const ADMIN_EMAIL = "admin@yourdomain.com"; // 관리자 이메일로 변경하세요
+
+  const handleSend = () => {
+    if (!text.trim()) return;
+
+    // 로컬 저장 (오류 이력)
+    const key = `error_reports`;
+    const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
+    const report = {
+      id: Date.now(),
+      propId: prop.id,
+      address: prop.address,
+      category,
+      text,
+      date: new Date().toLocaleString("ko-KR"),
+    };
+    localStorage.setItem(key, JSON.stringify([report, ...prev]));
+
+    // 관리자 이메일 전송 (mailto)
+    const subject = encodeURIComponent(`[오류제보] ${category} - ${prop.buildingName ?? prop.title} (${prop.unitNumber ?? ""})`);
+    const body = encodeURIComponent(
+      `■ 매물 ID: ${prop.id}\n■ 건물명: ${prop.buildingName ?? prop.title}\n■ 주소: ${prop.address}\n■ 호수: ${prop.unitNumber ?? "-"}\n\n■ 오류 유형: ${category}\n\n■ 오류 내용:\n${text}\n\n■ 제보일시: ${report.date}`
+    );
+    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
+
+    setSent(true);
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col"
+        style={{ width: "min(460px, 92vw)", maxHeight: "88vh" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border rounded-t-2xl flex-shrink-0"
+          style={{ background: "hsl(var(--destructive)/0.06)" }}>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: "hsl(var(--destructive)/0.12)" }}>
+              <AlertCircle className="w-4 h-4 text-destructive" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">오류 제보</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[280px]">
+                {prop.buildingName ?? prop.title} {prop.unitNumber ?? ""}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        {sent ? (
+          /* 전송 완료 */
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
+            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
+              <CheckCircle className="w-7 h-7 text-green-500" />
+            </div>
+            <p className="text-sm font-bold text-foreground">제보가 접수되었습니다</p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              이메일 앱이 열리면 전송을 완료해 주세요.<br />
+              제보 내용은 이 기기에도 저장되었습니다.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-2 px-5 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors"
+            >
+              닫기
+            </button>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* 매물 정보 요약 */}
+            <div className="rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-[11px] space-y-0.5">
+              <p className="font-bold text-foreground">{prop.buildingName ?? prop.title}</p>
+              <p className="text-muted-foreground">{prop.address}</p>
+              <p className="text-muted-foreground">호수: {prop.unitNumber ?? "-"} · {prop.floor} · {prop.area}</p>
+            </div>
+
+            {/* 오류 유형 선택 */}
+            <div>
+              <p className="text-[11px] font-semibold text-foreground mb-2">오류 유형 선택</p>
+              <div className="flex flex-wrap gap-1.5">
+                {ERROR_CATEGORIES.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setCategory(cat)}
+                    className="px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all"
+                    style={
+                      category === cat
+                        ? { background: "hsl(var(--destructive))", color: "#fff", borderColor: "hsl(var(--destructive))" }
+                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                    }
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 메모장 */}
+            <div>
+              <p className="text-[11px] font-semibold text-foreground mb-1.5">오류 내용 작성</p>
+              <div className="rounded-xl border border-border overflow-hidden" style={{ background: "hsl(var(--muted)/0.3)" }}>
+                {/* 메모장 줄 배경 */}
+                <div className="relative">
+                  <textarea
+                    autoFocus
+                    value={text}
+                    onChange={e => setText(e.target.value)}
+                    placeholder={`어떤 오류가 있는지 자세히 작성해 주세요.\n예) 월세가 실제와 다릅니다. 실제 월세는 400만원입니다.`}
+                    rows={7}
+                    className="w-full text-[12px] text-foreground leading-7 resize-none outline-none px-3 pt-2 pb-2 placeholder:text-muted-foreground/40"
+                    style={{
+                      background: "repeating-linear-gradient(transparent, transparent 27px, hsl(var(--border)) 27px, hsl(var(--border)) 28px)",
+                      backgroundPositionY: "2px",
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between items-center px-3 py-1.5 border-t border-border bg-muted/20">
+                  <span className="text-[9px] text-primary/60 font-medium">✓ 작성 후 관리자에게 전송됩니다</span>
+                  <span className="text-[9px] text-muted-foreground">{text.length}자</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 전송 버튼 */}
+            <button
+              onClick={handleSend}
+              disabled={!text.trim()}
+              className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: "hsl(var(--destructive))", color: "#fff" }}
+            >
+              <Send className="w-4 h-4" />
+              관리자에게 전송
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
@@ -500,6 +655,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
+  const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -558,6 +714,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
           prop={leaseProposalProp}
           allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
+        />
+      )}
+      {/* Error Report Modal */}
+      {errorReportProp && (
+        <ErrorReportModal
+          prop={errorReportProp}
+          onClose={() => setErrorReportProp(null)}
         />
       )}
       {/* Lightbox */}
@@ -794,7 +957,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); alert(`[오류제보] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          onClick={(e) => { e.stopPropagation(); setErrorReportProp(prop); }}
                           className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors"
                         >
                           <AlertCircle className="w-3 h-3 text-red-500" />
