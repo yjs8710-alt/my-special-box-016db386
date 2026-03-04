@@ -269,7 +269,11 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
               </div>
             ) : (
               <div className="p-2 flex flex-col gap-1.5">
-                {properties.map((prop) => {
+                {[...properties].sort((a, b) => {
+                  const isSaleA = a.type?.includes("매매") ? 1 : 0;
+                  const isSaleB = b.type?.includes("매매") ? 1 : 0;
+                  return isSaleA - isSaleB;
+                }).map((prop) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
