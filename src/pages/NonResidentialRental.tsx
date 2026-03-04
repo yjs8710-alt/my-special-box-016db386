@@ -313,17 +313,18 @@ const NonResidentialRental = () => {
 
         {/* 매매 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
-          const isActive = activeTypes.includes(t.label);
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map((t, i) => {
+          const key = `매매-${t.label}-${i}`;
+          const isActive = activeTypes.includes(key);
           return (
             <button
-              key={t.label}
-              onClick={() => toggleType(t.label)}
+              key={key}
+              onClick={() => toggleType(key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
-                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.6)", borderColor: "rgba(255,255,255,0.15)" }
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
               }
             >
               {t.label}
