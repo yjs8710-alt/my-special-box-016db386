@@ -780,7 +780,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   </>
                 )}
               </div>
-              <span className="text-[9px] text-muted-foreground">◀ 드래그로 크기 조절</span>
+              
             </div>
             {/* 2행: 액션 버튼들 */}
             <div className="px-3 pb-2 flex items-center gap-1.5">
