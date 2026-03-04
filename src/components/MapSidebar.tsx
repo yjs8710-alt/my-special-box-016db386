@@ -513,16 +513,34 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </div>
                       </div>
                     </button>
-                    {/* 선택 시 건물/토지대장 버튼 */}
+                    {/* 선택 시 액션 버튼들 */}
                     {selectedId === prop.id && (
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
-                        className="w-full flex items-center justify-center gap-1.5 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-t border-primary/20"
-                      >
-                        <FileText className="w-3.5 h-3.5 text-primary" />
-                        <span className="text-[11px] font-bold text-primary">건물/토지대장 열람</span>
-                      </button>
+                      <div className="grid grid-cols-3 border-t border-primary/20">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
+                          className="flex items-center justify-center gap-1 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-r border-primary/20"
+                        >
+                          <FileText className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] font-bold text-primary">건물/토지대장</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); alert(`[거래완료] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          className="flex items-center justify-center gap-1 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
+                        >
+                          <CheckCircle className="w-3 h-3 text-green-600" />
+                          <span className="text-[10px] font-bold text-green-700">거래완료</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); alert(`[오류제보] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          className="flex items-center justify-center gap-1 py-2 bg-red-50 hover:bg-red-100 transition-colors"
+                        >
+                          <AlertCircle className="w-3 h-3 text-red-500" />
+                          <span className="text-[10px] font-bold text-red-600">오류제보</span>
+                        </button>
+                      </div>
                     )}
                     </div>
                   );
