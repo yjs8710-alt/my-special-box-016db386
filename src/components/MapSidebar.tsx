@@ -96,12 +96,12 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
   };
 
   return (
-    <div className="relative flex items-center h-4">
+    <div className="relative flex items-center">
       <button
         type="button"
         title={label}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="w-4 h-4 flex items-center justify-center text-[12px] leading-none hover:scale-125 transition-transform select-none flex-shrink-0"
+        className="w-4 h-4 flex items-center justify-center text-[11px] leading-none hover:scale-125 transition-transform select-none flex-shrink-0"
       >
         {emoji}
       </button>
