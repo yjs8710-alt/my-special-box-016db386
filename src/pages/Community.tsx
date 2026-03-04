@@ -12,6 +12,7 @@ const CATEGORIES = [
   { key: "info", label: "정보공유", icon: TrendingUp },
   { key: "qna", label: "Q&A", icon: HelpCircle },
   { key: "free", label: "자유게시판", icon: MessageSquare },
+  { key: "improvement", label: "개선사항", icon: TrendingUp },
 ];
 
 const POSTS = [
@@ -118,6 +119,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   info: "hsl(152 60% 40%)",
   qna: "hsl(22 100% 52%)",
   free: "hsl(215 16% 48%)",
+  improvement: "hsl(262 80% 50%)",
 };
 
 const Community = () => {
