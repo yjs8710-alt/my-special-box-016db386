@@ -164,6 +164,7 @@ interface MapSidebarProps {
   onTypeChange: (type: string) => void;
   query?: string;
   onQueryChange?: (v: string) => void;
+  topOffset?: number;
 }
 
 const MIN_WIDTH = 200;
