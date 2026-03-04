@@ -689,7 +689,31 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
 
-  return (
+  /* ── Resize drag ── */
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(DEFAULT_WIDTH);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = width;
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = startX.current - ev.clientX;
+      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta)));
+    };
+    const onUp = () => {
+      dragging.current = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [width]);
+
+
     <>
       {/* Building Register Modal */}
       {buildingRegisterAddr && (
