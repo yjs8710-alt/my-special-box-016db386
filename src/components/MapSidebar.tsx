@@ -474,7 +474,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                 </div>
                               ) : null}
                             </div>
-                            {/* 줄4: 옵션 아이콘 + 건축물대장 버튼 */}
+                            {/* 줄4: 옵션 아이콘 + 건물/토지대장 버튼 */}
                             <div className="flex items-center gap-0.5 overflow-hidden justify-between">
                               <div className="flex items-center gap-0.5 overflow-hidden flex-1">
                                 {prop.options && prop.options.length > 0 ? (
