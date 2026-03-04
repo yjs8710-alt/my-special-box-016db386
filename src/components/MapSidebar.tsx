@@ -1,5 +1,5 @@
 import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 const TYPE_BG: Record<string, string> = {
@@ -643,13 +643,11 @@ interface MapSidebarProps {
   topOffset?: number;
 }
 
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 99999;
+const SIDEBAR_WIDTH = 380;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSidebarProps) => {
-  const defaultWidth = Math.round(window.innerWidth / 3);
+  const width = SIDEBAR_WIDTH;
   const [collapsed, setCollapsed] = useState(false);
-  const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
@@ -688,37 +686,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     const html = `<html><head><title>매물 상세 인쇄</title><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px}@media print{body{padding:0}}</style></head><body><h2>매물 상세 목록 (${list.length}건)</h2>${cards}</body></html>`;
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(defaultWidth);
-
-  const lastDragX = useRef(0);
-
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    dragging.current = true;
-    startX.current = e.clientX;
-    lastDragX.current = e.clientX;
-    startWidth.current = width;
-
-    const onMove = (ev: MouseEvent) => {
-      if (!dragging.current) return;
-      const delta = startX.current - ev.clientX;
-      const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
-      setWidth(newW);
-      // 프레임당 마우스 이동량만큼 모달 x도 함께 이동 (사이드바와 동일 방향)
-      const frameDelta = lastDragX.current - ev.clientX;
-      setModalPos(prev => ({ ...prev, x: prev.x - frameDelta }));
-      lastDragX.current = ev.clientX;
-    };
-    const onUp = () => {
-      dragging.current = false;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [width]);
 
   return (
     <>
@@ -788,16 +755,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
-          {/* Drag handle */}
-          {!collapsed && (
-            <div
-              onMouseDown={onMouseDown}
-              className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 group flex items-center justify-center"
-              title="드래그하여 너비 조절"
-            >
-              <div className="w-1 h-12 rounded-full bg-primary transition-colors" />
-            </div>
-          )}
 
           {/* Header */}
           <div
@@ -823,7 +780,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   </>
                 )}
               </div>
-              <span className="text-[9px] text-muted-foreground">◀ 드래그로 크기 조절</span>
+              
             </div>
             {/* 2행: 액션 버튼들 */}
             <div className="px-3 pb-2 flex items-center gap-1.5">
