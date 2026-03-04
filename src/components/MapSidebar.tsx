@@ -162,12 +162,15 @@ interface BuildingRegisterModalProps {
 }
 const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
   const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
-  const [pos, setPos] = useState({ x: window.innerWidth / 2 - 450, y: window.innerHeight / 2 - 350 });
+  const [pos, setPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
+  const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
   const onHeaderMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     draggingModal.current = true;
+    setIsDragging(true);
     dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     const onMove = (ev: MouseEvent) => {
       if (!draggingModal.current) return;
@@ -175,6 +178,7 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
     };
     const onUp = () => {
       draggingModal.current = false;
+      setIsDragging(false);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
