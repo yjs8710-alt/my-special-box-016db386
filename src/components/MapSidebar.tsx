@@ -304,7 +304,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     <>
       {/* Building Register Modal */}
       {buildingRegisterAddr && (
-        <BuildingRegisterModal address={buildingRegisterAddr} onClose={() => setBuildingRegisterAddr(null)} />
+        <BuildingRegisterModal
+          address={buildingRegisterAddr}
+          onClose={() => setBuildingRegisterAddr(null)}
+          pos={modalPos}
+          onPosChange={setModalPos}
+        />
       )}
       {/* Lightbox */}
       {lightboxSrc && (
