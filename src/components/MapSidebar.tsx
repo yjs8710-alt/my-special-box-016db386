@@ -351,20 +351,16 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
                               <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
                             </div>
-                            {/* 줄2: 등록일 / 확인일 */}
-                            <div className="flex items-center gap-1.5 overflow-hidden">
-                              {regDate ? (
-                                <div className="flex items-center gap-0.5" title="등록일">
-                                  <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
-                                  <span className="text-[8px] text-muted-foreground">{regDate}</span>
-                                </div>
-                              ) : <span className="opacity-0 text-[8px]">-</span>}
-                              {chkDate ? (
-                                <div className="flex items-center gap-0.5" title="확인일">
-                                  <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
-                                  <span className="text-[8px] text-primary font-semibold">{chkDate}</span>
-                                </div>
-                              ) : null}
+                            {/* 줄2: 등록일 / 확인일 — 가로 정렬 */}
+                            <div className="flex flex-row items-center gap-2 overflow-hidden">
+                              <div className="flex items-center gap-0.5" title="등록일">
+                                <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
+                                <span className="text-[8px] text-muted-foreground">{regDate ?? "-"}</span>
+                              </div>
+                              <div className="flex items-center gap-0.5" title="확인일">
+                                <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
+                                <span className="text-[8px] text-primary font-semibold">{chkDate ?? "-"}</span>
+                              </div>
                             </div>
                             {/* 줄3: 건물비번 / 방비번 */}
                             <div className="flex items-center gap-1.5 overflow-hidden">
