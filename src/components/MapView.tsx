@@ -96,8 +96,8 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
     if (!containerRef.current || mapRef.current) return;
 
     const map = L.map(containerRef.current, {
-      center: [37.5326, 127.024],
-      zoom: 12,
+      center: [36.6424, 127.4890],
+      zoom: 14,
       zoomControl: false,
     });
 
