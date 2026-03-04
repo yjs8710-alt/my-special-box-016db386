@@ -76,6 +76,8 @@ export interface FilterState {
   buildYear: string;
   buildingOptions: string[];
   roomOptions: string[];
+  landCategory: string[];
+  zoneType: string[];
 }
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -89,6 +91,8 @@ export const DEFAULT_FILTERS: FilterState = {
   buildYear: "전체",
   buildingOptions: [],
   roomOptions: [],
+  landCategory: [],
+  zoneType: [],
 };
 
 interface MapFilterBarProps {
