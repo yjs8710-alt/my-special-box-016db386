@@ -837,7 +837,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                 {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
-                  return isSaleA - isSaleB;
+                  if (isSaleA !== isSaleB) return isSaleA - isSaleB;
+                  // 최근 조사순 (확인일 내림차순)
+                  const dateA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
+                  const dateB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
+                  return dateB - dateA;
                 }).map((prop) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
