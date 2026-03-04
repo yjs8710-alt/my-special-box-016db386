@@ -113,6 +113,7 @@ export const DEFAULT_FILTERS: FilterState = {
 
 interface MapFilterBarProps {
   activeType: string;
+  activeTypes?: string[];
   onTypeChange: (v: string) => void;
   query: string;
   onQueryChange: (v: string) => void;
