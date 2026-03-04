@@ -243,7 +243,7 @@ const LandSearch = () => {
       </div>
 
       <main
-        className="flex-1 flex flex-col md:flex-row overflow-hidden"
+        className="flex-1 relative overflow-hidden"
         style={{ height: "calc(100vh - 56px - 41px)" }}
       >
         <MapSidebar
