@@ -399,7 +399,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   return (
                     <button
                       key={prop.id}
-                      onClick={() => { onSelect(prop.id); setBuildingRegisterAddr(prop.address); }}
+                      onClick={() => onSelect(prop.id)}
                       className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
                         selectedId === prop.id
                           ? "ring-2 ring-primary shadow-lg"
