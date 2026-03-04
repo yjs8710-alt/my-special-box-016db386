@@ -330,6 +330,7 @@ const MapFilterBar = ({
   showBuildingOptions = false,
   showLandFilters = false,
 }: MapFilterBarProps) => {
+  const navigate = useNavigate();
   const [showFilter, setShowFilter] = useState(false);
   const [showCategoryDrop, setShowCategoryDrop] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number] | null>(null);
