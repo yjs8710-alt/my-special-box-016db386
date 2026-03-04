@@ -755,16 +755,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
-          {/* Drag handle */}
-          {!collapsed && (
-            <div
-              onMouseDown={onMouseDown}
-              className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 group flex items-center justify-center"
-              title="드래그하여 너비 조절"
-            >
-              <div className="w-1 h-12 rounded-full bg-primary transition-colors" />
-            </div>
-          )}
 
           {/* Header */}
           <div
