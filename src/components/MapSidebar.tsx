@@ -655,6 +655,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const dragging = useRef(false);
   const startX = useRef(0);
@@ -777,6 +778,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                 {properties.length}
               </span>
               <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
+              {checkedIds.size > 0 && (
+                <>
+                  <span className="text-[10px] text-muted-foreground">·</span>
+                  <span className="text-xs font-extrabold text-primary-foreground bg-accent px-2.5 py-0.5 rounded-full shadow-sm">
+                    {checkedIds.size}개 선택
+                  </span>
+                  <button
+                    onClick={() => setCheckedIds(new Set())}
+                    className="text-[9px] text-destructive hover:underline"
+                  >
+                    선택 해제
+                  </button>
+                </>
+              )}
             </div>
             <span className="text-[10px] text-muted-foreground">◀ 좌측 가장자리 드래그로 크기 조절</span>
           </div>
@@ -822,7 +837,32 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                               alt={prop.title}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            <span className={`absolute top-1 left-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
+                            {/* 체크박스 - 좌상단 */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCheckedIds(prev => {
+                                  const next = new Set(prev);
+                                  next.has(prop.id) ? next.delete(prop.id) : next.add(prop.id);
+                                  return next;
+                                });
+                              }}
+                              className="absolute top-1 left-1 z-10 w-4 h-4 rounded flex items-center justify-center transition-all"
+                              style={{
+                                background: checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(255,255,255,0.85)",
+                                border: `1.5px solid ${checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(150,150,150,0.6)"}`,
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+                              }}
+                            >
+                              {checkedIds.has(prop.id) && (
+                                <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                                  <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </button>
+                            {/* type 뱃지 - 우하단으로 이동 */}
+                            <span className={`absolute bottom-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
                               {prop.type}
                             </span>
                             <button
