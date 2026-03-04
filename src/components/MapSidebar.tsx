@@ -164,12 +164,13 @@ interface MapSidebarProps {
   onTypeChange: (type: string) => void;
   query?: string;
   onQueryChange?: (v: string) => void;
+  topOffset?: number;
 }
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 99999;
 
-const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 97 }: MapSidebarProps) => {
   const defaultWidth = Math.round(window.innerWidth / 3);
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(defaultWidth);
@@ -230,8 +231,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
           }`}
           style={{
             width: collapsed ? 0 : width,
-            marginTop: "97px",
-            height: "calc(100% - 97px)",
+            marginTop: `${topOffset}px`,
+            height: `calc(100% - ${topOffset}px)`,
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
@@ -407,7 +408,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="pointer-events-auto self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
-          style={{ marginTop: "129px" }}
+          style={{ marginTop: `${topOffset + 32}px` }}
         >
           {collapsed ? (
             <ChevronLeft className="w-3.5 h-3.5" />

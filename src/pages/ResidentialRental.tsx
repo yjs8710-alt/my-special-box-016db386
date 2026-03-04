@@ -304,6 +304,7 @@ const ResidentialRental = () => {
           onSelect={setSelectedId}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          topOffset={97}
         />
         <div className="flex-1 relative">
           <MapView
