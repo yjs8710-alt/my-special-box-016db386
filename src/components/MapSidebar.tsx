@@ -522,46 +522,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </div>
                       </div>
                     </button>
-                    {/* 인라인 건물/토지대장 패널 */}
+                    {/* 선택 시 건물/토지대장 버튼 */}
                     {selectedId === prop.id && (
-                      <div className="overflow-hidden border-t border-border/30" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between px-3 py-1.5 bg-primary/5 border-b border-border/20">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <FileText className="w-3 h-3 text-primary flex-shrink-0" />
-                            <span className="text-[11px] font-bold text-primary whitespace-nowrap">건물/토지대장</span>
-                            <span className="text-[9px] text-muted-foreground truncate">{prop.address}</span>
-                          </div>
-                          <a
-                            href={`https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(prop.address)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-0.5 text-[9px] text-primary hover:underline flex-shrink-0 ml-2"
-                          >
-                            <ExternalLink className="w-2.5 h-2.5" />
-                            새 탭
-                          </a>
-                        </div>
-                        <iframe
-                          src={`https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(prop.address)}`}
-                          className="w-full border-0"
-                          style={{ height: 300 }}
-                          title="건물/토지대장"
-                          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-                        />
-                        <div className="px-3 py-1 bg-muted/30 border-t border-border/20">
-                          <p className="text-[9px] text-muted-foreground text-center">
-                            화면이 안 보이면{" "}
-                            <a
-                              href={`https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(prop.address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-primary underline"
-                            >새 탭에서 열기</a>
-                          </p>
-                        </div>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-t border-primary/20"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-[11px] font-bold text-primary">건물/토지대장 열람</span>
+                      </button>
                     )}
                     </div>
                   );
