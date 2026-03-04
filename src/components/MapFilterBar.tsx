@@ -550,11 +550,19 @@ const MapFilterBar = ({
               <div>
                 <SectionLabel>거래 유형</SectionLabel>
                 <div className="flex flex-wrap gap-1">
-                  {(showResidentialTypes ? DEAL_TYPES_RESIDENTIAL : DEAL_TYPES_COMMERCIAL).map((v) => (
-                    <Chip key={v} active={filters.dealType === v} onClick={() => set("dealType", v)}>{v}</Chip>
-                  ))}
+                  {(showResidentialTypes ? DEAL_TYPES_RESIDENTIAL : DEAL_TYPES_COMMERCIAL).map((v) => {
+                    const isAll = v === "전체";
+                    const active = isAll ? filters.dealType.length === 0 : filters.dealType.includes(v);
+                    return (
+                      <Chip key={v} active={active} onClick={() => {
+                        if (isAll) set("dealType", []);
+                        else set("dealType", toggleArr(filters.dealType, v));
+                      }}>{v}</Chip>
+                    );
+                  })}
                 </div>
               </div>
+
 
               {/* 방 종류 */}
               {showRoomTypes && (
