@@ -713,8 +713,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     window.addEventListener("mouseup", onUp);
   }, [width]);
 
-
+  return (
     <>
+
       {/* Building Register Modal */}
       {buildingRegisterAddr && (
         <BuildingRegisterModal
