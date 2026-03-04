@@ -37,7 +37,7 @@ const HeroSection = () => {
         {/* Quick Stats */}
         <div className="flex justify-center gap-8 mt-10">
           {[
-            { label: "전국 매물", value: "12,430+" },
+            { label: "매물", value: "12,430+" },
             { label: "오늘 신규", value: "284" },
             { label: "이번 주 계약", value: "1,021" },
           ].map((stat) => (
