@@ -716,6 +716,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
           onClose={() => setLeaseProposalProp(null)}
         />
       )}
+      {/* Error Report Modal */}
+      {errorReportProp && (
+        <ErrorReportModal
+          prop={errorReportProp}
+          onClose={() => setErrorReportProp(null)}
+        />
+      )}
       {/* Lightbox */}
       {lightboxSrc && (
         <div
