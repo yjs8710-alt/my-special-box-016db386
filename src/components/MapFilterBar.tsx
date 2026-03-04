@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
@@ -332,9 +332,14 @@ const MapFilterBar = ({
   showLandFilters = false,
 }: MapFilterBarProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showFilter, setShowFilter] = useState(false);
   const [showCategoryDrop, setShowCategoryDrop] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number] | null>(null);
+  const currentCategory = useMemo(
+    () => SEARCH_CATEGORIES.find(c => c.route === location.pathname) ?? SEARCH_CATEGORIES[0],
+    [location.pathname]
+  );
+  const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number]>(currentCategory);
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
@@ -417,7 +422,7 @@ const MapFilterBar = ({
               onClick={() => setShowCategoryDrop(v => !v)}
               className="flex items-center gap-1 h-10 px-2.5 text-[11px] font-bold text-foreground hover:bg-muted/40 transition-colors whitespace-nowrap"
             >
-              <span className="max-w-[70px] truncate">{selectedCategory?.short ?? "전체"}</span>
+              <span className="max-w-[70px] truncate">{selectedCategory.short}</span>
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="flex-shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </button>
             {showCategoryDrop && (
