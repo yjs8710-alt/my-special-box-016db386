@@ -476,6 +476,21 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
           onPosChange={setModalPos}
         />
       )}
+      {/* Photo Upload Modal */}
+      {photoUploadProp && (
+        <PhotoUploadModal
+          propId={photoUploadProp.id}
+          address={photoUploadProp.address}
+          onClose={() => setPhotoUploadProp(null)}
+        />
+      )}
+      {/* Lease Proposal Modal */}
+      {leaseProposalProp && (
+        <LeaseProposalModal
+          prop={leaseProposalProp}
+          onClose={() => setLeaseProposalProp(null)}
+        />
+      )}
       {/* Lightbox */}
       {lightboxSrc && (
         <div
