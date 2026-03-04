@@ -232,16 +232,16 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
 ];
 
 const NON_RESIDENTIAL_SUBTYPES = [
-  { label: "전체", group: "전체" },
-  { label: "사무실", group: "임대" },
-  { label: "공장·창고", group: "임대" },
-  { label: "병원·학원", group: "임대" },
-  { label: "기타임대", group: "임대" },
-  { label: "사무실", group: "매매" },
-  { label: "다가구", group: "매매" },
-  { label: "공장·창고", group: "매매" },
-  { label: "상가건물", group: "매매" },
-  { label: "창고/공장", group: "매매" },
+  { label: "전체", group: "전체", key: "전체" },
+  { label: "사무실", group: "임대", key: "임대-사무실" },
+  { label: "공장·창고", group: "임대", key: "임대-공장·창고" },
+  { label: "병원·학원", group: "임대", key: "임대-병원·학원" },
+  { label: "기타임대", group: "임대", key: "임대-기타임대" },
+  { label: "사무실", group: "매매", key: "매매-사무실" },
+  { label: "다가구", group: "매매", key: "매매-다가구" },
+  { label: "공장·창고", group: "매매", key: "매매-공장·창고" },
+  { label: "상가건물", group: "매매", key: "매매-상가건물" },
+  { label: "창고/공장", group: "매매", key: "매매-창고/공장" },
 ];
 
 const NonResidentialRental = () => {
