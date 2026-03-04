@@ -1,5 +1,5 @@
 import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer } from "lucide-react";
-import { useState, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 const TYPE_BG: Record<string, string> = {
