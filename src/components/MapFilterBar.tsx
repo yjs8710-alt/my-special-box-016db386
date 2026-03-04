@@ -693,6 +693,64 @@ const MapFilterBar = ({
               </div>
               )}
 
+              {/* 지목 */}
+              {showLandFilters && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <SectionLabel>지목</SectionLabel>
+                  {filters.landCategory.length > 0 && (
+                    <button
+                      onClick={() => set("landCategory", [])}
+                      className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                      style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                    >
+                      선택 삭제
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {LAND_CATEGORIES.map((v) => (
+                    <Chip
+                      key={v}
+                      active={filters.landCategory.includes(v)}
+                      onClick={() => set("landCategory", toggleArr(filters.landCategory, v))}
+                    >
+                      {v}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              {/* 용도지역 */}
+              {showLandFilters && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <SectionLabel>용도지역</SectionLabel>
+                  {filters.zoneType.length > 0 && (
+                    <button
+                      onClick={() => set("zoneType", [])}
+                      className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                      style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                    >
+                      선택 삭제
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {ZONE_TYPES.map((v) => (
+                    <Chip
+                      key={v}
+                      active={filters.zoneType.includes(v)}
+                      onClick={() => set("zoneType", toggleArr(filters.zoneType, v))}
+                    >
+                      {v}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              )}
+
 
             </div>
 
