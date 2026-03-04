@@ -511,11 +511,12 @@ const MapFilterBar = ({
                         <div className="flex flex-wrap gap-1 mt-1">
                           {nonResidentialSubtypes.filter((t) => t.group === group || (group === "임대" && t.group === "전체")).map((t) => {
                             const arr = activeTypes ?? [activeType];
-                            const active = arr.includes(t.label);
+                            const key = (t as any).key ?? t.label;
+                            const active = arr.includes(key);
                             return (
                               <button
-                                key={t.label}
-                                onClick={() => onTypeChange(t.label)}
+                                key={key}
+                                onClick={() => onTypeChange(key)}
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   active
