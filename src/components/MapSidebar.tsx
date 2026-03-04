@@ -397,8 +397,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   const chkDate = prop.checkedDate;
 
                   return (
+                    <div key={prop.id} className="flex flex-col">
                     <button
-                      key={prop.id}
                       onClick={() => onSelect(prop.id)}
                       className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
                         selectedId === prop.id
