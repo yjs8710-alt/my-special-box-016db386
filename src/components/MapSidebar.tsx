@@ -162,25 +162,45 @@ interface BuildingRegisterModalProps {
 }
 const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
   const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
+  const [pos, setPos] = useState({ x: window.innerWidth / 2 - 450, y: window.innerHeight / 2 - 350 });
+  const draggingModal = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+
+  const onHeaderMouseDown = (e: React.MouseEvent) => {
+    draggingModal.current = true;
+    dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+    const onMove = (ev: MouseEvent) => {
+      if (!draggingModal.current) return;
+      setPos({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
+    };
+    const onUp = () => {
+      draggingModal.current = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
   return (
     <>
-      <div
-        className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-[9990] bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
         className="fixed z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
+        style={{ left: pos.x, top: pos.y, width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 flex-shrink-0">
+        {/* Draggable Header */}
+        <div
+          className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 flex-shrink-0 cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={onHeaderMouseDown}
+        >
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">건축물대장 열람</p>
+              <p className="text-sm font-bold text-foreground">건물/토지대장 열람</p>
               <p className="text-[10px] text-muted-foreground truncate max-w-[400px]">{address}</p>
             </div>
           </div>
@@ -189,12 +209,14 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
               href={url}
               target="_blank"
               rel="noopener noreferrer"
+              onMouseDown={(e) => e.stopPropagation()}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-[11px] font-semibold text-primary"
             >
               <ExternalLink className="w-3 h-3" />
               새 탭에서 열기
             </a>
             <button
+              onMouseDown={(e) => e.stopPropagation()}
               onClick={onClose}
               className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
             >
@@ -206,7 +228,7 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
         <iframe
           src={url}
           className="flex-1 w-full border-0"
-          title="건축물대장"
+          title="건물/토지대장"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
         />
         {/* Fallback notice */}
@@ -452,7 +474,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                 </div>
                               ) : null}
                             </div>
-                            {/* 줄4: 옵션 아이콘 + 건축물대장 버튼 */}
+                            {/* 줄4: 옵션 아이콘 + 건물/토지대장 버튼 */}
                             <div className="flex items-center gap-0.5 overflow-hidden justify-between">
                               <div className="flex items-center gap-0.5 overflow-hidden flex-1">
                                 {prop.options && prop.options.length > 0 ? (
@@ -467,11 +489,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                               <button
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
-                                title="건축물대장 열람 (세움터)"
+                                title="건물/토지대장 열람 (세움터)"
                                 className="flex items-center gap-0.5 px-1 h-4 rounded bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
                               >
                                 <FileText className="w-2 h-2 text-primary" />
-                                <span className="text-[8px] text-primary font-semibold whitespace-nowrap">건축물대장</span>
+                                <span className="text-[8px] text-primary font-semibold whitespace-nowrap">건물/토지대장</span>
                               </button>
                             </div>
                           </div>
