@@ -335,10 +335,10 @@ const MapFilterBar = ({
   const [showFilter, setShowFilter] = useState(false);
   const [showCategoryDrop, setShowCategoryDrop] = useState(false);
   const currentCategory = useMemo(
-    () => SEARCH_CATEGORIES.find(c => c.route === location.pathname) ?? SEARCH_CATEGORIES[0],
+    () => SEARCH_CATEGORIES.find(c => c.route === location.pathname) ?? null,
     [location.pathname]
   );
-  const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number]>(currentCategory);
+  const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number] | null>(currentCategory);
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
