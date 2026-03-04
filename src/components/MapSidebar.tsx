@@ -383,7 +383,7 @@ const LeaseProposalModal = ({ prop, onClose }: LeaseProposalModalProps) => {
                 ["호실", prop.unitNumber ?? "-"],
                 ["보증금", prop.deposit],
                 ["월 임대료", prop.monthly],
-                ["관리비", prop.managementFee ?? "-"],
+                ["관리비", prop.manageFee ?? "-"],
               ].map(([label, value]) => (
                 <tr key={label} className="border-b border-border last:border-b-0">
                   <td className="px-4 py-2.5 bg-muted/40 font-semibold text-muted-foreground w-[110px] whitespace-nowrap">{label}</td>
