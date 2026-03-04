@@ -30,7 +30,7 @@ const MapSearch = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
-      <main className="flex-1 flex flex-col md:flex-row overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
+      <main className="flex-1 relative overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
         {/* Sidebar */}
         <MapSidebar
           properties={filtered}
