@@ -9,8 +9,7 @@ const SEARCH_CATEGORIES = [
   { value: "land", short: "토지", label: "토지", desc: "토지 임대 및 매매" },
 ];
 
-
-  { label: "임대전체", group: "임대" },
+const CATEGORY_TYPES = [
   { label: "상가임대", group: "임대" },
   { label: "기타임대", group: "임대" },
   { label: "매매전체", group: "매매" },
