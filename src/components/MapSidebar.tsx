@@ -778,6 +778,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                 {properties.length}
               </span>
               <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
+              {checkedIds.size > 0 && (
+                <>
+                  <span className="text-[10px] text-muted-foreground">·</span>
+                  <span className="text-xs font-extrabold text-primary-foreground bg-accent px-2.5 py-0.5 rounded-full shadow-sm">
+                    {checkedIds.size}개 선택
+                  </span>
+                  <button
+                    onClick={() => setCheckedIds(new Set())}
+                    className="text-[9px] text-destructive hover:underline"
+                  >
+                    선택 해제
+                  </button>
+                </>
+              )}
             </div>
             <span className="text-[10px] text-muted-foreground">◀ 좌측 가장자리 드래그로 크기 조절</span>
           </div>
