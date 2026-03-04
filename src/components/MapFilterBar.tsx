@@ -422,7 +422,7 @@ const MapFilterBar = ({
               onClick={() => setShowCategoryDrop(v => !v)}
               className="flex items-center gap-1 h-10 px-2.5 text-[11px] font-bold text-foreground hover:bg-muted/40 transition-colors whitespace-nowrap"
             >
-              <span className="max-w-[70px] truncate">{selectedCategory?.short ?? "전체"}</span>
+              <span className="max-w-[70px] truncate">{selectedCategory.short}</span>
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="flex-shrink-0"><path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </button>
             {showCategoryDrop && (
