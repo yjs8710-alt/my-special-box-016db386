@@ -516,7 +516,6 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
     ["관리비", base.manageFee ?? "-"],
     ["입주가능일", base.availableFrom ?? "-"],
     ["담당 중개사", base.agentName ?? "-"],
-    ["문의", base.contactOwner ?? base.contactManager ?? base.contact ?? "-"],
   ];
 
   return (
