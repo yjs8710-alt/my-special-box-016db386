@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -155,6 +155,71 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
   );
 };
 
+/* ── BuildingRegisterModal ── */
+interface BuildingRegisterModalProps {
+  address: string;
+  onClose: () => void;
+}
+const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
+  const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        className="fixed z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">건축물대장 열람</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[400px]">{address}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-[11px] font-semibold text-primary"
+            >
+              <ExternalLink className="w-3 h-3" />
+              새 탭에서 열기
+            </a>
+            <button
+              onClick={onClose}
+              className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        {/* iframe */}
+        <iframe
+          src={url}
+          className="flex-1 w-full border-0"
+          title="건축물대장"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+        />
+        {/* Fallback notice */}
+        <div className="px-4 py-2 bg-muted/30 border-t border-border flex-shrink-0">
+          <p className="text-[10px] text-muted-foreground text-center">
+            화면이 표시되지 않으면 <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">여기를 클릭</a>하여 세움터에서 직접 확인하세요.
+          </p>
+        </div>
+      </div>
+    </>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
@@ -175,6 +240,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
@@ -202,6 +268,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
 
   return (
     <>
+      {/* Building Register Modal */}
+      {buildingRegisterAddr && (
+        <BuildingRegisterModal address={buildingRegisterAddr} onClose={() => setBuildingRegisterAddr(null)} />
+      )}
       {/* Lightbox */}
       {lightboxSrc && (
         <div
@@ -394,17 +464,15 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                   </>
                                 ) : null}
                               </div>
-                              <a
-                                href={`https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(prop.address)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setBuildingRegisterAddr(prop.address); }}
                                 title="건축물대장 열람 (세움터)"
                                 className="flex items-center gap-0.5 px-1 h-4 rounded bg-primary/10 hover:bg-primary/20 transition-colors flex-shrink-0"
                               >
                                 <FileText className="w-2 h-2 text-primary" />
                                 <span className="text-[8px] text-primary font-semibold whitespace-nowrap">건축물대장</span>
-                              </a>
+                              </button>
                             </div>
                           </div>
                         </div>
