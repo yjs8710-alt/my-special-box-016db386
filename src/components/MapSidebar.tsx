@@ -159,10 +159,11 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
 interface BuildingRegisterModalProps {
   address: string;
   onClose: () => void;
+  pos: { x: number; y: number };
+  onPosChange: (pos: { x: number; y: number }) => void;
 }
-const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
+const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingRegisterModalProps) => {
   const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
-  const [pos, setPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -174,7 +175,7 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
     dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     const onMove = (ev: MouseEvent) => {
       if (!draggingModal.current) return;
-      setPos({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
+      onPosChange({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
     };
     const onUp = () => {
       draggingModal.current = false;
@@ -271,14 +272,18 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
+  const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
+
+  const lastDragX = useRef(0);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
     startX.current = e.clientX;
+    lastDragX.current = e.clientX;
     startWidth.current = width;
 
     const onMove = (ev: MouseEvent) => {
@@ -286,6 +291,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       const delta = startX.current - ev.clientX;
       const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
       setWidth(newW);
+      // 프레임당 마우스 이동량만큼 모달 x도 함께 이동 (사이드바와 동일 방향)
+      const frameDelta = lastDragX.current - ev.clientX;
+      setModalPos(prev => ({ ...prev, x: prev.x - frameDelta }));
+      lastDragX.current = ev.clientX;
     };
     const onUp = () => {
       dragging.current = false;
@@ -300,7 +309,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     <>
       {/* Building Register Modal */}
       {buildingRegisterAddr && (
-        <BuildingRegisterModal address={buildingRegisterAddr} onClose={() => setBuildingRegisterAddr(null)} />
+        <BuildingRegisterModal
+          address={buildingRegisterAddr}
+          onClose={() => setBuildingRegisterAddr(null)}
+          pos={modalPos}
+          onPosChange={setModalPos}
+        />
       )}
       {/* Lightbox */}
       {lightboxSrc && (
