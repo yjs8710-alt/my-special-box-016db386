@@ -240,8 +240,6 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "사무실", group: "매매", key: "매매-사무실" },
   { label: "다가구", group: "매매", key: "매매-다가구" },
   { label: "공장·창고", group: "매매", key: "매매-공장·창고" },
-  
-  { label: "창고/공장", group: "매매", key: "매매-창고/공장" },
   { label: "상가", group: "매매", key: "매매-상가" },
   { label: "아파트", group: "매매", key: "매매-아파트" },
   { label: "빌라", group: "매매", key: "매매-빌라" },
