@@ -240,6 +240,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
