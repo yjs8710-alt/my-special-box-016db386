@@ -556,6 +556,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       {leaseProposalProp && (
         <LeaseProposalModal
           prop={leaseProposalProp}
+          allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
         />
       )}
