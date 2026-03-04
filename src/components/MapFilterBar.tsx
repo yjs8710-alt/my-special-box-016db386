@@ -330,6 +330,8 @@ const MapFilterBar = ({
   showLandFilters = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
+  const [showCategoryDrop, setShowCategoryDrop] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<typeof SEARCH_CATEGORIES[number] | null>(null);
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
