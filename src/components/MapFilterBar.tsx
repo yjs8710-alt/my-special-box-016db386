@@ -4,6 +4,7 @@ import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lu
 import { Slider } from "@/components/ui/slider";
 
 const SEARCH_CATEGORIES = [
+  { value: "all", short: "전체", label: "전체", desc: "모든 매물 유형", route: "/map" },
   { value: "residential", short: "주거형임대", label: "주거형 임대", desc: "원투룸, 주택, 빌라, 아파트, 오피스텔", route: "/residential" },
   { value: "commercial", short: "주거형외", label: "주거형 외 임대 및 매매", desc: "상가, 사무실, 창고, 임대 및 모든 종류 건물 매매", route: "/non-residential" },
   { value: "apt", short: "아파트등", label: "아파트/오피스텔/빌라", desc: "아파트, 오피스텔, 빌라 임대 및 매매", route: "/commercial" },
