@@ -426,7 +426,7 @@ const MapFilterBar = ({
                   {SEARCH_CATEGORIES.map((cat) => (
                     <button
                       key={cat.value}
-                      onClick={() => { setSelectedCategory(cat); setShowCategoryDrop(false); }}
+                      onClick={() => { setSelectedCategory(cat); setShowCategoryDrop(false); navigate(cat.route); }}
                       className="w-full text-left px-3 py-2.5 hover:bg-primary/5 transition-colors border-b border-border/50 last:border-b-0"
                     >
                       <p className="text-[11px] font-bold text-foreground">{cat.label}</p>
