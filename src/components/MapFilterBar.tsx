@@ -635,7 +635,7 @@ const MapFilterBar = ({
               {/* 건물 옵션 */}
               {showBuildingOptions && (
               <div>
-                <SectionLabel>건물 옵션</SectionLabel>
+                <SectionLabel>옵션</SectionLabel>
                 <div className="flex flex-wrap gap-1">
                   {BUILDING_OPTIONS.map(({ key, label }) => (
                     <Chip
@@ -653,7 +653,7 @@ const MapFilterBar = ({
               {/* 방 옵션 */}
               {showBuildingOptions && (
               <div>
-                <SectionLabel>방 옵션 (가구·가전)</SectionLabel>
+                <SectionLabel>방 옵션</SectionLabel>
                 <div className="flex flex-wrap gap-1">
                   {ROOM_OPTIONS.map(({ key, label }) => (
                     <Chip
