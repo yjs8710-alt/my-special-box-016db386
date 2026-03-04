@@ -327,28 +327,28 @@ const MapFilterBar = ({
     onFiltersChange({ ...filters, [key]: val });
 
   const isDefault = (f: FilterState) =>
-    f.dealType === "전체" &&
+    f.dealType.length === 0 &&
     f.roomTypes.length === 0 &&
     f.depositRange[0] === 0 && f.depositRange[1] === 50000 &&
     f.monthlyRange[0] === 0 && f.monthlyRange[1] === 1000 &&
     f.saleRange[0] === 0 && f.saleRange[1] === 200000 &&
     f.floorRange[0] === -2 && f.floorRange[1] === 30 &&
     f.areaRange[0] === 0 && f.areaRange[1] === 200 &&
-    f.buildYear === "전체" &&
+    f.buildYear.length === 0 &&
     f.buildingOptions.length === 0 &&
     f.roomOptions.length === 0 &&
     f.landCategory.length === 0 &&
     f.zoneType.length === 0;
 
   const activeFilterCount = [
-    filters.dealType !== "전체",
+    filters.dealType.length > 0,
     filters.roomTypes.length > 0,
     filters.depositRange[0] !== 0 || filters.depositRange[1] !== 50000,
     filters.monthlyRange[0] !== 0 || filters.monthlyRange[1] !== 1000,
     filters.saleRange[0] !== 0 || filters.saleRange[1] !== 200000,
     filters.floorRange[0] !== -2 || filters.floorRange[1] !== 30,
     filters.areaRange[0] !== 0 || filters.areaRange[1] !== 200,
-    filters.buildYear !== "전체",
+    filters.buildYear.length > 0,
     filters.buildingOptions.length > 0,
     filters.roomOptions.length > 0,
     filters.landCategory.length > 0,
