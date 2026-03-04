@@ -330,8 +330,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
 
                         {/* 가격 + 우측 정보 */}
                         <div className="flex-1 flex flex-row items-stretch border-l border-border/30 min-w-0">
-                          {/* 보증금/월세 */}
-                          <div className="flex flex-col justify-center px-1.5 gap-1 min-w-0 flex-shrink-0">
+                          {/* 보증금/월세 — 고정 너비 */}
+                          <div className="flex flex-col justify-center px-1.5 gap-1 flex-shrink-0" style={{ width: "80px" }}>
                             <div className="flex items-center gap-1 h-4">
                               <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">보증금</span>
                               <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
@@ -341,10 +341,10 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
                             </div>
                           </div>
-                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등 */}
+                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등, 고정 시작점 */}
                           <div
-                            className="border-l border-border/20 min-w-0 flex-1"
-                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 12px", height: "80px", alignContent: "stretch" }}
+                            className="border-l border-border/20 flex-shrink-0"
+                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 10px", height: "80px", width: "90px", alignContent: "stretch" }}
                           >
                             {/* 줄1: 메모 이모티콘 */}
                             <div className="flex items-center gap-1 overflow-visible">
