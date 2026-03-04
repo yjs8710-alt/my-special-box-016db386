@@ -801,30 +801,71 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
 
           {/* Header */}
           <div
-            className="px-4 py-3 border-b border-border flex items-center justify-between flex-shrink-0"
+            className="border-b border-border flex-shrink-0"
             style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-extrabold text-primary-foreground bg-primary px-2.5 py-0.5 rounded-full shadow-sm">
-                {properties.length}
-              </span>
-              <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
-              {checkedIds.size > 0 && (
-                <>
-                  <span className="text-[10px] text-muted-foreground">·</span>
-                  <span className="text-xs font-extrabold text-primary-foreground bg-accent px-2.5 py-0.5 rounded-full shadow-sm">
-                    {checkedIds.size}개 선택
-                  </span>
-                  <button
-                    onClick={() => setCheckedIds(new Set())}
-                    className="text-[9px] text-destructive hover:underline"
-                  >
-                    선택 해제
-                  </button>
-                </>
-              )}
+            {/* 1행: 매물 수 + 선택 상태 */}
+            <div className="px-3 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-extrabold text-primary-foreground bg-primary px-2.5 py-0.5 rounded-full shadow-sm">
+                  {properties.length}
+                </span>
+                <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
+                {checkedIds.size > 0 && (
+                  <>
+                    <span className="text-[10px] text-muted-foreground">·</span>
+                    <span className="text-xs font-extrabold text-primary-foreground bg-accent px-2 py-0.5 rounded-full shadow-sm">
+                      {checkedIds.size}개 선택
+                    </span>
+                    <button onClick={() => setCheckedIds(new Set())} className="text-[9px] text-destructive hover:underline">
+                      해제
+                    </button>
+                  </>
+                )}
+              </div>
+              <span className="text-[9px] text-muted-foreground">◀ 드래그로 크기 조절</span>
             </div>
-            <span className="text-[10px] text-muted-foreground">◀ 좌측 가장자리 드래그로 크기 조절</span>
+            {/* 2행: 액션 버튼들 */}
+            <div className="px-3 pb-2 flex items-center gap-1.5">
+              {/* 찜 버튼 */}
+              <button
+                onClick={() => {
+                  if (checkedIds.size === 0) { alert("찜할 매물을 먼저 선택해주세요."); return; }
+                  setLikedIds(prev => {
+                    const next = new Set(prev);
+                    checkedIds.forEach(id => next.has(id) ? next.delete(id) : next.add(id));
+                    return next;
+                  });
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
+                style={
+                  likedIds.size > 0
+                    ? { background: "#fff0f3", color: "#e11d48", borderColor: "#fecdd3" }
+                    : { background: "white", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                }
+              >
+                <Heart className={`w-3 h-3 ${likedIds.size > 0 ? "fill-rose-500 text-rose-500" : ""}`} />
+                찜{likedIds.size > 0 ? ` ${likedIds.size}` : ""}
+              </button>
+              {/* 선택 인쇄 */}
+              <button
+                onClick={handleSelectPrint}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
+                style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+              >
+                <Printer className="w-3 h-3" />
+                선택인쇄
+              </button>
+              {/* 상세 인쇄 */}
+              <button
+                onClick={handleDetailPrint}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
+                style={{ background: "hsl(var(--primary))", color: "white", borderColor: "hsl(var(--primary))" }}
+              >
+                <Printer className="w-3 h-3" />
+                상세인쇄
+              </button>
+            </div>
           </div>
 
           {/* List */}
