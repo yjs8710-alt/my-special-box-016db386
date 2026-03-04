@@ -252,23 +252,29 @@ const NonResidentialRental = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  const toggleType = (t: string) => {
-    if (t === "전체") {
+  const toggleType = (k: string) => {
+    if (k === "전체") {
       setActiveTypes(["전체"]);
       return;
     }
     setActiveTypes(prev => {
       const without전체 = prev.filter(x => x !== "전체");
-      if (without전체.includes(t)) {
-        const next = without전체.filter(x => x !== t);
+      if (without전체.includes(k)) {
+        const next = without전체.filter(x => x !== k);
         return next.length === 0 ? ["전체"] : next;
       }
-      return [...without전체, t];
+      return [...without전체, k];
     });
   };
 
   const filtered = NON_RESIDENTIAL_PROPERTIES.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
+    if (!activeTypes.includes("전체")) {
+      // 선택된 key들에 해당하는 type 목록 추출
+      const selectedTypes = NON_RESIDENTIAL_SUBTYPES
+        .filter(s => activeTypes.includes(s.key))
+        .map(s => s.label);
+      if (!selectedTypes.includes(p.type)) return false;
+    }
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
