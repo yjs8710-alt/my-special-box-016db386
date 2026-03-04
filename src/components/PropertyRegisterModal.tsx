@@ -8,8 +8,8 @@ const BROKER_TYPES = ["일반중개", "공동중개"] as const;
 const TRADE_TYPES = ["임대", "매매"] as const;
 const BUILDING_TYPES = ["일반건물", "집합건물", "토지"] as const;
 const DETAIL_TYPES = [
-  "원룸", "투베이", "투룸", "정투룸", "쓰리룸", "포룸",
-  "주인", "고시원", "상가", "사무실", "창고/공장",
+  "원룸", "투베이", "투룸", "쓰리룸", "포룸",
+  "주인", "고시원", "다가구", "단독주택", "토지", "상가", "사무실", "창고/공장",
 ] as const;
 const ROOM_OPTIONS = [
   "냉장고", "세탁기", "드럼세탁기", "건조기", "스타일러", "TV",
