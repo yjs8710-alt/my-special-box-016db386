@@ -331,7 +331,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                             </div>
                           </div>
                           {/* 우측: 메모/날짜/비번/옵션 — 항상 4줄 고정 */}
-                          <div className="flex flex-col justify-center px-1.5 border-l border-border/20 min-w-0 flex-1 gap-[3px]">
+                           <div className="flex flex-col justify-between px-1.5 border-l border-border/20 min-w-0 flex-1 py-1.5">
                             {/* 줄1: 메모 이모티콘 */}
                             <div className="flex items-center gap-1 h-4">
                               {buildingMemo
