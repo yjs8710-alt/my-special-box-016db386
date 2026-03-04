@@ -82,14 +82,14 @@ const ROOM_OPTIONS = [
 ];
 
 export interface FilterState {
-  dealType: string;
+  dealType: string[];
   roomTypes: string[];
   depositRange: [number, number];
   monthlyRange: [number, number];
   saleRange: [number, number];
   floorRange: [number, number];
   areaRange: [number, number];
-  buildYear: string;
+  buildYear: string[];
   buildingOptions: string[];
   roomOptions: string[];
   landCategory: string[];
@@ -97,14 +97,14 @@ export interface FilterState {
 }
 
 export const DEFAULT_FILTERS: FilterState = {
-  dealType: "전체",
+  dealType: [],
   roomTypes: [],
   depositRange: [0, 50000],
   monthlyRange: [0, 1000],
   saleRange: [0, 200000],
   floorRange: [-2, 30],
   areaRange: [0, 200],
-  buildYear: "전체",
+  buildYear: [],
   buildingOptions: [],
   roomOptions: [],
   landCategory: [],
