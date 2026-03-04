@@ -298,11 +298,11 @@ const NonResidentialRental = () => {
         {/* 임대 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">임대</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => {
-          const isActive = activeTypes.includes(t.label);
+          const isActive = activeTypes.includes(t.key);
           return (
             <button
-              key={t.label}
-              onClick={() => toggleType(t.label)}
+              key={t.key}
+              onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
@@ -319,13 +319,12 @@ const NonResidentialRental = () => {
 
         {/* 매매 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map((t, i) => {
-          const key = `매매-${t.label}-${i}`;
-          const isActive = activeTypes.includes(key);
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
+          const isActive = activeTypes.includes(t.key);
           return (
             <button
-              key={key}
-              onClick={() => toggleType(key)}
+              key={t.key}
+              onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
