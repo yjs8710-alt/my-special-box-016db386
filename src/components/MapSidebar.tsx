@@ -229,12 +229,16 @@ const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps)
           </div>
         </div>
         {/* iframe */}
-        <iframe
-          src={url}
-          className="flex-1 w-full border-0"
-          title="건물/토지대장"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-        />
+          {/* iframe - 드래그 중 마우스 이벤트 차단용 오버레이 포함 */}
+          <div className="flex-1 relative min-h-0">
+            {isDragging && <div className="absolute inset-0 z-10" />}
+            <iframe
+              src={url}
+              className="w-full h-full border-0"
+              title="건물/토지대장"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+            />
+          </div>
         {/* Fallback notice */}
         <div className="px-4 py-2 bg-muted/30 border-t border-border flex-shrink-0">
           <p className="text-[10px] text-muted-foreground text-center">
