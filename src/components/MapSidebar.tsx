@@ -110,13 +110,13 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
           {/* 배경 클릭 시 닫기 */}
           <div className="fixed inset-0 z-[8999]" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
           <div
-            className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[240px]"
+            className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[260px]"
             onClick={(e) => e.stopPropagation()}
             style={{
               boxShadow: "0 8px 32px rgba(10,45,110,0.22)",
-              right: "calc(100% + 8px)",
+              left: "50%",
               top: "50%",
-              transform: "translateY(-50%) translateX(60%)",
+              transform: "translate(-50%, -50%)",
             }}
           >
             {/* 메모장 헤더 */}
