@@ -658,9 +658,16 @@ const MapFilterBar = ({
               <div>
                 <SectionLabel>준공년도</SectionLabel>
                 <div className="flex flex-wrap gap-1">
-                  {BUILD_YEARS.map((v) => (
-                    <Chip key={v} active={filters.buildYear === v} onClick={() => set("buildYear", v)}>{v}</Chip>
-                  ))}
+                  {BUILD_YEARS.map((v) => {
+                    const isAll = v === "전체";
+                    const active = isAll ? filters.buildYear.length === 0 : filters.buildYear.includes(v);
+                    return (
+                      <Chip key={v} active={active} onClick={() => {
+                        if (isAll) set("buildYear", []);
+                        else set("buildYear", toggleArr(filters.buildYear, v));
+                      }}>{v}</Chip>
+                    );
+                  })}
                 </div>
               </div>
               )}
