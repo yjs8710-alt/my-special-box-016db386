@@ -686,37 +686,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     const html = `<html><head><title>매물 상세 인쇄</title><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px}@media print{body{padding:0}}</style></head><body><h2>매물 상세 목록 (${list.length}건)</h2>${cards}</body></html>`;
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(defaultWidth);
-
-  const lastDragX = useRef(0);
-
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    dragging.current = true;
-    startX.current = e.clientX;
-    lastDragX.current = e.clientX;
-    startWidth.current = width;
-
-    const onMove = (ev: MouseEvent) => {
-      if (!dragging.current) return;
-      const delta = startX.current - ev.clientX;
-      const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
-      setWidth(newW);
-      // 프레임당 마우스 이동량만큼 모달 x도 함께 이동 (사이드바와 동일 방향)
-      const frameDelta = lastDragX.current - ev.clientX;
-      setModalPos(prev => ({ ...prev, x: prev.x - frameDelta }));
-      lastDragX.current = ev.clientX;
-    };
-    const onUp = () => {
-      dragging.current = false;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [width]);
 
   return (
     <>
