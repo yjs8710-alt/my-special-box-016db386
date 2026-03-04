@@ -1,5 +1,5 @@
 import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 const TYPE_BG: Record<string, string> = {
@@ -643,10 +643,12 @@ interface MapSidebarProps {
   topOffset?: number;
 }
 
-const SIDEBAR_WIDTH = 380;
+const MIN_WIDTH = 260;
+const MAX_WIDTH = 700;
+const DEFAULT_WIDTH = 380;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSidebarProps) => {
-  const width = SIDEBAR_WIDTH;
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [collapsed, setCollapsed] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
@@ -687,8 +689,33 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
 
+  /* ── Resize drag ── */
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(DEFAULT_WIDTH);
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    dragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = width;
+    const onMove = (ev: MouseEvent) => {
+      if (!dragging.current) return;
+      const delta = startX.current - ev.clientX;
+      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta)));
+    };
+    const onUp = () => {
+      dragging.current = false;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [width]);
+
   return (
     <>
+
       {/* Building Register Modal */}
       {buildingRegisterAddr && (
         <BuildingRegisterModal
@@ -755,6 +782,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
+          {/* Drag handle */}
+          {!collapsed && (
+            <div
+              onMouseDown={onMouseDown}
+              className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
+              title="드래그하여 너비 조절"
+            >
+              <div className="w-1 h-12 rounded-full bg-primary/40 hover:bg-primary transition-colors" />
+            </div>
+          )}
 
           {/* Header */}
           <div
