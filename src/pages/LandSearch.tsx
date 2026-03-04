@@ -272,6 +272,7 @@ const LandSearch = () => {
             showRoomTypes={false}
             showFloor={false}
             showBuildYear={false}
+            showLandFilters={true}
           />
         </div>
       </main>
