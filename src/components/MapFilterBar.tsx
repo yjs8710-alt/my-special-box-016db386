@@ -22,6 +22,22 @@ const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세", "단기임대"];
 const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이내", "20년 이상"];
 
+const LAND_CATEGORIES = [
+  "전", "답", "과수원", "목장용지", "임야", "대", "공장용지", "주차장",
+  "주유소용지", "창고용지", "잡종지", "묘지", "도로", "철도용지", "제방",
+  "하천", "구거", "유지", "양어장", "수도용지", "공원", "체육용지",
+  "유원지", "종교용지", "사적지", "광천지", "염전",
+];
+
+const ZONE_TYPES = [
+  "보전관리지역", "생산관리지역", "계획관리지역", "농림지역", "자연환경보전지역",
+  "1종전용주거지역", "2종전용주거지역", "3종전용주거지역",
+  "1종일반주거지역", "2종일반주거지역", "3종일반주거지역", "준주거지역",
+  "중심상업지역", "일반상업지역", "근린상업지역", "유통상업지역",
+  "전용공업지역", "일반공업지역", "준공업지역",
+  "녹지지역", "보전녹지지역", "생산녹지지역", "자연녹지지역",
+];
+
 const BUILDING_OPTIONS = [
   { key: "신축", label: "신축" },
   { key: "올리모델링", label: "올리모델링" },
@@ -76,6 +92,8 @@ export interface FilterState {
   buildYear: string;
   buildingOptions: string[];
   roomOptions: string[];
+  landCategory: string[];
+  zoneType: string[];
 }
 
 export const DEFAULT_FILTERS: FilterState = {
@@ -89,6 +107,8 @@ export const DEFAULT_FILTERS: FilterState = {
   buildYear: "전체",
   buildingOptions: [],
   roomOptions: [],
+  landCategory: [],
+  zoneType: [],
 };
 
 interface MapFilterBarProps {
@@ -108,6 +128,7 @@ interface MapFilterBarProps {
   showFloor?: boolean;
   showBuildYear?: boolean;
   showBuildingOptions?: boolean;
+  showLandFilters?: boolean;
 }
 
 function makeFormatManwon(max: number) {
@@ -298,6 +319,7 @@ const MapFilterBar = ({
   showFloor = true,
   showBuildYear = true,
   showBuildingOptions = false,
+  showLandFilters = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -314,7 +336,9 @@ const MapFilterBar = ({
     f.areaRange[0] === 0 && f.areaRange[1] === 200 &&
     f.buildYear === "전체" &&
     f.buildingOptions.length === 0 &&
-    f.roomOptions.length === 0;
+    f.roomOptions.length === 0 &&
+    f.landCategory.length === 0 &&
+    f.zoneType.length === 0;
 
   const activeFilterCount = [
     filters.dealType !== "전체",
@@ -327,6 +351,8 @@ const MapFilterBar = ({
     filters.buildYear !== "전체",
     filters.buildingOptions.length > 0,
     filters.roomOptions.length > 0,
+    filters.landCategory.length > 0,
+    filters.zoneType.length > 0,
   ].filter(Boolean).length;
 
   return (
@@ -661,6 +687,64 @@ const MapFilterBar = ({
                       onClick={() => set("roomOptions", toggleArr(filters.roomOptions, key))}
                     >
                       {label}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              {/* 지목 */}
+              {showLandFilters && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <SectionLabel>지목</SectionLabel>
+                  {filters.landCategory.length > 0 && (
+                    <button
+                      onClick={() => set("landCategory", [])}
+                      className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                      style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                    >
+                      선택 삭제
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {LAND_CATEGORIES.map((v) => (
+                    <Chip
+                      key={v}
+                      active={filters.landCategory.includes(v)}
+                      onClick={() => set("landCategory", toggleArr(filters.landCategory, v))}
+                    >
+                      {v}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              {/* 용도지역 */}
+              {showLandFilters && (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <SectionLabel>용도지역</SectionLabel>
+                  {filters.zoneType.length > 0 && (
+                    <button
+                      onClick={() => set("zoneType", [])}
+                      className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                      style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                    >
+                      선택 삭제
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {ZONE_TYPES.map((v) => (
+                    <Chip
+                      key={v}
+                      active={filters.zoneType.includes(v)}
+                      onClick={() => set("zoneType", toggleArr(filters.zoneType, v))}
+                    >
+                      {v}
                     </Chip>
                   ))}
                 </div>
