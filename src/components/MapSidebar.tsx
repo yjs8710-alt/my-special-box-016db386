@@ -219,8 +219,8 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
           }`}
           style={{
             width: collapsed ? 0 : width,
-            marginTop: "106px",
-            height: "calc(100% - 106px)",
+            marginTop: "56px",
+            height: "calc(100% - 56px)",
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
