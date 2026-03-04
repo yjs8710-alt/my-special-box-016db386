@@ -533,7 +533,8 @@ const MapFilterBar = ({
                   <div className="flex flex-wrap gap-1">
                     {RESIDENTIAL_TYPES.map((v) => {
                       const isAll = v === "전체";
-                      const active = isAll ? activeType === "전체" : activeType === v;
+                      const arr = activeTypes ?? [activeType];
+                      const active = isAll ? arr.includes("전체") || arr.length === 0 : arr.includes(v);
                       return (
                         <Chip
                           key={v}
