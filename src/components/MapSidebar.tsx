@@ -272,6 +272,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [width, setWidth] = useState(defaultWidth);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
+  const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
@@ -287,6 +288,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       const delta = startX.current - ev.clientX;
       const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
       setWidth(newW);
+      // 모달도 너비 변화 delta만큼 x축 이동
+      setModalPos(prev => ({ ...prev, x: prev.x - (ev.clientX - startX.current) + (startX.current - ev.clientX) / 2 * 0 }));
     };
     const onUp = () => {
       dragging.current = false;
