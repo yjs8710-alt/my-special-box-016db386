@@ -341,15 +341,15 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
                             </div>
                           </div>
-                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 균등 분배 */}
-                          <div className="flex flex-col border-l border-border/20 min-w-0 flex-1" style={{ padding: "4px 6px", gap: 0 }}>
-                            {/* 줄1: 메모 이모티콘 — 항상 표시, overflow:visible */}
-                            <div className="flex-1 flex items-center gap-1 overflow-visible">
+                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 고정높이 */}
+                          <div className="flex flex-col border-l border-border/20 min-w-0 flex-1 justify-around" style={{ padding: "3px 6px" }}>
+                            {/* 줄1: 메모 이모티콘 */}
+                            <div className="h-5 flex items-center gap-1 overflow-visible">
                               <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
                               <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
                             </div>
                             {/* 줄2: 등록일 / 확인일 */}
-                            <div className="flex-1 flex items-center gap-1.5 overflow-hidden">
+                            <div className="h-5 flex items-center gap-1.5 overflow-hidden">
                               {regDate ? (
                                 <div className="flex items-center gap-0.5" title="등록일">
                                   <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
@@ -364,7 +364,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               ) : null}
                             </div>
                             {/* 줄3: 건물비번 / 방비번 */}
-                            <div className="flex-1 flex items-center gap-1.5 overflow-hidden">
+                            <div className="h-5 flex items-center gap-1.5 overflow-hidden">
                               {buildingPw ? (
                                 <div className="flex items-center gap-0.5" title="건물 비밀번호">
                                   <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
@@ -379,7 +379,7 @@ const MapSidebar = ({ properties, selectedId, onSelect }: MapSidebarProps) => {
                               ) : null}
                             </div>
                             {/* 줄4: 옵션 아이콘 */}
-                            <div className="flex-1 flex items-center gap-0.5 overflow-hidden">
+                            <div className="h-5 flex items-center gap-0.5 overflow-hidden">
                               {prop.options && prop.options.length > 0 ? (
                                 <>
                                   {prop.options.slice(0, 6).map((opt) => (
