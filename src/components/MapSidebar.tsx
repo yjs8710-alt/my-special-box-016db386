@@ -337,15 +337,42 @@ const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) =
 };
 
 /* ── LeaseProposalModal ── */
-interface LeaseProposalModalProps { prop: MapProperty; onClose: () => void; }
-const LeaseProposalModal = ({ prop, onClose }: LeaseProposalModalProps) => {
-  const today2 = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+interface LeaseProposalModalProps { prop: MapProperty; allProperties: MapProperty[]; onClose: () => void; }
+const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModalProps) => {
+  const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
   const handlePrint = () => window.print();
+
+  // 같은 건물(buildingName 또는 title 기준)의 모든 호실
+  const buildingKey = prop.buildingName ?? prop.title;
+  const sameBuilding = allProperties.filter(
+    p => (p.buildingName ?? p.title) === buildingKey
+  ).sort((a, b) => (a.unitNumber ?? "").localeCompare(b.unitNumber ?? "", "ko"));
+
+  // 건물 현황은 첫 번째 매물(또는 현재 매물)로
+  const base = sameBuilding[0] ?? prop;
+
+  const buildingInfo = [
+    ["소재지", base.address],
+    ["건물명", base.buildingName ?? base.title],
+    ["건축연도", base.buildYear ?? "-"],
+    ["총 층수", base.totalFloors ?? "-"],
+    ["주차", base.parking ?? "-"],
+    ["엘리베이터", base.elevator ? "있음" : "없음"],
+    ["관리비", base.manageFee ?? "-"],
+    ["입주가능일", base.availableFrom ?? "-"],
+    ["담당 중개사", base.agentName ?? "-"],
+    ["문의", base.contactOwner ?? base.contactManager ?? base.contact ?? "-"],
+  ];
 
   return (
     <>
       <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl w-[min(560px,92vw)] flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col"
+        style={{ width: "min(680px, 94vw)", maxHeight: "92vh" }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* 헤더 */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -360,49 +387,90 @@ const LeaseProposalModal = ({ prop, onClose }: LeaseProposalModalProps) => {
             </button>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* 제안서 본문 */}
-          <div className="border border-border rounded-xl overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-primary text-primary-foreground px-6 py-4 text-center">
-              <p className="text-lg font-extrabold tracking-widest">임 대 제 안 서</p>
-              <p className="text-[11px] opacity-70 mt-0.5">Lease Proposal</p>
+
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+
+          {/* 타이틀 */}
+          <div className="bg-primary rounded-xl px-6 py-4 text-center">
+            <p className="text-base font-extrabold tracking-widest text-primary-foreground">임 대 제 안 서</p>
+            <p className="text-[10px] text-primary-foreground/60 mt-0.5">Lease Proposal · {todayStr}</p>
+          </div>
+
+          {/* ① 건물 현황 */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-4 bg-primary rounded-full" />
+              <p className="text-[12px] font-extrabold text-foreground">건물 현황</p>
             </div>
-            {/* 날짜 */}
-            <div className="px-6 pt-4 pb-2 text-right">
-              <span className="text-[11px] text-muted-foreground">작성일: {today2}</span>
-            </div>
-            {/* 매물 정보 */}
-            <table className="w-full text-[12px] border-t border-border">
-              {[
-                ["소재지", prop.address],
-                ["건물명", prop.buildingName ?? prop.title],
-                ["유형", prop.type],
-                ["층수", prop.floor ?? "-"],
-                ["면적", prop.area ?? "-"],
-                ["호실", prop.unitNumber ?? "-"],
-                ["보증금", prop.deposit],
-                ["월 임대료", prop.monthly],
-                ["관리비", prop.manageFee ?? "-"],
-              ].map(([label, value]) => (
-                <tr key={label} className="border-b border-border last:border-b-0">
-                  <td className="px-4 py-2.5 bg-muted/40 font-semibold text-muted-foreground w-[110px] whitespace-nowrap">{label}</td>
-                  <td className="px-4 py-2.5 text-foreground font-medium">{value}</td>
-                </tr>
-              ))}
-            </table>
-            {/* 특이사항 */}
-            <div className="px-4 py-3 border-t border-border bg-muted/20">
-              <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">특이사항 / 안내사항</p>
-              <div className="min-h-[60px] bg-white rounded-lg border border-border/50 p-2">
-                <p className="text-[11px] text-muted-foreground/50">※ 입력된 내용 없음</p>
-              </div>
-            </div>
-            {/* 연락처 */}
-            <div className="px-4 py-3 border-t border-border text-center bg-primary/5">
-              <p className="text-[11px] text-muted-foreground">문의: {prop.contactOwner ?? prop.contactManager ?? prop.contact ?? "-"}</p>
+            <div className="border border-border rounded-xl overflow-hidden">
+              <table className="w-full text-[11px]">
+                <tbody>
+                  {buildingInfo.map(([label, value], i) => (
+                    <tr key={label} className={i % 2 === 0 ? "bg-muted/30" : "bg-white"}>
+                      <td className="px-3 py-2 font-semibold text-muted-foreground w-[100px] whitespace-nowrap border-r border-border/40">{label}</td>
+                      <td className="px-3 py-2 text-foreground font-medium">{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+
+          {/* ② 호수별 임대 현황 */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-4 bg-accent rounded-full" />
+              <p className="text-[12px] font-extrabold text-foreground">호수별 임대 현황</p>
+              <span className="text-[10px] text-muted-foreground ml-1">총 {sameBuilding.length}개 호실</span>
+            </div>
+            <div className="border border-border rounded-xl overflow-hidden">
+              <table className="w-full text-[11px]">
+                <thead>
+                  <tr className="bg-primary text-primary-foreground">
+                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">호수</th>
+                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">유형</th>
+                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">층</th>
+                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">면적</th>
+                    <th className="px-3 py-2 text-right font-bold whitespace-nowrap">보증금</th>
+                    <th className="px-3 py-2 text-right font-bold whitespace-nowrap">월 임대료</th>
+                    <th className="px-3 py-2 text-center font-bold whitespace-nowrap">입주가능</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sameBuilding.map((p, i) => (
+                    <tr
+                      key={p.id}
+                      className={`border-t border-border/40 ${p.id === prop.id ? "bg-accent/10 font-bold" : i % 2 === 0 ? "bg-white" : "bg-muted/20"}`}
+                    >
+                      <td className="px-3 py-2 font-semibold text-foreground whitespace-nowrap">
+                        {p.unitNumber ?? "-"}
+                        {p.id === prop.id && <span className="ml-1 text-[8px] bg-accent text-white px-1 rounded">선택</span>}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.type}</td>
+                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.floor ?? "-"}</td>
+                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.area ?? "-"}</td>
+                      <td className="px-3 py-2 text-right text-foreground font-semibold whitespace-nowrap">{p.deposit}</td>
+                      <td className="px-3 py-2 text-right text-accent font-extrabold whitespace-nowrap">{p.monthly}</td>
+                      <td className="px-3 py-2 text-center text-muted-foreground whitespace-nowrap">{p.availableFrom ?? "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ③ 특이사항 */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
+              <p className="text-[12px] font-extrabold text-foreground">특이사항 / 안내사항</p>
+            </div>
+            <div className="border border-border rounded-xl p-3 min-h-[56px] bg-muted/20">
+              <p className="text-[11px] text-muted-foreground/50">{prop.buildingMemo ?? prop.memo ?? "※ 입력된 내용 없음"}</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </>
@@ -488,6 +556,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       {leaseProposalProp && (
         <LeaseProposalModal
           prop={leaseProposalProp}
+          allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
         />
       )}
