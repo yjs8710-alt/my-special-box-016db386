@@ -277,10 +277,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
 
+  const lastDragX = useRef(0);
+
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
     startX.current = e.clientX;
+    lastDragX.current = e.clientX;
     startWidth.current = width;
 
     const onMove = (ev: MouseEvent) => {
@@ -288,9 +291,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
       const delta = startX.current - ev.clientX;
       const newW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
       setWidth(newW);
-      // 사이드바 너비 변화(delta)만큼 모달 x도 함께 이동
-      const widthDelta = newW - (startWidth.current + (startX.current - ev.clientX));
-      setModalPos(prev => ({ ...prev, x: prev.x + (startX.current - ev.clientX) - delta + delta - (newW - startWidth.current - delta) }));
+      // 프레임당 마우스 이동량만큼 모달 x도 함께 이동 (사이드바와 동일 방향)
+      const frameDelta = lastDragX.current - ev.clientX;
+      setModalPos(prev => ({ ...prev, x: prev.x - frameDelta }));
+      lastDragX.current = ev.clientX;
     };
     const onUp = () => {
       dragging.current = false;
