@@ -232,15 +232,16 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
 ];
 
 const NON_RESIDENTIAL_SUBTYPES = [
-  { label: "전체", group: "전체" },
-  { label: "사무실", group: "임대" },
-  { label: "공장·창고", group: "임대" },
-  { label: "병원·학원", group: "임대" },
-  { label: "기타임대", group: "임대" },
-  { label: "사무실매매", group: "매매" },
-  { label: "공장·창고매매", group: "매매" },
-  { label: "상가건물매매", group: "매매" },
-  { label: "창고/공장매매", group: "매매" },
+  { label: "전체", group: "전체", key: "전체" },
+  { label: "사무실", group: "임대", key: "임대-사무실" },
+  { label: "공장·창고", group: "임대", key: "임대-공장·창고" },
+  { label: "병원·학원", group: "임대", key: "임대-병원·학원" },
+  { label: "기타임대", group: "임대", key: "임대-기타임대" },
+  { label: "사무실", group: "매매", key: "매매-사무실" },
+  { label: "다가구", group: "매매", key: "매매-다가구" },
+  { label: "공장·창고", group: "매매", key: "매매-공장·창고" },
+  { label: "상가건물", group: "매매", key: "매매-상가건물" },
+  { label: "창고/공장", group: "매매", key: "매매-창고/공장" },
 ];
 
 const NonResidentialRental = () => {
@@ -251,23 +252,29 @@ const NonResidentialRental = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  const toggleType = (t: string) => {
-    if (t === "전체") {
+  const toggleType = (k: string) => {
+    if (k === "전체") {
       setActiveTypes(["전체"]);
       return;
     }
     setActiveTypes(prev => {
       const without전체 = prev.filter(x => x !== "전체");
-      if (without전체.includes(t)) {
-        const next = without전체.filter(x => x !== t);
+      if (without전체.includes(k)) {
+        const next = without전체.filter(x => x !== k);
         return next.length === 0 ? ["전체"] : next;
       }
-      return [...without전체, t];
+      return [...without전체, k];
     });
   };
 
   const filtered = NON_RESIDENTIAL_PROPERTIES.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
+    if (!activeTypes.includes("전체")) {
+      // 선택된 key들에 해당하는 type 목록 추출
+      const selectedTypes = NON_RESIDENTIAL_SUBTYPES
+        .filter(s => activeTypes.includes(s.key))
+        .map(s => s.label);
+      if (!selectedTypes.includes(p.type)) return false;
+    }
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
@@ -291,11 +298,11 @@ const NonResidentialRental = () => {
         {/* 임대 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">임대</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => {
-          const isActive = activeTypes.includes(t.label);
+          const isActive = activeTypes.includes(t.key);
           return (
             <button
-              key={t.label}
-              onClick={() => toggleType(t.label)}
+              key={t.key}
+              onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
@@ -313,16 +320,16 @@ const NonResidentialRental = () => {
         {/* 매매 그룹 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
-          const isActive = activeTypes.includes(t.label);
+          const isActive = activeTypes.includes(t.key);
           return (
             <button
-              key={t.label}
-              onClick={() => toggleType(t.label)}
+              key={t.key}
+              onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
-                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.6)", borderColor: "rgba(255,255,255,0.15)" }
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
               }
             >
               {t.label}
