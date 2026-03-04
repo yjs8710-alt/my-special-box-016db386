@@ -92,6 +92,7 @@ const CommercialRental = () => {
           />
           <MapFilterBar
             activeType={activeType}
+            activeTypes={activeTypes}
             onTypeChange={(t) => toggleType(t)}
             query={query}
             onQueryChange={setQuery}
