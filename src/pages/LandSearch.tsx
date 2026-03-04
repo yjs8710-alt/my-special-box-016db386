@@ -179,14 +179,29 @@ const LAND_SUBTYPES = ["전체", "대지", "임야", "농지", "공장·창고"]
 
 const LandSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeType, setActiveType] = useState("전체");
+  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  const toggleType = (t: string) => {
+    if (t === "전체") {
+      setActiveTypes(["전체"]);
+      return;
+    }
+    setActiveTypes(prev => {
+      const without전체 = prev.filter(x => x !== "전체");
+      if (without전체.includes(t)) {
+        const next = without전체.filter(x => x !== t);
+        return next.length === 0 ? ["전체"] : next;
+      }
+      return [...without전체, t];
+    });
+  };
+
   const filtered = LAND_PROPERTIES.filter(p => {
-    if (activeType !== "전체" && p.roomType !== activeType) return false;
+    if (!activeTypes.includes("전체") && !activeTypes.includes(p.roomType ?? "")) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
@@ -195,33 +210,36 @@ const LandSearch = () => {
     return true;
   });
 
-  const selected = LAND_PROPERTIES.find(p => p.id === selectedId) ?? null;
+  const activeType = activeTypes[0] ?? "전체";
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 토지 유형 탭 - 맵 위 상단 배지 역할 */}
+      {/* 토지 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         <span className="text-white/50 text-xs font-semibold whitespace-nowrap">토지 유형</span>
-        {LAND_SUBTYPES.map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveType(t)}
-            className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-            style={
-              activeType === t
-                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-            }
-          >
-            {t}
-          </button>
-        ))}
+        {LAND_SUBTYPES.map(t => {
+          const isActive = activeTypes.includes(t);
+          return (
+            <button
+              key={t}
+              onClick={() => toggleType(t)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
+            >
+              {t}
+            </button>
+          );
+        })}
       </div>
 
       <main
