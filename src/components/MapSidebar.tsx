@@ -655,6 +655,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
+  const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
   const dragging = useRef(false);
   const startX = useRef(0);
