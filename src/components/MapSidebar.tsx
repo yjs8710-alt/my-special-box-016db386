@@ -251,6 +251,164 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingR
   );
 };
 
+/* ── PhotoUploadModal ── */
+interface PhotoUploadModalProps { propId: number; address: string; onClose: () => void; }
+const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) => {
+  const storageKey = `photos_${propId}`;
+  const [photos, setPhotos] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(storageKey) ?? "[]"); } catch { return []; }
+  });
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = (files: FileList | null) => {
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotos(prev => {
+          const next = [...prev, e.target?.result as string];
+          localStorage.setItem(storageKey, JSON.stringify(next));
+          return next;
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos(prev => {
+      const next = prev.filter((_, i) => i !== idx);
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl w-[min(480px,92vw)] flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Camera className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">사진 등록</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[300px]">{address}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="w-full border-2 border-dashed border-primary/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors mb-4"
+          >
+            <Camera className="w-8 h-8 text-primary/50" />
+            <span className="text-sm font-semibold text-primary">사진 선택 / 드래그</span>
+            <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등 이미지 파일</span>
+          </button>
+          {photos.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {photos.map((src, idx) => (
+                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removePhoto(idx)}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {photos.length === 0 && <p className="text-center text-[11px] text-muted-foreground mt-2">등록된 사진이 없습니다</p>}
+        </div>
+        <div className="px-4 py-3 border-t border-border flex-shrink-0">
+          <p className="text-[10px] text-muted-foreground text-center">✓ 사진은 이 기기에 임시 저장됩니다</p>
+        </div>
+      </div>
+    </>
+  );
+};
+
+/* ── LeaseProposalModal ── */
+interface LeaseProposalModalProps { prop: MapProperty; onClose: () => void; }
+const LeaseProposalModal = ({ prop, onClose }: LeaseProposalModalProps) => {
+  const today2 = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+  const handlePrint = () => window.print();
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl w-[min(560px,92vw)] flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <ClipboardList className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-sm font-bold text-foreground">임대제안서</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={handlePrint} className="px-2.5 py-1.5 text-[11px] font-bold bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors">🖨️ 인쇄</button>
+            <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* 제안서 본문 */}
+          <div className="border border-border rounded-xl overflow-hidden">
+            {/* 헤더 */}
+            <div className="bg-primary text-primary-foreground px-6 py-4 text-center">
+              <p className="text-lg font-extrabold tracking-widest">임 대 제 안 서</p>
+              <p className="text-[11px] opacity-70 mt-0.5">Lease Proposal</p>
+            </div>
+            {/* 날짜 */}
+            <div className="px-6 pt-4 pb-2 text-right">
+              <span className="text-[11px] text-muted-foreground">작성일: {today2}</span>
+            </div>
+            {/* 매물 정보 */}
+            <table className="w-full text-[12px] border-t border-border">
+              {[
+                ["소재지", prop.address],
+                ["건물명", prop.buildingName ?? prop.title],
+                ["유형", prop.type],
+                ["층수", prop.floor ?? "-"],
+                ["면적", prop.area ?? "-"],
+                ["호실", prop.unitNumber ?? "-"],
+                ["보증금", prop.deposit],
+                ["월 임대료", prop.monthly],
+                ["관리비", prop.managementFee ?? "-"],
+              ].map(([label, value]) => (
+                <tr key={label} className="border-b border-border last:border-b-0">
+                  <td className="px-4 py-2.5 bg-muted/40 font-semibold text-muted-foreground w-[110px] whitespace-nowrap">{label}</td>
+                  <td className="px-4 py-2.5 text-foreground font-medium">{value}</td>
+                </tr>
+              ))}
+            </table>
+            {/* 특이사항 */}
+            <div className="px-4 py-3 border-t border-border bg-muted/20">
+              <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">특이사항 / 안내사항</p>
+              <div className="min-h-[60px] bg-white rounded-lg border border-border/50 p-2">
+                <p className="text-[11px] text-muted-foreground/50">※ 입력된 내용 없음</p>
+              </div>
+            </div>
+            {/* 연락처 */}
+            <div className="px-4 py-3 border-t border-border text-center bg-primary/5">
+              <p className="text-[11px] text-muted-foreground">문의: {prop.contactOwner ?? prop.contactManager ?? prop.contact ?? "-"}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
