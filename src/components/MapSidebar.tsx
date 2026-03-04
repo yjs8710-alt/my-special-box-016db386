@@ -656,7 +656,38 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+  const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
+
+  // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
+  const handleSelectPrint = () => {
+    const list = properties.filter(p => checkedIds.has(p.id));
+    if (list.length === 0) { alert("인쇄할 매물을 선택해주세요."); return; }
+    const rows = list.map(p =>
+      `<tr><td>${p.id}</td><td>${p.buildingName ?? p.title}</td><td>${p.address}</td><td>${p.unitNumber ?? "-"}</td><td>${p.floor ?? "-"}</td><td>${p.area ?? "-"}</td><td>${p.deposit}</td><td>${p.monthly}</td></tr>`
+    ).join("");
+    const html = `<html><head><title>선택 매물 인쇄</title><style>body{font-family:sans-serif;font-size:12px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4ff}</style></head><body><h2>선택 매물 목록 (${list.length}건)</h2><table><thead><tr><th>번호</th><th>건물명</th><th>주소</th><th>호수</th><th>층</th><th>면적</th><th>보증금</th><th>월세</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
+  };
+
+  const handleDetailPrint = () => {
+    const list = checkedIds.size > 0 ? properties.filter(p => checkedIds.has(p.id)) : properties;
+    const cards = list.map(p =>
+      `<div style="border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;page-break-inside:avoid">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:14px">${p.buildingName ?? p.title}</strong>
+          <span style="background:#e8f0ff;color:#1a56db;border-radius:4px;padding:2px 8px;font-size:11px">${p.type}</span>
+        </div>
+        <p style="margin:2px 0;font-size:12px;color:#555">📍 ${p.address} ${p.unitNumber ?? ""}</p>
+        <p style="margin:2px 0;font-size:12px;color:#555">🏢 ${p.floor ?? "-"} / ${p.totalFloors ?? "-"} · ${p.area ?? "-"} · 준공 ${p.buildYear ?? "-"}</p>
+        <p style="margin:6px 0;font-size:13px;font-weight:bold;color:#1a56db">보증금 ${p.deposit} / 월세 ${p.monthly}</p>
+        <p style="margin:2px 0;font-size:11px;color:#777">관리비 ${p.manageFee ?? "-"} · 주차 ${p.parking ?? "-"} · 입주 ${p.availableFrom ?? "-"}</p>
+        ${p.options && p.options.length > 0 ? `<p style="margin:4px 0;font-size:11px;color:#555">옵션: ${p.options.join(", ")}</p>` : ""}
+      </div>`
+    ).join("");
+    const html = `<html><head><title>매물 상세 인쇄</title><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px}@media print{body{padding:0}}</style></head><body><h2>매물 상세 목록 (${list.length}건)</h2>${cards}</body></html>`;
+    const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
+  };
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(defaultWidth);
