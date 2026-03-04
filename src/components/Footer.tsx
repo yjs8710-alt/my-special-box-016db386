@@ -1,38 +1,8 @@
-import { MapPin, Phone, Mail, ChevronRight } from "lucide-react";
-
-const REGIONS = [
-  { name: "서울", count: 4210 },
-  { name: "경기", count: 3105 },
-  { name: "인천", count: 891 },
-  { name: "부산", count: 1023 },
-  { name: "대구", count: 678 },
-  { name: "광주", count: 445 },
-  { name: "대전", count: 512 },
-  { name: "제주", count: 234 },
-];
+import { Phone, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
     <footer className="bg-foreground text-white">
-      {/* Region Quick Links */}
-      <div className="border-b border-white/10 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h3 className="text-base font-semibold text-white/80 mb-5 flex items-center gap-2">
-            <MapPin className="w-4 h-4" /> 지역별 매물
-          </h3>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-            {REGIONS.map((r) => (
-              <div key={r.name} className="text-center cursor-pointer group">
-                <div className="w-full py-3 rounded-xl bg-white/5 hover:bg-primary/80 transition-colors group-hover:scale-105 duration-200">
-                  <p className="font-semibold text-white text-sm">{r.name}</p>
-                  <p className="text-xs text-white/50 group-hover:text-white/80 mt-0.5">{r.count.toLocaleString()}건</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Footer Bottom */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
