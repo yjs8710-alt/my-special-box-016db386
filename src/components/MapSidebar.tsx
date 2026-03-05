@@ -950,32 +950,32 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </div>
 
                         {/* 건물명 + 주소 */}
-                        <div className="w-[130px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
-                          <div className="flex items-center gap-1 flex-wrap min-w-0">
-                            <p className="text-[11px] font-bold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
-                            {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0">{prop.roomType}</span>}
-                            {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0">{prop.unitNumber}</span>}
-                          </div>
-                          <p className="text-[9px] text-muted-foreground truncate">{prop.address}</p>
-                          <div className="flex items-center gap-1 flex-wrap">
-                            <span className="text-[9px] text-muted-foreground">{prop.floor}</span>
-                            <span className="text-[9px] text-muted-foreground">{prop.area}</span>
-                          </div>
-                        </div>
+                         <div className="w-[130px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
+                           <div className="flex items-center gap-1 flex-wrap min-w-0">
+                             <p className="text-[12px] font-extrabold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                             {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0">{prop.roomType}</span>}
+                             {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0">{prop.unitNumber}</span>}
+                           </div>
+                           <p className="text-[10px] text-muted-foreground truncate font-medium">{prop.address}</p>
+                           <div className="flex items-center gap-1 flex-wrap">
+                             <span className="text-[10px] text-muted-foreground font-semibold">{prop.floor}</span>
+                             <span className="text-[10px] text-muted-foreground font-semibold">{prop.area}</span>
+                           </div>
+                         </div>
 
-                        {/* 가격 + 우측 정보 */}
-                        <div className="flex-1 flex flex-row items-stretch border-l border-border/30 min-w-0">
-                          {/* 보증금/월세 — 고정 너비 */}
-                          <div className="flex flex-col justify-center px-1.5 gap-1 flex-shrink-0" style={{ width: "80px" }}>
-                            <div className="flex items-center gap-1 h-4">
-                              <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">보증금</span>
-                              <span className="text-[10px] font-bold text-foreground truncate">{prop.deposit}</span>
-                            </div>
-                            <div className="flex items-center gap-1 h-4">
-                              <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">월세</span>
-                              <span className="text-[11px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
-                            </div>
-                          </div>
+                         {/* 가격 + 우측 정보 */}
+                         <div className="flex-1 flex flex-row items-stretch border-l border-border/30 min-w-0">
+                           {/* 보증금/월세 — 고정 너비 */}
+                           <div className="flex flex-col justify-center px-1.5 gap-1 flex-shrink-0" style={{ width: "80px" }}>
+                             <div className="flex items-center gap-1 h-4">
+                               <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">보증금</span>
+                               <span className="text-[11px] font-extrabold text-foreground truncate">{prop.deposit}</span>
+                             </div>
+                             <div className="flex items-center gap-1 h-4">
+                               <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">월세</span>
+                               <span className="text-[12px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
+                             </div>
+                           </div>
                           {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등, 고정 시작점 */}
                           <div
                             className="border-l border-border/20 flex-1 min-w-0"
