@@ -13,8 +13,14 @@ const MapSearch = () => {
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+
+  const handleDeleteProperties = (ids: Set<number>) => {
+    setDeletedIds(prev => new Set([...prev, ...ids]));
+  };
 
   const filtered = MAP_PROPERTIES.filter((p) => {
+    if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
@@ -38,6 +44,7 @@ const MapSearch = () => {
           onSelect={setSelectedId}
           activeType={activeType}
           onTypeChange={setActiveType}
+          onDeleteProperties={handleDeleteProperties}
         />
         {/* Map */}
         <div className="flex-1 relative">
