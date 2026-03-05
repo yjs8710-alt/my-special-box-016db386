@@ -496,16 +496,25 @@ const MapFilterBar = ({
           </div>
 
           <div className="flex items-center flex-1 px-3 gap-2 h-10">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+            <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
             <input
               type="text"
               value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="주소, 건물명, 역명 검색"
+              onChange={(e) => {
+                const v = e.target.value;
+                onQueryChange(v);
+                // 숫자만 입력 시 매물번호로도 검색
+                if (/^\d+$/.test(v.trim())) {
+                  onPropertyIdChange(v.trim());
+                } else {
+                  onPropertyIdChange("");
+                }
+              }}
+              placeholder="주소, 건물명, 매물번호 검색"
               className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
             />
             {query && (
-              <button onClick={() => onQueryChange("")} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
