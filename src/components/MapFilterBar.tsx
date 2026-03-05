@@ -538,7 +538,7 @@ const MapFilterBar = ({
               style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
             >
               <Phone className="w-3.5 h-3.5" />
-              건물주 번호
+              건물주 번호 검색
             </button>
           )}
         </div>
