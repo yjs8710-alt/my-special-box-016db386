@@ -54,10 +54,15 @@ const SORTS = ["최신순", "낮은 월세순", "조회순", "면적순"];
 const PropertyListSection = () => {
   const [activeType, setActiveType] = useState("전체");
   const [sortBy, setSortBy] = useState("최신순");
+  const [properties, setProperties] = useState(PROPERTIES);
 
   const filtered = activeType === "전체"
-    ? PROPERTIES
-    : PROPERTIES.filter((p) => p.type === activeType);
+    ? properties
+    : properties.filter((p) => p.type === activeType);
+
+  const handleDelete = (id: number) => {
+    setProperties((prev) => prev.filter((p) => p.id !== id));
+  };
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
@@ -108,7 +113,7 @@ const PropertyListSection = () => {
       {/* Property Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((property) => (
-          <PropertyCard key={property.id} {...property} />
+          <PropertyCard key={property.id} {...property} onDelete={() => handleDelete(property.id)} />
         ))}
       </div>
 

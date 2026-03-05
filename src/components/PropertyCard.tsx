@@ -1,5 +1,4 @@
-import { MapPin, Maximize2, Eye, Heart, BadgeCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { MapPin, Eye, Heart, X } from "lucide-react";
 import { useState } from "react";
 
 interface PropertyCardProps {
@@ -14,11 +13,12 @@ interface PropertyCardProps {
   isNew?: boolean;
   isHot?: boolean;
   views: number;
+  onDelete?: () => void;
 }
 
 const PropertyCard = ({
   image, title, address, type, area, floor, deposit, monthly,
-  isNew, isHot, views
+  isNew, isHot, views, onDelete
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
 
@@ -40,13 +40,23 @@ const PropertyCard = ({
             <span className="bg-badge-hot text-white text-xs font-bold px-2 py-0.5 rounded-full">HOT</span>
           )}
         </div>
-        {/* Like */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white transition-colors"
-        >
-          <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-        </button>
+        {/* Delete + Like */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5">
+          {onDelete && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onDelete(); }}
+              className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
+            className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white transition-colors"
+          >
+            <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+          </button>
+        </div>
         {/* Type badge */}
         <div className="absolute bottom-3 left-3">
           <span className="bg-primary/90 text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm">
