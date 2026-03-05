@@ -904,8 +904,125 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                           : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                       }`}
                     >
-                      {/* Row 1: main info — 전체 가로 고정 배분 */}
-                      <div className="flex items-stretch h-20" style={{ width: "100%" }}>
+                      {/* Row 1: main info — 2줄 레이아웃 */}
+                      <div className="flex items-stretch" style={{ width: "100%", minHeight: "76px" }}>
+
+                        {/* ①썸네일 76px */}
+                        <div className="w-[76px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "76px" }}>
+                          <img
+                            src={prop.image}
+                            alt={prop.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCheckedIds(prev => {
+                                const next = new Set(prev);
+                                next.has(prop.id) ? next.delete(prop.id) : next.add(prop.id);
+                                return next;
+                              });
+                            }}
+                            className="absolute top-1 left-1 z-10 w-4 h-4 rounded flex items-center justify-center transition-all"
+                            style={{
+                              background: checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(255,255,255,0.85)",
+                              border: `1.5px solid ${checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(150,150,150,0.6)"}`,
+                              boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+                            }}
+                          >
+                            {checkedIds.has(prop.id) && (
+                              <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                                <path d="M1 3.5L3.5 6L8 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </button>
+                          <span className={`absolute bottom-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
+                            {prop.type}
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
+                            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
+                          >
+                            <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
+                          </button>
+                        </div>
+
+                        {/* ②건물주/관리인 36px */}
+                        <div className="w-[36px] flex-shrink-0 flex flex-col border-l border-border/30">
+                          <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
+                          <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? prop.contact ?? null} />
+                        </div>
+
+                        {/* ③메인 정보 — 2줄 레이아웃 */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-center border-l border-border/30 px-2 py-1 gap-1">
+
+                          {/* 1줄: 건물명 | 로드뷰 | 보증금/월세 | 메모 */}
+                          <div className="flex items-center gap-1 min-w-0 overflow-hidden">
+                            <p className="text-[12px] font-extrabold text-foreground truncate leading-tight flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
+                            <a
+                              href={`https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              title="로드뷰"
+                              className="flex-shrink-0 px-1 py-0.5 rounded text-[8px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
+                              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+                            >
+                              로드뷰
+                            </a>
+                            <span className="flex-shrink-0 text-[11px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
+                            <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
+                            <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+                            <span className="flex-shrink-0 w-px h-3 bg-border/50 mx-0.5" />
+                            <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
+                            <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
+                          </div>
+
+                          {/* 2줄: 주소 | 층·호수 | 날짜 | 비번 | 옵션 */}
+                          <div className="flex items-center gap-1 min-w-0 overflow-hidden flex-wrap">
+                            <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap flex-shrink-0">{shortAddress(prop.address)}</span>
+                            {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
+                            {prop.floor && <span className="text-[9px] text-muted-foreground font-semibold flex-shrink-0 whitespace-nowrap">{prop.floor}</span>}
+                            {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
+                            <span className="flex-shrink-0 w-px h-3 bg-border/40" />
+                            {regDate && (
+                              <div className="flex items-center gap-0.5 flex-shrink-0" title="등록일">
+                                <CalendarPlus className="w-2.5 h-2.5 text-muted-foreground" />
+                                <span className="text-[9px] font-bold text-muted-foreground">{regDate}</span>
+                              </div>
+                            )}
+                            {chkDate && (
+                              <div className="flex items-center gap-0.5 flex-shrink-0" title="확인일">
+                                <CalendarCheck className="w-2.5 h-2.5 text-primary" />
+                                <span className="text-[9px] font-extrabold text-primary">{chkDate}</span>
+                              </div>
+                            )}
+                            {buildingPw && (
+                              <div className="flex items-center gap-0.5 flex-shrink-0" title="건물 비밀번호">
+                                <KeyRound className="w-2.5 h-2.5 text-muted-foreground" />
+                                <span className="text-[9px] font-extrabold text-muted-foreground font-mono">건{buildingPw}</span>
+                              </div>
+                            )}
+                            {roomPw && (
+                              <div className="flex items-center gap-0.5 flex-shrink-0" title="방 비밀번호">
+                                <KeyRound className="w-2.5 h-2.5 text-accent" />
+                                <span className="text-[9px] font-extrabold text-accent font-mono">방{roomPw}</span>
+                              </div>
+                            )}
+                            {prop.options && prop.options.length > 0 && (
+                              <>
+                                <span className="flex-shrink-0 w-px h-3 bg-border/40" />
+                                {prop.options.slice(0, 4).map((opt) => (
+                                  <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? "•"}</span>
+                                ))}
+                                {prop.options.length > 4 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 4}</span>}
+                              </>
+                            )}
+                          </div>
+
+                        </div>
+                      </div>
 
                         {/* ①썸네일 80px */}
                         <div className="w-20 h-20 overflow-hidden relative group/thumb flex-shrink-0">
