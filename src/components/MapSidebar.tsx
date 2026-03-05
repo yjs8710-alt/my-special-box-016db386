@@ -676,11 +676,83 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
   const handleSelectPrint = () => {
     const list = properties.filter(p => checkedIds.has(p.id));
     if (list.length === 0) { alert("인쇄할 매물을 선택해주세요."); return; }
-    const rows = list.map(p =>
-      `<tr><td>${p.id}</td><td>${p.buildingName ?? p.title}</td><td>${p.address}</td><td>${p.unitNumber ?? "-"}</td><td>${p.floor ?? "-"}</td><td>${p.area ?? "-"}</td><td>${p.deposit}</td><td>${p.monthly}</td></tr>`
+    const today = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
+    const rows = list.map((p, i) =>
+      `<tr>
+        <td style="text-align:center;color:#888">${i + 1}</td>
+        <td><strong>${p.buildingName ?? p.title}</strong><br/><span style="color:#888;font-size:10px">${p.unitNumber ?? ""}</span></td>
+        <td style="color:#555">${p.address}</td>
+        <td style="text-align:center">${p.floor ?? "-"}</td>
+        <td style="text-align:center">${p.area ?? "-"}</td>
+        <td style="text-align:center;color:#1a56db;font-weight:bold">${p.deposit}</td>
+        <td style="text-align:center;color:#e11d48;font-weight:bold">${p.monthly}</td>
+        <td style="text-align:center;color:#555">${p.manageFee ?? "-"}</td>
+        <td style="text-align:center">${p.availableFrom ?? "-"}</td>
+        <td style="text-align:center"><span style="background:#e8f0ff;color:#1a56db;border-radius:4px;padding:2px 6px;font-size:10px">${p.type}</span></td>
+      </tr>`
     ).join("");
-    const html = `<html><head><title>선택 매물 인쇄</title><style>body{font-family:sans-serif;font-size:12px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:6px 8px;text-align:left}th{background:#f0f4ff}</style></head><body><h2>선택 매물 목록 (${list.length}건)</h2><table><thead><tr><th>번호</th><th>건물명</th><th>주소</th><th>호수</th><th>층</th><th>면적</th><th>보증금</th><th>월세</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
-    const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
+    const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <title>선택 매물 목록 (${list.length}건)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Apple SD Gothic Neo', '맑은 고딕', sans-serif; font-size: 12px; color: #111; background: #fff; padding: 24px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; border-bottom: 2px solid #1a56db; padding-bottom: 10px; }
+    .header h1 { font-size: 18px; font-weight: 700; color: #1a56db; }
+    .header .meta { font-size: 11px; color: #888; text-align: right; line-height: 1.6; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #1a56db; color: #fff; padding: 7px 8px; font-size: 11px; font-weight: 600; text-align: center; }
+    td { border: 1px solid #e0e0e0; padding: 6px 8px; font-size: 11px; vertical-align: middle; }
+    tr:nth-child(even) td { background: #f8faff; }
+    tr:hover td { background: #eef3ff; }
+    .footer { margin-top: 14px; font-size: 10px; color: #aaa; text-align: right; }
+    @media print {
+      body { padding: 10px; }
+      .no-print { display: none !important; }
+      tr:hover td { background: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>📋 선택 매물 목록</h1>
+      <p style="font-size:12px;color:#555;margin-top:4px">총 <strong style="color:#1a56db">${list.length}건</strong> 선택</p>
+    </div>
+    <div class="meta">
+      출력일: ${today}<br/>
+      공실박스
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:28px">No.</th>
+        <th style="width:130px">건물명 / 호수</th>
+        <th>주소</th>
+        <th style="width:40px">층</th>
+        <th style="width:70px">면적</th>
+        <th style="width:80px">보증금</th>
+        <th style="width:80px">월세</th>
+        <th style="width:60px">관리비</th>
+        <th style="width:80px">입주가능일</th>
+        <th style="width:65px">유형</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">※ 본 자료는 참고용이며 실제 계약 조건과 다를 수 있습니다.</div>
+  <div class="no-print" style="margin-top:20px;text-align:center">
+    <button onclick="window.print()" style="padding:10px 28px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-right:8px">🖨️ 인쇄</button>
+    <button onclick="window.close()" style="padding:10px 20px;background:#f0f0f0;color:#333;border:none;border-radius:8px;font-size:13px;cursor:pointer">닫기</button>
+  </div>
+</body>
+</html>`;
+    const w = window.open("", "_blank", "width=1000,height=700");
+    w?.document.write(html);
+    w?.document.close();
   };
 
   const handleDetailPrint = () => {
