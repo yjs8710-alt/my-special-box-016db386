@@ -290,9 +290,9 @@ const AdminDashboard = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-foreground">{m.name}</span>
-                          <span className="text-xs text-muted-foreground">{m.agency}</span>
+                          <span className="text-xs text-muted-foreground">{m.agency_name}</span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{m.email} · 가입 {m.joinDate}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{m.email ?? m.phone} · 가입 {m.created_at.slice(0, 10)}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <button
