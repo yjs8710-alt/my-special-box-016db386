@@ -954,8 +954,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                           <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? prop.contact ?? null} />
                         </div>
 
-                        {/* ③메인 정보 — 2줄 레이아웃 */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-center border-l border-border/30 px-2 py-1 gap-1">
+                        {/* ③메인 정보 — 3줄 고정 레이아웃 */}
+                        <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2" style={{ height: "76px", justifyContent: "space-evenly" }}>
 
                           {/* 1줄: 건물명 | 로드뷰 | 보증금/월세 | 메모 */}
                           <div className="flex items-center gap-1 min-w-0 overflow-hidden">
