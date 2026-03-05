@@ -112,8 +112,8 @@ const AdminDashboard = () => {
     fetchMembers();
   }, [fetchMembers]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("admin_auth");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/admin/login");
   };
 
