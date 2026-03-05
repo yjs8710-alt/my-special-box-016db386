@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/lib/supabase";
 
 const STEPS = ["기본 정보", "자격 인증", "약관 동의"];
 
@@ -14,6 +15,8 @@ const SignupPage = () => {
   const [showPw, setShowPw] = useState(false);
   const [showPwConfirm, setShowPwConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -44,7 +47,6 @@ const SignupPage = () => {
     }));
   };
 
-  // sync agreeAll
   const handleAgreeSingle = (key: "agreeTerms" | "agreePrivacy" | "agreeMarketing", checked: boolean) => {
     const next = { ...form, [key]: checked };
     next.agreeAll = next.agreeTerms && next.agreePrivacy && next.agreeMarketing;
@@ -66,10 +68,56 @@ const SignupPage = () => {
 
   const canSubmit = form.agreeTerms && form.agreePrivacy;
 
-  const handleNext = () => setStep((s) => s + 1);
-  const handleBack = () => setStep((s) => s - 1);
+  const handleNext = () => { setError(""); setStep((s) => s + 1); };
+  const handleBack = () => { setError(""); setStep((s) => s - 1); };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError("");
+    setLoading(true);
+
+    // 1. Supabase 이메일/비밀번호 회원가입
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+    });
+
+    if (signUpError) {
+      setLoading(false);
+      if (signUpError.message.includes("already registered") || signUpError.message.includes("already been registered")) {
+        setError("이미 가입된 이메일입니다. 로그인 페이지에서 로그인해 주세요.");
+      } else {
+        setError(signUpError.message || "회원가입에 실패했습니다. 다시 시도해 주세요.");
+      }
+      return;
+    }
+
+    const userId = signUpData.user?.id;
+    if (!userId) {
+      setLoading(false);
+      setError("회원가입 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      return;
+    }
+
+    // 2. 중개사 프로필 저장
+    const { error: profileError } = await supabase.from("agent_profiles").insert({
+      user_id: userId,
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      agency_name: form.agencyName.trim(),
+      license_number: form.licenseNumber.trim(),
+      business_number: form.businessNumber.trim(),
+      agency_address: form.agencyAddress.trim(),
+      agree_marketing: form.agreeMarketing,
+      status: "pending",
+    });
+
+    setLoading(false);
+
+    if (profileError) {
+      setError("프로필 저장 중 오류가 발생했습니다: " + profileError.message);
+      return;
+    }
+
     setSubmitted(true);
   };
 
@@ -269,6 +317,9 @@ const SignupPage = () => {
                   가입 신청 후 관리자 승인까지 <strong>1~2 영업일</strong>이 소요될 수 있습니다.
                   승인 결과는 입력하신 이메일 <strong>{form.email}</strong>로 발송됩니다.
                 </div>
+                {error && (
+                  <p className="text-sm text-destructive text-center">{error}</p>
+                )}
               </div>
             )}
 
@@ -279,6 +330,7 @@ const SignupPage = () => {
                   variant="outline"
                   className="flex-1 rounded-full gap-1"
                   onClick={handleBack}
+                  disabled={loading}
                 >
                   <ArrowLeft className="w-4 h-4" />
                   이전
@@ -298,10 +350,10 @@ const SignupPage = () => {
                 <Button
                   className="flex-1 rounded-full font-semibold"
                   style={{ background: "hsl(var(--primary))", color: "#fff" }}
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || loading}
                   onClick={handleSubmit}
                 >
-                  가입 신청하기
+                  {loading ? "신청 중..." : "가입 신청하기"}
                 </Button>
               )}
             </div>
@@ -309,7 +361,7 @@ const SignupPage = () => {
 
           <p className="text-center text-sm text-muted-foreground mt-5">
             이미 계정이 있으신가요?{" "}
-            <button className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }} onClick={() => navigate("/")}>
+            <button className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }} onClick={() => navigate("/login")}>
               로그인
             </button>
           </p>
