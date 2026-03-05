@@ -192,12 +192,25 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                       {show ? (
                         <a
                           href={`tel:${prop.contactManager}`}
-                          className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+                          className="flex items-center gap-1.5 text-xs font-bold rounded-lg px-3 py-1.5 transition-colors"
+                          style={{ color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)" }}
                         >
+                          <Phone className="w-3.5 h-3.5" />
                           {prop.contactManager}
                         </a>
                       ) : (
-                        <span className="text-[11px] text-muted-foreground">●●●-●●●●-●●●●</span>
+                        !hasLandlord ? (
+                          <button
+                            onClick={() => handleReveal(prop.id)}
+                            className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all hover:scale-105"
+                            style={{ background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            번호 공개
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">●●●-●●●●-●●●●</span>
+                        )
                       )}
                     </div>
                   )}
