@@ -885,7 +885,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
               </div>
             ) : (
               <div className="p-2 flex flex-col gap-1.5">
-                {[...properties].sort((a, b) => {
+                 {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
                   if (isSaleA !== isSaleB) return isSaleA - isSaleB;
@@ -893,7 +893,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   const dateA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
                   const dateB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
                   return dateB - dateA;
-                }).map((prop) => {
+                }).map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
@@ -947,6 +947,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                           <span className={`absolute bottom-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
                             {prop.type}
                           </span>
+                          {/* 순번 + 등록일 — 하단 좌측 오버레이 */}
+                          <div className="absolute bottom-0 left-0 right-0 flex items-center gap-0.5 px-1 py-0.5" style={{ background: "rgba(0,0,0,0.52)" }}>
+                            <span className="text-[9px] font-extrabold text-white leading-none flex-shrink-0">{idx}.</span>
+                            {regDate && <span className="text-[8px] text-white/80 leading-none truncate">{regDate}</span>}
+                          </div>
                           <button
                             onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
                             className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
