@@ -307,6 +307,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property2,
     description: "성수동 카페 거리 핵심 위치의 대형 공실입니다. 천장고 4.5m의 독특한 공간감, 전면 통유리. 성수동 팝업스토어·플래그십 스토어 수요 급증으로 높은 임대 가치를 가집니다.",
     memo: "천장고 4.5m, 팝업/플래그십 최적",
+    registeredDate: "2026-02-05",
     checkedDate: "2024-01-30",
     options: ["에어컨", "전자키"],
     password: "2468#",
