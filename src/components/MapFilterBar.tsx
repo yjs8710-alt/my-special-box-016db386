@@ -379,14 +379,8 @@ const MapFilterBar = ({
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
-        {/* 카테고리 + 검색바 + 건물주 번호 한 행 */}
+        {/* 검색바 + 건물주 번호 한 행 */}
         <div className="flex items-center gap-2">
-
-          {/* 카테고리 드롭다운 */}
-          <div
-            className="flex items-center bg-white rounded-xl overflow-hidden border border-border flex-shrink-0"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
-          >
             <div className="relative">
               <button
                 onClick={() => setShowCategoryDrop(v => !v)}
