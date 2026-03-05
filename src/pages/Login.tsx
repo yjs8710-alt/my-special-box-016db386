@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/lib/supabase";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,14 +14,21 @@ const LoginPage = () => {
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError("이메일과 비밀번호를 입력해 주세요.");
       return;
     }
-    // 실제 서비스에서는 백엔드 인증 연동
-    setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    setLoading(true);
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (authError) {
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
+    }
+    navigate("/");
   };
 
   return (

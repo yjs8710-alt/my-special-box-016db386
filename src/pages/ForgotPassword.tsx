@@ -4,14 +4,16 @@ import { Home, ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabase";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!email.trim()) {
       setError("이메일을 입력해 주세요.");
       return;
@@ -21,7 +23,18 @@ const ForgotPassword = () => {
       setError("올바른 이메일 형식을 입력해 주세요.");
       return;
     }
-    // 실제 서비스에서는 백엔드 비밀번호 재설정 이메일 발송
+
+    setLoading(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+
+    if (resetError) {
+      setError(resetError.message || "이메일 발송에 실패했습니다. 다시 시도해 주세요.");
+      return;
+    }
+
     setSent(true);
   };
 
@@ -84,7 +97,7 @@ const ForgotPassword = () => {
                 <Button
                   className="w-full rounded-full font-semibold"
                   style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-                  onClick={() => setSent(false)}
+                  onClick={() => { setSent(false); }}
                 >
                   다시 전송하기
                 </Button>
@@ -138,9 +151,9 @@ const ForgotPassword = () => {
                   className="w-full rounded-full font-semibold"
                   style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
                   onClick={handleSubmit}
-                  disabled={!email}
+                  disabled={!email || loading}
                 >
-                  재설정 링크 전송
+                  {loading ? "전송 중..." : "재설정 링크 전송"}
                 </Button>
 
                 <button
