@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Search, X, SlidersHorizontal, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
