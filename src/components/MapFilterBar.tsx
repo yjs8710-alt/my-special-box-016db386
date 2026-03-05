@@ -136,6 +136,13 @@ interface MapFilterBarProps {
   showBuildYear?: boolean;
   showBuildingOptions?: boolean;
   showLandFilters?: boolean;
+  showApartmentFilters?: boolean;
+  apartmentActiveTypes?: string[];
+  onApartmentTypeChange?: (t: string) => void;
+  onClearApartmentTypes?: () => void;
+  apartmentDealTypes?: string[];
+  onApartmentDealTypeChange?: (t: string) => void;
+  onClearApartmentDealTypes?: () => void;
 }
 
 function makeFormatManwon(max: number) {
