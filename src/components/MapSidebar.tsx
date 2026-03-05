@@ -657,7 +657,9 @@ const DEFAULT_WIDTH = 540;
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSidebarProps) => {
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
-    return saved ? Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, Number(saved))) : DEFAULT_WIDTH;
+    const parsed = saved ? Number(saved) : 0;
+    // 저장값이 없거나 최소보다 작으면 새 기본값 사용
+    return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
   });
   const [collapsed, setCollapsed] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
