@@ -174,6 +174,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property4,
     description: "이태원 세계음식거리 핵심 위치의 대형 식당 공실입니다. 주방 시설 일부 잔류, 대형 환기 시설 완비. 외국인 관광 특수 지역으로 다국적 음식 브랜드 입점 문의 다수.",
     memo: "주방후드 대형 잔류, 환기 완비",
+    registeredDate: "2026-01-12",
     checkedDate: "2024-01-15",
     options: ["에어컨", "가스레인지", "주차"],
     password: "5678#",
