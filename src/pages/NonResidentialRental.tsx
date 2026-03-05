@@ -39,6 +39,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "지상 12층",
     buildYear: "2016년",
+    registeredDate: "2026-02-10",
+    checkedDate: "2026-03-01",
   },
   {
     id: 402,
@@ -66,6 +68,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "1층",
     buildYear: "2005년",
+    registeredDate: "2026-01-15",
+    checkedDate: "2026-02-20",
   },
   {
     id: 403,
@@ -93,6 +97,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "지상 8층",
     buildYear: "2012년",
+    registeredDate: "2026-01-20",
+    checkedDate: "2026-02-28",
   },
   {
     id: 404,
@@ -120,6 +126,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "협의",
     totalFloors: "1층",
     buildYear: "2008년",
+    registeredDate: "2026-02-01",
+    checkedDate: "2026-03-01",
   },
   {
     id: 405,
@@ -147,6 +155,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "지상 6층",
     buildYear: "2009년",
+    registeredDate: "2026-02-05",
+    checkedDate: "2026-03-02",
   },
   {
     id: 406,
@@ -174,6 +184,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "지상 10층",
     buildYear: "2014년",
+    registeredDate: "2026-01-25",
+    checkedDate: "2026-03-03",
   },
   {
     id: 411,
@@ -201,6 +213,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "협의",
     totalFloors: "지상 12층",
     buildYear: "2016년",
+    registeredDate: "2026-02-08",
+    checkedDate: "2026-03-01",
   },
   {
     id: 412,
@@ -228,6 +242,8 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
     availableFrom: "협의",
     totalFloors: "2층",
     buildYear: "2003년",
+    registeredDate: "2026-01-18",
+    checkedDate: "2026-02-25",
   },
 ];
 
