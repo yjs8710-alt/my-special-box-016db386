@@ -33,6 +33,8 @@ const App = () => (
           <Route path="/land" element={<LandSearch />} />
           <Route path="/non-residential" element={<NonResidentialRental />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
