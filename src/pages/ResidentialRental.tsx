@@ -292,6 +292,16 @@ const ResidentialRental = () => {
             </button>
           );
         })}
+        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
+        {!activeTypes.includes("전체") && activeTypes.length > 1 && (
+          <button
+            onClick={() => setActiveTypes(["전체"])}
+            className="ml-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
+            style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+          >
+            선택 삭제
+          </button>
+        )}
       </div>
 
       <main
