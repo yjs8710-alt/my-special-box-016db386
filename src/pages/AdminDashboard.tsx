@@ -67,10 +67,27 @@ const AdminDashboard = () => {
   const [postSearch, setPostSearch] = useState("");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
+  // ─── 세션 기반 관리자 인증 가드 ──────────────────────────────────────────
   useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") !== "true") {
-      navigate("/admin/login");
-    }
+    const checkAdminAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/admin/login");
+        return;
+      }
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roleData) {
+        await supabase.auth.signOut();
+        navigate("/admin/login");
+      }
+    };
+    checkAdminAuth();
   }, [navigate]);
 
   // ─── agent_profiles 불러오기 ─────────────────────────────────────────────
@@ -92,9 +109,7 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (sessionStorage.getItem("admin_auth") === "true") {
-      fetchMembers();
-    }
+    fetchMembers();
   }, [fetchMembers]);
 
   const handleLogout = () => {
