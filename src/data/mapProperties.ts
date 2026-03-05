@@ -141,6 +141,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property3,
     description: "홍대 걷고싶은거리 인근 유동인구 최상위 상권입니다. 전 임차인 카페 운영으로 주방 후드, 에어컨 기본 설치. 외국인 관광객 및 대학생 유입이 많아 F&B 업종에 최적화된 공간입니다.",
     memo: "전 카페 인테리어 잔류, 즉시영업 가능",
+    registeredDate: "2026-01-08",
     checkedDate: "2024-01-18",
     options: ["에어컨", "가스레인지", "전자레인지"],
     contact: "02-3456-7890",
