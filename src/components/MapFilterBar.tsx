@@ -378,30 +378,16 @@ const MapFilterBar = ({
       style={{ top: 16, left: 16, right: 16, width: "auto", maxWidth: 520 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
-        {/* 임대인 번호 찾기 */}
-        {onLandlordClick && (
-          <div className="flex items-center gap-2 justify-end">
-            <button
-              onClick={onLandlordClick}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
-            >
-              <Phone className="w-3.5 h-3.5" />
-              건물주 번호 검색
-            </button>
-          </div>
-        )}
 
-        {/* 주소 검색 + 필터 버튼 */}
+        {/* 카테고리 드롭다운 버튼 (단독 행) */}
         <div
-          className="flex items-center bg-white rounded-xl overflow-hidden border border-border"
+          className="flex items-center bg-white rounded-xl overflow-hidden border border-border self-start"
           style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
         >
-          {/* 카테고리 선택 드롭다운 */}
-          <div className="relative flex-shrink-0 border-r border-border">
+          <div className="relative flex-shrink-0">
             <button
               onClick={() => setShowCategoryDrop(v => !v)}
-              className="flex items-center gap-1.5 h-10 px-3 text-[12px] font-bold transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 h-10 px-4 text-[12px] font-bold transition-colors whitespace-nowrap"
               style={{
                 color: showCategoryDrop ? "hsl(var(--primary))" : "hsl(var(--foreground))",
                 background: showCategoryDrop ? "hsl(var(--primary)/0.07)" : "transparent",
@@ -429,12 +415,10 @@ const MapFilterBar = ({
                     boxShadow: "0 8px 32px rgba(10,45,110,0.18)",
                   }}
                 >
-                  {/* 헤더 */}
                   <div className="px-4 py-3 border-b border-border" style={{ background: "hsl(var(--primary)/0.05)" }}>
                     <p className="text-[11px] font-bold" style={{ color: "hsl(var(--primary))" }}>매물 카테고리 선택</p>
                   </div>
 
-                  {/* 전체 */}
                   <button
                     onClick={() => { setSelectedCategory(null); setShowCategoryDrop(false); navigate("/map"); }}
                     className="w-full flex items-center gap-3 px-4 py-3 border-b border-border/50 transition-all hover:bg-primary/5 group"
@@ -457,7 +441,6 @@ const MapFilterBar = ({
                     )}
                   </button>
 
-                  {/* 카테고리 목록 */}
                   {[
                     { ...SEARCH_CATEGORIES[0], icon: "🏠" },
                     { ...SEARCH_CATEGORIES[1], icon: "🏪" },
@@ -494,53 +477,70 @@ const MapFilterBar = ({
               </>
             )}
           </div>
+        </div>
 
-          <div className="flex items-center flex-1 px-3 gap-2 h-10">
-            <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                const v = e.target.value;
-                onQueryChange(v);
-                // 숫자만 입력 시 매물번호로도 검색
-                if (/^\d+$/.test(v.trim())) {
-                  onPropertyIdChange(v.trim());
-                } else {
-                  onPropertyIdChange("");
-                }
-              }}
-              placeholder="주소, 건물명, 매물번호 검색"
-              className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-            />
-            {query && (
-              <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+        {/* 검색바 + 건물주 번호 검색 */}
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center bg-white rounded-xl overflow-hidden border border-border flex-1"
+            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
+          >
+            <div className="flex items-center flex-1 px-3 gap-2 h-10">
+              <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  onQueryChange(v);
+                  if (/^\d+$/.test(v.trim())) {
+                    onPropertyIdChange(v.trim());
+                  } else {
+                    onPropertyIdChange("");
+                  }
+                }}
+                placeholder="주소, 건물명, 매물번호 검색"
+                className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+              />
+              {query && (
+                <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilter((v) => !v)}
+              className="relative flex items-center gap-1 px-3 h-10 border-l border-border transition-colors"
+              style={{ color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">필터</span>
+              {activeFilterCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                  style={{ background: "hsl(var(--accent))" }}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+            <button
+              className="flex items-center justify-center h-10 px-4 text-xs font-bold text-white rounded-r-xl"
+              style={{ background: "hsl(var(--primary))" }}
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button
-            onClick={() => setShowFilter((v) => !v)}
-            className="relative flex items-center gap-1 px-3 h-10 border-l border-border transition-colors"
-            style={{ color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">필터</span>
-            {activeFilterCount > 0 && (
-              <span
-                className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                style={{ background: "hsl(var(--accent))" }}
-              >
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-          <button
-            className="flex items-center justify-center h-10 px-4 text-xs font-bold text-white rounded-r-xl"
-            style={{ background: "hsl(var(--primary))" }}
-          >
-            <Search className="w-3.5 h-3.5" />
-          </button>
+          {onLandlordClick && (
+            <button
+              onClick={onLandlordClick}
+              className="flex items-center gap-1.5 h-10 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all whitespace-nowrap"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
+            >
+              <Phone className="w-3.5 h-3.5" />
+              건물주 번호
+            </button>
+          )}
         </div>
 
         {/* 상세 필터 패널 */}
