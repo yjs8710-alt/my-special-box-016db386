@@ -185,6 +185,7 @@ const LAND_PROPERTIES: MapProperty[] = [
     registeredDate: "2026-02-07",
     checkedDate: "2026-03-03",
   },
+];
 
 const LAND_SUBTYPES = ["전체", "대지", "임야", "농지", "공장·창고"];
 
