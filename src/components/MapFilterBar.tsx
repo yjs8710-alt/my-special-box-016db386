@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, X, SlidersHorizontal, Hash, MapPin, RotateCcw, Phone } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
 const SEARCH_CATEGORIES = [
