@@ -1,5 +1,4 @@
-import { MapPin, Maximize2, Eye, Heart, BadgeCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { MapPin, Eye, Heart, X } from "lucide-react";
 import { useState } from "react";
 
 interface PropertyCardProps {
@@ -14,6 +13,7 @@ interface PropertyCardProps {
   isNew?: boolean;
   isHot?: boolean;
   views: number;
+  onDelete?: () => void;
 }
 
 const PropertyCard = ({
