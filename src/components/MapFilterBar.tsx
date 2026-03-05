@@ -335,6 +335,13 @@ const MapFilterBar = ({
   showBuildYear = true,
   showBuildingOptions = false,
   showLandFilters = false,
+  showApartmentFilters = false,
+  apartmentActiveTypes = [],
+  onApartmentTypeChange,
+  onClearApartmentTypes,
+  apartmentDealTypes = [],
+  onApartmentDealTypeChange,
+  onClearApartmentDealTypes,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
