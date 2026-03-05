@@ -46,7 +46,6 @@ const AdminLogin = () => {
     }
 
     setLoading(false);
-    sessionStorage.setItem("admin_auth", "true");
     navigate("/admin");
   };
 
