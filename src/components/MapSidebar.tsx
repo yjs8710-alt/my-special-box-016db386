@@ -648,6 +648,7 @@ interface MapSidebarProps {
   query?: string;
   onQueryChange?: (v: string) => void;
   topOffset?: number;
+  onDeleteProperties?: (ids: Set<number>) => void;
 }
 
 const MIN_WIDTH = 260;
