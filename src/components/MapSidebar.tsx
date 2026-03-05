@@ -969,7 +969,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         {/* ③메인 정보 — 3줄 고정 레이아웃 */}
                         <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2" style={{ height: "76px", justifyContent: "space-evenly" }}>
 
-                          {/* 1줄: 건물명 | 로드뷰 | 보증금/월세 | 메모 | 확인·등록일 — 높이 고정 */}
+                          {/* 1줄: 건물명 | 로드뷰 | 보증금/월세 | → 메모·날짜 우측끝 */}
                           <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "22px" }}>
                             <p className="text-[12px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
                             <a
@@ -983,6 +983,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                             <span className="flex-shrink-0 text-[11px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
                             <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
                             <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+                            {/* 우측 끝 고정 */}
+                            <span className="flex-1" />
                             <span className="flex-shrink-0 w-px h-3 bg-border/50" />
                             <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
                             <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
