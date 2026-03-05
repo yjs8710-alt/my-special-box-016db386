@@ -958,14 +958,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
 
                         {/* 건물명 + 주소 */}
                          <div className="w-[130px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
+                           <p className="text-[12px] font-extrabold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
                            <div className="flex items-center gap-1 flex-wrap min-w-0">
-                             <p className="text-[12px] font-extrabold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
-                           </div>
-                           <p className="text-[10px] text-muted-foreground truncate font-medium">{shortAddress(prop.address)}</p>
-                           <div className="flex items-center gap-1 flex-wrap min-w-0">
+                             <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">{shortAddress(prop.address)}</span>
                              {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
-                             {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
                              {prop.floor && <span className="text-[9px] text-muted-foreground font-semibold flex-shrink-0 whitespace-nowrap">{prop.floor}</span>}
+                             {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
                            </div>
                          </div>
 
