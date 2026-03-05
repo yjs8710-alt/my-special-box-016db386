@@ -107,6 +107,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property2,
     description: "여의도 IFC몰 바로 인근 고층 오피스 빌딩입니다. 한강 뷰가 가능하며 회의실 공용 사용 가능. 최신 시스템 에어컨, 이중창 설치 완료. 금융기관, 증권사 밀집 지역으로 비즈니스 환경 최적입니다.",
     memo: "한강뷰, 회의실 4개 포함",
+    registeredDate: "2026-01-05",
     checkedDate: "2024-01-22",
     options: ["에어컨", "전자키", "주차"],
     password: "9988*",
