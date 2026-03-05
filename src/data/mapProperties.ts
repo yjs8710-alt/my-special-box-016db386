@@ -373,6 +373,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property4,
     description: "잠실 롯데월드몰 인근 초대형 상권의 핵심 위치입니다. 주말·휴일 유동인구 최상위, 관광객 방문 다수. 현재 인테리어 양호하며 다양한 업종 운영 가능. 잠실역 2호선·8호선 환승역 인근.",
     memo: "주말 유동인구 최상위, 관광객 방문 다수",
+    registeredDate: "2026-02-12",
     checkedDate: "2024-01-29",
     options: ["에어컨", "전자키", "주차"],
     password: "3690*",
