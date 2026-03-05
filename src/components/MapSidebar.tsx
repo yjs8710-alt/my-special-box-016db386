@@ -2,6 +2,13 @@ import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, Calendar
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
+// 주소에서 동+번지수만 추출 (예: "서울시 강남구 역삼동 123-45" → "역삼동 123-45")
+const shortAddress = (addr: string) => {
+  const match = addr.match(/([가-힣]+동)\s*([\d\-]+)?/);
+  if (match) return match[2] ? `${match[1]} ${match[2]}` : match[1];
+  return addr;
+};
+
 const TYPE_BG: Record<string, string> = {
   "상가": "bg-primary/10 text-primary",
   "사무실": "bg-purple-50 text-purple-700",
