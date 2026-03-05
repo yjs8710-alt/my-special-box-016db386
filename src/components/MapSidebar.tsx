@@ -987,7 +987,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                             <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
                             <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
                             <span className="flex-shrink-0 text-[9px] font-bold text-muted-foreground whitespace-nowrap">
-                              {chkDate ? `확인:${chkDate.slice(2).replace(/-/g, ".")}` : ""}{regDate ? `등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
+                              확인:{idx}{regDate ? ` 등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
                             </span>
                           </div>
 
