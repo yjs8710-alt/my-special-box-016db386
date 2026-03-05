@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 declare global {
   interface Window {
     naver: any;
+    __naverMapReady?: boolean;
+    __naverMapCallbacks?: Array<() => void>;
   }
 }
 
@@ -31,9 +33,7 @@ function createPinHtml(property: MapProperty, isSelected: boolean) {
   const shadow = isSelected
     ? `0 6px 20px rgba(0,0,0,0.45), 0 0 0 3px ${accent}`
     : "0 3px 10px rgba(0,0,0,0.3)";
-  const bg = isSelected
-    ? `linear-gradient(135deg, ${color}, ${accent})`
-    : color;
+  const bg = isSelected ? `linear-gradient(135deg, ${color}, ${accent})` : color;
   const scale = isSelected ? 1.25 : 1;
 
   return `
@@ -70,6 +70,28 @@ function createPinHtml(property: MapProperty, isSelected: boolean) {
   `;
 }
 
+function loadNaverScript(cb: () => void) {
+  if (window.naver && window.naver.maps) {
+    cb();
+    return;
+  }
+  if (!window.__naverMapCallbacks) window.__naverMapCallbacks = [];
+  window.__naverMapCallbacks.push(cb);
+
+  if (document.getElementById("naver-maps-script")) return;
+
+  const script = document.createElement("script");
+  script.id = "naver-maps-script";
+  script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_CLIENT_ID}`;
+  script.async = true;
+  script.onload = () => {
+    window.__naverMapReady = true;
+    window.__naverMapCallbacks?.forEach((fn) => fn());
+    window.__naverMapCallbacks = [];
+  };
+  document.head.appendChild(script);
+}
+
 interface MapViewProps {
   properties: MapProperty[];
   selectedId: number | null;
@@ -80,60 +102,19 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(true);
 
-  // Load Naver Maps script
-  useEffect(() => {
-    if (document.getElementById("naver-maps-script")) return;
-    const script = document.createElement("script");
-    script.id = "naver-maps-script";
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_CLIENT_ID}`;
-    script.async = true;
-    script.onload = () => initMap();
-    document.head.appendChild(script);
-
-    return () => {
-      // cleanup markers safely on unmount
-      markersRef.current.forEach((m) => {
-        try { m.setMap(null); } catch (_) {}
-      });
-      markersRef.current.clear();
-      if (mapRef.current) {
-        try { mapRef.current.destroy?.(); } catch (_) {}
-        mapRef.current = null;
-      }
-    };
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach((m) => {
+      try { m.setMap(null); } catch (_) {}
+    });
+    markersRef.current.clear();
   }, []);
 
-  // Init map after script load (or if already loaded)
-  useEffect(() => {
-    if (window.naver && !mapRef.current) {
-      initMap();
-    }
-  });
-
-  function initMap() {
-    if (!containerRef.current || mapRef.current || !window.naver) return;
-
-    const map = new window.naver.maps.Map(containerRef.current, {
-      center: new window.naver.maps.LatLng(36.6424, 127.4890),
-      zoom: 14,
-      mapTypeControl: false,
-    });
-
-    mapRef.current = map;
-    renderMarkers();
-  }
-
-  function renderMarkers() {
-    const map = mapRef.current;
-    if (!map || !window.naver) return;
-
-    // Remove old markers
-    markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current.clear();
-
-    properties.forEach((prop) => {
-      const isSelected = prop.id === selectedId;
+  const renderMarkers = useCallback((map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void) => {
+    clearMarkers();
+    props.forEach((prop) => {
+      const isSelected = prop.id === selId;
       const marker = new window.naver.maps.Marker({
         position: new window.naver.maps.LatLng(prop.lat, prop.lng),
         map,
@@ -143,30 +124,61 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
         },
         zIndex: isSelected ? 1000 : 0,
       });
-
-      window.naver.maps.Event.addListener(marker, "click", () => onSelect(prop.id));
+      window.naver.maps.Event.addListener(marker, "click", () => onSelectFn(prop.id));
       markersRef.current.set(prop.id, marker);
     });
-  }
+  }, [clearMarkers]);
 
-  // Sync markers on change
+  // Init map
   useEffect(() => {
-    if (mapRef.current && window.naver) {
-      renderMarkers();
-    }
-  }, [properties, selectedId]);
+    mountedRef.current = true;
+
+    loadNaverScript(() => {
+      if (!mountedRef.current || !containerRef.current) return;
+      if (mapRef.current) return;
+
+      const map = new window.naver.maps.Map(containerRef.current, {
+        center: new window.naver.maps.LatLng(36.6424, 127.4890),
+        zoom: 14,
+        mapTypeControl: false,
+        logoControl: true,
+        scaleControl: true,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: window.naver.maps.Position.RIGHT_BOTTOM,
+        },
+      });
+
+      mapRef.current = map;
+      renderMarkers(map, properties, selectedId, onSelect);
+    });
+
+    return () => {
+      mountedRef.current = false;
+      clearMarkers();
+      mapRef.current = null;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update markers when props/selection change
+  useEffect(() => {
+    if (!mapRef.current || !window.naver?.maps) return;
+    renderMarkers(mapRef.current, properties, selectedId, onSelect);
+  }, [properties, selectedId, onSelect, renderMarkers]);
 
   // Pan to selected
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || selectedId === null || !window.naver) return;
+    if (!mapRef.current || selectedId === null || !window.naver?.maps) return;
     const prop = properties.find((p) => p.id === selectedId);
     if (prop) {
-      map.panTo(new window.naver.maps.LatLng(prop.lat, prop.lng));
+      mapRef.current.panTo(new window.naver.maps.LatLng(prop.lat, prop.lng));
     }
   }, [selectedId, properties]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return (
+    <div ref={containerRef} className="w-full h-full" />
+  );
 };
 
 export default MapView;
