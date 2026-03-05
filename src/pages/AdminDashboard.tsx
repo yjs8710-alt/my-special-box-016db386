@@ -383,8 +383,25 @@ const AdminDashboard = () => {
                       onChange={(e) => setMemberSearch(e.target.value)}
                     />
                   </div>
+                  <button
+                    onClick={fetchMembers}
+                    disabled={membersLoading}
+                    className="p-1.5 rounded-md transition-colors hover:bg-muted/50"
+                    title="새로고침"
+                    style={{ color: "hsl(var(--muted-foreground))" }}
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
+                  </button>
                 </div>
               </div>
+
+              {/* 에러 메시지 */}
+              {membersError && (
+                <div className="flex items-center gap-2 rounded-xl p-3.5 text-sm" style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))" }}>
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {membersError}
+                </div>
+              )}
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
                 {/* Table header */}
@@ -395,10 +412,13 @@ const AdminDashboard = () => {
                   <span className="text-center">상태</span>
                   <span className="text-center">액션</span>
                 </div>
-                {filteredMembers.length === 0 && (
+                {membersLoading && (
+                  <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>
+                )}
+                {!membersLoading && filteredMembers.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>
                 )}
-                {filteredMembers.map((m, i) => (
+                {!membersLoading && filteredMembers.map((m) => (
                   <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""}`}>
                     <div
                       className="grid md:grid-cols-[1fr_1fr_130px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
