@@ -30,6 +30,8 @@ export interface MapProperty {
   registeredDate?: string; // 등록일
   checkedDate?: string;    // 확인일
   options?: string[];      // 옵션 아이콘
+  note?: string;           // 특이사항
+  vacateDate?: string;     // 퇴거일
   buildingPassword?: string; // 건물 비번
   password?: string;         // 레거시 호환 (현관 비번)
   roomPassword?: string;     // 방 비번
@@ -70,6 +72,8 @@ export const MAP_PROPERTIES: MapProperty[] = [
     registeredDate: "2024-01-10",
     checkedDate: "2024-01-20",
     options: ["에어컨", "전자키"],
+    note: "현 임차인 퇴거 협의 중",
+    vacateDate: "2024-03-31",
     buildingPassword: "1234#",
     roomPassword: "5678*",
     contact: "02-1234-5678",
