@@ -145,9 +145,9 @@ const LoginPage = () => {
               className="w-full rounded-full font-semibold"
               style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
               onClick={handleLogin}
-              disabled={!email || !password}
+              disabled={!email || !password || loading}
             >
-              로그인
+              {loading ? "로그인 중..." : "로그인"}
             </Button>
 
             {/* Divider */}
