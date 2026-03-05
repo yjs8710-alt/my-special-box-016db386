@@ -958,7 +958,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
 
                         {/* 건물명 + 주소 */}
                          <div className="w-[130px] flex-shrink-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30 min-w-0">
-                           <p className="text-[12px] font-extrabold text-foreground truncate leading-tight">{prop.buildingName ?? prop.title}</p>
+                           <div className="flex items-center gap-1 min-w-0">
+                             <p className="text-[12px] font-extrabold text-foreground truncate leading-tight flex-1 min-w-0">{prop.buildingName ?? prop.title}</p>
+                             <a
+                               href={`https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               onClick={(e) => e.stopPropagation()}
+                               title="로드뷰"
+                               className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-[10px] transition-colors hover:bg-primary/10"
+                               style={{ color: "hsl(var(--primary))" }}
+                             >
+                               🛣️
+                             </a>
+                           </div>
                            <div className="flex items-center gap-1 flex-wrap min-w-0">
                              <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">{shortAddress(prop.address)}</span>
                              {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
