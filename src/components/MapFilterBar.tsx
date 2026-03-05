@@ -136,6 +136,13 @@ interface MapFilterBarProps {
   showBuildYear?: boolean;
   showBuildingOptions?: boolean;
   showLandFilters?: boolean;
+  showApartmentFilters?: boolean;
+  apartmentActiveTypes?: string[];
+  onApartmentTypeChange?: (t: string) => void;
+  onClearApartmentTypes?: () => void;
+  apartmentDealTypes?: string[];
+  onApartmentDealTypeChange?: (t: string) => void;
+  onClearApartmentDealTypes?: () => void;
 }
 
 function makeFormatManwon(max: number) {
@@ -328,6 +335,13 @@ const MapFilterBar = ({
   showBuildYear = true,
   showBuildingOptions = false,
   showLandFilters = false,
+  showApartmentFilters = false,
+  apartmentActiveTypes = [],
+  onApartmentTypeChange,
+  onClearApartmentTypes,
+  apartmentDealTypes = [],
+  onApartmentDealTypeChange,
+  onClearApartmentDealTypes,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -460,6 +474,44 @@ const MapFilterBar = ({
             </div>
 
             <div className="px-4 py-3 flex flex-col gap-4">
+
+              {/* 아파트/오피스텔 필터 */}
+              {showApartmentFilters && (
+                <>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <SectionLabel>종 류</SectionLabel>
+                      {apartmentActiveTypes.length > 0 && (
+                        <button onClick={onClearApartmentTypes}
+                          className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                          style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                        >선택 삭제</button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {["아파트", "아파트분양권", "오피스텔", "오피스텔분양권", "연립/다세대", "빌라분양권"].map(t => (
+                        <Chip key={t} active={apartmentActiveTypes.includes(t)} onClick={() => onApartmentTypeChange?.(t)}>{t}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <SectionLabel>매전월</SectionLabel>
+                      {apartmentDealTypes.length > 0 && (
+                        <button onClick={onClearApartmentDealTypes}
+                          className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                          style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                        >선택 삭제</button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {["매매+전세+월세", "매매", "전세+월세", "전세", "월세"].map(t => (
+                        <Chip key={t} active={apartmentDealTypes.includes(t)} onClick={() => onApartmentDealTypeChange?.(t)}>{t}</Chip>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {/* 상가 카테고리 - showCategoryChips 일 때만 */}
               {showCategoryChips && (
