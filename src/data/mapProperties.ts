@@ -340,6 +340,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property3,
     description: "경복궁 인근 조용한 업무환경의 소형 사무실입니다. 자연채광이 풍부하며 인테리어 상태 양호. 광화문·종로 업무지구 인접으로 관공서·법무·회계 사무소에 적합.",
     memo: "자연채광 풍부, 인테리어 양호",
+    registeredDate: "2026-02-08",
     checkedDate: "2024-01-12",
     options: ["에어컨", "전자키", "냉장고"],
     password: "7777#",
