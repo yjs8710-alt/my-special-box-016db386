@@ -275,6 +275,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property1,
     description: "힙한 을지로 인쇄거리 감성 카페 임대입니다. 노출 콘크리트 인테리어 그대로 활용 가능, 전기 용량 충분. 을지로 특유의 레트로 감성으로 SNS 핫플레이스 창업에 이상적.",
     memo: "노출콘크리트 인테리어 유지, 전기용량 충분",
+    registeredDate: "2026-02-01",
     checkedDate: "2024-01-28",
     options: ["에어컨", "전자레인지", "냉장고"],
     contact: "02-6789-0123",
