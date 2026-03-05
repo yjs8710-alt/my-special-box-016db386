@@ -987,13 +987,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                         </div>
 
                         {/* ④우측 정보 — 고정 너비 */}
-                        <div className="flex flex-row items-stretch border-l border-border/30 flex-shrink-0" style={{ width: "80px" }}>
-                          {/* 빈 자리 (보증금/월세 이동됨) */}
-                          <div style={{ width: "0px" }} />
-                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등, 고정 시작점 */}
+                        {/* ④우측 메모/날짜/비번/옵션 — 고정 너비 */}
+                        <div className="flex-shrink-0 border-l border-border/30" style={{ width: "80px" }}>
                           <div
-                            className="border-l border-border/20 flex-1 min-w-0"
-                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 10px", height: "80px", alignContent: "stretch" }}
+                            className="w-full"
+                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 8px", height: "80px", alignContent: "stretch" }}
                           >
                             {/* 줄1: 메모 이모티콘 */}
                             <div className="flex items-center gap-1 overflow-visible">
