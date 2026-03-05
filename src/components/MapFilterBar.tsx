@@ -500,15 +500,30 @@ const MapFilterBar = ({
               {/* 비주거형 카테고리 - nonResidentialSubtypes 있을 때만 */}
               {nonResidentialSubtypes && nonResidentialSubtypes.length > 0 && (
                 <div>
-                  <SectionLabel>매물 유형</SectionLabel>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <SectionLabel>임대 / 매매</SectionLabel>
+                    {(() => {
+                      const arr = activeTypes ?? [activeType];
+                      const hasSelection = !arr.includes("전체") && arr.length > 0;
+                      return hasSelection ? (
+                        <button
+                          onClick={() => onTypeChange("전체")}
+                          className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
+                          style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+                        >
+                          선택 삭제
+                        </button>
+                      ) : null;
+                    })()}
+                  </div>
+                  <div className="flex flex-col gap-2">
                     {["임대", "매매"].map((group) => (
-                      <div key={group} className="w-full">
+                      <div key={group}>
                         <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--muted-foreground))" }}>
                           {group}
                         </span>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {nonResidentialSubtypes.filter((t) => t.group === group || (group === "임대" && t.group === "전체")).map((t) => {
+                          {nonResidentialSubtypes.filter((t) => t.group === group).map((t) => {
                             const arr = activeTypes ?? [activeType];
                             const key = (t as any).key ?? t.label;
                             const active = arr.includes(key);
