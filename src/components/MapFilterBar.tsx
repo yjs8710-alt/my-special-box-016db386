@@ -375,7 +375,7 @@ const MapFilterBar = ({
   return (
     <div
       className="absolute z-[1000] pointer-events-none"
-      style={{ top: 16, left: 16, right: 16, width: "auto", maxWidth: 700 }}
+      style={{ top: 16, left: 16, right: 16, width: "auto", maxWidth: 520 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
@@ -480,8 +480,8 @@ const MapFilterBar = ({
 
           {/* 검색바 */}
           <div
-            className="flex items-center bg-white rounded-xl overflow-hidden border border-border flex-1"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
+            className="flex items-center bg-white rounded-xl overflow-hidden border border-border"
+            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)", width: 220, flexShrink: 0 }}
           >
             <div className="flex items-center flex-1 px-3 gap-2 h-10">
               <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
