@@ -242,6 +242,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property6,
     description: "신촌 로데오거리 소형 상가로 대학생 유동인구가 풍부합니다. 소자본 창업에 최적화된 크기이며 인테리어 공사 허용. 연세대·이화여대 인근으로 젊은 층 타겟 업종 추천.",
     memo: "인테리어 공사 허용, 업종 제한 없음",
+    registeredDate: "2026-01-22",
     checkedDate: "2024-01-10",
     options: ["에어컨"],
     contact: "02-5678-9012",
