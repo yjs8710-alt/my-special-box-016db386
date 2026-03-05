@@ -1,25 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, MessageSquare,
   LogOut, Home, CheckCircle2, XCircle, Clock,
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
-  ChevronDown, ChevronUp, Search
+  ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
+import { supabase } from "@/lib/supabase";
 
-// ─── Mock 데이터 ────────────────────────────────────────────────────────────
-const MOCK_MEMBERS = [
-  { id: 1, name: "김중개사", email: "kim@realty.co.kr", phone: "010-1234-5678", agency: "강남공인중개사사무소", license: "11350-2024-00001", business: "123-45-67890", address: "서울 강남구 테헤란로 123", status: "pending", joinDate: "2026-03-01" },
-  { id: 2, name: "이공인", email: "lee@estate.kr", phone: "010-2345-6789", agency: "여의도부동산", license: "11440-2023-00125", business: "234-56-78901", address: "서울 영등포구 여의대로 56", status: "approved", joinDate: "2026-02-20" },
-  { id: 3, name: "박부동산", email: "park@house.kr", phone: "010-3456-7890", agency: "홍대공실중개", license: "11440-2022-00089", business: "345-67-89012", address: "서울 마포구 홍대입구로 78", status: "pending", joinDate: "2026-03-02" },
-  { id: 4, name: "최공인", email: "choi@prop.kr", phone: "010-4567-8901", agency: "판교테크빌딩", license: "41135-2023-00044", business: "456-78-90123", address: "경기 성남시 분당구 판교역로 166", status: "approved", joinDate: "2026-02-15" },
-  { id: 5, name: "정중개", email: "jung@space.kr", phone: "010-5678-9012", agency: "을지로중개사", license: "11140-2024-00067", business: "567-89-01234", address: "서울 중구 을지로3가 100", status: "rejected", joinDate: "2026-02-28" },
-  { id: 6, name: "한공인", email: "han@realty.kr", phone: "010-6789-0123", agency: "성수공간중개", license: "11200-2024-00033", business: "678-90-12345", address: "서울 성동구 성수2가 300", status: "pending", joinDate: "2026-03-03" },
-];
+// ─── Types ───────────────────────────────────────────────────────────────────
+type AgentProfile = {
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
+  agency_name: string;
+  license_number: string;
+  business_number: string;
+  agency_address: string;
+  agree_marketing: boolean;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  // joined from auth.users via email lookup
+  email?: string;
+};
 
 const MOCK_POSTS = [
   { id: 1, category: "notice", categoryLabel: "공지사항", title: "집다 플랫폼 서비스 오픈 안내", author: "관리자", date: "2026-03-01", views: 1240, reported: false, pinned: true },
@@ -48,14 +55,17 @@ const NAV = [
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("dashboard");
-  const [members, setMembers] = useState(MOCK_MEMBERS);
+  const [members, setMembers] = useState<AgentProfile[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [membersError, setMembersError] = useState("");
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [properties] = useState(MAP_PROPERTIES);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [propertySearch, setPropertySearch] = useState("");
   const [postSearch, setPostSearch] = useState("");
-  const [expandedMember, setExpandedMember] = useState<number | null>(null);
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
   useEffect(() => {
     if (sessionStorage.getItem("admin_auth") !== "true") {
@@ -63,12 +73,48 @@ const AdminDashboard = () => {
     }
   }, [navigate]);
 
+  // ─── agent_profiles 불러오기 ─────────────────────────────────────────────
+  const fetchMembers = useCallback(async () => {
+    setMembersLoading(true);
+    setMembersError("");
+    const { data, error } = await supabase
+      .from("agent_profiles")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setMembersError("데이터를 불러오는 중 오류가 발생했습니다: " + error.message);
+      setMembersLoading(false);
+      return;
+    }
+    setMembers(data as AgentProfile[]);
+    setMembersLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("admin_auth") === "true") {
+      fetchMembers();
+    }
+  }, [fetchMembers]);
+
   const handleLogout = () => {
     sessionStorage.removeItem("admin_auth");
     navigate("/admin/login");
   };
 
-  const updateMemberStatus = (id: number, status: string) => {
+  // ─── 승인/거절 처리 ──────────────────────────────────────────────────────
+  const updateMemberStatus = async (id: string, status: "approved" | "rejected") => {
+    setUpdatingId(id);
+    const { error } = await supabase
+      .from("agent_profiles")
+      .update({ status })
+      .eq("id", id);
+    setUpdatingId(null);
+
+    if (error) {
+      alert("상태 변경 중 오류가 발생했습니다: " + error.message);
+      return;
+    }
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
   };
 
@@ -92,8 +138,8 @@ const AdminDashboard = () => {
     const matchFilter = memberFilter === "all" || m.status === memberFilter;
     const matchSearch = !memberSearch ||
       m.name.includes(memberSearch) ||
-      m.email.includes(memberSearch) ||
-      m.agency.includes(memberSearch);
+      (m.email ?? "").includes(memberSearch) ||
+      m.agency_name.includes(memberSearch);
     return matchFilter && matchSearch;
   });
 
@@ -244,9 +290,9 @@ const AdminDashboard = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-foreground">{m.name}</span>
-                          <span className="text-xs text-muted-foreground">{m.agency}</span>
+                          <span className="text-xs text-muted-foreground">{m.agency_name}</span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{m.email} · 가입 {m.joinDate}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{m.email ?? m.phone} · 가입 {m.created_at.slice(0, 10)}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <button
@@ -337,8 +383,25 @@ const AdminDashboard = () => {
                       onChange={(e) => setMemberSearch(e.target.value)}
                     />
                   </div>
+                  <button
+                    onClick={fetchMembers}
+                    disabled={membersLoading}
+                    className="p-1.5 rounded-md transition-colors hover:bg-muted/50"
+                    title="새로고침"
+                    style={{ color: "hsl(var(--muted-foreground))" }}
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
+                  </button>
                 </div>
               </div>
+
+              {/* 에러 메시지 */}
+              {membersError && (
+                <div className="flex items-center gap-2 rounded-xl p-3.5 text-sm" style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))" }}>
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {membersError}
+                </div>
+              )}
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
                 {/* Table header */}
@@ -349,10 +412,13 @@ const AdminDashboard = () => {
                   <span className="text-center">상태</span>
                   <span className="text-center">액션</span>
                 </div>
-                {filteredMembers.length === 0 && (
+                {membersLoading && (
+                  <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>
+                )}
+                {!membersLoading && filteredMembers.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>
                 )}
-                {filteredMembers.map((m, i) => (
+                {!membersLoading && filteredMembers.map((m) => (
                   <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""}`}>
                     <div
                       className="grid md:grid-cols-[1fr_1fr_130px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
@@ -360,15 +426,15 @@ const AdminDashboard = () => {
                     >
                       <div>
                         <div className="text-sm font-semibold text-foreground">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.agency}</div>
+                        <div className="text-xs text-muted-foreground">{m.agency_name}</div>
                       </div>
                       <div className="hidden md:block">
-                        <div className="text-xs text-foreground">{m.email}</div>
+                        <div className="text-xs text-foreground">{m.email ?? "-"}</div>
                         <div className="text-xs text-muted-foreground">{m.phone}</div>
                       </div>
                       <div className="hidden md:block">
-                        <div className="text-xs text-foreground truncate">{m.license}</div>
-                        <div className="text-xs text-muted-foreground">{m.business}</div>
+                        <div className="text-xs text-foreground truncate">{m.license_number}</div>
+                        <div className="text-xs text-muted-foreground">{m.business_number}</div>
                       </div>
                       <div className="hidden md:flex justify-center">
                         <span
@@ -413,13 +479,13 @@ const AdminDashboard = () => {
                         style={{ background: "hsl(var(--muted) / 0.5)", borderColor: "hsl(var(--border))" }}
                       >
                         {[
-                          { label: "사무소명", value: m.agency },
-                          { label: "공인중개사 등록번호", value: m.license },
-                          { label: "사업자 등록번호", value: m.business },
-                          { label: "사무소 주소", value: m.address },
-                          { label: "이메일", value: m.email },
+                          { label: "사무소명", value: m.agency_name },
+                          { label: "공인중개사 등록번호", value: m.license_number },
+                          { label: "사업자 등록번호", value: m.business_number },
+                          { label: "사무소 주소", value: m.agency_address },
+                          { label: "이메일", value: m.email ?? "-" },
                           { label: "전화번호", value: m.phone },
-                          { label: "가입일", value: m.joinDate },
+                          { label: "가입일", value: m.created_at.slice(0, 10) },
                           { label: "상태", value: STATUS_LABEL[m.status].label },
                         ].map(({ label, value }) => (
                           <div key={label}>

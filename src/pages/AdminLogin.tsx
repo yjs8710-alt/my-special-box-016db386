@@ -4,25 +4,50 @@ import { Home, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// 간단한 관리자 인증 (실제 서비스에서는 백엔드 인증 사용)
-const ADMIN_ID = "admin";
-const ADMIN_PW = "jibda2024!";
+import { supabase } from "@/lib/supabase";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
-  const [id, setId] = useState("");
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (id === ADMIN_ID && pw === ADMIN_PW) {
-      sessionStorage.setItem("admin_auth", "true");
-      navigate("/admin");
-    } else {
-      setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+  const handleLogin = async () => {
+    setError("");
+    setLoading(true);
+
+    // 1. Supabase 로그인
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: pw,
+    });
+
+    if (signInError || !signInData.user) {
+      setLoading(false);
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+      return;
     }
+
+    // 2. admin 역할 확인
+    const { data: roleData, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", signInData.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError || !roleData) {
+      await supabase.auth.signOut();
+      setLoading(false);
+      setError("관리자 권한이 없는 계정입니다.");
+      return;
+    }
+
+    setLoading(false);
+    sessionStorage.setItem("admin_auth", "true");
+    navigate("/admin");
   };
 
   return (
@@ -56,12 +81,13 @@ const AdminLogin = () => {
         {/* Login Card */}
         <div className="bg-card border border-border rounded-2xl shadow-md p-8 flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="admin-id">관리자 아이디</Label>
+            <Label htmlFor="admin-email">이메일</Label>
             <Input
-              id="admin-id"
-              placeholder="아이디 입력"
-              value={id}
-              onChange={(e) => { setId(e.target.value); setError(""); }}
+              id="admin-email"
+              type="email"
+              placeholder="admin@example.com"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
           </div>
@@ -95,9 +121,9 @@ const AdminLogin = () => {
             className="w-full rounded-full font-semibold mt-1"
             style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
             onClick={handleLogin}
-            disabled={!id || !pw}
+            disabled={!email || !pw || loading}
           >
-            로그인
+            {loading ? "로그인 중..." : "로그인"}
           </Button>
         </div>
 
