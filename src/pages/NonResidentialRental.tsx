@@ -313,47 +313,55 @@ const NonResidentialRental = () => {
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        {/* 임대 그룹 */}
-        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">임대</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체" || t.group === "임대").map(t => {
+        {/* 전체 */}
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체").map(t => {
           const isActive = activeTypes.includes(t.key);
           return (
-            <button
-              key={t.key}
-              onClick={() => toggleType(t.key)}
+            <button key={t.key} onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
-            >
-              {t.label}
-            </button>
+              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+            >{t.label}</button>
+          );
+        })}
+
+        <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
+
+        {/* 임대 그룹 */}
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">임대</span>
+        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "임대").map(t => {
+          const isActive = activeTypes.includes(t.key);
+          return (
+            <button key={t.key} onClick={() => toggleType(t.key)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+            >{t.label}</button>
           );
         })}
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
         {/* 매매 그룹 */}
-        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap">매매</span>
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">매매</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
           const isActive = activeTypes.includes(t.key);
           return (
-            <button
-              key={t.key}
-              onClick={() => toggleType(t.key)}
+            <button key={t.key} onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
-            >
-              {t.label}
-            </button>
+              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+            >{t.label}</button>
           );
         })}
+
+        {/* 선택 삭제 */}
+        {!activeTypes.includes("전체") && (
+          <button
+            onClick={() => setActiveTypes(["전체"])}
+            className="ml-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
+            style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+          >
+            선택 삭제
+          </button>
+        )}
       </div>
 
       <main
