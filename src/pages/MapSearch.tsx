@@ -44,6 +44,7 @@ const MapSearch = () => {
           onSelect={setSelectedId}
           activeType={activeType}
           onTypeChange={setActiveType}
+          onDeleteProperties={handleDeleteProperties}
         />
         {/* Map */}
         <div className="flex-1 relative">
