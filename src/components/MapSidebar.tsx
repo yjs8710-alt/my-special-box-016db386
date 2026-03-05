@@ -836,6 +836,25 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             </div>
             {/* 2행: 액션 버튼들 */}
             <div className="px-3 pb-2 flex items-center gap-1.5">
+              {/* 선택 삭제 버튼 - 찜 버튼 위에 */}
+              <button
+                onClick={() => {
+                  if (checkedIds.size === 0) { alert("삭제할 매물을 먼저 선택해주세요."); return; }
+                  if (onDeleteProperties) {
+                    onDeleteProperties(new Set(checkedIds));
+                    setCheckedIds(new Set());
+                  }
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
+                style={
+                  checkedIds.size > 0
+                    ? { background: "#fff1f2", color: "#dc2626", borderColor: "#fca5a5" }
+                    : { background: "white", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                }
+              >
+                <X className="w-3 h-3" />
+                삭제{checkedIds.size > 0 ? ` ${checkedIds.size}` : ""}
+              </button>
               {/* 찜 버튼 */}
               <button
                 onClick={() => {
