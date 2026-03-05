@@ -337,6 +337,13 @@ const ApartmentRental = () => {
             onLandlordClick={() => setShowLandlord(true)}
             showCategoryChips={false}
             showRoomTypes={false}
+            showApartmentFilters={true}
+            apartmentActiveTypes={activeTypes}
+            onApartmentTypeChange={toggleType}
+            onClearApartmentTypes={() => setActiveTypes([])}
+            apartmentDealTypes={activeDealTypes}
+            onApartmentDealTypeChange={toggleDealType}
+            onClearApartmentDealTypes={() => setActiveDealTypes([])}
           />
         </div>
       </main>
