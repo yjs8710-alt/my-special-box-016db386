@@ -652,7 +652,7 @@ interface MapSidebarProps {
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
-const DEFAULT_WIDTH = 380;
+const DEFAULT_WIDTH = 540;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSidebarProps) => {
   const [width, setWidth] = useState(() => {
