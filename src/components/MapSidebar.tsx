@@ -956,21 +956,27 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                           <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? prop.contact ?? null} />
                         </div>
 
-                        {/* ③건물명+주소 — 가변, 나머지 공간 균등 분배를 위해 flex-1 */}
+                        {/* ③건물명+주소+보증금/월세 — 가변 */}
                         <div className="flex-1 min-w-0 flex flex-col justify-center px-2 gap-0.5 border-l border-border/30">
-                          <div className="flex items-center gap-1 min-w-0">
-                            <p className="text-[12px] font-extrabold text-foreground truncate leading-tight flex-1 min-w-0">{prop.buildingName ?? prop.title}</p>
+                          {/* 건물명 + 로드뷰 + 보증금/월세 한 줄 */}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <p className="text-[12px] font-extrabold text-foreground truncate leading-tight min-w-0 flex-shrink">{prop.buildingName ?? prop.title}</p>
                             <a
                               href={`https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
                               title="로드뷰"
-                              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold transition-colors hover:bg-primary/10 whitespace-nowrap"
-                              style={{ color: "hsl(var(--primary))" }}
+                              className="flex-shrink-0 px-1 py-0.5 rounded text-[8px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
+                              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
                             >
                               로드뷰
                             </a>
+                            <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                              <span className="text-[10px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
+                              <span className="text-[9px] text-muted-foreground">/</span>
+                              <span className="text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+                            </div>
                           </div>
                           <div className="flex items-center gap-1 flex-wrap min-w-0">
                             <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap">{shortAddress(prop.address)}</span>
@@ -980,23 +986,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                           </div>
                         </div>
 
-                        {/* ④가격 + 우측 정보 — 고정 너비로 우측 고정 */}
-                        <div className="flex flex-row items-stretch border-l border-border/30 flex-shrink-0" style={{ width: "160px" }}>
-                          {/* 보증금/월세 */}
-                          <div className="flex flex-col justify-center px-1.5 gap-1" style={{ width: "80px" }}>
-                             <div className="flex items-center gap-1 h-4">
-                               <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">보증금</span>
-                               <span className="text-[11px] font-extrabold text-foreground truncate">{prop.deposit}</span>
-                             </div>
-                             <div className="flex items-center gap-1 h-4">
-                               <span className="text-[9px] text-muted-foreground whitespace-nowrap w-[26px]">월세</span>
-                               <span className="text-[12px] font-extrabold text-accent leading-tight truncate">{prop.monthly}</span>
-                             </div>
-                           </div>
-                          {/* 우측: 메모/날짜/비번/옵션 — 4줄 grid 균등, 고정 시작점 */}
+                        {/* ④우측 정보 — 고정 너비 */}
+                        {/* ④우측 메모/날짜/비번/옵션 — 고정 너비 */}
+                        <div className="flex-shrink-0 border-l border-border/30" style={{ width: "80px" }}>
                           <div
-                            className="border-l border-border/20 flex-1 min-w-0"
-                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 10px", height: "80px", alignContent: "stretch" }}
+                            className="w-full"
+                            style={{ display: "grid", gridTemplateRows: "repeat(4, 20px)", padding: "0 6px 0 8px", height: "80px", alignContent: "stretch" }}
                           >
                             {/* 줄1: 메모 이모티콘 */}
                             <div className="flex items-center gap-1 overflow-visible">
