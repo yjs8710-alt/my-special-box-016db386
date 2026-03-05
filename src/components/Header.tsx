@@ -6,7 +6,7 @@ import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 
 const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential" },
-  { label: "상가임대", path: "/commercial" },
+  { label: "아파트/오피스텔", path: "/apartment" },
   { label: "주거형 외 임대·매매", path: "/non-residential" },
   { label: "토지", path: "/land" },
 ];
