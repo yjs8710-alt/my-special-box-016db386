@@ -1,15 +1,13 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { MapProperty } from "@/data/mapProperties";
 
-// Fix leaflet default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+declare global {
+  interface Window {
+    naver: any;
+  }
+}
+
+const NAVER_CLIENT_ID = "qhaskf0966";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#0a2d6e",
@@ -27,7 +25,7 @@ const TYPE_ACCENT: Record<string, string> = {
   "병원·학원": "#fb7185",
 };
 
-function createPinIcon(property: MapProperty, isSelected: boolean) {
+function createPinHtml(property: MapProperty, isSelected: boolean) {
   const color = TYPE_COLORS[property.type] ?? "#0a2d6e";
   const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
   const shadow = isSelected
@@ -38,7 +36,7 @@ function createPinIcon(property: MapProperty, isSelected: boolean) {
     : color;
   const scale = isSelected ? 1.25 : 1;
 
-  const html = `
+  return `
     <div style="
       background:${bg};
       color:white;
@@ -55,7 +53,6 @@ function createPinIcon(property: MapProperty, isSelected: boolean) {
       position:relative;
       cursor:pointer;
       letter-spacing:-0.3px;
-      backdrop-filter:blur(4px);
     ">
       ${property.monthly}
       <div style="
@@ -71,13 +68,6 @@ function createPinIcon(property: MapProperty, isSelected: boolean) {
       "></div>
     </div>
   `;
-
-  return L.divIcon({
-    html,
-    className: "",
-    iconAnchor: [32, 36],
-    iconSize: [64, 36],
-  });
 }
 
 interface MapViewProps {
@@ -87,66 +77,86 @@ interface MapViewProps {
 }
 
 const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
-  const mapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<Map<number, L.Marker>>(new Map());
+  const mapRef = useRef<any>(null);
+  const markersRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Init map
+  // Load Naver Maps script
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    const map = L.map(containerRef.current, {
-      center: [36.6424, 127.4890],
-      zoom: 14,
-      zoomControl: false,
-    });
-
-    // CartoDB Positron — clean, minimal, light gray style
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 20,
-    }).addTo(map);
-
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    mapRef.current = map;
+    if (document.getElementById("naver-maps-script")) return;
+    const script = document.createElement("script");
+    script.id = "naver-maps-script";
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_CLIENT_ID}`;
+    script.async = true;
+    script.onload = () => initMap();
+    document.head.appendChild(script);
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      // cleanup markers on unmount
+      markersRef.current.forEach((m) => m.setMap(null));
+      markersRef.current.clear();
     };
   }, []);
 
-  // Sync markers
+  // Init map after script load (or if already loaded)
   useEffect(() => {
+    if (window.naver && !mapRef.current) {
+      initMap();
+    }
+  });
+
+  function initMap() {
+    if (!containerRef.current || mapRef.current || !window.naver) return;
+
+    const map = new window.naver.maps.Map(containerRef.current, {
+      center: new window.naver.maps.LatLng(36.6424, 127.4890),
+      zoom: 14,
+      mapTypeControl: false,
+    });
+
+    mapRef.current = map;
+    renderMarkers();
+  }
+
+  function renderMarkers() {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !window.naver) return;
 
     // Remove old markers
-    markersRef.current.forEach((m) => m.remove());
+    markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current.clear();
 
     properties.forEach((prop) => {
       const isSelected = prop.id === selectedId;
-      const marker = L.marker([prop.lat, prop.lng], {
-        icon: createPinIcon(prop, isSelected),
-        zIndexOffset: isSelected ? 1000 : 0,
+      const marker = new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(prop.lat, prop.lng),
+        map,
+        icon: {
+          content: createPinHtml(prop, isSelected),
+          anchor: new window.naver.maps.Point(32, 36),
+        },
+        zIndex: isSelected ? 1000 : 0,
       });
 
-      marker.on("click", () => onSelect(prop.id));
-      marker.addTo(map);
+      window.naver.maps.Event.addListener(marker, "click", () => onSelect(prop.id));
       markersRef.current.set(prop.id, marker);
     });
-  }, [properties, selectedId, onSelect]);
+  }
 
-  // Fly to selected
+  // Sync markers on change
+  useEffect(() => {
+    if (mapRef.current && window.naver) {
+      renderMarkers();
+    }
+  }, [properties, selectedId]);
+
+  // Pan to selected
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || selectedId === null) return;
+    if (!map || selectedId === null || !window.naver) return;
     const prop = properties.find((p) => p.id === selectedId);
     if (prop) {
-      map.flyTo([prop.lat, prop.lng], 15, { duration: 0.8 });
+      map.panTo(new window.naver.maps.LatLng(prop.lat, prop.lng));
     }
   }, [selectedId, properties]);
 
