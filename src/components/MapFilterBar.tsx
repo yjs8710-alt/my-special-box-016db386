@@ -481,7 +481,7 @@ const MapFilterBar = ({
           {/* 검색바 */}
           <div
             className="flex items-center bg-white rounded-xl overflow-hidden border border-border"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)", width: 220, flexShrink: 0 }}
+            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)", width: 320, flexShrink: 0 }}
           >
             <div className="flex items-center flex-1 px-3 gap-2 h-10">
               <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
