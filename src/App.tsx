@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import MapSearch from "./pages/MapSearch";
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
-import CommercialRental from "./pages/CommercialRental";
+import ApartmentRental from "./pages/ApartmentRental";
 import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/map" element={<MapSearch />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/community" element={<Community />} />
-          <Route path="/commercial" element={<CommercialRental />} />
+          <Route path="/apartment" element={<ApartmentRental />} />
           <Route path="/residential" element={<ResidentialRental />} />
           <Route path="/land" element={<LandSearch />} />
           <Route path="/non-residential" element={<NonResidentialRental />} />
