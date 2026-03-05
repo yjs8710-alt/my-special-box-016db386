@@ -12,6 +12,8 @@ import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,8 @@ const App = () => (
           <Route path="/land" element={<LandSearch />} />
           <Route path="/non-residential" element={<NonResidentialRental />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
