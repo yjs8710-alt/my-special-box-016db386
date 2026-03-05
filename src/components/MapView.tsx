@@ -92,9 +92,15 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
     document.head.appendChild(script);
 
     return () => {
-      // cleanup markers on unmount
-      markersRef.current.forEach((m) => m.setMap(null));
+      // cleanup markers safely on unmount
+      markersRef.current.forEach((m) => {
+        try { m.setMap(null); } catch (_) {}
+      });
       markersRef.current.clear();
+      if (mapRef.current) {
+        try { mapRef.current.destroy?.(); } catch (_) {}
+        mapRef.current = null;
+      }
     };
   }, []);
 
