@@ -89,7 +89,7 @@ const LoginPage = () => {
                 <button
                   className="text-xs hover:underline"
                   style={{ color: "hsl(var(--primary))" }}
-                  onClick={() => {}}
+                  onClick={() => navigate("/forgot-password")}
                   type="button"
                 >
                   비밀번호 찾기
