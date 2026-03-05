@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_profiles: {
+        Row: {
+          agency_address: string
+          agency_name: string
+          agree_marketing: boolean
+          business_number: string
+          created_at: string
+          id: string
+          license_number: string
+          name: string
+          phone: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agency_address: string
+          agency_name: string
+          agree_marketing?: boolean
+          business_number: string
+          created_at?: string
+          id?: string
+          license_number: string
+          name: string
+          phone: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agency_address?: string
+          agency_name?: string
+          agree_marketing?: boolean
+          business_number?: string
+          created_at?: string
+          id?: string
+          license_number?: string
+          name?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
