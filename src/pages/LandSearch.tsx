@@ -37,6 +37,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-02-10",
+    checkedDate: "2026-03-01",
   },
   {
     id: 202,
@@ -64,6 +66,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-01-15",
+    checkedDate: "2026-02-20",
   },
   {
     id: 203,
@@ -91,6 +95,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-01-20",
+    checkedDate: "2026-02-25",
   },
   {
     id: 204,
@@ -118,6 +124,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "협의",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-02-03",
+    checkedDate: "2026-03-02",
   },
   {
     id: 205,
@@ -145,6 +153,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-01-28",
+    checkedDate: "2026-02-28",
   },
   {
     id: 206,
@@ -172,6 +182,8 @@ const LAND_PROPERTIES: MapProperty[] = [
     availableFrom: "즉시",
     totalFloors: "-",
     buildYear: "-",
+    registeredDate: "2026-02-07",
+    checkedDate: "2026-03-03",
   },
 ];
 
