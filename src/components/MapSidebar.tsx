@@ -989,13 +989,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                             {regDate && (
                               <div className="flex items-center gap-0.5 flex-shrink-0" title="등록일">
                                 <CalendarPlus className="w-2.5 h-2.5 text-muted-foreground" />
-                                <span className="text-[9px] font-bold text-muted-foreground">{regDate}</span>
+                                <span className="text-[9px] font-bold text-muted-foreground">등록{regDate}</span>
                               </div>
                             )}
                             {chkDate && (
                               <div className="flex items-center gap-0.5 flex-shrink-0" title="확인일">
                                 <CalendarCheck className="w-2.5 h-2.5 text-primary" />
-                                <span className="text-[9px] font-extrabold text-primary">{chkDate}</span>
+                                <span className="text-[9px] font-extrabold text-primary">확인{chkDate}</span>
                               </div>
                             )}
                             {buildingPw && (
