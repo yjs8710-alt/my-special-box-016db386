@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, User, Home, Map, Users } from "lucide-react";
+import { Menu, X, Bell, User, Home, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -21,31 +21,18 @@ const Header = () => {
       {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
       {/* Top bar */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
+        <div className="w-full px-4 sm:px-6">
+          <div className="flex items-center h-14">
             {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
-              <div className="flex items-center gap-1.5">
-                <div className="w-7 h-7 rounded bg-accent flex items-center justify-center">
-                  <Home className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
+            <div className="flex items-center gap-1.5 cursor-pointer mr-4" onClick={() => navigate("/")}>
+              <div className="w-7 h-7 rounded bg-accent flex items-center justify-center">
+                <Home className="w-4 h-4 text-white" />
               </div>
-              <span className="hidden sm:block text-xs text-white/40 font-light pl-2 border-l border-white/20">
-                중개사 전용 플랫폼
-              </span>
+              <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
             </div>
 
             {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center">
-              {/* 지도검색 */}
-              <button
-                onClick={() => navigate("/map")}
-                className="flex items-center gap-1.5 text-sm font-medium px-4 py-4 text-white/80 hover:text-accent transition-colors whitespace-nowrap"
-              >
-                <Map className="w-3.5 h-3.5" />
-                지도 검색
-              </button>
+            <nav className="hidden md:flex items-center flex-1">
               {NAV_ITEMS.map((item) => (
                 <a
                   key={item.label}
@@ -67,29 +54,30 @@ const Header = () => {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-1.5">
-              <button className="hidden md:flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors">
+            <div className="hidden md:flex items-center gap-1.5 ml-auto">
+              <button className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors">
                 <Bell className="w-4 h-4" />
                 <span>알림</span>
               </button>
-              <button className="hidden md:flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors" onClick={() => navigate("/login")}>
+              <button className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors" onClick={() => navigate("/login")}>
                 <User className="w-4 h-4" />
                 <span>로그인 / 회원가입</span>
               </button>
               <Button
                 size="sm"
                 onClick={() => setShowRegister(true)}
-                className="hidden md:flex bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-4 rounded-full"
+                className="bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-4 rounded-full"
               >
                 매물 등록
               </Button>
-              <button
-                className="md:hidden text-white p-1"
-                onClick={() => setMenuOpen(!menuOpen)}
-              >
-                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
             </div>
+
+            <button
+              className="md:hidden text-white p-1 ml-auto"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
       </div>
