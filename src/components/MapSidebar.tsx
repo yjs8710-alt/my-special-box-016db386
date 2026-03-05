@@ -885,7 +885,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
               </div>
             ) : (
               <div className="p-2 flex flex-col gap-1.5">
-                {[...properties].sort((a, b) => {
+                 {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
                   if (isSaleA !== isSaleB) return isSaleA - isSaleB;
@@ -893,7 +893,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                   const dateA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
                   const dateB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
                   return dateB - dateA;
-                }).map((prop) => {
+                }).map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
