@@ -378,37 +378,19 @@ const MapFilterBar = ({
       style={{ top: 16, left: 16, right: 16, width: "auto", maxWidth: 520 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
-        {/* 매물번호 검색 + 임대인 번호 찾기 */}
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center gap-2 bg-white rounded-xl px-3 h-10 border border-border flex-1"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)" }}
-          >
-            <Hash className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
-            <input
-              type="text"
-              value={propertyId}
-              onChange={(e) => onPropertyIdChange(e.target.value)}
-              placeholder="매물번호 검색 (예: 1023)"
-              className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-            />
-            {propertyId && (
-              <button onClick={() => onPropertyIdChange("")} className="text-muted-foreground hover:text-foreground">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-          {onLandlordClick && (
+        {/* 임대인 번호 찾기 */}
+        {onLandlordClick && (
+          <div className="flex items-center gap-2 justify-end">
             <button
               onClick={onLandlordClick}
-              className="flex items-center gap-1.5 h-10 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all"
               style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
             >
               <Phone className="w-3.5 h-3.5" />
               건물주 번호 검색
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* 주소 검색 + 필터 버튼 */}
         <div
