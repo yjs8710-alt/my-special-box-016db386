@@ -406,15 +406,15 @@ const AdminDashboard = () => {
                     >
                       <div>
                         <div className="text-sm font-semibold text-foreground">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.agency}</div>
+                        <div className="text-xs text-muted-foreground">{m.agency_name}</div>
                       </div>
                       <div className="hidden md:block">
-                        <div className="text-xs text-foreground">{m.email}</div>
+                        <div className="text-xs text-foreground">{m.email ?? "-"}</div>
                         <div className="text-xs text-muted-foreground">{m.phone}</div>
                       </div>
                       <div className="hidden md:block">
-                        <div className="text-xs text-foreground truncate">{m.license}</div>
-                        <div className="text-xs text-muted-foreground">{m.business}</div>
+                        <div className="text-xs text-foreground truncate">{m.license_number}</div>
+                        <div className="text-xs text-muted-foreground">{m.business_number}</div>
                       </div>
                       <div className="hidden md:flex justify-center">
                         <span
