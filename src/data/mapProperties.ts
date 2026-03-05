@@ -208,6 +208,7 @@ export const MAP_PROPERTIES: MapProperty[] = [
     image: property5,
     description: "판교 테크노밸리 IT 기업 밀집 지역 대형 오피스입니다. 분리된 회의실 4개, 탕비실, 서버룸 구성 가능. 신분당선 판교역 도보 5분, 주차장 넉넉. IT·스타트업·벤처기업에 최적입니다.",
     memo: "회의실 4개, 서버룸 별도, 구내식당 있음",
+    registeredDate: "2026-01-18",
     checkedDate: "2024-01-25",
     options: ["에어컨", "전자키", "주차", "냉장고"],
     password: "1357*",
