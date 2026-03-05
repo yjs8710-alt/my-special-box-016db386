@@ -1019,6 +1019,24 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                                 {prop.options.length > 4 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 4}</span>}
                               </>
                             )}
+                            {/* 퇴거일 */}
+                            {prop.vacateDate && (
+                              <>
+                                <span className="flex-shrink-0 w-px h-3 bg-border/40" />
+                                <span className="text-[9px] font-bold flex-shrink-0 whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
+                                  퇴거{prop.vacateDate}
+                                </span>
+                              </>
+                            )}
+                            {/* 특이사항 */}
+                            {prop.note && (
+                              <>
+                                {!prop.vacateDate && <span className="flex-shrink-0 w-px h-3 bg-border/40" />}
+                                <span className="text-[9px] text-muted-foreground flex-shrink-0 truncate max-w-[100px]" title={prop.note}>
+                                  ※{prop.note}
+                                </span>
+                              </>
+                            )}
                           </div>
 
                         </div>
