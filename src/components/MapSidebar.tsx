@@ -712,7 +712,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
     const onMove = (ev: MouseEvent) => {
       if (!dragging.current) return;
       const delta = startX.current - ev.clientX;
-      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta)));
+      const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
+      setWidth(newWidth);
+      localStorage.setItem("sidebar_width", String(newWidth));
     };
     const onUp = () => {
       dragging.current = false;
