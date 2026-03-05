@@ -995,30 +995,30 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0 }: MapSide
                             </div>
                             {/* 줄2: 등록일 / 확인일 — 가로 정렬 */}
                             <div className="flex flex-row items-center gap-2 overflow-hidden">
-                              <div className="flex items-center gap-0.5" title="등록일">
-                                <CalendarPlus className="w-2 h-2 text-muted-foreground flex-shrink-0" />
-                                <span className="text-[8px] text-muted-foreground">{regDate ?? "-"}</span>
-                              </div>
-                              <div className="flex items-center gap-0.5" title="확인일">
-                                <CalendarCheck className="w-2 h-2 text-primary flex-shrink-0" />
-                                <span className="text-[8px] text-primary font-semibold">{chkDate ?? "-"}</span>
-                              </div>
-                            </div>
-                            {/* 줄3: 건물비번 / 방비번 */}
-                            <div className="flex items-center gap-1.5 overflow-hidden">
-                              {buildingPw ? (
-                                <div className="flex items-center gap-0.5" title="건물 비밀번호">
-                                  <KeyRound className="w-2 h-2 text-muted-foreground flex-shrink-0" />
-                                  <span className="text-[8px] text-muted-foreground font-mono">건{buildingPw}</span>
-                                </div>
-                              ) : <span className="opacity-0 text-[8px]">-</span>}
-                              {roomPw ? (
-                                <div className="flex items-center gap-0.5" title="방 비밀번호">
-                                  <KeyRound className="w-2 h-2 text-accent flex-shrink-0" />
-                                  <span className="text-[8px] text-accent font-mono">방{roomPw}</span>
-                                </div>
-                              ) : null}
-                            </div>
+                               <div className="flex items-center gap-0.5" title="등록일">
+                                 <CalendarPlus className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                                 <span className="text-[10px] font-bold text-muted-foreground">{regDate ?? "-"}</span>
+                               </div>
+                               <div className="flex items-center gap-0.5" title="확인일">
+                                 <CalendarCheck className="w-2.5 h-2.5 text-primary flex-shrink-0" />
+                                 <span className="text-[10px] font-extrabold text-primary">{chkDate ?? "-"}</span>
+                               </div>
+                             </div>
+                             {/* 줄3: 건물비번 / 방비번 */}
+                             <div className="flex items-center gap-1.5 overflow-hidden">
+                               {buildingPw ? (
+                                 <div className="flex items-center gap-0.5" title="건물 비밀번호">
+                                   <KeyRound className="w-2.5 h-2.5 text-muted-foreground flex-shrink-0" />
+                                   <span className="text-[10px] font-extrabold text-muted-foreground font-mono">건{buildingPw}</span>
+                                 </div>
+                               ) : <span className="opacity-0 text-[10px]">-</span>}
+                               {roomPw ? (
+                                 <div className="flex items-center gap-0.5" title="방 비밀번호">
+                                   <KeyRound className="w-2.5 h-2.5 text-accent flex-shrink-0" />
+                                   <span className="text-[10px] font-extrabold text-accent font-mono">방{roomPw}</span>
+                                 </div>
+                               ) : null}
+                             </div>
                             {/* 줄4: 옵션 아이콘 */}
                             <div className="flex items-center gap-0.5 overflow-hidden">
                               <div className="flex items-center gap-0.5 overflow-hidden flex-1">
