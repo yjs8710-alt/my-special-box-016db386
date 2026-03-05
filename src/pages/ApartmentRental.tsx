@@ -227,33 +227,28 @@ const APARTMENT_PROPERTIES: MapProperty[] = [
   },
 ];
 
-const APARTMENT_SUBTYPES = ["전체", "아파트", "오피스텔"];
+const APARTMENT_SUBTYPES = ["아파트", "아파트분양권", "오피스텔", "오피스텔분양권", "연립/다세대", "빌라분양권"];
+const APARTMENT_DEAL_TYPES = ["매매+전세+월세", "매매", "전세+월세", "전세", "월세"];
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
+  const [activeTypes, setActiveTypes] = useState<string[]>([]);
+  const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   const toggleType = (t: string) => {
-    if (t === "전체") {
-      setActiveTypes(["전체"]);
-      return;
-    }
-    setActiveTypes(prev => {
-      const without전체 = prev.filter(x => x !== "전체");
-      if (without전체.includes(t)) {
-        const next = without전체.filter(x => x !== t);
-        return next.length === 0 ? ["전체"] : next;
-      }
-      return [...without전체, t];
-    });
+    setActiveTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+  };
+
+  const toggleDealType = (t: string) => {
+    setActiveDealTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
   };
 
   const filtered = APARTMENT_PROPERTIES.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
+    if (activeTypes.length > 0 && !activeTypes.includes(p.type)) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase();
@@ -273,24 +268,43 @@ const ApartmentRental = () => {
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        <span className="text-white/50 text-xs font-semibold whitespace-nowrap">유형</span>
+        {/* 종류 */}
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">종 류</span>
         {APARTMENT_SUBTYPES.map(t => {
           const isActive = activeTypes.includes(t);
           return (
-            <button
-              key={t}
-              onClick={() => toggleType(t)}
+            <button key={t} onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
-            >
-              {t}
-            </button>
+              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+            >{t}</button>
           );
         })}
+        {activeTypes.length > 0 && (
+          <button onClick={() => setActiveTypes([])}
+            className="px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
+            style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+          >선택 삭제</button>
+        )}
+
+        <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
+
+        {/* 매전월 */}
+        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">매전월</span>
+        {APARTMENT_DEAL_TYPES.map(t => {
+          const isActive = activeDealTypes.includes(t);
+          return (
+            <button key={t} onClick={() => toggleDealType(t)}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+            >{t}</button>
+          );
+        })}
+        {activeDealTypes.length > 0 && (
+          <button onClick={() => setActiveDealTypes([])}
+            className="px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
+            style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
+          >선택 삭제</button>
+        )}
       </div>
 
       <main
