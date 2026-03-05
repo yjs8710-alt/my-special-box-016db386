@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import MapSearch from "./pages/MapSearch";
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
-import CommercialRental from "./pages/CommercialRental";
+import ApartmentRental from "./pages/ApartmentRental";
 import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
