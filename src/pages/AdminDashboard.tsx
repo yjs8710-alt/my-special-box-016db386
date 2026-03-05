@@ -459,13 +459,13 @@ const AdminDashboard = () => {
                         style={{ background: "hsl(var(--muted) / 0.5)", borderColor: "hsl(var(--border))" }}
                       >
                         {[
-                          { label: "사무소명", value: m.agency },
-                          { label: "공인중개사 등록번호", value: m.license },
-                          { label: "사업자 등록번호", value: m.business },
-                          { label: "사무소 주소", value: m.address },
-                          { label: "이메일", value: m.email },
+                          { label: "사무소명", value: m.agency_name },
+                          { label: "공인중개사 등록번호", value: m.license_number },
+                          { label: "사업자 등록번호", value: m.business_number },
+                          { label: "사무소 주소", value: m.agency_address },
+                          { label: "이메일", value: m.email ?? "-" },
                           { label: "전화번호", value: m.phone },
-                          { label: "가입일", value: m.joinDate },
+                          { label: "가입일", value: m.created_at.slice(0, 10) },
                           { label: "상태", value: STATUS_LABEL[m.status].label },
                         ].map(({ label, value }) => (
                           <div key={label}>
