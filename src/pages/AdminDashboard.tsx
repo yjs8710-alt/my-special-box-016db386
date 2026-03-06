@@ -34,6 +34,7 @@ type AgentProfile = {
   member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
   parent_user_id?: string | null; // 대표중개사 user_id
   is_active?: boolean;            // 사이트 접속 가능 여부
+  tempPassword?: string;          // 관리자가 설정한 임시 비번 (로컬 상태)
 };
 
 type DBProperty = {
