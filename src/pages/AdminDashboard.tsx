@@ -152,13 +152,26 @@ const PropertyFormModal = ({
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async () => {
-    if (!form.title || !form.address || !form.type) {
-      alert("매물명, 주소, 유형은 필수입니다.");
+    if (!form.title.trim()) {
+      alert("매물명을 입력해주세요.");
+      return;
+    }
+    if (!form.address.trim()) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
+    if (!form.type) {
+      alert("유형을 선택해주세요.");
       return;
     }
     setSaving(true);
-    await onSave(form);
-    setSaving(false);
+    try {
+      await onSave(form);
+    } catch (e) {
+      console.error("매물 저장 오류:", e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const fields: { key: keyof typeof form; label: string; type?: string }[] = [
