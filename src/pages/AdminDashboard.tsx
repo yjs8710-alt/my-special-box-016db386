@@ -718,6 +718,7 @@ const ContactEditModal = ({
               className="h-9 text-sm"
             />
           </div>
+          {[
             { key: "phone", label: "대표 전화번호", placeholder: "043-XXX-XXXX" },
             { key: "contact_owner", label: "건물주 전화번호", placeholder: "010-XXXX-XXXX" },
             { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX" },
