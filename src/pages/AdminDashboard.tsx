@@ -1401,13 +1401,23 @@ const AdminDashboard = () => {
             );
           })()}
           {/* ── 매물 관리 ── */}
-          {tab === "properties" && (
+          {tab === "properties" && (() => {
+            // 같은 주소 기준으로 건물 그룹핑
+            const buildingGroups = filteredDbProperties.reduce<Record<string, DBProperty[]>>((acc, p) => {
+              const key = (p.building_name && p.building_name.trim()) ? `${p.address}__${p.building_name}` : p.address;
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(p);
+              return acc;
+            }, {});
+            const groupEntries = Object.entries(buildingGroups);
+
+            return (
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">매물 관리</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    DB 등록 {dbProperties.length}개 · 노출종료 {dbProperties.filter((p) => p.status === "hidden").length}개
+                    건물 {groupEntries.length}개 · 총 {dbProperties.length}호 · 노출종료 {dbProperties.filter((p) => p.status === "hidden").length}호
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1424,95 +1434,61 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_200px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>매물명 / 주소</span><span>중개사</span>
-                  <span className="text-center">유형</span><span className="text-center">조회</span>
-                  <span className="text-center">상태</span><span className="text-center">액션</span>
+              {propertiesLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
+              {!propertiesLoading && filteredDbProperties.length === 0 && (
+                <div className="bg-card border border-border rounded-xl py-16 text-center text-sm text-muted-foreground">
+                  등록된 매물이 없습니다.
+                  <div className="mt-3">
+                    <Button size="sm" variant="outline" onClick={() => setPropertyModal({ mode: "add", data: null })}>
+                      <Plus className="w-3.5 h-3.5 mr-1" />첫 매물 등록하기
+                    </Button>
+                  </div>
                 </div>
-                {propertiesLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
-                {!propertiesLoading && filteredDbProperties.length === 0 && (
-                  <div className="py-16 text-center text-sm text-muted-foreground">
-                    등록된 매물이 없습니다.
-                    <div className="mt-3">
-                      <Button size="sm" variant="outline" onClick={() => setPropertyModal({ mode: "add", data: null })}>
-                        <Plus className="w-3.5 h-3.5 mr-1" />첫 매물 등록하기
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {filteredDbProperties.map((p) => (
-                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_200px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
-                        {p.status === "hidden" && <EyeOff className="w-3 h-3 shrink-0 text-muted-foreground" />}
-                      </div>
-                      <div className="text-xs text-muted-foreground truncate">{p.address}</div>
-                    </div>
-                    <div className="hidden md:block text-xs text-muted-foreground truncate">{p.agent_name}</div>
-                    <div className="hidden md:flex justify-center">
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>{p.type}</span>
-                    </div>
-                    <div className="hidden md:flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                      <Eye className="w-3 h-3" />{p.views.toLocaleString()}
-                    </div>
-                    <div className="hidden md:flex justify-center">
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                        style={p.status === "active"
-                          ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
-                          : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
-                        }>
-                        {p.status === "active" ? "노출중" : "종료"}
-                      </span>
-                    </div>
-                    <div className="hidden md:flex items-center justify-center gap-1.5 flex-wrap">
-                      <button
-                        onClick={() => setPropertyModal({ mode: "edit", data: p })}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
-                        style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
-                        title="수정"
-                      >
-                        <Pencil className="w-3 h-3" />수정
-                      </button>
-                      <button
-                        onClick={() => {
-                          // id, created_at 제외 + 날짜·상태 초기화하여 새 등록 폼 열기
-                          const { id: _id, created_at: _ca, ...rest } = p;
-                          setPropertyModal({
-                            mode: "add",
-                            data: {
-                              ...rest,
-                              status: "active",
-                              registered_date: new Date().toISOString().slice(0, 10),
-                              views: 0,
-                            },
-                          });
-                        }}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
-                        style={{ background: "hsl(var(--chart-4) / 0.12)", color: "hsl(var(--chart-4))" }}
-                        title="이 매물 정보로 새로 등록"
-                      >
-                        <Copy className="w-3 h-3" />복사
-                      </button>
-                      <button
-                        onClick={() => togglePropertyStatus(p)}
-                        disabled={togglingId === p.id}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
-                        style={p.status === "active"
-                          ? { background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }
-                          : { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
-                        }
-                        title={p.status === "active" ? "노출종료" : "노출재개"}
-                      >
-                        {p.status === "active" ? <><EyeOff className="w-3 h-3" />종료</> : <><Eye className="w-3 h-3" />재개</>}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              )}
+
+              {/* 건물별 그룹 */}
+              {!propertiesLoading && groupEntries.map(([groupKey, units]) => {
+                const rep = units[0]; // 대표 매물 (첫 번째)
+                const hasImages = units.some(u => (u.images ?? []).length > 0);
+                const repImage = units.flatMap(u => u.images ?? []).find(Boolean);
+
+                return (
+                  <BuildingGroup
+                    key={groupKey}
+                    rep={rep}
+                    units={units}
+                    repImage={repImage}
+                    hasImages={hasImages}
+                    togglingId={togglingId}
+                    onEdit={(p) => setPropertyModal({ mode: "edit", data: p })}
+                    onAddUnit={(p) => {
+                      const { id: _id, created_at: _ca, ...rest } = p;
+                      setPropertyModal({
+                        mode: "add",
+                        data: {
+                          ...rest,
+                          unit_number: "",
+                          floor: "",
+                          deposit: "",
+                          monthly: "",
+                          room_password: "",
+                          room_memo: "",
+                          vacate_date: "",
+                          note: "",
+                          status: "active",
+                          registered_date: new Date().toISOString().slice(0, 10),
+                          checked_date: "",
+                          views: 0,
+                        },
+                      });
+                    }}
+                    onToggleStatus={togglePropertyStatus}
+                  />
+                );
+              })}
             </div>
-          )}
+            );
+          })()}
 
           {/* ── 청주 연락처 관리 ── */}
           {tab === "contacts" && (
