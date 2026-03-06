@@ -1004,7 +1004,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
               </div>
             ) : (
-              <div className="p-2 flex flex-col gap-1.5">
+              <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
                  {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
