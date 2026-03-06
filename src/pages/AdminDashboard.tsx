@@ -5,7 +5,7 @@ import {
   LogOut, Home, CheckCircle2, XCircle, Clock,
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
-  Plus, Pencil, EyeOff, Phone, MapPin, X, Save,
+  Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
