@@ -27,6 +27,7 @@ type AgentProfile = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   email?: string;
+  role?: "admin" | "user"; // user_roles에서 조회
 };
 
 type DBProperty = {
