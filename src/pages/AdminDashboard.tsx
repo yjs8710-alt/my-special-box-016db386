@@ -80,7 +80,7 @@ type CheongJuContact = {
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
-  title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "상가",
+  title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "원룸",
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
   manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
   build_year: "", description: "", building_memo: "", room_memo: "", note: "",
@@ -113,7 +113,25 @@ const NAV = [
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
 ];
 
-const PROPERTY_TYPES = ["상가", "사무실", "식당·카페", "원룸", "투룸", "오피스텔", "아파트", "기타"];
+const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
+  {
+    group: "주거형 임대",
+    types: ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원"],
+  },
+  {
+    group: "상가 임대",
+    types: ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"],
+  },
+  {
+    group: "주거형 외 임대·매매",
+    types: ["상가임대", "기타임대", "원룸건물매매", "주택매매", "상가주택매매", "상가건물매매", "구분상가매매", "창고/공장매매", "숙박/팬션매매"],
+  },
+  {
+    group: "토지",
+    types: ["토지"],
+  },
+];
+const ALL_PROPERTY_TYPES = PROPERTY_TYPE_GROUPS.flatMap((g) => g.types);
 const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
 
 // ─── PropertyFormModal ───────────────────────────────────────────────────────
@@ -184,26 +202,33 @@ const PropertyFormModal = ({
         </div>
 
         <div className="p-6 flex flex-col gap-4">
-          {/* 유형 선택 */}
-          <div className="flex flex-col gap-1.5">
+          {/* 유형 선택 - 카테고리별 그룹 */}
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-muted-foreground">유형 *</label>
-            <div className="flex flex-wrap gap-2">
-              {PROPERTY_TYPES.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => set("type", t)}
-                  className="px-3 py-1 rounded-full text-xs font-medium border transition-all"
-                  style={
-                    form.type === t
-                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                  }
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
+              <div key={group} className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold tracking-wide uppercase" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  {group}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {types.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => set("type", t)}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                      style={
+                        form.type === t
+                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                      }
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* 필드 그리드 */}
