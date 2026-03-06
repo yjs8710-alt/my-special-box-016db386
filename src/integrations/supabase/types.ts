@@ -59,6 +59,162 @@ export type Database = {
         }
         Relationships: []
       }
+      cheongju_contacts: {
+        Row: {
+          contact_manager: string | null
+          contact_owner: string | null
+          created_at: string
+          district: string
+          dong: string
+          id: string
+          memo: string | null
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          contact_manager?: string | null
+          contact_owner?: string | null
+          created_at?: string
+          district: string
+          dong: string
+          id?: string
+          memo?: string | null
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_manager?: string | null
+          contact_owner?: string | null
+          created_at?: string
+          district?: string
+          dong?: string
+          id?: string
+          memo?: string | null
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          agent_name: string
+          area: string
+          available_from: string
+          build_year: string
+          building_memo: string | null
+          building_name: string | null
+          building_password: string | null
+          checked_date: string | null
+          created_at: string
+          deposit: string
+          description: string
+          district: string | null
+          elevator: boolean
+          floor: string
+          id: string
+          is_hot: boolean
+          is_new: boolean
+          lat: number
+          lng: number
+          manage_fee: string
+          monthly: string
+          note: string | null
+          options: string[]
+          parking: string
+          registered_date: string
+          room_memo: string | null
+          room_password: string | null
+          room_type: string | null
+          status: string
+          title: string
+          total_floors: string
+          type: string
+          unit_number: string | null
+          updated_at: string
+          vacate_date: string | null
+          views: number
+        }
+        Insert: {
+          address: string
+          agent_name?: string
+          area?: string
+          available_from?: string
+          build_year?: string
+          building_memo?: string | null
+          building_name?: string | null
+          building_password?: string | null
+          checked_date?: string | null
+          created_at?: string
+          deposit?: string
+          description?: string
+          district?: string | null
+          elevator?: boolean
+          floor?: string
+          id?: string
+          is_hot?: boolean
+          is_new?: boolean
+          lat?: number
+          lng?: number
+          manage_fee?: string
+          monthly?: string
+          note?: string | null
+          options?: string[]
+          parking?: string
+          registered_date?: string
+          room_memo?: string | null
+          room_password?: string | null
+          room_type?: string | null
+          status?: string
+          title: string
+          total_floors?: string
+          type: string
+          unit_number?: string | null
+          updated_at?: string
+          vacate_date?: string | null
+          views?: number
+        }
+        Update: {
+          address?: string
+          agent_name?: string
+          area?: string
+          available_from?: string
+          build_year?: string
+          building_memo?: string | null
+          building_name?: string | null
+          building_password?: string | null
+          checked_date?: string | null
+          created_at?: string
+          deposit?: string
+          description?: string
+          district?: string | null
+          elevator?: boolean
+          floor?: string
+          id?: string
+          is_hot?: boolean
+          is_new?: boolean
+          lat?: number
+          lng?: number
+          manage_fee?: string
+          monthly?: string
+          note?: string | null
+          options?: string[]
+          parking?: string
+          registered_date?: string
+          room_memo?: string | null
+          room_password?: string | null
+          room_type?: string | null
+          status?: string
+          title?: string
+          total_floors?: string
+          type?: string
+          unit_number?: string | null
+          updated_at?: string
+          vacate_date?: string | null
+          views?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
