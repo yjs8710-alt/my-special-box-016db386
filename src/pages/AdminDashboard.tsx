@@ -708,7 +708,16 @@ const ContactEditModal = ({
               </div>
             </div>
           )}
-          {[
+          {/* 번지수 */}
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
+            <Input
+              value={form.lot_number ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
+              placeholder="예: 산123-45, 678-9"
+              className="h-9 text-sm"
+            />
+          </div>
             { key: "phone", label: "대표 전화번호", placeholder: "043-XXX-XXXX" },
             { key: "contact_owner", label: "건물주 전화번호", placeholder: "010-XXXX-XXXX" },
             { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX" },
