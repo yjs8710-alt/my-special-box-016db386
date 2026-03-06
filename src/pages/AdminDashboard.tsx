@@ -246,9 +246,16 @@ const PropertyFormModal = ({
         style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-10" style={{ background: "hsl(var(--card))" }}>
-          <h3 className="text-base font-bold text-foreground">
-            {initial ? "매물 수정" : "매물 등록"}
-          </h3>
+          <div>
+            <h3 className="text-base font-bold text-foreground">
+              {initial?.id ? "매물 수정" : "매물 등록"}
+            </h3>
+            {!initial?.id && initial?.address && (
+              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>
+                🏢 {initial.building_name || initial.address} · 호수 추가 (건물 공통 정보 자동 입력됨)
+              </p>
+            )}
+          </div>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
             <X className="w-4 h-4" />
           </button>
