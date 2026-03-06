@@ -7,6 +7,7 @@ import {
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
+  KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ type AgentProfile = {
   member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
   parent_user_id?: string | null; // 대표중개사 user_id
   is_active?: boolean;            // 사이트 접속 가능 여부
+  tempPassword?: string;          // 관리자가 설정한 임시 비번 (로컬 상태)
 };
 
 type DBProperty = {
@@ -539,6 +541,10 @@ const AdminDashboard = () => {
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [propertySearch, setPropertySearch] = useState("");
+  // 비밀번호 관리 상태
+  const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
+  const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({});
+  const [pwSaving, setPwSaving] = useState<string | null>(null);
   const [postSearch, setPostSearch] = useState("");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
@@ -584,8 +590,28 @@ const AdminDashboard = () => {
         roleMap = Object.fromEntries(rolesData.map((r: { user_id: string; role: "admin" | "user" }) => [r.user_id, r.role]));
       }
     }
+
+    // Edge Function으로 이메일(아이디) 조회
+    let emailMap: Record<string, string> = {};
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const res = await supabase.functions.invoke("admin-get-users", {
+          body: {},
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.data?.users) {
+          emailMap = Object.fromEntries(res.data.users.map((u: { user_id: string; email: string }) => [u.user_id, u.email]));
+        }
+      }
+    } catch (_) { /* 이메일 조회 실패시 무시 */ }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setMembers((data ?? []).map((m: any) => ({ ...m, role: roleMap[m.user_id] ?? "user" } as AgentProfile)));
+    setMembers((data ?? []).map((m: any) => ({
+      ...m,
+      role: roleMap[m.user_id] ?? "user",
+      email: emailMap[m.user_id] ?? m.email ?? "",
+    } as AgentProfile)));
     setMembersLoading(false);
   }, []);
 
@@ -668,7 +694,30 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.filter((p) => p.id !== m.id));
   };
 
-  // ─── 매물 노출 토글 ──────────────────────────────────────────────────────
+  // ─── 비밀번호 변경 (관리자용) ────────────────────────────────────────────
+  const setMemberPassword = async (m: AgentProfile) => {
+    const pw = pwInputs[m.id] ?? "";
+    if (pw.length < 6) { alert("비밀번호는 6자 이상이어야 합니다."); return; }
+    setPwSaving(m.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { alert("세션이 만료되었습니다."); return; }
+      const res = await supabase.functions.invoke("admin-get-users", {
+        body: { action: "set_password", user_id: m.user_id, password: pw },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.data?.success) {
+        alert(`✅ ${m.name} 님의 비밀번호가 변경되었습니다.`);
+        setPwInputs((prev) => ({ ...prev, [m.id]: "" }));
+      } else {
+        alert("비밀번호 변경 오류: " + (res.data?.error ?? "알 수 없는 오류"));
+      }
+    } finally {
+      setPwSaving(null);
+    }
+  };
+
+
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
     const newStatus = prop.status === "active" ? "hidden" : "active";
@@ -788,8 +837,13 @@ const AdminDashboard = () => {
         ? m.role !== "admin"
         : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원"
         ? mt === memberFilter
-        : m.status === memberFilter; // pending / approved / rejected
-    const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
+        : m.status === memberFilter;
+    const q = memberSearch.toLowerCase();
+    const matchSearch = !q
+      || m.name.toLowerCase().includes(q)
+      || (m.email ?? "").toLowerCase().includes(q)
+      || m.phone.includes(q)
+      || m.agency_name.toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
 
@@ -1028,10 +1082,10 @@ const AdminDashboard = () => {
                         }>{f.label}</button>
                     ))}
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-44" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
-                  </div>
+                   <div className="relative">
+                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                     <Input placeholder="이름·이메일·전화·사무소 검색" className="pl-7 h-8 text-xs w-52" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
+                   </div>
                   <button onClick={fetchMembers} disabled={membersLoading} className="p-1.5 rounded-md transition-colors hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
                   </button>
@@ -1075,13 +1129,16 @@ const AdminDashboard = () => {
                             <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
                           )}
                         </div>
-                        <div className="hidden md:block">
-                          <div className="text-xs text-foreground">{m.email ?? "-"}</div>
-                          <div className="text-xs text-muted-foreground">{m.phone}</div>
-                          {parentAgent && (
-                            <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
-                          )}
-                        </div>
+                         <div className="hidden md:block">
+                           <div className="text-xs font-medium text-foreground flex items-center gap-1">
+                             <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>
+                             {m.email ?? "-"}
+                           </div>
+                           <div className="text-xs text-muted-foreground">{m.phone}</div>
+                           {parentAgent && (
+                             <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
+                           )}
+                         </div>
                         {/* 역할 배지 */}
                         <div className="hidden md:flex justify-center">
                           {m.role === "admin" ? (
@@ -1127,24 +1184,81 @@ const AdminDashboard = () => {
                       {/* 확장 패널 */}
                       {expandedMember === m.id && (
                         <div className="mx-5 mb-4 rounded-xl p-4 flex flex-col gap-4 border" style={{ background: "hsl(var(--muted) / 0.4)", borderColor: "hsl(var(--border))" }}>
-                          {/* 기본 정보 */}
+                           {/* 기본 정보 */}
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                            {[
-                              { label: "사무소명", value: m.agency_name },
-                              { label: "공인중개사 등록번호", value: m.license_number },
-                              { label: "사업자 등록번호", value: m.business_number },
-                              { label: "사무소 주소", value: m.agency_address },
-                              { label: "이메일", value: m.email ?? "-" },
-                              { label: "전화번호", value: m.phone },
-                              { label: "가입일", value: m.created_at.slice(0, 10) },
-                              { label: "접속 상태", value: m.is_active !== false ? "✅ 허용" : "🚫 차단" },
-                            ].map(({ label, value }) => (
-                              <div key={label}>
-                                <div className="text-muted-foreground mb-0.5">{label}</div>
-                                <div className="font-medium text-foreground">{value}</div>
-                              </div>
-                            ))}
-                          </div>
+                             {[
+                               { label: "사무소명", value: m.agency_name },
+                               { label: "공인중개사 등록번호", value: m.license_number },
+                               { label: "사업자 등록번호", value: m.business_number },
+                               { label: "사무소 주소", value: m.agency_address },
+                               { label: "전화번호", value: m.phone },
+                               { label: "가입일", value: m.created_at.slice(0, 10) },
+                               { label: "접속 상태", value: m.is_active !== false ? "✅ 허용" : "🚫 차단" },
+                             ].map(({ label, value }) => (
+                               <div key={label}>
+                                 <div className="text-muted-foreground mb-0.5">{label}</div>
+                                 <div className="font-medium text-foreground">{value}</div>
+                               </div>
+                             ))}
+                           </div>
+
+                           {/* ── 아이디 / 비밀번호 관리 ── */}
+                           <div className="pt-3 border-t border-border flex flex-col gap-3">
+                             <p className="text-xs font-bold text-foreground flex items-center gap-1.5"><KeyRound className="w-3.5 h-3.5" /> 계정 아이디 / 비밀번호</p>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                               {/* 아이디(이메일) */}
+                               <div className="flex flex-col gap-1">
+                                 <label className="text-[11px] text-muted-foreground font-medium">아이디 (이메일)</label>
+                                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
+                                   style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
+                                   <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>ID</span>
+                                   <span className="text-foreground select-all">{m.email ?? "-"}</span>
+                                   {m.email && (
+                                     <button
+                                       onClick={() => { navigator.clipboard.writeText(m.email ?? ""); }}
+                                       className="ml-auto p-1 rounded hover:bg-muted/50 text-muted-foreground"
+                                       title="복사"
+                                     >
+                                       <Copy className="w-3 h-3" />
+                                     </button>
+                                   )}
+                                 </div>
+                               </div>
+                               {/* 비밀번호 변경 */}
+                               <div className="flex flex-col gap-1">
+                                 <label className="text-[11px] text-muted-foreground font-medium">비밀번호 변경 (관리자 설정)</label>
+                                 <div className="flex items-center gap-2">
+                                   <div className="relative flex-1">
+                                     <input
+                                       type={pwVisible[m.id] ? "text" : "password"}
+                                       placeholder="새 비밀번호 6자 이상"
+                                       value={pwInputs[m.id] ?? ""}
+                                       onChange={(e) => setPwInputs((p) => ({ ...p, [m.id]: e.target.value }))}
+                                       className="w-full h-9 rounded-lg border border-input bg-background px-3 pr-9 text-xs focus:outline-none text-foreground"
+                                       onKeyDown={(e) => e.key === "Enter" && setMemberPassword(m)}
+                                     />
+                                     <button
+                                       type="button"
+                                       onClick={() => setPwVisible((p) => ({ ...p, [m.id]: !p[m.id] }))}
+                                       className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                     >
+                                       {pwVisible[m.id] ? <EyeOffIcon className="w-3.5 h-3.5" /> : <EyeIcon className="w-3.5 h-3.5" />}
+                                     </button>
+                                   </div>
+                                   <button
+                                     onClick={() => setMemberPassword(m)}
+                                     disabled={pwSaving === m.id || !(pwInputs[m.id]?.length >= 6)}
+                                     className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50 shrink-0"
+                                     style={{ background: "hsl(var(--primary))", color: "#fff" }}
+                                   >
+                                     {pwSaving === m.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                     변경
+                                   </button>
+                                 </div>
+                               </div>
+                             </div>
+                           </div>
+
 
                           {/* ── 등급 변경 (역할 + 멤버 유형 통합) ── */}
                           <div className="pt-3 border-t border-border flex flex-col gap-3">
