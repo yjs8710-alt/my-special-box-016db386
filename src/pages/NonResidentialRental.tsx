@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDBProperties } from "@/hooks/useDBProperties";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -262,6 +263,12 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "숙박/팬션매매", group: "매매", key: "매매-숙박펜션" },
 ];
 
+const NON_RESIDENTIAL_DB_TYPES = [
+  "상가임대", "기타임대",
+  "원룸건물매매", "주택매매", "상가주택매매", "상가건물매매",
+  "구분상가매매", "창고/공장매매", "숙박/팬션매매",
+];
+
 const NonResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
@@ -269,6 +276,15 @@ const NonResidentialRental = () => {
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+
+  // DB 매물 (주거형 외 임대·매매)
+  const { properties: dbProperties } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
+
+  // static + DB 합치기
+  const allProperties = useMemo(
+    () => [...NON_RESIDENTIAL_PROPERTIES, ...dbProperties],
+    [dbProperties]
+  );
 
   const toggleType = (k: string) => {
     if (k === "전체") {
@@ -285,13 +301,12 @@ const NonResidentialRental = () => {
     });
   };
 
-  const filtered = NON_RESIDENTIAL_PROPERTIES.filter(p => {
+  const filtered = allProperties.filter(p => {
     if (!activeTypes.includes("전체")) {
-      // 선택된 key들에 해당하는 type 목록 추출
-      const selectedTypes = NON_RESIDENTIAL_SUBTYPES
+      const selectedLabels = NON_RESIDENTIAL_SUBTYPES
         .filter(s => activeTypes.includes(s.key))
         .map(s => s.label);
-      if (!selectedTypes.includes(p.type)) return false;
+      if (!selectedLabels.includes(p.type)) return false;
     }
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDBProperties } from "@/hooks/useDBProperties";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -197,6 +198,15 @@ const LandSearch = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  // DB 매물 (토지)
+  const { properties: dbProperties } = useDBProperties(["토지"]);
+
+  // static + DB 합치기
+  const allProperties = useMemo(
+    () => [...LAND_PROPERTIES, ...dbProperties],
+    [dbProperties]
+  );
+
   const toggleType = (t: string) => {
     if (t === "전체") {
       setActiveTypes(["전체"]);
@@ -212,7 +222,7 @@ const LandSearch = () => {
     });
   };
 
-  const filtered = LAND_PROPERTIES.filter(p => {
+  const filtered = allProperties.filter(p => {
     if (!activeTypes.includes("전체") && !activeTypes.includes(p.roomType ?? "")) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
