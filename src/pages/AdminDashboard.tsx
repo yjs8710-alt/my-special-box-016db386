@@ -1758,9 +1758,10 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[70px_90px_150px_140px_140px_90px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                <div className="hidden md:grid grid-cols-[70px_100px_100px_140px_130px_130px_80px_90px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                   <span>구</span>
                   <span>동/읍/면</span>
+                  <span>번지수</span>
                   <span>대표전화</span>
                   <span>건물주</span>
                   <span>관리인</span>
@@ -1776,7 +1777,7 @@ const AdminDashboard = () => {
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[70px_90px_150px_140px_140px_90px_100px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[70px_100px_100px_140px_130px_130px_80px_90px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -1784,6 +1785,12 @@ const AdminDashboard = () => {
                       </div>
                       {/* 동 */}
                       <div className="text-sm font-medium text-foreground">{c.dong}</div>
+                      {/* 번지수 */}
+                      <div className="hidden md:block text-xs text-muted-foreground">
+                        {c.lot_number ? (
+                          <span className="font-medium text-foreground">{c.lot_number}</span>
+                        ) : <span>—</span>}
+                      </div>
                       {/* 대표전화 */}
                       <div className="hidden md:flex items-center gap-1 text-xs">
                         {c.phone ? (
