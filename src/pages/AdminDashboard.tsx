@@ -6,7 +6,7 @@ import {
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
-  ImagePlus, Loader2,
+  ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
+type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
+
 type AgentProfile = {
   id: string;
   user_id: string;
@@ -27,7 +29,10 @@ type AgentProfile = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   email?: string;
-  role?: "admin" | "user"; // user_roles에서 조회
+  role?: "admin" | "user";        // user_roles에서 조회
+  member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
+  parent_user_id?: string | null; // 대표중개사 user_id
+  is_active?: boolean;            // 사이트 접속 가능 여부
 };
 
 type DBProperty = {
@@ -613,6 +618,36 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
   };
 
+  // ─── 등급(member_type) 변경 ──────────────────────────────────────────────
+  const updateMemberType = async (id: string, member_type: MemberType) => {
+    const { error } = await supabase.from("agent_profiles").update({ member_type }).eq("id", id);
+    if (error) { alert("등급 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((m) => m.id === id ? { ...m, member_type } : m));
+  };
+
+  // ─── 상위 부동산(parent) 변경 ────────────────────────────────────────────
+  const updateParent = async (id: string, parent_user_id: string | null) => {
+    const { error } = await supabase.from("agent_profiles").update({ parent_user_id }).eq("id", id);
+    if (error) { alert("상위 부동산 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((m) => m.id === id ? { ...m, parent_user_id } : m));
+  };
+
+  // ─── 접속 차단/허용 토글 ────────────────────────────────────────────────
+  const toggleIsActive = async (m: AgentProfile) => {
+    const newActive = !m.is_active;
+    const { error } = await supabase.from("agent_profiles").update({ is_active: newActive }).eq("id", m.id);
+    if (error) { alert("접속 상태 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
+  };
+
+  // ─── 회원 삭제 ──────────────────────────────────────────────────────────
+  const deleteMember = async (m: AgentProfile) => {
+    if (!window.confirm(`'${m.name}' 회원을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("agent_profiles").delete().eq("id", m.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setMembers((prev) => prev.filter((p) => p.id !== m.id));
+  };
+
   // ─── 매물 노출 토글 ──────────────────────────────────────────────────────
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
@@ -723,6 +758,7 @@ const AdminDashboard = () => {
   ];
 
   const filteredMembers = members.filter((m) => {
+    const mt = m.member_type ?? "대표중개사";
     const matchFilter =
       memberFilter === "all" || memberFilter === "all_status"
         ? true
@@ -730,6 +766,8 @@ const AdminDashboard = () => {
         ? m.role === "admin"
         : memberFilter === "role_user"
         ? m.role !== "admin"
+        : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원"
+        ? mt === memberFilter
         : m.status === memberFilter; // pending / approved / rejected
     const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
     return matchFilter && matchSearch;
@@ -914,34 +952,47 @@ const AdminDashboard = () => {
           )}
 
           {/* ── 회원 관리 ── */}
-          {tab === "members" && (
+          {tab === "members" && (() => {
+            const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string }> = {
+              "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "🏢" },
+              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "👔" },
+              "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🤝" },
+            };
+            // 대표중개사 목록 (parent 선택용)
+            const mainAgents = members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin");
+
+            return (
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">회원 관리</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {members.length}명 · 관리자 {members.filter(m => m.role === "admin").length}명 · 중개사 {members.filter(m => m.role !== "admin").length}명 · 승인대기 {pendingCount}명
+                    총 {members.length}명 · 관리자 {members.filter(m => m.role === "admin").length}명
+                    · 대표 {members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin").length}명
+                    · 소속 {members.filter(m => m.member_type === "소속중개사").length}명
+                    · 보조원 {members.filter(m => m.member_type === "중개보조원").length}명
+                    · 승인대기 {pendingCount}명
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/* 등급 필터 */}
                   <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
                     {[
-                      { key: "all", label: "전체등급" },
-                      { key: "role_admin", label: "🛡 관리자" },
-                      { key: "role_user", label: "👤 중개사" },
+                      { key: "all", label: "전체" },
+                      { key: "role_admin", label: "🛡관리자" },
+                      { key: "대표중개사", label: "🏢대표" },
+                      { key: "소속중개사", label: "👔소속" },
+                      { key: "중개보조원", label: "🤝보조원" },
                     ].map((f) => (
                       <button key={f.key} onClick={() => setMemberFilter(f.key)}
                         className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
                         style={memberFilter === f.key
                           ? { background: "hsl(var(--primary))", color: "#fff" }
                           : { color: "hsl(var(--muted-foreground))" }
-                        }>
-                        {f.label}
-                      </button>
+                        }>{f.label}</button>
                     ))}
                   </div>
-                  {/* 승인 상태 필터 */}
+                  {/* 상태 필터 */}
                   <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
                     {[
                       { key: "all_status", label: "전체상태" },
@@ -954,14 +1005,12 @@ const AdminDashboard = () => {
                         style={memberFilter === f.key
                           ? { background: "hsl(var(--primary))", color: "#fff" }
                           : { color: "hsl(var(--muted-foreground))" }
-                        }>
-                        {f.label}
-                      </button>
+                        }>{f.label}</button>
                     ))}
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-48" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
+                    <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-44" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
                   </div>
                   <button onClick={fetchMembers} disabled={membersLoading} className="p-1.5 rounded-md transition-colors hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
@@ -974,100 +1023,216 @@ const AdminDashboard = () => {
                 </div>
               )}
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[1fr_1fr_100px_90px_100px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>이름 / 사무소</span><span>이메일 / 전화</span><span>등록번호</span>
-                  <span className="text-center">등급</span>
-                  <span className="text-center">상태</span><span className="text-center">액션</span>
+                <div className="hidden md:grid grid-cols-[1fr_1fr_90px_100px_80px_130px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                  <span>이름 / 사무소</span><span>이메일 / 전화</span>
+                  <span className="text-center">등급(역할)</span>
+                  <span className="text-center">멤버 유형</span>
+                  <span className="text-center">상태</span>
+                  <span className="text-center">관리</span>
                 </div>
                 {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
-                {!membersLoading && filteredMembers.map((m) => (
-                  <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""}`}>
-                    <div className="grid md:grid-cols-[1fr_1fr_100px_90px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
-                      onClick={() => setExpandedMember(expandedMember === m.id ? null : m.id)}>
-                      <div>
-                        <div className="text-sm font-semibold text-foreground">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.agency_name}</div>
-                      </div>
-                      <div className="hidden md:block">
-                        <div className="text-xs text-foreground">{m.email ?? "-"}</div>
-                        <div className="text-xs text-muted-foreground">{m.phone}</div>
-                      </div>
-                      <div className="hidden md:block">
-                        <div className="text-xs text-foreground truncate">{m.license_number}</div>
-                        <div className="text-xs text-muted-foreground">{m.business_number}</div>
-                      </div>
-                      {/* 등급 배지 */}
-                      <div className="hidden md:flex justify-center">
-                        {m.role === "admin" ? (
-                          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}>
-                            🛡 관리자
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                            style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}>
-                            👤 중개사
-                          </span>
-                        )}
-                      </div>
-                      <div className="hidden md:flex justify-center">
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
-                          {STATUS_LABEL[m.status].label}
-                        </span>
-                      </div>
-                      <div className="hidden md:flex justify-center items-center gap-1.5">
-                        {m.status !== "approved" && (
-                          <button onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "approved"); }} className="p-1.5 rounded-md transition-colors" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        {m.status !== "rejected" && (
-                          <button onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "rejected"); }} className="p-1.5 rounded-md transition-colors" title="거절" style={{ color: "hsl(var(--destructive))" }}>
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        {expandedMember === m.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-                      </div>
-                    </div>
-                    {expandedMember === m.id && (
-                      <div className="mx-5 mb-4 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs border" style={{ background: "hsl(var(--muted) / 0.5)", borderColor: "hsl(var(--border))" }}>
-                        {[
-                          { label: "사무소명", value: m.agency_name },
-                          { label: "공인중개사 등록번호", value: m.license_number },
-                          { label: "사업자 등록번호", value: m.business_number },
-                          { label: "사무소 주소", value: m.agency_address },
-                          { label: "이메일", value: m.email ?? "-" },
-                          { label: "전화번호", value: m.phone },
-                          { label: "가입일", value: m.created_at.slice(0, 10) },
-                          { label: "등급", value: m.role === "admin" ? "🛡 관리자" : "👤 중개사(일반)" },
-                          { label: "상태", value: STATUS_LABEL[m.status].label },
-                        ].map(({ label, value }) => (
-                          <div key={label}>
-                            <div className="text-muted-foreground mb-0.5">{label}</div>
-                            <div className="font-medium text-foreground">{value}</div>
+                {!membersLoading && filteredMembers.map((m) => {
+                  const mt = (m.member_type ?? "대표중개사") as MemberType;
+                  const mtStyle = MEMBER_TYPE_LABELS[mt] ?? MEMBER_TYPE_LABELS["대표중개사"];
+                  const parentAgent = m.parent_user_id ? members.find(x => x.user_id === m.parent_user_id) : null;
+                  // 이 사람의 하위 회원들
+                  const subMembers = members.filter(x => x.parent_user_id === m.user_id);
+
+                  return (
+                    <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""} ${!m.is_active ? "opacity-60" : ""}`}>
+                      <div className="grid md:grid-cols-[1fr_1fr_90px_100px_80px_130px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
+                        onClick={() => setExpandedMember(expandedMember === m.id ? null : m.id)}>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-foreground">{m.name}</span>
+                            {!m.is_active && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}>접속차단</span>
+                            )}
                           </div>
-                        ))}
-                        <div className="col-span-2 md:col-span-3 flex gap-2 mt-2 pt-2 border-t border-border">
+                          <div className="text-xs text-muted-foreground">{m.agency_name}</div>
+                          {subMembers.length > 0 && (
+                            <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
+                          )}
+                        </div>
+                        <div className="hidden md:block">
+                          <div className="text-xs text-foreground">{m.email ?? "-"}</div>
+                          <div className="text-xs text-muted-foreground">{m.phone}</div>
+                          {parentAgent && (
+                            <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
+                          )}
+                        </div>
+                        {/* 역할 배지 */}
+                        <div className="hidden md:flex justify-center">
+                          {m.role === "admin" ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}>🛡관리자</span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}>👤중개사</span>
+                          )}
+                        </div>
+                        {/* 멤버 유형 배지 */}
+                        <div className="hidden md:flex justify-center">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: mtStyle.bg, color: mtStyle.color }}>
+                            {mtStyle.emoji} {mtStyle.label}
+                          </span>
+                        </div>
+                        {/* 승인 상태 */}
+                        <div className="hidden md:flex justify-center">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
+                            {STATUS_LABEL[m.status].label}
+                          </span>
+                        </div>
+                        {/* 액션 버튼 */}
+                        <div className="hidden md:flex justify-center items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           {m.status !== "approved" && (
-                            <button onClick={() => updateMemberStatus(m.id, "approved")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
-                              <CheckCircle2 className="w-3.5 h-3.5" /> 승인하기
+                            <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
+                              <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                           )}
                           {m.status !== "rejected" && (
-                            <button onClick={() => updateMemberStatus(m.id, "rejected")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
-                              <XCircle className="w-3.5 h-3.5" /> 거절하기
+                            <button onClick={() => updateMemberStatus(m.id, "rejected")} className="p-1.5 rounded-md" title="거절" style={{ color: "hsl(var(--destructive))" }}>
+                              <XCircle className="w-3.5 h-3.5" />
                             </button>
                           )}
+                          <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(var(--chart-2))" }}>
+                            {m.is_active ? <Ban className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                          </button>
+                          <button onClick={() => deleteMember(m)} className="p-1.5 rounded-md" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          {expandedMember === m.id ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* 확장 패널 */}
+                      {expandedMember === m.id && (
+                        <div className="mx-5 mb-4 rounded-xl p-4 flex flex-col gap-4 border" style={{ background: "hsl(var(--muted) / 0.4)", borderColor: "hsl(var(--border))" }}>
+                          {/* 기본 정보 */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                            {[
+                              { label: "사무소명", value: m.agency_name },
+                              { label: "공인중개사 등록번호", value: m.license_number },
+                              { label: "사업자 등록번호", value: m.business_number },
+                              { label: "사무소 주소", value: m.agency_address },
+                              { label: "이메일", value: m.email ?? "-" },
+                              { label: "전화번호", value: m.phone },
+                              { label: "가입일", value: m.created_at.slice(0, 10) },
+                              { label: "역할", value: m.role === "admin" ? "🛡 관리자" : "👤 중개사" },
+                              { label: "접속 상태", value: m.is_active !== false ? "✅ 허용" : "🚫 차단" },
+                            ].map(({ label, value }) => (
+                              <div key={label}>
+                                <div className="text-muted-foreground mb-0.5">{label}</div>
+                                <div className="font-medium text-foreground">{value}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* 멤버 유형 변경 */}
+                          {m.role !== "admin" && (
+                            <div className="flex flex-col gap-2 pt-3 border-t border-border">
+                              <p className="text-xs font-bold text-foreground">멤버 유형 변경</p>
+                              <div className="flex gap-2 flex-wrap">
+                                {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => (
+                                  <button key={t}
+                                    onClick={() => updateMemberType(m.id, t)}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={mt === t
+                                      ? { background: MEMBER_TYPE_LABELS[t].color, color: "#fff", borderColor: "transparent" }
+                                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                    }
+                                  >
+                                    {MEMBER_TYPE_LABELS[t].emoji} {t}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 상위 부동산 연결 (소속/보조원만) */}
+                          {m.role !== "admin" && (mt === "소속중개사" || mt === "중개보조원") && (
+                            <div className="flex flex-col gap-2 pt-3 border-t border-border">
+                              <p className="text-xs font-bold text-foreground">상위(대표) 부동산 연결</p>
+                              <div className="flex gap-2 flex-wrap">
+                                <button
+                                  onClick={() => updateParent(m.id, null)}
+                                  className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                  style={!m.parent_user_id
+                                    ? { background: "hsl(var(--muted-foreground))", color: "#fff", borderColor: "transparent" }
+                                    : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                  }
+                                >없음</button>
+                                {mainAgents.map((a) => (
+                                  <button key={a.id}
+                                    onClick={() => updateParent(m.id, a.user_id)}
+                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                    style={m.parent_user_id === a.user_id
+                                      ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "transparent" }
+                                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                    }
+                                  >🏢 {a.agency_name} ({a.name})</button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 하위 회원 목록 */}
+                          {subMembers.length > 0 && (
+                            <div className="flex flex-col gap-2 pt-3 border-t border-border">
+                              <p className="text-xs font-bold text-foreground">소속 하위 회원 ({subMembers.length}명)</p>
+                              <div className="flex flex-col gap-1">
+                                {subMembers.map((s) => (
+                                  <div key={s.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
+                                    <div className="flex items-center gap-2">
+                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
+                                        {MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.emoji}
+                                      </span>
+                                      <span className="font-medium text-foreground">{s.name}</span>
+                                      <span className="text-muted-foreground">{s.agency_name}</span>
+                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
+                                        {s.member_type ?? "소속중개사"}
+                                      </span>
+                                    </div>
+                                    <button onClick={() => deleteMember(s)} className="p-1 rounded" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 액션 버튼 */}
+                          <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
+                            {m.status !== "approved" && (
+                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
+                                <CheckCircle2 className="w-3.5 h-3.5" /> 승인하기
+                              </button>
+                            )}
+                            {m.status !== "rejected" && (
+                              <button onClick={() => updateMemberStatus(m.id, "rejected")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
+                                <XCircle className="w-3.5 h-3.5" /> 거절하기
+                              </button>
+                            )}
+                            <button onClick={() => toggleIsActive(m)} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs"
+                              style={m.is_active !== false
+                                ? { background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }
+                                : { background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }
+                              }>
+                              {m.is_active !== false ? <><Ban className="w-3.5 h-3.5" /> 접속 차단</> : <><Unlock className="w-3.5 h-3.5" /> 접속 허용</>}
+                            </button>
+                            <button onClick={() => deleteMember(m)} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs ml-auto" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
+                              <Trash2 className="w-3.5 h-3.5" /> 계정 삭제
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          )}
-
+            );
+          })()}
           {/* ── 매물 관리 ── */}
           {tab === "properties" && (
             <div className="flex flex-col gap-5">

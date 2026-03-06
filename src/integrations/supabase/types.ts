@@ -22,8 +22,11 @@ export type Database = {
           business_number: string
           created_at: string
           id: string
+          is_active: boolean
           license_number: string
+          member_type: string
           name: string
+          parent_user_id: string | null
           phone: string
           status: string
           updated_at: string
@@ -36,8 +39,11 @@ export type Database = {
           business_number: string
           created_at?: string
           id?: string
+          is_active?: boolean
           license_number: string
+          member_type?: string
           name: string
+          parent_user_id?: string | null
           phone: string
           status?: string
           updated_at?: string
@@ -50,8 +56,11 @@ export type Database = {
           business_number?: string
           created_at?: string
           id?: string
+          is_active?: boolean
           license_number?: string
+          member_type?: string
           name?: string
+          parent_user_id?: string | null
           phone?: string
           status?: string
           updated_at?: string

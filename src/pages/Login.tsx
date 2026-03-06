@@ -35,26 +35,31 @@ const LoginPage = () => {
       return;
     }
 
-    // 2. agent_profiles 에서 승인 상태 확인
+    // 2. agent_profiles 에서 승인 상태 + 접속 차단 여부 확인
     const { data: profile } = await supabase
       .from("agent_profiles")
-      .select("status")
+      .select("status, is_active")
       .eq("user_id", authData.user.id)
       .maybeSingle();
 
     setLoading(false);
 
     if (!profile) {
-      // 프로필 없음 → 가입 신청을 하지 않은 계정
       await supabase.auth.signOut();
       setError("가입 신청 정보를 찾을 수 없습니다. 회원가입을 먼저 완료해 주세요.");
+      return;
+    }
+
+    // 접속 차단된 계정
+    if (profile.is_active === false) {
+      await supabase.auth.signOut();
+      setError("관리자에 의해 접속이 차단된 계정입니다. 관리자에게 문의해 주세요.");
       return;
     }
 
     if (profile.status === "approved") {
       navigate("/");
     } else {
-      // pending / rejected → 안내 화면 표시 (로그인 세션은 유지하지 않음)
       await supabase.auth.signOut();
       setApprovalStatus(profile.status as ApprovalStatus);
     }
