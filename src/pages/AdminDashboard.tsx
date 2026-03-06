@@ -202,26 +202,33 @@ const PropertyFormModal = ({
         </div>
 
         <div className="p-6 flex flex-col gap-4">
-          {/* 유형 선택 */}
-          <div className="flex flex-col gap-1.5">
+          {/* 유형 선택 - 카테고리별 그룹 */}
+          <div className="flex flex-col gap-2">
             <label className="text-xs font-semibold text-muted-foreground">유형 *</label>
-            <div className="flex flex-wrap gap-2">
-              {PROPERTY_TYPES.map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => set("type", t)}
-                  className="px-3 py-1 rounded-full text-xs font-medium border transition-all"
-                  style={
-                    form.type === t
-                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                  }
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
+              <div key={group} className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold tracking-wide uppercase" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  {group}
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {types.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => set("type", t)}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                      style={
+                        form.type === t
+                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                      }
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* 필드 그리드 */}
