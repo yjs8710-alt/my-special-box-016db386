@@ -527,17 +527,25 @@ const AdminDashboard = () => {
 
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
   const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
-    // DB 컬럼과 정확히 매핑된 페이로드 생성
+    // 세션 확인 (RLS 통과를 위해 필수)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+      navigate("/admin/login");
+      return;
+    }
+
+    // DB 컬럼과 정확히 매핑된 페이로드 (undefined/빈문자열 → null 처리)
     const payload = {
       title: data.title || "",
-      building_name: data.building_name ?? null,
+      building_name: data.building_name || null,
       address: data.address || "",
       dong: data.dong ?? "",
       lot_number: data.lot_number ?? "",
-      district: data.district ?? null,
+      district: data.district || null,
       type: data.type || "",
-      room_type: data.room_type ?? null,
-      unit_number: data.unit_number ?? null,
+      room_type: data.room_type || null,
+      unit_number: data.unit_number || null,
       area: data.area ?? "",
       floor: data.floor ?? "",
       deposit: data.deposit ?? "",
@@ -549,16 +557,16 @@ const AdminDashboard = () => {
       total_floors: data.total_floors ?? "",
       build_year: data.build_year ?? "",
       description: data.description ?? "",
-      building_memo: data.building_memo ?? null,
-      room_memo: data.room_memo ?? null,
-      note: data.note ?? null,
+      building_memo: data.building_memo || null,
+      room_memo: data.room_memo || null,
+      note: data.note || null,
       vacate_date: data.vacate_date || null,
-      building_password: data.building_password ?? null,
-      room_password: data.room_password ?? null,
-      options: data.options ?? [],
-      views: data.views ?? 0,
-      lat: data.lat ?? 0,
-      lng: data.lng ?? 0,
+      building_password: data.building_password || null,
+      room_password: data.room_password || null,
+      options: Array.isArray(data.options) ? data.options : [],
+      views: Number(data.views) || 0,
+      lat: Number(data.lat) || 0,
+      lng: Number(data.lng) || 0,
       is_new: data.is_new ?? false,
       is_hot: data.is_hot ?? false,
       status: data.status ?? "active",
@@ -569,10 +577,18 @@ const AdminDashboard = () => {
 
     if (propertyModal?.mode === "edit" && propertyModal.data?.id) {
       const { error } = await supabase.from("properties").update(payload).eq("id", propertyModal.data.id);
-      if (error) { alert("수정 오류: " + error.message); return; }
+      if (error) {
+        console.error("수정 오류:", error);
+        alert("수정 오류: " + error.message);
+        return;
+      }
     } else {
       const { error } = await supabase.from("properties").insert(payload);
-      if (error) { alert("등록 오류: " + error.message); return; }
+      if (error) {
+        console.error("등록 오류:", error);
+        alert("등록 오류: " + error.message);
+        return;
+      }
     }
     setPropertyModal(null);
     fetchProperties();
