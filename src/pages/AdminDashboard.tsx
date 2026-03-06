@@ -365,11 +365,64 @@ const PropertyFormModal = ({
               ))}
             </div>
           </div>
+
+          {/* 사진 업로드 */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-semibold text-muted-foreground">매물 사진</label>
+
+            {/* 현재 업로드된 이미지 미리보기 */}
+            {(form.images ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(form.images ?? []).map((url, i) => (
+                  <div key={url} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
+                    <img src={url} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(url)}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-destructive transition-colors"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                    {i === 0 && (
+                      <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 업로드 버튼 */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleImageUpload(e.target.files)}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed transition-all hover:border-primary"
+              style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
+            >
+              {uploading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">업로드 중...</span></>
+                : <><ImagePlus className="w-4 h-4" /><span className="text-xs font-medium">사진 추가 (여러 장 선택 가능)</span></>
+              }
+            </button>
+            {(form.images ?? []).length > 0 && (
+              <p className="text-[10px] text-muted-foreground">
+                첫 번째 사진이 대표 이미지로 사용됩니다. 드래그해서 순서 변경은 삭제 후 재업로드로 가능합니다.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="px-6 py-4 border-t border-border flex justify-end gap-2 sticky bottom-0" style={{ background: "hsl(var(--card))" }}>
           <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button size="sm" onClick={handleSave} disabled={saving || uploading}>
             {saving ? "저장 중..." : <><Save className="w-3.5 h-3.5 mr-1" />저장</>}
           </Button>
         </div>
