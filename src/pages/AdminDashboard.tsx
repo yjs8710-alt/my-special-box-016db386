@@ -1064,7 +1064,10 @@ const AdminDashboard = () => {
 
   const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearch || c.dong.includes(contactSearch) || c.phone.includes(contactSearch);
+    const matchSearch = !contactSearch
+      || c.dong.includes(contactSearch)
+      || c.phone.includes(contactSearch)
+      || (c.memo ?? "").includes(contactSearch);
     return matchDist && matchSearch;
   });
 
