@@ -1717,7 +1717,9 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">주소(동)에 따른 전화번호 관리</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex gap-1">
@@ -1732,7 +1734,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="동 이름·전화번호 검색" className="pl-7 h-8 text-xs w-44" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
                   </div>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
@@ -1744,49 +1746,85 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[80px_100px_160px_160px_160px_80px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>구</span><span>동/읍/면</span>
-                  <span>대표전화</span><span>건물주</span><span>관리인</span>
-                  <span className="text-center">수정</span>
+                <div className="hidden md:grid grid-cols-[70px_90px_150px_140px_140px_90px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                  <span>구</span>
+                  <span>동/읍/면</span>
+                  <span>대표전화</span>
+                  <span>건물주</span>
+                  <span>관리인</span>
+                  <span className="text-center">노출상태</span>
+                  <span className="text-center">관리</span>
                 </div>
                 {contactsLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                {filteredContacts.map((c) => (
-                  <div key={c.id} className="grid md:grid-cols-[80px_100px_160px_160px_160px_80px] items-center px-5 py-3 border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                      <MapPin className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--accent))" }} />{c.district}
+                {filteredContacts.map((c) => {
+                  const isVisible = c.is_visible !== false;
+                  return (
+                    <div
+                      key={c.id}
+                      className={`grid md:grid-cols-[70px_90px_150px_140px_140px_90px_100px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                    >
+                      {/* 구 */}
+                      <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
+                        <MapPin className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--accent))" }} />{c.district}
+                      </div>
+                      {/* 동 */}
+                      <div className="text-sm font-medium text-foreground">{c.dong}</div>
+                      {/* 대표전화 */}
+                      <div className="hidden md:flex items-center gap-1 text-xs">
+                        {c.phone ? (
+                          <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--primary))" }}>{c.phone}</a>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </div>
+                      {/* 건물주 */}
+                      <div className="hidden md:block text-xs">
+                        {c.contact_owner ? (
+                          <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </div>
+                      {/* 관리인 */}
+                      <div className="hidden md:block text-xs">
+                        {c.contact_manager ? (
+                          <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </div>
+                      {/* 노출 상태 토글 */}
+                      <div className="hidden md:flex justify-center">
+                        <button
+                          onClick={() => toggleContactVisible(c)}
+                          disabled={togglingContactId === c.id}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-all"
+                          style={isVisible
+                            ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                            : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                          }
+                          title={isVisible ? "클릭 시 노출불가" : "클릭 시 노출"}
+                        >
+                          {togglingContactId === c.id
+                            ? <Loader2 className="w-3 h-3 animate-spin" />
+                            : isVisible
+                              ? <><Eye className="w-3 h-3" />노출</>
+                              : <><EyeOff className="w-3 h-3" />불가</>
+                          }
+                        </button>
+                      </div>
+                      {/* 수정 */}
+                      <div className="hidden md:flex justify-center">
+                        <button
+                          onClick={() => setContactModal(c)}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
+                          style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
+                        >
+                          <Pencil className="w-3 h-3" />수정
+                        </button>
+                      </div>
                     </div>
-                    <div className="text-sm font-medium text-foreground">{c.dong}</div>
-                    <div className="hidden md:flex items-center gap-1 text-xs">
-                      {c.phone ? (
-                        <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--primary))" }}>{c.phone}</a>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </div>
-                    <div className="hidden md:block text-xs">
-                      {c.contact_owner ? (
-                        <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>
-                      ) : <span className="text-muted-foreground">—</span>}
-                    </div>
-                    <div className="hidden md:block text-xs">
-                      {c.contact_manager ? (
-                        <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
-                      ) : <span className="text-muted-foreground">—</span>}
-                    </div>
-                    <div className="hidden md:flex justify-center">
-                      <button
-                        onClick={() => setContactModal(c)}
-                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
-                        style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
-                      >
-                        <Pencil className="w-3 h-3" />수정
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
