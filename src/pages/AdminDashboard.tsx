@@ -694,7 +694,30 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.filter((p) => p.id !== m.id));
   };
 
-  // ─── 매물 노출 토글 ──────────────────────────────────────────────────────
+  // ─── 비밀번호 변경 (관리자용) ────────────────────────────────────────────
+  const setMemberPassword = async (m: AgentProfile) => {
+    const pw = pwInputs[m.id] ?? "";
+    if (pw.length < 6) { alert("비밀번호는 6자 이상이어야 합니다."); return; }
+    setPwSaving(m.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { alert("세션이 만료되었습니다."); return; }
+      const res = await supabase.functions.invoke("admin-get-users", {
+        body: { action: "set_password", user_id: m.user_id, password: pw },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.data?.success) {
+        alert(`✅ ${m.name} 님의 비밀번호가 변경되었습니다.`);
+        setPwInputs((prev) => ({ ...prev, [m.id]: "" }));
+      } else {
+        alert("비밀번호 변경 오류: " + (res.data?.error ?? "알 수 없는 오류"));
+      }
+    } finally {
+      setPwSaving(null);
+    }
+  };
+
+
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
     const newStatus = prop.status === "active" ? "hidden" : "active";
