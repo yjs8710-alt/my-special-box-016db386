@@ -1082,10 +1082,10 @@ const AdminDashboard = () => {
                         }>{f.label}</button>
                     ))}
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-44" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
-                  </div>
+                   <div className="relative">
+                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                     <Input placeholder="이름·이메일·전화·사무소 검색" className="pl-7 h-8 text-xs w-52" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
+                   </div>
                   <button onClick={fetchMembers} disabled={membersLoading} className="p-1.5 rounded-md transition-colors hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
                   </button>
