@@ -146,7 +146,9 @@ const PropertyFormModal = ({
   const fields: { key: keyof typeof form; label: string; type?: string }[] = [
     { key: "title", label: "매물명" },
     { key: "building_name", label: "건물명" },
-    { key: "address", label: "주소" },
+    { key: "address", label: "도로명 주소" },
+    { key: "dong", label: "동 (洞)" },
+    { key: "lot_number", label: "번지수 (지번)" },
     { key: "district", label: "구 (청주시)" },
     { key: "unit_number", label: "호수" },
     { key: "floor", label: "층수" },
