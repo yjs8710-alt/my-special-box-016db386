@@ -33,6 +33,8 @@ type DBProperty = {
   title: string;
   building_name?: string;
   address: string;
+  dong: string;
+  lot_number: string;
   district?: string;
   type: string;
   room_type?: string;
@@ -78,7 +80,7 @@ type CheongJuContact = {
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
-  title: "", building_name: "", address: "", district: "", type: "상가",
+  title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "상가",
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
   manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
   build_year: "", description: "", building_memo: "", room_memo: "", note: "",
@@ -144,7 +146,9 @@ const PropertyFormModal = ({
   const fields: { key: keyof typeof form; label: string; type?: string }[] = [
     { key: "title", label: "매물명" },
     { key: "building_name", label: "건물명" },
-    { key: "address", label: "주소" },
+    { key: "address", label: "도로명 주소" },
+    { key: "dong", label: "동 (洞)" },
+    { key: "lot_number", label: "번지수 (지번)" },
     { key: "district", label: "구 (청주시)" },
     { key: "unit_number", label: "호수" },
     { key: "floor", label: "층수" },

@@ -110,6 +110,7 @@ export type Database = {
           deposit: string
           description: string
           district: string | null
+          dong: string
           elevator: boolean
           floor: string
           id: string
@@ -117,6 +118,7 @@ export type Database = {
           is_new: boolean
           lat: number
           lng: number
+          lot_number: string
           manage_fee: string
           monthly: string
           note: string | null
@@ -149,6 +151,7 @@ export type Database = {
           deposit?: string
           description?: string
           district?: string | null
+          dong?: string
           elevator?: boolean
           floor?: string
           id?: string
@@ -156,6 +159,7 @@ export type Database = {
           is_new?: boolean
           lat?: number
           lng?: number
+          lot_number?: string
           manage_fee?: string
           monthly?: string
           note?: string | null
@@ -188,6 +192,7 @@ export type Database = {
           deposit?: string
           description?: string
           district?: string | null
+          dong?: string
           elevator?: boolean
           floor?: string
           id?: string
@@ -195,6 +200,7 @@ export type Database = {
           is_new?: boolean
           lat?: number
           lng?: number
+          lot_number?: string
           manage_fee?: string
           monthly?: string
           note?: string | null
