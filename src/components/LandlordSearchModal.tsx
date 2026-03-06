@@ -149,7 +149,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--primary))" }} />
-                        <span className="text-[11px] font-semibold text-muted-foreground">건물주(임대인)</span>
+                        <span className="text-[11px] font-semibold text-muted-foreground">소유주(임대인)</span>
                       </div>
                       {show ? (
                         <a
