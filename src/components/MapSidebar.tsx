@@ -885,29 +885,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             className="border-b border-border flex-shrink-0"
             style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
           >
-            {/* 1행: 매물 수 + 선택 상태 */}
-            <div className="px-3 py-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-extrabold text-primary-foreground bg-primary px-2.5 py-0.5 rounded-full shadow-sm">
-                  {properties.length}
-                </span>
-                <span className="text-xs text-muted-foreground font-semibold">개 매물</span>
-                {checkedIds.size > 0 && (
-                  <>
-                    <span className="text-[10px] text-muted-foreground">·</span>
-                    <span className="text-xs font-extrabold text-primary-foreground bg-accent px-2 py-0.5 rounded-full shadow-sm">
-                      {checkedIds.size}개 선택
-                    </span>
-                    <button onClick={() => setCheckedIds(new Set())} className="text-[9px] text-destructive hover:underline">
-                      해제
-                    </button>
-                  </>
-                )}
-              </div>
-              
-            </div>
-            {/* 2행: 액션 버튼들 */}
-            <div className="px-3 pb-2 flex items-center gap-1.5 flex-wrap">
+            {/* 액션 버튼들 */}
+            <div className="px-3 py-2 flex items-center gap-1.5 flex-wrap">
               {/* 선택 인쇄 */}
               <button
                 onClick={handleSelectPrint}
