@@ -80,7 +80,7 @@ type CheongJuContact = {
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
-  title: "", building_name: "", address: "", district: "", type: "상가",
+  title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "상가",
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
   manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
   build_year: "", description: "", building_memo: "", room_memo: "", note: "",
