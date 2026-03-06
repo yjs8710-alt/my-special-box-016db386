@@ -439,15 +439,15 @@ const MapFilterBar = ({
             </button>
           </div>
 
-          {/* 건물주 번호 */}
+          {/* 소유주 번호 */}
           {onLandlordClick && (
             <button
               onClick={onLandlordClick}
-              className="flex items-center gap-1.5 h-10 px-3 rounded-xl text-white text-xs font-bold flex-shrink-0 hover:scale-105 transition-all whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))", boxShadow: "0 4px 16px rgba(10,45,110,0.25)" }}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs font-bold text-white whitespace-nowrap transition-colors flex-shrink-0"
+              style={{ background: "hsl(var(--accent))" }}
             >
               <Phone className="w-3.5 h-3.5" />
-              건물주 번호 검색
+              소유주 번호 검색
             </button>
           )}
         </div>

@@ -55,8 +55,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
               <Phone className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">임대인 번호 찾기</p>
-              <p className="text-[10px] text-white/70">주소 또는 건물명으로 임대인 연락처 조회</p>
+            <p className="text-sm font-bold text-white">소유주 번호 찾기</p>
+              <p className="text-[10px] text-white/70">주소 또는 건물명으로 소유주 연락처 조회</p>
             </div>
           </div>
           <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
@@ -149,7 +149,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--primary))" }} />
-                        <span className="text-[11px] font-semibold text-muted-foreground">건물주(임대인)</span>
+                        <span className="text-[11px] font-semibold text-muted-foreground">소유주(임대인)</span>
                       </div>
                       {show ? (
                         <a
