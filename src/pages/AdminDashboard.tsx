@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, MessageSquare,
@@ -6,6 +6,7 @@ import {
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
+  ImagePlus, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
