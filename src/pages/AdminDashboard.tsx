@@ -1117,7 +1117,12 @@ const AdminDashboard = () => {
         className="w-56 shrink-0 flex flex-col border-r sticky top-0 h-screen overflow-y-auto"
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: "hsl(var(--header-border))" }}>
+        <div
+          className="px-5 py-4 border-b flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          style={{ borderColor: "hsl(var(--header-border))" }}
+          onClick={() => navigate("/")}
+          title="일반 페이지로 이동"
+        >
           <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
             <Home className="w-4 h-4 text-white" />
           </div>
