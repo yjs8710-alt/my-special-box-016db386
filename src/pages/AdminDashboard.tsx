@@ -850,7 +850,7 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_150px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_200px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                   <span>매물명 / 주소</span><span>중개사</span>
                   <span className="text-center">유형</span><span className="text-center">조회</span>
                   <span className="text-center">상태</span><span className="text-center">액션</span>
