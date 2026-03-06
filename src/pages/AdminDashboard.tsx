@@ -1008,16 +1008,27 @@ const AdminDashboard = () => {
   const saveContact = async (updated: CheongJuContact) => {
     if (updated.id) {
       const { error } = await supabase.from("cheongju_contacts")
-        .update({ phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo })
+        .update({ phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo, is_visible: updated.is_visible ?? true })
         .eq("id", updated.id);
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
       const { error } = await supabase.from("cheongju_contacts")
-        .insert({ district: updated.district, dong: updated.dong, phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo });
+        .insert({ district: updated.district, dong: updated.dong, phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo, is_visible: updated.is_visible ?? true });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
     fetchContacts();
+  };
+
+  // ─── 연락처 노출 토글 ─────────────────────────────────────────────────────
+  const [togglingContactId, setTogglingContactId] = useState<string | null>(null);
+  const toggleContactVisible = async (c: CheongJuContact) => {
+    setTogglingContactId(c.id);
+    const newVisible = !c.is_visible;
+    const { error } = await supabase.from("cheongju_contacts").update({ is_visible: newVisible }).eq("id", c.id);
+    if (!error) setContacts((prev) => prev.map((x) => x.id === c.id ? { ...x, is_visible: newVisible } : x));
+    else alert("상태 변경 오류: " + error.message);
+    setTogglingContactId(null);
   };
 
   const deletePost = (id: number) => setPosts((prev) => prev.filter((p) => p.id !== id));
