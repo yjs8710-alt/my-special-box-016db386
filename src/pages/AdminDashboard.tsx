@@ -14,6 +14,8 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
+type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
+
 type AgentProfile = {
   id: string;
   user_id: string;
@@ -27,7 +29,10 @@ type AgentProfile = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   email?: string;
-  role?: "admin" | "user"; // user_roles에서 조회
+  role?: "admin" | "user";        // user_roles에서 조회
+  member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
+  parent_user_id?: string | null; // 대표중개사 user_id
+  is_active?: boolean;            // 사이트 접속 가능 여부
 };
 
 type DBProperty = {
