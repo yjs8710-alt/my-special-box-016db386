@@ -658,7 +658,7 @@ const ContactEditModal = ({
   onSave: (updated: CheongJuContact) => Promise<void>;
 }) => {
   const [form, setForm] = useState<CheongJuContact>(
-    contact ?? { id: "", district: "", dong: "", phone: "", contact_owner: "", contact_manager: "", memo: "" }
+    contact ?? { id: "", district: "", dong: "", lot_number: "", phone: "", contact_owner: "", contact_manager: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
 
