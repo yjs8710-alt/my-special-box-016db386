@@ -570,7 +570,8 @@ const AdminDashboard = () => {
     if (error) { setMembersError("데이터 로드 오류: " + error.message); setMembersLoading(false); return; }
 
     // user_roles에서 각 회원의 등급 조회
-    const userIds = (data ?? []).map((m: AgentProfile) => m.user_id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userIds = (data ?? []).map((m: any) => m.user_id as string);
     let roleMap: Record<string, "admin" | "user"> = {};
     if (userIds.length > 0) {
       const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds);
@@ -578,7 +579,8 @@ const AdminDashboard = () => {
         roleMap = Object.fromEntries(rolesData.map((r: { user_id: string; role: "admin" | "user" }) => [r.user_id, r.role]));
       }
     }
-    setMembers((data ?? []).map((m: AgentProfile) => ({ ...m, role: roleMap[m.user_id] ?? "user" })));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setMembers((data ?? []).map((m: any) => ({ ...m, role: roleMap[m.user_id] ?? "user" } as AgentProfile)));
     setMembersLoading(false);
   }, []);
 
