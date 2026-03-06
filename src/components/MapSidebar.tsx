@@ -1036,11 +1036,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
 
                         {/* ①썸네일 76px */}
                         <div className="w-[76px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "76px" }}>
-                          <img
-                            src={prop.image}
-                            alt={prop.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                          {prop.image ? (
+                            <img
+                              src={prop.image}
+                              alt={prop.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            /* 이미지 없는 DB 매물 placeholder */
+                            <div className="w-full h-full flex flex-col items-center justify-center gap-0.5"
+                              style={{ background: "hsl(var(--muted))" }}>
+                              <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
+                              <span className="text-[8px] font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>사진없음</span>
+                            </div>
+                          )}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -1072,12 +1081,14 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                             <span className="text-[9px] font-extrabold text-white leading-none flex-shrink-0">{idx}.</span>
                             {regDate && <span className="text-[8px] text-white/80 leading-none truncate">{regDate}</span>}
                           </div>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
-                            className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
-                          >
-                            <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
-                          </button>
+                          {prop.image && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
+                              className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
+                            >
+                              <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
+                            </button>
+                          )}
                         </div>
 
                         {/* ②건물주/관리인 36px */}
