@@ -649,6 +649,7 @@ const AdminDashboard = () => {
       building_password: data.building_password || null,
       room_password: data.room_password || null,
       options: Array.isArray(data.options) ? data.options : [],
+      images: Array.isArray(data.images) ? data.images : [],
       views: Number(data.views) || 0,
       lat: Number(data.lat) || 0,
       lng: Number(data.lng) || 0,
