@@ -86,7 +86,7 @@ const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
   manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
   build_year: "", description: "", building_memo: "", room_memo: "", note: "",
-  vacate_date: "", building_password: "", room_password: "", options: [],
+  vacate_date: "", building_password: "", room_password: "", options: [], images: [],
   views: 0, lat: 0, lng: 0, is_new: false, is_hot: false, status: "active",
   registered_date: new Date().toISOString().slice(0, 10), checked_date: "",
   agent_name: "",
