@@ -716,7 +716,7 @@ const ContactEditModal = ({
             <div key={key} className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-muted-foreground">{label}</label>
               <Input
-                value={(form as Record<string, string>)[key] ?? ""}
+                value={(form as Record<string, unknown>)[key] as string ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                 placeholder={placeholder}
                 className="h-9 text-sm"
