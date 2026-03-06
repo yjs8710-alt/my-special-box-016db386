@@ -758,6 +758,7 @@ const AdminDashboard = () => {
   ];
 
   const filteredMembers = members.filter((m) => {
+    const mt = m.member_type ?? "대표중개사";
     const matchFilter =
       memberFilter === "all" || memberFilter === "all_status"
         ? true
@@ -765,6 +766,8 @@ const AdminDashboard = () => {
         ? m.role === "admin"
         : memberFilter === "role_user"
         ? m.role !== "admin"
+        : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원"
+        ? mt === memberFilter
         : m.status === memberFilter; // pending / approved / rejected
     const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
     return matchFilter && matchSearch;
