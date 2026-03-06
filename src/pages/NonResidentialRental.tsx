@@ -380,7 +380,7 @@ const NonResidentialRental = () => {
       </div>
 
       <main
-        className="flex-1 relative overflow-hidden"
+        className="flex-1 overflow-hidden flex"
         style={{ height: "calc(100vh - 56px - 41px)" }}
       >
         <MapSidebar
@@ -390,7 +390,7 @@ const NonResidentialRental = () => {
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
         />
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-0">
           <MapView
             properties={filtered}
             selectedId={selectedId}
