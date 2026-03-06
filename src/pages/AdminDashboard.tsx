@@ -912,19 +912,46 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">회원 관리</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">총 {members.length}명 · 대기 {pendingCount}명</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    총 {members.length}명 · 관리자 {members.filter(m => m.role === "admin").length}명 · 중개사 {members.filter(m => m.role !== "admin").length}명 · 승인대기 {pendingCount}명
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {["all", "pending", "approved", "rejected"].map((f) => (
-                    <button key={f} onClick={() => setMemberFilter(f)}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                      style={memberFilter === f
-                        ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                      }>
-                      {f === "all" ? "전체" : f === "pending" ? "대기중" : f === "approved" ? "승인됨" : "거절됨"}
-                    </button>
-                  ))}
+                  {/* 등급 필터 */}
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
+                    {[
+                      { key: "all", label: "전체등급" },
+                      { key: "role_admin", label: "🛡 관리자" },
+                      { key: "role_user", label: "👤 중개사" },
+                    ].map((f) => (
+                      <button key={f.key} onClick={() => setMemberFilter(f.key)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        style={memberFilter === f.key
+                          ? { background: "hsl(var(--primary))", color: "#fff" }
+                          : { color: "hsl(var(--muted-foreground))" }
+                        }>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                  {/* 승인 상태 필터 */}
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
+                    {[
+                      { key: "all_status", label: "전체상태" },
+                      { key: "pending", label: "대기중" },
+                      { key: "approved", label: "승인됨" },
+                      { key: "rejected", label: "거절됨" },
+                    ].map((f) => (
+                      <button key={f.key} onClick={() => setMemberFilter(f.key)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        style={memberFilter === f.key
+                          ? { background: "hsl(var(--primary))", color: "#fff" }
+                          : { color: "hsl(var(--muted-foreground))" }
+                        }>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                     <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-48" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
@@ -940,15 +967,16 @@ const AdminDashboard = () => {
                 </div>
               )}
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[1fr_1fr_130px_100px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                <div className="hidden md:grid grid-cols-[1fr_1fr_100px_90px_100px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                   <span>이름 / 사무소</span><span>이메일 / 전화</span><span>등록번호</span>
+                  <span className="text-center">등급</span>
                   <span className="text-center">상태</span><span className="text-center">액션</span>
                 </div>
                 {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
                 {!membersLoading && filteredMembers.map((m) => (
                   <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""}`}>
-                    <div className="grid md:grid-cols-[1fr_1fr_130px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
+                    <div className="grid md:grid-cols-[1fr_1fr_100px_90px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
                       onClick={() => setExpandedMember(expandedMember === m.id ? null : m.id)}>
                       <div>
                         <div className="text-sm font-semibold text-foreground">{m.name}</div>
@@ -961,6 +989,20 @@ const AdminDashboard = () => {
                       <div className="hidden md:block">
                         <div className="text-xs text-foreground truncate">{m.license_number}</div>
                         <div className="text-xs text-muted-foreground">{m.business_number}</div>
+                      </div>
+                      {/* 등급 배지 */}
+                      <div className="hidden md:flex justify-center">
+                        {m.role === "admin" ? (
+                          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}>
+                            🛡 관리자
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                            style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}>
+                            👤 중개사
+                          </span>
+                        )}
                       </div>
                       <div className="hidden md:flex justify-center">
                         <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
@@ -991,6 +1033,7 @@ const AdminDashboard = () => {
                           { label: "이메일", value: m.email ?? "-" },
                           { label: "전화번호", value: m.phone },
                           { label: "가입일", value: m.created_at.slice(0, 10) },
+                          { label: "등급", value: m.role === "admin" ? "🛡 관리자" : "👤 중개사(일반)" },
                           { label: "상태", value: STATUS_LABEL[m.status].label },
                         ].map(({ label, value }) => (
                           <div key={label}>
