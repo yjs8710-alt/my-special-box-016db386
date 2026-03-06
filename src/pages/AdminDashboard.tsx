@@ -837,8 +837,13 @@ const AdminDashboard = () => {
         ? m.role !== "admin"
         : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원"
         ? mt === memberFilter
-        : m.status === memberFilter; // pending / approved / rejected
-    const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
+        : m.status === memberFilter;
+    const q = memberSearch.toLowerCase();
+    const matchSearch = !q
+      || m.name.toLowerCase().includes(q)
+      || (m.email ?? "").toLowerCase().includes(q)
+      || m.phone.includes(q)
+      || m.agency_name.toLowerCase().includes(q);
     return matchFilter && matchSearch;
   });
 
