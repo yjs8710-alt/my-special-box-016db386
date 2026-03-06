@@ -1233,6 +1233,9 @@ const AdminDashboard = () => {
           {/* ── 매물 관리 ── */}
           {tab === "properties" && (
             <div className="flex flex-col gap-5">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h2 className="text-lg font-extrabold text-foreground">매물 관리</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     DB 등록 {dbProperties.length}개 · 노출종료 {dbProperties.filter((p) => p.status === "hidden").length}개
                   </p>
