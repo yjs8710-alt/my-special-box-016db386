@@ -723,7 +723,14 @@ const AdminDashboard = () => {
   ];
 
   const filteredMembers = members.filter((m) => {
-    const matchFilter = memberFilter === "all" || m.status === memberFilter;
+    const matchFilter =
+      memberFilter === "all" || memberFilter === "all_status"
+        ? true
+        : memberFilter === "role_admin"
+        ? m.role === "admin"
+        : memberFilter === "role_user"
+        ? m.role !== "admin"
+        : m.status === memberFilter; // pending / approved / rejected
     const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
     return matchFilter && matchSearch;
   });
