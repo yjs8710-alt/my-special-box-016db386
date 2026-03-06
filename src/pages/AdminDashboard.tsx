@@ -541,6 +541,10 @@ const AdminDashboard = () => {
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [propertySearch, setPropertySearch] = useState("");
+  // 비밀번호 관리 상태
+  const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
+  const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({});
+  const [pwSaving, setPwSaving] = useState<string | null>(null);
   const [postSearch, setPostSearch] = useState("");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
