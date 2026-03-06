@@ -33,6 +33,8 @@ type DBProperty = {
   title: string;
   building_name?: string;
   address: string;
+  dong: string;
+  lot_number: string;
   district?: string;
   type: string;
   room_type?: string;
