@@ -514,11 +514,51 @@ const AdminDashboard = () => {
 
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
   const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
+    // DB 컬럼과 정확히 매핑된 페이로드 생성
+    const payload = {
+      title: data.title || "",
+      building_name: data.building_name ?? null,
+      address: data.address || "",
+      dong: data.dong ?? "",
+      lot_number: data.lot_number ?? "",
+      district: data.district ?? null,
+      type: data.type || "",
+      room_type: data.room_type ?? null,
+      unit_number: data.unit_number ?? null,
+      area: data.area ?? "",
+      floor: data.floor ?? "",
+      deposit: data.deposit ?? "",
+      monthly: data.monthly ?? "",
+      manage_fee: data.manage_fee ?? "",
+      parking: data.parking ?? "",
+      elevator: data.elevator ?? false,
+      available_from: data.available_from ?? "",
+      total_floors: data.total_floors ?? "",
+      build_year: data.build_year ?? "",
+      description: data.description ?? "",
+      building_memo: data.building_memo ?? null,
+      room_memo: data.room_memo ?? null,
+      note: data.note ?? null,
+      vacate_date: data.vacate_date || null,
+      building_password: data.building_password ?? null,
+      room_password: data.room_password ?? null,
+      options: data.options ?? [],
+      views: data.views ?? 0,
+      lat: data.lat ?? 0,
+      lng: data.lng ?? 0,
+      is_new: data.is_new ?? false,
+      is_hot: data.is_hot ?? false,
+      status: data.status ?? "active",
+      registered_date: data.registered_date || new Date().toISOString().slice(0, 10),
+      checked_date: data.checked_date || null,
+      agent_name: data.agent_name ?? "",
+    };
+
     if (propertyModal?.mode === "edit" && propertyModal.data?.id) {
-      const { error } = await supabase.from("properties").update(data).eq("id", propertyModal.data.id);
+      const { error } = await supabase.from("properties").update(payload).eq("id", propertyModal.data.id);
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
-      const { error } = await supabase.from("properties").insert(data);
+      const { error } = await supabase.from("properties").insert(payload);
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setPropertyModal(null);
