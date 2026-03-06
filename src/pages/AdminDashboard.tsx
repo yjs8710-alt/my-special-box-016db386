@@ -1137,7 +1137,6 @@ const AdminDashboard = () => {
                               { label: "이메일", value: m.email ?? "-" },
                               { label: "전화번호", value: m.phone },
                               { label: "가입일", value: m.created_at.slice(0, 10) },
-                              { label: "역할", value: m.role === "admin" ? "🛡 관리자" : "👤 중개사" },
                               { label: "접속 상태", value: m.is_active !== false ? "✅ 허용" : "🚫 차단" },
                             ].map(({ label, value }) => (
                               <div key={label}>
@@ -1147,31 +1146,65 @@ const AdminDashboard = () => {
                             ))}
                           </div>
 
-                          {/* 멤버 유형 변경 */}
-                          {m.role !== "admin" && (
-                            <div className="flex flex-col gap-2 pt-3 border-t border-border">
-                              <p className="text-xs font-bold text-foreground">멤버 유형 변경</p>
-                              <div className="flex gap-2 flex-wrap">
-                                {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => (
-                                  <button key={t}
-                                    onClick={() => updateMemberType(m.id, t)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={mt === t
-                                      ? { background: MEMBER_TYPE_LABELS[t].color, color: "#fff", borderColor: "transparent" }
+                          {/* ── 등급 변경 (역할 + 멤버 유형 통합) ── */}
+                          <div className="pt-3 border-t border-border flex flex-col gap-3">
+                            <p className="text-xs font-bold text-foreground">🎖 등급 변경</p>
+
+                            {/* 역할 변경: 관리자 ↔ 중개사 */}
+                            <div className="flex flex-col gap-1.5">
+                              <span className="text-[11px] text-muted-foreground font-medium">시스템 역할</span>
+                              <div className="flex gap-2">
+                                {[
+                                  { value: "admin" as const, label: "🛡 관리자", color: "hsl(var(--accent))", bg: "hsl(var(--accent) / 0.15)" },
+                                  { value: "user" as const, label: "👤 중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.12)" },
+                                ].map((r) => (
+                                  <button
+                                    key={r.value}
+                                    disabled={roleChangingId === m.id}
+                                    onClick={() => updateMemberRole(m, r.value)}
+                                    className="px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-1 disabled:opacity-60"
+                                    style={m.role === r.value
+                                      ? { background: r.bg, color: r.color, borderColor: r.color }
                                       : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                                     }
                                   >
-                                    {MEMBER_TYPE_LABELS[t].emoji} {t}
+                                    {roleChangingId === m.id && m.role !== r.value ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : null}
+                                    {r.label}
+                                    {m.role === r.value && <span className="text-[9px] opacity-70 ml-0.5">현재</span>}
                                   </button>
                                 ))}
                               </div>
                             </div>
-                          )}
+
+                            {/* 멤버 유형 변경 (관리자가 아닐 때만) */}
+                            {m.role !== "admin" && (
+                              <div className="flex flex-col gap-1.5">
+                                <span className="text-[11px] text-muted-foreground font-medium">중개사 유형</span>
+                                <div className="flex gap-2 flex-wrap">
+                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => (
+                                    <button key={t}
+                                      onClick={() => updateMemberType(m.id, t)}
+                                      className="px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-1"
+                                      style={mt === t
+                                        ? { background: MEMBER_TYPE_LABELS[t].bg, color: MEMBER_TYPE_LABELS[t].color, borderColor: MEMBER_TYPE_LABELS[t].color }
+                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                      }
+                                    >
+                                      {MEMBER_TYPE_LABELS[t].emoji} {t}
+                                      {mt === t && <span className="text-[9px] opacity-70">현재</span>}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
 
                           {/* 상위 부동산 연결 (소속/보조원만) */}
                           {m.role !== "admin" && (mt === "소속중개사" || mt === "중개보조원") && (
                             <div className="flex flex-col gap-2 pt-3 border-t border-border">
-                              <p className="text-xs font-bold text-foreground">상위(대표) 부동산 연결</p>
+                              <p className="text-xs font-bold text-foreground">🏢 상위(대표) 부동산 연결</p>
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => updateParent(m.id, null)}
@@ -1181,7 +1214,7 @@ const AdminDashboard = () => {
                                     : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                                   }
                                 >없음</button>
-                                {mainAgents.map((a) => (
+                                {mainAgents.filter(a => a.id !== m.id).map((a) => (
                                   <button key={a.id}
                                     onClick={() => updateParent(m.id, a.user_id)}
                                     className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
