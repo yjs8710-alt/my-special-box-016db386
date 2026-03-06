@@ -625,6 +625,26 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, member_type } : m));
   };
 
+  // ─── 역할(role) 변경: 관리자 부여/해제 ──────────────────────────────────
+  const [roleChangingId, setRoleChangingId] = useState<string | null>(null);
+  const updateMemberRole = async (m: AgentProfile, newRole: "admin" | "user") => {
+    setRoleChangingId(m.id);
+    try {
+      if (newRole === "admin") {
+        // 관리자 권한 부여
+        const { error } = await supabase.from("user_roles").insert({ user_id: m.user_id, role: "admin" });
+        if (error && !error.message.includes("duplicate")) { alert("역할 변경 오류: " + error.message); return; }
+      } else {
+        // 관리자 권한 해제
+        const { error } = await supabase.from("user_roles").delete().eq("user_id", m.user_id).eq("role", "admin");
+        if (error) { alert("역할 변경 오류: " + error.message); return; }
+      }
+      setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, role: newRole } : p));
+    } finally {
+      setRoleChangingId(null);
+    }
+  };
+
   // ─── 상위 부동산(parent) 변경 ────────────────────────────────────────────
   const updateParent = async (id: string, parent_user_id: string | null) => {
     const { error } = await supabase.from("agent_profiles").update({ parent_user_id }).eq("id", id);
