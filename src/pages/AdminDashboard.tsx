@@ -891,7 +891,7 @@ const AdminDashboard = () => {
                         {p.status === "active" ? "노출중" : "종료"}
                       </span>
                     </div>
-                    <div className="hidden md:flex items-center justify-center gap-1.5">
+                    <div className="hidden md:flex items-center justify-center gap-1.5 flex-wrap">
                       <button
                         onClick={() => setPropertyModal({ mode: "edit", data: p })}
                         className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
@@ -899,6 +899,26 @@ const AdminDashboard = () => {
                         title="수정"
                       >
                         <Pencil className="w-3 h-3" />수정
+                      </button>
+                      <button
+                        onClick={() => {
+                          // id, created_at 제외 + 날짜·상태 초기화하여 새 등록 폼 열기
+                          const { id: _id, created_at: _ca, ...rest } = p;
+                          setPropertyModal({
+                            mode: "add",
+                            data: {
+                              ...rest,
+                              status: "active",
+                              registered_date: new Date().toISOString().slice(0, 10),
+                              views: 0,
+                            },
+                          });
+                        }}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
+                        style={{ background: "hsl(var(--chart-4) / 0.12)", color: "hsl(var(--chart-4))" }}
+                        title="이 매물 정보로 새로 등록"
+                      >
+                        <Copy className="w-3 h-3" />복사
                       </button>
                       <button
                         onClick={() => togglePropertyStatus(p)}
