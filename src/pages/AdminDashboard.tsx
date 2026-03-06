@@ -6,7 +6,7 @@ import {
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
-  ImagePlus, Loader2,
+  ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
