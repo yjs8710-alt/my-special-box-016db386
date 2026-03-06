@@ -907,7 +907,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
               
             </div>
             {/* 2행: 액션 버튼들 */}
-            <div className="px-3 pb-2 flex items-center gap-1.5">
+            <div className="px-3 pb-2 flex items-center gap-1.5 flex-wrap">
               {/* 선택 인쇄 */}
               <button
                 onClick={handleSelectPrint}
@@ -926,6 +926,56 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 <Printer className="w-3 h-3" />
                 상세인쇄
               </button>
+              {/* 구분선 */}
+              <div className="w-px h-5 bg-border/60 mx-0.5" />
+              {/* 인터넷등기소 */}
+              <a
+                href="https://www.iros.go.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#f0f5ff", color: "#1a56db", borderColor: "#c7d7f8" }}
+                title="인터넷등기소"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                등기소
+              </a>
+              {/* 정부24 */}
+              <a
+                href="https://www.gov.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#f0fff4", color: "#166534", borderColor: "#bbf7d0" }}
+                title="정부24"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                정부24
+              </a>
+              {/* 토지e음 */}
+              <a
+                href="https://www.eum.go.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}
+                title="토지이음"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                토지e음
+              </a>
+              {/* 홈택스 */}
+              <a
+                href="https://www.hometax.go.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#fdf4ff", color: "#7e22ce", borderColor: "#e9d5ff" }}
+                title="홈택스"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                홈택스
+              </a>
             </div>
           </div>
 
