@@ -23,7 +23,9 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     views: Number(row.views) || 0,
     lat: Number(row.lat) || 0,
     lng: Number(row.lng) || 0,
-    image: "",           // DB 매물은 이미지 없음
+    image: Array.isArray(row.images) && (row.images as string[]).length > 0
+      ? (row.images as string[])[0]
+      : "",           // 이미지가 없으면 빈 문자열 (썸네일 없음)
     description: String(row.description ?? ""),
     buildingMemo: row.building_memo ? String(row.building_memo) : undefined,
     roomMemo: row.room_memo ? String(row.room_memo) : undefined,

@@ -114,6 +114,7 @@ export type Database = {
           elevator: boolean
           floor: string
           id: string
+          images: string[]
           is_hot: boolean
           is_new: boolean
           lat: number
@@ -155,6 +156,7 @@ export type Database = {
           elevator?: boolean
           floor?: string
           id?: string
+          images?: string[]
           is_hot?: boolean
           is_new?: boolean
           lat?: number
@@ -196,6 +198,7 @@ export type Database = {
           elevator?: boolean
           floor?: string
           id?: string
+          images?: string[]
           is_hot?: boolean
           is_new?: boolean
           lat?: number
