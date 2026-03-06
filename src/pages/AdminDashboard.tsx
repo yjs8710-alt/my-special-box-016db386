@@ -83,6 +83,7 @@ type CheongJuContact = {
   id: string;
   district: string;
   dong: string;
+  lot_number?: string;
   phone: string;
   contact_owner?: string;
   contact_manager?: string;
