@@ -590,8 +590,28 @@ const AdminDashboard = () => {
         roleMap = Object.fromEntries(rolesData.map((r: { user_id: string; role: "admin" | "user" }) => [r.user_id, r.role]));
       }
     }
+
+    // Edge Function으로 이메일(아이디) 조회
+    let emailMap: Record<string, string> = {};
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const res = await supabase.functions.invoke("admin-get-users", {
+          body: {},
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+        if (res.data?.users) {
+          emailMap = Object.fromEntries(res.data.users.map((u: { user_id: string; email: string }) => [u.user_id, u.email]));
+        }
+      }
+    } catch (_) { /* 이메일 조회 실패시 무시 */ }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setMembers((data ?? []).map((m: any) => ({ ...m, role: roleMap[m.user_id] ?? "user" } as AgentProfile)));
+    setMembers((data ?? []).map((m: any) => ({
+      ...m,
+      role: roleMap[m.user_id] ?? "user",
+      email: emailMap[m.user_id] ?? m.email ?? "",
+    } as AgentProfile)));
     setMembersLoading(false);
   }, []);
 
