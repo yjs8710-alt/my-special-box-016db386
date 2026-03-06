@@ -568,7 +568,17 @@ const AdminDashboard = () => {
     setMembersLoading(true); setMembersError("");
     const { data, error } = await supabase.from("agent_profiles").select("*").order("created_at", { ascending: false });
     if (error) { setMembersError("데이터 로드 오류: " + error.message); setMembersLoading(false); return; }
-    setMembers(data as AgentProfile[]);
+
+    // user_roles에서 각 회원의 등급 조회
+    const userIds = (data ?? []).map((m: AgentProfile) => m.user_id);
+    let roleMap: Record<string, "admin" | "user"> = {};
+    if (userIds.length > 0) {
+      const { data: rolesData } = await supabase.from("user_roles").select("user_id, role").in("user_id", userIds);
+      if (rolesData) {
+        roleMap = Object.fromEntries(rolesData.map((r: { user_id: string; role: "admin" | "user" }) => [r.user_id, r.role]));
+      }
+    }
+    setMembers((data ?? []).map((m: AgentProfile) => ({ ...m, role: roleMap[m.user_id] ?? "user" })));
     setMembersLoading(false);
   }, []);
 
