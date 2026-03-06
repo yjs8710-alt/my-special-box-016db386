@@ -8,6 +8,7 @@ import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
+const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
 
 const CommercialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -16,6 +17,15 @@ const CommercialRental = () => {
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+
+  // DB 매물 (상가임대)
+  const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
+
+  // static + DB 합치기
+  const allProperties = useMemo(
+    () => [...MAP_PROPERTIES, ...dbProperties],
+    [dbProperties]
+  );
 
   const toggleType = (t: string) => {
     if (t === "전체") {
@@ -32,7 +42,7 @@ const CommercialRental = () => {
     });
   };
 
-  const filtered = MAP_PROPERTIES.filter(p => {
+  const filtered = allProperties.filter(p => {
     if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
