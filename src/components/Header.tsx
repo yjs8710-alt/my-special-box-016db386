@@ -63,6 +63,14 @@ const Header = () => {
                 <User className="w-4 h-4" />
                 <span>로그인 / 회원가입</span>
               </button>
+              <button
+                className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/90 px-2 py-1.5 rounded transition-colors border border-white/10 hover:border-white/30"
+                onClick={() => navigate("/admin/login")}
+                title="관리자 로그인"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>관리자</span>
+              </button>
               <Button
                 size="sm"
                 onClick={() => setShowRegister(true)}
