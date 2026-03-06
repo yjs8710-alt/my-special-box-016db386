@@ -867,7 +867,7 @@ const AdminDashboard = () => {
                   </div>
                 )}
                 {filteredDbProperties.map((p) => (
-                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_150px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
+                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_200px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
