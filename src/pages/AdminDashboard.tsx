@@ -618,6 +618,36 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
   };
 
+  // ─── 등급(member_type) 변경 ──────────────────────────────────────────────
+  const updateMemberType = async (id: string, member_type: MemberType) => {
+    const { error } = await supabase.from("agent_profiles").update({ member_type }).eq("id", id);
+    if (error) { alert("등급 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((m) => m.id === id ? { ...m, member_type } : m));
+  };
+
+  // ─── 상위 부동산(parent) 변경 ────────────────────────────────────────────
+  const updateParent = async (id: string, parent_user_id: string | null) => {
+    const { error } = await supabase.from("agent_profiles").update({ parent_user_id }).eq("id", id);
+    if (error) { alert("상위 부동산 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((m) => m.id === id ? { ...m, parent_user_id } : m));
+  };
+
+  // ─── 접속 차단/허용 토글 ────────────────────────────────────────────────
+  const toggleIsActive = async (m: AgentProfile) => {
+    const newActive = !m.is_active;
+    const { error } = await supabase.from("agent_profiles").update({ is_active: newActive }).eq("id", m.id);
+    if (error) { alert("접속 상태 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
+  };
+
+  // ─── 회원 삭제 ──────────────────────────────────────────────────────────
+  const deleteMember = async (m: AgentProfile) => {
+    if (!window.confirm(`'${m.name}' 회원을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("agent_profiles").delete().eq("id", m.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setMembers((prev) => prev.filter((p) => p.id !== m.id));
+  };
+
   // ─── 매물 노출 토글 ──────────────────────────────────────────────────────
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
