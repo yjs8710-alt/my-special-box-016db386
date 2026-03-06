@@ -5,7 +5,7 @@ import {
   LogOut, Home, CheckCircle2, XCircle, Clock,
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
-  Plus, Pencil, EyeOff, Phone, MapPin, X, Save,
+  Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -850,7 +850,7 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_150px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_200px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                   <span>매물명 / 주소</span><span>중개사</span>
                   <span className="text-center">유형</span><span className="text-center">조회</span>
                   <span className="text-center">상태</span><span className="text-center">액션</span>
@@ -867,7 +867,7 @@ const AdminDashboard = () => {
                   </div>
                 )}
                 {filteredDbProperties.map((p) => (
-                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_150px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
+                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_200px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
@@ -891,7 +891,7 @@ const AdminDashboard = () => {
                         {p.status === "active" ? "노출중" : "종료"}
                       </span>
                     </div>
-                    <div className="hidden md:flex items-center justify-center gap-1.5">
+                    <div className="hidden md:flex items-center justify-center gap-1.5 flex-wrap">
                       <button
                         onClick={() => setPropertyModal({ mode: "edit", data: p })}
                         className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
@@ -899,6 +899,26 @@ const AdminDashboard = () => {
                         title="수정"
                       >
                         <Pencil className="w-3 h-3" />수정
+                      </button>
+                      <button
+                        onClick={() => {
+                          // id, created_at 제외 + 날짜·상태 초기화하여 새 등록 폼 열기
+                          const { id: _id, created_at: _ca, ...rest } = p;
+                          setPropertyModal({
+                            mode: "add",
+                            data: {
+                              ...rest,
+                              status: "active",
+                              registered_date: new Date().toISOString().slice(0, 10),
+                              views: 0,
+                            },
+                          });
+                        }}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
+                        style={{ background: "hsl(var(--chart-4) / 0.12)", color: "hsl(var(--chart-4))" }}
+                        title="이 매물 정보로 새로 등록"
+                      >
+                        <Copy className="w-3 h-3" />복사
                       </button>
                       <button
                         onClick={() => togglePropertyStatus(p)}
