@@ -955,6 +955,44 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 <ExternalLink className="w-2.5 h-2.5" />
                 홈택스
               </a>
+              {/* 구분선 */}
+              <div className="w-px h-5 bg-border/60 mx-0.5" />
+              {/* 네이버부동산 */}
+              <a
+                href="https://land.naver.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#e8f5e9", color: "#03C75A", borderColor: "#b2dfdb" }}
+                title="네이버부동산"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                네이버
+              </a>
+              {/* 직방 */}
+              <a
+                href="https://www.zigbang.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#fff3e0", color: "#FF6D00", borderColor: "#ffcc80" }}
+                title="직방"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                직방
+              </a>
+              {/* 다방 */}
+              <a
+                href="https://www.dabangapp.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
+                style={{ background: "#fce4ec", color: "#e91e63", borderColor: "#f8bbd0" }}
+                title="다방"
+              >
+                <ExternalLink className="w-2.5 h-2.5" />
+                다방
+              </a>
             </div>
           </div>
 
