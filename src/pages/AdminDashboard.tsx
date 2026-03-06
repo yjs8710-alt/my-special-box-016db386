@@ -1088,6 +1088,7 @@ const AdminDashboard = () => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
     const matchSearch = !contactSearch
       || c.dong.includes(contactSearch)
+      || (c.lot_number ?? "").includes(contactSearch)
       || c.phone.includes(contactSearch)
       || (c.memo ?? "").includes(contactSearch);
     return matchDist && matchSearch;
