@@ -1129,13 +1129,16 @@ const AdminDashboard = () => {
                             <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
                           )}
                         </div>
-                        <div className="hidden md:block">
-                          <div className="text-xs text-foreground">{m.email ?? "-"}</div>
-                          <div className="text-xs text-muted-foreground">{m.phone}</div>
-                          {parentAgent && (
-                            <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
-                          )}
-                        </div>
+                         <div className="hidden md:block">
+                           <div className="text-xs font-medium text-foreground flex items-center gap-1">
+                             <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>
+                             {m.email ?? "-"}
+                           </div>
+                           <div className="text-xs text-muted-foreground">{m.phone}</div>
+                           {parentAgent && (
+                             <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
+                           )}
+                         </div>
                         {/* 역할 배지 */}
                         <div className="hidden md:flex justify-center">
                           {m.role === "admin" ? (
