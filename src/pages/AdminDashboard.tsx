@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Users, Building2, MessageSquare,
   LogOut, Home, CheckCircle2, XCircle, Clock,
   Eye, Trash2, Pin, ShieldCheck, TrendingUp,
-  ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle
+  ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
+  Plus, Pencil, EyeOff, Phone, MapPin, X, Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +25,67 @@ type AgentProfile = {
   agree_marketing: boolean;
   status: "pending" | "approved" | "rejected";
   created_at: string;
-  // joined from auth.users via email lookup
   email?: string;
+};
+
+type DBProperty = {
+  id: string;
+  title: string;
+  building_name?: string;
+  address: string;
+  district?: string;
+  type: string;
+  room_type?: string;
+  unit_number?: string;
+  area: string;
+  floor: string;
+  deposit: string;
+  monthly: string;
+  manage_fee: string;
+  parking: string;
+  elevator: boolean;
+  available_from: string;
+  total_floors: string;
+  build_year: string;
+  description: string;
+  building_memo?: string;
+  room_memo?: string;
+  note?: string;
+  vacate_date?: string;
+  building_password?: string;
+  room_password?: string;
+  options: string[];
+  views: number;
+  lat: number;
+  lng: number;
+  is_new: boolean;
+  is_hot: boolean;
+  status: "active" | "hidden";
+  registered_date: string;
+  checked_date?: string;
+  agent_name: string;
+  created_at: string;
+};
+
+type CheongJuContact = {
+  id: string;
+  district: string;
+  dong: string;
+  phone: string;
+  contact_owner?: string;
+  contact_manager?: string;
+  memo?: string;
+};
+
+const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
+  title: "", building_name: "", address: "", district: "", type: "상가",
+  room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
+  manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
+  build_year: "", description: "", building_memo: "", room_memo: "", note: "",
+  vacate_date: "", building_password: "", room_password: "", options: [],
+  views: 0, lat: 0, lng: 0, is_new: false, is_hot: false, status: "active",
+  registered_date: new Date().toISOString().slice(0, 10), checked_date: "",
+  agent_name: "",
 };
 
 const MOCK_POSTS = [
@@ -43,13 +103,296 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }>
   rejected: { label: "거절됨", color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)" },
 };
 
-// ─── Sidebar nav items ───────────────────────────────────────────────────────
 const NAV = [
-  { key: "dashboard", label: "대시보드", icon: LayoutDashboard },
-  { key: "members",   label: "회원 관리", icon: Users },
-  { key: "properties",label: "매물 관리", icon: Building2 },
-  { key: "community", label: "커뮤니티 관리", icon: MessageSquare },
+  { key: "dashboard",  label: "대시보드",    icon: LayoutDashboard },
+  { key: "members",    label: "회원 관리",    icon: Users },
+  { key: "properties", label: "매물 관리",    icon: Building2 },
+  { key: "contacts",   label: "청주 연락처",  icon: Phone },
+  { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
 ];
+
+const PROPERTY_TYPES = ["상가", "사무실", "식당·카페", "원룸", "투룸", "오피스텔", "아파트", "기타"];
+const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
+
+// ─── PropertyFormModal ───────────────────────────────────────────────────────
+const PropertyFormModal = ({
+  initial,
+  onClose,
+  onSave,
+}: {
+  initial: Partial<DBProperty> | null;
+  onClose: () => void;
+  onSave: (data: Omit<DBProperty, "id" | "created_at">) => Promise<void>;
+}) => {
+  const [form, setForm] = useState<Omit<DBProperty, "id" | "created_at">>({
+    ...EMPTY_PROPERTY,
+    ...(initial ?? {}),
+  });
+  const [saving, setSaving] = useState(false);
+  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSave = async () => {
+    if (!form.title || !form.address || !form.type) {
+      alert("매물명, 주소, 유형은 필수입니다.");
+      return;
+    }
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  };
+
+  const fields: { key: keyof typeof form; label: string; type?: string }[] = [
+    { key: "title", label: "매물명" },
+    { key: "building_name", label: "건물명" },
+    { key: "address", label: "주소" },
+    { key: "district", label: "구 (청주시)" },
+    { key: "unit_number", label: "호수" },
+    { key: "floor", label: "층수" },
+    { key: "total_floors", label: "전체 층수" },
+    { key: "area", label: "면적" },
+    { key: "deposit", label: "보증금" },
+    { key: "monthly", label: "월세" },
+    { key: "manage_fee", label: "관리비" },
+    { key: "parking", label: "주차" },
+    { key: "available_from", label: "입주 가능일" },
+    { key: "build_year", label: "건축연도" },
+    { key: "agent_name", label: "중개사" },
+    { key: "building_password", label: "건물 비번" },
+    { key: "room_password", label: "방 비번" },
+    { key: "vacate_date", label: "퇴거일" },
+    { key: "lat", label: "위도", type: "number" },
+    { key: "lng", label: "경도", type: "number" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-10" style={{ background: "hsl(var(--card))" }}>
+          <h3 className="text-base font-bold text-foreground">
+            {initial ? "매물 수정" : "매물 등록"}
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-6 flex flex-col gap-4">
+          {/* 유형 선택 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground">유형 *</label>
+            <div className="flex flex-wrap gap-2">
+              {PROPERTY_TYPES.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => set("type", t)}
+                  className="px-3 py-1 rounded-full text-xs font-medium border transition-all"
+                  style={
+                    form.type === t
+                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                  }
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 필드 그리드 */}
+          <div className="grid grid-cols-2 gap-3">
+            {fields.map(({ key, label, type }) => (
+              <div key={key} className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+                {key === "district" ? (
+                  <select
+                    value={form[key] as string ?? ""}
+                    onChange={(e) => set(key, e.target.value)}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
+                  >
+                    <option value="">선택</option>
+                    {CHEONGJU_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                    <option value="기타">기타</option>
+                  </select>
+                ) : (
+                  <Input
+                    type={type ?? "text"}
+                    value={String(form[key] ?? "")}
+                    onChange={(e) => set(key, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
+                    className="h-9 text-sm"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 설명 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground">설명</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={3}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none resize-none text-foreground"
+            />
+          </div>
+
+          {/* 옵션 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground">옵션 (쉼표로 구분)</label>
+            <Input
+              value={form.options.join(", ")}
+              onChange={(e) => set("options", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
+              placeholder="에어컨, 냉장고, 세탁기"
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* 체크박스 */}
+          <div className="flex gap-6">
+            {[
+              { key: "elevator", label: "엘리베이터" },
+              { key: "is_new", label: "신규 매물" },
+              { key: "is_hot", label: "인기 매물" },
+            ].map(({ key, label }) => (
+              <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form[key as keyof typeof form] as boolean}
+                  onChange={(e) => set(key, e.target.checked)}
+                  className="w-4 h-4 accent-primary"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          {/* 노출 상태 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-muted-foreground">노출 상태</label>
+            <div className="flex gap-2">
+              {(["active", "hidden"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => set("status", s)}
+                  className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                  style={
+                    form.status === s
+                      ? { background: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff", borderColor: "transparent" }
+                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                  }
+                >
+                  {s === "active" ? "노출중" : "노출종료"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 border-t border-border flex justify-end gap-2 sticky bottom-0" style={{ background: "hsl(var(--card))" }}>
+          <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
+          <Button size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? "저장 중..." : <><Save className="w-3.5 h-3.5 mr-1" />저장</>}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── ContactEditModal ────────────────────────────────────────────────────────
+const ContactEditModal = ({
+  contact,
+  onClose,
+  onSave,
+}: {
+  contact: CheongJuContact | null;
+  onClose: () => void;
+  onSave: (updated: CheongJuContact) => Promise<void>;
+}) => {
+  const [form, setForm] = useState<CheongJuContact>(
+    contact ?? { id: "", district: "", dong: "", phone: "", contact_owner: "", contact_manager: "", memo: "" }
+  );
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div
+        className="w-full max-w-md rounded-2xl shadow-2xl"
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h3 className="text-base font-bold text-foreground">
+            {form.district} {form.dong} 연락처 {contact?.id ? "수정" : "등록"}
+          </h3>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-6 flex flex-col gap-4">
+          {!contact?.id && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">구 *</label>
+                <select
+                  value={form.district}
+                  onChange={(e) => setForm((f) => ({ ...f, district: e.target.value }))}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
+                >
+                  <option value="">선택</option>
+                  {CHEONGJU_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">동/읍/면 *</label>
+                <Input
+                  value={form.dong}
+                  onChange={(e) => setForm((f) => ({ ...f, dong: e.target.value }))}
+                  placeholder="예: 복대동"
+                  className="h-9 text-sm"
+                />
+              </div>
+            </div>
+          )}
+          {[
+            { key: "phone", label: "대표 전화번호", placeholder: "043-XXX-XXXX" },
+            { key: "contact_owner", label: "건물주 전화번호", placeholder: "010-XXXX-XXXX" },
+            { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX" },
+            { key: "memo", label: "메모", placeholder: "비고" },
+          ].map(({ key, label, placeholder }) => (
+            <div key={key} className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+              <Input
+                value={(form as Record<string, string>)[key] ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                placeholder={placeholder}
+                className="h-9 text-sm"
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="px-6 py-4 border-t border-border flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
+          <Button size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? "저장 중..." : <><Save className="w-3.5 h-3.5 mr-1" />저장</>}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 const AdminDashboard = () => {
@@ -60,123 +403,171 @@ const AdminDashboard = () => {
   const [membersError, setMembersError] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [posts, setPosts] = useState(MOCK_POSTS);
-  const [properties] = useState(MAP_PROPERTIES);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [propertySearch, setPropertySearch] = useState("");
   const [postSearch, setPostSearch] = useState("");
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
+  // 매물 관리 state
+  const [dbProperties, setDbProperties] = useState<DBProperty[]>([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(false);
+  const [propertyModal, setPropertyModal] = useState<{ mode: "add" | "edit"; data: Partial<DBProperty> | null } | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  // 청주 연락처 state
+  const [contacts, setContacts] = useState<CheongJuContact[]>([]);
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
+  const [contactSearch, setContactSearch] = useState("");
+  const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
+
   // ─── 세션 기반 관리자 인증 가드 ──────────────────────────────────────────
   useEffect(() => {
     const checkAdminAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/admin/login");
-        return;
-      }
+      if (!session) { navigate("/admin/login"); return; }
       const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-
-      if (!roleData) {
-        await supabase.auth.signOut();
-        navigate("/admin/login");
-      }
+        .from("user_roles").select("role")
+        .eq("user_id", session.user.id).eq("role", "admin").maybeSingle();
+      if (!roleData) { await supabase.auth.signOut(); navigate("/admin/login"); }
     };
     checkAdminAuth();
   }, [navigate]);
 
-  // ─── agent_profiles 불러오기 ─────────────────────────────────────────────
+  // ─── 회원 불러오기 ───────────────────────────────────────────────────────
   const fetchMembers = useCallback(async () => {
-    setMembersLoading(true);
-    setMembersError("");
-    const { data, error } = await supabase
-      .from("agent_profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      setMembersError("데이터를 불러오는 중 오류가 발생했습니다: " + error.message);
-      setMembersLoading(false);
-      return;
-    }
+    setMembersLoading(true); setMembersError("");
+    const { data, error } = await supabase.from("agent_profiles").select("*").order("created_at", { ascending: false });
+    if (error) { setMembersError("데이터 로드 오류: " + error.message); setMembersLoading(false); return; }
     setMembers(data as AgentProfile[]);
     setMembersLoading(false);
   }, []);
 
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  // ─── 매물(DB) 불러오기 ───────────────────────────────────────────────────
+  const fetchProperties = useCallback(async () => {
+    setPropertiesLoading(true);
+    const { data, error } = await supabase.from("properties").select("*").order("created_at", { ascending: false });
+    if (!error && data) setDbProperties(data as DBProperty[]);
+    setPropertiesLoading(false);
+  }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/admin/login");
-  };
+  // ─── 청주 연락처 불러오기 ────────────────────────────────────────────────
+  const fetchContacts = useCallback(async () => {
+    setContactsLoading(true);
+    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong");
+    if (!error && data) setContacts(data as CheongJuContact[]);
+    setContactsLoading(false);
+  }, []);
 
-  // ─── 승인/거절 처리 ──────────────────────────────────────────────────────
+  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); }, [fetchMembers, fetchProperties, fetchContacts]);
+
+  const handleLogout = async () => { await supabase.auth.signOut(); navigate("/admin/login"); };
+
+  // ─── 승인/거절 ───────────────────────────────────────────────────────────
   const updateMemberStatus = async (id: string, status: "approved" | "rejected") => {
     setUpdatingId(id);
-    const { error } = await supabase
-      .from("agent_profiles")
-      .update({ status })
-      .eq("id", id);
+    const { error } = await supabase.from("agent_profiles").update({ status }).eq("id", id);
     setUpdatingId(null);
-
-    if (error) {
-      alert("상태 변경 중 오류가 발생했습니다: " + error.message);
-      return;
-    }
+    if (error) { alert("상태 변경 오류: " + error.message); return; }
     setMembers((prev) => prev.map((m) => m.id === id ? { ...m, status } : m));
   };
 
-  const deletePost = (id: number) => {
-    setPosts((prev) => prev.filter((p) => p.id !== id));
+  // ─── 매물 노출 토글 ──────────────────────────────────────────────────────
+  const togglePropertyStatus = async (prop: DBProperty) => {
+    setTogglingId(prop.id);
+    const newStatus = prop.status === "active" ? "hidden" : "active";
+    const { error } = await supabase.from("properties").update({ status: newStatus }).eq("id", prop.id);
+    if (!error) setDbProperties((prev) => prev.map((p) => p.id === prop.id ? { ...p, status: newStatus } : p));
+    else alert("상태 변경 오류: " + error.message);
+    setTogglingId(null);
   };
 
-  const togglePin = (id: number) => {
-    setPosts((prev) => prev.map((p) => p.id === id ? { ...p, pinned: !p.pinned } : p));
+  // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
+  const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
+    if (propertyModal?.mode === "edit" && propertyModal.data?.id) {
+      const { error } = await supabase.from("properties").update(data).eq("id", propertyModal.data.id);
+      if (error) { alert("수정 오류: " + error.message); return; }
+    } else {
+      const { error } = await supabase.from("properties").insert(data);
+      if (error) { alert("등록 오류: " + error.message); return; }
+    }
+    setPropertyModal(null);
+    fetchProperties();
   };
+
+  // ─── 연락처 저장 ─────────────────────────────────────────────────────────
+  const saveContact = async (updated: CheongJuContact) => {
+    if (updated.id) {
+      const { error } = await supabase.from("cheongju_contacts")
+        .update({ phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo })
+        .eq("id", updated.id);
+      if (error) { alert("수정 오류: " + error.message); return; }
+    } else {
+      const { error } = await supabase.from("cheongju_contacts")
+        .insert({ district: updated.district, dong: updated.dong, phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo });
+      if (error) { alert("등록 오류: " + error.message); return; }
+    }
+    setContactModal(null);
+    fetchContacts();
+  };
+
+  const deletePost = (id: number) => setPosts((prev) => prev.filter((p) => p.id !== id));
+  const togglePin = (id: number) => setPosts((prev) => prev.map((p) => p.id === id ? { ...p, pinned: !p.pinned } : p));
 
   // Stats
-  const totalMembers  = members.length;
-  const pendingCount  = members.filter((m) => m.status === "pending").length;
+  const pendingCount = members.filter((m) => m.status === "pending").length;
   const approvedCount = members.filter((m) => m.status === "approved").length;
-  const totalProperties = properties.length;
-  const totalPosts = posts.length;
   const reportedPosts = posts.filter((p) => p.reported).length;
+  // 매물: DB + static 합산
+  const allProperties = [
+    ...dbProperties,
+    ...MAP_PROPERTIES.map((p) => ({ ...p, id: String(p.id), status: "active" as const, manage_fee: p.manageFee, available_from: p.availableFrom, total_floors: p.totalFloors, build_year: p.buildYear, building_name: p.buildingName, room_type: p.roomType, unit_number: p.unitNumber, building_memo: p.buildingMemo, room_memo: p.roomMemo, building_password: p.buildingPassword, room_password: p.roomPassword, vacate_date: p.vacateDate, checked_date: p.checkedDate, registered_date: p.registeredDate ?? "", is_new: p.isNew ?? false, is_hot: p.isHot ?? false, lat: p.lat, lng: p.lng, options: p.options ?? [], agent_name: p.agentName, created_at: "" })),
+  ];
 
   const filteredMembers = members.filter((m) => {
     const matchFilter = memberFilter === "all" || m.status === memberFilter;
-    const matchSearch = !memberSearch ||
-      m.name.includes(memberSearch) ||
-      (m.email ?? "").includes(memberSearch) ||
-      m.agency_name.includes(memberSearch);
+    const matchSearch = !memberSearch || m.name.includes(memberSearch) || (m.email ?? "").includes(memberSearch) || m.agency_name.includes(memberSearch);
     return matchFilter && matchSearch;
   });
 
-  const filteredProperties = properties.filter((p) =>
-    !propertySearch ||
-    p.title.includes(propertySearch) ||
-    p.address.includes(propertySearch) ||
-    p.agentName.includes(propertySearch)
+  const filteredDbProperties = dbProperties.filter((p) =>
+    !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch)
   );
 
   const filteredPosts = posts.filter((p) =>
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
   );
 
+  const filteredContacts = contacts.filter((c) => {
+    const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
+    const matchSearch = !contactSearch || c.dong.includes(contactSearch) || c.phone.includes(contactSearch);
+    return matchDist && matchSearch;
+  });
+
   return (
     <div className="min-h-screen flex" style={{ background: "hsl(var(--background))" }}>
+      {/* Modals */}
+      {propertyModal && (
+        <PropertyFormModal
+          initial={propertyModal.data}
+          onClose={() => setPropertyModal(null)}
+          onSave={saveProperty}
+        />
+      )}
+      {contactModal !== null && (
+        <ContactEditModal
+          contact={contactModal === "new" ? null : contactModal as CheongJuContact}
+          onClose={() => setContactModal(null)}
+          onSave={saveContact}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <aside
         className="w-56 shrink-0 flex flex-col border-r sticky top-0 h-screen overflow-y-auto"
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        {/* Logo */}
         <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: "hsl(var(--header-border))" }}>
           <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
             <Home className="w-4 h-4 text-white" />
@@ -186,8 +577,6 @@ const AdminDashboard = () => {
             <div className="text-[10px] text-white/40 leading-none mt-0.5">관리자</div>
           </div>
         </div>
-
-        {/* Nav */}
         <nav className="flex flex-col gap-0.5 px-3 py-4 flex-1">
           {NAV.map(({ key, label, icon: Icon }) => (
             <button
@@ -203,50 +592,27 @@ const AdminDashboard = () => {
               <Icon className="w-4 h-4 shrink-0" />
               {label}
               {key === "members" && pendingCount > 0 && (
-                <span
-                  className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white"
-                  style={{ background: "hsl(var(--destructive))" }}
-                >
-                  {pendingCount}
-                </span>
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{pendingCount}</span>
               )}
               {key === "community" && reportedPosts > 0 && (
-                <span
-                  className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white"
-                  style={{ background: "hsl(var(--destructive))" }}
-                >
-                  신고 {reportedPosts}
-                </span>
+                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>신고 {reportedPosts}</span>
               )}
             </button>
           ))}
         </nav>
-
-        {/* Logout */}
         <div className="px-3 py-4 border-t" style={{ borderColor: "hsl(var(--header-border))" }}>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm w-full transition-colors"
-            style={{ color: "rgba(255,255,255,0.50)" }}
-          >
-            <LogOut className="w-4 h-4" />
-            로그아웃
+          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm w-full transition-colors" style={{ color: "rgba(255,255,255,0.50)" }}>
+            <LogOut className="w-4 h-4" />로그아웃
           </button>
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
+      {/* ── Main ── */}
       <main className="flex-1 overflow-y-auto">
-        {/* Header bar */}
-        <div
-          className="sticky top-0 z-10 border-b px-6 py-3 flex items-center justify-between"
-          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-        >
+        <div className="sticky top-0 z-10 border-b px-6 py-3 flex items-center justify-between" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
-            <h1 className="text-sm font-bold text-foreground">
-              {NAV.find((n) => n.key === tab)?.label ?? "관리자"}
-            </h1>
+            <h1 className="text-sm font-bold text-foreground">{NAV.find((n) => n.key === tab)?.label ?? "관리자"}</h1>
           </div>
           <span className="text-xs text-muted-foreground">관리자 계정</span>
         </div>
@@ -260,14 +626,12 @@ const AdminDashboard = () => {
                 <h2 className="text-xl font-extrabold text-foreground mb-1">안녕하세요, 관리자님 👋</h2>
                 <p className="text-sm text-muted-foreground">집다 플랫폼 현황을 확인하세요.</p>
               </div>
-
-              {/* Stat cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "전체 회원", value: totalMembers, sub: `승인 대기 ${pendingCount}건`, icon: Users, color: "hsl(var(--primary))" },
+                  { label: "전체 회원", value: members.length, sub: `승인 대기 ${pendingCount}건`, icon: Users, color: "hsl(var(--primary))" },
                   { label: "승인된 회원", value: approvedCount, sub: "활성 중개사", icon: CheckCircle2, color: "hsl(var(--chart-2))" },
-                  { label: "등록 매물", value: totalProperties, sub: "총 등록 매물 수", icon: Building2, color: "hsl(var(--accent))" },
-                  { label: "커뮤니티 게시글", value: totalPosts, sub: `신고 게시글 ${reportedPosts}건`, icon: MessageSquare, color: "hsl(var(--chart-4))" },
+                  { label: "등록 매물(DB)", value: dbProperties.length, sub: `노출종료 ${dbProperties.filter((p) => p.status === "hidden").length}건`, icon: Building2, color: "hsl(var(--accent))" },
+                  { label: "커뮤니티 게시글", value: posts.length, sub: `신고 게시글 ${reportedPosts}건`, icon: MessageSquare, color: "hsl(var(--chart-4))" },
                 ].map(({ label, value, sub, icon: Icon, color }) => (
                   <div key={label} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
                     <div className="flex items-center justify-between">
@@ -284,20 +648,13 @@ const AdminDashboard = () => {
                 ))}
               </div>
 
-              {/* Recent pending */}
+              {/* 승인 대기 */}
               <div className="bg-card border border-border rounded-xl">
                 <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                    <Clock className="w-4 h-4" style={{ color: "hsl(var(--chart-4))" }} />
-                    승인 대기 회원
+                    <Clock className="w-4 h-4" style={{ color: "hsl(var(--chart-4))" }} />승인 대기 회원
                   </h3>
-                  <button
-                    className="text-xs font-medium"
-                    style={{ color: "hsl(var(--primary))" }}
-                    onClick={() => setTab("members")}
-                  >
-                    전체 보기 →
-                  </button>
+                  <button className="text-xs font-medium" style={{ color: "hsl(var(--primary))" }} onClick={() => setTab("members")}>전체 보기 →</button>
                 </div>
                 <div className="divide-y divide-border">
                   {members.filter((m) => m.status === "pending").slice(0, 5).map((m) => (
@@ -310,18 +667,10 @@ const AdminDashboard = () => {
                         <div className="text-xs text-muted-foreground mt-0.5">{m.email ?? m.phone} · 가입 {m.created_at.slice(0, 10)}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          onClick={() => updateMemberStatus(m.id, "approved")}
-                          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold transition-colors"
-                          style={{ background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }}
-                        >
+                        <button onClick={() => updateMemberStatus(m.id, "approved")} disabled={updatingId === m.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }}>
                           <CheckCircle2 className="w-3 h-3" /> 승인
                         </button>
-                        <button
-                          onClick={() => updateMemberStatus(m.id, "rejected")}
-                          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold transition-colors"
-                          style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}
-                        >
+                        <button onClick={() => updateMemberStatus(m.id, "rejected")} disabled={updatingId === m.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
                           <XCircle className="w-3 h-3" /> 거절
                         </button>
                       </div>
@@ -333,22 +682,17 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Trending */}
+              {/* 인기 매물 */}
               <div className="bg-card border border-border rounded-xl">
                 <div className="px-5 py-4 border-b border-border flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" style={{ color: "hsl(var(--accent))" }} />
                   <h3 className="text-sm font-bold text-foreground">인기 매물 TOP 5</h3>
                 </div>
                 <div className="divide-y divide-border">
-                  {[...properties].sort((a, b) => b.views - a.views).slice(0, 5).map((p, i) => (
+                  {[...allProperties].sort((a, b) => b.views - a.views).slice(0, 5).map((p, i) => (
                     <div key={p.id} className="px-5 py-3 flex items-center gap-4">
-                      <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                        style={
-                          i === 0 ? { background: "hsl(var(--accent))", color: "#fff" }
-                          : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
-                        }
-                      >
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                        style={i === 0 ? { background: "hsl(var(--accent))", color: "#fff" } : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -356,8 +700,7 @@ const AdminDashboard = () => {
                         <div className="text-xs text-muted-foreground truncate">{p.address}</div>
                       </div>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                        <Eye className="w-3 h-3" />
-                        {p.views.toLocaleString()}
+                        <Eye className="w-3 h-3" />{p.views.toLocaleString()}
                       </div>
                     </div>
                   ))}
@@ -376,69 +719,40 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {["all", "pending", "approved", "rejected"].map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setMemberFilter(f)}
+                    <button key={f} onClick={() => setMemberFilter(f)}
                       className="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
-                      style={
-                        memberFilter === f
-                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                          : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                      }
-                    >
+                      style={memberFilter === f
+                        ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                      }>
                       {f === "all" ? "전체" : f === "pending" ? "대기중" : f === "approved" ? "승인됨" : "거절됨"}
                     </button>
                   ))}
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input
-                      placeholder="이름·이메일·사무소 검색"
-                      className="pl-7 h-8 text-xs w-48"
-                      value={memberSearch}
-                      onChange={(e) => setMemberSearch(e.target.value)}
-                    />
+                    <Input placeholder="이름·이메일·사무소 검색" className="pl-7 h-8 text-xs w-48" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
                   </div>
-                  <button
-                    onClick={fetchMembers}
-                    disabled={membersLoading}
-                    className="p-1.5 rounded-md transition-colors hover:bg-muted/50"
-                    title="새로고침"
-                    style={{ color: "hsl(var(--muted-foreground))" }}
-                  >
+                  <button onClick={fetchMembers} disabled={membersLoading} className="p-1.5 rounded-md transition-colors hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? "animate-spin" : ""}`} />
                   </button>
                 </div>
               </div>
-
-              {/* 에러 메시지 */}
               {membersError && (
                 <div className="flex items-center gap-2 rounded-xl p-3.5 text-sm" style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))" }}>
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {membersError}
+                  <AlertCircle className="w-4 h-4 shrink-0" />{membersError}
                 </div>
               )}
-
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                {/* Table header */}
                 <div className="hidden md:grid grid-cols-[1fr_1fr_130px_100px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>이름 / 사무소</span>
-                  <span>이메일 / 전화</span>
-                  <span>등록번호</span>
-                  <span className="text-center">상태</span>
-                  <span className="text-center">액션</span>
+                  <span>이름 / 사무소</span><span>이메일 / 전화</span><span>등록번호</span>
+                  <span className="text-center">상태</span><span className="text-center">액션</span>
                 </div>
-                {membersLoading && (
-                  <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>
-                )}
-                {!membersLoading && filteredMembers.length === 0 && (
-                  <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>
-                )}
+                {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
+                {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
                 {!membersLoading && filteredMembers.map((m) => (
                   <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""}`}>
-                    <div
-                      className="grid md:grid-cols-[1fr_1fr_130px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
-                      onClick={() => setExpandedMember(expandedMember === m.id ? null : m.id)}
-                    >
+                    <div className="grid md:grid-cols-[1fr_1fr_130px_100px_100px] items-center px-5 py-3.5 cursor-pointer hover:bg-muted/20 transition-colors"
+                      onClick={() => setExpandedMember(expandedMember === m.id ? null : m.id)}>
                       <div>
                         <div className="text-sm font-semibold text-foreground">{m.name}</div>
                         <div className="text-xs text-muted-foreground">{m.agency_name}</div>
@@ -452,47 +766,26 @@ const AdminDashboard = () => {
                         <div className="text-xs text-muted-foreground">{m.business_number}</div>
                       </div>
                       <div className="hidden md:flex justify-center">
-                        <span
-                          className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                          style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}
-                        >
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
                           {STATUS_LABEL[m.status].label}
                         </span>
                       </div>
                       <div className="hidden md:flex justify-center items-center gap-1.5">
                         {m.status !== "approved" && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "approved"); }}
-                            className="p-1.5 rounded-md transition-colors"
-                            title="승인"
-                            style={{ color: "hsl(var(--chart-2))" }}
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "approved"); }} className="p-1.5 rounded-md transition-colors" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
                         )}
                         {m.status !== "rejected" && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "rejected"); }}
-                            className="p-1.5 rounded-md transition-colors"
-                            title="거절"
-                            style={{ color: "hsl(var(--destructive))" }}
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); updateMemberStatus(m.id, "rejected"); }} className="p-1.5 rounded-md transition-colors" title="거절" style={{ color: "hsl(var(--destructive))" }}>
                             <XCircle className="w-4 h-4" />
                           </button>
                         )}
-                        {expandedMember === m.id
-                          ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                          : <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                        }
+                        {expandedMember === m.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                       </div>
                     </div>
-
-                    {/* Expanded detail */}
                     {expandedMember === m.id && (
-                      <div
-                        className="mx-5 mb-4 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs border"
-                        style={{ background: "hsl(var(--muted) / 0.5)", borderColor: "hsl(var(--border))" }}
-                      >
+                      <div className="mx-5 mb-4 rounded-xl p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs border" style={{ background: "hsl(var(--muted) / 0.5)", borderColor: "hsl(var(--border))" }}>
                         {[
                           { label: "사무소명", value: m.agency_name },
                           { label: "공인중개사 등록번호", value: m.license_number },
@@ -510,20 +803,12 @@ const AdminDashboard = () => {
                         ))}
                         <div className="col-span-2 md:col-span-3 flex gap-2 mt-2 pt-2 border-t border-border">
                           {m.status !== "approved" && (
-                            <button
-                              onClick={() => updateMemberStatus(m.id, "approved")}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs"
-                              style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
-                            >
+                            <button onClick={() => updateMemberStatus(m.id, "approved")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
                               <CheckCircle2 className="w-3.5 h-3.5" /> 승인하기
                             </button>
                           )}
                           {m.status !== "rejected" && (
-                            <button
-                              onClick={() => updateMemberStatus(m.id, "rejected")}
-                              className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs"
-                              style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}
-                            >
+                            <button onClick={() => updateMemberStatus(m.id, "rejected")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
                               <XCircle className="w-3.5 h-3.5" /> 거절하기
                             </button>
                           )}
@@ -542,51 +827,168 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">매물 관리</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">총 {properties.length}개 매물</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    DB 등록 {dbProperties.length}개 · 노출종료 {dbProperties.filter((p) => p.status === "hidden").length}개
+                  </p>
                 </div>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                  <Input
-                    placeholder="매물명·주소·중개사 검색"
-                    className="pl-7 h-8 text-xs w-56"
-                    value={propertySearch}
-                    onChange={(e) => setPropertySearch(e.target.value)}
-                  />
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Input placeholder="매물명·주소·중개사 검색" className="pl-7 h-8 text-xs w-52" value={propertySearch} onChange={(e) => setPropertySearch(e.target.value)} />
+                  </div>
+                  <button onClick={fetchProperties} disabled={propertiesLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
+                    <RefreshCw className={`w-3.5 h-3.5 ${propertiesLoading ? "animate-spin" : ""}`} />
+                  </button>
+                  <Button size="sm" onClick={() => setPropertyModal({ mode: "add", data: null })}>
+                    <Plus className="w-3.5 h-3.5 mr-1" />매물 등록
+                  </Button>
                 </div>
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_80px_100px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>매물명 / 주소</span>
-                  <span>중개사</span>
-                  <span className="text-center">유형</span>
-                  <span className="text-center">조회수</span>
-                  <span className="text-center">보증금</span>
-                  <span className="text-center">월세</span>
+                <div className="hidden md:grid grid-cols-[2fr_1fr_80px_70px_90px_150px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                  <span>매물명 / 주소</span><span>중개사</span>
+                  <span className="text-center">유형</span><span className="text-center">조회</span>
+                  <span className="text-center">상태</span><span className="text-center">액션</span>
                 </div>
-                {filteredProperties.length === 0 && (
-                  <div className="py-16 text-center text-sm text-muted-foreground">해당 매물이 없습니다.</div>
+                {propertiesLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
+                {!propertiesLoading && filteredDbProperties.length === 0 && (
+                  <div className="py-16 text-center text-sm text-muted-foreground">
+                    등록된 매물이 없습니다.
+                    <div className="mt-3">
+                      <Button size="sm" variant="outline" onClick={() => setPropertyModal({ mode: "add", data: null })}>
+                        <Plus className="w-3.5 h-3.5 mr-1" />첫 매물 등록하기
+                      </Button>
+                    </div>
+                  </div>
                 )}
-                {filteredProperties.map((p) => (
-                  <div key={p.id} className="grid md:grid-cols-[2fr_1fr_80px_80px_100px_100px] items-center px-5 py-3.5 border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                {filteredDbProperties.map((p) => (
+                  <div key={p.id} className={`grid md:grid-cols-[2fr_1fr_80px_70px_90px_150px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.status === "hidden" ? "opacity-50" : "hover:bg-muted/20"}`}>
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-foreground truncate">{p.title}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground truncate">{p.title}</span>
+                        {p.status === "hidden" && <EyeOff className="w-3 h-3 shrink-0 text-muted-foreground" />}
+                      </div>
                       <div className="text-xs text-muted-foreground truncate">{p.address}</div>
                     </div>
-                    <div className="hidden md:block text-xs text-muted-foreground truncate">{p.agentName}</div>
+                    <div className="hidden md:block text-xs text-muted-foreground truncate">{p.agent_name}</div>
                     <div className="hidden md:flex justify-center">
-                      <span
-                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}
-                      >
-                        {p.type}
-                      </span>
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>{p.type}</span>
                     </div>
                     <div className="hidden md:flex items-center justify-center gap-1 text-xs text-muted-foreground">
                       <Eye className="w-3 h-3" />{p.views.toLocaleString()}
                     </div>
-                    <div className="hidden md:block text-xs text-center text-foreground">{p.deposit}</div>
-                    <div className="hidden md:block text-xs text-center text-foreground">{p.monthly}</div>
+                    <div className="hidden md:flex justify-center">
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={p.status === "active"
+                          ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                          : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                        }>
+                        {p.status === "active" ? "노출중" : "종료"}
+                      </span>
+                    </div>
+                    <div className="hidden md:flex items-center justify-center gap-1.5">
+                      <button
+                        onClick={() => setPropertyModal({ mode: "edit", data: p })}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
+                        style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
+                        title="수정"
+                      >
+                        <Pencil className="w-3 h-3" />수정
+                      </button>
+                      <button
+                        onClick={() => togglePropertyStatus(p)}
+                        disabled={togglingId === p.id}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-colors"
+                        style={p.status === "active"
+                          ? { background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }
+                          : { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                        }
+                        title={p.status === "active" ? "노출종료" : "노출재개"}
+                      >
+                        {p.status === "active" ? <><EyeOff className="w-3 h-3" />종료</> : <><Eye className="w-3 h-3" />재개</>}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── 청주 연락처 관리 ── */}
+          {tab === "contacts" && (
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">주소(동)에 따른 전화번호 관리</p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex gap-1">
+                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => (
+                      <button key={d} onClick={() => setContactDistrictFilter(d)}
+                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                        style={contactDistrictFilter === d
+                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                        }>{d}</button>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                    <Input placeholder="동 이름·전화번호 검색" className="pl-7 h-8 text-xs w-44" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                  </div>
+                  <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
+                    <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
+                  </button>
+                  <Button size="sm" onClick={() => setContactModal("new")}>
+                    <Plus className="w-3.5 h-3.5 mr-1" />연락처 추가
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-card border border-border rounded-xl overflow-hidden">
+                <div className="hidden md:grid grid-cols-[80px_100px_160px_160px_160px_80px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                  <span>구</span><span>동/읍/면</span>
+                  <span>대표전화</span><span>건물주</span><span>관리인</span>
+                  <span className="text-center">수정</span>
+                </div>
+                {contactsLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
+                {!contactsLoading && filteredContacts.length === 0 && (
+                  <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
+                )}
+                {filteredContacts.map((c) => (
+                  <div key={c.id} className="grid md:grid-cols-[80px_100px_160px_160px_160px_80px] items-center px-5 py-3 border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                    <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
+                      <MapPin className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--accent))" }} />{c.district}
+                    </div>
+                    <div className="text-sm font-medium text-foreground">{c.dong}</div>
+                    <div className="hidden md:flex items-center gap-1 text-xs">
+                      {c.phone ? (
+                        <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--primary))" }}>{c.phone}</a>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </div>
+                    <div className="hidden md:block text-xs">
+                      {c.contact_owner ? (
+                        <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </div>
+                    <div className="hidden md:block text-xs">
+                      {c.contact_manager ? (
+                        <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                      ) : <span className="text-muted-foreground">—</span>}
+                    </div>
+                    <div className="hidden md:flex justify-center">
+                      <button
+                        onClick={() => setContactModal(c)}
+                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
+                        style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
+                      >
+                        <Pencil className="w-3 h-3" />수정
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -599,84 +1001,40 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">커뮤니티 관리</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {posts.length}개 게시글 · 신고 {posts.filter((p) => p.reported).length}건
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">총 {posts.length}개 게시글 · 신고 {posts.filter((p) => p.reported).length}건</p>
                 </div>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                  <Input
-                    placeholder="제목·작성자 검색"
-                    className="pl-7 h-8 text-xs w-48"
-                    value={postSearch}
-                    onChange={(e) => setPostSearch(e.target.value)}
-                  />
+                  <Input placeholder="제목·작성자 검색" className="pl-7 h-8 text-xs w-48" value={postSearch} onChange={(e) => setPostSearch(e.target.value)} />
                 </div>
               </div>
-
               <div className="bg-card border border-border rounded-xl overflow-hidden">
                 <div className="hidden md:grid grid-cols-[80px_1fr_80px_60px_60px_100px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>분류</span>
-                  <span>제목</span>
-                  <span className="text-center">작성자</span>
-                  <span className="text-center">조회</span>
-                  <span className="text-center">신고</span>
-                  <span className="text-center">관리</span>
+                  <span>분류</span><span>제목</span><span className="text-center">작성자</span>
+                  <span className="text-center">조회</span><span className="text-center">신고</span><span className="text-center">관리</span>
                 </div>
-                {filteredPosts.length === 0 && (
-                  <div className="py-16 text-center text-sm text-muted-foreground">게시글이 없습니다.</div>
-                )}
+                {filteredPosts.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">게시글이 없습니다.</div>}
                 {filteredPosts.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`grid md:grid-cols-[80px_1fr_80px_60px_60px_100px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.reported ? "bg-destructive/[0.03]" : "hover:bg-muted/20"}`}
-                  >
-                    <span
-                      className="text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit"
-                      style={{
-                        background: p.category === "notice" ? "hsl(218 88% 22% / 0.12)" : "hsl(var(--muted))",
-                        color: p.category === "notice" ? "hsl(218 88% 40%)" : "hsl(var(--muted-foreground))"
-                      }}
-                    >
+                  <div key={p.id} className={`grid md:grid-cols-[80px_1fr_80px_60px_60px_100px] items-center px-5 py-3.5 border-b border-border last:border-0 transition-colors ${p.reported ? "bg-destructive/[0.03]" : "hover:bg-muted/20"}`}>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit"
+                      style={{ background: p.category === "notice" ? "hsl(218 88% 22% / 0.12)" : "hsl(var(--muted))", color: p.category === "notice" ? "hsl(218 88% 40%)" : "hsl(var(--muted-foreground))" }}>
                       {p.categoryLabel}
                     </span>
                     <div className="flex items-center gap-2 min-w-0">
                       {p.pinned && <Pin className="w-3 h-3 shrink-0 text-destructive" />}
                       <span className="text-sm font-medium text-foreground truncate">{p.title}</span>
-                      {p.reported && (
-                        <span
-                          className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                          style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}
-                        >
-                          신고
-                        </span>
-                      )}
+                      {p.reported && <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}>신고</span>}
                     </div>
                     <span className="hidden md:block text-xs text-muted-foreground text-center">{p.author}</span>
-                    <span className="hidden md:flex items-center justify-center gap-0.5 text-xs text-muted-foreground">
-                      <Eye className="w-3 h-3" />{p.views}
-                    </span>
+                    <span className="hidden md:flex items-center justify-center gap-0.5 text-xs text-muted-foreground"><Eye className="w-3 h-3" />{p.views}</span>
                     <div className="hidden md:flex justify-center">
-                      {p.reported
-                        ? <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--destructive))" }} />
-                        : <span className="text-xs text-muted-foreground">-</span>
-                      }
+                      {p.reported ? <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--destructive))" }} /> : <span className="text-xs text-muted-foreground">-</span>}
                     </div>
                     <div className="hidden md:flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => togglePin(p.id)}
-                        className="p-1.5 rounded transition-colors"
-                        title={p.pinned ? "고정 해제" : "공지 고정"}
-                        style={{ color: p.pinned ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}
-                      >
+                      <button onClick={() => togglePin(p.id)} className="p-1.5 rounded transition-colors" title={p.pinned ? "고정 해제" : "공지 고정"} style={{ color: p.pinned ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}>
                         <Pin className="w-3.5 h-3.5" />
                       </button>
-                      <button
-                        onClick={() => deletePost(p.id)}
-                        className="p-1.5 rounded transition-colors"
-                        title="삭제"
-                        style={{ color: "hsl(var(--destructive))" }}
-                      >
+                      <button onClick={() => deletePost(p.id)} className="p-1.5 rounded transition-colors" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
