@@ -76,6 +76,7 @@ export type Database = {
           district: string
           dong: string
           id: string
+          is_visible: boolean
           memo: string | null
           phone: string
           updated_at: string
@@ -87,6 +88,7 @@ export type Database = {
           district: string
           dong: string
           id?: string
+          is_visible?: boolean
           memo?: string | null
           phone?: string
           updated_at?: string
@@ -98,6 +100,7 @@ export type Database = {
           district?: string
           dong?: string
           id?: string
+          is_visible?: boolean
           memo?: string | null
           phone?: string
           updated_at?: string
