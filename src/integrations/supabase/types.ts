@@ -77,6 +77,7 @@ export type Database = {
           dong: string
           id: string
           is_visible: boolean
+          lot_number: string
           memo: string | null
           phone: string
           updated_at: string
@@ -89,6 +90,7 @@ export type Database = {
           dong: string
           id?: string
           is_visible?: boolean
+          lot_number?: string
           memo?: string | null
           phone?: string
           updated_at?: string
@@ -101,6 +103,7 @@ export type Database = {
           dong?: string
           id?: string
           is_visible?: boolean
+          lot_number?: string
           memo?: string | null
           phone?: string
           updated_at?: string
