@@ -87,6 +87,7 @@ type CheongJuContact = {
   contact_owner?: string;
   contact_manager?: string;
   memo?: string;
+  is_visible?: boolean;
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
