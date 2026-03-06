@@ -58,6 +58,7 @@ type DBProperty = {
   building_password?: string;
   room_password?: string;
   options: string[];
+  images: string[];   // ← 추가
   views: number;
   lat: number;
   lng: number;
