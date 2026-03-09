@@ -33,7 +33,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-[950]" style={{ background: "hsl(var(--header-bg))" }}>
       <AdminEditBar />
-      {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
+      {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
       {/* Top bar */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
         <div className="w-full px-4 sm:px-6">
@@ -88,7 +88,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               </button>
               <Button
                 size="sm"
-                onClick={() => setShowRegister(true)}
+                onClick={openRegister}
                 className="bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-4 rounded-full"
               >
                 매물 등록
@@ -113,7 +113,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               {item.label}
             </a>
           ))}
-          <Button size="sm" onClick={() => setShowRegister(true)} className="bg-accent text-white w-full mt-2 rounded-full font-semibold">
+          <Button size="sm" onClick={openRegister} className="bg-accent text-white w-full mt-2 rounded-full font-semibold">
             매물 등록
           </Button>
         </div>
