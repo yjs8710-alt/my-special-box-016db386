@@ -940,20 +940,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         </div>
       )}
 
-      <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
+      <div className="flex flex-row-reverse h-full flex-shrink-0" style={{ position: "relative" }}>
         {/* Panel */}
         <aside
-          className={`pointer-events-auto bg-white border-l border-border flex flex-col transition-[opacity] duration-300 ${
+          className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
             collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
           }`}
           style={{
             width: collapsed ? 0 : width,
-            marginTop: `${topOffset}px`,
-            height: `calc(100% - ${topOffset}px)`,
-            boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
+            boxShadow: "-2px 0 16px rgba(10,45,110,0.08)",
+            flexShrink: 0,
           }}
         >
-          {/* Drag handle — pl-3(12px) 패딩과 정렬 */}
+          {/* Drag handle */}
           {!collapsed && (
             <div
               onMouseDown={onMouseDown}
