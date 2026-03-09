@@ -940,20 +940,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         </div>
       )}
 
-      <div className="absolute right-0 top-0 bottom-0 z-[900] flex flex-row-reverse pointer-events-none">
+      <div className="flex flex-row-reverse h-full flex-shrink-0" style={{ position: "relative" }}>
         {/* Panel */}
         <aside
-          className={`pointer-events-auto bg-white border-l border-border flex flex-col transition-[opacity] duration-300 ${
+          className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
             collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
           }`}
           style={{
             width: collapsed ? 0 : width,
-            marginTop: `${topOffset}px`,
-            height: `calc(100% - ${topOffset}px)`,
-            boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
+            boxShadow: "-2px 0 16px rgba(10,45,110,0.08)",
+            flexShrink: 0,
           }}
         >
-          {/* Drag handle — pl-3(12px) 패딩과 정렬 */}
+          {/* Drag handle */}
           {!collapsed && (
             <div
               onMouseDown={onMouseDown}
@@ -966,40 +965,56 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           )}
 
           {/* Header */}
+          {/* ── 사이드바 헤더 ── */}
           <div
-            className="border-b border-border flex-shrink-0"
-            style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
+            className="flex-shrink-0 border-b border-border"
+            style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 액션 버튼들 */}
-            <div className="pl-[21px] pr-3 py-2 flex items-center gap-1.5 flex-wrap">
-              {/* 선택 인쇄 */}
+            {/* 상단: 매물 수 + 주요 액션 */}
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div
+                  className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0"
+                  style={{ background: "hsl(var(--primary)/0.08)" }}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-extrabold text-foreground leading-none">
+                    {properties.length}
+                    <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
+                  </p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : "지도에서 핀 클릭"}
+                  </p>
+                </div>
+              </div>
+              {/* 인쇄 버튼들 */}
               <button
                 onClick={handleSelectPrint}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
-                style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+                className="toolbar-btn"
               >
                 <Printer className="w-3 h-3" />
                 선택인쇄
               </button>
-              {/* 상세 인쇄 */}
               <button
                 onClick={handleDetailPrint}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
-                style={{ background: "hsl(var(--primary))", color: "white", borderColor: "hsl(var(--primary))" }}
+                className="toolbar-btn toolbar-btn-primary"
               >
                 <Printer className="w-3 h-3" />
                 상세인쇄
               </button>
+            </div>
+            {/* 외부 링크 바 */}
+            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
-              <div className="w-px h-5 bg-border/60 mx-0.5" />
-              {/* 인터넷등기소 */}
+              <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
               {/* 인터넷등기소 */}
               <a
                 href="https://www.iros.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#f0f5ff", color: "#1a56db", borderColor: "#c7d7f8" }}
+                className="toolbar-btn"
                 title="인터넷등기소"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1010,8 +1025,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.gov.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#f0fff4", color: "#166534", borderColor: "#bbf7d0" }}
+                className="toolbar-btn"
                 title="정부24"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1022,8 +1036,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.eum.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}
+                className="toolbar-btn"
                 title="토지이음"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1034,22 +1047,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.hometax.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fdf4ff", color: "#7e22ce", borderColor: "#e9d5ff" }}
+                className="toolbar-btn"
                 title="홈택스"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 홈택스
               </a>
               {/* 구분선 */}
-              <div className="w-px h-5 bg-border/60 mx-0.5" />
+              <div className="w-px h-4 bg-border/60 mx-0.5 flex-shrink-0" />
               {/* 네이버부동산 */}
               <a
                 href="https://land.naver.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#e8f5e9", color: "#03C75A", borderColor: "#b2dfdb" }}
+                className="toolbar-btn"
                 title="네이버부동산"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1060,8 +1071,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.zigbang.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fff3e0", color: "#FF6D00", borderColor: "#ffcc80" }}
+                className="toolbar-btn"
                 title="직방"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1072,8 +1082,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.dabangapp.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fce4ec", color: "#e91e63", borderColor: "#f8bbd0" }}
+                className="toolbar-btn"
                 title="다방"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1090,7 +1099,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
               </div>
             ) : (
-              <div className="pt-2 pb-2 pr-2 pl-[21px] flex flex-col gap-1.5">
+              <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
                  {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
@@ -1343,8 +1352,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         {/* Toggle tab */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="pointer-events-auto self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
-          style={{ marginTop: `${topOffset + 32}px` }}
+          className="self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
+          style={{ marginTop: "32px" }}
         >
           {collapsed ? (
             <ChevronLeft className="w-3.5 h-3.5" />
