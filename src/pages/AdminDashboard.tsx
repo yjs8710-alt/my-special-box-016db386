@@ -1095,6 +1095,60 @@ const AdminDashboard = () => {
     return matchDist && matchSearch;
   });
 
+  // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
+  const handleTabChange = (key: string) => {
+    setTab(key);
+    setSidebarOpen(false);
+  };
+
+  // 사이드바 공통 콘텐츠
+  const SidebarContent = () => (
+    <>
+      <div
+        className="px-5 py-4 border-b flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+        style={{ borderColor: "hsl(var(--header-border))" }}
+        onClick={() => { navigate("/"); setSidebarOpen(false); }}
+        title="일반 페이지로 이동"
+      >
+        <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
+          <Home className="w-4 h-4 text-white" />
+        </div>
+        <div>
+          <div className="text-sm font-extrabold text-white leading-none">집다</div>
+          <div className="text-[10px] text-white/40 leading-none mt-0.5">관리자</div>
+        </div>
+      </div>
+      <nav className="flex flex-col gap-0.5 px-3 py-4 flex-1">
+        {NAV.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => handleTabChange(key)}
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left w-full"
+            style={
+              tab === key
+                ? { background: "hsl(var(--accent) / 0.18)", color: "hsl(var(--accent))" }
+                : { color: "rgba(255,255,255,0.65)" }
+            }
+          >
+            <Icon className="w-4 h-4 shrink-0" />
+            {label}
+            {key === "members" && pendingCount > 0 && (
+              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{pendingCount}</span>
+            )}
+            {key === "community" && reportedPosts > 0 && (
+              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>신고 {reportedPosts}</span>
+            )}
+          </button>
+        ))}
+      </nav>
+      <div className="px-3 py-4 border-t" style={{ borderColor: "hsl(var(--header-border))" }}>
+        <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm w-full transition-colors" style={{ color: "rgba(255,255,255,0.50)" }}>
+          <LogOut className="w-4 h-4" />로그아웃
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen flex" style={{ background: "hsl(var(--background))" }}>
       {/* Modals */}
@@ -1113,59 +1167,46 @@ const AdminDashboard = () => {
         />
       )}
 
-      {/* ── Sidebar ── */}
+      {/* ── Mobile Sidebar Overlay ── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar (Desktop: sticky, Mobile: drawer) ── */}
       <aside
-        className="w-56 shrink-0 flex flex-col border-r sticky top-0 h-screen overflow-y-auto"
+        className={`
+          fixed md:sticky top-0 h-screen z-50 md:z-auto
+          w-64 md:w-56 shrink-0 flex flex-col border-r overflow-y-auto
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        <div
-          className="px-5 py-4 border-b flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          style={{ borderColor: "hsl(var(--header-border))" }}
-          onClick={() => navigate("/")}
-          title="일반 페이지로 이동"
+        {/* 모바일 닫기 버튼 */}
+        <button
+          className="md:hidden absolute top-3 right-3 p-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/10"
+          onClick={() => setSidebarOpen(false)}
         >
-          <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
-            <Home className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <div className="text-sm font-extrabold text-white leading-none">집다</div>
-            <div className="text-[10px] text-white/40 leading-none mt-0.5">관리자</div>
-          </div>
-        </div>
-        <nav className="flex flex-col gap-0.5 px-3 py-4 flex-1">
-          {NAV.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left w-full"
-              style={
-                tab === key
-                  ? { background: "hsl(var(--accent) / 0.18)", color: "hsl(var(--accent))" }
-                  : { color: "rgba(255,255,255,0.65)" }
-              }
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
-              {key === "members" && pendingCount > 0 && (
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{pendingCount}</span>
-              )}
-              {key === "community" && reportedPosts > 0 && (
-                <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>신고 {reportedPosts}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className="px-3 py-4 border-t" style={{ borderColor: "hsl(var(--header-border))" }}>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm w-full transition-colors" style={{ color: "rgba(255,255,255,0.50)" }}>
-            <LogOut className="w-4 h-4" />로그아웃
-          </button>
-        </div>
+          <X className="w-4 h-4" />
+        </button>
+        <SidebarContent />
       </aside>
 
       {/* ── Main ── */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="sticky top-0 z-10 border-b px-6 py-3 flex items-center justify-between" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+      <main className="flex-1 overflow-y-auto min-w-0">
+        <div className="sticky top-0 z-10 border-b px-4 md:px-6 py-3 flex items-center justify-between" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
           <div className="flex items-center gap-2">
+            {/* 모바일 햄버거 버튼 */}
+            <button
+              className="md:hidden p-1.5 -ml-1 rounded-md hover:bg-muted/50 transition-colors"
+              onClick={() => setSidebarOpen(true)}
+              style={{ color: "hsl(var(--foreground))" }}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <ShieldCheck className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
             <h1 className="text-sm font-bold text-foreground">{NAV.find((n) => n.key === tab)?.label ?? "관리자"}</h1>
           </div>
