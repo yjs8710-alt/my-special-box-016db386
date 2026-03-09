@@ -275,6 +275,7 @@ const NonResidentialRental = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB 매물 (주거형 외 임대·매매)
@@ -320,7 +321,7 @@ const NonResidentialRental = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 유형 탭 - 다중 선택 */}
@@ -407,6 +408,7 @@ const NonResidentialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             nonResidentialSubtypes={NON_RESIDENTIAL_SUBTYPES}
             showRoomTypes={false}
           />

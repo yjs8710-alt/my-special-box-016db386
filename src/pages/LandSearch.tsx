@@ -196,6 +196,7 @@ const LandSearch = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB 매물 (토지)
@@ -236,7 +237,7 @@ const LandSearch = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 토지 유형 탭 - 다중 선택 */}
@@ -300,6 +301,7 @@ const LandSearch = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             showRoomTypes={false}
             showFloor={false}
             showBuildYear={false}

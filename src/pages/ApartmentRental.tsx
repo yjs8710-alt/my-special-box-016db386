@@ -240,6 +240,7 @@ const ApartmentRental = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB 매물 (아파트/오피스텔)
@@ -273,7 +274,7 @@ const ApartmentRental = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       <div
@@ -347,6 +348,7 @@ const ApartmentRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             showCategoryChips={false}
             showRoomTypes={false}
             showApartmentFilters={true}

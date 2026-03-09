@@ -128,6 +128,7 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  hideSearchBar?: boolean;
   showCategoryChips?: boolean;
   showResidentialTypes?: boolean;
   nonResidentialSubtypes?: { label: string; group: string }[];
@@ -327,6 +328,7 @@ const MapFilterBar = ({
   filters,
   onFiltersChange,
   onLandlordClick,
+  hideSearchBar = false,
   showCategoryChips = false,
   showResidentialTypes = false,
   nonResidentialSubtypes,
@@ -385,7 +387,7 @@ const MapFilterBar = ({
       <div className="pointer-events-auto flex flex-col gap-2">
 
         {/* 검색바 + 건물주 번호 한 행 */}
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
 
           {/* 검색바 */}
           <div
