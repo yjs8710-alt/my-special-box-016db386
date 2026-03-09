@@ -662,6 +662,8 @@ const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
+  const { isAdmin } = useAdminAuth();
+  const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
