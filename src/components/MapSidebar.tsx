@@ -1261,17 +1261,30 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
 
                     {/* 선택 시 액션 버튼들 */}
                     {selectedId === prop.id && (
-                      <div className={`grid border-t border-primary/20 ${isAdmin && prop.memo ? "grid-cols-6" : "grid-cols-5"}`}>
-                        {/* 관리자 수정 버튼 - DB 매물(memo = uuid)만 */}
-                        {isAdmin && prop.memo && (
+                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-6" : "grid-cols-5"}`}>
+                        {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
+                        {isAdmin && (
                           <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); setAdminEditProp(prop); }}
-                            className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors"
-                            style={{ background: "hsl(var(--accent)/0.12)" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!prop.memo) {
+                                alert("static 샘플 매물은 수정할 수 없습니다.\nDB에 등록된 매물만 수정 가능합니다.");
+                                return;
+                              }
+                              setAdminEditProp(prop);
+                            }}
+                            className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80"
+                            style={{
+                              background: prop.memo
+                                ? "hsl(var(--accent)/0.12)"
+                                : "hsl(var(--muted)/0.5)",
+                            }}
                           >
-                            <Pencil className="w-3 h-3" style={{ color: "hsl(var(--accent))" }} />
-                            <span className="text-[9px] font-bold" style={{ color: "hsl(var(--accent))" }}>수정</span>
+                            <Pencil className="w-3 h-3" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }} />
+                            <span className="text-[9px] font-bold" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }}>
+                              {prop.memo ? "수정" : "수정불가"}
+                            </span>
                           </button>
                         )}
                         <button
