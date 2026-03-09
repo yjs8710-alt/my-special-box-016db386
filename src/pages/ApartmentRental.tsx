@@ -274,7 +274,7 @@ const ApartmentRental = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       <div
