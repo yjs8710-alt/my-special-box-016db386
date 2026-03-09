@@ -320,9 +320,11 @@ const ApartmentRental = () => {
         )}
       </div>
 
+      <ExternalLinksBar />
+
       <main
         className="flex-1 overflow-hidden flex"
-        style={{ height: "calc(100vh - 56px - 41px)" }}
+        style={{ height: "calc(100vh - 56px - 41px - 37px)" }}
       >
         <MapSidebar
           properties={filtered}
