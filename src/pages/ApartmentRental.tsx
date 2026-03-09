@@ -353,6 +353,13 @@ const ApartmentRental = () => {
             onClearApartmentDealTypes={() => setActiveDealTypes([])}
           />
         </div>
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+        />
       </main>
     </div>
   );
