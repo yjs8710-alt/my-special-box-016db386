@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import Header from "@/components/Header";
+import ExternalLinksBar from "@/components/ExternalLinksBar";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
