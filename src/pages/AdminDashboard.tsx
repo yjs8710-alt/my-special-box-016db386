@@ -146,6 +146,53 @@ const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
 const ALL_PROPERTY_TYPES = PROPERTY_TYPE_GROUPS.flatMap((g) => g.types);
 const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
 
+// ─── Address Data ─────────────────────────────────────────────────────────────
+const SIDO_LIST = [
+  "강원","경기","경남","경북","광주","대구","대전","부산",
+  "서울","세종","울산","인천","전남","전북","제주","충남","충북",
+];
+const SIGUNGU_MAP: Record<string, string[]> = {
+  충북: ["괴산군","단양군","보은군","영동군","옥천군","음성군","제천시","증평군","진천군",
+         "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구","충주시"],
+  경기: ["수원시","성남시","고양시","용인시","부천시","안산시","화성시","남양주시","안양시","평택시"],
+  서울: ["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구","노원구","도봉구",
+         "동대문구","동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구",
+         "용산구","은평구","종로구","중구","중랑구"],
+  경남: ["창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시"],
+  경북: ["포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시"],
+  광주: ["동구","서구","남구","북구","광산구"],
+  대구: ["중구","동구","서구","남구","북구","수성구","달서구","달성군"],
+  대전: ["동구","중구","서구","유성구","대덕구"],
+  부산: ["중구","서구","동구","영도구","부산진구","동래구","남구","북구","해운대구","사하구",
+         "금정구","강서구","연제구","수영구","사상구","기장군"],
+  세종: ["세종시"],
+  울산: ["중구","남구","동구","북구","울주군"],
+  인천: ["중구","동구","미추홀구","연수구","남동구","부평구","계양구","서구","강화군","옹진군"],
+  전남: ["목포시","여수시","순천시","나주시","광양시"],
+  전북: ["전주시","군산시","익산시","정읍시","남원시","김제시"],
+  제주: ["제주시","서귀포시"],
+  충남: ["천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시"],
+  강원: ["춘천시","원주시","강릉시","동해시","태백시","속초시","삼척시"],
+};
+const DONG_MAP: Record<string, string[]> = {
+  "청주시 흥덕구": ["개신동","남이면","모충동","미평동","분평동","사직동","사창동","산남동",
+                   "성화동","수곡동","장성동","장암동","죽림동","현도면"],
+  "청주시 상당구": ["금천동","낭성면","남일면","미원면","문의면","사천동","용담동","월오동",
+                   "운동동","정북동","주성동"],
+  "청주시 서원구": ["개신동","남이면","모충동","미평동","분평동","사직동","수곡동"],
+  "청주시 청원구": ["내곡동","내덕동","오창읍","오송읍","율량동","주중동"],
+};
+const FLOOR_OPTIONS_ADMIN = [
+  "지하5층","지하4층","지하3층","지하2층","지하1층","0층",
+  "1층","2층","3층","4층","5층","6층","7층","8층","9층","10층","10층이상",
+];
+const DIRECTION_OPTIONS_ADMIN = ["동","서","남","북","동남","남서","북동","북서"];
+const ROOM_OPTIONS_ADMIN = [
+  "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
+  "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
+  "옷장","전자키","복층","옥탑","테라스","주차",
+];
+
 // ─── PropertyFormModal ───────────────────────────────────────────────────────
 const PropertyFormModal = ({
   initial,
@@ -162,8 +209,26 @@ const PropertyFormModal = ({
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  // 주소에서 시도/시군구/동 파싱 (초기값 복원용)
+  const [sido, setSido] = useState("");
+  const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
+  const [dong, setDong] = useState(form.dong ?? "");
+  const sigunguList = SIGUNGU_MAP[sido] ?? [];
+  const dongList = DONG_MAP[sigungu] ?? [];
+
+  // 주소 자동 조합
+  const updateAddress = (s: string, sg: string, d: string, lot: string) => {
+    const parts = [s, sg, d, lot].filter(Boolean);
+    set("address", parts.join(" "));
+    // district 추출 (청주시 서원구 → 서원구)
+    if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
+    set("dong", d);
+    set("lot_number", lot);
+  };
 
   // ── 이미지 업로드 ──────────────────────────────────────────────────────────
   const handleImageUpload = async (files: FileList | null) => {
@@ -183,9 +248,7 @@ const PropertyFormModal = ({
         .getPublicUrl(path);
       if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
     }
-    if (newUrls.length > 0) {
-      setForm((f) => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
-    }
+    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
     setUploading(false);
   };
 
@@ -193,260 +256,462 @@ const PropertyFormModal = ({
     setForm((f) => ({ ...f, images: (f.images ?? []).filter((u) => u !== url) }));
   };
 
-  const handleSave = async () => {
-    if (!form.title.trim()) {
-      alert("매물명을 입력해주세요.");
-      return;
-    }
-    if (!form.address.trim()) {
-      alert("주소를 입력해주세요.");
-      return;
-    }
-    if (!form.type) {
-      alert("유형을 선택해주세요.");
-      return;
-    }
-    setSaving(true);
-    try {
-      await onSave(form);
-    } catch (e) {
-      console.error("매물 저장 오류:", e);
-    } finally {
-      setSaving(false);
-    }
+  const toggleOption = (opt: string) => {
+    setForm((f) => ({
+      ...f,
+      options: f.options.includes(opt) ? f.options.filter((o) => o !== opt) : [...f.options, opt],
+    }));
   };
 
-  const fields: { key: keyof typeof form; label: string; type?: string }[] = [
-    { key: "title", label: "매물명" },
-    { key: "building_name", label: "건물명" },
-    { key: "address", label: "도로명 주소" },
-    { key: "dong", label: "동 (洞)" },
-    { key: "lot_number", label: "번지수 (지번)" },
-    { key: "district", label: "구 (청주시)" },
-    { key: "unit_number", label: "호수" },
-    { key: "floor", label: "층수" },
-    { key: "total_floors", label: "전체 층수" },
-    { key: "area", label: "면적" },
-    { key: "deposit", label: "보증금" },
-    { key: "monthly", label: "월세" },
-    { key: "manage_fee", label: "관리비" },
-    { key: "parking", label: "주차" },
-    { key: "available_from", label: "입주 가능일" },
-    { key: "build_year", label: "건축연도" },
-    { key: "agent_name", label: "중개사" },
-    { key: "building_password", label: "건물 비번" },
-    { key: "room_password", label: "방 비번" },
-    { key: "vacate_date", label: "퇴거일" },
-    { key: "lat", label: "위도", type: "number" },
-    { key: "lng", label: "경도", type: "number" },
-  ];
+  const handleSave = async () => {
+    if (!form.type) { alert("유형을 선택해주세요."); return; }
+    if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
+    setSaving(true);
+    try { await onSave(form); } catch (e) { console.error(e); } finally { setSaving(false); }
+  };
+
+  const STEP_LABELS_ADMIN = ["기본 설정 및 주소", "옵션 및 조건", "사진 및 기타"];
+
+  const icA = (hasError = false) =>
+    `w-full px-3 py-2 text-sm rounded-lg border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground ${
+      hasError ? "border-destructive" : "border-border focus:border-primary focus:ring-1 focus:ring-primary/20"
+    }`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
-        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 z-10" style={{ background: "hsl(var(--card))" }}>
+      <div className="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl"
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0"
+          style={{ background: "hsl(var(--header-bg))" }}>
           <div>
-            <h3 className="text-base font-bold text-foreground">
+            <h3 className="text-base font-bold text-white">
               {initial?.id ? "매물 수정" : "매물 등록"}
             </h3>
             {!initial?.id && initial?.address && (
-              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>
-                🏢 {initial.building_name || initial.address} · 호수 추가 (건물 공통 정보 자동 입력됨)
+              <p className="text-xs mt-0.5 text-white/60">
+                🏢 {initial.building_name || initial.address} · 호수 추가
               </p>
             )}
           </div>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 flex flex-col gap-4">
-          {/* 유형 선택 - 카테고리별 그룹 */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-muted-foreground">유형 *</label>
-            {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
-              <div key={group} className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold tracking-wide uppercase" style={{ color: "hsl(var(--muted-foreground))" }}>
-                  {group}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {types.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => set("type", t)}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                      style={
-                        form.type === t
-                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                      }
-                    >
+        {/* Step indicator */}
+        <div className="px-6 pt-4 pb-2 flex-shrink-0">
+          <div className="flex gap-1.5 mb-1.5">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= formStep ? "bg-primary" : "bg-muted"}`} />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">{formStep}/3 {STEP_LABELS_ADMIN[formStep - 1]}</p>
+        </div>
+
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 px-6 py-4">
+
+          {/* ── STEP 1 ── */}
+          {formStep === 1 && (
+            <div className="flex flex-col gap-5">
+              {/* 유형 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">유형 *</label>
+                {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
+                  <div key={group} className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {types.map((t) => (
+                        <button key={t} type="button" onClick={() => set("type", t)}
+                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                          style={form.type === t
+                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                          }>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 주소 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">주소 입력</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <AdminSelect value={sido} onChange={(v) => { setSido(v); setSigungu(""); setDong(""); updateAddress(v, "", "", form.lot_number); }} placeholder="시/도" options={SIDO_LIST} />
+                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(sido, v, "", form.lot_number); }} placeholder="시/군/구" options={sigunguList} disabled={!sido} />
+                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sido, sigungu, v, form.lot_number); }} placeholder="동" options={dongList} disabled={!sigungu} />
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
+                    onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
+                    className={icA() + " flex-1"} />
+                  <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground/60">도로명주소 불가 / 번지주소만 가능</p>
+                {form.address && (
+                  <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                )}
+              </div>
+
+              {/* 건물명 / 매물명 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
+                  <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""}
+                    onChange={(e) => set("building_name", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">매물명 *</label>
+                  <input type="text" placeholder="예) 흥덕구 원룸" value={form.title}
+                    onChange={(e) => set("title", e.target.value)} className={icA()} />
+                </div>
+              </div>
+
+              {/* 층수 / 호수 / 평수 */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">층수</label>
+                  <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS_ADMIN} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">호수</label>
+                  <input type="text" placeholder="직접입력" value={form.unit_number ?? ""}
+                    onChange={(e) => set("unit_number", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">평수</label>
+                  <input type="text" placeholder="예) 15평" value={form.area}
+                    onChange={(e) => set("area", e.target.value)} className={icA()} />
+                </div>
+              </div>
+
+              {/* 전체층수 / 건축연도 / 중개사 */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
+                  <input type="text" placeholder="예) 5층" value={form.total_floors}
+                    onChange={(e) => set("total_floors", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
+                  <input type="text" placeholder="예) 2010" value={form.build_year}
+                    onChange={(e) => set("build_year", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">중개사</label>
+                  <input type="text" placeholder="담당자명" value={form.agent_name}
+                    onChange={(e) => set("agent_name", e.target.value)} className={icA()} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 2 ── */}
+          {formStep === 2 && (
+            <div className="flex flex-col gap-5">
+              {/* 요약 칩 */}
+              <div className="flex gap-1.5 flex-wrap">
+                {[form.type, form.address].filter(Boolean).map((v) => (
+                  <span key={v} className="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-1 rounded-full truncate max-w-[200px]">{v}</span>
+                ))}
+              </div>
+
+              {/* 방 옵션 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">방 옵션</label>
+                <div className="flex flex-wrap gap-2">
+                  {ROOM_OPTIONS_ADMIN.map((opt) => (
+                    <button key={opt} type="button" onClick={() => toggleOption(opt)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        form.options.includes(opt)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 방 비번 / 건물 비번 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
+                  <input type="text" placeholder="방 비밀번호" value={form.room_password ?? ""}
+                    onChange={(e) => set("room_password", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건물 비번</label>
+                  <input type="text" placeholder="건물 비밀번호" value={form.building_password ?? ""}
+                    onChange={(e) => set("building_password", e.target.value)} className={icA()} />
+                </div>
+              </div>
+
+              {/* 방향 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">방향</label>
+                <div className="flex flex-wrap gap-2">
+                  {DIRECTION_OPTIONS_ADMIN.map((d) => (
+                    <button key={d} type="button"
+                      onClick={() => set("parking", form.parking === d ? "" : d)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        form.parking === d
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 공실 여부 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">현재 빈방 여부</label>
+                <div className="flex gap-3">
+                  {["공실", "세입자 거주중"].map((t) => (
+                    <button key={t} type="button" onClick={() => set("available_from", t)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                        form.available_from === t
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>
                       {t}
                     </button>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* 필드 그리드 */}
-          <div className="grid grid-cols-2 gap-3">
-            {fields.map(({ key, label, type }) => (
-              <div key={key} className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-muted-foreground">{label}</label>
-                {key === "district" ? (
-                  <select
-                    value={form[key] as string ?? ""}
-                    onChange={(e) => set(key, e.target.value)}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
-                  >
-                    <option value="">선택</option>
-                    {CHEONGJU_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
-                    <option value="기타">기타</option>
-                  </select>
-                ) : (
-                  <Input
-                    type={type ?? "text"}
-                    value={String(form[key] ?? "")}
-                    onChange={(e) => set(key, type === "number" ? parseFloat(e.target.value) || 0 : e.target.value)}
-                    className="h-9 text-sm"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* 설명 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">설명</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-              rows={3}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none resize-none text-foreground"
-            />
-          </div>
-
-          {/* 옵션 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">옵션 (쉼표로 구분)</label>
-            <Input
-              value={form.options.join(", ")}
-              onChange={(e) => set("options", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
-              placeholder="에어컨, 냉장고, 세탁기"
-              className="h-9 text-sm"
-            />
-          </div>
-
-          {/* 체크박스 */}
-          <div className="flex gap-6">
-            {[
-              { key: "elevator", label: "엘리베이터" },
-              { key: "is_new", label: "신규 매물" },
-              { key: "is_hot", label: "인기 매물" },
-            ].map(({ key, label }) => (
-              <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form[key as keyof typeof form] as boolean}
-                  onChange={(e) => set(key, e.target.checked)}
-                  className="w-4 h-4 accent-primary"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-
-          {/* 노출 상태 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-muted-foreground">노출 상태</label>
-            <div className="flex gap-2">
-              {(["active", "hidden"] as const).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => set("status", s)}
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                  style={
-                    form.status === s
-                      ? { background: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff", borderColor: "transparent" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                  }
-                >
-                  {s === "active" ? "노출중" : "노출종료"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 사진 업로드 */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-muted-foreground">매물 사진</label>
-
-            {/* 현재 업로드된 이미지 미리보기 */}
-            {(form.images ?? []).length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {(form.images ?? []).map((url, i) => (
-                  <div key={url} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
-                    <img src={url} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(url)}
-                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-destructive transition-colors"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
-                    {i === 0 && (
-                      <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
-                    )}
+              {/* 금액 - 단위: 만원 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">금액 입력</label>
+                <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "deposit", label: "보증금" },
+                    { key: "monthly", label: "월세" },
+                    { key: "manage_fee", label: "관리비" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+                      <div className="relative">
+                        <input type="text" placeholder="만원"
+                          value={form[key as keyof typeof form] as string}
+                          onChange={(e) => set(key, e.target.value)}
+                          className={icA() + " pr-10"} />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">만원</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">퇴거일</label>
+                    <input type="text" placeholder="예) 2026-05-01"
+                      value={form.vacate_date ?? ""}
+                      onChange={(e) => set("vacate_date", e.target.value)}
+                      className={icA()} />
                   </div>
+                  <div className="col-span-2 flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">중개보수</label>
+                    <input type="text" placeholder="예) 협의"
+                      value={form.note ?? ""}
+                      onChange={(e) => set("note", e.target.value)}
+                      className={icA()} />
+                  </div>
+                </div>
+              </div>
+
+              {/* 체크박스 */}
+              <div className="flex gap-6 flex-wrap">
+                {[
+                  { key: "elevator", label: "엘리베이터" },
+                  { key: "is_new", label: "신규 매물" },
+                  { key: "is_hot", label: "인기 매물" },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                    <input type="checkbox"
+                      checked={form[key as keyof typeof form] as boolean}
+                      onChange={(e) => set(key, e.target.checked)}
+                      className="w-4 h-4 accent-primary" />
+                    {label}
+                  </label>
                 ))}
               </div>
-            )}
 
-            {/* 업로드 버튼 */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleImageUpload(e.target.files)}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed transition-all hover:border-primary"
-              style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-            >
-              {uploading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">업로드 중...</span></>
-                : <><ImagePlus className="w-4 h-4" /><span className="text-xs font-medium">사진 추가 (여러 장 선택 가능)</span></>
-              }
+              {/* 메모 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">메모</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건물 메모</label>
+                    <textarea rows={2} value={form.building_memo ?? ""}
+                      onChange={(e) => set("building_memo", e.target.value)}
+                      className={icA() + " resize-none"} placeholder="건물 관련 메모" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">방 메모</label>
+                    <textarea rows={2} value={form.room_memo ?? ""}
+                      onChange={(e) => set("room_memo", e.target.value)}
+                      className={icA() + " resize-none"} placeholder="방 관련 메모" />
+                  </div>
+                </div>
+              </div>
+
+              {/* 매물 소개 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-foreground">매물 소개</label>
+                <textarea rows={3} value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  className={icA() + " resize-none"} placeholder="매물의 특징, 특이사항 등" />
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3 ── */}
+          {formStep === 3 && (
+            <div className="flex flex-col gap-5">
+              {/* 연락처 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">연락처</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { key: "agent_name", label: "부동산 연락처", placeholder: "043-123-4567" },
+                    { key: "building_name", label: "건물주 연락처", placeholder: "010-1234-5678" },
+                  ].map(({ key, label, placeholder }) => (
+                    <div key={key + label} className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+                      <div className="relative">
+                        <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <input type="tel" placeholder={placeholder}
+                          value={form[key as keyof typeof form] as string ?? ""}
+                          onChange={(e) => set(key, e.target.value)}
+                          className={icA() + " pl-8"} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 위도/경도 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">좌표 (지도 핀)</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">위도</label>
+                    <input type="number" step="0.000001" placeholder="36.6424" value={form.lat || ""}
+                      onChange={(e) => set("lat", parseFloat(e.target.value) || 0)} className={icA()} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">경도</label>
+                    <input type="number" step="0.000001" placeholder="127.4890" value={form.lng || ""}
+                      onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={icA()} />
+                  </div>
+                </div>
+              </div>
+
+              {/* 노출 상태 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">노출 설정</label>
+                <div className="flex gap-2">
+                  {(["active", "hidden"] as const).map((s) => (
+                    <button key={s} type="button" onClick={() => set("status", s)}
+                      className="px-4 py-2 rounded-full text-xs font-semibold border transition-all"
+                      style={form.status === s
+                        ? { background: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff", borderColor: "transparent" }
+                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                      }>
+                      {s === "active" ? "노출중" : "노출종료"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 날짜 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">등록일</label>
+                  <input type="date" value={form.registered_date}
+                    onChange={(e) => set("registered_date", e.target.value)} className={icA()} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">물건확인일</label>
+                  <input type="date" value={form.checked_date ?? ""}
+                    onChange={(e) => set("checked_date", e.target.value)} className={icA()} />
+                </div>
+              </div>
+
+              {/* 사진 업로드 */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">매물 사진</label>
+                {(form.images ?? []).length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {(form.images ?? []).map((url, i) => (
+                      <div key={url} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border">
+                        <img src={url} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+                        <button type="button" onClick={() => removeImage(url)}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-destructive">
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                        {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
+                  onChange={(e) => handleImageUpload(e.target.files)} />
+                <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed transition-all hover:border-primary"
+                  style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                  {uploading
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">업로드 중...</span></>
+                    : <><ImagePlus className="w-4 h-4" /><span className="text-xs font-medium">사진 추가 (여러 장 선택 가능)</span></>
+                  }
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step Navigation */}
+          <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
+            <button type="button" onClick={formStep === 1 ? onClose : () => setFormStep((s) => (s - 1) as 1 | 2 | 3)}
+              className="flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors">
+              {formStep === 1 ? "취소" : "이전"}
             </button>
-            {(form.images ?? []).length > 0 && (
-              <p className="text-[10px] text-muted-foreground">
-                첫 번째 사진이 대표 이미지로 사용됩니다. 드래그해서 순서 변경은 삭제 후 재업로드로 가능합니다.
-              </p>
+            {formStep < 3 ? (
+              <button type="button" onClick={() => setFormStep((s) => (s + 1) as 1 | 2 | 3)}
+                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors">
+                다음
+              </button>
+            ) : (
+              <button type="button" onClick={handleSave} disabled={saving || uploading}
+                className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {saving ? "저장 중..." : <span className="flex items-center justify-center gap-1"><Save className="w-3.5 h-3.5" />저장</span>}
+              </button>
             )}
           </div>
-        </div>
-
-        <div className="px-6 py-4 border-t border-border flex justify-end gap-2 sticky bottom-0" style={{ background: "hsl(var(--card))" }}>
-          <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
-          <Button size="sm" onClick={handleSave} disabled={saving || uploading}>
-            {saving ? "저장 중..." : <><Save className="w-3.5 h-3.5 mr-1" />저장</>}
-          </Button>
         </div>
       </div>
     </div>
   );
 };
+
+// ─── AdminSelect helper ────────────────────────────────────────────────────────
+const AdminSelect = ({ value, onChange, placeholder, options, disabled }: {
+  value: string; onChange: (v: string) => void; placeholder: string; options: string[]; disabled?: boolean;
+}) => (
+  <div className="relative">
+    <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
+      className="w-full px-3 py-2 text-sm rounded-lg border outline-none appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-7">
+      <option value="">{placeholder}</option>
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+    </select>
+    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+  </div>
+);
 
 // ─── BuildingGroup ────────────────────────────────────────────────────────────
 const BuildingGroup = ({
