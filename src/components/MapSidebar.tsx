@@ -216,7 +216,7 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, 
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">건물/토지대장 열람</p>
+              <p className="text-sm font-bold text-foreground">{title ?? "건물/토지대장 열람"}</p>
               <p className="text-[10px] text-muted-foreground truncate max-w-[400px]">{address}</p>
             </div>
           </div>
