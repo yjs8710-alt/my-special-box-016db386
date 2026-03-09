@@ -1,6 +1,8 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, CalendarCheck, CalendarPlus, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2 } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 
 // 주소에서 동+번지수만 추출 (예: "서울시 강남구 역삼동 123-45" → "역삼동 123-45")
 const shortAddress = (addr: string) => {
@@ -660,6 +662,8 @@ const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
 const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
+  const { isAdmin } = useAdminAuth();
+  const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
@@ -863,6 +867,56 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         <ErrorReportModal
           prop={errorReportProp}
           onClose={() => setErrorReportProp(null)}
+        />
+      )}
+      {/* Admin Property Edit Modal */}
+      {adminEditProp && (
+        <AdminPropertyFormModal
+          initial={
+            adminEditProp.memo
+              ? {
+                  id: adminEditProp.memo, // memo에 DB uuid 저장됨
+                  title: adminEditProp.title,
+                  building_name: adminEditProp.buildingName,
+                  address: adminEditProp.address,
+                  dong: adminEditProp.address?.split(" ").slice(-2, -1)[0] ?? "",
+                  lot_number: adminEditProp.address?.split(" ").slice(-1)[0] ?? "",
+                  district: adminEditProp.address?.match(/([가-힣]+구)/)?.[1],
+                  type: adminEditProp.type,
+                  unit_number: adminEditProp.unitNumber,
+                  area: adminEditProp.area?.replace(/[^0-9]/g, "") ?? "",
+                  floor: adminEditProp.floor ?? "",
+                  deposit: adminEditProp.deposit?.replace(/[^0-9,]/g, "") ?? "",
+                  monthly: adminEditProp.monthly?.replace(/[^0-9,]/g, "") ?? "",
+                  manage_fee: adminEditProp.manageFee?.replace(/[^0-9,]/g, "") ?? "",
+                  parking: adminEditProp.parking ?? "",
+                  elevator: adminEditProp.elevator ?? false,
+                  available_from: adminEditProp.availableFrom ?? "",
+                  total_floors: adminEditProp.totalFloors?.replace(/[^0-9층]/g, "") ?? "",
+                  build_year: adminEditProp.buildYear?.replace(/[^0-9]/g, "") ?? "",
+                  description: adminEditProp.description ?? "",
+                  building_memo: adminEditProp.buildingMemo ?? "",
+                  room_memo: adminEditProp.roomMemo ?? "",
+                  note: adminEditProp.note ?? "",
+                  vacate_date: adminEditProp.vacateDate ?? "",
+                  building_password: adminEditProp.buildingPassword ?? "",
+                  room_password: adminEditProp.roomPassword ?? "",
+                  options: adminEditProp.options ?? [],
+                  images: adminEditProp.image ? [adminEditProp.image] : [],
+                  views: adminEditProp.views ?? 0,
+                  lat: adminEditProp.lat ?? 0,
+                  lng: adminEditProp.lng ?? 0,
+                  is_new: adminEditProp.isNew ?? false,
+                  is_hot: adminEditProp.isHot ?? false,
+                  status: "active",
+                  registered_date: adminEditProp.registeredDate ?? new Date().toISOString().slice(0, 10),
+                  checked_date: adminEditProp.checkedDate ?? "",
+                  agent_name: adminEditProp.agentName ?? "",
+                }
+              : null
+          }
+          onClose={() => setAdminEditProp(null)}
+          onSaved={() => setAdminEditProp(null)}
         />
       )}
       {/* Lightbox */}
@@ -1206,7 +1260,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
 
                     {/* 선택 시 액션 버튼들 */}
                     {selectedId === prop.id && (
-                      <div className="grid grid-cols-5 border-t border-primary/20">
+                      <div className={`grid border-t border-primary/20 ${isAdmin && prop.memo ? "grid-cols-6" : "grid-cols-5"}`}>
+                        {/* 관리자 수정 버튼 - DB 매물(memo = uuid)만 */}
+                        {isAdmin && prop.memo && (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setAdminEditProp(prop); }}
+                            className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors"
+                            style={{ background: "hsl(var(--accent)/0.12)" }}
+                          >
+                            <Pencil className="w-3 h-3" style={{ color: "hsl(var(--accent))" }} />
+                            <span className="text-[9px] font-bold" style={{ color: "hsl(var(--accent))" }}>수정</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setModalPos(getModalInitPos()); setBuildingRegisterAddr(prop.address); }}
