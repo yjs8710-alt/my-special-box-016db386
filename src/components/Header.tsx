@@ -3,6 +3,7 @@ import { Menu, X, Bell, User, Home, Users, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
+import AdminEditBar from "@/components/AdminEditBar";
 
 const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential" },
