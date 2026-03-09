@@ -531,9 +531,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col"
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
         style={{ width: "min(680px, 94vw)", maxHeight: "92vh" }}
         onClick={e => e.stopPropagation()}
       >
