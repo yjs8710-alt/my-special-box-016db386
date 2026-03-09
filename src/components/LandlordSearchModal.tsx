@@ -38,7 +38,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
       onClick={onClose}
     >
       <div
