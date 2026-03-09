@@ -1005,38 +1005,15 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 상세인쇄
               </button>
             </div>
-
-            {/* 외부 링크 바 */}
-            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
-
-              {/* 선택 인쇄 */}
-              <button
-                onClick={handleSelectPrint}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
-                style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
-              >
-                <Printer className="w-3 h-3" />
-                선택인쇄
-              </button>
-              {/* 상세 인쇄 */}
-              <button
-                onClick={handleDetailPrint}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
-                style={{ background: "hsl(var(--primary))", color: "white", borderColor: "hsl(var(--primary))" }}
-              >
-                <Printer className="w-3 h-3" />
-                상세인쇄
-              </button>
+              {/* 외부 링크들 — 중복 인쇄 버튼 제거 후 링크만 */}
               {/* 구분선 */}
-              <div className="w-px h-5 bg-border/60 mx-0.5" />
-              {/* 인터넷등기소 */}
+              <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
               {/* 인터넷등기소 */}
               <a
                 href="https://www.iros.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#f0f5ff", color: "#1a56db", borderColor: "#c7d7f8" }}
+                className="toolbar-btn"
                 title="인터넷등기소"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1047,8 +1024,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.gov.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#f0fff4", color: "#166534", borderColor: "#bbf7d0" }}
+                className="toolbar-btn"
                 title="정부24"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1059,8 +1035,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.eum.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}
+                className="toolbar-btn"
                 title="토지이음"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1071,22 +1046,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.hometax.go.kr"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fdf4ff", color: "#7e22ce", borderColor: "#e9d5ff" }}
+                className="toolbar-btn"
                 title="홈택스"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 홈택스
               </a>
               {/* 구분선 */}
-              <div className="w-px h-5 bg-border/60 mx-0.5" />
+              <div className="w-px h-4 bg-border/60 mx-0.5 flex-shrink-0" />
               {/* 네이버부동산 */}
               <a
                 href="https://land.naver.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#e8f5e9", color: "#03C75A", borderColor: "#b2dfdb" }}
+                className="toolbar-btn"
                 title="네이버부동산"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1097,8 +1070,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.zigbang.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fff3e0", color: "#FF6D00", borderColor: "#ffcc80" }}
+                className="toolbar-btn"
                 title="직방"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
@@ -1109,8 +1081,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 href="https://www.dabangapp.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
-                style={{ background: "#fce4ec", color: "#e91e63", borderColor: "#f8bbd0" }}
+                className="toolbar-btn"
                 title="다방"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
