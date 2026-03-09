@@ -344,6 +344,13 @@ const ResidentialRental = () => {
             showRoomTypes={false}
           />
         </div>
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+        />
       </main>
     </div>
   );
