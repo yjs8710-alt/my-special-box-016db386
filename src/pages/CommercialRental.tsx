@@ -85,7 +85,7 @@ const CommercialRental = () => {
       </div>
 
       <main
-        className="flex-1 overflow-hidden flex"
+        className="flex-1 overflow-hidden flex relative"
         style={{ height: "calc(100vh - 56px - 41px)" }}
       >
         <MapSidebar
