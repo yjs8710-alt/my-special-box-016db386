@@ -200,9 +200,9 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, 
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="fixed z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{ left: pos.x, top: pos.y, width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -300,9 +300,9 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col"
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
         style={{ width: "min(460px, 92vw)", maxHeight: "88vh" }}
         onClick={e => e.stopPropagation()}
       >
@@ -451,8 +451,8 @@ const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) =
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl w-[min(480px,92vw)] flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl w-[min(480px,92vw)] flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -531,9 +531,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col"
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
         style={{ width: "min(680px, 94vw)", maxHeight: "92vh" }}
         onClick={e => e.stopPropagation()}
       >
