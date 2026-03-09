@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import LoginPage from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import MapSearch from "./pages/MapSearch";
+
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
 import ApartmentRental from "./pages/ApartmentRental";
@@ -38,7 +38,7 @@ const App = () => (
 
           {/* 인증 필요 페이지 */}
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/map" element={<ProtectedRoute><MapSearch /></ProtectedRoute>} />
+          
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/apartment" element={<ProtectedRoute><ApartmentRental /></ProtectedRoute>} />
           <Route path="/residential" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Map, Building } from "lucide-react";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential", icon: Building },
   { label: "아파트/오피스텔", path: "/apartment", icon: Building },
   { label: "주거형 외 임대·매매", path: "/non-residential", icon: Building },
-  { label: "토지", path: "/land", icon: Map },
+  { label: "토지", path: "/land", icon: Building },
 ];
 
 interface HeaderProps {
@@ -78,23 +78,6 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               </span>
             </div>
 
-            {/* 지도 검색 강조 버튼 */}
-            <button
-              onClick={() => navigate("/map")}
-              className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-bold transition-all flex-shrink-0"
-              style={
-                isActive("/map")
-                  ? { background: "hsl(var(--accent))", color: "white" }
-                  : {
-                      background: "rgba(255,255,255,0.1)",
-                      color: "rgba(255,255,255,0.9)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                    }
-              }
-            >
-              <Map className="w-3.5 h-3.5" />
-              지도검색
-            </button>
 
             {/* 데스크톱 Nav */}
             <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-hidden">
@@ -214,13 +197,6 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
       {menuOpen && (
         <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3"
           style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
-          <button
-            onClick={() => { navigate("/map"); setMenuOpen(false); }}
-            className="text-left text-sm font-bold text-white/90 py-2.5 px-3 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.1)" }}
-          >
-            📍 지도 검색
-          </button>
           {NAV_ITEMS.map((item) => (
             <button
               key={item.label}
