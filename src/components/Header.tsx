@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Map, Building } from "lucide-react";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
