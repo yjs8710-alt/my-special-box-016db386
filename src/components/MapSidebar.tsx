@@ -971,7 +971,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
           >
             {/* 액션 버튼들 */}
-            <div className="px-3 py-2 flex items-center gap-1.5 flex-wrap">
+            <div className="pl-[21px] pr-3 py-2 flex items-center gap-1.5 flex-wrap">
               {/* 선택 인쇄 */}
               <button
                 onClick={handleSelectPrint}
