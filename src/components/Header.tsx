@@ -19,6 +19,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-[950]" style={{ background: "hsl(var(--header-bg))" }}>
+      <AdminEditBar />
       {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
       {/* Top bar */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
