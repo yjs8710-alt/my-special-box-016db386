@@ -200,9 +200,9 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, 
 
   return (
     <>
-      <div className="fixed inset-0 z-[9990] bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed z-[9991] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        className="fixed z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{ left: pos.x, top: pos.y, width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
         onClick={(e) => e.stopPropagation()}
       >
