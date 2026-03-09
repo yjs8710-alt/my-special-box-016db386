@@ -1211,24 +1211,24 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                           </div>
 
                           {/* 2줄: 주소 | 층·호수 | 비번 — 높이 고정 */}
-                          <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "18px" }}>
-                            <span className="text-[10px] text-muted-foreground font-medium whitespace-nowrap flex-shrink-0">{shortAddress(prop.address)}</span>
-                            {prop.roomType && <span className="text-[9px] text-primary font-semibold bg-primary/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
-                            {prop.floor && <span className="text-[9px] text-muted-foreground font-semibold flex-shrink-0 whitespace-nowrap">{prop.floor}</span>}
-                            {prop.unitNumber && <span className="text-[9px] text-accent font-semibold bg-accent/10 px-1 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
+                          <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "20px" }}>
+                            <span className="text-[12px] text-muted-foreground font-semibold whitespace-nowrap flex-shrink-0">{shortAddress(prop.address)}</span>
+                            {prop.roomType && <span className="text-[11px] text-primary font-bold bg-primary/10 px-1.5 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
+                            {prop.floor && <span className="text-[11px] text-muted-foreground font-bold flex-shrink-0 whitespace-nowrap">{prop.floor}</span>}
+                            {prop.unitNumber && <span className="text-[11px] text-accent font-bold bg-accent/10 px-1.5 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
                             {buildingPw && (
                               <>
                                 <span className="flex-shrink-0 w-px h-3 bg-border/40" />
                                 <div className="flex items-center gap-0.5 flex-shrink-0">
-                                  <KeyRound className="w-2.5 h-2.5 text-muted-foreground" />
-                                  <span className="text-[9px] font-extrabold text-muted-foreground font-mono whitespace-nowrap">건{buildingPw}</span>
+                                  <KeyRound className="w-3 h-3 text-muted-foreground" />
+                                  <span className="text-[11px] font-extrabold text-muted-foreground font-mono whitespace-nowrap">건{buildingPw}</span>
                                 </div>
                               </>
                             )}
                             {roomPw && (
                               <div className="flex items-center gap-0.5 flex-shrink-0">
-                                <KeyRound className="w-2.5 h-2.5 text-accent" />
-                                <span className="text-[9px] font-extrabold text-accent font-mono whitespace-nowrap">방{roomPw}</span>
+                                <KeyRound className="w-3 h-3 text-accent" />
+                                <span className="text-[11px] font-extrabold text-accent font-mono whitespace-nowrap">방{roomPw}</span>
                               </div>
                             )}
                           </div>
