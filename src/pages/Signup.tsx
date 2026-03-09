@@ -207,6 +207,44 @@ const SignupPage = () => {
             {step === 0 && (
               <div className="flex flex-col gap-4">
                 <h2 className="text-lg font-bold text-foreground mb-1">기본 정보 입력</h2>
+
+                {/* 회원 유형 선택 */}
+                <div className="flex flex-col gap-2">
+                  <Label>회원 유형 <span className="text-destructive">*</span></Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { value: "대표중개사", label: "부동산 대표자", desc: "대표 공인중개사" },
+                      { value: "소속중개사", label: "소속공인중개사", desc: "소속 공인중개사" },
+                      { value: "중개보조원", label: "중개보조원", desc: "중개 보조 직원" },
+                    ].map(({ value, label, desc }) => {
+                      const isActive = form.memberType === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => set("memberType", value)}
+                          className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl border-2 transition-all text-center"
+                          style={
+                            isActive
+                              ? { borderColor: "hsl(var(--accent))", background: "hsl(var(--accent) / 0.08)" }
+                              : { borderColor: "hsl(var(--border))", background: "transparent" }
+                          }
+                        >
+                          <span
+                            className="text-xs font-bold leading-tight"
+                            style={{ color: isActive ? "hsl(var(--accent))" : "hsl(var(--foreground))" }}
+                          >
+                            {label}
+                          </span>
+                          <span className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>
+                            {desc}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
                     <Label>이름 <span className="text-destructive">*</span></Label>
