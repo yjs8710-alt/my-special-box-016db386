@@ -1,0 +1,574 @@
+import { useState, useRef } from "react";
+import { X, Phone, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+export type DBPropertyForm = {
+  id?: string;
+  created_at?: string;
+  title: string;
+  building_name?: string;
+  address: string;
+  dong: string;
+  lot_number: string;
+  district?: string;
+  type: string;
+  room_type?: string;
+  unit_number?: string;
+  area: string;
+  floor: string;
+  deposit: string;
+  monthly: string;
+  manage_fee: string;
+  parking: string;
+  elevator: boolean;
+  available_from: string;
+  total_floors: string;
+  build_year: string;
+  description: string;
+  building_memo?: string;
+  room_memo?: string;
+  note?: string;
+  vacate_date?: string;
+  building_password?: string;
+  room_password?: string;
+  options: string[];
+  images: string[];
+  views: number;
+  lat: number;
+  lng: number;
+  is_new: boolean;
+  is_hot: boolean;
+  status: "active" | "hidden";
+  registered_date: string;
+  checked_date?: string;
+  agent_name: string;
+};
+
+// ─── Address Data ─────────────────────────────────────────────────────────────
+const SIDO_LIST = [
+  "강원","경기","경남","경북","광주","대구","대전","부산",
+  "서울","세종","울산","인천","전남","전북","제주","충남","충북",
+];
+const SIGUNGU_MAP: Record<string, string[]> = {
+  충북: ["괴산군","단양군","보은군","영동군","옥천군","음성군","제천시","증평군","진천군",
+         "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구","충주시"],
+  경기: ["수원시","성남시","고양시","용인시","부천시","안산시","화성시","남양주시","안양시","평택시"],
+  서울: ["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구","노원구","도봉구",
+         "동대문구","동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구",
+         "용산구","은평구","종로구","중구","중랑구"],
+  경남: ["창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시"],
+  경북: ["포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시"],
+  광주: ["동구","서구","남구","북구","광산구"],
+  대구: ["중구","동구","서구","남구","북구","수성구","달서구","달성군"],
+  대전: ["동구","중구","서구","유성구","대덕구"],
+  부산: ["중구","서구","동구","영도구","부산진구","동래구","남구","북구","해운대구","사하구",
+         "금정구","강서구","연제구","수영구","사상구","기장군"],
+  세종: ["세종시"],
+  울산: ["중구","남구","동구","북구","울주군"],
+  인천: ["중구","동구","미추홀구","연수구","남동구","부평구","계양구","서구","강화군","옹진군"],
+  전남: ["목포시","여수시","순천시","나주시","광양시"],
+  전북: ["전주시","군산시","익산시","정읍시","남원시","김제시"],
+  제주: ["제주시","서귀포시"],
+  충남: ["천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시"],
+  강원: ["춘천시","원주시","강릉시","동해시","태백시","속초시","삼척시"],
+};
+const DONG_MAP: Record<string, string[]> = {
+  "청주시 상당구": [
+    "낭성면","미원면","가덕면","남일면","문의면",
+    "중앙동","성안동","탑동","대성동","영운동","금천동",
+    "용담동","명암동","산성동","용암동",
+  ],
+  "청주시 서원구": [
+    "남이면","현도면",
+    "사직동","사창동","모충동","분평동","산남동","수곡동",
+    "성화동","개신동","죽림동",
+  ],
+  "청주시 흥덕구": [
+    "오송읍","강내면","옥산면",
+    "운천동","신봉동","복대동","가경동","봉명동","강서동",
+  ],
+  "청주시 청원구": [
+    "내수읍","오창읍","북이면",
+    "우암동","내덕동","율량동","사천동","오근장동",
+  ],
+};
+const FLOOR_OPTIONS = [
+  "지하5층","지하4층","지하3층","지하2층","지하1층","0층",
+  "1층","2층","3층","4층","5층","6층","7층","8층","9층","10층","10층이상",
+];
+const ROOM_OPTIONS = [
+  "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
+  "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
+  "옷장","전자키","복층","옥탑","테라스","주차",
+];
+const PROPERTY_TYPE_GROUPS = [
+  { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","고시원"] },
+  { group: "상가 임대", types: ["상가","식당·카페","사무실","공장·창고","병원·학원"] },
+  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","원룸건물매매","주택매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","숙박/팬션매매"] },
+  { group: "토지", types: ["토지"] },
+];
+
+const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
+  title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "원룸",
+  room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
+  manage_fee: "", parking: "", elevator: false, available_from: "", total_floors: "",
+  build_year: "", description: "", building_memo: "", room_memo: "", note: "",
+  vacate_date: "", building_password: "", room_password: "", options: [], images: [],
+  views: 0, lat: 0, lng: 0, is_new: false, is_hot: false, status: "active",
+  registered_date: new Date().toISOString().slice(0, 10), checked_date: "",
+  agent_name: "",
+};
+
+// AdminSelect helper
+const AdminSelect = ({ value, onChange, placeholder, options, disabled }: {
+  value: string; onChange: (v: string) => void; placeholder: string; options: string[]; disabled?: boolean;
+}) => (
+  <div className="relative">
+    <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
+      className="w-full px-3 py-2 text-sm rounded-lg border outline-none appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-7">
+      <option value="">{placeholder}</option>
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+    </select>
+    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+  </div>
+);
+
+// ─── AdminPropertyFormModal ───────────────────────────────────────────────────
+interface AdminPropertyFormModalProps {
+  /** 수정 시 기존 데이터, 신규 등록 시 null */
+  initial: Partial<DBPropertyForm> | null;
+  onClose: () => void;
+  /** 저장 후 콜백 */
+  onSaved?: () => void;
+}
+
+const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyFormModalProps) => {
+  const [form, setForm] = useState<Omit<DBPropertyForm, "id" | "created_at">>({
+    ...EMPTY,
+    ...(initial ?? {}),
+  });
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+
+  const [sido, setSido] = useState("");
+  const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
+  const [dong, setDong] = useState(form.dong ?? "");
+  const sigunguList = SIGUNGU_MAP[sido] ?? [];
+  const dongList = DONG_MAP[sigungu] ?? [];
+
+  const updateAddress = (s: string, sg: string, d: string, lot: string) => {
+    const parts = [s, sg, d, lot].filter(Boolean);
+    set("address", parts.join(" "));
+    if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
+    set("dong", d);
+    set("lot_number", lot);
+  };
+
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
+      if (error) { alert("이미지 업로드 실패: " + error.message); continue; }
+      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    }
+    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
+    setUploading(false);
+  };
+
+  const toggleOption = (opt: string) => {
+    setForm((f) => ({
+      ...f,
+      options: f.options.includes(opt) ? f.options.filter((o) => o !== opt) : [...f.options, opt],
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!form.type) { alert("유형을 선택해주세요."); return; }
+    if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
+    setSaving(true);
+
+    const payload = {
+      title: form.title || "",
+      building_name: form.building_name || null,
+      address: form.address || "",
+      dong: form.dong ?? "",
+      lot_number: form.lot_number ?? "",
+      district: form.district || null,
+      type: form.type || "",
+      room_type: form.room_type || null,
+      unit_number: form.unit_number || null,
+      area: form.area ?? "",
+      floor: form.floor ?? "",
+      deposit: form.deposit ?? "",
+      monthly: form.monthly ?? "",
+      manage_fee: form.manage_fee ?? "",
+      parking: form.parking ?? "",
+      elevator: form.elevator ?? false,
+      available_from: form.available_from ?? "",
+      total_floors: form.total_floors ?? "",
+      build_year: form.build_year ?? "",
+      description: form.description ?? "",
+      building_memo: form.building_memo || null,
+      room_memo: form.room_memo || null,
+      note: form.note || null,
+      vacate_date: form.vacate_date || null,
+      building_password: form.building_password || null,
+      room_password: form.room_password || null,
+      options: Array.isArray(form.options) ? form.options : [],
+      images: Array.isArray(form.images) ? form.images : [],
+      views: Number(form.views) || 0,
+      lat: Number(form.lat) || 0,
+      lng: Number(form.lng) || 0,
+      is_new: form.is_new ?? false,
+      is_hot: form.is_hot ?? false,
+      status: form.status ?? "active",
+      registered_date: form.registered_date || new Date().toISOString().slice(0, 10),
+      checked_date: form.checked_date || null,
+      agent_name: form.agent_name ?? "",
+    };
+
+    try {
+      if (initial?.id) {
+        const { error } = await supabase.from("properties").update(payload).eq("id", initial.id);
+        if (error) { alert("수정 오류: " + error.message); return; }
+      } else {
+        const { error } = await supabase.from("properties").insert(payload);
+        if (error) { alert("등록 오류: " + error.message); return; }
+      }
+      onSaved?.();
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const ic = `w-full px-3 py-2 text-sm rounded-lg border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground border-border focus:border-primary focus:ring-1 focus:ring-primary/20`;
+  const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "사진 및 기타"];
+
+  return (
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl shadow-2xl"
+        style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0"
+          style={{ background: "hsl(var(--header-bg))" }}>
+          <div>
+            <h3 className="text-base font-bold text-white">
+              {initial?.id ? "매물 수정" : "매물 등록"}
+            </h3>
+            {initial?.id && (
+              <p className="text-xs mt-0.5 text-white/60">{initial.address} {initial.unit_number ? `· ${initial.unit_number}호` : ""}</p>
+            )}
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Step indicator */}
+        <div className="px-6 pt-4 pb-2 flex-shrink-0">
+          <div className="flex gap-1.5 mb-1.5">
+            {[1, 2, 3].map((s) => (
+              <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= formStep ? "bg-primary" : "bg-muted"}`} />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">{formStep}/3 {STEP_LABELS[formStep - 1]}</p>
+        </div>
+
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 px-6 py-4">
+          {/* ── STEP 1 ── */}
+          {formStep === 1 && (
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">유형 *</label>
+                {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
+                  <div key={group} className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {types.map((t) => (
+                        <button key={t} type="button" onClick={() => set("type", t)}
+                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                          style={form.type === t
+                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">주소 입력</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <AdminSelect value={sido} onChange={(v) => { setSido(v); setSigungu(""); setDong(""); updateAddress(v, "", "", form.lot_number); }} placeholder="시/도" options={SIDO_LIST} />
+                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(sido, v, "", form.lot_number); }} placeholder="시/군/구" options={sigunguList} disabled={!sido} />
+                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sido, sigungu, v, form.lot_number); }} placeholder="동" options={dongList} disabled={!sigungu} />
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
+                    onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
+                    className={ic + " flex-1"} />
+                  <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
+                </div>
+                {form.address && (
+                  <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
+                  <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">매물명 *</label>
+                  <input type="text" placeholder="예) 흥덕구 원룸" value={form.title} onChange={(e) => set("title", e.target.value)} className={ic} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">층수</label>
+                  <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">호수</label>
+                  <input type="text" placeholder="직접입력" value={form.unit_number ?? ""} onChange={(e) => set("unit_number", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">평수</label>
+                  <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
+                  <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
+                  <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">중개사</label>
+                  <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 2 ── */}
+          {formStep === 2 && (
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">방 옵션</label>
+                <div className="flex flex-wrap gap-2">
+                  {ROOM_OPTIONS.map((opt) => (
+                    <button key={opt} type="button" onClick={() => toggleOption(opt)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        form.options.includes(opt)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>{opt}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
+                  <input type="text" placeholder="방 비밀번호" value={form.room_password ?? ""} onChange={(e) => set("room_password", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건물 비번</label>
+                  <input type="text" placeholder="건물 비밀번호" value={form.building_password ?? ""} onChange={(e) => set("building_password", e.target.value)} className={ic} />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">현재 빈방 여부</label>
+                <div className="flex gap-3">
+                  {["공실", "세입자 거주중"].map((t) => (
+                    <button key={t} type="button" onClick={() => set("available_from", t)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                        form.available_from === t
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>{t}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">금액 입력</label>
+                <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[{ key: "deposit", label: "보증금" }, { key: "monthly", label: "월세" }, { key: "manage_fee", label: "관리비" }].map(({ key, label }) => (
+                    <div key={key} className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+                      <div className="relative">
+                        <input type="text" placeholder="만원" value={form[key as keyof typeof form] as string}
+                          onChange={(e) => set(key, e.target.value)} className={ic + " pr-10"} />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">만원</span>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">퇴거일</label>
+                    <input type="text" placeholder="예) 2026-05-01" value={form.vacate_date ?? ""} onChange={(e) => set("vacate_date", e.target.value)} className={ic} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-6 flex-wrap">
+                {[{ key: "elevator", label: "엘리베이터" }, { key: "is_new", label: "신규 매물" }, { key: "is_hot", label: "인기 매물" }].map(({ key, label }) => (
+                  <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                    <input type="checkbox" checked={form[key as keyof typeof form] as boolean}
+                      onChange={(e) => set(key, e.target.checked)} className="w-4 h-4 accent-primary" />
+                    {label}
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">메모</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건물 메모</label>
+                    <textarea rows={2} value={form.building_memo ?? ""} onChange={(e) => set("building_memo", e.target.value)}
+                      className={ic + " resize-none"} placeholder="건물 관련 메모" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">방 메모</label>
+                    <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
+                      className={ic + " resize-none"} placeholder="방 관련 메모" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-foreground">매물 소개</label>
+                <textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)}
+                  className={ic + " resize-none"} placeholder="매물의 특징, 특이사항 등" />
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 3 ── */}
+          {formStep === 3 && (
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">연락처</label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">부동산 연락처</label>
+                  <div className="relative">
+                    <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <input type="tel" placeholder="043-123-4567" value={form.agent_name}
+                      onChange={(e) => set("agent_name", e.target.value)} className={ic + " pl-8"} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">좌표 (지도 핀 위치)</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">위도 (lat)</label>
+                    <input type="number" step="0.000001" value={form.lat || ""}
+                      onChange={(e) => set("lat", parseFloat(e.target.value) || 0)} className={ic} placeholder="예) 36.6424" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">경도 (lng)</label>
+                    <input type="number" step="0.000001" value={form.lng || ""}
+                      onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={ic} placeholder="예) 127.4890" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">이미지 업로드</label>
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
+                  onChange={(e) => handleImageUpload(e.target.files)} />
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full border-2 border-dashed border-primary/30 rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors">
+                  <span className="text-sm font-semibold text-primary">{uploading ? "업로드 중..." : "이미지 선택 / 드래그"}</span>
+                  <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등</span>
+                </button>
+                {(form.images ?? []).length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {(form.images ?? []).map((url, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                        <button type="button"
+                          onClick={() => setForm((f) => ({ ...f, images: (f.images ?? []).filter((_, i) => i !== idx) }))}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <X className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-foreground">노출 상태</label>
+                <div className="flex gap-3">
+                  {["active", "hidden"].map((s) => (
+                    <button key={s} type="button" onClick={() => set("status", s)}
+                      className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${
+                        form.status === s ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"
+                      }`}>
+                      {s === "active" ? "✅ 노출" : "🔕 숨김"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 px-6 py-4 border-t border-border flex items-center gap-3">
+          {formStep > 1 && (
+            <button type="button" onClick={() => setFormStep((s) => (s - 1) as 1 | 2 | 3)}
+              className="px-4 py-2 rounded-full text-xs font-semibold border border-border text-foreground hover:bg-muted/50">
+              이전
+            </button>
+          )}
+          <div className="flex-1" />
+          {formStep < 3 ? (
+            <button type="button" onClick={() => setFormStep((s) => (s + 1) as 2 | 3)}
+              className="px-6 py-2 rounded-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90">
+              다음
+            </button>
+          ) : (
+            <button type="button" onClick={handleSave} disabled={saving}
+              className="px-6 py-2 rounded-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+              {saving ? "저장 중..." : (initial?.id ? "수정 완료" : "등록 완료")}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminPropertyFormModal;
+export type { DBPropertyForm };
