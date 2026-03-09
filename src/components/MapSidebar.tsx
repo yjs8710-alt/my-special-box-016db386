@@ -994,38 +994,41 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
               <div className="w-px h-5 bg-border/60 mx-0.5" />
               {/* 인터넷등기소 */}
               {/* 인터넷등기소 */}
-              <button
-                type="button"
-                onClick={() => openExternalModal("https://www.iros.go.kr", "인터넷등기소")}
+              <a
+                href="https://www.iros.go.kr"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#f0f5ff", color: "#1a56db", borderColor: "#c7d7f8" }}
                 title="인터넷등기소"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 등기소
-              </button>
+              </a>
               {/* 정부24 */}
-              <button
-                type="button"
-                onClick={() => openExternalModal("https://www.gov.kr", "정부24")}
+              <a
+                href="https://www.gov.kr"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#f0fff4", color: "#166534", borderColor: "#bbf7d0" }}
                 title="정부24"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 정부24
-              </button>
+              </a>
               {/* 토지e음 */}
-              <button
-                type="button"
-                onClick={() => openExternalModal("https://www.eum.go.kr", "토지이음")}
+              <a
+                href="https://www.eum.go.kr"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}
                 title="토지이음"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 토지e음
-              </button>
+              </a>
               {/* 홈택스 */}
               <a
                 href="https://www.hometax.go.kr"
