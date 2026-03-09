@@ -24,6 +24,7 @@ const SignupPage = () => {
     email: "",
     password: "",
     passwordConfirm: "",
+    memberType: "",
     agencyName: "",
     licenseNumber: "",
     businessNumber: "",
