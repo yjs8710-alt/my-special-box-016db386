@@ -940,7 +940,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         </div>
       )}
 
-      <div className="flex flex-row-reverse h-full flex-shrink-0" style={{ position: "relative" }}>
+      <div className="flex h-full flex-shrink-0" style={{ position: "relative" }}>
         {/* Panel */}
         <aside
           className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
