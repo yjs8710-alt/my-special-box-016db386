@@ -953,11 +953,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             boxShadow: "-4px 0 24px rgba(10,45,110,0.12)",
           }}
         >
-          {/* Drag handle */}
+          {/* Drag handle — pl-3(12px) 패딩과 정렬 */}
           {!collapsed && (
             <div
               onMouseDown={onMouseDown}
-              className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
+              className="absolute top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
+              style={{ left: "9px" }}
               title="드래그하여 너비 조절"
             >
               <div className="w-1.5 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow" />
