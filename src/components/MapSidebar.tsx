@@ -168,9 +168,13 @@ interface BuildingRegisterModalProps {
   onClose: () => void;
   pos: { x: number; y: number };
   onPosChange: (pos: { x: number; y: number }) => void;
+  /** 커스텀 URL (정부24, 토지이음 등). 없으면 세움터 주소검색 URL 사용 */
+  customUrl?: string;
+  /** 팝업 제목 */
+  title?: string;
 }
-const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingRegisterModalProps) => {
-  const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
+const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, title }: BuildingRegisterModalProps) => {
+  const url = customUrl ?? `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
   const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -212,7 +216,7 @@ const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingR
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">건물/토지대장 열람</p>
+              <p className="text-sm font-bold text-foreground">{title ?? "건물/토지대장 열람"}</p>
               <p className="text-[10px] text-muted-foreground truncate max-w-[400px]">{address}</p>
             </div>
           </div>
@@ -671,12 +675,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
+  // 상단 바 외부링크 팝업 (등기소/정부24/토지이음 등)
+  const [externalModal, setExternalModal] = useState<{ url: string; title: string } | null>(null);
+  const [externalModalPos, setExternalModalPos] = useState({ x: 0, y: 97 });
   const getModalInitPos = useCallback(() => {
     // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
     const x = width;
     // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
     const y = 97;
     return { x, y };
+  }, [width]);
+  const openExternalModal = useCallback((url: string, title: string) => {
+    const pos = { x: width, y: 97 };
+    setExternalModalPos(pos);
+    setExternalModal({ url, title });
   }, [width]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
@@ -819,6 +831,17 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           onPosChange={setModalPos}
         />
       )}
+      {/* External Link Modal (등기소/정부24/토지이음 등) */}
+      {externalModal && (
+        <BuildingRegisterModal
+          address=""
+          customUrl={externalModal.url}
+          title={externalModal.title}
+          onClose={() => setExternalModal(null)}
+          pos={externalModalPos}
+          onPosChange={setExternalModalPos}
+        />
+      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
@@ -915,41 +938,39 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
               {/* 구분선 */}
               <div className="w-px h-5 bg-border/60 mx-0.5" />
               {/* 인터넷등기소 */}
-              <a
-                href="https://www.iros.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
+              {/* 인터넷등기소 */}
+              <button
+                type="button"
+                onClick={() => openExternalModal("https://www.iros.go.kr", "인터넷등기소")}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#f0f5ff", color: "#1a56db", borderColor: "#c7d7f8" }}
                 title="인터넷등기소"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 등기소
-              </a>
+              </button>
               {/* 정부24 */}
-              <a
-                href="https://www.gov.kr"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => openExternalModal("https://www.gov.kr", "정부24")}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#f0fff4", color: "#166534", borderColor: "#bbf7d0" }}
                 title="정부24"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 정부24
-              </a>
+              </button>
               {/* 토지e음 */}
-              <a
-                href="https://www.eum.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => openExternalModal("https://www.eum.go.kr", "토지이음")}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-all hover:opacity-80"
                 style={{ background: "#fffbeb", color: "#92400e", borderColor: "#fde68a" }}
                 title="토지이음"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 토지e음
-              </a>
+              </button>
               {/* 홈택스 */}
               <a
                 href="https://www.hometax.go.kr"
