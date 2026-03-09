@@ -965,12 +965,50 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           )}
 
           {/* Header */}
+          {/* ── 사이드바 헤더 ── */}
           <div
-            className="border-b border-border flex-shrink-0"
-            style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
+            className="flex-shrink-0 border-b border-border"
+            style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 액션 버튼들 */}
-            <div className="pl-[21px] pr-3 py-2 flex items-center gap-1.5 flex-wrap">
+            {/* 상단: 매물 수 + 주요 액션 */}
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div
+                  className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0"
+                  style={{ background: "hsl(var(--primary)/0.08)" }}
+                >
+                  <Building2 className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[13px] font-extrabold text-foreground leading-none">
+                    {properties.length}
+                    <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
+                  </p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : "지도에서 핀 클릭"}
+                  </p>
+                </div>
+              </div>
+              {/* 인쇄 버튼들 */}
+              <button
+                onClick={handleSelectPrint}
+                className="toolbar-btn"
+              >
+                <Printer className="w-3 h-3" />
+                선택인쇄
+              </button>
+              <button
+                onClick={handleDetailPrint}
+                className="toolbar-btn toolbar-btn-primary"
+              >
+                <Printer className="w-3 h-3" />
+                상세인쇄
+              </button>
+            </div>
+
+            {/* 외부 링크 바 */}
+            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
+
               {/* 선택 인쇄 */}
               <button
                 onClick={handleSelectPrint}
