@@ -279,7 +279,7 @@ const ResidentialRental = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 주거 유형 탭 - 다중 선택 */}
