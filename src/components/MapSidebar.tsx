@@ -670,7 +670,14 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
-  const [modalPos, setModalPos] = useState({ x: Math.max(0, window.innerWidth / 2 - 450), y: Math.max(0, window.innerHeight / 2 - 350) });
+  const [modalPos, setModalPos] = useState({ x: 0, y: 60 });
+  const getModalInitPos = useCallback(() => {
+    const sidebarW = width;
+    const popupW = Math.min(900, window.innerWidth * 0.92);
+    const x = Math.max(0, Math.min(sidebarW, window.innerWidth - popupW - 8));
+    const y = 60;
+    return { x, y };
+  }, [width]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
