@@ -301,6 +301,7 @@ const LandSearch = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             showRoomTypes={false}
             showFloor={false}
             showBuildYear={false}

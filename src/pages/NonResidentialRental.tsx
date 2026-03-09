@@ -408,6 +408,7 @@ const NonResidentialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             nonResidentialSubtypes={NON_RESIDENTIAL_SUBTYPES}
             showRoomTypes={false}
           />

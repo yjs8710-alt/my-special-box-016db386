@@ -345,6 +345,7 @@ const ResidentialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            hideSearchBar={showRegister}
             showResidentialTypes={true}
             showBuildingOptions={true}
             showRoomTypes={false}
