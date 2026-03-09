@@ -196,6 +196,7 @@ const LandSearch = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB 매물 (토지)
