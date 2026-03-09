@@ -571,4 +571,3 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 };
 
 export default AdminPropertyFormModal;
-export type { DBPropertyForm };
