@@ -12,10 +12,23 @@ const NAV_ITEMS = [
   { label: "토지", path: "/land" },
 ];
 
-const Header = () => {
+interface HeaderProps {
+  onRegisterChange?: (open: boolean) => void;
+}
+
+const Header = ({ onRegisterChange }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const navigate = useNavigate();
+
+  const openRegister = () => {
+    setShowRegister(true);
+    onRegisterChange?.(true);
+  };
+  const closeRegister = () => {
+    setShowRegister(false);
+    onRegisterChange?.(false);
+  };
 
   return (
     <header className="sticky top-0 z-[950]" style={{ background: "hsl(var(--header-bg))" }}>
