@@ -278,13 +278,6 @@ const LandSearch = () => {
         className="flex-1 overflow-hidden flex relative"
         style={{ height: "calc(100vh - 56px - 41px)" }}
       >
-        <MapSidebar
-          properties={filtered}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          activeType={activeType}
-          onTypeChange={(t) => toggleType(t)}
-        />
         <div className="flex-1 relative min-w-0">
           <MapView
             properties={filtered}
@@ -308,6 +301,13 @@ const LandSearch = () => {
             showLandFilters={true}
           />
         </div>
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+        />
       </main>
     </div>
   );
