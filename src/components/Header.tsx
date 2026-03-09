@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Menu, X, Bell, User, Home, Users, ShieldCheck } from "lucide-react";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminEditBar from "@/components/AdminEditBar";
+import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential" },
@@ -20,6 +21,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const navigate = useNavigate();
+  const { isAuthorized, user, logout } = useAuth();
 
   const openRegister = () => {
     setShowRegister(true);
@@ -28,6 +30,11 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
   const closeRegister = () => {
     setShowRegister(false);
     onRegisterChange?.(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
@@ -74,18 +81,44 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                 <Bell className="w-4 h-4" />
                 <span>알림</span>
               </button>
-              <button className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors" onClick={() => navigate("/login")}>
-                <User className="w-4 h-4" />
-                <span>로그인 / 회원가입</span>
-              </button>
-              <button
-                className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/90 px-2 py-1.5 rounded transition-colors border border-white/10 hover:border-white/30"
-                onClick={() => navigate("/admin/login")}
-                title="관리자 로그인"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>관리자</span>
-              </button>
+
+              {isAuthorized ? (
+                <>
+                  {/* 사용자 정보 */}
+                  <span className="text-xs text-white/60 px-2">
+                    {user?.memberType}
+                  </span>
+                  {/* 관리자 버튼 (관리자일 때만) */}
+                  {user?.isAdmin && (
+                    <button
+                      className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/90 px-2 py-1.5 rounded transition-colors border border-white/10 hover:border-white/30"
+                      onClick={() => navigate("/admin")}
+                      title="관리자 대시보드"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>관리자</span>
+                    </button>
+                  )}
+                  {/* 로그아웃 */}
+                  <button
+                    className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white px-3 py-1.5 rounded transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>로그아웃</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/90 px-2 py-1.5 rounded transition-colors border border-white/10 hover:border-white/30"
+                  onClick={() => navigate("/admin/login")}
+                  title="관리자 로그인"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>관리자</span>
+                </button>
+              )}
+
               <Button
                 size="sm"
                 onClick={openRegister}
@@ -116,6 +149,14 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
           <Button size="sm" onClick={openRegister} className="bg-accent text-white w-full mt-2 rounded-full font-semibold">
             매물 등록
           </Button>
+          {isAuthorized && (
+            <button
+              className="text-sm text-destructive font-medium py-2 mt-1"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </button>
+          )}
         </div>
       )}
     </header>
