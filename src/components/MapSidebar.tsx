@@ -831,6 +831,17 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           onPosChange={setModalPos}
         />
       )}
+      {/* External Link Modal (등기소/정부24/토지이음 등) */}
+      {externalModal && (
+        <BuildingRegisterModal
+          address=""
+          customUrl={externalModal.url}
+          title={externalModal.title}
+          onClose={() => setExternalModal(null)}
+          pos={externalModalPos}
+          onPosChange={setExternalModalPos}
+        />
+      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
