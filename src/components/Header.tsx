@@ -197,13 +197,6 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
       {menuOpen && (
         <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3"
           style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
-          <button
-            onClick={() => { navigate("/map"); setMenuOpen(false); }}
-            className="text-left text-sm font-bold text-white/90 py-2.5 px-3 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.1)" }}
-          >
-            📍 지도 검색
-          </button>
           {NAV_ITEMS.map((item) => (
             <button
               key={item.label}
