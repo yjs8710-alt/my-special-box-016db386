@@ -941,6 +941,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
       )}
 
       <div className="flex h-full flex-shrink-0" style={{ position: "relative" }}>
+        {/* Toggle tab — 사이드바 왼쪽 */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
+          style={{ marginTop: "32px" }}
+        >
+          {collapsed ? (
+            <ChevronLeft className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronRight className="w-3.5 h-3.5" />
+          )}
+        </button>
+
         {/* Panel */}
         <aside
           className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
@@ -952,12 +965,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             flexShrink: 0,
           }}
         >
-          {/* Drag handle */}
+          {/* Drag handle — 사이드바 왼쪽 끝 */}
           {!collapsed && (
             <div
               onMouseDown={onMouseDown}
               className="absolute top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
-              style={{ left: "9px" }}
+              style={{ left: "0px" }}
               title="드래그하여 너비 조절"
             >
               <div className="w-1.5 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow" />
