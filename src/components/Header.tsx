@@ -78,23 +78,6 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               </span>
             </div>
 
-            {/* 지도 검색 강조 버튼 */}
-            <button
-              onClick={() => navigate("/map")}
-              className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-bold transition-all flex-shrink-0"
-              style={
-                isActive("/map")
-                  ? { background: "hsl(var(--accent))", color: "white" }
-                  : {
-                      background: "rgba(255,255,255,0.1)",
-                      color: "rgba(255,255,255,0.9)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                    }
-              }
-            >
-              <Map className="w-3.5 h-3.5" />
-              지도검색
-            </button>
 
             {/* 데스크톱 Nav */}
             <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-hidden">
