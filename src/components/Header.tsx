@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential", icon: Building },
   { label: "아파트/오피스텔", path: "/apartment", icon: Building },
   { label: "주거형 외 임대·매매", path: "/non-residential", icon: Building },
-  { label: "토지", path: "/land", icon: Map },
+  { label: "토지", path: "/land", icon: Building },
 ];
 
 interface HeaderProps {
