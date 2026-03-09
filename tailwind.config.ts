@@ -51,6 +51,12 @@ export default {
         "badge-new": "hsl(var(--badge-new))",
         "badge-hot": "hsl(var(--badge-hot))",
         "header-bg": "hsl(var(--header-bg))",
+        surface: "hsl(var(--surface))",
+        "surface-elevated": "hsl(var(--surface-elevated))",
+        "toolbar-bg": "hsl(var(--toolbar-bg))",
+        "stat-blue": "hsl(var(--stat-blue))",
+        "stat-green": "hsl(var(--stat-green))",
+        "stat-orange": "hsl(var(--stat-orange))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
