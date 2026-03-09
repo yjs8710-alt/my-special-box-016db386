@@ -675,12 +675,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
+  // 상단 바 외부링크 팝업 (등기소/정부24/토지이음 등)
+  const [externalModal, setExternalModal] = useState<{ url: string; title: string } | null>(null);
+  const [externalModalPos, setExternalModalPos] = useState({ x: 0, y: 97 });
   const getModalInitPos = useCallback(() => {
     // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
     const x = width;
     // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
     const y = 97;
     return { x, y };
+  }, [width]);
+  const openExternalModal = useCallback((url: string, title: string) => {
+    const pos = { x: width, y: 97 };
+    setExternalModalPos(pos);
+    setExternalModal({ url, title });
   }, [width]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
