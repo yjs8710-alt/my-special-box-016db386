@@ -7,7 +7,7 @@ import {
   ChevronDown, ChevronUp, Search, RefreshCw, AlertCircle,
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
-  KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon,
+  KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
