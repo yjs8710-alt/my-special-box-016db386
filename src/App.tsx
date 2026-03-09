@@ -38,7 +38,7 @@ const App = () => (
 
           {/* 인증 필요 페이지 */}
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/map" element={<ProtectedRoute><MapSearch /></ProtectedRoute>} />
+          
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
           <Route path="/apartment" element={<ProtectedRoute><ApartmentRental /></ProtectedRoute>} />
           <Route path="/residential" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
