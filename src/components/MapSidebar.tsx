@@ -971,7 +971,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
             style={{ background: "linear-gradient(to right, hsl(var(--primary)/0.04), hsl(var(--primary)/0.08))" }}
           >
             {/* 액션 버튼들 */}
-            <div className="px-3 py-2 flex items-center gap-1.5 flex-wrap">
+            <div className="pl-[21px] pr-3 py-2 flex items-center gap-1.5 flex-wrap">
               {/* 선택 인쇄 */}
               <button
                 onClick={handleSelectPrint}
@@ -1087,7 +1087,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
               </div>
             ) : (
-              <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
+              <div className="pt-2 pb-2 pr-2 pl-[21px] flex flex-col gap-1.5">
                  {[...properties].sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
