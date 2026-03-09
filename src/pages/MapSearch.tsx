@@ -5,6 +5,9 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
+import { LayoutGrid, Map, List } from "lucide-react";
+
+type ViewMode = "map" | "list";
 
 const MapSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -14,6 +17,7 @@ const MapSearch = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>("map");
 
   const handleDeleteProperties = (ids: Set<number>) => {
     setDeletedIds(prev => new Set([...prev, ...ids]));
@@ -33,27 +37,86 @@ const MapSearch = () => {
   const selected = MAP_PROPERTIES.find((p) => p.id === selectedId) ?? null;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col" style={{ height: "100vh" }}>
       <Header />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
-      <main className="flex-1 overflow-hidden flex" style={{ height: "calc(100vh - 56px)" }}>
-        {/* Sidebar */}
-        <MapSidebar
-          properties={filtered}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          activeType={activeType}
-          onTypeChange={setActiveType}
-          onDeleteProperties={handleDeleteProperties}
-        />
-        {/* Map */}
+
+      {/* 서브 툴바 — 필터/뷰 전환 */}
+      <div
+        className="flex-shrink-0 flex items-center gap-2 px-4 h-9 border-b"
+        style={{
+          background: "hsl(var(--toolbar-bg))",
+          borderColor: "hsl(var(--border))",
+        }}
+      >
+        {/* 뷰 전환 */}
+        <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: "hsl(var(--border))" }}>
+          <button
+            onClick={() => setViewMode("map")}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all"
+            style={
+              viewMode === "map"
+                ? { background: "white", color: "hsl(var(--primary))", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
+                : { color: "hsl(var(--muted-foreground))" }
+            }
+          >
+            <Map className="w-3 h-3" />
+            지도
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all"
+            style={
+              viewMode === "list"
+                ? { background: "white", color: "hsl(var(--primary))", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
+                : { color: "hsl(var(--muted-foreground))" }
+            }
+          >
+            <List className="w-3 h-3" />
+            목록
+          </button>
+        </div>
+
+        {/* 매물 수 */}
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--stat-green))" }} />
+          <span className="text-[11px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
+            {filtered.length}개 매물
+          </span>
+        </div>
+
+        <div className="flex-1" />
+
+        {/* 유형 칩 */}
+        {["전체", "원룸", "빌라", "상가", "사무실", "토지"].map(type => (
+          <button
+            key={type}
+            onClick={() => setActiveType(type)}
+            className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all hidden lg:block"
+            style={
+              activeType === type
+                ? { background: "hsl(var(--primary))", color: "white", borderColor: "hsl(var(--primary))" }
+                : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+            }
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+
+      {/* 메인 콘텐츠 */}
+      <main
+        className="flex-1 relative overflow-hidden flex"
+        style={{ minHeight: 0 }}
+      >
+        {/* 지도 영역 */}
         <div className="flex-1 relative min-w-0">
           <MapView
             properties={filtered}
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
-          {/* Left top filter bar overlay */}
+          {/* 필터 바 오버레이 */}
           <MapFilterBar
             activeType={activeType}
             onTypeChange={setActiveType}
@@ -66,6 +129,16 @@ const MapSearch = () => {
             onLandlordClick={() => setShowLandlord(true)}
           />
         </div>
+
+        {/* 우측 사이드바 */}
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={setActiveType}
+          onDeleteProperties={handleDeleteProperties}
+        />
       </main>
     </div>
   );
