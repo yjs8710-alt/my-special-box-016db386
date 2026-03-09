@@ -672,11 +672,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
   const getModalInitPos = useCallback(() => {
-    const sidebarW = width;
-    const popupW = Math.min(900, window.innerWidth * 0.92);
-    // x: 파란 드래그 라인(사이드바 우측 끝)에 맞추되 화면 밖으로 나가지 않도록
-    const x = Math.min(sidebarW, window.innerWidth - popupW - 8);
-    // y: 헤더(56) + 주거유형 탭바(41) = 97px
+    // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
+    const x = width;
+    // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
     const y = 97;
     return { x, y };
   }, [width]);
