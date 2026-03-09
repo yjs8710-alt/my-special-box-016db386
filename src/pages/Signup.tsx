@@ -59,7 +59,8 @@ const SignupPage = () => {
     form.phone.trim() &&
     form.email.trim() &&
     form.password.length >= 8 &&
-    form.password === form.passwordConfirm;
+    form.password === form.passwordConfirm &&
+    form.memberType;
 
   const canNext1 =
     form.agencyName.trim() &&
