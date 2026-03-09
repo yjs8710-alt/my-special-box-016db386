@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import LoginPage from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import MapSearch from "./pages/MapSearch";
+
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
 import ApartmentRental from "./pages/ApartmentRental";
