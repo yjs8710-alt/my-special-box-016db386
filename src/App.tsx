@@ -14,10 +14,12 @@ import ApartmentRental from "./pages/ApartmentRental";
 import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
+import CommercialRental from "./pages/CommercialRental";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,20 +30,26 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/map" element={<MapSearch />} />
+          {/* 공개 페이지 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/apartment" element={<ApartmentRental />} />
-          <Route path="/residential" element={<ResidentialRental />} />
-          <Route path="/land" element={<LandSearch />} />
-          <Route path="/non-residential" element={<NonResidentialRental />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+          {/* 인증 필요 페이지 */}
+          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/map" element={<ProtectedRoute><MapSearch /></ProtectedRoute>} />
+          <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+          <Route path="/apartment" element={<ProtectedRoute><ApartmentRental /></ProtectedRoute>} />
+          <Route path="/residential" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
+          <Route path="/land" element={<ProtectedRoute><LandSearch /></ProtectedRoute>} />
+          <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
+          <Route path="/commercial" element={<ProtectedRoute><CommercialRental /></ProtectedRoute>} />
+
+          {/* 관리자 */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
