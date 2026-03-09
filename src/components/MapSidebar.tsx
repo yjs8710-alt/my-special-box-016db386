@@ -1005,7 +1005,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                 상세인쇄
               </button>
             </div>
-              {/* 외부 링크들 — 중복 인쇄 버튼 제거 후 링크만 */}
+            {/* 외부 링크 바 */}
+            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
               {/* 인터넷등기소 */}
