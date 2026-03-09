@@ -751,6 +751,7 @@ const ContactEditModal = ({
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
