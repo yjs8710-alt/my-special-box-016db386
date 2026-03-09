@@ -290,24 +290,6 @@ const LoginPage = () => {
               {loading ? "로그인 중..." : "로그인"}
             </Button>
 
-            {/* Divider */}
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
-              <span className="text-xs text-muted-foreground">또는</span>
-              <div className="flex-1 h-px" style={{ background: "hsl(var(--border))" }} />
-            </div>
-
-            {/* 카카오 로그인 */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors hover:brightness-95"
-              style={{ background: "#FEE500", color: "#3C1E1E" }}
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.67 1.64 5.02 4.12 6.43l-.94 3.5 3.98-2.62c.59.08 1.19.12 1.84.12 4.97 0 9-3.36 9-7.5S16.97 3 12 3z"/>
-              </svg>
-              카카오로 로그인
-            </button>
           </div>
 
           {/* Footer links */}
