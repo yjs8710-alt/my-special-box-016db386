@@ -110,6 +110,7 @@ const SignupPage = () => {
       business_number: form.businessNumber.trim(),
       agency_address: form.agencyAddress.trim(),
       agree_marketing: form.agreeMarketing,
+      member_type: form.memberType,
       status: "pending",
     });
 
