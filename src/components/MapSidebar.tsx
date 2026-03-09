@@ -168,9 +168,13 @@ interface BuildingRegisterModalProps {
   onClose: () => void;
   pos: { x: number; y: number };
   onPosChange: (pos: { x: number; y: number }) => void;
+  /** 커스텀 URL (정부24, 토지이음 등). 없으면 세움터 주소검색 URL 사용 */
+  customUrl?: string;
+  /** 팝업 제목 */
+  title?: string;
 }
-const BuildingRegisterModal = ({ address, onClose, pos, onPosChange }: BuildingRegisterModalProps) => {
-  const url = `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
+const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, title }: BuildingRegisterModalProps) => {
+  const url = customUrl ?? `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
   const [isDragging, setIsDragging] = useState(false);
   const draggingModal = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
