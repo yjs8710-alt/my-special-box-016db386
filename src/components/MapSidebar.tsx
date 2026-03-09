@@ -869,6 +869,56 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           onClose={() => setErrorReportProp(null)}
         />
       )}
+      {/* Admin Property Edit Modal */}
+      {adminEditProp && (
+        <AdminPropertyFormModal
+          initial={
+            adminEditProp.memo
+              ? {
+                  id: adminEditProp.memo, // memo에 DB uuid 저장됨
+                  title: adminEditProp.title,
+                  building_name: adminEditProp.buildingName,
+                  address: adminEditProp.address,
+                  dong: adminEditProp.address?.split(" ").slice(-2, -1)[0] ?? "",
+                  lot_number: adminEditProp.address?.split(" ").slice(-1)[0] ?? "",
+                  district: adminEditProp.address?.match(/([가-힣]+구)/)?.[1],
+                  type: adminEditProp.type,
+                  unit_number: adminEditProp.unitNumber,
+                  area: adminEditProp.area?.replace(/[^0-9]/g, "") ?? "",
+                  floor: adminEditProp.floor ?? "",
+                  deposit: adminEditProp.deposit?.replace(/[^0-9,]/g, "") ?? "",
+                  monthly: adminEditProp.monthly?.replace(/[^0-9,]/g, "") ?? "",
+                  manage_fee: adminEditProp.manageFee?.replace(/[^0-9,]/g, "") ?? "",
+                  parking: adminEditProp.parking ?? "",
+                  elevator: adminEditProp.elevator ?? false,
+                  available_from: adminEditProp.availableFrom ?? "",
+                  total_floors: adminEditProp.totalFloors?.replace(/[^0-9층]/g, "") ?? "",
+                  build_year: adminEditProp.buildYear?.replace(/[^0-9]/g, "") ?? "",
+                  description: adminEditProp.description ?? "",
+                  building_memo: adminEditProp.buildingMemo ?? "",
+                  room_memo: adminEditProp.roomMemo ?? "",
+                  note: adminEditProp.note ?? "",
+                  vacate_date: adminEditProp.vacateDate ?? "",
+                  building_password: adminEditProp.buildingPassword ?? "",
+                  room_password: adminEditProp.roomPassword ?? "",
+                  options: adminEditProp.options ?? [],
+                  images: adminEditProp.image ? [adminEditProp.image] : [],
+                  views: adminEditProp.views ?? 0,
+                  lat: adminEditProp.lat ?? 0,
+                  lng: adminEditProp.lng ?? 0,
+                  is_new: adminEditProp.isNew ?? false,
+                  is_hot: adminEditProp.isHot ?? false,
+                  status: "active",
+                  registered_date: adminEditProp.registeredDate ?? new Date().toISOString().slice(0, 10),
+                  checked_date: adminEditProp.checkedDate ?? "",
+                  agent_name: adminEditProp.agentName ?? "",
+                }
+              : null
+          }
+          onClose={() => setAdminEditProp(null)}
+          onSaved={() => setAdminEditProp(null)}
+        />
+      )}
       {/* Lightbox */}
       {lightboxSrc && (
         <div
