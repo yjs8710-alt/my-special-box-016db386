@@ -302,15 +302,21 @@ export default function PropertyRegisterModal({ onClose }: Props) {
             {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
             {step === 3 && <Step3 form={form} set={set} errors={errors} />}
 
+            {saveError && (
+              <p className="text-xs text-destructive text-center mt-2">{saveError}</p>
+            )}
+
             <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
               <button type="button" onClick={step === 1 ? onClose : goPrev}
-                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors">
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50">
                 {step === 1 ? "취소" : "이전"}
               </button>
               <button type="button" onClick={goNext}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors"
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-70"
                 style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}>
-                {step === 3 ? "매물 등록 신청" : "다음"}
+                {saving ? "등록 중..." : step === 3 ? "매물 등록" : "다음"}
               </button>
             </div>
           </div>
