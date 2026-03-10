@@ -1,4 +1,87 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
+function ImageCarouselPreview({ images, onRemove }: { images: string[]; onRemove: (url: string) => void }) {
+  const [idx, setIdx] = useState(0);
+  const safeIdx = Math.min(idx, images.length - 1);
+
+  const handleRemove = useCallback((url: string) => {
+    onRemove(url);
+    setIdx((i) => Math.min(i, images.length - 2));
+  }, [onRemove, images.length]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
+      {/* 슬라이드 */}
+      <div
+        className="flex h-full transition-transform duration-300"
+        style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+      >
+        {images.map((src) => (
+          <div key={src} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }}>
+            <img src={src} alt="매물 사진" className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+
+      {/* 그라디언트 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+      {/* 삭제 버튼 */}
+      <button
+        type="button"
+        onClick={() => handleRemove(images[safeIdx])}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors z-10"
+      >
+        <X className="w-3.5 h-3.5 text-white" />
+      </button>
+
+      {/* 대표 배지 */}
+      {safeIdx === 0 && (
+        <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full z-10">대표</span>
+      )}
+
+      {/* 좌우 화살표 */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIdx((i) => (i - 1 + images.length) % images.length)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIdx((i) => (i + 1) % images.length)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </button>
+          {/* 인디케이터 */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIdx(i)}
+                className="w-1.5 h-1.5 rounded-full transition-all"
+                style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
+              />
+            ))}
+          </div>
+          {/* 장수 표시 */}
+          <div className="absolute bottom-2 right-3 text-white text-[10px] font-bold bg-black/50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+            {safeIdx + 1} / {images.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 import { X, Phone, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -637,46 +720,32 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </Section>
 
-              {/* 좌표 */}
-              <Section label="좌표 (지도 핀 위치)">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">위도 (lat)</label>
-                    <input type="number" step="0.000001" value={form.lat || ""}
-                      onChange={(e) => set("lat", parseFloat(e.target.value) || 0)} className={ic} placeholder="예) 36.6424" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">경도 (lng)</label>
-                    <input type="number" step="0.000001" value={form.lng || ""}
-                      onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={ic} placeholder="예) 127.4890" />
-                  </div>
-                </div>
-              </Section>
 
-              {/* 이미지 업로드 */}
+
+
+              {/* 이미지 업로드 — 캐러셀 프리뷰 */}
               <Section label="이미지 업로드">
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
                   onChange={(e) => handleImageUpload(e.target.files)} />
+                {(form.images ?? []).length > 0 && (
+                  <ImageCarouselPreview
+                    images={form.images ?? []}
+                    onRemove={(url) =>
+                      setForm((f) => ({ ...f, images: (f.images ?? []).filter((u) => u !== url) }))
+                    }
+                  />
+                )}
                 <button type="button" onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full border-2 border-dashed border-primary/30 rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors">
-                  <span className="text-sm font-semibold text-primary">{uploading ? "업로드 중..." : "이미지 선택 / 드래그"}</span>
-                  <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등</span>
+                  className="w-full border-2 border-dashed border-primary/30 rounded-xl py-4 flex flex-col items-center gap-1.5 hover:border-primary/60 hover:bg-primary/5 transition-colors mt-1">
+                  {uploading
+                    ? <><span className="text-sm font-semibold text-primary">업로드 중...</span></>
+                    : <>
+                        <span className="text-sm font-semibold text-primary">📷 사진 추가</span>
+                        <span className="text-[11px] text-muted-foreground">여러 장 동시 선택 가능 · JPG, PNG, WEBP</span>
+                      </>
+                  }
                 </button>
-                {(form.images ?? []).length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {(form.images ?? []).map((url, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
-                        <button type="button"
-                          onClick={() => setForm((f) => ({ ...f, images: (f.images ?? []).filter((_, i) => i !== idx) }))}
-                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <X className="w-3 h-3 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </Section>
 
               {/* 노출 상태 */}

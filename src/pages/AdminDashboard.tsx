@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, MessageSquare,
@@ -592,22 +593,6 @@ const PropertyFormModal = ({
                 </div>
               </div>
 
-              {/* 위도/경도 */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">좌표 (지도 핀)</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">위도</label>
-                    <input type="number" step="0.000001" placeholder="36.6424" value={form.lat || ""}
-                      onChange={(e) => set("lat", parseFloat(e.target.value) || 0)} className={icA()} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">경도</label>
-                    <input type="number" step="0.000001" placeholder="127.4890" value={form.lng || ""}
-                      onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={icA()} />
-                  </div>
-                </div>
-              </div>
 
               {/* 노출 상태 */}
               <div className="flex flex-col gap-2">
@@ -819,7 +804,8 @@ const BuildingGroup = ({
             return (
               <div
                 key={u.id}
-                className={`grid md:grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] items-center px-4 py-3 border-t border-border transition-colors ${u.status === "hidden" ? "opacity-50 bg-muted/10" : "hover:bg-muted/10"}`}
+                onClick={() => onEdit(u)}
+                className={`grid md:grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] items-center px-4 py-3 border-t border-border transition-colors cursor-pointer ${u.status === "hidden" ? "opacity-50 bg-muted/10 hover:bg-muted/20" : "hover:bg-primary/5"}`}
               >
                 {/* 사진 썸네일 */}
                 <div className="flex justify-center">
@@ -898,7 +884,7 @@ const BuildingGroup = ({
                 {/* 액션 */}
                 <div className="hidden md:flex items-center justify-center gap-1.5 flex-wrap">
                   <button
-                    onClick={() => onEdit(u)}
+                    onClick={(e) => { e.stopPropagation(); onEdit(u); }}
                     className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
                     style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
                     title="수정"
@@ -906,7 +892,7 @@ const BuildingGroup = ({
                     <Pencil className="w-3 h-3" />수정
                   </button>
                   <button
-                    onClick={() => onToggleStatus(u)}
+                    onClick={(e) => { e.stopPropagation(); onToggleStatus(u); }}
                     disabled={togglingId === u.id}
                     className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
                     style={u.status === "active"
@@ -1451,10 +1437,10 @@ const AdminDashboard = () => {
     <div className="min-h-screen flex" style={{ background: "hsl(var(--background))" }}>
       {/* Modals */}
       {propertyModal && (
-        <PropertyFormModal
+        <AdminPropertyFormModal
           initial={propertyModal.data}
           onClose={() => setPropertyModal(null)}
-          onSave={saveProperty}
+          onSaved={() => { setPropertyModal(null); fetchProperties(); }}
         />
       )}
       {contactModal !== null && (
