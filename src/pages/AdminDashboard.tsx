@@ -2016,7 +2016,11 @@ const AdminDashboard = () => {
                     {d}
                     {d !== "전체" && (
                       <span className="ml-1 opacity-70">
-                        ({dbProperties.filter(p => (p.district ?? "").includes(d)).length})
+                        ({dbProperties.filter(p => {
+                          const dv = p.district ?? "";
+                          const da = CHEONGJU_DISTRICTS.find(x => p.address.includes(x)) ?? "";
+                          return (dv || da).includes(d);
+                        }).length})
                       </span>
                     )}
                   </button>
