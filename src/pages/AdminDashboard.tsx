@@ -146,34 +146,12 @@ const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
 const ALL_PROPERTY_TYPES = PROPERTY_TYPE_GROUPS.flatMap((g) => g.types);
 const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
 
-// ─── Address Data ─────────────────────────────────────────────────────────────
-const SIDO_LIST = [
-  "강원","경기","경남","경북","광주","대구","대전","부산",
-  "서울","세종","울산","인천","전남","전북","제주","충남","충북",
+// ─── Address Data (청주시 4개 구 고정) ──────────────────────────────────────
+const FIXED_SIDO = "충북";
+// 청주시 4개 구만 표시
+const CHEONGJU_SIGUNGU = [
+  "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구",
 ];
-const SIGUNGU_MAP: Record<string, string[]> = {
-  충북: ["괴산군","단양군","보은군","영동군","옥천군","음성군","제천시","증평군","진천군",
-         "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구","충주시"],
-  경기: ["수원시","성남시","고양시","용인시","부천시","안산시","화성시","남양주시","안양시","평택시"],
-  서울: ["강남구","강동구","강북구","강서구","관악구","광진구","구로구","금천구","노원구","도봉구",
-         "동대문구","동작구","마포구","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구",
-         "용산구","은평구","종로구","중구","중랑구"],
-  경남: ["창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시"],
-  경북: ["포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시"],
-  광주: ["동구","서구","남구","북구","광산구"],
-  대구: ["중구","동구","서구","남구","북구","수성구","달서구","달성군"],
-  대전: ["동구","중구","서구","유성구","대덕구"],
-  부산: ["중구","서구","동구","영도구","부산진구","동래구","남구","북구","해운대구","사하구",
-         "금정구","강서구","연제구","수영구","사상구","기장군"],
-  세종: ["세종시"],
-  울산: ["중구","남구","동구","북구","울주군"],
-  인천: ["중구","동구","미추홀구","연수구","남동구","부평구","계양구","서구","강화군","옹진군"],
-  전남: ["목포시","여수시","순천시","나주시","광양시"],
-  전북: ["전주시","군산시","익산시","정읍시","남원시","김제시"],
-  제주: ["제주시","서귀포시"],
-  충남: ["천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시"],
-  강원: ["춘천시","원주시","강릉시","동해시","태백시","속초시","삼척시"],
-};
 const DONG_MAP: Record<string, string[]> = {
   "청주시 상당구": [
     "낭성면","미원면","가덕면","남일면","문의면",
@@ -226,18 +204,16 @@ const PropertyFormModal = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
-  // 주소에서 시도/시군구/동 파싱 (초기값 복원용)
-  const [sido, setSido] = useState("");
+  // 충북 고정 — 청주시 4개 구만 표시
   const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
   const [dong, setDong] = useState(form.dong ?? "");
-  const sigunguList = SIGUNGU_MAP[sido] ?? [];
+  const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // 주소 자동 조합
-  const updateAddress = (s: string, sg: string, d: string, lot: string) => {
-    const parts = [s, sg, d, lot].filter(Boolean);
+  // 주소 자동 조합 (충북 고정)
+  const updateAddress = (sg: string, d: string, lot: string) => {
+    const parts = [FIXED_SIDO, sg, d, lot].filter(Boolean);
     set("address", parts.join(" "));
-    // district 추출 (청주시 서원구 → 서원구)
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
     set("lot_number", lot);
@@ -354,14 +330,19 @@ const PropertyFormModal = ({
               {/* 주소 */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-foreground">주소 입력</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <AdminSelect value={sido} onChange={(v) => { setSido(v); setSigungu(""); setDong(""); updateAddress(v, "", "", form.lot_number); }} placeholder="시/도" options={SIDO_LIST} />
-                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(sido, v, "", form.lot_number); }} placeholder="시/군/구" options={sigunguList} disabled={!sido} />
-                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sido, sigungu, v, form.lot_number); }} placeholder="동" options={dongList} disabled={!sigungu} />
+                {/* 시/도 고정 배지 */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5">
+                  <span className="text-xs text-muted-foreground">시/도</span>
+                  <span className="text-sm font-bold text-primary">충청북도 (충북)</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground/60 bg-muted px-2 py-0.5 rounded-full">고정</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(v, "", form.lot_number); }} placeholder="시/군/구 선택" options={sigunguList} />
+                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sigungu, v, form.lot_number); }} placeholder="동/읍/면 선택" options={dongList} disabled={!sigungu} />
                 </div>
                 <div className="flex gap-2">
-                  <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
-                    onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
+                  <input type="text" placeholder="번지 입력 (예: 123-4)" value={form.lot_number}
+                    onChange={(e) => { set("lot_number", e.target.value); updateAddress(sigungu, dong, e.target.value); }}
                     className={icA() + " flex-1"} />
                   <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
                 </div>
@@ -1050,6 +1031,7 @@ const AdminDashboard = () => {
   const [propertiesLoading, setPropertiesLoading] = useState(false);
   const [propertyModal, setPropertyModal] = useState<{ mode: "add" | "edit"; data: Partial<DBProperty> | null } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [propertyDistrictFilter, setPropertyDistrictFilter] = useState("전체");
 
   // 청주 연락처 state
   const [contacts, setContacts] = useState<CheongJuContact[]>([]);
