@@ -95,6 +95,7 @@ interface FormState {
   contactManager: string;
   expose: boolean;
   allowAddressView: boolean;
+  images: string[];
 }
 
 const INITIAL: FormState = {
