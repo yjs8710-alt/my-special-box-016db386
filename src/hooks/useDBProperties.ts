@@ -5,8 +5,15 @@ import { MapProperty } from "@/data/mapProperties";
 // 관리자 DB 매물 → MapProperty 변환
 // DB에는 이미지가 없으므로 빈 문자열(썸네일 없음)로 처리
 function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
+  // note 필드에서 건물주/관리인 연락처 파싱
+  // 형식: "건물주: 010-xxxx\n관리인: 010-yyyy" 또는 "건물주:010-xxxx|관리인:010-yyyy"
+  const noteStr = String(row.note ?? row.agent_name ?? "");
+  const parseContact = (key: string) => {
+    const m = noteStr.match(new RegExp(`${key}[:\\s]+([0-9\\-]+)`));
+    return m ? m[1].trim() : undefined;
+  };
+
   return {
-    // DB uuid를 숫자 hash로 변환 (id 충돌 방지: 100000 + idx)
     id: 100000 + idx,
     title: String(row.title ?? ""),
     buildingName: row.building_name ? String(row.building_name) : undefined,
@@ -25,7 +32,8 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     lng: Number(row.lng) || 0,
     image: Array.isArray(row.images) && (row.images as string[]).length > 0
       ? (row.images as string[])[0]
-      : "",           // 이미지가 없으면 빈 문자열 (썸네일 없음)
+      : "",
+    images: Array.isArray(row.images) ? (row.images as string[]) : [],
     description: String(row.description ?? ""),
     buildingMemo: row.building_memo ? String(row.building_memo) : undefined,
     roomMemo: row.room_memo ? String(row.room_memo) : undefined,
@@ -36,7 +44,9 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     options: Array.isArray(row.options) ? (row.options as string[]) : [],
     registeredDate: row.registered_date ? String(row.registered_date) : undefined,
     checkedDate: row.checked_date ? String(row.checked_date) : undefined,
-    contact: "",         // DB 매물은 별도 contact 없음 (청주시 연락처와 연동)
+    contact: parseContact("부동산") ?? "",
+    contactOwner: parseContact("건물주"),
+    contactManager: parseContact("관리인"),
     agentName: String(row.agent_name ?? ""),
     manageFee: String(row.manage_fee ?? ""),
     parking: String(row.parking ?? ""),
@@ -44,7 +54,6 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     availableFrom: String(row.available_from ?? ""),
     totalFloors: String(row.total_floors ?? ""),
     buildYear: String(row.build_year ?? ""),
-    // 추가 메타: DB 원본 ID를 메모에 저장 (상세 조회 시 활용 가능)
     memo: String(row.id ?? ""),
   };
 }
