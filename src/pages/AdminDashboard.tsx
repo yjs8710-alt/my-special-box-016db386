@@ -710,6 +710,7 @@ const AdminSelect = ({ value, onChange, placeholder, options, disabled }: {
 );
 
 // ─── BuildingGroup ────────────────────────────────────────────────────────────
+// 동·번지 행 클릭 시 하단 호수 아코디언 표시
 const BuildingGroup = ({
   rep,
   units,
@@ -728,14 +729,15 @@ const BuildingGroup = ({
   onAddUnit: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
 }) => {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const activeCount = units.filter(u => u.status === "active").length;
+  const repDate = rep.registered_date ? rep.registered_date.slice(0, 10) : "";
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
-      {/* 건물 헤더 */}
+      {/* 동·번지 헤더 행 — 클릭 시 호수 아코디언 토글 */}
       <div
-        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors"
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors select-none"
         style={{ background: "hsl(var(--muted) / 0.35)" }}
         onClick={() => setExpanded(!expanded)}
       >
@@ -753,8 +755,10 @@ const BuildingGroup = ({
             {rep.building_name && (
               <span className="text-sm font-extrabold text-foreground">{rep.building_name}</span>
             )}
-            <span className="text-xs text-muted-foreground truncate">{rep.address}</span>
-            {rep.dong && <span className="text-xs text-muted-foreground">{rep.dong} {rep.lot_number}</span>}
+            <span className="text-xs font-semibold text-foreground truncate">
+              {rep.dong} {rep.lot_number && <span className="text-muted-foreground">{rep.lot_number}번지</span>}
+            </span>
+            <span className="text-xs text-muted-foreground truncate hidden sm:block">{rep.address}</span>
           </div>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>
@@ -763,6 +767,11 @@ const BuildingGroup = ({
             <span className="text-[11px] text-muted-foreground">
               총 {units.length}호 · 노출 {activeCount}호
             </span>
+            {repDate && (
+              <span className="text-[11px] text-muted-foreground">
+                📅 {repDate}
+              </span>
+            )}
             {units.some(u => (u.images ?? []).length > 0) && (
               <span className="text-[11px] font-medium" style={{ color: "hsl(var(--chart-2))" }}>
                 📷 사진 {units.reduce((s, u) => s + (u.images ?? []).length, 0)}장
@@ -781,33 +790,38 @@ const BuildingGroup = ({
           >
             <Plus className="w-3.5 h-3.5" />호수 추가
           </button>
-          {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+          {expanded
+            ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            : <ChevronDown className="w-4 h-4 text-muted-foreground" />
+          }
         </div>
       </div>
 
-      {/* 호수 목록 */}
+      {/* 호수 목록 — 동·번지 클릭 시 하단 펼침 */}
       {expanded && (
         <div>
-          {/* 헤더 */}
-          <div className="hidden md:grid grid-cols-[60px_80px_1fr_100px_80px_70px_90px_180px] text-xs font-semibold text-muted-foreground bg-muted/20 px-4 py-2 border-t border-border">
+          {/* 컬럼 헤더 */}
+          <div className="hidden md:grid grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] text-xs font-semibold text-muted-foreground bg-muted/20 px-4 py-2 border-t border-border">
             <span className="text-center">📷</span>
             <span className="text-center">호수</span>
             <span>매물명</span>
             <span className="text-center">보증금/월세</span>
             <span className="text-center">층/면적</span>
             <span className="text-center">조회</span>
+            <span className="text-center">등록일</span>
             <span className="text-center">상태</span>
             <span className="text-center">액션</span>
           </div>
           {units.map((u, idx) => {
             const unitImages = u.images ?? [];
             const thumb = unitImages[0];
+            const regDate = u.registered_date ? u.registered_date.slice(0, 10) : "";
             return (
               <div
                 key={u.id}
-                className={`grid md:grid-cols-[60px_80px_1fr_100px_80px_70px_90px_180px] items-center px-4 py-3 border-t border-border transition-colors ${u.status === "hidden" ? "opacity-50 bg-muted/10" : "hover:bg-muted/10"}`}
+                className={`grid md:grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] items-center px-4 py-3 border-t border-border transition-colors ${u.status === "hidden" ? "opacity-50 bg-muted/10" : "hover:bg-muted/10"}`}
               >
-                {/* 사진 썸네일 (호수별) */}
+                {/* 사진 썸네일 */}
                 <div className="flex justify-center">
                   <div className="w-10 h-10 rounded-md overflow-hidden border border-border bg-muted flex items-center justify-center relative">
                     {thumb ? (
@@ -844,7 +858,7 @@ const BuildingGroup = ({
                     )}
                   </div>
                   {u.room_password && (
-                    <div className="text-[10px] text-muted-foreground mt-0.5">🔑 방비번: {u.room_password}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">🔑 {u.room_password}</div>
                   )}
                 </div>
 
@@ -856,13 +870,18 @@ const BuildingGroup = ({
 
                 {/* 층/면적 */}
                 <div className="hidden md:block text-center">
-                  <div className="text-xs text-foreground">{u.floor ? `${u.floor}층` : "—"}</div>
+                  <div className="text-xs text-foreground">{u.floor ? `${u.floor}` : "—"}</div>
                   <div className="text-[10px] text-muted-foreground">{u.area || "—"}</div>
                 </div>
 
                 {/* 조회수 */}
                 <div className="hidden md:flex items-center justify-center gap-1 text-xs text-muted-foreground">
                   <Eye className="w-3 h-3" />{u.views.toLocaleString()}
+                </div>
+
+                {/* 등록일 */}
+                <div className="hidden md:flex items-center justify-center">
+                  <span className="text-[10px] text-muted-foreground">{regDate || "—"}</span>
                 </div>
 
                 {/* 상태 */}
