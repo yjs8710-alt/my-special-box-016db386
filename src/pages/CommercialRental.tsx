@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -43,15 +44,7 @@ const CommercialRental = () => {
     });
   };
 
-  const filtered = allProperties.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
-    if (propertyId && !String(p.id).includes(propertyId)) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q) && !(p.buildingName ?? "").toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
+  const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
 

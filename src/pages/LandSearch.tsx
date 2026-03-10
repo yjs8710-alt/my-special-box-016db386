@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -223,15 +224,14 @@ const LandSearch = () => {
     });
   };
 
-  const filtered = allProperties.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.roomType ?? "")) return false;
-    if (propertyId && !String(p.id).includes(propertyId)) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
+  // 토지 페이지: roomType 기준으로 필터 (지목 일치)
+  const landTypeFilter = useMemo(() => {
+    if (activeTypes.includes("전체")) return ["전체"];
+    // roomType과 activeTypes 비교
+    return activeTypes;
+  }, [activeTypes]);
+
+  const filtered = usePropertyFilter(allProperties, filters, landTypeFilter, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
 
