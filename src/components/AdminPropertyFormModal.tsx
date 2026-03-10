@@ -704,18 +704,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
                     { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
                   ].map(({ key, label, placeholder, required }) => (
-                    <div key={key} className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-foreground/70">
-                        {label} {required && <span className="text-destructive">*</span>}
-                      </label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input type="tel" placeholder={placeholder}
-                          value={form[key] as string}
-                          onChange={(e) => set(key, e.target.value)}
-                          className={ic + " pl-9"} />
-                      </div>
-                    </div>
+                    <ContactField
+                      key={key}
+                      fieldKey={key}
+                      label={label}
+                      placeholder={placeholder}
+                      required={required}
+                      value={form[key] as string}
+                      onChange={(v) => set(key, v)}
+                    />
                   ))}
                 </div>
               </Section>
