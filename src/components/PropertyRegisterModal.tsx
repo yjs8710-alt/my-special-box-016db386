@@ -174,7 +174,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep3 = () => {
     const e: Record<string, string> = {};
-    if (!form.contactBroker.trim()) e.contactBroker = "부동산 연락처를 입력해주세요";
+    if (!form.contactOwner.trim()) e.contactOwner = "건물주 연락처를 입력해주세요";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -487,8 +487,8 @@ function Step2({
 /* ─── Step 3 ─── */
 function Step3({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
-    { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567", required: true },
-    { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678" },
+    { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
+    { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
     { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
     { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
   ];
