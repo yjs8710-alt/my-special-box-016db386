@@ -35,7 +35,21 @@ const LoginPage = () => {
       return;
     }
 
-    // 2. agent_profiles 에서 승인 상태 + 접속 차단 여부 확인
+    // 2. 관리자 여부 먼저 확인 (관리자는 agent_profiles 없어도 로그인 허용)
+    const { data: roleData } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", authData.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleData) {
+      setLoading(false);
+      navigate("/admin");
+      return;
+    }
+
+    // 3. 일반 중개사: agent_profiles 에서 승인 상태 + 접속 차단 여부 확인
     const { data: profile } = await supabase
       .from("agent_profiles")
       .select("status, is_active")
