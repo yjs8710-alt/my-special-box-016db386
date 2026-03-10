@@ -204,18 +204,16 @@ const PropertyFormModal = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
-  // 주소에서 시도/시군구/동 파싱 (초기값 복원용)
-  const [sido, setSido] = useState("");
+  // 충북 고정 — 청주시 4개 구만 표시
   const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
   const [dong, setDong] = useState(form.dong ?? "");
-  const sigunguList = SIGUNGU_MAP[sido] ?? [];
+  const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // 주소 자동 조합
-  const updateAddress = (s: string, sg: string, d: string, lot: string) => {
-    const parts = [s, sg, d, lot].filter(Boolean);
+  // 주소 자동 조합 (충북 고정)
+  const updateAddress = (sg: string, d: string, lot: string) => {
+    const parts = [FIXED_SIDO, sg, d, lot].filter(Boolean);
     set("address", parts.join(" "));
-    // district 추출 (청주시 서원구 → 서원구)
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
     set("lot_number", lot);

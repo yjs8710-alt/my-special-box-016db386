@@ -207,11 +207,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  // 충북 고정
-  const FIXED_SIDO = "충북";
+  // 충북 고정 — 청주시 4개 구만 표시
   const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
   const [dong, setDong] = useState(form.dong ?? "");
-  const sigunguList = SIGUNGU_MAP[FIXED_SIDO] ?? [];
+  const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
   const updateAddress = (sg: string, d: string, lot: string) => {

@@ -303,9 +303,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
 /* ─── Step 1 ─── */
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
-  // 충북 고정 — sido는 항상 "충북"
-  const FIXED_SIDO = "충북";
-  const sigunguList = SIGUNGU_MAP[FIXED_SIDO] ?? [];
+  // 충북 고정 — sido는 항상 "충북", 청주시 4개 구만 표시
+  const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
   return (
