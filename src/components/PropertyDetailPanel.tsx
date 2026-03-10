@@ -3,7 +3,7 @@ import {
   Layers, BadgeCheck, Share2, ArrowUpRight, FileText, ExternalLink,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 
 interface PropertyDetailPanelProps {
@@ -18,6 +18,107 @@ const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
   "공장·창고":{ bg: "bg-green-600", text: "text-white" },
   "병원·학원":{ bg: "bg-red-700",   text: "text-white" },
 };
+
+/* ─── 풀스크린 라이트박스 ─── */
+function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
+  const [idx, setIdx] = useState(startIdx);
+
+  const prev = useCallback(() => setIdx((i) => (i - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setIdx((i) => (i + 1) % images.length), [images.length]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [prev, next, onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center"
+      onClick={onClose}
+    >
+      {/* 닫기 */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10"
+      >
+        <X className="w-5 h-5 text-white" />
+      </button>
+
+      {/* 카운터 */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10">
+        {idx + 1} / {images.length}
+      </div>
+
+      {/* 슬라이드 영역 */}
+      <div
+        className="relative w-full h-full flex items-center justify-center overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="flex h-full transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${idx * 100}%)`, width: `${images.length * 100}%` }}
+        >
+          {images.map((src, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 h-full flex items-center justify-center px-14"
+              style={{ width: `${100 / images.length}%` }}
+            >
+              <img
+                src={src}
+                alt={`사진 ${i + 1}`}
+                className="max-w-full max-h-full object-contain rounded-lg select-none"
+                draggable={false}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* 이전/다음 */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6 text-white" />
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronRight className="w-6 h-6 text-white" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* 하단 썸네일 스트립 */}
+      {images.length > 1 && (
+        <div
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all"
+              style={{ borderColor: i === idx ? "hsl(var(--primary))" : "transparent", opacity: i === idx ? 1 : 0.5 }}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ─── 전화번호 클릭시 노출 컴포넌트 ─── */
 function RevealPhone({ label, phone }: { label: string; phone?: string }) {
@@ -60,7 +161,7 @@ function RevealPhone({ label, phone }: { label: string; phone?: string }) {
 }
 
 /* ─── 이미지 캐러셀 ─── */
-function ImageCarousel({ images, title }: { images: string[]; title: string }) {
+function ImageCarousel({ images, title, onImageClick }: { images: string[]; title: string; onImageClick: (idx: number) => void }) {
   const [idx, setIdx] = useState(0);
   const imgs = images.filter(Boolean);
 
@@ -83,10 +184,11 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
 
   return (
     <div className="relative flex-shrink-0 h-48 overflow-hidden bg-muted">
-      {/* 슬라이드 */}
+      {/* 슬라이드 — 클릭 시 라이트박스 */}
       <div
-        className="flex h-full transition-transform duration-300 ease-in-out"
+        className="flex h-full transition-transform duration-300 ease-in-out cursor-zoom-in"
         style={{ transform: `translateX(-${idx * 100}%)`, width: `${imgs.length * 100}%` }}
+        onClick={() => onImageClick(idx)}
       >
         {imgs.map((src, i) => (
           <div key={i} className="h-full flex-shrink-0" style={{ width: `${100 / imgs.length}%` }}>
@@ -132,6 +234,12 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
           </div>
         </>
       )}
+
+      {/* 확대 힌트 */}
+      <div className="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none flex items-center gap-1">
+        <Maximize2 className="w-2.5 h-2.5" />
+        클릭하여 크게 보기
+      </div>
     </div>
   );
 }
@@ -139,225 +247,240 @@ function ImageCarousel({ images, title }: { images: string[]; title: string }) {
 const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
   const [buildingOpen, setBuildingOpen] = useState(false);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   if (!property) return null;
 
   const buildingSearchUrl = `https://www.eais.go.kr`;
   const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
-  // 이미지 배열: images 배열 우선, 없으면 image 단일
   const allImages = (property.images && property.images.length > 0)
     ? property.images
     : property.image ? [property.image] : [];
 
   return (
-    <div className="absolute left-0 top-0 bottom-0 z-[900] w-[360px] bg-white border-l border-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250">
+    <>
+      {/* ── 풀스크린 라이트박스 ── */}
+      {lightboxIdx !== null && (
+        <Lightbox
+          images={allImages}
+          startIdx={lightboxIdx}
+          onClose={() => setLightboxIdx(null)}
+        />
+      )}
 
-      {/* ── Image Carousel ── */}
-      <div className="relative">
-        <ImageCarousel images={allImages} title={property.title} />
+      <div className="absolute left-0 top-0 bottom-0 z-[900] w-[360px] bg-white border-l border-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250">
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-1.5 z-10" style={{ top: allImages.length > 1 ? "2.5rem" : "0.75rem" }}>
-          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${typeStyle.bg} ${typeStyle.text}`}>
-            {property.type}
-          </span>
-          {property.isNew && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-badge-new text-white">NEW</span>}
-          {property.isHot && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-badge-hot text-white">HOT</span>}
-        </div>
+        {/* ── Image Carousel ── */}
+        <div className="relative">
+          <ImageCarousel
+            images={allImages}
+            title={property.title}
+            onImageClick={(i) => setLightboxIdx(i)}
+          />
 
-        {/* Top-right controls */}
-        <div className="absolute top-3 right-3 flex gap-1.5 z-10">
-          <button onClick={() => setLiked(!liked)} className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
-            <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
-          </button>
-          <button className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
-            <Share2 className="w-3.5 h-3.5 text-white" />
-          </button>
-          <button onClick={onClose} className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
-            <X className="w-3.5 h-3.5 text-white" />
-          </button>
-        </div>
-
-        {/* Bottom title overlay */}
-        <div className="absolute bottom-3 left-4 right-4 z-10">
-          <p className="text-white font-bold text-[15px] line-clamp-1 drop-shadow-sm">{property.title}</p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3 text-white/70 flex-shrink-0" />
-            <p className="text-white/80 text-xs line-clamp-1">{property.address}</p>
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex gap-1.5 z-10" style={{ top: allImages.length > 1 ? "2.5rem" : "0.75rem" }}>
+            <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${typeStyle.bg} ${typeStyle.text}`}>
+              {property.type}
+            </span>
+            {property.isNew && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-badge-new text-white">NEW</span>}
+            {property.isHot && <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-badge-hot text-white">HOT</span>}
           </div>
-        </div>
-      </div>
 
-      {/* ── Scrollable body ── */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
-
-        {/* Price block */}
-        <div className="px-4 py-4 bg-primary/5 border-b border-border">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
-              <p className="text-xl font-extrabold text-foreground leading-tight">
-                {property.deposit}
-                <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
-                <span className="text-accent">{property.monthly}</span>
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] text-muted-foreground">관리비</p>
-              <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
-            </div>
+          {/* Top-right controls */}
+          <div className="absolute top-3 right-3 flex gap-1.5 z-10">
+            <button onClick={() => setLiked(!liked)} className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
+              <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
+            </button>
+            <button className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
+              <Share2 className="w-3.5 h-3.5 text-white" />
+            </button>
+            <button onClick={onClose} className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
+              <X className="w-3.5 h-3.5 text-white" />
+            </button>
           </div>
-          <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/60">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Eye className="w-3 h-3" />
-              <span>조회 {property.views.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-badge-new font-semibold">
-              <BadgeCheck className="w-3 h-3" />
-              <span>입주가능 {property.availableFrom}</span>
+
+          {/* Bottom title overlay */}
+          <div className="absolute bottom-3 left-4 right-4 z-10">
+            <p className="text-white font-bold text-[15px] line-clamp-1 drop-shadow-sm">{property.title}</p>
+            <div className="flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3 text-white/70 flex-shrink-0" />
+              <p className="text-white/80 text-xs line-clamp-1">{property.address}</p>
             </div>
           </div>
         </div>
 
-        {/* Info grid */}
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: property.area.split(" ")[0], sub: property.area.split(" ")[1] },
-              { icon: <Layers className="w-3.5 h-3.5" />,    label: "해당층", value: property.floor },
-              { icon: <Building2 className="w-3.5 h-3.5" />, label: "건물층", value: property.totalFloors.replace("지상 ", "") },
-              { icon: <Calendar className="w-3.5 h-3.5" />,  label: "준공",   value: property.buildYear.replace("년", ""), sub: "년" },
-              { icon: <Car className="w-3.5 h-3.5" />,       label: "주차",   value: property.parking },
-              { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
-            ].map(({ icon, label, value, sub }) => (
-              <div key={label} className="bg-muted/50 rounded-lg px-2.5 py-2 flex flex-col gap-0.5 text-center">
-                <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
-                  {icon}
-                  <span className="text-[10px]">{label}</span>
-                </div>
-                <p className="text-sm font-bold text-foreground leading-tight">{value}{sub && <span className="text-xs font-normal text-muted-foreground">{sub}</span>}</p>
+        {/* ── Scrollable body ── */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+
+          {/* Price block */}
+          <div className="px-4 py-4 bg-primary/5 border-b border-border">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
+                <p className="text-xl font-extrabold text-foreground leading-tight">
+                  {property.deposit}
+                  <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
+                  <span className="text-accent">{property.monthly}</span>
+                </p>
               </div>
-            ))}
+              <div className="text-right">
+                <p className="text-[11px] text-muted-foreground">관리비</p>
+                <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/60">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Eye className="w-3 h-3" />
+                <span>조회 {property.views.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-badge-new font-semibold">
+                <BadgeCheck className="w-3 h-3" />
+                <span>입주가능 {property.availableFrom}</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Divider */}
-        <div className="h-2 bg-muted/50 my-2" />
-
-        {/* Description */}
-        <div className="px-4 pb-3">
-          <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 설명</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{property.description}</p>
-        </div>
-
-        {/* ── 연락처 (건물주 / 관리인 클릭 시 노출) ── */}
-        {(property.contactOwner || property.contactManager) && (
-          <>
-            <div className="h-2 bg-muted/50 my-2" />
-            <div className="px-4 pb-3 flex flex-col gap-2">
-              <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
-              <RevealPhone label="건물주" phone={property.contactOwner} />
-              <RevealPhone label="관리인" phone={property.contactManager} />
-              {property.contact && (
-                <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
-                      <Phone className="w-3 h-3 text-accent" />
-                    </div>
-                    <span className="text-xs font-semibold text-foreground">부동산</span>
+          {/* Info grid */}
+          <div className="px-4 pt-4 pb-2">
+            <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: property.area.split(" ")[0], sub: property.area.split(" ")[1] },
+                { icon: <Layers className="w-3.5 h-3.5" />,    label: "해당층", value: property.floor },
+                { icon: <Building2 className="w-3.5 h-3.5" />, label: "건물층", value: property.totalFloors.replace("지상 ", "") },
+                { icon: <Calendar className="w-3.5 h-3.5" />,  label: "준공",   value: property.buildYear.replace("년", ""), sub: "년" },
+                { icon: <Car className="w-3.5 h-3.5" />,       label: "주차",   value: property.parking },
+                { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
+              ].map(({ icon, label, value, sub }) => (
+                <div key={label} className="bg-muted/50 rounded-lg px-2.5 py-2 flex flex-col gap-0.5 text-center">
+                  <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
+                    {icon}
+                    <span className="text-[10px]">{label}</span>
                   </div>
-                  <a href={`tel:${property.contact}`} className="text-xs font-bold text-accent hover:underline">
-                    {property.contact}
-                  </a>
+                  <p className="text-sm font-bold text-foreground leading-tight">{value}{sub && <span className="text-xs font-normal text-muted-foreground">{sub}</span>}</p>
                 </div>
-              )}
+              ))}
             </div>
-          </>
-        )}
+          </div>
 
-        {/* Divider */}
-        <div className="h-2 bg-muted/50 my-2" />
+          {/* Divider */}
+          <div className="h-2 bg-muted/50 my-2" />
 
-        {/* 건축물대장 */}
-        <div className="px-4 pb-3">
-          <button onClick={() => setBuildingOpen(!buildingOpen)} className="w-full flex items-center justify-between py-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-                <FileText className="w-3.5 h-3.5 text-primary" />
-              </div>
-              <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물대장</span>
-            </div>
-            {buildingOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-          </button>
+          {/* Description */}
+          <div className="px-4 pb-3">
+            <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 설명</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{property.description}</p>
+          </div>
 
-          {buildingOpen && (
-            <div className="mt-2 rounded-xl border border-border overflow-hidden">
-              <div className="px-3 py-2.5 bg-muted/40 border-b border-border">
-                <p className="text-[10px] text-muted-foreground font-medium mb-0.5">조회 주소</p>
-                <p className="text-xs font-semibold text-foreground">{property.address}</p>
+          {/* ── 연락처 ── */}
+          {(property.contactOwner || property.contactManager) && (
+            <>
+              <div className="h-2 bg-muted/50 my-2" />
+              <div className="px-4 pb-3 flex flex-col gap-2">
+                <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
+                <RevealPhone label="건물주" phone={property.contactOwner} />
+                <RevealPhone label="관리인" phone={property.contactManager} />
+                {property.contact && (
+                  <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                        <Phone className="w-3 h-3 text-accent" />
+                      </div>
+                      <span className="text-xs font-semibold text-foreground">부동산</span>
+                    </div>
+                    <a href={`tel:${property.contact}`} className="text-xs font-bold text-accent hover:underline">
+                      {property.contact}
+                    </a>
+                  </div>
+                )}
               </div>
-              <div className="px-3 py-3 grid grid-cols-2 gap-y-2 gap-x-4 bg-white text-xs">
-                <div><p className="text-[10px] text-muted-foreground">건물 유형</p><p className="font-semibold text-foreground">{property.type}</p></div>
-                <div><p className="text-[10px] text-muted-foreground">준공연도</p><p className="font-semibold text-foreground">{property.buildYear}</p></div>
-                <div><p className="text-[10px] text-muted-foreground">총 층수</p><p className="font-semibold text-foreground">{property.totalFloors}</p></div>
-                <div><p className="text-[10px] text-muted-foreground">엘리베이터</p><p className="font-semibold text-foreground">{property.elevator ? "있음" : "없음"}</p></div>
-              </div>
-              <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
-                <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
-                <div className="flex gap-2">
-                  <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
-                    <ExternalLink className="w-3 h-3" />세움터 열람
-                  </a>
-                  <a href={naverBuildingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-accent text-white text-[11px] font-bold hover:bg-accent/90 transition-colors">
-                    <ExternalLink className="w-3 h-3" />네이버 건물정보
-                  </a>
-                </div>
-              </div>
-            </div>
+            </>
           )}
-        </div>
 
-        {/* Divider */}
-        <div className="h-2 bg-muted/50 my-2" />
+          {/* Divider */}
+          <div className="h-2 bg-muted/50 my-2" />
 
-        {/* Agent card */}
-        <div className="px-4 pb-4">
-          <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">담당 공인중개사</p>
-          <div className="border border-border rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-foreground">{property.agentName}</p>
-              <p className="text-xs text-muted-foreground">공인중개사</p>
-            </div>
-            {property.contact && (
-              <a href={`tel:${property.contact}`} className="flex items-center gap-1.5 text-xs font-bold text-accent hover:underline">
-                <Phone className="w-3.5 h-3.5" />
-                {property.contact}
-              </a>
+          {/* 건축물대장 */}
+          <div className="px-4 pb-3">
+            <button onClick={() => setBuildingOpen(!buildingOpen)} className="w-full flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물대장</span>
+              </div>
+              {buildingOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+            </button>
+
+            {buildingOpen && (
+              <div className="mt-2 rounded-xl border border-border overflow-hidden">
+                <div className="px-3 py-2.5 bg-muted/40 border-b border-border">
+                  <p className="text-[10px] text-muted-foreground font-medium mb-0.5">조회 주소</p>
+                  <p className="text-xs font-semibold text-foreground">{property.address}</p>
+                </div>
+                <div className="px-3 py-3 grid grid-cols-2 gap-y-2 gap-x-4 bg-white text-xs">
+                  <div><p className="text-[10px] text-muted-foreground">건물 유형</p><p className="font-semibold text-foreground">{property.type}</p></div>
+                  <div><p className="text-[10px] text-muted-foreground">준공연도</p><p className="font-semibold text-foreground">{property.buildYear}</p></div>
+                  <div><p className="text-[10px] text-muted-foreground">총 층수</p><p className="font-semibold text-foreground">{property.totalFloors}</p></div>
+                  <div><p className="text-[10px] text-muted-foreground">엘리베이터</p><p className="font-semibold text-foreground">{property.elevator ? "있음" : "없음"}</p></div>
+                </div>
+                <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
+                  <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
+                  <div className="flex gap-2">
+                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
+                      <ExternalLink className="w-3 h-3" />세움터 열람
+                    </a>
+                    <a href={naverBuildingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-accent text-white text-[11px] font-bold hover:bg-accent/90 transition-colors">
+                      <ExternalLink className="w-3 h-3" />네이버 건물정보
+                    </a>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
+
+          {/* Divider */}
+          <div className="h-2 bg-muted/50 my-2" />
+
+          {/* Agent card */}
+          <div className="px-4 pb-4">
+            <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">담당 공인중개사</p>
+            <div className="border border-border rounded-xl p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">{property.agentName}</p>
+                <p className="text-xs text-muted-foreground">공인중개사</p>
+              </div>
+              {property.contact && (
+                <a href={`tel:${property.contact}`} className="flex items-center gap-1.5 text-xs font-bold text-accent hover:underline">
+                  <Phone className="w-3.5 h-3.5" />
+                  {property.contact}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── CTA ── */}
+        <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-white grid grid-cols-2 gap-2">
+          <a
+            href={`tel:${property.contactOwner ?? property.contact}`}
+            className="flex items-center justify-center gap-1.5 h-11 rounded-lg border-2 border-primary text-primary text-sm font-bold hover:bg-primary hover:text-white transition-colors"
+          >
+            <Phone className="w-4 h-4" />
+            전화 문의
+          </a>
+          <button className="flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent/90 text-white text-sm font-bold transition-colors">
+            <ArrowUpRight className="w-4 h-4" />
+            상세 보기
+          </button>
         </div>
       </div>
-
-      {/* ── CTA ── */}
-      <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-white grid grid-cols-2 gap-2">
-        <a
-          href={`tel:${property.contactOwner ?? property.contact}`}
-          className="flex items-center justify-center gap-1.5 h-11 rounded-lg border-2 border-primary text-primary text-sm font-bold hover:bg-primary hover:text-white transition-colors"
-        >
-          <Phone className="w-4 h-4" />
-          전화 문의
-        </a>
-        <button className="flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent/90 text-white text-sm font-bold transition-colors">
-          <ArrowUpRight className="w-4 h-4" />
-          상세 보기
-        </button>
-      </div>
-    </div>
+    </>
   );
 };
 
