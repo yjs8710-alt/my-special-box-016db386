@@ -804,7 +804,8 @@ const BuildingGroup = ({
             return (
               <div
                 key={u.id}
-                className={`grid md:grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] items-center px-4 py-3 border-t border-border transition-colors ${u.status === "hidden" ? "opacity-50 bg-muted/10" : "hover:bg-muted/10"}`}
+                onClick={() => onEdit(u)}
+                className={`grid md:grid-cols-[60px_80px_1fr_110px_90px_70px_80px_80px_170px] items-center px-4 py-3 border-t border-border transition-colors cursor-pointer ${u.status === "hidden" ? "opacity-50 bg-muted/10 hover:bg-muted/20" : "hover:bg-primary/5"}`}
               >
                 {/* 사진 썸네일 */}
                 <div className="flex justify-center">
