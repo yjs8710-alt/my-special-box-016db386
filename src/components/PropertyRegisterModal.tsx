@@ -583,7 +583,17 @@ function Step2({
 }
 
 /* ─── Step 3 ─── */
-function Step3({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+function Step3({
+  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove,
+}: {
+  form: FormState;
+  set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  errors: Record<string, string>;
+  uploading: boolean;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  onImageUpload: (files: FileList | null) => Promise<void>;
+  onImageRemove: (url: string) => void;
+}) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
     { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
