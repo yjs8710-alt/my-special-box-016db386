@@ -54,20 +54,20 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
         {idx + 1} / {images.length}
       </div>
 
-      {/* 슬라이드 영역 */}
+      {/* 슬라이드 영역 — overflow 컨테이너에 flex 없이 */}
       <div
-        className="relative w-full h-full flex items-center justify-center overflow-hidden"
+        className="relative w-full h-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${idx * 100}%)`, width: `${images.length * 100}%` }}
+          style={{ transform: `translateX(-${idx * 100}vw)`, width: `${images.length * 100}vw` }}
         >
           {images.map((src, i) => (
             <div
               key={i}
-              className="flex-shrink-0 h-full flex items-center justify-center px-14"
-              style={{ width: `${100 / images.length}%` }}
+              className="flex-shrink-0 h-full flex items-center justify-center px-16"
+              style={{ width: "100vw" }}
             >
               <img
                 src={src}

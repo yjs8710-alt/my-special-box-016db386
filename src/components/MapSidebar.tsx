@@ -28,13 +28,14 @@ function LightboxModal({ images, startIdx, onClose }: { images: string[]; startI
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10">
         {idx + 1} / {images.length}
       </div>
-      <div className="relative w-full h-full flex items-center justify-center overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full h-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        {/* 슬라이드 트랙 */}
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${idx * 100}%)`, width: `${images.length * 100}%` }}
+          style={{ transform: `translateX(-${idx * 100}vw)`, width: `${images.length * 100}vw` }}
         >
           {images.map((src, i) => (
-            <div key={i} className="flex-shrink-0 h-full flex items-center justify-center px-14" style={{ width: `${100 / images.length}%` }}>
+            <div key={i} className="flex-shrink-0 h-full flex items-center justify-center px-16" style={{ width: "100vw" }}>
               <img src={src} alt={`사진 ${i + 1}`} className="max-w-full max-h-full object-contain rounded-lg select-none" draggable={false} />
             </div>
           ))}
