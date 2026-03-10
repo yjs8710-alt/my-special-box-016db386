@@ -327,9 +327,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
 /* ─── Step 1 ─── */
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
-  // 충북 고정 — 다른 시/도 선택 불가
+  // 충북 고정 — sido는 항상 "충북"
   const FIXED_SIDO = "충북";
-  if (form.sido !== FIXED_SIDO) set("sido", FIXED_SIDO);
   const sigunguList = SIGUNGU_MAP[FIXED_SIDO] ?? [];
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
