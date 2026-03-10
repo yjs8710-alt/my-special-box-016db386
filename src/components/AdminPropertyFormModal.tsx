@@ -638,30 +638,31 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
 
 
-              {/* 이미지 업로드 */}
+
+
+              {/* 이미지 업로드 — 캐러셀 프리뷰 */}
               <Section label="이미지 업로드">
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
                   onChange={(e) => handleImageUpload(e.target.files)} />
+                {(form.images ?? []).length > 0 && (
+                  <ImageCarouselPreview
+                    images={form.images ?? []}
+                    onRemove={(url) =>
+                      setForm((f) => ({ ...f, images: (f.images ?? []).filter((u) => u !== url) }))
+                    }
+                  />
+                )}
                 <button type="button" onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="w-full border-2 border-dashed border-primary/30 rounded-xl py-5 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors">
-                  <span className="text-sm font-semibold text-primary">{uploading ? "업로드 중..." : "이미지 선택 / 드래그"}</span>
-                  <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등</span>
+                  className="w-full border-2 border-dashed border-primary/30 rounded-xl py-4 flex flex-col items-center gap-1.5 hover:border-primary/60 hover:bg-primary/5 transition-colors mt-1">
+                  {uploading
+                    ? <><span className="text-sm font-semibold text-primary">업로드 중...</span></>
+                    : <>
+                        <span className="text-sm font-semibold text-primary">📷 사진 추가</span>
+                        <span className="text-[11px] text-muted-foreground">여러 장 동시 선택 가능 · JPG, PNG, WEBP</span>
+                      </>
+                  }
                 </button>
-                {(form.images ?? []).length > 0 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {(form.images ?? []).map((url, idx) => (
-                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group border border-border">
-                        <img src={url} alt="" className="w-full h-full object-cover" />
-                        <button type="button"
-                          onClick={() => setForm((f) => ({ ...f, images: (f.images ?? []).filter((_, i) => i !== idx) }))}
-                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <X className="w-3 h-3 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </Section>
 
               {/* 노출 상태 */}
