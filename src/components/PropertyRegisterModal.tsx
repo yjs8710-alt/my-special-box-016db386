@@ -368,24 +368,22 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
 
       {/* 주소 입력 */}
       <Section label="주소 입력">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="flex flex-col gap-1">
-            {errors.sido && <p className="text-xs text-destructive">{errors.sido}</p>}
-            <Select
-              value={form.sido}
-              onChange={(v) => { set("sido", v); set("sigungu", ""); set("dong", ""); }}
-              placeholder="시/도"
-              options={SIDO_LIST}
-            />
-          </div>
+        {/* 시/도 고정 배지 */}
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/5">
+          <span className="text-xs text-muted-foreground">시/도</span>
+          <span className="text-sm font-bold text-primary">충청북도 (충북)</span>
+          <span className="ml-auto text-[10px] text-muted-foreground/60 bg-muted px-2 py-0.5 rounded-full">고정</span>
+        </div>
+
+        {/* 시/군/구 + 동 */}
+        <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
             {errors.sigungu && <p className="text-xs text-destructive">{errors.sigungu}</p>}
             <Select
               value={form.sigungu}
               onChange={(v) => { set("sigungu", v); set("dong", ""); }}
-              placeholder="시/군/구"
+              placeholder="시/군/구 선택"
               options={sigunguList}
-              disabled={!form.sido}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -393,18 +391,19 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <Select
               value={form.dong}
               onChange={(v) => set("dong", v)}
-              placeholder="동"
+              placeholder="동/읍/면 선택"
               options={dongList}
               disabled={!form.sigungu}
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-1">
+        {/* 번지 */}
+        <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
-              type="text" placeholder="번지 (예: 123-4)"
+              type="text" placeholder="번지 입력 (예: 123-4)"
               value={form.lotNumber}
               onChange={(e) => set("lotNumber", e.target.value)}
               className={ic(false) + " pl-9"}
