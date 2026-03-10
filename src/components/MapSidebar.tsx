@@ -919,25 +919,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
           onSaved={() => setAdminEditProp(null)}
         />
       )}
-      {/* Lightbox */}
-      {lightboxSrc && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          onClick={() => setLightboxSrc(null)}
-        >
-          <button
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"
-            onClick={() => setLightboxSrc(null)}
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-          <img
-            src={lightboxSrc}
-            alt="매물 사진 확대"
-            className="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-2xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
+      {/* Lightbox — 여러 장 좌우 탐색 */}
+      {lightbox && (
+        <LightboxModal
+          images={lightbox.images}
+          startIdx={lightbox.idx}
+          onClose={() => setLightbox(null)}
+        />
       )}
 
       <div className="flex h-full flex-shrink-0" style={{ position: "relative" }}>
