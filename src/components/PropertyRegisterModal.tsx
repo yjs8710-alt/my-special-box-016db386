@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Building2, Phone, MapPin, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Address Data ─── */
 const SIDO_LIST = [
@@ -144,6 +145,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const [form, setForm] = useState<FormState>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -179,10 +182,78 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     return Object.keys(e).length === 0;
   };
 
+  const handleSubmit = async () => {
+    setSaving(true);
+    setSaveError("");
+
+    // 주소 조합: 시도 + 시군구 + 동 + 번지
+    const address = [form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+
+    // 연락처 조합: 건물주 / 부동산 / 세입자 / 관리인 순
+    const contactParts = [
+      form.contactOwner && `건물주:${form.contactOwner}`,
+      form.contactBroker && `부동산:${form.contactBroker}`,
+      form.contactTenant && `세입자:${form.contactTenant}`,
+      form.contactManager && `관리인:${form.contactManager}`,
+    ].filter(Boolean).join("|");
+
+    const payload = {
+      title: `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
+      building_name: form.buildingName || null,
+      address,
+      dong: form.dong,
+      lot_number: form.lotNumber,
+      district: form.sigungu || null,
+      type: form.brokerType === "공동중개" ? "공동중개" : form.tradeType,
+      room_type: form.detailType || null,
+      unit_number: form.unitNo || null,
+      area: form.area,
+      floor: form.floor,
+      deposit: form.deposit,
+      monthly: form.monthlyRent,
+      manage_fee: form.managementFee,
+      parking: "",
+      elevator: false,
+      available_from: "",
+      total_floors: "",
+      build_year: "",
+      description: form.description,
+      room_memo: form.myMemo || null,
+      room_password: form.roomPassword || null,
+      options: form.options,
+      images: [] as string[],
+      views: 0,
+      lat: 0,
+      lng: 0,
+      is_new: true,
+      is_hot: false,
+      status: "active" as const,
+      registered_date: new Date().toISOString().split("T")[0],
+      agent_name: contactParts,
+      note: [
+        form.contactOwner && `건물주: ${form.contactOwner}`,
+        form.contactBroker && `부동산: ${form.contactBroker}`,
+        form.contactTenant && `세입자: ${form.contactTenant}`,
+        form.contactManager && `관리인: ${form.contactManager}`,
+      ].filter(Boolean).join("\n") || null,
+    };
+
+    const { error } = await supabase.from("properties").insert(payload);
+
+    setSaving(false);
+
+    if (error) {
+      setSaveError("저장 중 오류가 발생했습니다: " + error.message);
+      return;
+    }
+
+    setSubmitted(true);
+  };
+
   const goNext = () => {
     if (step === 1 && validateStep1()) setStep(2);
     else if (step === 2 && validateStep2()) setStep(3);
-    else if (step === 3 && validateStep3()) setSubmitted(true);
+    else if (step === 3 && validateStep3()) handleSubmit();
   };
 
   const goPrev = () => {
@@ -231,15 +302,21 @@ export default function PropertyRegisterModal({ onClose }: Props) {
             {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
             {step === 3 && <Step3 form={form} set={set} errors={errors} />}
 
+            {saveError && (
+              <p className="text-xs text-destructive text-center mt-2">{saveError}</p>
+            )}
+
             <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
               <button type="button" onClick={step === 1 ? onClose : goPrev}
-                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors">
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50">
                 {step === 1 ? "취소" : "이전"}
               </button>
               <button type="button" onClick={goNext}
-                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors"
+                disabled={saving}
+                className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-70"
                 style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}>
-                {step === 3 ? "매물 등록 신청" : "다음"}
+                {saving ? "등록 중..." : step === 3 ? "매물 등록" : "다음"}
               </button>
             </div>
           </div>
