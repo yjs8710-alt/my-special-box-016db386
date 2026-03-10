@@ -222,7 +222,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       room_memo: form.myMemo || null,
       room_password: form.roomPassword || null,
       options: form.options,
-      images: [] as string[],
+      images: form.images,
       views: 0,
       lat: 0,
       lng: 0,
