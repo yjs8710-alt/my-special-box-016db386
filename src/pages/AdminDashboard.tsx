@@ -884,7 +884,7 @@ const BuildingGroup = ({
                 {/* 액션 */}
                 <div className="hidden md:flex items-center justify-center gap-1.5 flex-wrap">
                   <button
-                    onClick={() => onEdit(u)}
+                    onClick={(e) => { e.stopPropagation(); onEdit(u); }}
                     className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
                     style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
                     title="수정"
@@ -892,7 +892,7 @@ const BuildingGroup = ({
                     <Pencil className="w-3 h-3" />수정
                   </button>
                   <button
-                    onClick={() => onToggleStatus(u)}
+                    onClick={(e) => { e.stopPropagation(); onToggleStatus(u); }}
                     disabled={togglingId === u.id}
                     className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
                     style={u.status === "active"
