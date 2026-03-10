@@ -1,33 +1,28 @@
-import { useState } from "react";
-import { X, Building2, Phone, MapPin, ChevronDown } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Address Data ─── */
-// 청주시 4개 구만 표시 (충북 고정)
 const CHEONGJU_SIGUNGU = [
   "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구",
 ];
 
 const DONG_MAP: Record<string, string[]> = {
-  // ── 상당구 ──────────────────────────────────
   "청주시 상당구": [
     "낭성면","미원면","가덕면","남일면","문의면",
     "중앙동","성안동","탑동","대성동","영운동","금천동",
     "용담동","명암동","산성동","용암동",
   ],
-  // ── 서원구 ──────────────────────────────────
   "청주시 서원구": [
     "남이면","현도면",
     "사직동","사창동","모충동","분평동","산남동",
     "수곡동","성화동","개신동","죽림동",
   ],
-  // ── 흥덕구 ──────────────────────────────────
   "청주시 흥덕구": [
     "오송읍","강내면","옥산면",
     "운천동","신봉동","복대동","가경동",
     "봉명동","강서동",
   ],
-  // ── 청원구 ──────────────────────────────────
   "청주시 청원구": [
     "내수읍","오창읍","북이면",
     "우암동","내덕동","율량동","사천동","오근장동",
@@ -95,6 +90,7 @@ interface FormState {
   contactManager: string;
   expose: boolean;
   allowAddressView: boolean;
+  images: string[];
 }
 
 const INITIAL: FormState = {
@@ -110,9 +106,10 @@ const INITIAL: FormState = {
   description: "",
   contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
   expose: true, allowAddressView: false,
+  images: [],
 };
 
-const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 노출"];
+const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
 
 interface Props { onClose: () => void; }
 
@@ -123,6 +120,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -133,6 +132,27 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     set("options", form.options.includes(opt)
       ? form.options.filter((o) => o !== opt)
       : [...form.options, opt]);
+
+  /* ─── 이미지 업로드 ─── */
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
+      if (error) { console.error("업로드 실패:", error.message); continue; }
+      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    }
+    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...f.images, ...newUrls] }));
+    setUploading(false);
+  };
+
+  const removeImage = (url: string) =>
+    setForm((f) => ({ ...f, images: f.images.filter((u) => u !== url) }));
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
@@ -161,12 +181,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSaving(true);
     setSaveError("");
 
-    // 주소 조합: 시군구 + 동 + 번지 (충북 고정)
     const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
-    // district: "청주시 서원구" → "서원구"
     const districtVal = form.sigungu ? form.sigungu.replace("청주시 ", "") : null;
 
-    // 연락처 조합: 건물주 / 부동산 / 세입자 / 관리인 순
     const contactParts = [
       form.contactOwner && `건물주:${form.contactOwner}`,
       form.contactBroker && `부동산:${form.contactBroker}`,
@@ -198,7 +215,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       room_memo: form.myMemo || null,
       room_password: form.roomPassword || null,
       options: form.options,
-      images: [] as string[],
+      images: form.images,
       views: 0,
       lat: 0,
       lng: 0,
@@ -216,7 +233,6 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     };
 
     const { error } = await supabase.from("properties").insert(payload);
-
     setSaving(false);
 
     if (error) {
@@ -277,23 +293,43 @@ export default function PropertyRegisterModal({ onClose }: Props) {
           <div className="overflow-y-auto flex-1 px-6 py-4">
             {step === 1 && <Step1 form={form} set={set} errors={errors} />}
             {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
-            {step === 3 && <Step3 form={form} set={set} errors={errors} />}
+            {step === 3 && (
+              <Step3
+                form={form}
+                set={set}
+                errors={errors}
+                uploading={uploading}
+                fileInputRef={fileInputRef}
+                onImageUpload={handleImageUpload}
+                onImageRemove={removeImage}
+              />
+            )}
 
             {saveError && (
               <p className="text-xs text-destructive text-center mt-2">{saveError}</p>
             )}
 
+            {/* 숨김 파일 input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleImageUpload(e.target.files)}
+            />
+
             <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
               <button type="button" onClick={step === 1 ? onClose : goPrev}
-                disabled={saving}
+                disabled={saving || uploading}
                 className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50">
                 {step === 1 ? "취소" : "이전"}
               </button>
               <button type="button" onClick={goNext}
-                disabled={saving}
+                disabled={saving || uploading}
                 className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-70"
                 style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}>
-                {saving ? "등록 중..." : step === 3 ? "매물 등록" : "다음"}
+                {saving ? "등록 중..." : uploading ? "사진 업로드 중..." : step === 3 ? "매물 등록" : "다음"}
               </button>
             </div>
           </div>
@@ -305,7 +341,6 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
 /* ─── Step 1 ─── */
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
-  // 충북 고정 — sido는 항상 "충북", 청주시 4개 구만 표시
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
@@ -343,74 +378,41 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
 
       {/* 주소 입력 */}
       <Section label="주소 입력">
-        {/* 시/도 고정 배지 */}
         <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/5">
           <span className="text-xs text-muted-foreground">시/도</span>
           <span className="text-sm font-bold text-primary">충청북도 (충북)</span>
           <span className="ml-auto text-[10px] text-muted-foreground/60 bg-muted px-2 py-0.5 rounded-full">고정</span>
         </div>
-
-        {/* 시/군/구 + 동 */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col gap-1">
             {errors.sigungu && <p className="text-xs text-destructive">{errors.sigungu}</p>}
-            <Select
-              value={form.sigungu}
-              onChange={(v) => { set("sigungu", v); set("dong", ""); }}
-              placeholder="시/군/구 선택"
-              options={sigunguList}
-            />
+            <Select value={form.sigungu} onChange={(v) => { set("sigungu", v); set("dong", ""); }} placeholder="시/군/구 선택" options={sigunguList} />
           </div>
           <div className="flex flex-col gap-1">
             {errors.dong && <p className="text-xs text-destructive">{errors.dong}</p>}
-            <Select
-              value={form.dong}
-              onChange={(v) => set("dong", v)}
-              placeholder="동/읍/면 선택"
-              options={dongList}
-              disabled={!form.sigungu}
-            />
+            <Select value={form.dong} onChange={(v) => set("dong", v)} placeholder="동/읍/면 선택" options={dongList} disabled={!form.sigungu} />
           </div>
         </div>
-
-        {/* 번지 */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text" placeholder="번지 입력 (예: 123-4)"
-              value={form.lotNumber}
-              onChange={(e) => set("lotNumber", e.target.value)}
-              className={ic(false) + " pl-9"}
-            />
+            <input type="text" placeholder="번지 입력 (예: 123-4)" value={form.lotNumber} onChange={(e) => set("lotNumber", e.target.value)} className={ic(false) + " pl-9"} />
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">
-          도로명주소 불가 / 번지주소만 가능
-        </p>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
       </Section>
 
       {/* 건물이름 */}
       <Section label="건물이름">
-        <input
-          type="text" placeholder="건물 이름 (선택)"
-          value={form.buildingName}
-          onChange={(e) => set("buildingName", e.target.value)}
-          className={ic(false)}
-        />
+        <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
       </Section>
 
       {/* 층수 / 호수 / 평수 */}
       <div className="grid grid-cols-3 gap-3">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-foreground/70">층수</label>
-          <Select
-            value={form.floor}
-            onChange={(v) => set("floor", v)}
-            placeholder="선택"
-            options={FLOOR_OPTIONS}
-          />
+          <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-foreground/70">호수</label>
@@ -461,12 +463,7 @@ function Step2({
 
       {/* 방 비번 */}
       <Section label="방 비번">
-        <input
-          type="text" placeholder="방 비밀번호 입력"
-          value={form.roomPassword}
-          onChange={(e) => set("roomPassword", e.target.value)}
-          className={ic(false)}
-        />
+        <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
       </Section>
 
       {/* 방향 */}
@@ -539,7 +536,17 @@ function Step2({
 }
 
 /* ─── Step 3 ─── */
-function Step3({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+function Step3({
+  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove,
+}: {
+  form: FormState;
+  set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  errors: Record<string, string>;
+  uploading: boolean;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  onImageUpload: (files: FileList | null) => Promise<void>;
+  onImageRemove: (url: string) => void;
+}) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
     { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
@@ -559,6 +566,45 @@ function Step3({ form, set, errors }: { form: FormState; set: <K extends keyof F
           className={ic(false) + " resize-none"}
         />
         <p className="text-right text-[11px] text-muted-foreground mt-0.5">{form.description.length} / 300</p>
+      </Section>
+
+      {/* 매물 사진 */}
+      <Section label="매물 사진">
+        {/* 업로드된 사진 미리보기 */}
+        {form.images.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {form.images.map((url, i) => (
+              <div key={url} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border bg-muted shrink-0">
+                <img src={url} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => onImageRemove(url)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-destructive transition-colors"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+                {i === 0 && (
+                  <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {/* 업로드 버튼 */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed transition-all hover:border-primary hover:bg-primary/5 disabled:opacity-50"
+          style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
+        >
+          {uploading ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">업로드 중...</span></>
+          ) : (
+            <><ImagePlus className="w-4 h-4" /><span className="text-sm font-medium">사진 추가 {form.images.length > 0 ? `(${form.images.length}장)` : "(여러 장 가능)"}</span></>
+          )}
+        </button>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">첫 번째 사진이 대표 이미지로 설정됩니다</p>
       </Section>
 
       {/* 연락처 */}
@@ -617,9 +663,9 @@ function SuccessView({ onClose }: { onClose: () => void }) {
       <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
         <span className="text-3xl">🎉</span>
       </div>
-      <h3 className="text-lg font-extrabold text-foreground">등록 신청 완료!</h3>
+      <h3 className="text-lg font-extrabold text-foreground">등록 완료!</h3>
       <p className="text-sm text-muted-foreground text-center">
-        매물 검토 후 1~2 영업일 내에 게시됩니다.<br />궁금한 점은 고객센터로 문의해주세요.
+        매물이 즉시 등록되었습니다.<br />매물 목록에서 확인하세요.
       </p>
       <button onClick={onClose} className="mt-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
         확인
@@ -683,7 +729,7 @@ function Select({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-8`}
+        className="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-8"
       >
         <option value="">{placeholder}</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
