@@ -1359,7 +1359,11 @@ const AdminDashboard = () => {
   });
 
   const filteredDbProperties = dbProperties.filter((p) => {
-    const matchDistrict = propertyDistrictFilter === "전체" || (p.district ?? "").includes(propertyDistrictFilter);
+    // district 컬럼 우선, 없으면 address에서 구 이름 파싱
+    const districtVal = p.district ?? "";
+    const districtFromAddr = CHEONGJU_DISTRICTS.find(d => p.address.includes(d)) ?? "";
+    const effectiveDistrict = districtVal || districtFromAddr;
+    const matchDistrict = propertyDistrictFilter === "전체" || effectiveDistrict.includes(propertyDistrictFilter);
     const matchSearch = !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch);
     return matchDistrict && matchSearch;
   });
@@ -2012,7 +2016,11 @@ const AdminDashboard = () => {
                     {d}
                     {d !== "전체" && (
                       <span className="ml-1 opacity-70">
-                        ({dbProperties.filter(p => (p.district ?? "").includes(d)).length})
+                        ({dbProperties.filter(p => {
+                          const dv = p.district ?? "";
+                          const da = CHEONGJU_DISTRICTS.find(x => p.address.includes(x)) ?? "";
+                          return (dv || da).includes(d);
+                        }).length})
                       </span>
                     )}
                   </button>
