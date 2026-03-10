@@ -160,7 +160,6 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
-    if (!form.sido) e.sido = "시/도를 선택해주세요";
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
     if (!form.dong) e.dong = "동을 선택해주세요";
     if (!form.detailType) e.detailType = "세부 종류를 선택해주세요";
