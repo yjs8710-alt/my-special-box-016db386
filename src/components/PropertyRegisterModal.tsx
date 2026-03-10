@@ -570,25 +570,9 @@ function Step3({
 
       {/* 매물 사진 */}
       <Section label="매물 사진">
-        {/* 업로드된 사진 미리보기 */}
+        {/* 캐러셀 미리보기 */}
         {form.images.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {form.images.map((url, i) => (
-              <div key={url} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border bg-muted shrink-0">
-                <img src={url} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => onImageRemove(url)}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center hover:bg-destructive transition-colors"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-                {i === 0 && (
-                  <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
-                )}
-              </div>
-            ))}
-          </div>
+          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} />
         )}
         {/* 업로드 버튼 */}
         <button
