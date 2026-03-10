@@ -1237,9 +1237,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                             <span className="text-[9px] font-extrabold text-white leading-none flex-shrink-0">{idx}.</span>
                             {regDate && <span className="text-[8px] text-white/80 leading-none truncate">{regDate}</span>}
                           </div>
-                          {prop.image && (
+                          {(prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : []).length > 0 && (
                             <button
-                              onClick={(e) => { e.stopPropagation(); setLightboxSrc(prop.image); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const imgs = prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [];
+                                setLightbox({ images: imgs, idx: 0 });
+                              }}
                               className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                             >
                               <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
