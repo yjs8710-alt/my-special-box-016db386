@@ -214,7 +214,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const dongList = DONG_MAP[sigungu] ?? [];
 
   const updateAddress = (sg: string, d: string, lot: string) => {
-    const parts = [FIXED_SIDO, sg, d, lot].filter(Boolean);
+    const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
     set("address", parts.join(" "));
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
