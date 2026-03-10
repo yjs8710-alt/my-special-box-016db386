@@ -640,6 +640,94 @@ function Step3({
   );
 }
 
+/* ─── Image Preview Carousel ─── */
+function ImagePreviewCarousel({ images, onRemove }: { images: string[]; onRemove: (url: string) => void }) {
+  const [idx, setIdx] = useState(0);
+  const safeIdx = Math.min(idx, images.length - 1);
+
+  const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
+  const next = () => setIdx((i) => (i + 1) % images.length);
+
+  const handleRemove = (url: string) => {
+    const newLen = images.length - 1;
+    if (safeIdx >= newLen && newLen > 0) setIdx(newLen - 1);
+    onRemove(url);
+  };
+
+  return (
+    <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
+      {/* 슬라이드 */}
+      <div
+        className="flex h-full transition-transform duration-300 ease-in-out"
+        style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+      >
+        {images.map((src, i) => (
+          <div key={src} className="h-full flex-shrink-0 relative" style={{ width: `${100 / images.length}%` }}>
+            <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+
+      {/* 그라디언트 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+      {/* 삭제 버튼 */}
+      <button
+        type="button"
+        onClick={() => handleRemove(images[safeIdx])}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors"
+      >
+        <X className="w-3.5 h-3.5 text-white" />
+      </button>
+
+      {/* 대표 뱃지 */}
+      {safeIdx === 0 && (
+        <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">대표</span>
+      )}
+
+      {/* 이전/다음 버튼 */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </button>
+        </>
+      )}
+
+      {/* 인디케이터 + 장수 */}
+      <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-1">
+        <div className="flex gap-1">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className="w-1.5 h-1.5 rounded-full transition-all"
+              style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 장수 카운터 */}
+      <div className="absolute bottom-2 right-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+        {safeIdx + 1} / {images.length}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Success ─── */
 function SuccessView({ onClose }: { onClose: () => void }) {
   return (
