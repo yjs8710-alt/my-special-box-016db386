@@ -124,7 +124,7 @@ interface FormState {
 const INITIAL: FormState = {
   brokerType: "일반중개", tradeType: "임대", buildingType: "단독건물",
   detailType: "",
-  sido: "", sigungu: "", dong: "", lotNumber: "",
+  sido: "충북", sigungu: "", dong: "", lotNumber: "",
   buildingName: "", floor: "", unitNo: "", area: "",
   options: [], roomPassword: "", direction: "",
   vacancy: "공실",
