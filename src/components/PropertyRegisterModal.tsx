@@ -301,23 +301,43 @@ export default function PropertyRegisterModal({ onClose }: Props) {
           <div className="overflow-y-auto flex-1 px-6 py-4">
             {step === 1 && <Step1 form={form} set={set} errors={errors} />}
             {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
-            {step === 3 && <Step3 form={form} set={set} errors={errors} />}
+            {step === 3 && (
+              <Step3
+                form={form}
+                set={set}
+                errors={errors}
+                uploading={uploading}
+                fileInputRef={fileInputRef}
+                onImageUpload={handleImageUpload}
+                onImageRemove={removeImage}
+              />
+            )}
 
             {saveError && (
               <p className="text-xs text-destructive text-center mt-2">{saveError}</p>
             )}
 
+            {/* 숨김 파일 input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleImageUpload(e.target.files)}
+            />
+
             <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-card">
               <button type="button" onClick={step === 1 ? onClose : goPrev}
-                disabled={saving}
+                disabled={saving || uploading}
                 className="flex-1 py-3 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50">
                 {step === 1 ? "취소" : "이전"}
               </button>
               <button type="button" onClick={goNext}
-                disabled={saving}
+                disabled={saving || uploading}
                 className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-extrabold hover:bg-primary/90 transition-colors disabled:opacity-70"
                 style={{ boxShadow: "0 4px 16px hsl(var(--primary)/0.3)" }}>
-                {saving ? "등록 중..." : step === 3 ? "매물 등록" : "다음"}
+                {saving ? "등록 중..." : uploading ? "사진 업로드 중..." : step === 3 ? "매물 등록" : "다음"}
               </button>
             </div>
           </div>
