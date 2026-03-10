@@ -266,15 +266,7 @@ const ResidentialRental = () => {
     });
   };
 
-  const filtered = allProperties.filter(p => {
-    if (!activeTypes.includes("전체") && !activeTypes.includes(p.type)) return false;
-    if (propertyId && !String(p.id).includes(propertyId)) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
+  const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
 
