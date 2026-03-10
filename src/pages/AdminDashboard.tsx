@@ -1133,6 +1133,17 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); }, [fetchMembers, fetchProperties, fetchContacts]);
 
+  // Realtime 구독: 매물 변경 즉시 반영
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-properties-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, () => {
+        fetchProperties();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchProperties]);
+
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/admin/login"); };
 
   // ─── 승인/거절 ───────────────────────────────────────────────────────────
