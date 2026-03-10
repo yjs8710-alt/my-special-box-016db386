@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2 } from "lucide-react";
+import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Address Data ─── */
