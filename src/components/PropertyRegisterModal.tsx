@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, Building2, Phone, MapPin, ChevronDown } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Address Data ─── */
 const SIDO_LIST = [
