@@ -1436,10 +1436,10 @@ const AdminDashboard = () => {
     <div className="min-h-screen flex" style={{ background: "hsl(var(--background))" }}>
       {/* Modals */}
       {propertyModal && (
-        <PropertyFormModal
+        <AdminPropertyFormModal
           initial={propertyModal.data}
           onClose={() => setPropertyModal(null)}
-          onSave={saveProperty}
+          onSaved={() => { setPropertyModal(null); fetchProperties(); }}
         />
       )}
       {contactModal !== null && (
