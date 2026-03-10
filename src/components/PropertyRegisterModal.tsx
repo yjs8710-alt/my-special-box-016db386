@@ -174,7 +174,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep3 = () => {
     const e: Record<string, string> = {};
-    if (!form.contactBroker.trim()) e.contactBroker = "부동산 연락처를 입력해주세요";
+    if (!form.contactOwner.trim()) e.contactOwner = "건물주 연락처를 입력해주세요";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
