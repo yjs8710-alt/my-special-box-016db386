@@ -427,16 +427,25 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 주소 입력 */}
               <Section label="주소 입력">
-                <div className="grid grid-cols-3 gap-2">
-                  <AdminSelect value={sido} onChange={(v) => { setSido(v); setSigungu(""); setDong(""); updateAddress(v, "", "", form.lot_number); }} placeholder="시/도" options={SIDO_LIST} />
-                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(sido, v, "", form.lot_number); }} placeholder="시/군/구" options={sigunguList} disabled={!sido} />
-                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sido, sigungu, v, form.lot_number); }} placeholder="동" options={dongList} disabled={!sigungu} />
+                {/* 시/도 고정 배지 */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/5">
+                  <span className="text-xs text-muted-foreground">시/도</span>
+                  <span className="text-sm font-bold text-primary">충청북도 (충북)</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground/60 bg-muted px-2 py-0.5 rounded-full">고정</span>
                 </div>
+
+                {/* 시/군/구 + 동 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(v, "", form.lot_number); }} placeholder="시/군/구 선택" options={sigunguList} />
+                  <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sigungu, v, form.lot_number); }} placeholder="동/읍/면 선택" options={dongList} disabled={!sigungu} />
+                </div>
+
+                {/* 번지 */}
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
-                      onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
+                    <input type="text" placeholder="번지 입력 (예: 123-4)" value={form.lot_number}
+                      onChange={(e) => { set("lot_number", e.target.value); updateAddress(sigungu, dong, e.target.value); }}
                       className={ic + " pl-9"} />
                   </div>
                   <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
