@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { X, Phone, ChevronDown } from "lucide-react";
+import { X, Phone, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -93,6 +93,8 @@ const DONG_MAP: Record<string, string[]> = {
     "우암동","내덕동","율량동","사천동","오근장동",
   ],
 };
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 const FLOOR_OPTIONS = [
   "지하5층","지하4층","지하3층","지하2층","지하1층","0층",
   "1층","2층","3층","4층","5층","6층","7층","8층","9층","10층","10층이상",
@@ -102,12 +104,20 @@ const ROOM_OPTIONS = [
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
   "옷장","전자키","복층","옥탑","테라스","주차",
 ];
+const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
+const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
+const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
+const BROKER_TYPES = ["일반중개","공동중개"] as const;
+const TRADE_TYPES = ["임대","매매"] as const;
+const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","고시원"] },
   { group: "상가 임대", types: ["상가","식당·카페","사무실","공장·창고","병원·학원"] },
   { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","원룸건물매매","주택매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","숙박/팬션매매"] },
   { group: "토지", types: ["토지"] },
 ];
+
+type LhType = typeof LH_TYPES[number];
 
 const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
   title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "원룸",
@@ -120,32 +130,96 @@ const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
   agent_name: "",
 };
 
-// AdminSelect helper
+// Extended form state for admin (adds fields not in DBPropertyForm)
+interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
+  brokerType: typeof BROKER_TYPES[number];
+  tradeType: typeof TRADE_TYPES[number];
+  buildingType: typeof BUILDING_TYPES[number];
+  direction: string;
+  lhType: LhType;
+  exitCleanFee: string;
+  brokerFee: string;
+  contactOwner: string;
+  contactTenant: string;
+  contactManager: string;
+}
+
+const EMPTY_EXTENDED: AdminFormExtended = {
+  ...EMPTY,
+  brokerType: "일반중개",
+  tradeType: "임대",
+  buildingType: "단독건물",
+  direction: "",
+  lhType: "관계없음",
+  exitCleanFee: "",
+  brokerFee: "",
+  contactOwner: "",
+  contactTenant: "",
+  contactManager: "",
+};
+
+// ─── Shared UI Helpers ────────────────────────────────────────────────────────
+const ic = `w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20`;
+
+function Section({ label, children, error }: { label: string; children: React.ReactNode; error?: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-bold text-foreground">{label}</p>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+function Radio({ checked, onClick, children }: { checked: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <label className="flex items-center gap-1.5 cursor-pointer select-none" onClick={onClick}>
+      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${checked ? "border-primary" : "border-muted-foreground/40"}`}>
+        {checked && <span className="w-2 h-2 rounded-full bg-primary" />}
+      </span>
+      <span className={`text-sm ${checked ? "text-foreground font-semibold" : "text-muted-foreground"}`}>{children}</span>
+    </label>
+  );
+}
+
+function AmountInput({ label, value, onChange, placeholder = "만원", noUnit = false }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; noUnit?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-semibold text-foreground/70">{label}</label>
+      <div className="relative">
+        <input type="text" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)}
+          className={ic + (noUnit ? "" : " pr-10")} />
+        {!noUnit && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">만원</span>}
+      </div>
+    </div>
+  );
+}
+
 const AdminSelect = ({ value, onChange, placeholder, options, disabled }: {
   value: string; onChange: (v: string) => void; placeholder: string; options: string[]; disabled?: boolean;
 }) => (
   <div className="relative">
     <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled}
-      className="w-full px-3 py-2 text-sm rounded-lg border outline-none appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-1 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-7">
+      className={`w-full px-3 py-2.5 text-sm rounded-xl border outline-none appearance-none bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-40 disabled:cursor-not-allowed pr-8`}>
       <option value="">{placeholder}</option>
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
     </select>
-    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
   </div>
 );
 
 // ─── AdminPropertyFormModal ───────────────────────────────────────────────────
 interface AdminPropertyFormModalProps {
-  /** 수정 시 기존 데이터, 신규 등록 시 null */
   initial: Partial<DBPropertyForm> | null;
   onClose: () => void;
-  /** 저장 후 콜백 */
   onSaved?: () => void;
 }
 
 const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyFormModalProps) => {
-  const [form, setForm] = useState<Omit<DBPropertyForm, "id" | "created_at">>({
-    ...EMPTY,
+  const [form, setForm] = useState<AdminFormExtended>({
+    ...EMPTY_EXTENDED,
     ...(initial ?? {}),
   });
   const [saving, setSaving] = useState(false);
@@ -153,7 +227,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
 
   const [sido, setSido] = useState("");
   const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
@@ -198,6 +273,21 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
+    // 연락처 조합
+    const contactParts = [
+      form.contactOwner && `건물주:${form.contactOwner}`,
+      form.agent_name && `부동산:${form.agent_name}`,
+      form.contactTenant && `세입자:${form.contactTenant}`,
+      form.contactManager && `관리인:${form.contactManager}`,
+    ].filter(Boolean).join("|");
+
+    const noteStr = [
+      form.contactOwner && `건물주: ${form.contactOwner}`,
+      form.agent_name && `부동산: ${form.agent_name}`,
+      form.contactTenant && `세입자: ${form.contactTenant}`,
+      form.contactManager && `관리인: ${form.contactManager}`,
+    ].filter(Boolean).join("\n");
+
     const payload = {
       title: form.title || "",
       building_name: form.building_name || null,
@@ -221,7 +311,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       description: form.description ?? "",
       building_memo: form.building_memo || null,
       room_memo: form.room_memo || null,
-      note: form.note || null,
+      note: noteStr || form.note || null,
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
       room_password: form.room_password || null,
@@ -235,7 +325,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       status: form.status ?? "active",
       registered_date: form.registered_date || new Date().toISOString().slice(0, 10),
       checked_date: form.checked_date || null,
-      agent_name: form.agent_name ?? "",
+      agent_name: contactParts || form.agent_name || "",
     };
 
     try {
@@ -253,7 +343,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
   };
 
-  const ic = `w-full px-3 py-2 text-sm rounded-lg border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground border-border focus:border-primary focus:ring-1 focus:ring-primary/20`;
   const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "사진 및 기타"];
 
   return (
@@ -289,11 +378,34 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-6 py-4">
+
           {/* ── STEP 1 ── */}
           {formStep === 1 && (
             <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">유형 *</label>
+
+              {/* 거래 방식 */}
+              <Section label="거래 방식">
+                <div className="flex gap-5">
+                  {BROKER_TYPES.map((t) => <Radio key={t} checked={form.brokerType === t} onClick={() => set("brokerType", t)}>{t}</Radio>)}
+                </div>
+              </Section>
+
+              {/* 거래 종류 */}
+              <Section label="거래 종류">
+                <div className="flex gap-5">
+                  {TRADE_TYPES.map((t) => <Radio key={t} checked={form.tradeType === t} onClick={() => set("tradeType", t)}>{t}</Radio>)}
+                </div>
+              </Section>
+
+              {/* 매물 종류 */}
+              <Section label="매물 종류">
+                <div className="flex gap-5">
+                  {BUILDING_TYPES.map((t) => <Radio key={t} checked={form.buildingType === t} onClick={() => set("buildingType", t)}>{t}</Radio>)}
+                </div>
+              </Section>
+
+              {/* 세부 종류 (유형) */}
+              <Section label="세부 종류 (유형) *">
                 {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
                   <div key={group} className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
@@ -310,26 +422,31 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
                   </div>
                 ))}
-              </div>
+              </Section>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">주소 입력</label>
+              {/* 주소 입력 */}
+              <Section label="주소 입력">
                 <div className="grid grid-cols-3 gap-2">
                   <AdminSelect value={sido} onChange={(v) => { setSido(v); setSigungu(""); setDong(""); updateAddress(v, "", "", form.lot_number); }} placeholder="시/도" options={SIDO_LIST} />
                   <AdminSelect value={sigungu} onChange={(v) => { setSigungu(v); setDong(""); updateAddress(sido, v, "", form.lot_number); }} placeholder="시/군/구" options={sigunguList} disabled={!sido} />
                   <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sido, sigungu, v, form.lot_number); }} placeholder="동" options={dongList} disabled={!sigungu} />
                 </div>
-                <div className="flex gap-2">
-                  <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
-                    onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
-                    className={ic + " flex-1"} />
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input type="text" placeholder="번지 (예: 123-4)" value={form.lot_number}
+                      onChange={(e) => { set("lot_number", e.target.value); updateAddress(sido, sigungu, dong, e.target.value); }}
+                      className={ic + " pl-9"} />
+                  </div>
                   <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
                 </div>
+                <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
                 {form.address && (
                   <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
                 )}
-              </div>
+              </Section>
 
+              {/* 건물이름 / 매물명 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
@@ -341,6 +458,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
+              {/* 층수 / 호수 / 평수 */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
@@ -356,6 +474,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
+              {/* 전체 층수 / 건축연도 / 중개사 */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
@@ -366,7 +485,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">중개사</label>
+                  <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
                   <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
                 </div>
               </div>
@@ -376,8 +495,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           {/* ── STEP 2 ── */}
           {formStep === 2 && (
             <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">방 옵션</label>
+
+              {/* 요약 칩 */}
+              <div className="flex gap-1.5 flex-wrap">
+                {[form.brokerType, form.tradeType, form.buildingType, form.type].filter(Boolean).map((v) => (
+                  <span key={v} className="text-xs bg-primary/10 text-primary font-semibold px-2.5 py-1 rounded-full">{v}</span>
+                ))}
+              </div>
+
+              {/* 방 옵션 */}
+              <Section label="방 옵션">
                 <div className="flex flex-wrap gap-2">
                   {ROOM_OPTIONS.map((opt) => (
                     <button key={opt} type="button" onClick={() => toggleOption(opt)}
@@ -388,8 +515,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       }`}>{opt}</button>
                   ))}
                 </div>
-              </div>
+              </Section>
 
+              {/* 방 비번 / 건물 비번 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
@@ -401,10 +529,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">현재 빈방 여부</label>
+              {/* 방향 */}
+              <Section label="방향">
+                <div className="flex flex-wrap gap-2">
+                  {DIRECTION_OPTIONS.map((d) => (
+                    <button key={d} type="button" onClick={() => set("direction", form.direction === d ? "" : d)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                        form.direction === d
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-foreground border-border hover:border-primary/50"
+                      }`}>{d}</button>
+                  ))}
+                </div>
+              </Section>
+
+              {/* 공실 여부 */}
+              <Section label="현재 빈방 여부">
                 <div className="flex gap-3">
-                  {["공실", "세입자 거주중"].map((t) => (
+                  {VACANCY_TYPES.map((t) => (
                     <button key={t} type="button" onClick={() => set("available_from", t)}
                       className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                         form.available_from === t
@@ -413,41 +555,50 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       }`}>{t}</button>
                   ))}
                 </div>
-              </div>
+              </Section>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">금액 입력</label>
+              {/* 금액 입력 */}
+              <Section label="금액 입력">
                 <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {[{ key: "deposit", label: "보증금" }, { key: "monthly", label: "월세" }, { key: "manage_fee", label: "관리비" }].map(({ key, label }) => (
-                    <div key={key} className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-muted-foreground">{label}</label>
-                      <div className="relative">
-                        <input type="text" placeholder="만원" value={form[key as keyof typeof form] as string}
-                          onChange={(e) => set(key, e.target.value)} className={ic + " pr-10"} />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">만원</span>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">퇴거일</label>
-                    <input type="text" placeholder="예) 2026-05-01" value={form.vacate_date ?? ""} onChange={(e) => set("vacate_date", e.target.value)} className={ic} />
+                  <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
+                  <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
+                  <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
+                  <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+                  <div className="col-span-2">
+                    <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
                   </div>
                 </div>
-              </div>
+              </Section>
 
+              {/* LH 전세대출 */}
+              <Section label="LH (전세대출)">
+                <div className="flex gap-5">
+                  {LH_TYPES.map((t) => (
+                    <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
+                  ))}
+                </div>
+              </Section>
+
+              {/* 체크박스 옵션 */}
               <div className="flex gap-6 flex-wrap">
-                {[{ key: "elevator", label: "엘리베이터" }, { key: "is_new", label: "신규 매물" }, { key: "is_hot", label: "인기 매물" }].map(({ key, label }) => (
+                {[{ key: "elevator" as const, label: "엘리베이터" }, { key: "is_new" as const, label: "신규 매물" }, { key: "is_hot" as const, label: "인기 매물" }].map(({ key, label }) => (
                   <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                    <input type="checkbox" checked={form[key as keyof typeof form] as boolean}
+                    <input type="checkbox" checked={form[key] as boolean}
                       onChange={(e) => set(key, e.target.checked)} className="w-4 h-4 accent-primary" />
                     {label}
                   </label>
                 ))}
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">메모</label>
+              {/* 퇴거일 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">퇴거일</label>
+                <input type="text" placeholder="예) 2026-05-01" value={form.vacate_date ?? ""} onChange={(e) => set("vacate_date", e.target.value)} className={ic} />
+              </div>
+
+              {/* 메모 */}
+              <Section label="메모">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-muted-foreground">건물 메모</label>
@@ -455,38 +606,53 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       className={ic + " resize-none"} placeholder="건물 관련 메모" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">방 메모</label>
+                    <label className="text-xs font-semibold text-muted-foreground">방 메모 (내 메모)</label>
                     <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
-                      className={ic + " resize-none"} placeholder="방 관련 메모" />
+                      className={ic + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
                   </div>
                 </div>
-              </div>
+              </Section>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-foreground">매물 소개</label>
+              {/* 매물 소개 */}
+              <Section label="매물 소개">
                 <textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)}
-                  className={ic + " resize-none"} placeholder="매물의 특징, 특이사항 등" />
-              </div>
+                  className={ic + " resize-none"} placeholder="매물의 특징, 특이사항 등" maxLength={300} />
+                <p className="text-right text-[11px] text-muted-foreground">{form.description.length} / 300</p>
+              </Section>
             </div>
           )}
 
           {/* ── STEP 3 ── */}
           {formStep === 3 && (
             <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">연락처</label>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">부동산 연락처</label>
-                  <div className="relative">
-                    <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <input type="tel" placeholder="043-123-4567" value={form.agent_name}
-                      onChange={(e) => set("agent_name", e.target.value)} className={ic + " pl-8"} />
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">좌표 (지도 핀 위치)</label>
+              {/* 연락처 */}
+              <Section label="연락처">
+                <div className="flex flex-col gap-3">
+                  {[
+                    { key: "contactOwner" as const, label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
+                    { key: "agent_name" as const, label: "부동산 연락처", placeholder: "예) 043-123-4567" },
+                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
+                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
+                  ].map(({ key, label, placeholder, required }) => (
+                    <div key={key} className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-foreground/70">
+                        {label} {required && <span className="text-destructive">*</span>}
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input type="tel" placeholder={placeholder}
+                          value={form[key] as string}
+                          onChange={(e) => set(key, e.target.value)}
+                          className={ic + " pl-9"} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+
+              {/* 좌표 */}
+              <Section label="좌표 (지도 핀 위치)">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-muted-foreground">위도 (lat)</label>
@@ -499,10 +665,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={ic} placeholder="예) 127.4890" />
                   </div>
                 </div>
-              </div>
+              </Section>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">이미지 업로드</label>
+              {/* 이미지 업로드 */}
+              <Section label="이미지 업로드">
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden"
                   onChange={(e) => handleImageUpload(e.target.files)} />
                 <button type="button" onClick={() => fileInputRef.current?.click()}
@@ -525,12 +691,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     ))}
                   </div>
                 )}
-              </div>
+              </Section>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">노출 상태</label>
+              {/* 노출 상태 */}
+              <Section label="노출 상태">
                 <div className="flex gap-3">
-                  {["active", "hidden"].map((s) => (
+                  {(["active", "hidden"] as const).map((s) => (
                     <button key={s} type="button" onClick={() => set("status", s)}
                       className={`flex-1 py-2 rounded-xl text-sm font-bold border transition-all ${
                         form.status === s ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"
@@ -538,6 +704,18 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       {s === "active" ? "✅ 노출" : "🔕 숨김"}
                     </button>
                   ))}
+                </div>
+              </Section>
+
+              {/* 등록일 / 확인일 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">등록일</label>
+                  <input type="date" value={form.registered_date} onChange={(e) => set("registered_date", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">확인일</label>
+                  <input type="date" value={form.checked_date ?? ""} onChange={(e) => set("checked_date", e.target.value)} className={ic} />
                 </div>
               </div>
             </div>
