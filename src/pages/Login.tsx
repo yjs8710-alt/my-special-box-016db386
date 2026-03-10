@@ -58,7 +58,7 @@ const LoginPage = () => {
     }
 
     if (profile.status === "approved") {
-      navigate("/");
+      navigate("/residential");
     } else {
       await supabase.auth.signOut();
       setApprovalStatus(profile.status as ApprovalStatus);
