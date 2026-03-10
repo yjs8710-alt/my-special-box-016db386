@@ -592,22 +592,6 @@ const PropertyFormModal = ({
                 </div>
               </div>
 
-              {/* 위도/경도 */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-foreground">좌표 (지도 핀)</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">위도</label>
-                    <input type="number" step="0.000001" placeholder="36.6424" value={form.lat || ""}
-                      onChange={(e) => set("lat", parseFloat(e.target.value) || 0)} className={icA()} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">경도</label>
-                    <input type="number" step="0.000001" placeholder="127.4890" value={form.lng || ""}
-                      onChange={(e) => set("lng", parseFloat(e.target.value) || 0)} className={icA()} />
-                  </div>
-                </div>
-              </div>
 
               {/* 노출 상태 */}
               <div className="flex flex-col gap-2">
