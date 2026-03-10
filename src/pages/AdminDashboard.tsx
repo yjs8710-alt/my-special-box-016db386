@@ -1358,9 +1358,11 @@ const AdminDashboard = () => {
     return matchFilter && matchSearch;
   });
 
-  const filteredDbProperties = dbProperties.filter((p) =>
-    !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch)
-  );
+  const filteredDbProperties = dbProperties.filter((p) => {
+    const matchDistrict = propertyDistrictFilter === "전체" || (p.district ?? "").includes(propertyDistrictFilter);
+    const matchSearch = !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch);
+    return matchDistrict && matchSearch;
+  });
 
   const filteredPosts = posts.filter((p) =>
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
