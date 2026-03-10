@@ -124,6 +124,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -134,6 +136,27 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     set("options", form.options.includes(opt)
       ? form.options.filter((o) => o !== opt)
       : [...form.options, opt]);
+
+  // 이미지 업로드
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
+      if (error) { console.error("업로드 실패:", error.message); continue; }
+      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    }
+    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...f.images, ...newUrls] }));
+    setUploading(false);
+  };
+
+  const removeImage = (url: string) =>
+    setForm((f) => ({ ...f, images: f.images.filter((u) => u !== url) }));
 
   const validateStep1 = () => {
     const e: Record<string, string> = {};
