@@ -110,7 +110,7 @@ const INITIAL: FormState = {
   myMemo: "",
   description: "",
   contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
-  expose: true, allowAddressView: false,
+  expose: true, allowAddressView: false, images: [],
 };
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 노출"];
