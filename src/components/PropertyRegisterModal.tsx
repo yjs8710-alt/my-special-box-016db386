@@ -161,8 +161,10 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSaving(true);
     setSaveError("");
 
-    // 주소 조합: 시도 + 시군구 + 동 + 번지
-    const address = [form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    // 주소 조합: 시군구 + 동 + 번지 (충북 고정)
+    const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    // district: "청주시 서원구" → "서원구"
+    const districtVal = form.sigungu ? form.sigungu.replace("청주시 ", "") : null;
 
     // 연락처 조합: 건물주 / 부동산 / 세입자 / 관리인 순
     const contactParts = [
@@ -178,8 +180,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       address,
       dong: form.dong,
       lot_number: form.lotNumber,
-      district: form.sigungu || null,
-      type: form.brokerType === "공동중개" ? "공동중개" : form.tradeType,
+      district: districtVal,
+      type: form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
       room_type: form.detailType || null,
       unit_number: form.unitNo || null,
       area: form.area,
