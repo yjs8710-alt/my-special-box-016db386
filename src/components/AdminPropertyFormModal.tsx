@@ -230,14 +230,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const [sido, setSido] = useState("");
+  // 충북 고정
+  const FIXED_SIDO = "충북";
   const [sigungu, setSigungu] = useState(form.district ? `청주시 ${form.district}` : "");
   const [dong, setDong] = useState(form.dong ?? "");
-  const sigunguList = SIGUNGU_MAP[sido] ?? [];
+  const sigunguList = SIGUNGU_MAP[FIXED_SIDO] ?? [];
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  const updateAddress = (s: string, sg: string, d: string, lot: string) => {
-    const parts = [s, sg, d, lot].filter(Boolean);
+  const updateAddress = (sg: string, d: string, lot: string) => {
+    const parts = [FIXED_SIDO, sg, d, lot].filter(Boolean);
     set("address", parts.join(" "));
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
