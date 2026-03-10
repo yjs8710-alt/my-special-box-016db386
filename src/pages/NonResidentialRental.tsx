@@ -303,20 +303,15 @@ const NonResidentialRental = () => {
     });
   };
 
-  const filtered = allProperties.filter(p => {
-    if (!activeTypes.includes("전체")) {
-      const selectedLabels = NON_RESIDENTIAL_SUBTYPES
-        .filter(s => activeTypes.includes(s.key))
-        .map(s => s.label);
-      if (!selectedLabels.includes(p.type)) return false;
-    }
-    if (propertyId && !String(p.id).includes(propertyId)) return false;
-    if (query) {
-      const q = query.toLowerCase();
-      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
+  // key → label 변환 후 usePropertyFilter에 전달
+  const nonResidentialTypeLabels = useMemo(() => {
+    if (activeTypes.includes("전체")) return ["전체"];
+    return NON_RESIDENTIAL_SUBTYPES
+      .filter(s => activeTypes.includes(s.key))
+      .map(s => s.label);
+  }, [activeTypes]);
+
+  const filtered = usePropertyFilter(allProperties, filters, nonResidentialTypeLabels, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
 
