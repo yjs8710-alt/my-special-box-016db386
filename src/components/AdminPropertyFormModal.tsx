@@ -1,4 +1,87 @@
 import { useState, useRef, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+// ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
+function ImageCarouselPreview({ images, onRemove }: { images: string[]; onRemove: (url: string) => void }) {
+  const [idx, setIdx] = useState(0);
+  const safeIdx = Math.min(idx, images.length - 1);
+
+  const handleRemove = useCallback((url: string) => {
+    onRemove(url);
+    setIdx((i) => Math.min(i, images.length - 2));
+  }, [onRemove, images.length]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
+      {/* 슬라이드 */}
+      <div
+        className="flex h-full transition-transform duration-300"
+        style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+      >
+        {images.map((src) => (
+          <div key={src} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }}>
+            <img src={src} alt="매물 사진" className="w-full h-full object-cover" />
+          </div>
+        ))}
+      </div>
+
+      {/* 그라디언트 */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+      {/* 삭제 버튼 */}
+      <button
+        type="button"
+        onClick={() => handleRemove(images[safeIdx])}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors z-10"
+      >
+        <X className="w-3.5 h-3.5 text-white" />
+      </button>
+
+      {/* 대표 배지 */}
+      {safeIdx === 0 && (
+        <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full z-10">대표</span>
+      )}
+
+      {/* 좌우 화살표 */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIdx((i) => (i - 1 + images.length) % images.length)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIdx((i) => (i + 1) % images.length)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </button>
+          {/* 인디케이터 */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIdx(i)}
+                className="w-1.5 h-1.5 rounded-full transition-all"
+                style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
+              />
+            ))}
+          </div>
+          {/* 장수 표시 */}
+          <div className="absolute bottom-2 right-3 text-white text-[10px] font-bold bg-black/50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+            {safeIdx + 1} / {images.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 import { X, Phone, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
