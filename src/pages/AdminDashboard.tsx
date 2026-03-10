@@ -1997,6 +1997,28 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
+              {/* 구별 탭 필터 */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {DISTRICT_FILTER_TABS.map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setPropertyDistrictFilter(d)}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                    style={propertyDistrictFilter === d
+                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                    }
+                  >
+                    {d}
+                    {d !== "전체" && (
+                      <span className="ml-1 opacity-70">
+                        ({dbProperties.filter(p => (p.district ?? "").includes(d)).length})
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
               {propertiesLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
               {!propertiesLoading && filteredDbProperties.length === 0 && (
                 <div className="bg-card border border-border rounded-xl py-16 text-center text-sm text-muted-foreground">
