@@ -1031,6 +1031,7 @@ const AdminDashboard = () => {
   const [propertiesLoading, setPropertiesLoading] = useState(false);
   const [propertyModal, setPropertyModal] = useState<{ mode: "add" | "edit"; data: Partial<DBProperty> | null } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [propertyDistrictFilter, setPropertyDistrictFilter] = useState("전체");
 
   // 청주 연락처 state
   const [contacts, setContacts] = useState<CheongJuContact[]>([]);
