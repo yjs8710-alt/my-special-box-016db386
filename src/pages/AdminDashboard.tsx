@@ -1166,7 +1166,15 @@ const AdminDashboard = () => {
     setContactsLoading(false);
   }, []);
 
-  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); }, [fetchMembers, fetchProperties, fetchContacts]);
+  // ─── 신고/제안 불러오기 ──────────────────────────────────────────────────
+  const fetchReports = useCallback(async () => {
+    setReportsLoading(true);
+    const { data, error } = await supabase.from("property_reports").select("*").order("created_at", { ascending: false });
+    if (!error && data) setReports(data as PropertyReport[]);
+    setReportsLoading(false);
+  }, []);
+
+  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); fetchReports(); }, [fetchMembers, fetchProperties, fetchContacts, fetchReports]);
 
   // Realtime 구독: 매물 변경 즉시 반영
   useEffect(() => {
