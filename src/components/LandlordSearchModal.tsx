@@ -310,7 +310,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                 {/* 연락처 */}
                 <div className="border-t border-border/50 pt-2 flex flex-col gap-1.5">
                   {item.contactOwner ? (
-                    <PhoneRow label="소유주(임대인)" phone={item.contactOwner} id={item.id} color="hsl(var(--primary))" />
+                    <PhoneRow label="소유주(임대인)" phone={item.contactOwner} id={item.id} color="hsl(var(--primary))" isRevealed={isRevealed(item.id)} onReveal={() => handleReveal(item.id)} />
                   ) : (
                     <div className="flex items-center gap-1.5">
                       <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
@@ -318,10 +318,10 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     </div>
                   )}
                   {item.contactManager && (
-                    <PhoneRow label="관리인" phone={item.contactManager} id={item.id} color="hsl(var(--chart-4))" />
+                    <PhoneRow label="관리인" phone={item.contactManager} id={item.id} color="hsl(var(--chart-4))" isRevealed={isRevealed(item.id)} onReveal={() => handleReveal(item.id)} />
                   )}
                   {item.contactBroker && (
-                    <PhoneRow label="부동산" phone={item.contactBroker} id={item.id} color="hsl(var(--chart-3))" />
+                    <PhoneRow label="부동산" phone={item.contactBroker} id={item.id} color="hsl(var(--chart-3))" isRevealed={isRevealed(item.id)} onReveal={() => handleReveal(item.id)} />
                   )}
                 </div>
               </div>
