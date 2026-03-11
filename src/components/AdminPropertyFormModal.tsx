@@ -595,12 +595,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       <p className="text-[11px] text-muted-foreground px-1 animate-pulse">📡 좌표 자동 조회 중...</p>
                     )}
                     {!geocoding && form.lat !== 0 && form.lng !== 0 && (
-                      <p className="text-[11px] text-green-600 font-semibold px-1">
+                      <p className="text-[11px] text-success font-semibold px-1">
                         ✅ 좌표 확인: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
                       </p>
                     )}
                     {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && form.lot_number && (
-                      <p className="text-[11px] text-amber-500 px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
+                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
                     )}
                   </div>
                 )}
