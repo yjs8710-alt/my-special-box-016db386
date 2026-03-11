@@ -376,7 +376,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         setForm((f) => ({ ...f, lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) }));
       }
     });
-  }, []);
 
 
 
