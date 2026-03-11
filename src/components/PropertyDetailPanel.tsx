@@ -229,17 +229,24 @@ function ErrorReportModal({ property, onClose }: { property: MapProperty; onClos
   const handleSubmit = async () => {
     if (!content.trim()) return;
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    await supabase.from("property_reports").insert({
-      property_id: String(property.id),
-      property_title: property.title,
-      property_address: property.address,
-      report_type: "error_report",
-      error_content: content.trim(),
-      submitted_by: session?.user?.id ?? null,
-    });
-    setSaving(false);
-    setDone(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: String(property.id),
+        property_title: property.title,
+        property_address: property.address,
+        report_type: "error_report",
+        error_content: content.trim(),
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setDone(true);
+    } catch (e) {
+      console.error("오류제보 저장 실패:", e);
+      alert("제보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
