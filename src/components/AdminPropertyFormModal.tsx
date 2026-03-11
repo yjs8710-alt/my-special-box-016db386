@@ -361,7 +361,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         setTimeout(() => geocodeAddress(fullAddress), 1500);
       }
     }
-  };
+
+
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
 
 
 
