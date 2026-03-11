@@ -340,6 +340,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [uploading, setUploading] = useState(false);
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const [geocoding, setGeocoding] = useState(false);
+  const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
@@ -366,6 +367,27 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     });
   }, []);
 
+  // 청주 연락처 자동 불러오기
+  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string) => {
+    if (!dongVal) return;
+    let query = supabase.from("cheongju_contacts").select("contact_owner,contact_manager,phone").eq("dong", dongVal);
+    if (lotVal) query = query.eq("lot_number", lotVal);
+    const { data } = await query.maybeSingle();
+    if (data) {
+      const owner = data.contact_owner || data.phone || "";
+      const manager = data.contact_manager || "";
+      if (owner || manager) {
+        setForm((f) => ({
+          ...f,
+          contactOwner: f.contactOwner || owner,
+          contactManager: f.contactManager || manager,
+        }));
+        setContactAutoFilled(true);
+        setTimeout(() => setContactAutoFilled(false), 4000);
+      }
+    }
+  }, []);
+
   const updateAddress = (sg: string, d: string, lot: string) => {
     const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
     const fullAddress = parts.join(" ");
@@ -375,6 +397,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동+번지가 모두 있으면 좌표 자동 조회
     if (d && lot) geocodeAddress(fullAddress);
+    // 신규 등록 시에만 연락처 자동 불러오기 (기존 연락처 덮어쓰지 않기 위해)
+    if (!initial?.id && d) fetchContactFromDB(d, lot);
   };
 
   const handleImageUpload = async (files: FileList | null) => {
@@ -874,6 +898,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 연락처 */}
               <Section label="연락처">
+                {contactAutoFilled && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/8 text-primary text-xs font-semibold animate-pulse">
+                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>청주 연락처에서 자동으로 불러왔습니다</span>
+                  </div>
+                )}
                 <div className="flex flex-col gap-3">
                   {[
                     { key: "contactOwner" as const, label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
