@@ -239,7 +239,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     if (!error && form.dong) {
       // ── cheongju_contacts 동기화 ──────────────────────────────
       const contactDistrict = districtVal ?? "";
-      const hasContact = form.contactOwner || form.contactManager;
+      const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
       if (hasContact) {
         let q = supabase
           .from("cheongju_contacts")
