@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // getClaims()으로 로컬에서 JWT 검증
+    // 로컬 JWT 검증
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -35,16 +35,29 @@ Deno.serve(async (req) => {
 
     const userId = claimsData.claims.sub;
 
-    // 서비스 키 클라이언트로 admin 권한 확인
+    // 서비스 키 클라이언트
     const adminClient = createClient(supabaseUrl, serviceKey);
-    const { data: roleData } = await adminClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
 
-    if (!roleData) {
+    // admin 또는 승인된 중개사인지 확인
+    const [roleRes, profileRes] = await Promise.all([
+      adminClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      adminClient
+        .from("agent_profiles")
+        .select("status, is_active")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
+
+    const isAdmin = !!roleRes.data;
+    const isApprovedAgent =
+      profileRes.data?.status === "approved" && profileRes.data?.is_active === true;
+
+    if (!isAdmin && !isApprovedAgent) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -58,7 +71,7 @@ Deno.serve(async (req) => {
     }
     const keyword = q.trim();
 
-    // 모든 매물 조회 (status 무관)
+    // 모든 매물 조회 (status 무관 — 숨김/종료 포함)
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
