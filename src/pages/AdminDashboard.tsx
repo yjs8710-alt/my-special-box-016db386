@@ -93,6 +93,27 @@ type CheongJuContact = {
   is_visible?: boolean;
 };
 
+type PropertyReport = {
+  id: string;
+  property_id: string;
+  property_title: string;
+  property_address: string;
+  report_type: "error_report" | "deal_complete" | "rental_proposal";
+  status: "pending" | "reviewed" | "resolved";
+  error_content?: string;
+  deal_date?: string;
+  deal_memo?: string;
+  proposer_name?: string;
+  proposer_phone?: string;
+  proposer_company?: string;
+  proposal_deposit?: string;
+  proposal_monthly?: string;
+  proposal_period?: string;
+  proposal_content?: string;
+  admin_memo?: string;
+  created_at: string;
+};
+
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
   title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "원룸",
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
