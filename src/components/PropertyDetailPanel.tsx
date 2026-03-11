@@ -2,9 +2,11 @@ import {
   X, MapPin, Eye, Heart, Phone, Calendar, Building2, Car, Maximize2,
   Layers, BadgeCheck, Share2, ArrowUpRight, FileText, ExternalLink,
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
+  AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -41,20 +43,15 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
       className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center"
       onClick={onClose}
     >
-      {/* 닫기 */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10"
       >
         <X className="w-5 h-5 text-white" />
       </button>
-
-      {/* 카운터 */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10">
         {idx + 1} / {images.length}
       </div>
-
-      {/* 슬라이드 영역 — overflow 컨테이너에 flex 없이 */}
       <div
         className="relative w-full h-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -78,8 +75,6 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
             </div>
           ))}
         </div>
-
-        {/* 이전/다음 */}
         {images.length > 1 && (
           <>
             <button
@@ -97,8 +92,6 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
           </>
         )}
       </div>
-
-      {/* 하단 썸네일 스트립 */}
       {images.length > 1 && (
         <div
           className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
@@ -184,7 +177,6 @@ function ImageCarousel({ images, title, onImageClick }: { images: string[]; titl
 
   return (
     <div className="relative flex-shrink-0 h-48 overflow-hidden bg-muted">
-      {/* 슬라이드 — 클릭 시 라이트박스 */}
       <div
         className="flex h-full transition-transform duration-300 ease-in-out cursor-zoom-in"
         style={{ transform: `translateX(-${idx * 100}%)`, width: `${imgs.length * 100}%` }}
@@ -196,27 +188,15 @@ function ImageCarousel({ images, title, onImageClick }: { images: string[]; titl
           </div>
         ))}
       </div>
-
-      {/* 그라디언트 */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
-
-      {/* 이전/다음 버튼 */}
       {imgs.length > 1 && (
         <>
-          <button
-            onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
+          <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors">
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
-          <button
-            onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
+          <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors">
             <ChevronRight className="w-4 h-4 text-white" />
           </button>
-
-          {/* 인디케이터 점 */}
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1">
             {imgs.map((_, i) => (
               <button
@@ -227,18 +207,308 @@ function ImageCarousel({ images, title, onImageClick }: { images: string[]; titl
               />
             ))}
           </div>
-
-          {/* 장수 표시 */}
           <div className="absolute top-3 left-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
             {idx + 1} / {imgs.length}
           </div>
         </>
       )}
-
-      {/* 확대 힌트 */}
       <div className="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none flex items-center gap-1">
         <Maximize2 className="w-2.5 h-2.5" />
         클릭하여 크게 보기
+      </div>
+    </div>
+  );
+}
+
+/* ─── 오류제보 모달 ─── */
+function ErrorReportModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
+  const [content, setContent] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!content.trim()) return;
+    setSaving(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    await supabase.from("property_reports").insert({
+      property_id: String(property.id),
+      property_title: property.title,
+      property_address: property.address,
+      report_type: "error_report",
+      error_content: content.trim(),
+      submitted_by: session?.user?.id ?? null,
+    });
+    setSaving(false);
+    setDone(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border" style={{ background: "hsl(var(--destructive) / 0.08)" }}>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" style={{ color: "hsl(var(--destructive))" }} />
+            <h3 className="text-sm font-bold text-foreground">오류 제보</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        {done ? (
+          <div className="p-8 flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
+            <p className="text-sm font-bold text-foreground">제보가 접수되었습니다</p>
+            <p className="text-xs text-muted-foreground">관리자가 검토 후 처리할 예정입니다.</p>
+            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+          </div>
+        ) : (
+          <div className="p-5 flex flex-col gap-4">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
+              <p className="text-xs font-semibold text-foreground truncate">{property.title}</p>
+              <p className="text-[11px] text-muted-foreground">{property.address}</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">오류 내용 *</label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="잘못된 정보, 허위 매물 등 오류 내용을 입력해주세요."
+                rows={4}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={!content.trim() || saving}
+              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: "hsl(var(--destructive))" }}
+            >
+              {saving ? "제출 중..." : "제보하기"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── 거래완료 모달 ─── */
+function DealCompleteModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
+  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
+  const [memo, setMemo] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    await supabase.from("property_reports").insert({
+      property_id: String(property.id),
+      property_title: property.title,
+      property_address: property.address,
+      report_type: "deal_complete",
+      deal_date: dealDate,
+      deal_memo: memo.trim() || null,
+      submitted_by: session?.user?.id ?? null,
+    });
+    setSaving(false);
+    setDone(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+            <h3 className="text-sm font-bold text-foreground">거래 완료 처리</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        {done ? (
+          <div className="p-8 flex flex-col items-center gap-3 text-center">
+            <CheckCircle2 className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
+            <p className="text-sm font-bold text-foreground">거래완료가 접수되었습니다</p>
+            <p className="text-xs text-muted-foreground">관리자가 확인 후 매물 상태를 변경합니다.</p>
+            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+          </div>
+        ) : (
+          <div className="p-5 flex flex-col gap-4">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
+              <p className="text-xs font-semibold text-foreground truncate">{property.title}</p>
+              <p className="text-[11px] text-muted-foreground">{property.address}</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">거래 완료일</label>
+              <input
+                type="date"
+                value={dealDate}
+                onChange={(e) => setDealDate(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">메모 (선택)</label>
+              <textarea
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="거래 관련 메모를 입력하세요."
+                rows={3}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: "hsl(var(--chart-2))" }}
+            >
+              {saving ? "처리 중..." : "거래완료 신청"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── 임대제안서 모달 ─── */
+function RentalProposalModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
+  const [form, setForm] = useState({
+    proposer_name: "",
+    proposer_phone: "",
+    proposer_company: "",
+    proposal_deposit: "",
+    proposal_monthly: "",
+    proposal_period: "",
+    proposal_content: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const ic = "w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
+
+  const handleSubmit = async () => {
+    if (!form.proposer_name.trim() || !form.proposer_phone.trim()) return;
+    setSaving(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    await supabase.from("property_reports").insert({
+      property_id: String(property.id),
+      property_title: property.title,
+      property_address: property.address,
+      report_type: "rental_proposal",
+      proposer_name: form.proposer_name.trim(),
+      proposer_phone: form.proposer_phone.trim(),
+      proposer_company: form.proposer_company.trim() || null,
+      proposal_deposit: form.proposal_deposit.trim() || null,
+      proposal_monthly: form.proposal_monthly.trim() || null,
+      proposal_period: form.proposal_period.trim() || null,
+      proposal_content: form.proposal_content.trim() || null,
+      submitted_by: session?.user?.id ?? null,
+    });
+    setSaving(false);
+    setDone(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-bold text-foreground">임대 제안서 작성</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="p-8 flex flex-col items-center gap-3 text-center">
+            <Send className="w-10 h-10 text-primary" />
+            <p className="text-sm font-bold text-foreground">임대 제안서가 전송되었습니다</p>
+            <p className="text-xs text-muted-foreground">관리자가 확인 후 연락드립니다.</p>
+            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+          </div>
+        ) : (
+          <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
+            {/* 대상 매물 */}
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[10px] text-muted-foreground mb-0.5">임대 제안 대상 매물</p>
+              <p className="text-xs font-semibold text-foreground truncate">{property.title}</p>
+              <p className="text-[11px] text-muted-foreground">{property.address}</p>
+              <div className="flex gap-3 mt-1.5 text-[11px] text-muted-foreground">
+                <span>현재 보증금: <strong className="text-foreground">{property.deposit}</strong></span>
+                <span>월세: <strong className="text-foreground">{property.monthly}</strong></span>
+              </div>
+            </div>
+
+            {/* 제안자 정보 */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">제안자 정보</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">이름 *</label>
+                  <input value={form.proposer_name} onChange={(e) => set("proposer_name", e.target.value)} placeholder="홍길동" className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">연락처 *</label>
+                  <input value={form.proposer_phone} onChange={(e) => set("proposer_phone", e.target.value)} placeholder="010-0000-0000" className={ic} />
+                </div>
+              </div>
+              <div className="mt-2 flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">회사/부동산명 (선택)</label>
+                <input value={form.proposer_company} onChange={(e) => set("proposer_company", e.target.value)} placeholder="예) OO공인중개사" className={ic} />
+              </div>
+            </div>
+
+            {/* 제안 조건 */}
+            <div>
+              <p className="text-xs font-bold text-foreground mb-2">제안 임대 조건</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">제안 보증금</label>
+                  <input value={form.proposal_deposit} onChange={(e) => set("proposal_deposit", e.target.value)} placeholder="예) 500만원" className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">제안 월세</label>
+                  <input value={form.proposal_monthly} onChange={(e) => set("proposal_monthly", e.target.value)} placeholder="예) 80만원" className={ic} />
+                </div>
+              </div>
+              <div className="mt-2 flex flex-col gap-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">계약 희망 기간</label>
+                <input value={form.proposal_period} onChange={(e) => set("proposal_period", e.target.value)} placeholder="예) 1년, 2년, 협의" className={ic} />
+              </div>
+            </div>
+
+            {/* 제안 내용 */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">추가 제안 내용 (선택)</label>
+              <textarea
+                value={form.proposal_content}
+                onChange={(e) => set("proposal_content", e.target.value)}
+                placeholder="특별 요청사항, 입주 희망일, 업종 등을 자유롭게 작성해주세요."
+                rows={3}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+              />
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={!form.proposer_name.trim() || !form.proposer_phone.trim() || saving}
+              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: "hsl(var(--primary))" }}
+            >
+              <Send className="w-4 h-4" />
+              {saving ? "전송 중..." : "임대 제안서 전송"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -248,6 +518,8 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
   const [liked, setLiked] = useState(false);
   const [buildingOpen, setBuildingOpen] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
+
   if (!property) return null;
 
   const buildingSearchUrl = `https://www.eais.go.kr`;
@@ -268,6 +540,11 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
           onClose={() => setLightboxIdx(null)}
         />
       )}
+
+      {/* ── 액션 모달 ── */}
+      {activeModal === "error" && <ErrorReportModal property={property} onClose={() => setActiveModal(null)} />}
+      {activeModal === "deal" && <DealCompleteModal property={property} onClose={() => setActiveModal(null)} />}
+      {activeModal === "proposal" && <RentalProposalModal property={property} onClose={() => setActiveModal(null)} />}
 
       <div className="absolute left-0 top-0 bottom-0 z-[900] w-[360px] bg-card border-l border-border shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-250">
 
@@ -463,6 +740,38 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
               )}
             </div>
           </div>
+
+          {/* ── 추가 액션 버튼 ── */}
+          <div className="h-2 bg-muted/50 my-2" />
+          <div className="px-4 pb-4 flex flex-col gap-2">
+            <p className="text-xs font-bold text-foreground uppercase tracking-wide mb-1">기타 기능</p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => setActiveModal("proposal")}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-primary/5 transition-colors"
+                style={{ borderColor: "hsl(var(--primary) / 0.3)" }}
+              >
+                <ClipboardList className="w-4 h-4 text-primary" />
+                <span className="text-[11px] font-semibold text-foreground">임대제안서</span>
+              </button>
+              <button
+                onClick={() => setActiveModal("deal")}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-chart-2/5 transition-colors"
+                style={{ borderColor: "hsl(var(--chart-2) / 0.3)" }}
+              >
+                <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+                <span className="text-[11px] font-semibold text-foreground">거래완료</span>
+              </button>
+              <button
+                onClick={() => setActiveModal("error")}
+                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-destructive/5 transition-colors"
+                style={{ borderColor: "hsl(var(--destructive) / 0.3)" }}
+              >
+                <AlertTriangle className="w-4 h-4" style={{ color: "hsl(var(--destructive))" }} />
+                <span className="text-[11px] font-semibold text-foreground">오류제보</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ── CTA ── */}
@@ -474,9 +783,13 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
             <Phone className="w-4 h-4" />
             전화 문의
           </a>
-          <button className="flex items-center justify-center gap-1.5 h-11 rounded-lg bg-accent hover:bg-accent/90 text-white text-sm font-bold transition-colors">
-            <ArrowUpRight className="w-4 h-4" />
-            상세 보기
+          <button
+            onClick={() => setActiveModal("proposal")}
+            className="flex items-center justify-center gap-1.5 h-11 rounded-lg text-white text-sm font-bold transition-colors"
+            style={{ background: "hsl(var(--accent))" }}
+          >
+            <ClipboardList className="w-4 h-4" />
+            임대 제안서
           </button>
         </div>
       </div>
