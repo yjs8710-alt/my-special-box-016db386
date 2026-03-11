@@ -932,55 +932,77 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
         />
       )}
       {/* Admin Property Edit Modal */}
-      {adminEditProp && (
-        <AdminPropertyFormModal
-          initial={
-            adminEditProp.memo
-              ? {
-                  id: adminEditProp.memo, // memo에 DB uuid 저장됨
-                  title: adminEditProp.title,
-                  building_name: adminEditProp.buildingName,
-                  address: adminEditProp.address,
-                  dong: adminEditProp.address?.split(" ").slice(-2, -1)[0] ?? "",
-                  lot_number: adminEditProp.address?.split(" ").slice(-1)[0] ?? "",
-                  district: adminEditProp.address?.match(/([가-힣]+구)/)?.[1],
-                  type: adminEditProp.type,
-                  unit_number: adminEditProp.unitNumber,
-                  area: adminEditProp.area?.replace(/[^0-9]/g, "") ?? "",
-                  floor: adminEditProp.floor ?? "",
-                  deposit: adminEditProp.deposit?.replace(/[^0-9,]/g, "") ?? "",
-                  monthly: adminEditProp.monthly?.replace(/[^0-9,]/g, "") ?? "",
-                  manage_fee: adminEditProp.manageFee?.replace(/[^0-9,]/g, "") ?? "",
-                  parking: adminEditProp.parking ?? "",
-                  elevator: adminEditProp.elevator ?? false,
-                  available_from: adminEditProp.availableFrom ?? "",
-                  total_floors: adminEditProp.totalFloors?.replace(/[^0-9층]/g, "") ?? "",
-                  build_year: adminEditProp.buildYear?.replace(/[^0-9]/g, "") ?? "",
-                  description: adminEditProp.description ?? "",
-                  building_memo: adminEditProp.buildingMemo ?? "",
-                  room_memo: adminEditProp.roomMemo ?? "",
-                  note: adminEditProp.note ?? "",
-                  vacate_date: adminEditProp.vacateDate ?? "",
-                  building_password: adminEditProp.buildingPassword ?? "",
-                  room_password: adminEditProp.roomPassword ?? "",
-                  options: adminEditProp.options ?? [],
-                  images: adminEditProp.image ? [adminEditProp.image] : [],
-                  views: adminEditProp.views ?? 0,
-                  lat: adminEditProp.lat ?? 0,
-                  lng: adminEditProp.lng ?? 0,
-                  is_new: adminEditProp.isNew ?? false,
-                  is_hot: adminEditProp.isHot ?? false,
-                  status: "active",
-                  registered_date: adminEditProp.registeredDate ?? new Date().toISOString().slice(0, 10),
-                  checked_date: adminEditProp.checkedDate ?? "",
-                  agent_name: adminEditProp.agentName ?? "",
-                }
-              : null
-          }
-          onClose={() => setAdminEditProp(null)}
-          onSaved={() => setAdminEditProp(null)}
-        />
-      )}
+      {adminEditProp && (() => {
+        // agent_name(DB)에 저장된 연락처 문자열 파싱
+        // 형식: "건물주:010-xxx|부동산:043-xxx|세입자:010-xxx|관리인:010-xxx"
+        // 또는 note: "건물주: 010-xxx\n부동산: 043-xxx\n..."
+        const rawContact = adminEditProp.agentName ?? adminEditProp.note ?? "";
+        const parseC = (key: string) => {
+          const m = rawContact.match(new RegExp(`${key}[:\\s]+([0-9][0-9\\-]+)`));
+          return m ? m[1].trim() : "";
+        };
+        const parsedOwner = adminEditProp.contactOwner || parseC("건물주");
+        const parsedBroker = adminEditProp.contact || parseC("부동산");
+        const parsedTenant = parseC("세입자");
+        const parsedManager = adminEditProp.contactManager || parseC("관리인");
+
+        return (
+          <AdminPropertyFormModal
+            initial={
+              adminEditProp.memo
+                ? {
+                    id: adminEditProp.memo,
+                    title: adminEditProp.title,
+                    building_name: adminEditProp.buildingName,
+                    address: adminEditProp.address,
+                    dong: adminEditProp.address?.split(" ").slice(-2, -1)[0] ?? "",
+                    lot_number: adminEditProp.address?.split(" ").slice(-1)[0] ?? "",
+                    district: adminEditProp.address?.match(/([가-힣]+구)/)?.[1],
+                    type: adminEditProp.type,
+                    unit_number: adminEditProp.unitNumber,
+                    area: adminEditProp.area?.replace(/[^0-9]/g, "") ?? "",
+                    floor: adminEditProp.floor ?? "",
+                    deposit: adminEditProp.deposit?.replace(/[^0-9,]/g, "") ?? "",
+                    monthly: adminEditProp.monthly?.replace(/[^0-9,]/g, "") ?? "",
+                    manage_fee: adminEditProp.manageFee?.replace(/[^0-9,]/g, "") ?? "",
+                    parking: adminEditProp.parking ?? "",
+                    elevator: adminEditProp.elevator ?? false,
+                    available_from: adminEditProp.availableFrom ?? "",
+                    total_floors: adminEditProp.totalFloors?.replace(/[^0-9층]/g, "") ?? "",
+                    build_year: adminEditProp.buildYear?.replace(/[^0-9]/g, "") ?? "",
+                    description: adminEditProp.description ?? "",
+                    building_memo: adminEditProp.buildingMemo ?? "",
+                    room_memo: adminEditProp.roomMemo ?? "",
+                    note: adminEditProp.note ?? "",
+                    vacate_date: adminEditProp.vacateDate ?? "",
+                    building_password: adminEditProp.buildingPassword ?? "",
+                    room_password: adminEditProp.roomPassword ?? "",
+                    options: adminEditProp.options ?? [],
+                    images: adminEditProp.images && adminEditProp.images.length > 0
+                      ? adminEditProp.images
+                      : adminEditProp.image ? [adminEditProp.image] : [],
+                    views: adminEditProp.views ?? 0,
+                    lat: adminEditProp.lat ?? 0,
+                    lng: adminEditProp.lng ?? 0,
+                    is_new: adminEditProp.isNew ?? false,
+                    is_hot: adminEditProp.isHot ?? false,
+                    status: "active",
+                    registered_date: adminEditProp.registeredDate ?? new Date().toISOString().slice(0, 10),
+                    checked_date: adminEditProp.checkedDate ?? "",
+                    // 연락처: 각 필드에 분리 배치 (담당중개사 필드에 묶지 않음)
+                    agent_name: parsedBroker,
+                    // 아래는 AdminFormExtended 확장 필드로 초기화됨
+                    ...(parsedOwner   ? { contactOwner:   parsedOwner   } : {}),
+                    ...(parsedTenant  ? { contactTenant:  parsedTenant  } : {}),
+                    ...(parsedManager ? { contactManager: parsedManager } : {}),
+                  }
+                : null
+            }
+            onClose={() => setAdminEditProp(null)}
+            onSaved={() => setAdminEditProp(null)}
+          />
+        );
+      })()}
       {/* Lightbox — 여러 장 좌우 탐색 */}
       {lightbox && (
         <LightboxModal
