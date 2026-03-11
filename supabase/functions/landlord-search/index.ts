@@ -93,6 +93,16 @@ Deno.serve(async (req) => {
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
+          // extended fields
+          floor: row.floor ?? undefined,
+          area: row.area ?? undefined,
+          deposit: row.deposit ?? undefined,
+          monthly: row.monthly ?? undefined,
+          type: row.room_type ?? row.type ?? undefined,
+          buildYear: row.build_year ?? undefined,
+          totalFloors: row.total_floors ?? undefined,
+          availableFrom: row.available_from ?? undefined,
+          note: row.note ?? undefined,
         });
       }
     }
