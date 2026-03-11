@@ -1324,7 +1324,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                                 <span className="text-[9px] font-bold flex-shrink-0 whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>퇴거{prop.vacateDate}</span>
                               </>
                             )}
-                            {prop.note && (
+                            {prop.note && !/[0-9]{3}[-\s]?[0-9]{3,4}[-\s]?[0-9]{4}/.test(prop.note) && (
                               <>
                                 <span className="flex-shrink-0 w-px h-3 bg-border/40" />
                                 <span className="text-[9px] text-muted-foreground flex-shrink-0 truncate" title={prop.note}>※{prop.note}</span>
