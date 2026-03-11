@@ -36,6 +36,8 @@ export interface MapProperty {
   password?: string;         // 레거시 호환 (현관 비번)
   roomPassword?: string;     // 방 비번
   images?: string[];       // 여러장 사진
+  dong?: string;        // 동 (지번주소용)
+  lotNumber?: string;   // 번지수
   contact: string;
   contactOwner?: string;
   contactManager?: string;
