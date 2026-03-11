@@ -70,6 +70,7 @@ export type Database = {
       }
       cheongju_contacts: {
         Row: {
+          contact_broker: string | null
           contact_manager: string | null
           contact_owner: string | null
           created_at: string
@@ -83,6 +84,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          contact_broker?: string | null
           contact_manager?: string | null
           contact_owner?: string | null
           created_at?: string
@@ -96,6 +98,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          contact_broker?: string | null
           contact_manager?: string | null
           contact_owner?: string | null
           created_at?: string
