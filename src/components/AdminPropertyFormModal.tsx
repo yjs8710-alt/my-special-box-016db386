@@ -513,7 +513,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
 
       // 청주 연락처 자동 저장: 동이 있고 연락처(건물주/관리인 중 하나라도)가 있으면 저장
-      const hasAnyContact = !!(form.contactOwner || form.contactManager);
+      const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
       if (form.dong && hasAnyContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
