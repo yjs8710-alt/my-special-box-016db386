@@ -333,6 +333,35 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [dong, setDong] = useState(form.dong ?? "");
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
+  const [geocoding, setGeocoding] = useState(false);
+
+  const geocodeAddress = useCallback((fullAddress: string) => {
+    if (!fullAddress || !window.kakao?.maps?.services) return;
+    setGeocoding(true);
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    geocoder.addressSearch(fullAddress, (result: any[], status: string) => {
+      setGeocoding(false);
+      if (status === window.kakao.maps.services.Status.OK && result[0]) {
+        setForm((f) => ({ ...f, lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) }));
+      }
+    });
+  }, []);
+
+  const updateAddress = (sg: string, d: string, lot: string) => {
+    const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
+    const fullAddress = parts.join(" ");
+    set("address", fullAddress);
+    set("dong", d);
+    set("lot_number", lot);
+    if (sg && d && lot) {
+      if (window.kakao?.maps?.services) {
+        geocodeAddress(fullAddress);
+      } else {
+        setTimeout(() => geocodeAddress(fullAddress), 1500);
+      }
+    }
+  };
+
 
   const updateAddress = (sg: string, d: string, lot: string) => {
     const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
