@@ -458,6 +458,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
+    // 좌표가 없으면 저장 전 Edge Function으로 geocode 호출
+    let finalLat = form.lat;
+    let finalLng = form.lng;
+    if (!finalLat || !finalLng) {
+      try {
+        const { data } = await supabase.functions.invoke("geocode", {
+          body: { address: form.address },
+        });
+        if (data?.success) {
+          finalLat = data.lat;
+          finalLng = data.lng;
+          setForm((f) => ({ ...f, lat: finalLat, lng: finalLng }));
+        }
+      } catch {
+        // 좌표 없이 저장 계속
+      }
+    }
+
     // note 필드: 연락처 정보만 저장 (건물주/세입자/관리인)
     // agent_name 필드: 담당 중개사 이름만 저장 (연락처 X)
     const noteStr = [
