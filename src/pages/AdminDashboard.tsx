@@ -1005,6 +1005,7 @@ const ContactEditModal = ({
             { key: "phone", label: "대표 전화번호", placeholder: "043-XXX-XXXX" },
             { key: "contact_owner", label: "건물주 전화번호", placeholder: "010-XXXX-XXXX" },
             { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX" },
+            { key: "contact_broker", label: "부동산 전화번호", placeholder: "043-XXXX-XXXX" },
             { key: "memo", label: "메모", placeholder: "비고" },
           ].map(({ key, label, placeholder }) => (
             <div key={key} className="flex flex-col gap-1">
