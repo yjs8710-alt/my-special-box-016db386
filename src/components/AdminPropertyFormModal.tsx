@@ -323,6 +323,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  const [geocoding, setGeocoding] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
@@ -334,12 +335,30 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
+  // Kakao Geocoder로 주소 → 좌표 자동 조회
+  const geocodeAddress = useCallback((fullAddress: string) => {
+    if (!fullAddress.trim() || !window.kakao?.maps?.services) return;
+    setGeocoding(true);
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    geocoder.addressSearch(fullAddress, (result: any[], status: string) => {
+      setGeocoding(false);
+      if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
+        const lat = parseFloat(result[0].y);
+        const lng = parseFloat(result[0].x);
+        setForm((f) => ({ ...f, lat, lng }));
+      }
+    });
+  }, []);
+
   const updateAddress = (sg: string, d: string, lot: string) => {
     const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
-    set("address", parts.join(" "));
+    const fullAddress = parts.join(" ");
+    set("address", fullAddress);
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
     set("lot_number", lot);
+    // 동+번지가 모두 있으면 좌표 자동 조회
+    if (d && lot) geocodeAddress(fullAddress);
   };
 
   const handleImageUpload = async (files: FileList | null) => {
@@ -570,7 +589,20 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
                 <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
                 {form.address && (
-                  <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                    {geocoding && (
+                      <p className="text-[11px] text-muted-foreground px-1 animate-pulse">📡 좌표 자동 조회 중...</p>
+                    )}
+                    {!geocoding && form.lat !== 0 && form.lng !== 0 && (
+                      <p className="text-[11px] text-success font-semibold px-1">
+                        ✅ 좌표 확인: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+                      </p>
+                    )}
+                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && form.lot_number && (
+                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
+                    )}
+                  </div>
                 )}
               </Section>
 

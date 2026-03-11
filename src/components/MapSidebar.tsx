@@ -1288,7 +1288,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteP
                           <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "22px" }}>
                             <p className="text-[12px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
                             <a
-                              href={`https://map.kakao.com/?q=${encodeURIComponent(prop.address)}&map_type=TYPE_ROADVIEW`}
+                              href={
+                                prop.lat && prop.lng
+                                  ? `https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`
+                                  : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}&map_type=TYPE_ROADVIEW`
+                              }
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
