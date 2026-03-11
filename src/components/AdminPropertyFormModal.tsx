@@ -347,23 +347,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     });
   }, []);
 
-  const updateAddress = (sg: string, d: string, lot: string) => {
-    const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
-    const fullAddress = parts.join(" ");
-    set("address", fullAddress);
-    set("dong", d);
-    set("lot_number", lot);
-    if (sg && d && lot) {
-      if (window.kakao?.maps?.services) {
-        geocodeAddress(fullAddress);
-      } else {
-        setTimeout(() => geocodeAddress(fullAddress), 1500);
-      }
-    }
-  };
-
-
-  const updateAddress = (sg: string, d: string, lot: string) => {
     const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
     set("address", parts.join(" "));
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
