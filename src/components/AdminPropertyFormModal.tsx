@@ -346,16 +346,37 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!files || files.length === 0) return;
     setUploading(true);
     const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-      if (error) { alert("이미지 업로드 실패: " + error.message); continue; }
-      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
-      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
+
+    // 병렬 업로드: 각 파일에 고유 타임스탬프+인덱스로 경로 중복 방지
+    const uploadResults = await Promise.all(
+      fileArray.map(async (file, i) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const uniqueId = `${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`;
+        const path = `properties/${uniqueId}.${ext}`;
+        const { error } = await supabase.storage
+          .from("property-images")
+          .upload(path, file, { upsert: false });
+        if (error) {
+          console.error(`이미지 업로드 실패 (${file.name}):`, error.message);
+          return null;
+        }
+        const { data: urlData } = supabase.storage
+          .from("property-images")
+          .getPublicUrl(path);
+        return urlData?.publicUrl ?? null;
+      })
+    );
+
+    const successUrls = uploadResults.filter((url): url is string => !!url);
+    if (successUrls.length < fileArray.length) {
+      alert(`${fileArray.length}장 중 ${successUrls.length}장 업로드 성공. 일부 실패했습니다.`);
     }
-    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
+    if (successUrls.length > 0) {
+      setForm((f) => ({ ...f, images: [...(f.images ?? []), ...successUrls] }));
+    }
+    // input 초기화 (같은 파일 재선택 가능하도록)
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setUploading(false);
   };
 
