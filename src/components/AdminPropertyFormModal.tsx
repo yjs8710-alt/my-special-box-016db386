@@ -366,13 +366,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const handleImageUpload = async (files: FileList | null) => {
 
 
-  const geocodeAddress = useCallback((fullAddress: string) => {
-    if (!fullAddress || !window.kakao?.maps?.services) return;
-    setGeocoding(true);
-    const geocoder = new window.kakao.maps.services.Geocoder();
-    geocoder.addressSearch(fullAddress, (result: any[], status: string) => {
-      setGeocoding(false);
-      if (status === window.kakao.maps.services.Status.OK && result[0]) {
+
+  const handleImageUpload
         setForm((f) => ({ ...f, lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) }));
       }
     });
