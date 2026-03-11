@@ -565,9 +565,18 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
             </div>
 
             <div className="px-5 pb-4 flex-shrink-0 border-t border-border/40 pt-2">
-              <p className="text-[10px] text-muted-foreground text-center">
-                ℹ️ 연락처는 일 1회 열람 가능하며, 무분별한 조회는 제한될 수 있습니다.
-              </p>
+              {isApproved ? (
+                <div className="flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                  <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
+                    승인된 회원 — 건물주·관리인·부동산 번호 제한없이 열람 가능
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground text-center">
+                  ℹ️ 연락처는 일 1회 열람 가능하며, 승인된 회원은 제한없이 조회됩니다.
+                </p>
+              )}
             </div>
           </div>
 
