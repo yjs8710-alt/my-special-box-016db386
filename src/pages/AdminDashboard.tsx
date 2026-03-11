@@ -2152,13 +2152,14 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-                <div className="hidden md:grid grid-cols-[70px_100px_100px_140px_130px_130px_80px_90px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
-                  <span>구</span>
-                  <span>동/읍/면</span>
-                  <span>번지수</span>
-                  <span>대표전화</span>
-                  <span>건물주</span>
-                  <span>관리인</span>
+                 <div className="hidden md:grid grid-cols-[70px_100px_100px_140px_120px_120px_120px_80px_90px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+                   <span>구</span>
+                   <span>동/읍/면</span>
+                   <span>번지수</span>
+                   <span>대표전화</span>
+                   <span>건물주</span>
+                   <span>관리인</span>
+                   <span>부동산</span>
                   <span className="text-center">노출상태</span>
                   <span className="text-center">관리</span>
                 </div>
