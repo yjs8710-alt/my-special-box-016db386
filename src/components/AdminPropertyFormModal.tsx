@@ -356,24 +356,22 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // Naver Geocoder로 주소 → 좌표 자동 조회
-  const geocodeAddress = useCallback((fullAddress: string) => {
+  // Edge Function을 통해 주소 → 좌표 자동 조회 (네이버 API 직접 호출 제거)
+  const geocodeAddress = useCallback(async (fullAddress: string) => {
     if (!fullAddress.trim()) return;
     setGeocoding(true);
-    fetch(
-      `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(fullAddress)}`,
-      { headers: { "X-NCP-APIGW-API-KEY-ID": "vsdohdygzo" } }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setGeocoding(false);
-        if (data.addresses && data.addresses.length > 0) {
-          const lat = parseFloat(data.addresses[0].y);
-          const lng = parseFloat(data.addresses[0].x);
-          setForm((f) => ({ ...f, lat, lng }));
-        }
-      })
-      .catch(() => setGeocoding(false));
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", {
+        body: { address: fullAddress },
+      });
+      if (!error && data?.success) {
+        setForm((f) => ({ ...f, lat: data.lat, lng: data.lng }));
+      }
+    } catch {
+      // 좌표 조회 실패 시 무시 (저장은 계속 진행)
+    } finally {
+      setGeocoding(false);
+    }
   }, []);
 
   // 청주 연락처 자동 불러오기
@@ -460,6 +458,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
+    // 좌표가 없으면 저장 전 Edge Function으로 geocode 호출
+    let finalLat = form.lat;
+    let finalLng = form.lng;
+    if (!finalLat || !finalLng) {
+      try {
+        const { data } = await supabase.functions.invoke("geocode", {
+          body: { address: form.address },
+        });
+        if (data?.success) {
+          finalLat = data.lat;
+          finalLng = data.lng;
+          setForm((f) => ({ ...f, lat: finalLat, lng: finalLng }));
+        }
+      } catch {
+        // 좌표 없이 저장 계속
+      }
+    }
+
     // note 필드: 연락처 정보만 저장 (건물주/세입자/관리인)
     // agent_name 필드: 담당 중개사 이름만 저장 (연락처 X)
     const noteStr = [
@@ -498,8 +514,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       options: Array.isArray(form.options) ? form.options : [],
       images: Array.isArray(form.images) ? form.images : [],
       views: Number(form.views) || 0,
-      lat: Number(form.lat) || 0,
-      lng: Number(form.lng) || 0,
+      lat: Number(finalLat) || 0,
+      lng: Number(finalLng) || 0,
       is_new: form.is_new ?? false,
       is_hot: form.is_hot ?? false,
       status: form.status ?? "active",
