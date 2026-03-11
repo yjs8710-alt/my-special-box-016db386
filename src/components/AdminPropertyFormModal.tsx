@@ -515,31 +515,33 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (error) { alert("등록 오류: " + error.message); return; }
       }
 
-      // 청주 연락처 자동 저장: 동이 있고 연락처(건물주/관리인/세입자 중 하나라도)가 있으면 저장
-      const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactTenant);
+      // 청주 연락처 자동 저장: 동이 있고 연락처(건물주/관리인 중 하나라도)가 있으면 저장
+      const hasAnyContact = !!(form.contactOwner || form.contactManager);
       if (form.dong && hasAnyContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
 
         // 기존 동+번지 레코드 조회
-        let query = supabase
+        let contactQuery = supabase
           .from("cheongju_contacts")
-          .select("id")
-          .eq("dong", form.dong);
-        if (lotNum) query = query.eq("lot_number", lotNum);
-        else query = query.eq("lot_number", "");
+          .select("id, contact_owner, contact_manager")
+          .eq("dong", form.dong)
+          .eq("lot_number", lotNum);
 
-        const { data: existing } = await query.maybeSingle();
+        const { data: existing, error: selectErr } = await contactQuery.maybeSingle();
+        console.log("[청주연락처] 기존 레코드:", existing, "오류:", selectErr);
 
         if (existing?.id) {
-          // 기존 레코드 업데이트 (입력된 연락처만 덮어씀)
+          // 기존 레코드 업데이트 (빈 칸이 아닌 경우에만 덮어씀)
           const updateData: Record<string, string | null> = {};
           if (form.contactOwner) { updateData.contact_owner = form.contactOwner; updateData.phone = form.contactOwner; }
           if (form.contactManager) updateData.contact_manager = form.contactManager;
-          await supabase.from("cheongju_contacts").update(updateData).eq("id", existing.id);
+          const { error: updateErr } = await supabase.from("cheongju_contacts").update(updateData).eq("id", existing.id);
+          if (updateErr) console.error("[청주연락처] 업데이트 오류:", updateErr.message);
+          else console.log("[청주연락처] 업데이트 완료 id:", existing.id);
         } else {
           // 신규 레코드 삽입
-          await supabase.from("cheongju_contacts").insert({
+          const { error: insertErr } = await supabase.from("cheongju_contacts").insert({
             district: contactDistrict,
             dong: form.dong,
             lot_number: lotNum,
@@ -548,6 +550,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
             contact_manager: form.contactManager || null,
             is_visible: true,
           });
+          if (insertErr) console.error("[청주연락처] 삽입 오류:", insertErr.message);
+          else console.log("[청주연락처] 신규 저장 완료 dong:", form.dong, "lot:", lotNum);
         }
       }
 
