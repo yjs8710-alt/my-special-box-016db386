@@ -242,6 +242,75 @@ export type Database = {
         }
         Relationships: []
       }
+      property_reports: {
+        Row: {
+          admin_memo: string | null
+          created_at: string
+          deal_date: string | null
+          deal_memo: string | null
+          error_content: string | null
+          id: string
+          property_address: string
+          property_id: string
+          property_title: string
+          proposal_content: string | null
+          proposal_deposit: string | null
+          proposal_monthly: string | null
+          proposal_period: string | null
+          proposer_company: string | null
+          proposer_name: string | null
+          proposer_phone: string | null
+          report_type: string
+          status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_memo?: string | null
+          created_at?: string
+          deal_date?: string | null
+          deal_memo?: string | null
+          error_content?: string | null
+          id?: string
+          property_address: string
+          property_id: string
+          property_title: string
+          proposal_content?: string | null
+          proposal_deposit?: string | null
+          proposal_monthly?: string | null
+          proposal_period?: string | null
+          proposer_company?: string | null
+          proposer_name?: string | null
+          proposer_phone?: string | null
+          report_type: string
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_memo?: string | null
+          created_at?: string
+          deal_date?: string | null
+          deal_memo?: string | null
+          error_content?: string | null
+          id?: string
+          property_address?: string
+          property_id?: string
+          property_title?: string
+          proposal_content?: string | null
+          proposal_deposit?: string | null
+          proposal_monthly?: string | null
+          proposal_period?: string | null
+          proposer_company?: string | null
+          proposer_name?: string | null
+          proposer_phone?: string | null
+          report_type?: string
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
