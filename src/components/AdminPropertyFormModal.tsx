@@ -372,7 +372,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
 
 
-
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
 
 
