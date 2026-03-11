@@ -914,6 +914,14 @@ const BuildingGroup = ({
 };
 
 // ─── ContactEditModal ────────────────────────────────────────────────────────
+// 구 단축명 → DONG_MAP 풀네임 매핑
+const DISTRICT_SHORT_TO_FULL: Record<string, string> = {
+  "상당구": "청주시 상당구",
+  "서원구": "청주시 서원구",
+  "흥덕구": "청주시 흥덕구",
+  "청원구": "청주시 청원구",
+};
+
 const ContactEditModal = ({
   contact,
   onClose,
@@ -933,6 +941,11 @@ const ContactEditModal = ({
     await onSave(form);
     setSaving(false);
   };
+
+  // 구 선택 시 가용 동 목록
+  const availableDongs = form.district
+    ? (DONG_MAP[DISTRICT_SHORT_TO_FULL[form.district]] ?? [])
+    : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
@@ -956,21 +969,24 @@ const ContactEditModal = ({
                 <label className="text-xs font-semibold text-muted-foreground">구 *</label>
                 <select
                   value={form.district}
-                  onChange={(e) => setForm((f) => ({ ...f, district: e.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, district: e.target.value, dong: "" }))}
                   className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
                 >
-                  <option value="">선택</option>
+                  <option value="">구 선택</option>
                   {CHEONGJU_DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-muted-foreground">동/읍/면 *</label>
-                <Input
+                <select
                   value={form.dong}
                   onChange={(e) => setForm((f) => ({ ...f, dong: e.target.value }))}
-                  placeholder="예: 복대동"
-                  className="h-9 text-sm"
-                />
+                  disabled={availableDongs.length === 0}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none disabled:opacity-50"
+                >
+                  <option value="">{form.district ? "동 선택" : "구 먼저 선택"}</option>
+                  {availableDongs.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
               </div>
             </div>
           )}
