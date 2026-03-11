@@ -2162,9 +2162,12 @@ const AdminDashboard = () => {
                       <div className="text-sm font-medium text-foreground">{c.dong}</div>
                       {/* 번지수 */}
                       <div className="hidden md:block text-xs text-muted-foreground">
-                        {c.lot_number ? (
-                          <span className="font-medium text-foreground">{c.lot_number}</span>
-                        ) : <span>—</span>}
+                        {c.lot_number && c.lot_number.trim() ? (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
+                          >{c.lot_number}</span>
+                        ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 대표전화 */}
                       <div className="hidden md:flex items-center gap-1 text-xs">
