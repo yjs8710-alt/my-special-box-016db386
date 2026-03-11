@@ -242,6 +242,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   contactOwner: string;
   contactTenant: string;
   contactManager: string;
+  contactBroker: string;
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
