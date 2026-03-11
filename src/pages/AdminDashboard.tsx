@@ -124,6 +124,7 @@ const NAV = [
   { key: "members",    label: "회원 관리",    icon: Users },
   { key: "properties", label: "매물 관리",    icon: Building2 },
   { key: "contacts",   label: "청주 연락처",  icon: Phone },
+  { key: "reports",    label: "신고/제안",    icon: AlertCircle },
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
 ];
 
