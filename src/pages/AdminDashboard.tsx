@@ -1068,6 +1068,34 @@ const AdminDashboard = () => {
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
   const [contactLotFilter, setContactLotFilter] = useState<"전체" | "번지있음" | "번지없음">("전체");
 
+  // 신고/제안 state
+  type PropertyReport = {
+    id: string;
+    property_id: string;
+    property_title: string;
+    property_address: string;
+    report_type: "error_report" | "deal_complete" | "rental_proposal";
+    status: "pending" | "reviewed" | "resolved";
+    error_content?: string;
+    deal_date?: string;
+    deal_memo?: string;
+    proposer_name?: string;
+    proposer_phone?: string;
+    proposer_company?: string;
+    proposal_deposit?: string;
+    proposal_monthly?: string;
+    proposal_period?: string;
+    proposal_content?: string;
+    admin_memo?: string;
+    created_at: string;
+  };
+  const [reports, setReports] = useState<PropertyReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportFilter, setReportFilter] = useState<"all" | "error_report" | "deal_complete" | "rental_proposal">("all");
+  const [reportStatusFilter, setReportStatusFilter] = useState<"all" | "pending" | "reviewed" | "resolved">("all");
+  const [expandedReport, setExpandedReport] = useState<string | null>(null);
+  const [reportMemoInputs, setReportMemoInputs] = useState<Record<string, string>>({});
+
   // ─── 세션 기반 관리자 인증 가드 ──────────────────────────────────────────
   useEffect(() => {
     const checkAdminAuth = async () => {
