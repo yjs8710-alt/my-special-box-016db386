@@ -27,6 +27,49 @@ interface LandlordSearchModalProps {
   onClose: () => void;
 }
 
+// 번호 공개 행 컴포넌트
+const PhoneRow = ({
+  label,
+  phone,
+  id,
+  color,
+  isRevealed,
+  onReveal,
+}: {
+  label: string;
+  phone: string;
+  id: string;
+  color: string;
+  isRevealed: boolean;
+  onReveal: () => void;
+}) => (
+  <div className="flex items-center justify-between">
+    <div className="flex items-center gap-1.5">
+      <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
+      <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
+    </div>
+    {isRevealed ? (
+      <a
+        href={`tel:${phone}`}
+        className="flex items-center gap-1.5 text-sm font-bold rounded-lg px-3 py-1.5 transition-colors"
+        style={{ color, background: `${color}18` }}
+      >
+        <Phone className="w-3.5 h-3.5" />
+        {phone}
+      </a>
+    ) : (
+      <button
+        onClick={onReveal}
+        className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all hover:scale-105"
+        style={{ background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }}
+      >
+        <Eye className="w-3.5 h-3.5" />
+        번호 공개
+      </button>
+    )}
+  </div>
+);
+
 const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
