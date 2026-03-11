@@ -589,7 +589,20 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
                 <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
                 {form.address && (
-                  <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
+                    {geocoding && (
+                      <p className="text-[11px] text-muted-foreground px-1 animate-pulse">📡 좌표 자동 조회 중...</p>
+                    )}
+                    {!geocoding && form.lat !== 0 && form.lng !== 0 && (
+                      <p className="text-[11px] text-green-600 font-semibold px-1">
+                        ✅ 좌표 확인: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+                      </p>
+                    )}
+                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && form.lot_number && (
+                      <p className="text-[11px] text-amber-500 px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
+                    )}
+                  </div>
                 )}
               </Section>
 
