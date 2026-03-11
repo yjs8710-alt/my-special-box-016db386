@@ -451,17 +451,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
-    // 연락처 조합
-    const contactParts = [
-      form.contactOwner && `건물주:${form.contactOwner}`,
-      form.agent_name && `부동산:${form.agent_name}`,
-      form.contactTenant && `세입자:${form.contactTenant}`,
-      form.contactManager && `관리인:${form.contactManager}`,
-    ].filter(Boolean).join("|");
-
+    // note 필드: 연락처 정보만 저장 (건물주/세입자/관리인)
+    // agent_name 필드: 담당 중개사 이름만 저장 (연락처 X)
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
-      form.agent_name && `부동산: ${form.agent_name}`,
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
     ].filter(Boolean).join("\n");
@@ -489,7 +482,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       description: form.description ?? "",
       building_memo: form.building_memo || null,
       room_memo: form.room_memo || null,
-      note: noteStr || form.note || null,
+      note: noteStr || null,
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
       room_password: form.room_password || null,
@@ -503,7 +496,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       status: form.status ?? "active",
       registered_date: form.registered_date || new Date().toISOString().slice(0, 10),
       checked_date: form.checked_date || null,
-      agent_name: contactParts || form.agent_name || "",
+      agent_name: form.agent_name || "",
     };
 
     try {
