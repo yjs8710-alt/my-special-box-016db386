@@ -348,11 +348,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   }, []);
 
 
-    set("address", parts.join(" "));
-    if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
-    set("dong", d);
-    set("lot_number", lot);
-  };
+
+
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
