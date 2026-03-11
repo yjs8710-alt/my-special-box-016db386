@@ -559,8 +559,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
           {/* ── 우측 매물 상세 패널 ── */}
           {hasPanel && (
             <div
-              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl"
-              style={{ width: "360px", maxHeight: "90vh", flexShrink: 0 }}
+              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
+              style={{ width: "360px", height: "90vh", flexShrink: 0, position: "relative" }}
               onClick={(e) => e.stopPropagation()}
             >
               <PropertyDetailPanel
