@@ -610,6 +610,39 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 ))}
               </div>
 
+              {/* 반려동물 */}
+              <Section label="반려동물">
+                <div className="flex gap-3">
+                  {[
+                    { key: "애완동물가능", label: "🐾 가능" },
+                    { key: "애완동물불가", label: "🚫 불가" },
+                  ].map(({ key, label }) => {
+                    const isActive = form.options.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          // 가능/불가는 하나만 선택 (서로 배타적)
+                          const other = key === "애완동물가능" ? "애완동물불가" : "애완동물가능";
+                          setForm((f) => {
+                            const without = f.options.filter((o) => o !== key && o !== other);
+                            return { ...f, options: isActive ? without : [...without, key] };
+                          });
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                          isActive
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Section>
+
               {/* 방 옵션 */}
               <Section label="방 옵션">
                 <div className="flex flex-wrap gap-2">
