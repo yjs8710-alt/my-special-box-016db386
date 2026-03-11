@@ -367,6 +367,27 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     });
   }, []);
 
+  // 청주 연락처 자동 불러오기
+  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string) => {
+    if (!dongVal) return;
+    let query = supabase.from("cheongju_contacts").select("contact_owner,contact_manager,phone").eq("dong", dongVal);
+    if (lotVal) query = query.eq("lot_number", lotVal);
+    const { data } = await query.maybeSingle();
+    if (data) {
+      const owner = data.contact_owner || data.phone || "";
+      const manager = data.contact_manager || "";
+      if (owner || manager) {
+        setForm((f) => ({
+          ...f,
+          contactOwner: f.contactOwner || owner,
+          contactManager: f.contactManager || manager,
+        }));
+        setContactAutoFilled(true);
+        setTimeout(() => setContactAutoFilled(false), 4000);
+      }
+    }
+  }, []);
+
   const updateAddress = (sg: string, d: string, lot: string) => {
     const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
     const fullAddress = parts.join(" ");
@@ -376,6 +397,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동+번지가 모두 있으면 좌표 자동 조회
     if (d && lot) geocodeAddress(fullAddress);
+    // 신규 등록 시에만 연락처 자동 불러오기 (기존 연락처 덮어쓰지 않기 위해)
+    if (!initial?.id && d) fetchContactFromDB(d, lot);
   };
 
   const handleImageUpload = async (files: FileList | null) => {
