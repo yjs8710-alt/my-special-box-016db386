@@ -85,14 +85,14 @@ function ImageCarouselPreview({ images, onRemove }: { images: string[]; onRemove
 import { X, Phone, Eye, EyeOff, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-// ─── ContactField: 번호 입력 + 클릭 시 노출 ─────────────────────────────────
+// ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
 function ContactField({
   fieldKey, label, placeholder, required, value, onChange,
 }: {
   fieldKey: string; label: string; placeholder: string; required?: boolean;
   value: string; onChange: (v: string) => void;
 }) {
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(true); // 기본 노출
   const ic = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition";
 
   return (
