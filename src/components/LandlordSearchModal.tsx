@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler } from "lucide-react";
+import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
+import { MapProperty } from "@/data/mapProperties";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const revealKey = (id: string) => `landlord_reveal_${id}`;
@@ -30,6 +32,39 @@ interface SearchResult {
   totalFloors?: string;
   availableFrom?: string;
   note?: string;
+}
+
+// ── SearchResult → MapProperty 변환 ───────────────────────────────────────
+let _panelId = 1;
+function toMapProperty(item: SearchResult): MapProperty {
+  return {
+    id: _panelId++,
+    title: item.label,
+    address: item.sublabel,
+    type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
+    area: item.area ? `${item.area}㎡` : "—",
+    floor: item.floor ?? "—",
+    deposit: item.deposit ? `${item.deposit}만` : "—",
+    monthly: item.monthly ? `${item.monthly}만` : "—",
+    views: 0,
+    lat: 0,
+    lng: 0,
+    image: (item.images ?? [])[0] ?? "",
+    images: item.images ?? [],
+    description: item.note ?? "",
+    contact: item.contactBroker ?? "",
+    contactOwner: item.contactOwner ?? "",
+    contactManager: item.contactManager ?? "",
+    agentName: "",
+    manageFee: "—",
+    parking: "—",
+    elevator: false,
+    availableFrom: item.availableFrom ?? "—",
+    totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "—",
+    buildYear: item.buildYear ? `${item.buildYear}년` : "—",
+    isNew: false,
+    isHot: false,
+  };
 }
 
 // ── Photo Lightbox ──────────────────────────────────────────────
@@ -129,8 +164,10 @@ interface ResultCardProps {
   show: boolean;
   onReveal: () => void;
   onLightbox: (images: string[], idx: number) => void;
+  onOpenPanel: (item: SearchResult) => void;
+  isSelected: boolean;
 }
-const ResultCard = ({ item, show, onReveal, onLightbox }: ResultCardProps) => {
+const ResultCard = ({ item, show, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const isContact = item.source === "contact";
   const isHidden = item.source === "property" && item.status !== "active";
@@ -140,8 +177,13 @@ const ResultCard = ({ item, show, onReveal, onLightbox }: ResultCardProps) => {
 
   return (
     <div
-      className="rounded-xl border border-border bg-background overflow-hidden"
-      style={isHidden || isInvisible ? { opacity: 0.85 } : {}}
+      className="rounded-xl border overflow-hidden transition-all"
+      style={{
+        borderColor: isSelected ? "hsl(var(--primary))" : "hsl(var(--border))",
+        background: isSelected ? "hsl(var(--primary) / 0.04)" : "hsl(var(--background))",
+        opacity: isHidden || isInvisible ? 0.85 : 1,
+        boxShadow: isSelected ? "0 0 0 2px hsl(var(--primary) / 0.2)" : undefined,
+      }}
     >
       {/* Photo strip (property only) */}
       {!isContact && hasImages && (
@@ -210,6 +252,19 @@ const ResultCard = ({ item, show, onReveal, onLightbox }: ResultCardProps) => {
               </div>
             )}
           </div>
+
+          {/* 상세보기 버튼 */}
+          <button
+            onClick={() => onOpenPanel(item)}
+            className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all shrink-0"
+            style={isSelected
+              ? { background: "hsl(var(--primary))", color: "#fff" }
+              : { background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }
+            }
+          >
+            {isSelected ? "보는 중" : "상세보기"}
+            <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
 
         {/* Property detail grid */}
@@ -321,6 +376,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
   const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
+  const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
+  const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
   const handleReveal = (id: string) => {
     markRevealed(id);
@@ -333,6 +390,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     setSearched(true);
     setLoading(true);
     setError("");
+    setSelectedItem(null);
+    setPanelProperty(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: query.trim() },
@@ -348,6 +407,18 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     }
   };
 
+  const handleOpenPanel = (item: SearchResult) => {
+    if (selectedItem?.id === item.id) {
+      setSelectedItem(null);
+      setPanelProperty(null);
+    } else {
+      setSelectedItem(item);
+      setPanelProperty(toMapProperty(item));
+    }
+  };
+
+  const hasPanel = panelProperty !== null;
+
   return (
     <>
       {lightbox && (
@@ -359,113 +430,145 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
       )}
 
       <div
-        className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+        className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-2 md:px-4"
         onClick={onClose}
       >
+        {/* 컨테이너: 검색모달 + 상세패널 나란히 */}
         <div
-          className="bg-card rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+          className="flex gap-3 w-full items-start justify-center"
           style={{ maxHeight: "90vh" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
+          {/* ── 검색 모달 ── */}
           <div
-            className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))" }}
+            className="bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300"
+            style={{
+              maxHeight: "90vh",
+              width: hasPanel ? "420px" : "100%",
+              maxWidth: hasPanel ? "420px" : "512px",
+              minWidth: "320px",
+              flexShrink: 0,
+            }}
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                <Phone className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">소유주 번호 찾기</p>
-                <p className="text-[10px] text-white/70">숨김 매물·미노출 연락처 포함 전체 조회</p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))" }}
             >
-              <X className="w-4 h-4 text-white" />
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="px-5 pt-4 pb-3 flex-shrink-0">
-            <div className="flex gap-2">
-              <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 h-10 focus-within:border-primary transition-colors">
-                <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  placeholder="동 이름, 번지수, 건물명, 전화번호 입력"
-                  className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-                  autoFocus
-                />
-                {query && (
-                  <button onClick={() => { setQuery(""); setSearched(false); setResults([]); }} className="text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white">소유주 번호 찾기</p>
+                  <p className="text-[10px] text-white/70">숨김 매물·미노출 연락처 포함 전체 조회</p>
+                </div>
               </div>
               <button
-                onClick={handleSearch}
-                disabled={!query.trim() || loading}
-                className="h-10 px-4 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-40"
-                style={{ background: "hsl(var(--primary))" }}
+                onClick={onClose}
+                className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
               >
-                {loading ? <span className="animate-pulse text-xs">...</span> : <Search className="w-4 h-4" />}
+                <X className="w-4 h-4 text-white" />
               </button>
             </div>
-            {searched && !loading && (
-              <p className="text-[10px] text-muted-foreground mt-1.5 pl-1">매물(숨김 포함) + 청주 연락처DB 전체 통합 검색</p>
-            )}
+
+            {/* Search */}
+            <div className="px-5 pt-4 pb-3 flex-shrink-0">
+              <div className="flex gap-2">
+                <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 h-10 focus-within:border-primary transition-colors">
+                  <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                    placeholder="동 이름, 번지수, 건물명, 전화번호 입력"
+                    className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                    autoFocus
+                  />
+                  {query && (
+                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); setPanelProperty(null); }} className="text-muted-foreground hover:text-foreground">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={handleSearch}
+                  disabled={!query.trim() || loading}
+                  className="h-10 px-4 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-40"
+                  style={{ background: "hsl(var(--primary))" }}
+                >
+                  {loading ? <span className="animate-pulse text-xs">...</span> : <Search className="w-4 h-4" />}
+                </button>
+              </div>
+              {searched && !loading && (
+                <p className="text-[10px] text-muted-foreground mt-1.5 pl-1">
+                  매물(숨김 포함) + 청주 연락처DB 전체 통합 검색
+                  {hasPanel && <span className="ml-1 font-medium" style={{ color: "hsl(var(--primary))" }}>· 우측에서 상세 확인 중</span>}
+                </p>
+              )}
+            </div>
+
+            {/* Results */}
+            <div className="px-5 pb-3 flex flex-col gap-2.5 overflow-y-auto flex-1">
+              {error && (
+                <div className="py-4 flex items-center gap-2 text-destructive text-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
+                </div>
+              )}
+              {searched && !loading && !error && results.length === 0 && (
+                <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
+                  <AlertCircle className="w-8 h-8 opacity-30" />
+                  <p className="text-sm">연락처가 등록된 검색 결과가 없습니다.</p>
+                  <p className="text-xs">다른 주소나 동 이름으로 검색해보세요.</p>
+                </div>
+              )}
+              {!searched && (
+                <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground">
+                  <Search className="w-7 h-7 opacity-20" />
+                  <p className="text-xs">동 이름, 번지수 또는 건물명을 입력 후 검색하세요.</p>
+                </div>
+              )}
+              {loading && (
+                <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs">검색 중...</p>
+                </div>
+              )}
+
+              {!loading && results.map((item) => (
+                <ResultCard
+                  key={item.id}
+                  item={item}
+                  show={isRevealed(item.id)}
+                  onReveal={() => handleReveal(item.id)}
+                  onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
+                  onOpenPanel={handleOpenPanel}
+                  isSelected={selectedItem?.id === item.id}
+                />
+              ))}
+            </div>
+
+            <div className="px-5 pb-4 flex-shrink-0 border-t border-border/40 pt-2">
+              <p className="text-[10px] text-muted-foreground text-center">
+                ℹ️ 연락처는 일 1회 열람 가능하며, 무분별한 조회는 제한될 수 있습니다.
+              </p>
+            </div>
           </div>
 
-          {/* Results */}
-          <div className="px-5 pb-3 flex flex-col gap-2.5 overflow-y-auto flex-1">
-            {error && (
-              <div className="py-4 flex items-center gap-2 text-destructive text-xs">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />{error}
-              </div>
-            )}
-            {searched && !loading && !error && results.length === 0 && (
-              <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
-                <AlertCircle className="w-8 h-8 opacity-30" />
-                <p className="text-sm">연락처가 등록된 검색 결과가 없습니다.</p>
-                <p className="text-xs">다른 주소나 동 이름으로 검색해보세요.</p>
-              </div>
-            )}
-            {!searched && (
-              <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground">
-                <Search className="w-7 h-7 opacity-20" />
-                <p className="text-xs">동 이름, 번지수 또는 건물명을 입력 후 검색하세요.</p>
-              </div>
-            )}
-            {loading && (
-              <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs">검색 중...</p>
-              </div>
-            )}
-
-            {!loading && results.map((item) => (
-              <ResultCard
-                key={item.id}
-                item={item}
-                show={isRevealed(item.id)}
-                onReveal={() => handleReveal(item.id)}
-                onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
+          {/* ── 우측 매물 상세 패널 ── */}
+          {hasPanel && (
+            <div
+              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl"
+              style={{ width: "360px", maxHeight: "90vh", flexShrink: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PropertyDetailPanel
+                property={panelProperty}
+                onClose={() => { setSelectedItem(null); setPanelProperty(null); }}
               />
-            ))}
-          </div>
-
-          <div className="px-5 pb-4 flex-shrink-0 border-t border-border/40 pt-2">
-            <p className="text-[10px] text-muted-foreground text-center">
-              ℹ️ 연락처는 일 1회 열람 가능하며, 무분별한 조회는 제한될 수 있습니다.
-            </p>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </>
