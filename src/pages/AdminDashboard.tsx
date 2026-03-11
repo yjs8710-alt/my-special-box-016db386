@@ -88,6 +88,7 @@ type CheongJuContact = {
   phone: string;
   contact_owner?: string;
   contact_manager?: string;
+  contact_broker?: string;
   memo?: string;
   is_visible?: boolean;
 };
