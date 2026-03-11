@@ -1318,12 +1318,12 @@ const AdminDashboard = () => {
   const saveContact = async (updated: CheongJuContact) => {
     if (updated.id) {
       const { error } = await supabase.from("cheongju_contacts")
-        .update({ lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo, is_visible: updated.is_visible ?? true })
+        .update({ lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, contact_broker: updated.contact_broker, memo: updated.memo, is_visible: updated.is_visible ?? true })
         .eq("id", updated.id);
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
       const { error } = await supabase.from("cheongju_contacts")
-        .insert({ district: updated.district, dong: updated.dong, lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, memo: updated.memo, is_visible: updated.is_visible ?? true });
+        .insert({ district: updated.district, dong: updated.dong, lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, contact_broker: updated.contact_broker, memo: updated.memo, is_visible: updated.is_visible ?? true });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
