@@ -410,23 +410,30 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   const handleSubmit = async () => {
     if (!form.proposer_name.trim() || !form.proposer_phone.trim()) return;
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    await supabase.from("property_reports").insert({
-      property_id: String(property.id),
-      property_title: property.title,
-      property_address: property.address,
-      report_type: "rental_proposal",
-      proposer_name: form.proposer_name.trim(),
-      proposer_phone: form.proposer_phone.trim(),
-      proposer_company: form.proposer_company.trim() || null,
-      proposal_deposit: form.proposal_deposit.trim() || null,
-      proposal_monthly: form.proposal_monthly.trim() || null,
-      proposal_period: form.proposal_period.trim() || null,
-      proposal_content: form.proposal_content.trim() || null,
-      submitted_by: session?.user?.id ?? null,
-    });
-    setSaving(false);
-    setDone(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: String(property.id),
+        property_title: property.title,
+        property_address: property.address,
+        report_type: "rental_proposal",
+        proposer_name: form.proposer_name.trim(),
+        proposer_phone: form.proposer_phone.trim(),
+        proposer_company: form.proposer_company.trim() || null,
+        proposal_deposit: form.proposal_deposit.trim() || null,
+        proposal_monthly: form.proposal_monthly.trim() || null,
+        proposal_period: form.proposal_period.trim() || null,
+        proposal_content: form.proposal_content.trim() || null,
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setDone(true);
+    } catch (e) {
+      console.error("임대제안서 저장 실패:", e);
+      alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
