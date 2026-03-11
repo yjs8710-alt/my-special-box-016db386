@@ -474,6 +474,39 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         const { error } = await supabase.from("properties").insert(payload);
         if (error) { alert("등록 오류: " + error.message); return; }
       }
+
+      // 청주 연락처 자동 저장: 동+번지수로 upsert
+      if (form.dong && form.lot_number && (form.contactOwner || form.contactManager)) {
+        const contactDistrict = form.district ?? "";
+        // 기존 동+번지 레코드 조회
+        const { data: existing } = await supabase
+          .from("cheongju_contacts")
+          .select("id")
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lot_number)
+          .maybeSingle();
+
+        if (existing?.id) {
+          // 기존 레코드 업데이트 (연락처가 있는 경우만 덮어씀)
+          const updateData: Record<string, string> = {};
+          if (form.contactOwner) updateData.contact_owner = form.contactOwner;
+          if (form.contactManager) updateData.contact_manager = form.contactManager;
+          if (form.contactOwner) updateData.phone = form.contactOwner;
+          await supabase.from("cheongju_contacts").update(updateData).eq("id", existing.id);
+        } else {
+          // 신규 레코드 삽입
+          await supabase.from("cheongju_contacts").insert({
+            district: contactDistrict,
+            dong: form.dong,
+            lot_number: form.lot_number,
+            phone: form.contactOwner || "",
+            contact_owner: form.contactOwner || null,
+            contact_manager: form.contactManager || null,
+            is_visible: true,
+          });
+        }
+      }
+
       onSaved?.();
       onClose();
     } finally {
