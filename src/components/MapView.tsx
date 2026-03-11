@@ -3,13 +3,13 @@ import { MapProperty } from "@/data/mapProperties";
 
 declare global {
   interface Window {
-    kakao: any;
-    __kakaoMapReady?: boolean;
-    __kakaoMapCallbacks?: Array<() => void>;
+    naver: any;
+    __naverMapReady?: boolean;
+    __naverMapCallbacks?: Array<() => void>;
   }
 }
 
-const KAKAO_APP_KEY = "1399365";
+const NAVER_CLIENT_ID = "vsdohdygzo";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#0a2d6e",
@@ -80,26 +80,24 @@ function createPinHtml(property: MapProperty, isSelected: boolean) {
   `;
 }
 
-function loadKakaoScript(cb: () => void) {
-  if (window.kakao && window.kakao.maps) {
+function loadNaverScript(cb: () => void) {
+  if (window.naver && window.naver.maps) {
     cb();
     return;
   }
-  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
-  window.__kakaoMapCallbacks.push(cb);
+  if (!window.__naverMapCallbacks) window.__naverMapCallbacks = [];
+  window.__naverMapCallbacks.push(cb);
 
-  if (document.getElementById("kakao-maps-script")) return;
+  if (document.getElementById("naver-maps-script")) return;
 
   const script = document.createElement("script");
-  script.id = "kakao-maps-script";
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&libraries=services&autoload=false`;
+  script.id = "naver-maps-script";
+  script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_CLIENT_ID}`;
   script.async = true;
   script.onload = () => {
-    window.kakao.maps.load(() => {
-      window.__kakaoMapReady = true;
-      window.__kakaoMapCallbacks?.forEach((fn) => fn());
-      window.__kakaoMapCallbacks = [];
-    });
+    window.__naverMapReady = true;
+    window.__naverMapCallbacks?.forEach((fn) => fn());
+    window.__naverMapCallbacks = [];
   };
   document.head.appendChild(script);
 }
@@ -112,81 +110,89 @@ interface MapViewProps {
 
 const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   const mapRef = useRef<any>(null);
-  const overlaysRef = useRef<Map<number, any>>(new Map());
+  const markersRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
 
-  const clearOverlays = useCallback(() => {
-    overlaysRef.current.forEach((o) => {
-      try { o.setMap(null); } catch (_) {}
+  const clearMarkers = useCallback(() => {
+    markersRef.current.forEach((m) => {
+      try { m.setMap(null); } catch (_) {}
     });
-    overlaysRef.current.clear();
+    markersRef.current.clear();
   }, []);
 
-  const renderOverlays = useCallback(
+  const renderMarkers = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void) => {
-      clearOverlays();
+      clearMarkers();
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         const isSelected = prop.id === selId;
-        const position = new window.kakao.maps.LatLng(prop.lat, prop.lng);
 
         const content = document.createElement("div");
         content.innerHTML = createPinHtml(prop, isSelected);
         content.style.cssText = "cursor:pointer;";
         content.addEventListener("click", () => onSelectFn(prop.id));
 
-        const overlay = new window.kakao.maps.CustomOverlay({
-          position,
-          content,
+        const marker = new window.naver.maps.Marker({
+          position: new window.naver.maps.LatLng(prop.lat, prop.lng),
           map,
-          yAnchor: 1.3,
+          icon: {
+            content,
+            anchor: new window.naver.maps.Point(
+              content.offsetWidth / 2 || 30,
+              content.offsetHeight + 7 || 37
+            ),
+          },
           zIndex: isSelected ? 1000 : 0,
         });
 
-        overlaysRef.current.set(prop.id, overlay);
+        markersRef.current.set(prop.id, marker);
       });
     },
-    [clearOverlays]
+    [clearMarkers]
   );
 
   // Init map
   useEffect(() => {
     mountedRef.current = true;
 
-    loadKakaoScript(() => {
+    loadNaverScript(() => {
       if (!mountedRef.current || !containerRef.current) return;
       if (mapRef.current) return;
 
-      const map = new window.kakao.maps.Map(containerRef.current, {
-        center: new window.kakao.maps.LatLng(36.6424, 127.489),
-        level: 5,
+      const map = new window.naver.maps.Map(containerRef.current, {
+        center: new window.naver.maps.LatLng(36.6424, 127.489),
+        zoom: 14,
+        mapTypeControl: false,
+        scaleControl: false,
+        logoControl: true,
+        mapDataControl: false,
       });
 
       mapRef.current = map;
-      renderOverlays(map, properties, selectedId, onSelect);
+      renderMarkers(map, properties, selectedId, onSelect);
     });
 
     return () => {
       mountedRef.current = false;
-      clearOverlays();
+      clearMarkers();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update overlays when props/selection change
+  // Update markers when props/selection change
   useEffect(() => {
-    if (!mapRef.current || !window.kakao?.maps) return;
-    renderOverlays(mapRef.current, properties, selectedId, onSelect);
-  }, [properties, selectedId, onSelect, renderOverlays]);
+    if (!mapRef.current || !window.naver?.maps) return;
+    renderMarkers(mapRef.current, properties, selectedId, onSelect);
+  }, [properties, selectedId, onSelect, renderMarkers]);
 
   // Pan to selected
   useEffect(() => {
-    if (!mapRef.current || selectedId === null || !window.kakao?.maps) return;
+    if (!mapRef.current || selectedId === null || !window.naver?.maps) return;
     const prop = properties.find((p) => p.id === selectedId);
     if (prop && prop.lat && prop.lng) {
-      mapRef.current.panTo(new window.kakao.maps.LatLng(prop.lat, prop.lng));
+      mapRef.current.panTo(new window.naver.maps.LatLng(prop.lat, prop.lng));
     }
   }, [selectedId, properties]);
 
