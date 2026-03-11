@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight } from "lucide-react";
+import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MapProperty } from "@/data/mapProperties";
+import { useAuth } from "@/hooks/useAuth";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const revealKey = (id: string) => `landlord_reveal_${id}`;
@@ -162,12 +163,15 @@ const PhoneRow = ({ label, phone, color, show, onReveal }: PhoneRowProps) => (
 interface ResultCardProps {
   item: SearchResult;
   show: boolean;
+  isApproved: boolean;
   onReveal: () => void;
   onLightbox: (images: string[], idx: number) => void;
   onOpenPanel: (item: SearchResult) => void;
   isSelected: boolean;
 }
-const ResultCard = ({ item, show, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
+const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
+  // 승인된 회원은 제한 없이 바로 노출
+  const phoneVisible = isApproved || show;
   const [expanded, setExpanded] = useState(false);
   const isContact = item.source === "contact";
   const isHidden = item.source === "property" && item.status !== "active";
@@ -343,8 +347,14 @@ const ResultCard = ({ item, show, onReveal, onLightbox, onOpenPanel, isSelected 
 
         {/* Phone numbers */}
         <div className="border-t border-border/50 pt-2 flex flex-col gap-1.5">
+          {isApproved && (
+            <div className="flex items-center gap-1 mb-0.5">
+              <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+              <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</span>
+            </div>
+          )}
           {item.contactOwner ? (
-            <PhoneRow label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" show={show} onReveal={onReveal} />
+            <PhoneRow label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" show={phoneVisible} onReveal={onReveal} />
           ) : (
             <div className="flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
@@ -352,10 +362,10 @@ const ResultCard = ({ item, show, onReveal, onLightbox, onOpenPanel, isSelected 
             </div>
           )}
           {item.contactManager && (
-            <PhoneRow label="관리인" phone={item.contactManager} color="hsl(var(--chart-4))" show={show} onReveal={onReveal} />
+            <PhoneRow label="관리인" phone={item.contactManager} color="hsl(var(--chart-4))" show={phoneVisible} onReveal={onReveal} />
           )}
           {item.contactBroker && (
-            <PhoneRow label="부동산" phone={item.contactBroker} color="hsl(var(--chart-3))" show={show} onReveal={onReveal} />
+            <PhoneRow label="부동산" phone={item.contactBroker} color="hsl(var(--chart-3))" show={phoneVisible} onReveal={onReveal} />
           )}
         </div>
       </div>
@@ -369,6 +379,7 @@ interface LandlordSearchModalProps {
 }
 
 const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
+  const { isAuthorized } = useAuth();
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -379,11 +390,14 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
   const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
+  // 승인된 회원은 번호 제한 없이 바로 노출
+  const isApproved = isAuthorized;
+
   const handleReveal = (id: string) => {
     markRevealed(id);
     setRevealed((prev) => ({ ...prev, [id]: true }));
   };
-  const isRevealed = (id: string) => revealed[id] || hasRevealedToday(id);
+  const isRevealed = (id: string) => isApproved || revealed[id] || hasRevealedToday(id);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -541,6 +555,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                   key={item.id}
                   item={item}
                   show={isRevealed(item.id)}
+                  isApproved={isApproved}
                   onReveal={() => handleReveal(item.id)}
                   onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
                   onOpenPanel={handleOpenPanel}
@@ -550,9 +565,18 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
             </div>
 
             <div className="px-5 pb-4 flex-shrink-0 border-t border-border/40 pt-2">
-              <p className="text-[10px] text-muted-foreground text-center">
-                ℹ️ 연락처는 일 1회 열람 가능하며, 무분별한 조회는 제한될 수 있습니다.
-              </p>
+              {isApproved ? (
+                <div className="flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                  <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
+                    승인된 회원 — 건물주·관리인·부동산 번호 제한없이 열람 가능
+                  </p>
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground text-center">
+                  ℹ️ 연락처는 일 1회 열람 가능하며, 승인된 회원은 제한없이 조회됩니다.
+                </p>
+              )}
             </div>
           </div>
 
