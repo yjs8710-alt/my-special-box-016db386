@@ -163,12 +163,15 @@ const PhoneRow = ({ label, phone, color, show, onReveal }: PhoneRowProps) => (
 interface ResultCardProps {
   item: SearchResult;
   show: boolean;
+  isApproved: boolean;
   onReveal: () => void;
   onLightbox: (images: string[], idx: number) => void;
   onOpenPanel: (item: SearchResult) => void;
   isSelected: boolean;
 }
-const ResultCard = ({ item, show, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
+const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
+  // 승인된 회원은 제한 없이 바로 노출
+  const phoneVisible = isApproved || show;
   const [expanded, setExpanded] = useState(false);
   const isContact = item.source === "contact";
   const isHidden = item.source === "property" && item.status !== "active";
