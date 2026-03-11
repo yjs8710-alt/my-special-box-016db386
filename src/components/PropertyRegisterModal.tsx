@@ -236,6 +236,37 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     const { error } = await supabase.from("properties").insert(payload);
     setSaving(false);
 
+    if (!error && form.dong) {
+      // ── cheongju_contacts 동기화 ──────────────────────────────
+      const contactDistrict = districtVal ?? "";
+      const hasContact = form.contactOwner || form.contactManager;
+      if (hasContact) {
+        let q = supabase
+          .from("cheongju_contacts")
+          .select("id")
+          .eq("dong", form.dong);
+        if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+        const { data: existing } = await q.maybeSingle();
+
+        if (existing) {
+          const upd: Record<string, string> = {};
+          if (form.contactOwner) { upd.contact_owner = form.contactOwner; upd.phone = form.contactOwner; }
+          if (form.contactManager) upd.contact_manager = form.contactManager;
+          await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
+        } else {
+          await supabase.from("cheongju_contacts").insert({
+            district: contactDistrict,
+            dong: form.dong,
+            lot_number: form.lotNumber || "",
+            phone: form.contactOwner || "",
+            contact_owner: form.contactOwner || null,
+            contact_manager: form.contactManager || null,
+            is_visible: true,
+          });
+        }
+      }
+    }
+
     if (error) {
       setSaveError("저장 중 오류가 발생했습니다: " + error.message);
       return;
