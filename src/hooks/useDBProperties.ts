@@ -18,6 +18,8 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     title: String(row.title ?? ""),
     buildingName: row.building_name ? String(row.building_name) : undefined,
     address: String(row.address ?? ""),
+    dong: row.dong ? String(row.dong) : undefined,
+    lotNumber: row.lot_number ? String(row.lot_number) : undefined,
     type: String(row.type ?? ""),
     roomType: row.room_type ? String(row.room_type) : undefined,
     unitNumber: row.unit_number ? String(row.unit_number) : undefined,
