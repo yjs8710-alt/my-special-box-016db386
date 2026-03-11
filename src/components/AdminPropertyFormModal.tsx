@@ -356,24 +356,22 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // Naver Geocoder로 주소 → 좌표 자동 조회
-  const geocodeAddress = useCallback((fullAddress: string) => {
+  // Edge Function을 통해 주소 → 좌표 자동 조회 (네이버 API 직접 호출 제거)
+  const geocodeAddress = useCallback(async (fullAddress: string) => {
     if (!fullAddress.trim()) return;
     setGeocoding(true);
-    fetch(
-      `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(fullAddress)}`,
-      { headers: { "X-NCP-APIGW-API-KEY-ID": "vsdohdygzo" } }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setGeocoding(false);
-        if (data.addresses && data.addresses.length > 0) {
-          const lat = parseFloat(data.addresses[0].y);
-          const lng = parseFloat(data.addresses[0].x);
-          setForm((f) => ({ ...f, lat, lng }));
-        }
-      })
-      .catch(() => setGeocoding(false));
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", {
+        body: { address: fullAddress },
+      });
+      if (!error && data?.success) {
+        setForm((f) => ({ ...f, lat: data.lat, lng: data.lng }));
+      }
+    } catch {
+      // 좌표 조회 실패 시 무시 (저장은 계속 진행)
+    } finally {
+      setGeocoding(false);
+    }
   }, []);
 
   // 청주 연락처 자동 불러오기
