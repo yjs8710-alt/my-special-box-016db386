@@ -347,7 +347,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     });
   }, []);
 
-    const parts = [FIXED_SIDO_ADMIN, sg, d, lot].filter(Boolean);
+
     set("address", parts.join(" "));
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
