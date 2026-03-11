@@ -340,6 +340,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [uploading, setUploading] = useState(false);
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const [geocoding, setGeocoding] = useState(false);
+  const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
