@@ -257,6 +257,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   contactOwner: "",
   contactTenant: "",
   contactManager: "",
+  contactBroker: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
