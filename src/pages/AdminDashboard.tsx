@@ -2518,6 +2518,7 @@ const AdminDashboard = () => {
           })()}
 
           {/* ── 커뮤니티 관리 ── */}
+          {tab === "community" && (
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
