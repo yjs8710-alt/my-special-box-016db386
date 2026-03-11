@@ -347,8 +347,14 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
 
         {/* Phone numbers */}
         <div className="border-t border-border/50 pt-2 flex flex-col gap-1.5">
+          {isApproved && (
+            <div className="flex items-center gap-1 mb-0.5">
+              <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+              <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</span>
+            </div>
+          )}
           {item.contactOwner ? (
-            <PhoneRow label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" show={show} onReveal={onReveal} />
+            <PhoneRow label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" show={phoneVisible} onReveal={onReveal} />
           ) : (
             <div className="flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
@@ -356,10 +362,10 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
             </div>
           )}
           {item.contactManager && (
-            <PhoneRow label="관리인" phone={item.contactManager} color="hsl(var(--chart-4))" show={show} onReveal={onReveal} />
+            <PhoneRow label="관리인" phone={item.contactManager} color="hsl(var(--chart-4))" show={phoneVisible} onReveal={onReveal} />
           )}
           {item.contactBroker && (
-            <PhoneRow label="부동산" phone={item.contactBroker} color="hsl(var(--chart-3))" show={show} onReveal={onReveal} />
+            <PhoneRow label="부동산" phone={item.contactBroker} color="hsl(var(--chart-3))" show={phoneVisible} onReveal={onReveal} />
           )}
         </div>
       </div>
