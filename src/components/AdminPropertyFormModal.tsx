@@ -531,6 +531,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           const updateData: Record<string, string | null> = {};
           if (form.contactOwner) { updateData.contact_owner = form.contactOwner; updateData.phone = form.contactOwner; }
           if (form.contactManager) updateData.contact_manager = form.contactManager;
+          if (form.contactBroker) updateData.contact_broker = form.contactBroker;
           const { error: updateErr } = await supabase.from("cheongju_contacts").update(updateData).eq("id", existing.id);
           if (updateErr) console.error("[청주연락처] 업데이트 오류:", updateErr.message);
           else console.log("[청주연락처] 업데이트 완료 id:", existing.id);
