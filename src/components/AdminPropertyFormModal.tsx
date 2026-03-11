@@ -367,7 +367,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    const newUrls: string[] = [];
 
 
 
