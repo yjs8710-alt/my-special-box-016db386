@@ -546,6 +546,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
             phone: form.contactOwner || form.contactManager || "",
             contact_owner: form.contactOwner || null,
             contact_manager: form.contactManager || null,
+            contact_broker: form.contactBroker || null,
             is_visible: true,
           });
           if (insertErr) console.error("[청주연락처] 삽입 오류:", insertErr.message);
