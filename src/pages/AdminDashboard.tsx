@@ -93,6 +93,27 @@ type CheongJuContact = {
   is_visible?: boolean;
 };
 
+type PropertyReport = {
+  id: string;
+  property_id: string;
+  property_title: string;
+  property_address: string;
+  report_type: "error_report" | "deal_complete" | "rental_proposal";
+  status: "pending" | "reviewed" | "resolved";
+  error_content?: string;
+  deal_date?: string;
+  deal_memo?: string;
+  proposer_name?: string;
+  proposer_phone?: string;
+  proposer_company?: string;
+  proposal_deposit?: string;
+  proposal_monthly?: string;
+  proposal_period?: string;
+  proposal_content?: string;
+  admin_memo?: string;
+  created_at: string;
+};
+
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
   title: "", building_name: "", address: "", dong: "", lot_number: "", district: "", type: "원룸",
   room_type: "", unit_number: "", area: "", floor: "", deposit: "", monthly: "",
@@ -124,6 +145,7 @@ const NAV = [
   { key: "members",    label: "회원 관리",    icon: Users },
   { key: "properties", label: "매물 관리",    icon: Building2 },
   { key: "contacts",   label: "청주 연락처",  icon: Phone },
+  { key: "reports",    label: "신고/제안",    icon: AlertCircle },
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
 ];
 
@@ -1067,6 +1089,14 @@ const AdminDashboard = () => {
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
   const [contactLotFilter, setContactLotFilter] = useState<"전체" | "번지있음" | "번지없음">("전체");
 
+  // 신고/제안 state
+  const [reports, setReports] = useState<PropertyReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [reportFilter, setReportFilter] = useState<"all" | "error_report" | "deal_complete" | "rental_proposal">("all");
+  const [reportStatusFilter, setReportStatusFilter] = useState<"all" | "pending" | "reviewed" | "resolved">("all");
+  const [expandedReport, setExpandedReport] = useState<string | null>(null);
+  const [reportMemoInputs, setReportMemoInputs] = useState<Record<string, string>>({});
+
   // ─── 세션 기반 관리자 인증 가드 ──────────────────────────────────────────
   useEffect(() => {
     const checkAdminAuth = async () => {
@@ -1137,7 +1167,15 @@ const AdminDashboard = () => {
     setContactsLoading(false);
   }, []);
 
-  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); }, [fetchMembers, fetchProperties, fetchContacts]);
+  // ─── 신고/제안 불러오기 ──────────────────────────────────────────────────
+  const fetchReports = useCallback(async () => {
+    setReportsLoading(true);
+    const { data, error } = await supabase.from("property_reports").select("*").order("created_at", { ascending: false });
+    if (!error && data) setReports(data as PropertyReport[]);
+    setReportsLoading(false);
+  }, []);
+
+  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); fetchReports(); }, [fetchMembers, fetchProperties, fetchContacts, fetchReports]);
 
   // Realtime 구독: 매물 변경 즉시 반영
   useEffect(() => {
@@ -2251,6 +2289,233 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* ── 신고/제안 관리 ── */}
+          {tab === "reports" && (() => {
+            const REPORT_TYPE_META = {
+              error_report:    { label: "오류제보",  color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)", emoji: "⚠️" },
+              deal_complete:   { label: "거래완료",  color: "hsl(var(--chart-2))",     bg: "hsl(var(--chart-2) / 0.12)",    emoji: "✅" },
+              rental_proposal: { label: "임대제안서", color: "hsl(var(--primary))",     bg: "hsl(var(--primary) / 0.10)",    emoji: "📋" },
+            };
+            const REPORT_STATUS_META = {
+              pending:  { label: "미처리", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)" },
+              reviewed: { label: "검토중", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)" },
+              resolved: { label: "처리완료", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)" },
+            };
+
+            const filteredReports = reports.filter((r) => {
+              if (reportFilter !== "all" && r.report_type !== reportFilter) return false;
+              if (reportStatusFilter !== "all" && r.status !== reportStatusFilter) return false;
+              return true;
+            });
+
+            const updateReportStatus = async (id: string, status: "pending" | "reviewed" | "resolved") => {
+              const { error } = await supabase.from("property_reports").update({ status }).eq("id", id);
+              if (!error) setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+            };
+
+            const saveReportMemo = async (id: string) => {
+              const memo = reportMemoInputs[id] ?? "";
+              const { error } = await supabase.from("property_reports").update({ admin_memo: memo }).eq("id", id);
+              if (!error) {
+                setReports((prev) => prev.map((r) => r.id === id ? { ...r, admin_memo: memo } : r));
+                alert("메모가 저장되었습니다.");
+              }
+            };
+
+            const deleteReport = async (id: string) => {
+              if (!window.confirm("이 항목을 삭제하시겠습니까?")) return;
+              const { error } = await supabase.from("property_reports").delete().eq("id", id);
+              if (!error) setReports((prev) => prev.filter((r) => r.id !== id));
+            };
+
+            const pendingCount = reports.filter(r => r.status === "pending").length;
+
+            return (
+              <div className="flex flex-col gap-5">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-foreground">신고 / 제안 관리</h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      총 {reports.length}건 · 미처리 {pendingCount}건
+                    </p>
+                  </div>
+                  <button onClick={fetchReports} disabled={reportsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
+                    <RefreshCw className={`w-3.5 h-3.5 ${reportsLoading ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+
+                {/* 필터 */}
+                <div className="flex flex-wrap gap-2">
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
+                    {([
+                      { key: "all", label: "전체" },
+                      { key: "error_report", label: "⚠️ 오류제보" },
+                      { key: "deal_complete", label: "✅ 거래완료" },
+                      { key: "rental_proposal", label: "📋 임대제안서" },
+                    ] as const).map((f) => (
+                      <button key={f.key} onClick={() => setReportFilter(f.key)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        style={reportFilter === f.key ? { background: "hsl(var(--primary))", color: "#fff" } : { color: "hsl(var(--muted-foreground))" }}>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
+                    {([
+                      { key: "all", label: "전체상태" },
+                      { key: "pending", label: "미처리" },
+                      { key: "reviewed", label: "검토중" },
+                      { key: "resolved", label: "처리완료" },
+                    ] as const).map((f) => (
+                      <button key={f.key} onClick={() => setReportStatusFilter(f.key)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+                        style={reportStatusFilter === f.key ? { background: "hsl(var(--primary))", color: "#fff" } : { color: "hsl(var(--muted-foreground))" }}>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 목록 */}
+                {reportsLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
+                {!reportsLoading && filteredReports.length === 0 && (
+                  <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 항목이 없습니다.</div>
+                )}
+                <div className="flex flex-col gap-3">
+                  {filteredReports.map((r) => {
+                    const tm = REPORT_TYPE_META[r.report_type];
+                    const sm = REPORT_STATUS_META[r.status];
+                    const isExpanded = expandedReport === r.id;
+                    return (
+                      <div key={r.id} className="bg-card border border-border rounded-xl overflow-hidden">
+                        {/* 헤더 행 */}
+                        <div
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/20 transition-colors"
+                          onClick={() => setExpandedReport(isExpanded ? null : r.id)}
+                        >
+                          {/* 타입 배지 */}
+                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap"
+                            style={{ background: tm.bg, color: tm.color }}>
+                            {tm.emoji} {tm.label}
+                          </span>
+
+                          {/* 매물 정보 */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{r.property_title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{r.property_address}</p>
+                          </div>
+
+                          {/* 상태 배지 */}
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                            style={{ background: sm.bg, color: sm.color }}>
+                            {sm.label}
+                          </span>
+
+                          {/* 날짜 */}
+                          <span className="text-[11px] text-muted-foreground shrink-0 hidden sm:block">
+                            {r.created_at.slice(0, 10)}
+                          </span>
+
+                          {isExpanded
+                            ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
+                            : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                          }
+                        </div>
+
+                        {/* 상세 펼침 */}
+                        {isExpanded && (
+                          <div className="border-t border-border px-4 py-4 flex flex-col gap-4">
+                            {/* 내용 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {r.report_type === "error_report" && r.error_content && (
+                                <div className="md:col-span-2 rounded-xl bg-destructive/5 border border-destructive/20 p-3">
+                                  <p className="text-[10px] font-bold text-destructive mb-1">오류 내용</p>
+                                  <p className="text-sm text-foreground">{r.error_content}</p>
+                                </div>
+                              )}
+                              {r.report_type === "deal_complete" && (
+                                <>
+                                  {r.deal_date && (
+                                    <div className="rounded-xl bg-muted/40 border border-border p-3">
+                                      <p className="text-[10px] font-bold text-muted-foreground mb-0.5">거래 완료일</p>
+                                      <p className="text-sm font-semibold text-foreground">{r.deal_date}</p>
+                                    </div>
+                                  )}
+                                  {r.deal_memo && (
+                                    <div className="rounded-xl bg-muted/40 border border-border p-3">
+                                      <p className="text-[10px] font-bold text-muted-foreground mb-0.5">메모</p>
+                                      <p className="text-sm text-foreground">{r.deal_memo}</p>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                              {r.report_type === "rental_proposal" && (
+                                <>
+                                  <div className="rounded-xl bg-muted/40 border border-border p-3">
+                                    <p className="text-[10px] font-bold text-muted-foreground mb-1">제안자 정보</p>
+                                    <p className="text-sm font-semibold text-foreground">{r.proposer_name}</p>
+                                    <a href={`tel:${r.proposer_phone}`} className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>{r.proposer_phone}</a>
+                                    {r.proposer_company && <p className="text-xs text-muted-foreground mt-0.5">{r.proposer_company}</p>}
+                                  </div>
+                                  <div className="rounded-xl bg-muted/40 border border-border p-3">
+                                    <p className="text-[10px] font-bold text-muted-foreground mb-1">제안 조건</p>
+                                    {r.proposal_deposit && <p className="text-xs text-foreground">보증금: <strong>{r.proposal_deposit}</strong></p>}
+                                    {r.proposal_monthly && <p className="text-xs text-foreground">월세: <strong>{r.proposal_monthly}</strong></p>}
+                                    {r.proposal_period && <p className="text-xs text-foreground">기간: <strong>{r.proposal_period}</strong></p>}
+                                  </div>
+                                  {r.proposal_content && (
+                                    <div className="md:col-span-2 rounded-xl bg-primary/5 border border-primary/20 p-3">
+                                      <p className="text-[10px] font-bold text-primary mb-1">추가 내용</p>
+                                      <p className="text-sm text-foreground">{r.proposal_content}</p>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+
+                            {/* 상태 변경 */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-semibold text-muted-foreground">처리 상태:</span>
+                              {(["pending", "reviewed", "resolved"] as const).map((s) => (
+                                <button key={s} onClick={() => updateReportStatus(r.id, s)}
+                                  className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
+                                  style={r.status === s
+                                    ? { background: REPORT_STATUS_META[s].bg, color: REPORT_STATUS_META[s].color, outline: `1.5px solid ${REPORT_STATUS_META[s].color}` }
+                                    : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                                  }>
+                                  {REPORT_STATUS_META[s].label}
+                                </button>
+                              ))}
+                              <button onClick={() => deleteReport(r.id)} className="ml-auto flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold" style={{ color: "hsl(var(--destructive))", background: "hsl(var(--destructive) / 0.08)" }}>
+                                <Trash2 className="w-3 h-3" />삭제
+                              </button>
+                            </div>
+
+                            {/* 관리자 메모 */}
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                placeholder="관리자 메모 입력..."
+                                value={reportMemoInputs[r.id] ?? (r.admin_memo ?? "")}
+                                onChange={(e) => setReportMemoInputs((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                                className="flex-1 px-3 py-2 text-xs rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
+                              />
+                              <button onClick={() => saveReportMemo(r.id)}
+                                className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-white"
+                                style={{ background: "hsl(var(--primary))" }}>
+                                <Save className="w-3 h-3" />저장
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── 커뮤니티 관리 ── */}
           {tab === "community" && (
