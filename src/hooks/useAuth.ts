@@ -46,6 +46,7 @@ async function checkSession() {
     .eq("user_id", session.user.id)
     .maybeSingle();
 
+  // 미승인(pending/rejected) 또는 비활성 계정 → 강제 로그아웃
   if (!profile || profile.status !== "approved" || profile.is_active === false) {
     await supabase.auth.signOut();
     notify("unauthorized", null);
