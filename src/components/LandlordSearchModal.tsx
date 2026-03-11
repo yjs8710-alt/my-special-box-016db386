@@ -379,7 +379,7 @@ interface LandlordSearchModalProps {
 }
 
 const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
-  const { isAuthorized } = useAuth();
+  const { isAuthorized, isLoading: authLoading } = useAuth();
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -390,8 +390,9 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
   const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
-  // 승인된 회원은 번호 제한 없이 바로 노출
-  const isApproved = isAuthorized;
+  // 승인된 회원(인증된 모든 로그인 사용자)은 번호 제한 없이 바로 노출
+  // authLoading 중에는 false로 처리하되, 로딩 완료 후 isAuthorized 값 사용
+  const isApproved = !authLoading && isAuthorized;
 
   const handleReveal = (id: string) => {
     markRevealed(id);
