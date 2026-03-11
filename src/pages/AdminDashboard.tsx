@@ -145,7 +145,7 @@ const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
   },
 ];
 const ALL_PROPERTY_TYPES = PROPERTY_TYPE_GROUPS.flatMap((g) => g.types);
-const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
+const CHEONGJU_DISTRICTS = ["상당구", "서원구", "흥덕구", "청원구"];
 
 // ─── Address Data (청주시 4개 구 고정) ──────────────────────────────────────
 const FIXED_SIDO = "충북";
