@@ -249,11 +249,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         const { data: existing } = await q.maybeSingle();
 
         if (existing) {
-          const upd: Record<string, string> = {};
+          const upd: Record<string, string | null> = {};
           if (form.contactOwner) { upd.contact_owner = form.contactOwner; upd.phone = form.contactOwner; }
           if (form.contactManager) upd.contact_manager = form.contactManager;
+          if (form.contactBroker) upd.contact_broker = form.contactBroker;
           await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
-        } else {
           await supabase.from("cheongju_contacts").insert({
             district: contactDistrict,
             dong: form.dong,
@@ -261,6 +261,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
             phone: form.contactOwner || "",
             contact_owner: form.contactOwner || null,
             contact_manager: form.contactManager || null,
+            contact_broker: form.contactBroker || null,
             is_visible: true,
           });
         }

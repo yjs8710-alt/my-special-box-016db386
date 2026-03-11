@@ -242,6 +242,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   contactOwner: string;
   contactTenant: string;
   contactManager: string;
+  contactBroker: string;
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -256,6 +257,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   contactOwner: "",
   contactTenant: "",
   contactManager: "",
+  contactBroker: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -531,6 +533,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           const updateData: Record<string, string | null> = {};
           if (form.contactOwner) { updateData.contact_owner = form.contactOwner; updateData.phone = form.contactOwner; }
           if (form.contactManager) updateData.contact_manager = form.contactManager;
+          if (form.contactBroker) updateData.contact_broker = form.contactBroker;
           const { error: updateErr } = await supabase.from("cheongju_contacts").update(updateData).eq("id", existing.id);
           if (updateErr) console.error("[청주연락처] 업데이트 오류:", updateErr.message);
           else console.log("[청주연락처] 업데이트 완료 id:", existing.id);
@@ -543,6 +546,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
             phone: form.contactOwner || form.contactManager || "",
             contact_owner: form.contactOwner || null,
             contact_manager: form.contactManager || null,
+            contact_broker: form.contactBroker || null,
             is_visible: true,
           });
           if (insertErr) console.error("[청주연락처] 삽입 오류:", insertErr.message);
