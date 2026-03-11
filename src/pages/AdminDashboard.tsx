@@ -1046,6 +1046,7 @@ const AdminDashboard = () => {
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
+  const [contactLotFilter, setContactLotFilter] = useState<"전체" | "번지있음" | "번지없음">("전체");
 
   // ─── 세션 기반 관리자 인증 가드 ──────────────────────────────────────────
   useEffect(() => {
@@ -1371,12 +1372,14 @@ const AdminDashboard = () => {
 
   const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
+    const hasLot = !!(c.lot_number && c.lot_number.trim() !== "");
+    const matchLot = contactLotFilter === "전체" || (contactLotFilter === "번지있음" ? hasLot : !hasLot);
     const matchSearch = !contactSearch
       || c.dong.includes(contactSearch)
       || (c.lot_number ?? "").includes(contactSearch)
       || c.phone.includes(contactSearch)
       || (c.memo ?? "").includes(contactSearch);
-    return matchDist && matchSearch;
+    return matchDist && matchLot && matchSearch;
   });
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
@@ -2084,10 +2087,10 @@ const AdminDashboard = () => {
           {tab === "contacts" && (
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between flex-wrap gap-3">
-                <div>
+                 <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    총 {contacts.length}개 · 번지있음 {contacts.filter(c => !!(c.lot_number && c.lot_number.trim())).length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -2099,6 +2102,21 @@ const AdminDashboard = () => {
                           ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                           : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                         }>{d}</button>
+                    ))}
+                  </div>
+                  {/* 번지수 필터 */}
+                  <div className="flex gap-1 border-l border-border pl-2">
+                    {(["전체", "번지있음", "번지없음"] as const).map((f) => (
+                      <button key={f} onClick={() => setContactLotFilter(f)}
+                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                        style={contactLotFilter === f
+                          ? f === "번지있음"
+                            ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "hsl(var(--chart-2))" }
+                            : f === "번지없음"
+                            ? { background: "hsl(var(--destructive))", color: "#fff", borderColor: "hsl(var(--destructive))" }
+                            : { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                        }>{f}</button>
                     ))}
                   </div>
                   <div className="relative">
@@ -2144,9 +2162,12 @@ const AdminDashboard = () => {
                       <div className="text-sm font-medium text-foreground">{c.dong}</div>
                       {/* 번지수 */}
                       <div className="hidden md:block text-xs text-muted-foreground">
-                        {c.lot_number ? (
-                          <span className="font-medium text-foreground">{c.lot_number}</span>
-                        ) : <span>—</span>}
+                        {c.lot_number && c.lot_number.trim() ? (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
+                          >{c.lot_number}</span>
+                        ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 대표전화 */}
                       <div className="hidden md:flex items-center gap-1 text-xs">
