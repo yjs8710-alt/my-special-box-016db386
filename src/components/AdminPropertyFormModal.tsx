@@ -898,6 +898,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 연락처 */}
               <Section label="연락처">
+                {contactAutoFilled && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/30 bg-primary/8 text-primary text-xs font-semibold animate-pulse">
+                    <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>청주 연락처에서 자동으로 불러왔습니다</span>
+                  </div>
+                )}
                 <div className="flex flex-col gap-3">
                   {[
                     { key: "contactOwner" as const, label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
