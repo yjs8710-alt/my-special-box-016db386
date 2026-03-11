@@ -373,6 +373,7 @@ interface LandlordSearchModalProps {
 }
 
 const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
+  const { isAuthorized } = useAuth();
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -383,11 +384,14 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
   const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
+  // 승인된 회원은 번호 제한 없이 바로 노출
+  const isApproved = isAuthorized;
+
   const handleReveal = (id: string) => {
     markRevealed(id);
     setRevealed((prev) => ({ ...prev, [id]: true }));
   };
-  const isRevealed = (id: string) => revealed[id] || hasRevealedToday(id);
+  const isRevealed = (id: string) => isApproved || revealed[id] || hasRevealedToday(id);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
