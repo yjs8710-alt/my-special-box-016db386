@@ -814,6 +814,29 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
         {/* Footer */}
         <div className="flex-shrink-0 px-6 py-4 border-t border-border flex items-center gap-3">
+          {/* 삭제 버튼 — 수정 모드에서만 표시 */}
+          {initial?.id && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={async () => {
+                if (!confirm("이 매물을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.")) return;
+                setSaving(true);
+                try {
+                  const { error } = await supabase.from("properties").delete().eq("id", initial.id!);
+                  if (error) { alert("삭제 오류: " + error.message); return; }
+                  onSaved?.();
+                  onClose();
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors disabled:opacity-50"
+            >
+              <X className="w-3.5 h-3.5" />
+              삭제
+            </button>
+          )}
           {formStep > 1 && (
             <button type="button" onClick={() => setFormStep((s) => (s - 1) as 1 | 2 | 3)}
               className="px-4 py-2 rounded-full text-xs font-semibold border border-border text-foreground hover:bg-muted/50">
