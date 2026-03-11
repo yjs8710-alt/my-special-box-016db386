@@ -145,7 +145,7 @@ const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
   },
 ];
 const ALL_PROPERTY_TYPES = PROPERTY_TYPE_GROUPS.flatMap((g) => g.types);
-const CHEONGJU_DISTRICTS = ["서원구", "흥덕구", "상당구", "청원구"];
+const CHEONGJU_DISTRICTS = ["상당구", "서원구", "흥덕구", "청원구"];
 
 // ─── Address Data (청주시 4개 구 고정) ──────────────────────────────────────
 const FIXED_SIDO = "충북";
@@ -176,7 +176,7 @@ const DONG_MAP: Record<string, string[]> = {
   ],
 };
 // 매물관리 동 선택 표시용 (4개 구 표기명)
-const DISTRICT_FILTER_TABS = ["전체", "서원구", "흥덕구", "청원구", "상당구"] as const;
+const DISTRICT_FILTER_TABS = ["전체", "상당구", "서원구", "흥덕구", "청원구"] as const;
 const FLOOR_OPTIONS_ADMIN = [
   "지하5층","지하4층","지하3층","지하2층","지하1층","0층",
   "1층","2층","3층","4층","5층","6층","7층","8층","9층","10층","10층이상",
