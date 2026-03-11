@@ -2,43 +2,48 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    // 서비스 키로 RLS 우회 (관리자 전용 검색)
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // 호출자가 admin인지 확인
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) {
+
+    // getClaims()으로 로컬에서 JWT 검증
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const { data: roleData } = await supabase
+
+    const userId = claimsData.claims.sub;
+
+    // 서비스 키 클라이언트로 admin 권한 확인
+    const adminClient = createClient(supabaseUrl, serviceKey);
+    const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
+
     if (!roleData) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -55,12 +60,12 @@ Deno.serve(async (req) => {
 
     // 모든 매물 조회 (status 무관)
     const [propRes, contactRes] = await Promise.all([
-      supabase
+      adminClient
         .from("properties")
         .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
-      supabase
+      adminClient
         .from("cheongju_contacts")
         .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible")
         .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,contact_owner.ilike.%${keyword}%,contact_manager.ilike.%${keyword}%,contact_broker.ilike.%${keyword}%,phone.ilike.%${keyword}%`)
@@ -93,7 +98,6 @@ Deno.serve(async (req) => {
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
-          // extended fields
           floor: row.floor ?? undefined,
           area: row.area ?? undefined,
           deposit: row.deposit ?? undefined,
