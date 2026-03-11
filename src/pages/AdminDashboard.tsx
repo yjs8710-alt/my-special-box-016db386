@@ -2203,10 +2203,16 @@ const AdminDashboard = () => {
                           <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
-                      {/* 관리인 */}
+                       {/* 관리인 */}
                       <div className="hidden md:block text-xs">
                         {c.contact_manager ? (
                           <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </div>
+                      {/* 부동산 */}
+                      <div className="hidden md:block text-xs">
+                        {c.contact_broker ? (
+                          <a href={`tel:${c.contact_broker}`} className="font-medium" style={{ color: "hsl(var(--chart-3))" }}>{c.contact_broker}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
                       {/* 노출 상태 토글 */}
