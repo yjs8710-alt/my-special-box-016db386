@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       supabase
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status")
+        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       supabase
@@ -93,6 +93,16 @@ Deno.serve(async (req) => {
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
+          // extended fields
+          floor: row.floor ?? undefined,
+          area: row.area ?? undefined,
+          deposit: row.deposit ?? undefined,
+          monthly: row.monthly ?? undefined,
+          type: row.room_type ?? row.type ?? undefined,
+          buildYear: row.build_year ?? undefined,
+          totalFloors: row.total_floors ?? undefined,
+          availableFrom: row.available_from ?? undefined,
+          note: row.note ?? undefined,
         });
       }
     }
