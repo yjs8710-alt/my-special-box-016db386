@@ -424,7 +424,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         const { error } = await supabase.from("properties").update(payload).eq("id", initial.id);
         if (error) { alert("수정 오류: " + error.message); return; }
       } else {
-        const { error } = await supabase.from("properties").insert(payload);
+        const { error } = await supabase.from("properties").insert(payload as any);
         if (error) { alert("등록 오류: " + error.message); return; }
       }
       onSaved?.();
