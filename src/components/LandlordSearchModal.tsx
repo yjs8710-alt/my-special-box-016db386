@@ -549,6 +549,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                   key={item.id}
                   item={item}
                   show={isRevealed(item.id)}
+                  isApproved={isApproved}
                   onReveal={() => handleReveal(item.id)}
                   onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
                   onOpenPanel={handleOpenPanel}
