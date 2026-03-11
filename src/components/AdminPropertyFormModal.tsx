@@ -394,9 +394,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
 
     const newUrls: string[] = [];
-    const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
 
-    // 병렬 업로드: 각 파일에 고유 타임스탬프+인덱스로 경로 중복 방지
+
     const uploadResults = await Promise.all(
       fileArray.map(async (file, i) => {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
