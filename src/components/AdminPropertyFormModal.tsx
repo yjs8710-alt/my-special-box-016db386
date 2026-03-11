@@ -375,7 +375,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
 
 
-  const handleImageUpload
+
+
         setForm((f) => ({ ...f, lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) }));
       }
     });
