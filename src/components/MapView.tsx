@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-const NAVER_CLIENT_ID = "vsdohdygzo";
+const NAVER_CLIENT_ID = "s0knnmfq0i";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#0a2d6e",
