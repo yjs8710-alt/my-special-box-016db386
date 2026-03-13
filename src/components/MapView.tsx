@@ -92,7 +92,7 @@ function loadNaverScript(cb: () => void) {
 
   const script = document.createElement("script");
   script.id = "naver-maps-script";
-  script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${NAVER_CLIENT_ID}`;
+  script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_CLIENT_ID}`;
   script.async = true;
   script.onload = () => {
     window.__naverMapReady = true;
