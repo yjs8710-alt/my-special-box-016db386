@@ -5,6 +5,7 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
+import { useDBProperties } from "@/hooks/useDBProperties";
 import { LayoutGrid, Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
@@ -19,11 +20,17 @@ const MapSearch = () => {
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("map");
 
+  // DB에서 실시간으로 매물 불러오기
+  const { properties: dbProperties } = useDBProperties();
+
+  // 정적 목 데이터 + DB 데이터 병합
+  const allProperties = [...MAP_PROPERTIES, ...dbProperties];
+
   const handleDeleteProperties = (ids: Set<number>) => {
     setDeletedIds(prev => new Set([...prev, ...ids]));
   };
 
-  const filtered = MAP_PROPERTIES.filter((p) => {
+  const filtered = allProperties.filter((p) => {
     if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
@@ -34,7 +41,10 @@ const MapSearch = () => {
     return true;
   });
 
-  const selected = MAP_PROPERTIES.find((p) => p.id === selectedId) ?? null;
+  // lat/lng가 유효한 매물만 지도에 표시 (0,0은 제외)
+  const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
+
+  const selected = allProperties.find((p) => p.id === selectedId) ?? null;
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
@@ -112,7 +122,7 @@ const MapSearch = () => {
         {/* 지도 영역 */}
         <div className="flex-1 relative min-w-0">
           <MapView
-            properties={filtered}
+            properties={mappableProperties}
             selectedId={selectedId}
             onSelect={setSelectedId}
           />
