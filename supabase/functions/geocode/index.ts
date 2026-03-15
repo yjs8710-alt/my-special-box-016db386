@@ -10,19 +10,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const clientId = Deno.env.get("NAVER_CLIENT_ID");
-    const clientSecret = Deno.env.get("NAVER_CLIENT_SECRET");
+    const kakaoApiKey = Deno.env.get("KAKAO_API_KEY");
 
-    // 1. 환경변수 로드 여부 로그
-    console.log("[geocode] NAVER_CLIENT_ID loaded:", !!clientId);
-    console.log("[geocode] NAVER_CLIENT_SECRET loaded:", !!clientSecret);
-    if (clientId) {
-      console.log("[geocode] NAVER_CLIENT_ID prefix:", clientId.substring(0, 6) + "...");
-    }
+    console.log("[geocode] KAKAO_API_KEY loaded:", !!kakaoApiKey);
 
-    if (!clientId || !clientSecret) {
+    if (!kakaoApiKey) {
       return new Response(
-        JSON.stringify({ success: false, error: "Naver API credentials not configured" }),
+        JSON.stringify({ success: false, error: "Kakao API key not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -37,48 +31,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 2. 정확한 URL 확인
-    const url = `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(address)}`;
-    console.log("[geocode] Request URL:", url);
+    const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`;
+    console.log("[geocode] Kakao request URL:", url);
 
-    // 3. 정확한 헤더 이름 확인
-    const requestHeaders = {
-      "X-NCP-APIGW-API-KEY-ID": clientId,
-      "X-NCP-APIGW-API-KEY": clientSecret,
-    };
-    console.log("[geocode] Using headers: X-NCP-APIGW-API-KEY-ID, X-NCP-APIGW-API-KEY");
+    const kakaoRes = await fetch(url, {
+      headers: {
+        Authorization: `KakaoAK ${kakaoApiKey}`,
+        "KA": "sdk/1.0.0 os/web origin/https://lovable.app",
+      },
+    });
 
-    const naverRes = await fetch(url, { headers: requestHeaders });
+    console.log("[geocode] Kakao API response status:", kakaoRes.status);
 
-    // 4. 응답 status 로그
-    console.log("[geocode] Naver API response status:", naverRes.status);
+    const responseText = await kakaoRes.text();
+    console.log("[geocode] Kakao API response body:", responseText);
 
-    const responseText = await naverRes.text();
-    // 5. 응답 body 로그
-    console.log("[geocode] Naver API response body:", responseText);
-
-    if (!naverRes.ok) {
+    if (!kakaoRes.ok) {
       return new Response(
-        JSON.stringify({ success: false, error: `Naver API error: ${naverRes.status}`, body: responseText }),
+        JSON.stringify({ success: false, error: `Kakao API error: ${kakaoRes.status}`, body: responseText }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const data = JSON.parse(responseText);
-    const addresses = data?.addresses;
+    const documents = data?.documents;
 
-    if (!addresses || addresses.length === 0) {
+    if (!documents || documents.length === 0) {
       return new Response(
         JSON.stringify({ success: false, error: "No results found for the given address" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const first = addresses[0];
+    const first = documents[0];
     const lat = parseFloat(first.y);
     const lng = parseFloat(first.x);
-    const roadAddress = first.roadAddress ?? "";
-    const jibunAddress = first.jibunAddress ?? "";
+    const roadAddress = first.road_address?.address_name ?? "";
+    const jibunAddress = first.address?.address_name ?? "";
 
     console.log("[geocode] Success:", lat, lng);
     return new Response(
