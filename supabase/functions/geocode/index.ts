@@ -37,6 +37,7 @@ Deno.serve(async (req) => {
     const kakaoRes = await fetch(url, {
       headers: {
         Authorization: `KakaoAK ${kakaoApiKey}`,
+        "KA": "sdk/1.0.0 os/web origin/https://lovable.app",
       },
     });
 
