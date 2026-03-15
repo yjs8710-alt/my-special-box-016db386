@@ -40,24 +40,18 @@ const TYPE_ACCENT: Record<string, string> = {
 function createPinHtml(property: MapProperty, isSelected: boolean) {
   const color = TYPE_COLORS[property.type] ?? "#0a2d6e";
   const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
-  const pinColor = isSelected ? accent : color;
-  const scale = isSelected ? 1.3 : 1;
+  const bgColor = isSelected ? accent : color;
+  const scale = isSelected ? 1.15 : 1;
   const shadow = isSelected
-    ? `filter:drop-shadow(0 4px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 4px ${accent})`
-    : `filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35))`;
+    ? `box-shadow:0 4px 12px rgba(0,0,0,0.35),0 0 0 2px ${accent}44`
+    : `box-shadow:0 2px 6px rgba(0,0,0,0.25)`;
+  const price = property.monthly || property.deposit || "";
 
   return `
-    <div style="transform:scale(${scale});transform-origin:bottom center;cursor:pointer;display:flex;flex-direction:column;align-items:center;${shadow};">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="52" viewBox="0 0 48 52">
-        <rect x="4" y="22" width="40" height="24" rx="5" ry="5" fill="${pinColor}" />
-        <polygon points="24,4 44,22 4,22" fill="${isSelected ? color : accent}" />
-        <rect x="32" y="8" width="5" height="10" rx="1" fill="${isSelected ? color : accent}" />
-        <rect x="19" y="32" width="10" height="14" rx="3" fill="rgba(255,255,255,0.9)" />
-        <circle cx="27" cy="39" r="1.2" fill="${pinColor}" />
-        <polygon points="18,46 30,46 24,52" fill="${pinColor}" />
-        <polygon points="24,4 44,22 4,22" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" />
-      </svg>
-      <div style="background:${pinColor};color:white;font-size:10px;font-weight:800;font-family:'Noto Sans KR',sans-serif;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1.5px solid rgba(255,255,255,0.85);margin-top:-2px;letter-spacing:-0.3px;">${property.monthly || property.deposit}</div>
+    <div style="transform:scale(${scale});transform-origin:bottom center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0;">
+      <div style="background:${bgColor};color:white;font-size:11px;font-weight:700;font-family:'Noto Sans KR',sans-serif;padding:4px 9px;border-radius:12px;white-space:nowrap;letter-spacing:-0.3px;${shadow};border:1.5px solid rgba(255,255,255,0.3);line-height:1.3;">${price}</div>
+      <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${bgColor};margin-top:-1px;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.15));"></div>
+      <div style="width:4px;height:4px;border-radius:50%;background:${bgColor};margin-top:1px;opacity:0.7;"></div>
     </div>
   `;
 }
