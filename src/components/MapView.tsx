@@ -46,47 +46,18 @@ function createPinHtml(property: MapProperty, isSelected: boolean) {
     ? `filter:drop-shadow(0 4px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 4px ${accent})`
     : `filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35))`;
 
-  // 집 모양 SVG 핀 (지붕 + 집 본체 + 문 + 꼬리)
   return `
-    <div style="
-      transform:scale(${scale});
-      transform-origin:bottom center;
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      ${shadow};
-    ">
+    <div style="transform:scale(${scale});transform-origin:bottom center;cursor:pointer;display:flex;flex-direction:column;align-items:center;${shadow};">
       <svg xmlns="http://www.w3.org/2000/svg" width="48" height="52" viewBox="0 0 48 52">
-        <!-- 집 본체 둥근 배경 -->
         <rect x="4" y="22" width="40" height="24" rx="5" ry="5" fill="${pinColor}" />
-        <!-- 지붕 삼각형 -->
         <polygon points="24,4 44,22 4,22" fill="${isSelected ? color : accent}" />
-        <!-- 굴뚝 -->
         <rect x="32" y="8" width="5" height="10" rx="1" fill="${isSelected ? color : accent}" />
-        <!-- 문 -->
         <rect x="19" y="32" width="10" height="14" rx="3" fill="rgba(255,255,255,0.9)" />
-        <!-- 문 손잡이 -->
         <circle cx="27" cy="39" r="1.2" fill="${pinColor}" />
-        <!-- 꼬리 (아래 삼각형) -->
         <polygon points="18,46 30,46 24,52" fill="${pinColor}" />
-        <!-- 흰 테두리 효과 (지붕) -->
         <polygon points="24,4 44,22 4,22" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" />
       </svg>
-      <!-- 가격 라벨 -->
-      <div style="
-        background:${pinColor};
-        color:white;
-        font-size:10px;
-        font-weight:800;
-        font-family:'Noto Sans KR',sans-serif;
-        padding:2px 8px;
-        border-radius:999px;
-        white-space:nowrap;
-        border:1.5px solid rgba(255,255,255,0.85);
-        margin-top:-2px;
-        letter-spacing:-0.3px;
-      ">${property.monthly || property.deposit}</div>
+      <div style="background:${pinColor};color:white;font-size:10px;font-weight:800;font-family:'Noto Sans KR',sans-serif;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1.5px solid rgba(255,255,255,0.85);margin-top:-2px;letter-spacing:-0.3px;">${property.monthly || property.deposit}</div>
     </div>
   `;
 }
