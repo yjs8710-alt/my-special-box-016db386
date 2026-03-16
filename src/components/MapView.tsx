@@ -37,38 +37,102 @@ const TYPE_ACCENT: Record<string, string> = {
   "토지": "#4ade80",
 };
 
-function createPinHtml(property: MapProperty, isSelected: boolean) {
+/**
+ * 줌 레벨(1~14) → 핀 크기(px) 매핑
+ * 카카오 맵 level: 작을수록 확대 (1=가장 확대, 14=가장 축소)
+ */
+function getPinSize(zoomLevel: number): number {
+  if (zoomLevel <= 2) return 38;
+  if (zoomLevel <= 3) return 34;
+  if (zoomLevel <= 4) return 30;
+  if (zoomLevel <= 5) return 26;
+  if (zoomLevel <= 6) return 22;
+  if (zoomLevel <= 7) return 18;
+  if (zoomLevel <= 9) return 14;
+  return 11;
+}
+
+function createHousePinHtml(
+  property: MapProperty,
+  isSelected: boolean,
+  size: number
+) {
   const color = TYPE_COLORS[property.type] ?? "#0a2d6e";
   const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
-  const bgColor = isSelected ? accent : color;
-  const scale = isSelected ? 1.15 : 1;
-  const shadow = isSelected
-    ? `box-shadow:0 4px 12px rgba(0,0,0,0.35),0 0 0 2px ${accent}44`
-    : `box-shadow:0 2px 6px rgba(0,0,0,0.25)`;
-  const price = property.monthly || property.deposit || "";
+  const fill = isSelected ? accent : color;
+  const glow = isSelected
+    ? `filter:drop-shadow(0 0 6px ${accent}cc) drop-shadow(0 2px 4px rgba(0,0,0,0.35))`
+    : `filter:drop-shadow(0 2px 5px rgba(0,0,0,0.30))`;
+  const doorH = Math.round(size * 0.38);
+  const doorW = Math.round(size * 0.22);
+  const winS = Math.round(size * 0.16);
+  const roofOH = Math.round(size * 0.38); // roof overhang
+  const bodyH = Math.round(size * 0.52);
+  const dotSize = Math.max(3, Math.round(size * 0.14));
+  const totalW = size + roofOH * 2;
 
-  return `
-    <div style="transform:scale(${scale});transform-origin:bottom center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0;">
-      <div style="background:${bgColor};color:white;font-size:11px;font-weight:700;font-family:'Noto Sans KR',sans-serif;padding:4px 9px;border-radius:12px;white-space:nowrap;letter-spacing:-0.3px;${shadow};border:1.5px solid rgba(255,255,255,0.3);line-height:1.3;">${price}</div>
-      <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${bgColor};margin-top:-1px;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.15));"></div>
-      <div style="width:4px;height:4px;border-radius:50%;background:${bgColor};margin-top:1px;opacity:0.7;"></div>
-    </div>
+  // Inline SVG house — clean modern shape
+  const svg = `
+    <svg width="${totalW}" height="${size + dotSize + 4}" viewBox="0 0 ${totalW} ${size + dotSize + 4}" fill="none" xmlns="http://www.w3.org/2000/svg" style="${glow}">
+      <!-- Roof -->
+      <polygon
+        points="${totalW / 2},0 ${totalW},${roofOH + 2} 0,${roofOH + 2}"
+        fill="${fill}"
+        rx="2"
+      />
+      <!-- Body -->
+      <rect x="${roofOH}" y="${roofOH}" width="${size}" height="${bodyH}" rx="2" fill="${fill}" />
+      <!-- Roof top cap -->
+      <rect x="${totalW / 2 - 3}" y="0" width="6" height="4" rx="1" fill="${accent}" opacity="0.85"/>
+      <!-- Door -->
+      <rect
+        x="${totalW / 2 - doorW / 2}"
+        y="${roofOH + bodyH - doorH}"
+        width="${doorW}"
+        height="${doorH}"
+        rx="1"
+        fill="${isSelected ? '#fff' : accent}"
+        opacity="${isSelected ? '0.9' : '0.75'}"
+      />
+      <!-- Left window -->
+      <rect
+        x="${roofOH + Math.round(size * 0.08)}"
+        y="${roofOH + Math.round(bodyH * 0.22)}"
+        width="${winS}"
+        height="${winS}"
+        rx="1"
+        fill="white"
+        opacity="0.55"
+      />
+      <!-- Right window -->
+      <rect
+        x="${roofOH + size - Math.round(size * 0.08) - winS}"
+        y="${roofOH + Math.round(bodyH * 0.22)}"
+        width="${winS}"
+        height="${winS}"
+        rx="1"
+        fill="white"
+        opacity="0.55"
+      />
+      <!-- Anchor dot -->
+      <circle
+        cx="${totalW / 2}"
+        cy="${roofOH + bodyH + dotSize / 2 + 2}"
+        r="${dotSize / 2}"
+        fill="${fill}"
+        opacity="0.65"
+      />
+    </svg>
   `;
+
+  return `<div style="cursor:pointer;display:flex;align-items:flex-end;justify-content:center;">${svg}</div>`;
 }
 
 function loadKakaoScript(cb: () => void) {
-  if (window.kakao && window.kakao.maps) {
-    cb();
-    return;
-  }
-
+  if (window.kakao && window.kakao.maps) { cb(); return; }
   if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
   window.__kakaoMapCallbacks.push(cb);
-
-  if (document.getElementById("kakao-maps-script")) {
-    // 스크립트는 있지만 아직 로드 중
-    return;
-  }
+  if (document.getElementById("kakao-maps-script")) return;
 
   const script = document.createElement("script");
   script.id = "kakao-maps-script";
@@ -95,23 +159,25 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
+  const zoomLevelRef = useRef<number>(5);
 
   const clearOverlays = useCallback(() => {
-    overlaysRef.current.forEach((o) => {
-      try { o.setMap(null); } catch (_) {}
-    });
+    overlaysRef.current.forEach((o) => { try { o.setMap(null); } catch (_) {} });
     overlaysRef.current.clear();
   }, []);
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void) => {
       clearOverlays();
+      const zoom = zoomLevelRef.current;
+      const pinSize = getPinSize(zoom);
+
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         const isSelected = prop.id === selId;
 
         const content = document.createElement("div");
-        content.innerHTML = createPinHtml(prop, isSelected);
+        content.innerHTML = createHousePinHtml(prop, isSelected, isSelected ? Math.round(pinSize * 1.18) : pinSize);
         content.style.cssText = "cursor:pointer;";
         content.addEventListener("click", () => onSelectFn(prop.id));
 
@@ -143,7 +209,15 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
       });
 
       mapRef.current = map;
+      zoomLevelRef.current = map.getLevel();
       renderOverlays(map, properties, selectedId, onSelect);
+
+      // 줌 변경 시 핀 크기 갱신
+      window.kakao.maps.event.addListener(map, "zoom_changed", () => {
+        if (!mountedRef.current) return;
+        zoomLevelRef.current = map.getLevel();
+        renderOverlays(map, properties, selectedId, onSelect);
+      });
     });
 
     return () => {
