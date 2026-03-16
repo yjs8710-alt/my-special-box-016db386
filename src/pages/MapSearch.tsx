@@ -145,6 +145,7 @@ const MapSearch = () => {
           properties={filtered}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={setActiveType}
           onDeleteProperties={handleDeleteProperties}

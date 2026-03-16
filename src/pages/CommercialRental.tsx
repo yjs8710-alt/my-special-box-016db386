@@ -108,6 +108,7 @@ const CommercialRental = () => {
           properties={filtered}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
         />
