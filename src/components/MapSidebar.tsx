@@ -1190,7 +1190,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   <div className="flex items-center justify-between px-2 py-1 mb-1 rounded-lg bg-primary/5 border border-primary/15">
                     <span className="text-[10px] font-semibold text-primary">핀 선택됨 — 해당 매물만 표시</span>
                     <button
-                      onClick={() => onSelect(selectedId)}
+                      onClick={() => onDeselect?.()}
                       className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted"
                     >
                       전체보기
