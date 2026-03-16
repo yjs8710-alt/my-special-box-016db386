@@ -138,7 +138,7 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
       if (mapRef.current) return;
 
       const map = new window.kakao.maps.Map(containerRef.current, {
-        center: new window.kakao.maps.LatLng(36.6424, 127.489),
+        center: new window.kakao.maps.LatLng(36.6285, 127.4568),
         level: 5,
       });
 
