@@ -719,27 +719,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              {/* 세부유형 / 층수 / 호수 / 평수 */}
-              <div className="grid grid-cols-4 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">세부유형</label>
-                  {ROOM_TYPE_MAP[form.type] ? (
-                    <AdminSelect
-                      value={form.room_type ?? ""}
-                      onChange={(v) => set("room_type", v)}
-                      placeholder="선택"
-                      options={ROOM_TYPE_MAP[form.type]}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="직접입력"
-                      value={form.room_type ?? ""}
-                      onChange={(e) => set("room_type", e.target.value)}
-                      className={ic}
-                    />
-                  )}
-                </div>
+              {/* 층수 / 호수 / 평수 */}
+              <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
                   <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
