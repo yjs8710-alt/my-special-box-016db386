@@ -1605,8 +1605,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                       }`}
                     >
-                      {/* Row: 3줄 고정 레이아웃 */}
-                      <div className="flex items-stretch" style={{ width: "100%", height: "76px" }}>
+                      {/* Row: 3줄 레이아웃 */}
+                      <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
 
                         {/* ①썸네일 76px */}
                         <div className="w-[76px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "76px" }}>
