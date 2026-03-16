@@ -1140,8 +1140,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
           if (isFull) return (
             <div
+              ref={optBadgeRef}
               className="relative flex-shrink-0"
-              onMouseEnter={() => setShowOptPopup(true)}
+              onMouseEnter={handleOptMouseEnter}
               onMouseLeave={() => setShowOptPopup(false)}
               onClick={(e) => e.stopPropagation()}
             >
@@ -1151,11 +1152,17 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               >
                 풀옵션 ▾
               </span>
-              {/* 호버 팝업 */}
+              {/* 호버 팝업 — fixed로 overflow:hidden 탈출 */}
               {showOptPopup && (
                 <div
                   className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5"
-                  style={{ minWidth: "160px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)", bottom: "auto", right: "auto", transform: "translateY(-100%) translateY(-4px)" }}
+                  style={{
+                    top: optPopupPos.top,
+                    left: optPopupPos.left,
+                    transform: "translateY(-100%)",
+                    minWidth: "160px",
+                    boxShadow: "0 4px 20px hsl(var(--primary)/0.15)",
+                  }}
                   onMouseEnter={() => setShowOptPopup(true)}
                   onMouseLeave={() => setShowOptPopup(false)}
                 >
