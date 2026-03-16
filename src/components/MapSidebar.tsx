@@ -1033,14 +1033,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
         <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
         {areaShort && (
-          <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
-            {areaShort.replace(/[㎡\s].*$/, "").replace(/\(/, "").replace(/\)/, "")}
-            {!areaShort.includes("평") && prop.area?.match(/(\d+)\s*평/) ? prop.area.match(/(\d+)\s*평/)?.[0] : areaShort.includes("평") ? "" : ""}
-            {(() => {
-              const m = prop.area?.match(/\((\d+)평\)/);
-              return m ? m[1] + "평" : (prop.area?.match(/(\d+)\s*평/)?.[1] ? prop.area.match(/(\d+)\s*평/)?.[1] + "평" : areaShort);
-            })()}
-          </span>
+          <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">{areaShort}</span>
         )}
         <span className="flex-1" />
         {/* 옵션 아이콘들 — 2줄에만 표시 */}
