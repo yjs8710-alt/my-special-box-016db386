@@ -100,7 +100,7 @@ const CommercialRental = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             hideSearchBar={showRegister}
-            topOffset={72}
+            topOffset={97}
             showCategoryChips={true}
             showRoomTypes={false}
           />
