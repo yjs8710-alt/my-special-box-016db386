@@ -994,9 +994,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
-          propId={photoUploadProp.id}
-          address={photoUploadProp.address}
+          prop={photoUploadProp}
           onClose={() => setPhotoUploadProp(null)}
+          onImagesUpdated={(imgs) => {
+            // 실시간 반영: photoUploadProp의 이미지 업데이트
+            setPhotoUploadProp(prev => prev ? { ...prev, images: imgs, image: imgs[0] ?? prev.image } : null);
+          }}
         />
       )}
       {/* Lease Proposal Modal */}
