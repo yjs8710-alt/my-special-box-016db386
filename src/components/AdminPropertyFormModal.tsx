@@ -682,8 +682,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         ✅ 좌표 확인: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
                       </p>
                     )}
-                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && form.lot_number && (
-                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
+                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && (
+                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 정확히 입력해주세요.</p>
                     )}
                   </div>
                 )}
