@@ -129,6 +129,7 @@ interface MapFilterBarProps {
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
   hideSearchBar?: boolean;
+  topOffset?: number;
   showCategoryChips?: boolean;
   showResidentialTypes?: boolean;
   nonResidentialSubtypes?: { label: string; group: string }[];
