@@ -1133,7 +1133,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </span>
           );
           return prop.options.map((opt) => (
-            <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
+            <span key={opt} title={opt} className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.75 }}>
+              <OptionSvgIcon name={opt} size={11} />
+            </span>
           ));
         })()}
         {/* ⑧ 비번 */}
