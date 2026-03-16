@@ -650,7 +650,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
                     <div className="flex flex-wrap gap-1.5">
                       {types.map((t) => (
-                        <button key={t} type="button" onClick={() => set("type", t)}
+                        <button key={t} type="button" onClick={() => { set("type", t); set("room_type", ""); }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
                             ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
