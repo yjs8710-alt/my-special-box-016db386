@@ -1134,7 +1134,27 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           </span>
         )}
         <span className="flex-1" />
-        {/* ⑦ 옵션 — 항상 '옵션' 텍스트 배지, 호버 시 상세 목록 팝업 */}
+        {/* ⑦ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV) */}
+        {(() => {
+          const EMOJI_OPTIONS: Record<string, string> = {
+            "반려동물가능": "🐾",
+            "애완동물가능": "🐾",
+            "반려동물불가": "🚫",
+            "애완동물불가": "🚫",
+            "엘리베이터": "🛗",
+            "수도": "🚿",
+            "인터넷": "📶",
+            "유선TV": "📺",
+          };
+          const opts = prop.options ?? [];
+          const emojiItems = opts.filter(o => EMOJI_OPTIONS[o]);
+          return emojiItems.map(opt => (
+            <span key={opt} title={opt} className="flex-shrink-0 text-[12px] leading-none cursor-default select-none" style={{ opacity: 0.85 }}>
+              {EMOJI_OPTIONS[opt]}
+            </span>
+          ));
+        })()}
+        {/* ⑦-b 옵션 텍스트 배지 — 호버 시 상세 목록 팝업 */}
         {prop.options && prop.options.length > 0 && (() => {
           const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
