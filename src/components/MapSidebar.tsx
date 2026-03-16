@@ -488,160 +488,256 @@ interface PhotoUploadModalProps {
   onClose: () => void;
   onImagesUpdated?: (images: string[]) => void;
 }
-const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalProps) => {
-  const isDBProperty = !!prop.memo; // memo = DB uuid
-  const dbId = prop.memo;
 
-  // DB 매물: prop.images 기준, Static: localStorage 기준
+/** 파일을 dataURL로 변환 */
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalProps) => {
+  const isDBProperty = !!prop.memo;
+  const dbId = prop.memo;
   const storageKey = `photos_${prop.id}`;
-  const [photos, setPhotos] = useState<string[]>(() => {
+
+  // 이미 저장된 사진
+  const [savedPhotos, setSavedPhotos] = useState<string[]>(() => {
     if (isDBProperty) return prop.images ?? (prop.image ? [prop.image] : []);
     try { return JSON.parse(localStorage.getItem(storageKey) ?? "[]"); } catch { return []; }
   });
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>("");
+
+  // 새로 선택(미리보기)된 파일들 (아직 저장 안 됨)
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [pendingPreviews, setPendingPreviews] = useState<string[]>([]);
+
+  const [saving, setSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState("");
+  const [saved, setSaved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Static 매물: localStorage에 저장
-  const saveToLocal = (imgs: string[]) => localStorage.setItem(storageKey, JSON.stringify(imgs));
-
-  // DB 매물: Supabase Storage 업로드 후 properties 테이블 갱신
-  const handleFilesDB = async (files: FileList) => {
-    setUploading(true);
-    const newUrls: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      setUploadProgress(`업로드 중 ${i + 1}/${files.length}…`);
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${dbId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-      if (!error) {
-        const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
-        newUrls.push(urlData.publicUrl);
-      }
-    }
-    // DB 업데이트
-    const merged = [...photos, ...newUrls];
-    const { error: updateErr } = await supabase
-      .from("properties")
-      .update({ images: merged })
-      .eq("id", dbId);
-    if (!updateErr) {
-      setPhotos(merged);
-      onImagesUpdated?.(merged);
-    }
-    setUploading(false);
-    setUploadProgress("");
-  };
-
-  const handleFiles = (files: FileList | null) => {
+  // 파일 선택 → 미리보기만 생성
+  const handleSelectFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    if (isDBProperty) {
-      handleFilesDB(files);
-      return;
-    }
-    // Static: FileReader → localStorage
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotos(prev => {
-          const next = [...prev, e.target?.result as string];
-          saveToLocal(next);
-          return next;
-        });
-      };
-      reader.readAsDataURL(file);
-    });
+    const arr = Array.from(files);
+    const previews = await Promise.all(arr.map(readFileAsDataURL));
+    setPendingFiles(prev => [...prev, ...arr]);
+    setPendingPreviews(prev => [...prev, ...previews]);
+    setSaved(false);
   };
 
-  const removePhoto = async (idx: number) => {
-    const url = photos[idx];
+  // 대기 사진 제거 (저장 전)
+  const removePending = (idx: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== idx));
+    setPendingPreviews(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // 저장된 사진 제거
+  const removeSaved = async (idx: number) => {
+    const url = savedPhotos[idx];
     if (isDBProperty) {
-      // Storage에서 파일 삭제 (URL에서 경로 추출)
       const bucketBase = supabase.storage.from("property-images").getPublicUrl("").data.publicUrl.replace(/\/$/, "");
       const filePath = url.replace(bucketBase + "/", "");
       await supabase.storage.from("property-images").remove([filePath]);
-      const next = photos.filter((_, i) => i !== idx);
+      const next = savedPhotos.filter((_, i) => i !== idx);
       await supabase.from("properties").update({ images: next }).eq("id", dbId);
-      setPhotos(next);
+      setSavedPhotos(next);
       onImagesUpdated?.(next);
     } else {
-      const next = photos.filter((_, i) => i !== idx);
-      saveToLocal(next);
-      setPhotos(next);
+      const next = savedPhotos.filter((_, i) => i !== idx);
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      setSavedPhotos(next);
     }
   };
+
+  // ── 저장하기 ──
+  const handleSave = async () => {
+    if (pendingFiles.length === 0) return;
+    setSaving(true);
+    setSaved(false);
+
+    if (isDBProperty) {
+      const newUrls: string[] = [];
+      for (let i = 0; i < pendingFiles.length; i++) {
+        setSaveProgress(`저장 중 ${i + 1} / ${pendingFiles.length}…`);
+        const file = pendingFiles[i];
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `${dbId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage
+          .from("property-images")
+          .upload(path, file, { upsert: false });
+        if (!error) {
+          const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+          newUrls.push(urlData.publicUrl);
+        }
+      }
+      const merged = [...savedPhotos, ...newUrls];
+      const { error: updateErr } = await supabase
+        .from("properties")
+        .update({ images: merged })
+        .eq("id", dbId);
+      if (!updateErr) {
+        setSavedPhotos(merged);
+        onImagesUpdated?.(merged);
+        setPendingFiles([]);
+        setPendingPreviews([]);
+        setSaved(true);
+      }
+    } else {
+      // Static: dataURL을 localStorage에 저장
+      const merged = [...savedPhotos, ...pendingPreviews];
+      localStorage.setItem(storageKey, JSON.stringify(merged));
+      setSavedPhotos(merged);
+      setPendingFiles([]);
+      setPendingPreviews([]);
+      setSaved(true);
+    }
+
+    setSaving(false);
+    setSaveProgress("");
+  };
+
+  const totalCount = savedPhotos.length + pendingPreviews.length;
 
   return (
     <>
       <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl w-[min(520px,92vw)] flex flex-col max-h-[82vh]" onClick={e => e.stopPropagation()}>
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
+        style={{ width: "min(560px, 94vw)", maxHeight: "88vh" }}
+        onClick={e => e.stopPropagation()}
+      >
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border rounded-t-2xl flex-shrink-0" style={{ background: "hsl(var(--primary)/0.05)" }}>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(var(--primary)/0.1)" }}>
               <Camera className="w-4 h-4 text-primary" />
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">사진 등록</p>
-              <p className="text-[10px] text-muted-foreground truncate max-w-[320px]">{prop.buildingName ?? prop.title} · {prop.address}</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[340px]">
+                {prop.buildingName ?? prop.title} · {prop.address}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
+          <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          {/* 업로드 드롭존 */}
-          <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
+        {/* 스크롤 영역 */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+
+          {/* 파일 선택 드롭존 */}
+          <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleSelectFiles(e.target.files)} />
           <button
-            disabled={uploading}
+            disabled={saving}
             onClick={() => inputRef.current?.click()}
-            className="w-full border-2 border-dashed border-primary/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors mb-4 disabled:opacity-50"
+            className="w-full border-2 border-dashed rounded-xl py-5 flex flex-col items-center gap-1.5 transition-colors disabled:opacity-50"
+            style={{ borderColor: "hsl(var(--primary)/0.3)" }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = "hsl(var(--primary)/0.6)")}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = "hsl(var(--primary)/0.3)")}
           >
-            {uploading ? (
-              <>
-                <Upload className="w-8 h-8 text-primary animate-bounce" />
-                <span className="text-sm font-semibold text-primary">{uploadProgress}</span>
-              </>
-            ) : (
-              <>
-                <Camera className="w-8 h-8 text-primary/50" />
-                <span className="text-sm font-semibold text-primary">사진 선택 / 드래그</span>
-                <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등 — 여러 장 동시 선택 가능</span>
-              </>
-            )}
+            <Camera className="w-7 h-7" style={{ color: "hsl(var(--primary)/0.5)" }} />
+            <span className="text-sm font-semibold text-primary">사진 선택</span>
+            <span className="text-[11px] text-muted-foreground">JPG · PNG · WEBP — 여러 장 동시 선택 가능</span>
           </button>
 
-          {/* 사진 그리드 */}
-          {photos.length > 0 ? (
-            <div className="grid grid-cols-3 gap-2">
-              {photos.map((src, idx) => (
-                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-border">
-                  {idx === 0 && (
-                    <span className="absolute top-1 left-1 z-10 text-[8px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
-                  )}
-                  <img src={src} alt="" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => removePhoto(idx)}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="w-3 h-3 text-white" />
-                  </button>
-                </div>
-              ))}
+          {/* 새로 선택된 사진 (미리보기, 미저장) */}
+          {pendingPreviews.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-bold text-foreground">새로 선택한 사진</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))" }}>
+                  {pendingPreviews.length}장
+                </span>
+                <span className="text-[10px] text-muted-foreground">— 아직 저장되지 않았습니다</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {pendingPreviews.map((src, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border-2" style={{ borderColor: "hsl(var(--accent)/0.4)" }}>
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => removePending(idx)}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                    <span className="absolute bottom-0 inset-x-0 text-center text-[8px] font-semibold text-white py-0.5" style={{ background: "hsl(var(--accent)/0.7)" }}>미저장</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          ) : (
-            <p className="text-center text-[11px] text-muted-foreground mt-2">등록된 사진이 없습니다</p>
+          )}
+
+          {/* 이미 저장된 사진 */}
+          {savedPhotos.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] font-bold text-foreground">저장된 사진</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>
+                  {savedPhotos.length}장
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {savedPhotos.map((src, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-border">
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 z-10 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary))" }}>대표</span>
+                    )}
+                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => removeSaved(idx)}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {totalCount === 0 && (
+            <p className="text-center text-[11px] text-muted-foreground py-4">사진을 선택해 주세요</p>
           )}
         </div>
 
-        <div className="px-4 py-2.5 border-t border-border flex-shrink-0 flex items-center justify-between">
-          <span className="text-[10px] text-muted-foreground">
-            {isDBProperty ? "✓ 사진은 서버에 저장됩니다" : "✓ 사진은 이 기기에 임시 저장됩니다"}
+        {/* 하단 푸터 — 저장 버튼 */}
+        <div className="px-4 py-3 border-t border-border flex-shrink-0 flex items-center gap-3">
+          <span className="text-[10px] text-muted-foreground flex-1">
+            {isDBProperty ? "✓ 서버에 저장됩니다" : "✓ 이 기기에 저장됩니다"}
+            {totalCount > 0 && <span className="ml-1 font-semibold text-primary">· 총 {totalCount}장</span>}
           </span>
-          <span className="text-[10px] font-semibold text-primary">{photos.length}장</span>
+
+          {saved && pendingFiles.length === 0 && (
+            <span className="text-[11px] font-bold flex items-center gap-1" style={{ color: "hsl(var(--primary))" }}>
+              <CheckCircle className="w-3.5 h-3.5" /> 저장 완료
+            </span>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={pendingFiles.length === 0 || saving}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "hsl(var(--primary))", color: "white" }}
+          >
+            {saving ? (
+              <>
+                <Upload className="w-4 h-4 animate-bounce" />
+                {saveProgress || "저장 중…"}
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4" />
+                사진 저장하기
+                {pendingFiles.length > 0 && <span className="ml-0.5 text-white/80">({pendingFiles.length})</span>}
+              </>
+            )}
+          </button>
         </div>
       </div>
     </>
