@@ -202,7 +202,13 @@ const FLOOR_OPTIONS = [
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","전자키","인터넷","복층","옥탑","테라스","주차",
+  "옷장","전자키","복층","옥탑","테라스","주차",
+];
+// 부가 시설 옵션 (이모지 뱃지로 표시)
+const EXTRA_FACILITY_OPTIONS: { key: string; label: string; emoji: string; bg: string; color: string; border: string }[] = [
+  { key: "수도",   label: "수도",   emoji: "🚿", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+  { key: "유선TV", label: "유선TV", emoji: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+  { key: "인터넷", label: "인터넷", emoji: "📶", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
@@ -795,6 +801,37 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         }`}
                       >
                         {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Section>
+
+              {/* 부가 시설 (수도·유선TV·인터넷) */}
+              <Section label="부가 시설">
+                <div className="flex flex-wrap gap-2">
+                  {EXTRA_FACILITY_OPTIONS.map(({ key, label, emoji, bg, color, border }) => {
+                    const isActive = form.options.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setForm((f) => ({
+                            ...f,
+                            options: isActive
+                              ? f.options.filter((o) => o !== key)
+                              : [...f.options, key],
+                          }));
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
+                        style={isActive
+                          ? { background: color, color: "#fff", borderColor: color }
+                          : { background: bg, color, borderColor: border }
+                        }
+                      >
+                        <span>{emoji}</span>
+                        <span>{label}</span>
                       </button>
                     );
                   })}
