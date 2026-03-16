@@ -56,6 +56,7 @@ const Index = () => {
           properties={filtered}
           selectedId={selectedId}
           onSelect={setSelectedId}
+          onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={setActiveType}
           query={query}
