@@ -4,9 +4,10 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
-import { LayoutGrid, Map, List } from "lucide-react";
+import { Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
@@ -44,7 +45,12 @@ const MapSearch = () => {
   // lat/lng가 유효한 매물만 지도에 표시 (0,0은 제외)
   const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
 
-  const selected = allProperties.find((p) => p.id === selectedId) ?? null;
+  // 핀 클릭 시 선택된 매물
+  const selectedProperty = allProperties.find((p) => p.id === selectedId) ?? null;
+
+  const handlePinSelect = (id: number) => {
+    setSelectedId(prev => prev === id ? null : id);
+  };
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
@@ -120,11 +126,11 @@ const MapSearch = () => {
         style={{ minHeight: 0 }}
       >
         {/* 지도 영역 */}
-        <div className="flex-1 relative min-w-0">
+        <div className="flex-1 relative min-w-0" style={{ minHeight: 0 }}>
           <MapView
             properties={mappableProperties}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handlePinSelect}
           />
           {/* 필터 바 오버레이 */}
           <MapFilterBar
@@ -140,15 +146,27 @@ const MapSearch = () => {
           />
         </div>
 
-        {/* 우측 사이드바 */}
-        <MapSidebar
-          properties={filtered}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          activeType={activeType}
-          onTypeChange={setActiveType}
-          onDeleteProperties={handleDeleteProperties}
-        />
+        {/* 핀 클릭 시 매물 상세 패널 (우측) */}
+        {selectedProperty && (
+          <div className="flex-shrink-0 w-80 border-l border-border overflow-y-auto" style={{ background: "hsl(var(--background))" }}>
+            <PropertyDetailPanel
+              property={selectedProperty}
+              onClose={() => setSelectedId(null)}
+            />
+          </div>
+        )}
+
+        {/* 핀 미선택 시 기존 사이드바 */}
+        {!selectedProperty && (
+          <MapSidebar
+            properties={filtered}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            activeType={activeType}
+            onTypeChange={setActiveType}
+            onDeleteProperties={handleDeleteProperties}
+          />
+        )}
       </main>
     </div>
   );
