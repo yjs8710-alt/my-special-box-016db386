@@ -838,60 +838,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   })}
                 </div>
               </Section>
-                <div className="flex flex-wrap gap-2">
-                  {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
-                    const isActive = form.options.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setForm((f) => ({
-                            ...f,
-                            options: isActive
-                              ? f.options.filter((o) => o !== key)
-                              : [...f.options, key],
-                          }));
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
-                        style={isActive
-                          ? { background: color, color: "#fff", borderColor: color }
-                          : { background: bg, color, borderColor: border }
-                        }
-                      >
-                        <span>{icon}</span>
-                        <span>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-                    const isActive = form.options.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          setForm((f) => ({
-                            ...f,
-                            options: isActive
-                              ? f.options.filter((o) => o !== key)
-                              : [...f.options, key],
-                          }));
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
-                        style={isActive
-                          ? { background: color, color: "#fff", borderColor: color }
-                          : { background: bg, color, borderColor: border }
-                        }
-                      >
-                        <span>{emoji}</span>
-                        <span>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
+
 
               {/* 방 옵션 */}
               <Section label="방 옵션">
