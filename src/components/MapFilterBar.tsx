@@ -330,6 +330,7 @@ const MapFilterBar = ({
   onFiltersChange,
   onLandlordClick,
   hideSearchBar = false,
+  topOffset,
   showCategoryChips = false,
   showResidentialTypes = false,
   nonResidentialSubtypes,
