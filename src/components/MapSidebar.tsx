@@ -98,13 +98,13 @@ const markRevealed = (id: number, type: string) => localStorage.setItem(revealKe
 /* ── ContactEmojiRow ── */
 interface ContactEmojiRowProps {
   propId: number;
-  type: "owner" | "manager";
+  type: "owner" | "manager" | "tenant" | "broker";
   number: string | null;
 }
 
 const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
-  const emoji = type === "owner" ? "🏠" : "👤";
-  const label = type === "owner" ? "건물주" : "관리인";
+  const emoji = type === "owner" ? "🏠" : type === "tenant" ? "🧑" : type === "broker" ? "📞" : "👤";
+  const label = type === "owner" ? "건물주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
 
