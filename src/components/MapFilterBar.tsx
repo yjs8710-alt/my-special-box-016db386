@@ -129,6 +129,7 @@ interface MapFilterBarProps {
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
   hideSearchBar?: boolean;
+  topOffset?: number;
   showCategoryChips?: boolean;
   showResidentialTypes?: boolean;
   nonResidentialSubtypes?: { label: string; group: string }[];
@@ -329,6 +330,7 @@ const MapFilterBar = ({
   onFiltersChange,
   onLandlordClick,
   hideSearchBar = false,
+  topOffset,
   showCategoryChips = false,
   showResidentialTypes = false,
   nonResidentialSubtypes,
@@ -382,7 +384,7 @@ const MapFilterBar = ({
   return (
     <div
       className="fixed z-[1000] pointer-events-none"
-      style={{ top: 148, left: 16, right: "auto", width: "auto", maxWidth: 520 }}
+      style={{ top: topOffset ?? 148, left: 16, right: "auto", width: "auto", maxWidth: 520 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
