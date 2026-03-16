@@ -47,6 +47,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     contact: parseContact("부동산") ?? "",
     contactOwner: parseContact("건물주"),
     contactManager: parseContact("관리인"),
+    contactTenant: parseContact("세입자"),
     agentName: String(row.agent_name ?? ""),
     manageFee: String(row.manage_fee ?? ""),
     parking: String(row.parking ?? ""),

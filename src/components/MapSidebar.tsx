@@ -98,13 +98,13 @@ const markRevealed = (id: number, type: string) => localStorage.setItem(revealKe
 /* ── ContactEmojiRow ── */
 interface ContactEmojiRowProps {
   propId: number;
-  type: "owner" | "manager";
+  type: "owner" | "manager" | "tenant" | "broker";
   number: string | null;
 }
 
 const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
-  const emoji = type === "owner" ? "🏠" : "👤";
-  const label = type === "owner" ? "건물주" : "관리인";
+  const emoji = type === "owner" ? "🏠" : type === "tenant" ? "🧑" : type === "broker" ? "📞" : "👤";
+  const label = type === "owner" ? "건물주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
 
@@ -1051,20 +1051,16 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         )}
       </div>
 
-      {/* 3줄: 연락처 버튼들 | 퇴거일 | 특이사항 */}
+      {/* 3줄: 옵션아이콘 | 퇴거일 | 특이사항 */}
       <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[18px]">
-        {contacts.map(c => (
-          <ContactRevealBtn
-            key={c.label}
-            propId={prop.id}
-            label={c.label}
-            shortLabel={c.short}
-            number={c.num}
-            colorStyle={c.color}
-            borderStyle={c.border}
-          />
-        ))}
-        {contacts.length === 0 && <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">연락처없음</span>}
+        {prop.options && prop.options.length > 0 ? (
+          <>
+            {prop.options.slice(0, 6).map((opt) => (
+              <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? "•"}</span>
+            ))}
+            {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 6}</span>}
+          </>
+        ) : <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">옵션없음</span>}
         {prop.vacateDate && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
@@ -1669,10 +1665,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           )}
                         </div>
 
-                        {/* ②건물주/관리인 36px */}
+                        {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
                         <div className="w-[36px] flex-shrink-0 flex flex-col border-l border-border/30">
                           <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
-                          <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? prop.contact ?? null} />
+                          <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
+                          <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
                         </div>
 
                          {/* ③메인 정보 — 3줄 고정 레이아웃 */}

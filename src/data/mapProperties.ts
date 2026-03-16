@@ -39,6 +39,7 @@ export interface MapProperty {
   contact: string;
   contactOwner?: string;
   contactManager?: string;
+  contactTenant?: string;
   agentName: string;
   manageFee: string;
   parking: string;
