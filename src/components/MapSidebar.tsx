@@ -1014,6 +1014,7 @@ interface AddressToggleCardProps {
 }
 const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
   const [showFullAddr, setShowFullAddr] = useState(false);
+  const [showOptionsPopup, setShowOptionsPopup] = useState(false);
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
