@@ -337,6 +337,7 @@ const ApartmentRental = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             hideSearchBar={showRegister}
+            topOffset={97}
             showCategoryChips={false}
             showRoomTypes={false}
             showApartmentFilters={true}
