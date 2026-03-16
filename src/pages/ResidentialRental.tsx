@@ -6,7 +6,6 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MapProperty } from "@/data/mapProperties";
 import property1 from "@/assets/property1.jpg";
 import property2 from "@/assets/property2.jpg";
@@ -338,24 +337,13 @@ const ResidentialRental = () => {
             showRoomTypes={false}
           />
         </div>
-
-        {/* 매물 선택 시 상세패널, 아닐 때 목록 사이드바 */}
-        {selectedId !== null ? (
-          <div className="w-[340px] flex-shrink-0 h-full overflow-y-auto border-l border-border bg-background">
-            <PropertyDetailPanel
-              property={filtered.find((p) => p.id === selectedId) ?? null}
-              onClose={() => setSelectedId(null)}
-            />
-          </div>
-        ) : (
-          <MapSidebar
-            properties={filtered}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            activeType={activeType}
-            onTypeChange={(t) => toggleType(t)}
-          />
-        )}
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+        />
       </main>
     </div>
   );
