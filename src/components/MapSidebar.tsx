@@ -1014,7 +1014,6 @@ interface AddressToggleCardProps {
 }
 const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
   const [showFullAddr, setShowFullAddr] = useState(false);
-  const [showOptionsPopup, setShowOptionsPopup] = useState(false);
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
@@ -1123,42 +1122,38 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           </span>
         )}
         <span className="flex-1" />
-        {/* ⑦ 옵션 — 풀옵션이면 클릭 가능 배지, 아니면 SVG 아이콘 */}
+        {/* ⑦ 옵션 — 풀옵션이면 호버 팝업 배지, 아니면 SVG 아이콘 */}
         {prop.options && prop.options.length > 0 && (() => {
           const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
           if (isFull) return (
-            <div className="relative flex-shrink-0">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setShowOptionsPopup(v => !v); }}
-                className="text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap transition-all hover:scale-105 active:scale-95"
+            <div
+              className="relative flex-shrink-0 group"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span
+                className="text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
                 style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }}
               >
                 풀옵션 ▾
-              </button>
-              {showOptionsPopup && (
-                <>
-                  <div className="fixed inset-0 z-[8998]" onClick={(e) => { e.stopPropagation(); setShowOptionsPopup(false); }} />
-                  <div
-                    className="absolute right-0 top-full mt-1 z-[8999] bg-white border border-border rounded-xl shadow-xl p-2.5"
-                    style={{ minWidth: "160px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>풀옵션 구성</p>
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                      {prop.options!.map((opt) => (
-                        <div key={opt} className="flex items-center gap-1">
-                          <span className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.8 }}>
-                            <OptionSvgIcon name={opt} size={11} />
-                          </span>
-                          <span className="text-[10px] font-semibold text-foreground whitespace-nowrap">{opt}</span>
-                        </div>
-                      ))}
+              </span>
+              {/* 호버 팝업 */}
+              <div
+                className="absolute right-0 top-full mt-1 z-[8999] bg-white border border-border rounded-xl shadow-xl p-2.5 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
+                style={{ minWidth: "160px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
+              >
+                <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>풀옵션 구성</p>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                  {prop.options!.map((opt) => (
+                    <div key={opt} className="flex items-center gap-1">
+                      <span className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.8 }}>
+                        <OptionSvgIcon name={opt} size={11} />
+                      </span>
+                      <span className="text-[10px] font-semibold text-foreground whitespace-nowrap">{opt}</span>
                     </div>
-                  </div>
-                </>
-              )}
+                  ))}
+                </div>
+              </div>
             </div>
           );
           return prop.options.map((opt) => (
