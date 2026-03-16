@@ -978,7 +978,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {prop.buildYear && (
           <span
             className="flex-shrink-0 text-[9px] font-black px-1 py-0.5 whitespace-nowrap"
-            style={{ background: "#111", color: "#fff", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
+            style={{ background: "#fff", color: "#111", border: "1.5px solid #111", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
           </span>
@@ -1022,30 +1022,30 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {/* ① 세부유형 */}
         {prop.roomType && (
           <span className="flex-shrink-0 text-[11px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
-            style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.2)" }}>
+            style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.35)" }}>
             {prop.roomType}
           </span>
         )}
         {/* ② 층 */}
         {floorShort && (
-          <span className="flex-shrink-0 text-[11px] font-bold text-muted-foreground whitespace-nowrap">{floorShort}</span>
+          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{floorShort}</span>
         )}
         {/* ③ 호수 */}
         {prop.unitNumber && (
-          <span className="flex-shrink-0 text-[11px] font-bold text-foreground whitespace-nowrap">{prop.unitNumber}</span>
+          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.unitNumber}</span>
         )}
         {/* 구분선 */}
         {(prop.roomType || floorShort || prop.unitNumber) && (
-          <span className="flex-shrink-0 w-px h-3 bg-border/60" />
+          <span className="flex-shrink-0 w-px h-3 bg-border" />
         )}
         {/* ④ 보증금 */}
-        <span className="flex-shrink-0 text-[12px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
-        <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
+        <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+        <span className="flex-shrink-0 text-[10px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
         {/* ⑤ 월세 */}
         <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
         {/* ⑥ 평수 */}
         {areaShort && (
-          <span className="flex-shrink-0 text-[10px] font-semibold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
+          <span className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
             {areaShort}
           </span>
         )}
@@ -1056,7 +1056,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
           if (isFull) return (
             <span className="flex-shrink-0 text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
-              style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}>
+              style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }}>
               풀옵션
             </span>
           );
@@ -1067,10 +1067,10 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {/* ⑧ 비번 */}
         {(buildingPw || roomPw) && (
           <>
-            <span className="flex-shrink-0 w-px h-3 bg-border/40" />
+            <span className="flex-shrink-0 w-px h-3 bg-border" />
             <div className="flex items-center gap-0.5 flex-shrink-0">
-              <KeyRound className="w-2.5 h-2.5 text-muted-foreground" />
-              {buildingPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>{buildingPw}</span>}
+              <KeyRound className="w-2.5 h-2.5" style={{ color: "hsl(var(--foreground)/0.5)" }} />
+              {buildingPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.7)" }}>{buildingPw}</span>}
               {roomPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
             </div>
           </>
