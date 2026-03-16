@@ -884,7 +884,52 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
   );
 };
 
-/* ── AddressToggleCard ── 매인정보 3줄 (주소 클릭 토글) */
+/* ── ContactRevealBtn ── 연락처 클릭 시 번호 인라인 표시 */
+interface ContactRevealBtnProps {
+  propId: number;
+  label: string;
+  shortLabel: string;
+  number: string;
+  colorStyle: React.CSSProperties;
+  borderStyle: React.CSSProperties;
+}
+const ContactRevealBtn = ({ propId, label, shortLabel, number, colorStyle, borderStyle }: ContactRevealBtnProps) => {
+  const [revealed, setRevealed] = useState(() => hasRevealedToday(propId, label));
+  const [showNum, setShowNum] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!revealed) { markRevealed(propId, label); setRevealed(true); }
+    setShowNum(v => !v);
+  };
+
+  if (showNum) {
+    return (
+      <a
+        href={`tel:${number}`}
+        onClick={(e) => e.stopPropagation()}
+        className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-extrabold border whitespace-nowrap flex-shrink-0 transition-colors"
+        style={colorStyle}
+      >
+        <Phone className="w-2.5 h-2.5 flex-shrink-0" />
+        {number}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap flex-shrink-0 transition-all hover:opacity-80"
+      style={borderStyle}
+    >
+      {shortLabel}
+    </button>
+  );
+};
+
+/* ── AddressToggleCard ── 매인정보 레이아웃 (이미지 참고 레이아웃) */
 interface AddressToggleCardProps {
   prop: MapProperty;
   idx: number;
@@ -898,37 +943,65 @@ interface AddressToggleCardProps {
 const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
   const [showFullAddr, setShowFullAddr] = useState(false);
 
-  return (
-    <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2" style={{ height: "76px", justifyContent: "space-evenly" }}>
+  // 면적에서 평수만 추출
+  const areaShort = prop.area ? prop.area.match(/(\d+)\s*평/)?.[0] ?? prop.area.split(" ")[0] : "";
+  // floor에서 층 숫자만 (예: "3층" → "3F")
+  const floorShort = prop.floor ? prop.floor.replace(/층/g, "F").replace(/지상\s*/g, "") : "";
+  // 연락처 버튼 목록
+  const contacts: { label: string; short: string; num: string; color: React.CSSProperties; border: React.CSSProperties }[] = [];
+  if (prop.contactOwner) contacts.push({
+    label: "건물주", short: "건물주",
+    num: prop.contactOwner,
+    color: { background: "#dcfce7", color: "#15803d", borderColor: "#86efac" },
+    border: { background: "transparent", color: "#15803d", borderColor: "#86efac" },
+  });
+  if (prop.contactManager) contacts.push({
+    label: "관리인", short: "관리인",
+    num: prop.contactManager,
+    color: { background: "#dbeafe", color: "#1d4ed8", borderColor: "#93c5fd" },
+    border: { background: "transparent", color: "#1d4ed8", borderColor: "#93c5fd" },
+  });
+  if (prop.contact) contacts.push({
+    label: "부동산",
+    short: prop.agentName ? `${prop.agentName.slice(0, 3)}문의` : "부동산",
+    num: prop.contact,
+    color: { background: "#fff7ed", color: "#c2410c", borderColor: "#fdba74" },
+    border: { background: "transparent", color: "#c2410c", borderColor: "#fdba74" },
+  });
 
-      {/* 1줄: 준공년도 | 건물명 | 로드뷰 | 보증금/월세 | 메모·날짜 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "22px" }}>
+  return (
+    <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+
+      {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
+      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[20px]">
         {prop.buildYear && (
           <span
-            className="flex-shrink-0 text-[9px] font-black px-1 py-0.5 whitespace-nowrap border"
-            style={{ background: "#111", color: "#fff", borderColor: "#111", borderRadius: "3px", letterSpacing: "-0.02em" }}
+            className="flex-shrink-0 text-[9px] font-black px-1 py-0.5 whitespace-nowrap"
+            style={{ background: "#111", color: "#fff", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
           </span>
         )}
         <p className="text-[12px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setShowFullAddr(v => !v); }}
+          className="text-[11px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
+          style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+          title="클릭하면 전체 주소 표시"
+        >
+          {showFullAddr ? prop.address : shortAddress(prop.address)}
+        </button>
         <a
-          href={
-            prop.lat && prop.lng
-              ? `https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`
-              : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}&map_type=TYPE_ROADVIEW`
-          }
-          target="_blank"
-          rel="noopener noreferrer"
+          href={prop.lat && prop.lng
+            ? `https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`
+            : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}&map_type=TYPE_ROADVIEW`}
+          target="_blank" rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
           className="flex-shrink-0 px-1 py-0.5 rounded text-[8px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
           style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
         >로드뷰</a>
-        <span className="flex-shrink-0 text-[11px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
-        <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
-        <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
         <span className="flex-1" />
-        <span className="flex-shrink-0 w-px h-3 bg-border/50" />
         <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
         <span className="flex-shrink-0 text-[9px] font-bold text-muted-foreground whitespace-nowrap">
@@ -936,53 +1009,69 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         </span>
       </div>
 
-      {/* 2줄: 주소(클릭 토글) | 층·호수 | 비번 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "20px" }}>
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); setShowFullAddr(v => !v); }}
-          className="text-[12px] text-muted-foreground font-semibold whitespace-nowrap flex-shrink-0 hover:text-foreground transition-colors underline decoration-dotted underline-offset-2 cursor-pointer"
-          title="클릭하면 전체 주소 표시"
-        >
-          {showFullAddr ? prop.address : shortAddress(prop.address)}
-        </button>
-        {prop.roomType && <span className="text-[11px] text-primary font-bold bg-primary/10 px-1.5 rounded flex-shrink-0 whitespace-nowrap">{prop.roomType}</span>}
-        {prop.floor && <span className="text-[11px] text-muted-foreground font-bold flex-shrink-0 whitespace-nowrap">{prop.floor}</span>}
-        {prop.unitNumber && <span className="text-[11px] text-accent font-bold bg-accent/10 px-1.5 rounded flex-shrink-0 whitespace-nowrap">{prop.unitNumber}</span>}
-        {buildingPw && (
+      {/* 2줄: 유형(층) 호수 | 보증금/월세 | 평수 → 옵션아이콘 | 비번 */}
+      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[20px]">
+        {/* 남향 뱃지 (note에 포함된 경우) */}
+        {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
+          <span className="flex-shrink-0 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap"
+            style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>
+            {prop.note.match(/[남북동서]향/)?.[0]}
+          </span>
+        )}
+        {/* 유형(층) 호수 — 하나의 배지로 묶기 */}
+        {(prop.roomType || floorShort || prop.unitNumber) && (
+          <span
+            className="flex-shrink-0 text-[11px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+            style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.2)" }}
+          >
+            {[prop.roomType, floorShort && `(${floorShort})`, prop.unitNumber].filter(Boolean).join(" ")}
+          </span>
+        )}
+        {/* 보증금/월세 */}
+        <span className="flex-shrink-0 text-[12px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
+        <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
+        <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+        {areaShort && <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">{areaShort}</span>}
+        <span className="flex-1" />
+        {/* 옵션 아이콘들 */}
+        {prop.options && prop.options.slice(0, 4).map((opt) => (
+          <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
+        ))}
+        {prop.options && prop.options.length > 4 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 4}</span>}
+        {/* 비번 */}
+        {(buildingPw || roomPw) && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
             <div className="flex items-center gap-0.5 flex-shrink-0">
-              <KeyRound className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[11px] font-extrabold text-muted-foreground font-mono whitespace-nowrap">건{buildingPw}</span>
+              <KeyRound className="w-2.5 h-2.5 text-muted-foreground" />
+              {buildingPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>{buildingPw}</span>}
+              {roomPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
             </div>
           </>
         )}
-        {roomPw && (
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            <KeyRound className="w-3 h-3 text-accent" />
-            <span className="text-[11px] font-extrabold text-accent font-mono whitespace-nowrap">방{roomPw}</span>
-          </div>
-        )}
       </div>
 
-      {/* 3줄: 옵션 | 퇴거일 | 특이사항 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "18px" }}>
-        {prop.options && prop.options.length > 0 ? (
-          <>
-            {prop.options.slice(0, 5).map((opt) => (
-              <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? "•"}</span>
-            ))}
-            {prop.options.length > 5 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 5}</span>}
-          </>
-        ) : <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">옵션없음</span>}
+      {/* 3줄: 연락처 버튼들 | 퇴거일 | 특이사항 */}
+      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[18px]">
+        {contacts.map(c => (
+          <ContactRevealBtn
+            key={c.label}
+            propId={prop.id}
+            label={c.label}
+            shortLabel={c.short}
+            number={c.num}
+            colorStyle={c.color}
+            borderStyle={c.border}
+          />
+        ))}
+        {contacts.length === 0 && <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">연락처없음</span>}
         {prop.vacateDate && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
             <span className="text-[9px] font-bold flex-shrink-0 whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>퇴거{prop.vacateDate}</span>
           </>
         )}
-        {prop.note && !/[0-9]{3}[-\s]?[0-9]{3,4}[-\s]?[0-9]{4}/.test(prop.note) && (
+        {prop.note && !/[0-9]{3}[-\s]?[0-9]{3,4}[-\s]?[0-9]{4}/.test(prop.note) && !/[남북동서]향/.test(prop.note) && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
             <span className="text-[9px] text-muted-foreground flex-shrink-0 truncate" title={prop.note}>※{prop.note}</span>
@@ -1516,8 +1605,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                       }`}
                     >
-                      {/* Row: 3줄 고정 레이아웃 */}
-                      <div className="flex items-stretch" style={{ width: "100%", height: "76px" }}>
+                      {/* Row: 3줄 레이아웃 */}
+                      <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
 
                         {/* ①썸네일 76px */}
                         <div className="w-[76px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "76px" }}>
