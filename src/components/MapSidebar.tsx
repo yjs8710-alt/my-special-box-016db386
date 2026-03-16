@@ -1051,20 +1051,16 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         )}
       </div>
 
-      {/* 3줄: 연락처 버튼들 | 퇴거일 | 특이사항 */}
+      {/* 3줄: 옵션아이콘 | 퇴거일 | 특이사항 */}
       <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[18px]">
-        {contacts.map(c => (
-          <ContactRevealBtn
-            key={c.label}
-            propId={prop.id}
-            label={c.label}
-            shortLabel={c.short}
-            number={c.num}
-            colorStyle={c.color}
-            borderStyle={c.border}
-          />
-        ))}
-        {contacts.length === 0 && <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">연락처없음</span>}
+        {prop.options && prop.options.length > 0 ? (
+          <>
+            {prop.options.slice(0, 6).map((opt) => (
+              <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? "•"}</span>
+            ))}
+            {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 6}</span>}
+          </>
+        ) : <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">옵션없음</span>}
         {prop.vacateDate && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
