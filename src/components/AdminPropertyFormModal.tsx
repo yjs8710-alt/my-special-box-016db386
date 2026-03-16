@@ -402,8 +402,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
     set("lot_number", lot);
-    // 동+번지가 모두 있으면 좌표 자동 조회
-    if (d && lot) geocodeAddress(fullAddress);
+    // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
+    if (d) geocodeAddress(fullAddress);
     // 신규 등록 시에만 연락처 자동 불러오기 (기존 연락처 덮어쓰지 않기 위해)
     if (!initial?.id && d) fetchContactFromDB(d, lot);
   };
@@ -682,8 +682,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         ✅ 좌표 확인: {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
                       </p>
                     )}
-                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && form.lot_number && (
-                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 확인해주세요.</p>
+                    {!geocoding && form.lat === 0 && form.lng === 0 && form.dong && (
+                      <p className="text-[11px] text-warning px-1">⚠️ 좌표를 찾을 수 없습니다. 번지를 정확히 입력해주세요.</p>
                     )}
                   </div>
                 )}
