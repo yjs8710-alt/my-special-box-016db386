@@ -978,7 +978,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {prop.buildYear && (
           <span
             className="flex-shrink-0 text-[9px] font-black px-1 py-0.5 whitespace-nowrap"
-            style={{ background: "#111", color: "#fff", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
+            style={{ background: "#fff", color: "#111", border: "1.5px solid #111", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
           </span>
