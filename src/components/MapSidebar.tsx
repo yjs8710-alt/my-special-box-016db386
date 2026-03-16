@@ -943,8 +943,9 @@ interface AddressToggleCardProps {
 const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
   const [showFullAddr, setShowFullAddr] = useState(false);
 
-  // 면적에서 평수만 추출
-  const areaShort = prop.area ? prop.area.match(/(\d+)\s*평/)?.[0] ?? prop.area.split(" ")[0] : "";
+  // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "99㎡ (30평)" → "30평")
+  const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
+  const areaShort = pyeong ? pyeong[1] + "평" : (prop.area ? prop.area.split(" ")[0] : "");
   // floor에서 층 숫자만 (예: "3층" → "3F")
   const floorShort = prop.floor ? prop.floor.replace(/층/g, "F").replace(/지상\s*/g, "") : "";
   // 연락처 버튼 목록
