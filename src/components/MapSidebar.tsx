@@ -1540,19 +1540,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                {selectedId !== null && (
-                  <div className="flex items-center justify-between px-2 py-1 mb-1 rounded-lg bg-primary/5 border border-primary/15">
-                    <span className="text-[10px] font-semibold text-primary">핀 선택됨 — 해당 매물만 표시</span>
-                    <button
-                      onClick={() => onDeselect?.()}
-                      className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded hover:bg-muted"
-                    >
-                      전체보기
-                    </button>
-                  </div>
-                )}
                  {[...properties]
-                  .filter((p) => selectedId === null || p.id === selectedId)
                   .sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
