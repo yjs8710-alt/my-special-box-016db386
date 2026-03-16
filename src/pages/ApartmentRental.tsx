@@ -317,7 +317,7 @@ const ApartmentRental = () => {
 
       <main
         className="flex-1 overflow-hidden flex relative"
-        style={{ height: "calc(100vh - 56px - 41px)" }}
+        style={{ minHeight: 0 }}
       >
         <div className="flex-1 relative min-w-0">
           <MapView
