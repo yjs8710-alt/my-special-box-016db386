@@ -650,7 +650,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
                     <div className="flex flex-wrap gap-1.5">
                       {types.map((t) => (
-                        <button key={t} type="button" onClick={() => { set("type", t); set("room_type", ""); }}
+                        <button key={t} type="button" onClick={() => { set("type", t); set("room_type", t); }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
                             ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
@@ -719,27 +719,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              {/* 세부유형 / 층수 / 호수 / 평수 */}
-              <div className="grid grid-cols-4 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">세부유형</label>
-                  {ROOM_TYPE_MAP[form.type] ? (
-                    <AdminSelect
-                      value={form.room_type ?? ""}
-                      onChange={(v) => set("room_type", v)}
-                      placeholder="선택"
-                      options={ROOM_TYPE_MAP[form.type]}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="직접입력"
-                      value={form.room_type ?? ""}
-                      onChange={(e) => set("room_type", e.target.value)}
-                      className={ic}
-                    />
-                  )}
-                </div>
+              {/* 층수 / 호수 / 평수 */}
+              <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
                   <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
