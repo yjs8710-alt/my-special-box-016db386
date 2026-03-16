@@ -1134,38 +1134,67 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           </span>
         )}
         <span className="flex-1" />
-        {/* ⑦ 특수 뱃지 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV) */}
+        {/* ⑦ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV/CCTV) — 아이콘만 표시 */}
         {(() => {
-          type BadgeDef = { emoji: string; label: string; bg: string; color: string; border: string };
-          const BADGE_OPTIONS: Record<string, BadgeDef> = {
-            "반려동물가능":  { emoji: "🐾", label: "반려동물", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "애완동물가능":  { emoji: "🐾", label: "반려동물", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "반려동물불가":  { emoji: "🚫", label: "반려불가",  bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "애완동물불가":  { emoji: "🚫", label: "반려불가",  bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "수도":         { emoji: "🚿", label: "수도",      bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-            "인터넷":        { emoji: "📶", label: "인터넷",    bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-            "유선TV":        { emoji: "📺", label: "유선TV",    bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-          };
-          const opts = prop.options ?? [];
+          type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
           const badges: JSX.Element[] = [];
-          // 엘리베이터는 prop.elevator boolean 필드에서 읽음
-          if (prop.elevator) {
+          const opts = prop.options ?? [];
+
+          // 엘리베이터 (boolean 필드)
+          if (prop.elevator) badges.push(
+            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+              style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </span>
+          );
+
+          // 옵션 배열 기반 아이콘 맵
+          const ICON_MAP: Record<string, IconBadge> = {
+            "반려동물가능":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "애완동물가능":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물불가":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "애완동물불가":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "수도":          { icon: <Droplet size={11} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+            "인터넷":        { icon: <span className="text-[9px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+            "유선TV":        { icon: <Tv size={11} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+            "CCTV":          { icon: <Cctv size={11} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+          };
+
+          // 반려동물 불가는 금지선 오버레이
+          const isPetDenied = opts.includes("반려동물불가") || opts.includes("애완동물불가");
+          const isPetAllowed = opts.includes("반려동물가능") || opts.includes("애완동물가능");
+
+          if (isPetDenied) {
             badges.push(
-              <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap select-none"
-                style={{ background: "#f0f9ff", color: "#0369a1", border: "1px solid #7dd3fc" }}>
-                🛗<span>엘리베이터</span>
+              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+                style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
+                <Dog size={10} strokeWidth={2}/>
+                <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
+                </span>
+              </span>
+            );
+          } else if (isPetAllowed) {
+            badges.push(
+              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+                style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>
+                <Dog size={10} strokeWidth={2}/>
               </span>
             );
           }
-          opts.filter(o => BADGE_OPTIONS[o]).forEach(opt => {
-            const d = BADGE_OPTIONS[opt];
+
+          const EXTRA_KEYS = ["수도", "인터넷", "유선TV", "CCTV"];
+          opts.filter(o => EXTRA_KEYS.includes(o)).forEach(opt => {
+            const d = ICON_MAP[opt];
+            if (!d) return;
             badges.push(
-              <span key={opt} title={opt} className="flex-shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap select-none"
-                style={{ background: d.bg, color: d.color, border: `1px solid ${d.border}` }}>
-                {d.emoji}<span>{d.label}</span>
+              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+                style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}>
+                {d.icon}
               </span>
             );
           });
+
           return badges;
         })()}
         {/* ⑦-b 옵션 텍스트 배지 — 호버 시 상세 목록 팝업 */}
