@@ -81,12 +81,38 @@ const TYPE_BG: Record<string, string> = {
   "병원·학원": "bg-red-50 text-red-700",
 };
 
+/* 옵션 SVG 아이콘 컴포넌트 */
+const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => {
+  const s = size;
+  const icons: Record<string, JSX.Element> = {
+    "냉장고":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><line x1="5" y1="9" x2="19" y2="9" stroke="currentColor" strokeWidth="1.8"/><line x1="10" y1="5.5" x2="10" y2="7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><line x1="10" y1="13" x2="10" y2="17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+    "세탁기":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="14" r="4.5" stroke="currentColor" strokeWidth="1.8"/><circle cx="8" cy="5.5" r="1" fill="currentColor"/><circle cx="12" cy="5.5" r="1" fill="currentColor"/></svg>,
+    "드럼세탁기":<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="13" r="5" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="13" r="2" stroke="currentColor" strokeWidth="1.5"/></svg>,
+    "건조기":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 12 Q12 8 15 12 Q12 16 9 12Z" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>,
+    "스타일러": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M8 8 Q12 6 16 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/><path d="M8 12h8M8 15h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    "TV":       <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 19 L7 22M15 19 L17 22M7 22 h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    "에어컨":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="8" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M6 17 Q9 14 12 17 Q15 14 18 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/><circle cx="8" cy="9" r="1" fill="currentColor"/></svg>,
+    "가스레인지":<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="8" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="16" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/></svg>,
+    "인덕션":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="8" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 1.5"/><circle cx="16" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 1.5"/></svg>,
+    "전자레인지":<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><rect x="5" y="8" width="10" height="8" rx="1" stroke="currentColor" strokeWidth="1.4"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg>,
+    "침대":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M2 18V12C2 10.9 2.9 10 4 10H20C21.1 10 22 10.9 22 12V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M2 18H22M3 10V7M21 10V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><rect x="6" y="7" width="5" height="3" rx="1" stroke="currentColor" strokeWidth="1.4"/></svg>,
+    "책상":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M3 8H21V10H3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M5 10V18M19 10V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+    "옷장":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="1.5" stroke="currentColor" strokeWidth="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" strokeWidth="1.5"/><line x1="9.5" y1="12" x2="11" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><line x1="13" y1="12" x2="14.5" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    "전자키":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M8 8V6a4 4 0 1 1 8 0v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><circle cx="12" cy="14.5" r="1.5" fill="currentColor"/></svg>,
+    "인터넷":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 3 Q8 12 12 21" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M12 3 Q16 12 12 21" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M3 12 h18" stroke="currentColor" strokeWidth="1.5"/></svg>,
+    "주차":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 17V8h4a3 3 0 0 1 0 6H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    "애완동물가능": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="4.5" cy="9" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="9.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="14.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="19.5" cy="9" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M12 12 C7 12 5 16 5 19 Q8 22 12 22 Q16 22 19 19 C19 16 17 12 12 12Z" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>,
+    "애완동물불가": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+  };
+  return icons[name] ?? <span className="text-[10px] leading-none">{name.slice(0, 1)}</span>;
+};
+
 const OPTION_ICONS: Record<string, string> = {
-  "냉장고": "🧊", "세탁기": "🫧", "드럼세탁기": "🌀", "건조기": "💨",
-  "스타일러": "👔", "TV": "📺", "에어컨": "❄️", "가스레인지": "🔥",
-  "인덕션": "⚡", "전자레인지": "📡", "침대": "🛏", "책상": "🪑",
-  "옷장": "🚪", "전자키": "🔑", "인터넷": "🌐", "주차": "🅿️",
-  "애완동물가능": "🐾", "애완동물불가": "🚫",
+  "냉장고": "냉장고", "세탁기": "세탁기", "드럼세탁기": "드럼세탁기", "건조기": "건조기",
+  "스타일러": "스타일러", "TV": "TV", "에어컨": "에어컨", "가스레인지": "가스레인지",
+  "인덕션": "인덕션", "전자레인지": "전자레인지", "침대": "침대", "책상": "책상",
+  "옷장": "옷장", "전자키": "전자키", "인터넷": "인터넷", "주차": "주차",
+  "애완동물가능": "애완동물가능", "애완동물불가": "애완동물불가",
 };
 
 /* Daily-limit helpers */
@@ -147,9 +173,9 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
 
   if (!number) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none py-1">
+      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none">
         <ContactIcon type={type} />
-        <span className="text-[7px] text-muted-foreground mt-0.5 leading-none font-medium">{label}</span>
+        <span className="text-[6px] text-muted-foreground mt-0.5 leading-none">{label}</span>
       </div>
     );
   }
@@ -166,13 +192,13 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
         type="button"
         onClick={handleClick}
         title={label}
-        className="flex flex-col items-center justify-center w-full h-full py-1 rounded transition-colors hover:bg-primary/8 group"
+        className="flex flex-col items-center justify-center w-full h-full rounded transition-colors hover:bg-primary/10 group"
       >
-        <span className="flex items-center justify-center w-6 h-6 rounded-full transition-all group-hover:scale-110"
+        <span className="flex items-center justify-center w-5 h-5 rounded-full transition-all group-hover:scale-110"
           style={{ background: `${typeColor[type]}18` }}>
           <ContactIcon type={type} active />
         </span>
-        <span className="text-[7px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>{label}</span>
+        <span className="text-[6px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>{label}</span>
       </button>
       {showPopup && (
         <div
@@ -1107,7 +1133,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </span>
           );
           return prop.options.map((opt) => (
-            <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
+            <span key={opt} title={opt} className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.75 }}>
+              <OptionSvgIcon name={opt} size={11} />
+            </span>
           ));
         })()}
         {/* ⑧ 비번 */}
@@ -1719,7 +1747,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                         </div>
 
                         {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
-                        <div className="w-[36px] flex-shrink-0 flex flex-col border-l border-border/30">
+                        <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
                           <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
                           <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
                           <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
