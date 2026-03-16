@@ -483,22 +483,70 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
 };
 
 /* ── PhotoUploadModal ── */
-interface PhotoUploadModalProps { propId: number; address: string; onClose: () => void; }
-const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) => {
-  const storageKey = `photos_${propId}`;
+interface PhotoUploadModalProps {
+  prop: MapProperty;
+  onClose: () => void;
+  onImagesUpdated?: (images: string[]) => void;
+}
+const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalProps) => {
+  const isDBProperty = !!prop.memo; // memo = DB uuid
+  const dbId = prop.memo;
+
+  // DB 매물: prop.images 기준, Static: localStorage 기준
+  const storageKey = `photos_${prop.id}`;
   const [photos, setPhotos] = useState<string[]>(() => {
+    if (isDBProperty) return prop.images ?? (prop.image ? [prop.image] : []);
     try { return JSON.parse(localStorage.getItem(storageKey) ?? "[]"); } catch { return []; }
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Static 매물: localStorage에 저장
+  const saveToLocal = (imgs: string[]) => localStorage.setItem(storageKey, JSON.stringify(imgs));
+
+  // DB 매물: Supabase Storage 업로드 후 properties 테이블 갱신
+  const handleFilesDB = async (files: FileList) => {
+    setUploading(true);
+    const newUrls: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setUploadProgress(`업로드 중 ${i + 1}/${files.length}…`);
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const path = `${dbId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
+      if (!error) {
+        const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+        newUrls.push(urlData.publicUrl);
+      }
+    }
+    // DB 업데이트
+    const merged = [...photos, ...newUrls];
+    const { error: updateErr } = await supabase
+      .from("properties")
+      .update({ images: merged })
+      .eq("id", dbId);
+    if (!updateErr) {
+      setPhotos(merged);
+      onImagesUpdated?.(merged);
+    }
+    setUploading(false);
+    setUploadProgress("");
+  };
+
   const handleFiles = (files: FileList | null) => {
-    if (!files) return;
+    if (!files || files.length === 0) return;
+    if (isDBProperty) {
+      handleFilesDB(files);
+      return;
+    }
+    // Static: FileReader → localStorage
     Array.from(files).forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setPhotos(prev => {
           const next = [...prev, e.target?.result as string];
-          localStorage.setItem(storageKey, JSON.stringify(next));
+          saveToLocal(next);
           return next;
         });
       };
@@ -506,18 +554,29 @@ const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) =
     });
   };
 
-  const removePhoto = (idx: number) => {
-    setPhotos(prev => {
-      const next = prev.filter((_, i) => i !== idx);
-      localStorage.setItem(storageKey, JSON.stringify(next));
-      return next;
-    });
+  const removePhoto = async (idx: number) => {
+    const url = photos[idx];
+    if (isDBProperty) {
+      // Storage에서 파일 삭제 (URL에서 경로 추출)
+      const bucketBase = supabase.storage.from("property-images").getPublicUrl("").data.publicUrl.replace(/\/$/, "");
+      const filePath = url.replace(bucketBase + "/", "");
+      await supabase.storage.from("property-images").remove([filePath]);
+      const next = photos.filter((_, i) => i !== idx);
+      await supabase.from("properties").update({ images: next }).eq("id", dbId);
+      setPhotos(next);
+      onImagesUpdated?.(next);
+    } else {
+      const next = photos.filter((_, i) => i !== idx);
+      saveToLocal(next);
+      setPhotos(next);
+    }
   };
 
   return (
     <>
       <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl w-[min(480px,92vw)] flex flex-col max-h-[80vh]" onClick={e => e.stopPropagation()}>
+      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl w-[min(520px,92vw)] flex flex-col max-h-[82vh]" onClick={e => e.stopPropagation()}>
+        {/* 헤더 */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -525,42 +584,64 @@ const PhotoUploadModal = ({ propId, address, onClose }: PhotoUploadModalProps) =
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">사진 등록</p>
-              <p className="text-[10px] text-muted-foreground truncate max-w-[300px]">{address}</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[320px]">{prop.buildingName ?? prop.title} · {prop.address}</p>
             </div>
           </div>
           <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
+
         <div className="flex-1 overflow-y-auto p-4">
+          {/* 업로드 드롭존 */}
           <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
           <button
+            disabled={uploading}
             onClick={() => inputRef.current?.click()}
-            className="w-full border-2 border-dashed border-primary/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors mb-4"
+            className="w-full border-2 border-dashed border-primary/30 rounded-xl py-6 flex flex-col items-center gap-2 hover:border-primary/60 hover:bg-primary/5 transition-colors mb-4 disabled:opacity-50"
           >
-            <Camera className="w-8 h-8 text-primary/50" />
-            <span className="text-sm font-semibold text-primary">사진 선택 / 드래그</span>
-            <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등 이미지 파일</span>
+            {uploading ? (
+              <>
+                <Upload className="w-8 h-8 text-primary animate-bounce" />
+                <span className="text-sm font-semibold text-primary">{uploadProgress}</span>
+              </>
+            ) : (
+              <>
+                <Camera className="w-8 h-8 text-primary/50" />
+                <span className="text-sm font-semibold text-primary">사진 선택 / 드래그</span>
+                <span className="text-[11px] text-muted-foreground">JPG, PNG, WEBP 등 — 여러 장 동시 선택 가능</span>
+              </>
+            )}
           </button>
-          {photos.length > 0 && (
+
+          {/* 사진 그리드 */}
+          {photos.length > 0 ? (
             <div className="grid grid-cols-3 gap-2">
               {photos.map((src, idx) => (
-                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden group">
+                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-border">
+                  {idx === 0 && (
+                    <span className="absolute top-1 left-1 z-10 text-[8px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full">대표</span>
+                  )}
                   <img src={src} alt="" className="w-full h-full object-cover" />
                   <button
                     onClick={() => removePhoto(idx)}
-                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <X className="w-3 h-3 text-white" />
+                    <Trash2 className="w-3 h-3 text-white" />
                   </button>
                 </div>
               ))}
             </div>
+          ) : (
+            <p className="text-center text-[11px] text-muted-foreground mt-2">등록된 사진이 없습니다</p>
           )}
-          {photos.length === 0 && <p className="text-center text-[11px] text-muted-foreground mt-2">등록된 사진이 없습니다</p>}
         </div>
-        <div className="px-4 py-3 border-t border-border flex-shrink-0">
-          <p className="text-[10px] text-muted-foreground text-center">✓ 사진은 이 기기에 임시 저장됩니다</p>
+
+        <div className="px-4 py-2.5 border-t border-border flex-shrink-0 flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground">
+            {isDBProperty ? "✓ 사진은 서버에 저장됩니다" : "✓ 사진은 이 기기에 임시 저장됩니다"}
+          </span>
+          <span className="text-[10px] font-semibold text-primary">{photos.length}장</span>
         </div>
       </div>
     </>
