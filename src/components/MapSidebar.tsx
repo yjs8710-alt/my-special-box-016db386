@@ -1134,25 +1134,39 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           </span>
         )}
         <span className="flex-1" />
-        {/* ⑦ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV) */}
+        {/* ⑦ 특수 뱃지 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV) */}
         {(() => {
-          const EMOJI_OPTIONS: Record<string, string> = {
-            "반려동물가능": "🐾",
-            "애완동물가능": "🐾",
-            "반려동물불가": "🚫",
-            "애완동물불가": "🚫",
-            "엘리베이터": "🛗",
-            "수도": "🚿",
-            "인터넷": "📶",
-            "유선TV": "📺",
+          type BadgeDef = { emoji: string; label: string; bg: string; color: string; border: string };
+          const BADGE_OPTIONS: Record<string, BadgeDef> = {
+            "반려동물가능":  { emoji: "🐾", label: "반려동물", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "애완동물가능":  { emoji: "🐾", label: "반려동물", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물불가":  { emoji: "🚫", label: "반려불가",  bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "애완동물불가":  { emoji: "🚫", label: "반려불가",  bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "수도":         { emoji: "🚿", label: "수도",      bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+            "인터넷":        { emoji: "📶", label: "인터넷",    bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+            "유선TV":        { emoji: "📺", label: "유선TV",    bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
           };
           const opts = prop.options ?? [];
-          const emojiItems = opts.filter(o => EMOJI_OPTIONS[o]);
-          return emojiItems.map(opt => (
-            <span key={opt} title={opt} className="flex-shrink-0 text-[12px] leading-none cursor-default select-none" style={{ opacity: 0.85 }}>
-              {EMOJI_OPTIONS[opt]}
-            </span>
-          ));
+          const badges: JSX.Element[] = [];
+          // 엘리베이터는 prop.elevator boolean 필드에서 읽음
+          if (prop.elevator) {
+            badges.push(
+              <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap select-none"
+                style={{ background: "#f0f9ff", color: "#0369a1", border: "1px solid #7dd3fc" }}>
+                🛗<span>엘리베이터</span>
+              </span>
+            );
+          }
+          opts.filter(o => BADGE_OPTIONS[o]).forEach(opt => {
+            const d = BADGE_OPTIONS[opt];
+            badges.push(
+              <span key={opt} title={opt} className="flex-shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap select-none"
+                style={{ background: d.bg, color: d.color, border: `1px solid ${d.border}` }}>
+                {d.emoji}<span>{d.label}</span>
+              </span>
+            );
+          });
+          return badges;
         })()}
         {/* ⑦-b 옵션 텍스트 배지 — 호버 시 상세 목록 팝업 */}
         {prop.options && prop.options.length > 0 && (() => {
