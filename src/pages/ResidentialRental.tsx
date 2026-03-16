@@ -243,6 +243,7 @@ const ResidentialRental = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+
   // DB 매물 (주거형)
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
