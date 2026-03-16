@@ -4,9 +4,10 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
-import { LayoutGrid, Map, List } from "lucide-react";
+import { Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
