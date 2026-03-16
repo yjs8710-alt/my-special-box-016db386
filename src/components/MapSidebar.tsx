@@ -1129,7 +1129,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
           if (isFull) return (
             <div
-              className="relative flex-shrink-0 group"
+              className="relative flex-shrink-0"
+              onMouseEnter={() => setShowOptPopup(true)}
+              onMouseLeave={() => setShowOptPopup(false)}
               onClick={(e) => e.stopPropagation()}
             >
               <span
@@ -1139,22 +1141,26 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                 풀옵션 ▾
               </span>
               {/* 호버 팝업 */}
-              <div
-                className="absolute right-0 top-full mt-1 z-[8999] bg-white border border-border rounded-xl shadow-xl p-2.5 pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150"
-                style={{ minWidth: "160px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
-              >
-                <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>풀옵션 구성</p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                  {prop.options!.map((opt) => (
-                    <div key={opt} className="flex items-center gap-1">
-                      <span className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.8 }}>
-                        <OptionSvgIcon name={opt} size={11} />
-                      </span>
-                      <span className="text-[10px] font-semibold text-foreground whitespace-nowrap">{opt}</span>
-                    </div>
-                  ))}
+              {showOptPopup && (
+                <div
+                  className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5"
+                  style={{ minWidth: "160px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)", bottom: "auto", right: "auto", transform: "translateY(-100%) translateY(-4px)" }}
+                  onMouseEnter={() => setShowOptPopup(true)}
+                  onMouseLeave={() => setShowOptPopup(false)}
+                >
+                  <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>풀옵션 구성</p>
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                    {prop.options!.map((opt) => (
+                      <div key={opt} className="flex items-center gap-1">
+                        <span className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.8 }}>
+                          <OptionSvgIcon name={opt} size={11} />
+                        </span>
+                        <span className="text-[10px] font-semibold text-foreground whitespace-nowrap">{opt}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           );
           return prop.options.map((opt) => (
