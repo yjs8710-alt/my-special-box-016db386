@@ -1669,10 +1669,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           )}
                         </div>
 
-                        {/* ②건물주/관리인 36px */}
+                        {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
                         <div className="w-[36px] flex-shrink-0 flex flex-col border-l border-border/30">
                           <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
-                          <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? prop.contact ?? null} />
+                          <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
+                          <ContactEmojiRow propId={prop.id} type="tenant" number={(prop as MapProperty & { contactTenant?: string }).contactTenant ?? null} />
                         </div>
 
                          {/* ③메인 정보 — 3줄 고정 레이아웃 */}
