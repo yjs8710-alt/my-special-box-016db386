@@ -402,8 +402,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (sg.includes("청주시 ")) set("district", sg.replace("청주시 ", ""));
     set("dong", d);
     set("lot_number", lot);
-    // 동+번지가 모두 있으면 좌표 자동 조회
-    if (d && lot) geocodeAddress(fullAddress);
+    // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
+    if (d) geocodeAddress(fullAddress);
     // 신규 등록 시에만 연락처 자동 불러오기 (기존 연락처 덮어쓰지 않기 위해)
     if (!initial?.id && d) fetchContactFromDB(d, lot);
   };
