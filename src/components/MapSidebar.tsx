@@ -1010,33 +1010,47 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         </span>
       </div>
 
-      {/* 2줄: 유형(층) 호수 | 보증금/월세 | 평수 → 옵션아이콘 | 비번 */}
+      {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 평수 | 옵션 | 비번 */}
       <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[20px]">
-        {/* 남향 뱃지 (note에 포함된 경우) */}
+        {/* 남향 뱃지 */}
         {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
           <span className="flex-shrink-0 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap"
             style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>
             {prop.note.match(/[남북동서]향/)?.[0]}
           </span>
         )}
-        {/* 유형(층) 호수 — 하나의 배지로 묶기 */}
-        {(prop.roomType || floorShort || prop.unitNumber) && (
-          <span
-            className="flex-shrink-0 text-[11px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
-            style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.2)" }}
-          >
-            {[prop.roomType, floorShort && `(${floorShort})`, prop.unitNumber].filter(Boolean).join(" ")}
+        {/* ① 세부유형 */}
+        {prop.roomType && (
+          <span className="flex-shrink-0 text-[11px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+            style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.2)" }}>
+            {prop.roomType}
           </span>
         )}
-        {/* 보증금/월세 */}
+        {/* ② 층 */}
+        {floorShort && (
+          <span className="flex-shrink-0 text-[11px] font-bold text-muted-foreground whitespace-nowrap">{floorShort}</span>
+        )}
+        {/* ③ 호수 */}
+        {prop.unitNumber && (
+          <span className="flex-shrink-0 text-[11px] font-bold text-foreground whitespace-nowrap">{prop.unitNumber}</span>
+        )}
+        {/* 구분선 */}
+        {(prop.roomType || floorShort || prop.unitNumber) && (
+          <span className="flex-shrink-0 w-px h-3 bg-border/60" />
+        )}
+        {/* ④ 보증금 */}
         <span className="flex-shrink-0 text-[12px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
         <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
+        {/* ⑤ 월세 */}
         <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+        {/* ⑥ 평수 */}
         {areaShort && (
-          <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">{areaShort}</span>
+          <span className="flex-shrink-0 text-[10px] font-semibold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
+            {areaShort}
+          </span>
         )}
         <span className="flex-1" />
-        {/* 옵션 표시 — 7개 풀옵션이면 "풀옵션" 배지, 아니면 이모티콘 */}
+        {/* ⑦ 옵션 — 풀옵션이면 배지, 아니면 이모티콘 */}
         {prop.options && prop.options.length > 0 && (() => {
           const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
@@ -1050,7 +1064,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
           ));
         })()}
-        {/* 비번 */}
+        {/* ⑧ 비번 */}
         {(buildingPw || roomPw) && (
           <>
             <span className="flex-shrink-0 w-px h-3 bg-border/40" />
