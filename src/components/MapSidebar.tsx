@@ -711,6 +711,7 @@ interface MapSidebarProps {
   properties: MapProperty[];
   selectedId: number | null;
   onSelect: (id: number) => void;
+  onDeselect?: () => void;
   activeType: string;
   onTypeChange: (type: string) => void;
   query?: string;
@@ -723,7 +724,7 @@ const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
