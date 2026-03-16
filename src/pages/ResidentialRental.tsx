@@ -6,7 +6,6 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MapProperty } from "@/data/mapProperties";
 import property1 from "@/assets/property1.jpg";
 import property2 from "@/assets/property2.jpg";
@@ -243,7 +242,6 @@ const ResidentialRental = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-
   // DB 매물 (주거형)
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
@@ -272,21 +270,14 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 시 선택된 매물
-  const selectedProperty = allProperties.find((p) => p.id === selectedId) ?? null;
-
-  const handlePinSelect = (id: number) => {
-    setSelectedId(prev => prev === id ? null : id);
-  };
-
   return (
-    <div style={{ height: "100vh" }} className="flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 주거 유형 탭 - 다중 선택 */}
       <div
-        className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
+        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         <span className="text-white/50 text-xs font-semibold whitespace-nowrap flex-shrink-0">주거 유형</span>
@@ -307,6 +298,7 @@ const ResidentialRental = () => {
             </button>
           );
         })}
+        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
         {!activeTypes.includes("전체") && activeTypes.length > 1 && (
           <button
             onClick={() => setActiveTypes(["전체"])}
@@ -319,14 +311,14 @@ const ResidentialRental = () => {
       </div>
 
       <main
-        className="flex-1 overflow-hidden flex"
-        style={{ minHeight: 0 }}
+        className="flex-1 overflow-hidden flex relative"
+        style={{ height: "calc(100vh - 56px - 41px)" }}
       >
-        <div className="flex-1 relative min-w-0" style={{ minHeight: 0 }}>
+        <div className="flex-1 relative min-w-0">
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={handlePinSelect}
+            onSelect={setSelectedId}
           />
           <MapFilterBar
             activeType={activeType}
@@ -345,27 +337,13 @@ const ResidentialRental = () => {
             showRoomTypes={false}
           />
         </div>
-
-        {/* 핀 클릭 시 매물 상세 패널 (우측) */}
-        {selectedProperty && (
-          <div className="flex-shrink-0 w-80 border-l border-border overflow-y-auto" style={{ background: "hsl(var(--background))" }}>
-            <PropertyDetailPanel
-              property={selectedProperty}
-              onClose={() => setSelectedId(null)}
-            />
-          </div>
-        )}
-
-        {/* 핀 미선택 시 기존 사이드바 */}
-        {!selectedProperty && (
-          <MapSidebar
-            properties={filtered}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            activeType={activeType}
-            onTypeChange={(t) => toggleType(t)}
-          />
-        )}
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+        />
       </main>
     </div>
   );
