@@ -173,9 +173,9 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
 
   if (!number) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none py-1">
+      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none">
         <ContactIcon type={type} />
-        <span className="text-[7px] text-muted-foreground mt-0.5 leading-none font-medium">{label}</span>
+        <span className="text-[6px] text-muted-foreground mt-0.5 leading-none">{label}</span>
       </div>
     );
   }
@@ -192,13 +192,13 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
         type="button"
         onClick={handleClick}
         title={label}
-        className="flex flex-col items-center justify-center w-full h-full py-1 rounded transition-colors hover:bg-primary/8 group"
+        className="flex flex-col items-center justify-center w-full h-full rounded transition-colors hover:bg-primary/10 group"
       >
-        <span className="flex items-center justify-center w-6 h-6 rounded-full transition-all group-hover:scale-110"
+        <span className="flex items-center justify-center w-5 h-5 rounded-full transition-all group-hover:scale-110"
           style={{ background: `${typeColor[type]}18` }}>
           <ContactIcon type={type} active />
         </span>
-        <span className="text-[7px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>{label}</span>
+        <span className="text-[6px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>{label}</span>
       </button>
       {showPopup && (
         <div
