@@ -1015,6 +1015,17 @@ interface AddressToggleCardProps {
 const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
   const [showFullAddr, setShowFullAddr] = useState(false);
   const [showOptPopup, setShowOptPopup] = useState(false);
+  const optBadgeRef = useRef<HTMLDivElement>(null);
+  const [optPopupPos, setOptPopupPos] = useState({ top: 0, left: 0 });
+
+  const handleOptMouseEnter = () => {
+    if (optBadgeRef.current) {
+      const rect = optBadgeRef.current.getBoundingClientRect();
+      setOptPopupPos({ top: rect.top - 4, left: rect.left });
+    }
+    setShowOptPopup(true);
+  };
+
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
