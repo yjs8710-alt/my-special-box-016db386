@@ -217,6 +217,24 @@ const PROPERTY_TYPE_GROUPS = [
   { group: "토지", types: ["토지"] },
 ];
 
+// 매물 유형별 세부유형 목록
+const ROOM_TYPE_MAP: Record<string, string[]> = {
+  "원룸":     ["원룸","복층원룸","옥탑원룸","반지하원룸"],
+  "투베이":   ["투베이","복층투베이"],
+  "투룸":     ["투룸","복층투룸","옥탑투룸"],
+  "쓰리룸":   ["쓰리룸","복층쓰리룸"],
+  "아파트":   ["아파트","주상복합"],
+  "오피스텔": ["오피스텔"],
+  "빌라":     ["빌라","다세대","연립"],
+  "고시원":   ["고시원","고시텔"],
+  "주인세대": ["주인세대","단독주택"],
+  "상가":     ["1층상가","2층상가","지하상가","코너상가","대형상가"],
+  "식당·카페":["카페","식당","패스트푸드","베이커리","분식"],
+  "사무실":   ["소형사무실","중형사무실","대형사무실","오피스","코워킹"],
+  "공장·창고":["소형창고","대형창고","공장","물류센터"],
+  "병원·학원":["병원","의원","학원","어린이집"],
+};
+
 type LhType = typeof LH_TYPES[number];
 
 const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
@@ -632,7 +650,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
                     <div className="flex flex-wrap gap-1.5">
                       {types.map((t) => (
-                        <button key={t} type="button" onClick={() => set("type", t)}
+                        <button key={t} type="button" onClick={() => { set("type", t); set("room_type", ""); }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
                             ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
@@ -701,8 +719,27 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              {/* 층수 / 호수 / 평수 */}
-              <div className="grid grid-cols-3 gap-3">
+              {/* 세부유형 / 층수 / 호수 / 평수 */}
+              <div className="grid grid-cols-4 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">세부유형</label>
+                  {ROOM_TYPE_MAP[form.type] ? (
+                    <AdminSelect
+                      value={form.room_type ?? ""}
+                      onChange={(v) => set("room_type", v)}
+                      placeholder="선택"
+                      options={ROOM_TYPE_MAP[form.type]}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="직접입력"
+                      value={form.room_type ?? ""}
+                      onChange={(e) => set("room_type", e.target.value)}
+                      className={ic}
+                    />
+                  )}
+                </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
                   <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
