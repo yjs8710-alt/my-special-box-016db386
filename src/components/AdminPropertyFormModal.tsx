@@ -202,7 +202,7 @@ const FLOOR_OPTIONS = [
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","전자키","복층","옥탑","테라스","주차",
+  "옷장","전자키","인터넷","복층","옥탑","테라스","주차",
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
@@ -781,6 +781,35 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 방 옵션 */}
               <Section label="방 옵션">
+                {/* 풀옵션 버튼 */}
+                <div className="mb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const FULL_OPTIONS = ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"];
+                      setForm((f) => {
+                        const current = new Set(f.options);
+                        const allSelected = FULL_OPTIONS.every(o => current.has(o));
+                        if (allSelected) {
+                          // 풀옵션 해제
+                          FULL_OPTIONS.forEach(o => current.delete(o));
+                        } else {
+                          // 풀옵션 전체 선택
+                          FULL_OPTIONS.forEach(o => current.add(o));
+                        }
+                        return { ...f, options: Array.from(current) };
+                      });
+                    }}
+                    className="px-4 py-1.5 rounded-xl text-xs font-extrabold border-2 transition-all"
+                    style={
+                      ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"].every(o => form.options.includes(o))
+                        ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { background: "transparent", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }
+                    }
+                  >
+                    ✨ 풀옵션
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {ROOM_OPTIONS.map((opt) => (
                     <button key={opt} type="button" onClick={() => toggleOption(opt)}
