@@ -382,7 +382,7 @@ const MapFilterBar = ({
   return (
     <div
       className="fixed z-[1000] pointer-events-none"
-      style={{ top: 113, left: 16, right: "auto", width: "auto", maxWidth: 520 }}
+      style={{ top: 105, left: 16, right: "auto", width: "auto", maxWidth: 520 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
