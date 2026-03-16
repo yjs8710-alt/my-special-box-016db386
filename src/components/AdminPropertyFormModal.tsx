@@ -202,10 +202,10 @@ const FLOOR_OPTIONS = [
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","전자키","인터넷","복층","옥탑","테라스","주차",
+  "옷장","전자키","복층","옥탑","테라스","주차",
 ];
-// 건물 부가 옵션 (수도·유선TV 등)
-const BUILDING_EXTRA_OPTIONS: { key: string; label: string; emoji: string; bg: string; color: string; border: string }[] = [
+// 부가 시설 옵션 (이모지 뱃지로 표시)
+const EXTRA_FACILITY_OPTIONS: { key: string; label: string; emoji: string; bg: string; color: string; border: string }[] = [
   { key: "수도",   label: "수도",   emoji: "🚿", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
   { key: "유선TV", label: "유선TV", emoji: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
   { key: "인터넷", label: "인터넷", emoji: "📶", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
