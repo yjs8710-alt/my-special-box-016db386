@@ -1036,10 +1036,20 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">{areaShort}</span>
         )}
         <span className="flex-1" />
-        {/* 옵션 아이콘들 — 2줄에만 표시 */}
-        {prop.options && prop.options.map((opt) => (
-          <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
-        ))}
+        {/* 옵션 표시 — 7개 풀옵션이면 "풀옵션" 배지, 아니면 이모티콘 */}
+        {prop.options && prop.options.length > 0 && (() => {
+          const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
+          const isFull = FULL_OPT.every(o => prop.options!.includes(o));
+          if (isFull) return (
+            <span className="flex-shrink-0 text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+              style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}>
+              풀옵션
+            </span>
+          );
+          return prop.options.map((opt) => (
+            <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
+          ));
+        })()}
         {/* 비번 */}
         {(buildingPw || roomPw) && (
           <>
