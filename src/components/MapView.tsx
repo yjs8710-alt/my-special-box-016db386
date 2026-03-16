@@ -95,6 +95,7 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
+  const initializedRef = useRef(false);
 
   const clearOverlays = useCallback(() => {
     overlaysRef.current.forEach((o) => {
@@ -133,9 +134,9 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   useEffect(() => {
     mountedRef.current = true;
 
-    loadKakaoScript(() => {
+    const initMap = () => {
       if (!mountedRef.current || !containerRef.current) return;
-      if (mapRef.current) return;
+      if (initializedRef.current && mapRef.current) return;
 
       const map = new window.kakao.maps.Map(containerRef.current, {
         center: new window.kakao.maps.LatLng(36.6424, 127.489),
@@ -143,13 +144,21 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
       });
 
       mapRef.current = map;
+      initializedRef.current = true;
       renderOverlays(map, properties, selectedId, onSelect);
-    });
+    };
+
+    if (window.kakao?.maps) {
+      initMap();
+    } else {
+      loadKakaoScript(initMap);
+    }
 
     return () => {
       mountedRef.current = false;
       clearOverlays();
       mapRef.current = null;
+      initializedRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -169,7 +178,7 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
     }
   }, [selectedId, properties]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return <div ref={containerRef} style={{ width: "100%", height: "100%", minHeight: 0 }} />;
 };
 
 export default MapView;
