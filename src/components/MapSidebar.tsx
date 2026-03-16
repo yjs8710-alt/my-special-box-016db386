@@ -1134,11 +1134,11 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           </span>
         )}
         <span className="flex-1" />
-        {/* ⑦ 옵션 — 풀옵션이면 호버 팝업 배지, 아니면 SVG 아이콘 */}
+        {/* ⑦ 옵션 — 항상 '옵션' 텍스트 배지, 호버 시 상세 목록 팝업 */}
         {prop.options && prop.options.length > 0 && (() => {
           const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
           const isFull = FULL_OPT.every(o => prop.options!.includes(o));
-          if (isFull) return (
+          return (
             <div
               ref={optBadgeRef}
               className="relative flex-shrink-0"
@@ -1148,9 +1148,12 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             >
               <span
                 className="text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
-                style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }}
+                style={isFull
+                  ? { background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }
+                  : { background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }
+                }
               >
-                풀옵션 ▾
+                {isFull ? "풀옵션 ▾" : `옵션(${prop.options!.length}) ▾`}
               </span>
               {/* 호버 팝업 — fixed로 overflow:hidden 탈출 */}
               {showOptPopup && (
@@ -1166,26 +1169,18 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                   onMouseEnter={() => setShowOptPopup(true)}
                   onMouseLeave={() => setShowOptPopup(false)}
                 >
-                  <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>풀옵션 구성</p>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                  <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                    {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                     {prop.options!.map((opt) => (
-                      <div key={opt} className="flex items-center gap-1">
-                        <span className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.8 }}>
-                          <OptionSvgIcon name={opt} size={11} />
-                        </span>
-                        <span className="text-[10px] font-semibold text-foreground whitespace-nowrap">{opt}</span>
-                      </div>
+                      <span key={opt} className="text-[10px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
                     ))}
                   </div>
                 </div>
               )}
             </div>
           );
-          return prop.options.map((opt) => (
-            <span key={opt} title={opt} className="text-muted-foreground flex-shrink-0 leading-none" style={{ opacity: 0.75 }}>
-              <OptionSvgIcon name={opt} size={11} />
-            </span>
-          ));
         })()}
         {/* ⑧ 비번 */}
         {(buildingPw || roomPw) && (
