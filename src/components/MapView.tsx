@@ -60,68 +60,102 @@ function createHousePinHtml(
   const color = TYPE_COLORS[property.type] ?? "#0a2d6e";
   const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
   const fill = isSelected ? accent : color;
-  const glow = isSelected
-    ? `filter:drop-shadow(0 0 6px ${accent}cc) drop-shadow(0 2px 4px rgba(0,0,0,0.35))`
-    : `filter:drop-shadow(0 2px 5px rgba(0,0,0,0.30))`;
-  const doorH = Math.round(size * 0.38);
-  const doorW = Math.round(size * 0.22);
-  const winS = Math.round(size * 0.16);
-  const roofOH = Math.round(size * 0.38); // roof overhang
-  const bodyH = Math.round(size * 0.52);
-  const dotSize = Math.max(3, Math.round(size * 0.14));
-  const totalW = size + roofOH * 2;
 
-  // Inline SVG house — clean modern shape
+  // Dimensions
+  const W = size;                            // body width
+  const bodyH = Math.round(size * 0.50);     // body height
+  const roofH = Math.round(size * 0.42);     // roof peak height above body
+  const overhang = Math.round(size * 0.10);  // roof side overhang
+  const totalW = W + overhang * 2;
+  const roofY = roofH;                       // y where body starts
+  const totalBodyBottom = roofY + bodyH;
+  const dotR = Math.max(3, Math.round(size * 0.10));
+  const svgH = totalBodyBottom + dotR * 2 + 3;
+
+  // Chimney
+  const chimneyW = Math.max(3, Math.round(size * 0.10));
+  const chimneyH = Math.round(size * 0.18);
+  const chimneyX = Math.round(totalW * 0.68);
+  const chimneyY = roofY - chimneyH + 2;
+
+  // Door
+  const doorW = Math.round(size * 0.20);
+  const doorH = Math.round(size * 0.32);
+  const doorX = Math.round((totalW - doorW) / 2);
+  const doorY = totalBodyBottom - doorH;
+  const doorRx = Math.max(1, Math.round(doorW * 0.35));
+
+  // Windows
+  const winS = Math.round(size * 0.14);
+  const winY = roofY + Math.round(bodyH * 0.18);
+  const winLX = overhang + Math.round(W * 0.10);
+  const winRX = overhang + W - Math.round(W * 0.10) - winS;
+
+  // Roof curved path: peak → right eave (curved) → left eave (curved) → close
+  const px = totalW / 2;
+  const py = 0;
+  const reX = totalW + overhang * 0;  // right eave
+  const reY = roofY + 3;
+  const leX = 0;
+  const leY = roofY + 3;
+  // Quadratic bezier for each slope
+  const roofPath = `M${px},${py} Q${totalW * 0.80},${roofY * 0.55} ${reX},${reY} L${leX},${leY} Q${totalW * 0.20},${roofY * 0.55} ${px},${py} Z`;
+
+  // Glow & shadow
+  const shadowFilter = isSelected
+    ? `filter:drop-shadow(0 0 ${Math.round(size*0.22)}px ${accent}bb) drop-shadow(0 3px 6px rgba(0,0,0,0.40))`
+    : `filter:drop-shadow(0 2px 6px rgba(0,0,0,0.32)) drop-shadow(0 1px 2px rgba(0,0,0,0.20))`;
+
+  // Roof highlight (top-left shine)
+  const highlightOp = isSelected ? "0.30" : "0.18";
+
   const svg = `
-    <svg width="${totalW}" height="${size + dotSize + 4}" viewBox="0 0 ${totalW} ${size + dotSize + 4}" fill="none" xmlns="http://www.w3.org/2000/svg" style="${glow}">
+    <svg width="${totalW}" height="${svgH}" viewBox="0 0 ${totalW} ${svgH}" fill="none" xmlns="http://www.w3.org/2000/svg" style="${shadowFilter}">
+      <defs>
+        <linearGradient id="bodyGrad${size}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${fill}" stop-opacity="1"/>
+          <stop offset="100%" stop-color="${fill}" stop-opacity="0.78"/>
+        </linearGradient>
+        <linearGradient id="roofGrad${size}" x1="0.3" y1="0" x2="0.7" y2="1">
+          <stop offset="0%" stop-color="${accent}" stop-opacity="${isSelected ? '0.55' : '0.25'}"/>
+          <stop offset="100%" stop-color="${fill}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Chimney (behind roof) -->
+      <rect x="${chimneyX}" y="${chimneyY}" width="${chimneyW}" height="${chimneyH + 4}" rx="${Math.max(1,Math.round(chimneyW*0.3))}" fill="${fill}" opacity="0.85"/>
+      <!-- Chimney cap -->
+      <rect x="${chimneyX - 1}" y="${chimneyY}" width="${chimneyW + 2}" height="${Math.max(2,Math.round(chimneyH*0.18))}" rx="1" fill="${accent}" opacity="0.70"/>
+
       <!-- Roof -->
-      <polygon
-        points="${totalW / 2},0 ${totalW},${roofOH + 2} 0,${roofOH + 2}"
-        fill="${fill}"
-        rx="2"
-      />
+      <path d="${roofPath}" fill="url(#bodyGrad${size})"/>
+      <!-- Roof shine overlay -->
+      <path d="${roofPath}" fill="url(#roofGrad${size})"/>
+      <!-- Roof ridge line -->
+      <line x1="${px}" y1="${py + 1}" x2="${px - 2}" y2="${py + 1}" stroke="white" stroke-width="1" opacity="${highlightOp}"/>
+
       <!-- Body -->
-      <rect x="${roofOH}" y="${roofOH}" width="${size}" height="${bodyH}" rx="2" fill="${fill}" />
-      <!-- Roof top cap -->
-      <rect x="${totalW / 2 - 3}" y="0" width="6" height="4" rx="1" fill="${accent}" opacity="0.85"/>
-      <!-- Door -->
-      <rect
-        x="${totalW / 2 - doorW / 2}"
-        y="${roofOH + bodyH - doorH}"
-        width="${doorW}"
-        height="${doorH}"
-        rx="1"
-        fill="${isSelected ? '#fff' : accent}"
-        opacity="${isSelected ? '0.9' : '0.75'}"
-      />
+      <rect x="${overhang}" y="${roofY}" width="${W}" height="${bodyH}" rx="2" fill="url(#bodyGrad${size})"/>
+      <!-- Body top edge highlight -->
+      <rect x="${overhang + 2}" y="${roofY}" width="${W - 4}" height="1.5" rx="1" fill="white" opacity="${highlightOp}"/>
+
       <!-- Left window -->
-      <rect
-        x="${roofOH + Math.round(size * 0.08)}"
-        y="${roofOH + Math.round(bodyH * 0.22)}"
-        width="${winS}"
-        height="${winS}"
-        rx="1"
-        fill="white"
-        opacity="0.55"
-      />
+      <rect x="${winLX}" y="${winY}" width="${winS}" height="${winS}" rx="1" fill="white" opacity="${isSelected ? '0.80' : '0.50'}"/>
+      <line x1="${winLX + winS/2}" y1="${winY}" x2="${winLX + winS/2}" y2="${winY + winS}" stroke="${fill}" stroke-width="0.8" opacity="0.5"/>
+      <line x1="${winLX}" y1="${winY + winS/2}" x2="${winLX + winS}" y2="${winY + winS/2}" stroke="${fill}" stroke-width="0.8" opacity="0.5"/>
+
       <!-- Right window -->
-      <rect
-        x="${roofOH + size - Math.round(size * 0.08) - winS}"
-        y="${roofOH + Math.round(bodyH * 0.22)}"
-        width="${winS}"
-        height="${winS}"
-        rx="1"
-        fill="white"
-        opacity="0.55"
-      />
-      <!-- Anchor dot -->
-      <circle
-        cx="${totalW / 2}"
-        cy="${roofOH + bodyH + dotSize / 2 + 2}"
-        r="${dotSize / 2}"
-        fill="${fill}"
-        opacity="0.65"
-      />
+      <rect x="${winRX}" y="${winY}" width="${winS}" height="${winS}" rx="1" fill="white" opacity="${isSelected ? '0.80' : '0.50'}"/>
+      <line x1="${winRX + winS/2}" y1="${winY}" x2="${winRX + winS/2}" y2="${winY + winS}" stroke="${fill}" stroke-width="0.8" opacity="0.5"/>
+      <line x1="${winRX}" y1="${winY + winS/2}" x2="${winRX + winS}" y2="${winY + winS/2}" stroke="${fill}" stroke-width="0.8" opacity="0.5"/>
+
+      <!-- Door -->
+      <rect x="${doorX}" y="${doorY}" width="${doorW}" height="${doorH}" rx="${doorRx}" fill="${isSelected ? '#fff' : accent}" opacity="${isSelected ? '0.92' : '0.80'}"/>
+      <!-- Door knob -->
+      <circle cx="${doorX + doorW * 0.72}" cy="${doorY + doorH * 0.58}" r="${Math.max(1, Math.round(doorW * 0.09))}" fill="${isSelected ? accent : '#fff'}" opacity="0.70"/>
+
+      <!-- Ground anchor dot -->
+      <circle cx="${totalW / 2}" cy="${totalBodyBottom + dotR + 1}" r="${dotR}" fill="${fill}" opacity="0.55"/>
     </svg>
   `;
 
