@@ -49,13 +49,13 @@ const CommercialRental = () => {
   const activeType = activeTypes[0] ?? "전체";
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 상가 유형 탭 - 다중 선택 */}
       <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
+        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         <span className="text-white/50 text-xs font-semibold whitespace-nowrap">상가 유형</span>
