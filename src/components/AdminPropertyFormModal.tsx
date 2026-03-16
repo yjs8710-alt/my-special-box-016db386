@@ -811,7 +811,33 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               {/* 부가 시설 (수도·유선TV·인터넷) */}
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
-                  {EXTRA_FACILITY_OPTIONS.map(({ key, label, emoji, bg, color, border }) => {
+                  {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
+                    const isActive = form.options.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => {
+                          setForm((f) => ({
+                            ...f,
+                            options: isActive
+                              ? f.options.filter((o) => o !== key)
+                              : [...f.options, key],
+                          }));
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
+                        style={isActive
+                          ? { background: color, color: "#fff", borderColor: color }
+                          : { background: bg, color, borderColor: border }
+                        }
+                      >
+                        <span>{icon}</span>
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Section>
                     const isActive = form.options.includes(key);
                     return (
                       <button
