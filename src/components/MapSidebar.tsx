@@ -1481,6 +1481,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                           {/* 1줄: 건물명 | 로드뷰 | 보증금/월세 | → 메모·날짜 우측끝 */}
                           <div className="flex items-center gap-1 overflow-hidden flex-nowrap" style={{ height: "22px" }}>
+                            {prop.buildYear && <span className="flex-shrink-0 text-[9px] font-bold px-1 py-0.5 rounded bg-muted text-muted-foreground whitespace-nowrap">{prop.buildYear}</span>}
                             <p className="text-[12px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
                             <a
                               href={
