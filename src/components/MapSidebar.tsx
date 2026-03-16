@@ -1077,6 +1077,22 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         )}
       </div>
 
+      {/* 3줄: 특이사항 (description / note / roomMemo 중 첫 번째) */}
+      {(prop.description || prop.note || roomMemo) && (() => {
+        const text = prop.description || prop.note || roomMemo || "";
+        if (!text.trim()) return null;
+        return (
+          <div className="flex items-start gap-1 min-h-[16px] overflow-hidden">
+            <span className="flex-shrink-0 text-[9px] font-bold mt-0.5 whitespace-nowrap"
+              style={{ color: "hsl(var(--muted-foreground)/0.6)" }}>특이</span>
+            <span className="text-[10px] font-medium leading-tight truncate"
+              style={{ color: "hsl(var(--foreground)/0.75)" }}>
+              {text.length > 60 ? text.slice(0, 60) + "…" : text}
+            </span>
+          </div>
+        );
+      })()}
+
     </div>
   );
 };
