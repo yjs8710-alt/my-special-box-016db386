@@ -1031,13 +1031,21 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-shrink-0 text-[12px] font-extrabold text-foreground whitespace-nowrap">{prop.deposit}</span>
         <span className="flex-shrink-0 text-[9px] text-muted-foreground">/</span>
         <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
-        {areaShort && <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">{areaShort}</span>}
+        {areaShort && (
+          <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+            {areaShort.replace(/[㎡\s].*$/, "").replace(/\(/, "").replace(/\)/, "")}
+            {!areaShort.includes("평") && prop.area?.match(/(\d+)\s*평/) ? prop.area.match(/(\d+)\s*평/)?.[0] : areaShort.includes("평") ? "" : ""}
+            {(() => {
+              const m = prop.area?.match(/\((\d+)평\)/);
+              return m ? m[1] + "평" : (prop.area?.match(/(\d+)\s*평/)?.[1] ? prop.area.match(/(\d+)\s*평/)?.[1] + "평" : areaShort);
+            })()}
+          </span>
+        )}
         <span className="flex-1" />
-        {/* 옵션 아이콘들 */}
-        {prop.options && prop.options.slice(0, 4).map((opt) => (
+        {/* 옵션 아이콘들 — 2줄에만 표시 */}
+        {prop.options && prop.options.map((opt) => (
           <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? ""}</span>
         ))}
-        {prop.options && prop.options.length > 4 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 4}</span>}
         {/* 비번 */}
         {(buildingPw || roomPw) && (
           <>
@@ -1047,30 +1055,6 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               {buildingPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>{buildingPw}</span>}
               {roomPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
             </div>
-          </>
-        )}
-      </div>
-
-      {/* 3줄: 옵션아이콘 | 퇴거일 | 특이사항 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[18px]">
-        {prop.options && prop.options.length > 0 ? (
-          <>
-            {prop.options.slice(0, 6).map((opt) => (
-              <span key={opt} title={opt} className="text-[11px] leading-none flex-shrink-0">{OPTION_ICONS[opt] ?? "•"}</span>
-            ))}
-            {prop.options.length > 6 && <span className="text-[8px] text-muted-foreground flex-shrink-0">+{prop.options.length - 6}</span>}
-          </>
-        ) : <span className="text-[9px] text-muted-foreground/30 flex-shrink-0">옵션없음</span>}
-        {prop.vacateDate && (
-          <>
-            <span className="flex-shrink-0 w-px h-3 bg-border/40" />
-            <span className="text-[9px] font-bold flex-shrink-0 whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>퇴거{prop.vacateDate}</span>
-          </>
-        )}
-        {prop.note && !/[0-9]{3}[-\s]?[0-9]{3,4}[-\s]?[0-9]{4}/.test(prop.note) && !/[남북동서]향/.test(prop.note) && (
-          <>
-            <span className="flex-shrink-0 w-px h-3 bg-border/40" />
-            <span className="text-[9px] text-muted-foreground flex-shrink-0 truncate" title={prop.note}>※{prop.note}</span>
           </>
         )}
       </div>
