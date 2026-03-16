@@ -268,12 +268,12 @@ const ApartmentRental = () => {
   const activeType = activeTypes[0] ?? "전체";
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto"
+        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         {/* 종류 */}
