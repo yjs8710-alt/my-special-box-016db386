@@ -172,7 +172,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
+    if (form.tradeType === "매매") {
+      if (!form.salePrice.trim()) e.amount = "매매가액을 입력해주세요";
+    } else {
+      if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
