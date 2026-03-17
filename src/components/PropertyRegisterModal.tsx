@@ -579,8 +579,13 @@ function Step2({
       <Section label="금액 입력" error={errors.amount}>
         <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
         <div className="grid grid-cols-2 gap-3">
-          {/* 매매 선택 시 매매가액 */}
-          {form.tradeType === "매매" ? (
+          {/* 건물매매 선택 시 전용 레이아웃 */}
+          {form.detailType === "건물매매" ? (
+            <div className="col-span-2 flex flex-col gap-1 p-3 rounded-xl border border-primary/20 bg-primary/5">
+              <p className="text-xs font-bold text-primary mb-1">건물매매 금액</p>
+              <AmountInput label="매매가 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 150,000" />
+            </div>
+          ) : form.tradeType === "매매" ? (
             <div className="col-span-2">
               <AmountInput label="매매가액 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 15,000" />
             </div>
@@ -596,8 +601,12 @@ function Step2({
               <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
             </div>
           )}
-          <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
-          <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+          {form.detailType !== "건물매매" && (
+            <>
+              <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
+              <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+            </>
+          )}
           <div className="col-span-2">
             <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
           </div>
