@@ -390,11 +390,13 @@ const PropertyRow = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  isAdmin,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  isAdmin?: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -424,6 +426,12 @@ const PropertyRow = ({
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                 style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
                 숨김
+              </span>
+            )}
+            {isAdmin && prop.agent_name && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
+                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                👤 {prop.agent_name}
               </span>
             )}
           </div>
@@ -726,6 +734,7 @@ const MyProperties = () => {
                 onEdit={setEditTarget}
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
+                isAdmin={agentName === "관리자"}
               />
             ))}
           </div>
