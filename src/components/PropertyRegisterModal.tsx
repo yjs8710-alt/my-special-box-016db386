@@ -275,6 +275,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       status: "active" as const,
       registered_date: new Date().toISOString().split("T")[0],
       agent_name: myAgentName || contactParts,
+      registered_by: user?.userId ?? null,
       note: [
         form.contactOwner && `건물주: ${form.contactOwner}`,
         form.contactBroker && `부동산: ${form.contactBroker}`,

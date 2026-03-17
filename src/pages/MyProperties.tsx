@@ -52,6 +52,7 @@ type DBProperty = {
   registered_date: string;
   checked_date?: string;
   agent_name: string;
+  registered_by?: string | null;
   created_at: string;
 };
 
@@ -391,14 +392,20 @@ const PropertyRow = ({
   onDelete,
   onToggleStatus,
   isAdmin,
+  registrantInfo,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
   isAdmin?: boolean;
+  registrantInfo?: { name: string; email?: string } | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  // 관리자 뷰에서 등록자 표시: registrantInfo(프로필 기반) > agent_name 순으로
+  const displayRegistrant = registrantInfo?.name || prop.agent_name || null;
+
   return (
     <div className="border border-border rounded-xl overflow-hidden" style={{ background: "hsl(var(--card))" }}>
       {/* 요약 행 */}
@@ -428,18 +435,32 @@ const PropertyRow = ({
                 숨김
               </span>
             )}
-            {isAdmin && prop.agent_name && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
-                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                👤 {prop.agent_name}
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{prop.address}</span>
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
+          {/* 관리자 전용: 등록자 정보 */}
+          {isAdmin && displayRegistrant && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                👤 {displayRegistrant}
+              </span>
+              {!registrantInfo && !prop.agent_name && (
+                <span className="text-[10px] text-muted-foreground">등록자 정보 없음</span>
+              )}
+            </div>
+          )}
+          {isAdmin && !displayRegistrant && (
+            <div className="mt-0.5">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
+                👤 등록자 미상
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
@@ -531,6 +552,8 @@ const MyProperties = () => {
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const [agentName, setAgentName] = useState("");
+  // 관리자 전용: user_id → {name, email} 맵
+  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; email?: string }>>({});
 
   // 프로필 및 매물 로드
   useEffect(() => {
@@ -551,18 +574,24 @@ const MyProperties = () => {
       const isAdmin = !!roleData;
 
       if (isAdmin) {
-        // 관리자: 전체 매물 조회
+        // 관리자: 전체 매물 + agent_profiles 매핑 조회
         setAgentName("관리자");
-        const { data, error } = await supabase
-          .from("properties")
-          .select("*")
-          .order("registered_date", { ascending: false });
-        if (!error && data) setProperties(data as DBProperty[]);
+        const [{ data: props }, { data: profiles }] = await Promise.all([
+          supabase.from("properties").select("*").order("registered_date", { ascending: false }),
+          supabase.from("agent_profiles").select("user_id, name, phone"),
+        ]);
+        if (props) setProperties(props as DBProperty[]);
+        if (profiles) {
+          const map: Record<string, { name: string; email?: string }> = {};
+          profiles.forEach(p => { map[p.user_id] = { name: p.name }; });
+          setRegistrantMap(map);
+        }
         setLoading(false);
         return;
       }
 
       // 일반 사용자: agent_profiles에서 이름 조회
+      // 본인 registered_by OR agent_name 기준 매물 조회
       const { data: profile } = await supabase
         .from("agent_profiles")
         .select("name")
@@ -572,13 +601,13 @@ const MyProperties = () => {
       const name = profile?.name ?? "";
       setAgentName(name);
 
-      if (!name) { setLoading(false); return; }
+      if (!name && !user.userId) { setLoading(false); return; }
 
-      // 본인 agent_name 매물 조회
+      // registered_by = 본인 userId OR agent_name = 본인 이름 (둘 다 커버)
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("agent_name", name)
+        .or(`registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`)
         .order("registered_date", { ascending: false });
 
       if (!error && data) setProperties(data as DBProperty[]);
@@ -780,6 +809,7 @@ const MyProperties = () => {
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
                 isAdmin={agentName === "관리자"}
+                registrantInfo={agentName === "관리자" && prop.registered_by ? registrantMap[prop.registered_by] ?? null : null}
               />
             ))}
           </div>
