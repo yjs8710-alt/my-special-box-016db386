@@ -6,6 +6,7 @@ import MapSearchBar from "@/components/MapSearchBar";
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 
 const Index = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -13,14 +14,15 @@ const Index = () => {
   const [query, setQuery] = useState("");
 
   const { properties: dbProperties } = useDBProperties();
+  const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
   const allProperties = useMemo(() => {
     const dbIds = new Set(dbProperties.map((p) => p.id));
     return [
       ...dbProperties,
-      ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id)),
+      ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id) && !hiddenMockIds.has(p.id)),
     ];
-  }, [dbProperties]);
+  }, [dbProperties, hiddenMockIds]);
 
   const filtered = allProperties
     .filter((p) => activeType === "전체" || p.type === activeType)
