@@ -46,6 +46,7 @@ const App = () => (
           <Route path="/land" element={<ProtectedRoute><LandSearch /></ProtectedRoute>} />
           <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
           <Route path="/commercial" element={<ProtectedRoute><CommercialRental /></ProtectedRoute>} />
+          <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
 
           {/* 관리자 */}
           <Route path="/admin/login" element={<AdminLogin />} />
