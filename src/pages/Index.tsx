@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapSearchBar from "@/components/MapSearchBar";
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 
 const Index = () => {
@@ -12,15 +11,7 @@ const Index = () => {
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
 
-  const { properties: dbProperties } = useDBProperties();
-
-  const allProperties = useMemo(() => {
-    const dbIds = new Set(dbProperties.map((p) => p.id));
-    return [
-      ...dbProperties,
-      ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id)),
-    ];
-  }, [dbProperties]);
+  const { properties: allProperties } = useDBProperties();
 
   const filtered = allProperties
     .filter((p) => activeType === "전체" || p.type === activeType)

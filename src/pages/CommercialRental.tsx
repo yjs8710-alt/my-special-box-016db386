@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
@@ -6,7 +6,6 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
@@ -22,13 +21,7 @@ const CommercialRental = () => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // DB 매물 (상가임대)
-  const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
-
-  // static + DB 합치기
-  const allProperties = useMemo(
-    () => [...MAP_PROPERTIES, ...dbProperties],
-    [dbProperties]
-  );
+  const allProperties = useDBProperties(COMMERCIAL_DB_TYPES).properties;
 
   const toggleType = (t: string) => {
     if (t === "전체") {
