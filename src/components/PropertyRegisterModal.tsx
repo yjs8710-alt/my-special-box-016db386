@@ -570,7 +570,7 @@ function Step2({
 
 /* ─── Step 3 ─── */
 function Step3({
-  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove,
+  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove, onImageSetMain,
 }: {
   form: FormState;
   set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
@@ -579,6 +579,7 @@ function Step3({
   fileInputRef: React.RefObject<HTMLInputElement>;
   onImageUpload: (files: FileList | null) => Promise<void>;
   onImageRemove: (url: string) => void;
+  onImageSetMain: (url: string) => void;
 }) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
@@ -605,7 +606,7 @@ function Step3({
       <Section label="매물 사진">
         {/* 캐러셀 미리보기 */}
         {form.images.length > 0 && (
-          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} />
+          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} />
         )}
         {/* 업로드 버튼 */}
         <button
