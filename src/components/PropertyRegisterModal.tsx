@@ -481,8 +481,8 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
       </Section>
 
-      {/* 건물이름 - 토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+      {/* 건물이름 - 토지(detailType/buildingType)/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.buildingType !== "토지" && (
         <Section label="건물이름">
           <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
         </Section>
