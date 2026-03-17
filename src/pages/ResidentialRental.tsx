@@ -243,12 +243,12 @@ const ResidentialRental = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  // DB 매물 (주거형)
+  // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
-  // static + DB 합치기
+  // static + DB 합치기 (타입에 '매매' 포함된 매물 제외)
   const allProperties = useMemo(
-    () => [...RESIDENTIAL_PROPERTIES, ...dbProperties],
+    () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p => !p.type.includes("매매"))],
     [dbProperties]
   );
 
