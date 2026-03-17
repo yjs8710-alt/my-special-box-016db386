@@ -1825,8 +1825,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                       {/* Row: 3줄 레이아웃 */}
                       <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
 
-                        {/* ①썸네일 76px */}
-                        <div className="w-[76px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "76px" }}>
+                        {/* ①썸네일 90px */}
+                        <div className="w-[90px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "90px" }}>
                           {prop.image ? (
                             <img
                               src={prop.image}
