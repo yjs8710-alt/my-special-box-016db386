@@ -247,7 +247,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       dong: form.dong,
       lot_number: form.lotNumber,
       district: districtVal,
-      type: form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
+      type: (form.detailType === "토지" || form.buildingType === "토지")
+        ? "토지"
+        : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
       room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
       unit_number: form.unitNo || null,
       area: isBuildingSale
