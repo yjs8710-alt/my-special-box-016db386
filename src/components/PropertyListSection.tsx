@@ -13,12 +13,8 @@ const PropertyListSection = () => {
   const { properties: dbProperties, loading } = useDBProperties();
 
   const filtered = activeType === "전체"
-    ? properties
-    : properties.filter((p) => p.type === activeType);
-
-  const handleDelete = (id: number) => {
-    setProperties((prev) => prev.filter((p) => p.id !== id));
-  };
+    ? dbProperties
+    : dbProperties.filter((p) => p.type === activeType);
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
