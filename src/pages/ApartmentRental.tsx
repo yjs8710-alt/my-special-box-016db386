@@ -236,6 +236,7 @@ const APARTMENT_DB_TYPES = ["아파트", "오피스텔"];
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -266,6 +267,12 @@ const ApartmentRental = () => {
   const filtered = usePropertyFilter(allProperties, filters, aptTypeFilter, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
+
+  const handlePinSelect = (id: number) => {
+    setSelectedId(id);
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (prop) setPinnedAddress(prop.address);
+  };
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -323,7 +330,7 @@ const ApartmentRental = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handlePinSelect}
           />
           <MapFilterBar
             activeType={activeType}
@@ -351,10 +358,16 @@ const ApartmentRental = () => {
         <MapSidebar
           properties={filtered}
           selectedId={selectedId}
-          onSelect={setSelectedId}
-          onDeselect={() => setSelectedId(null)}
+          onSelect={(id) => {
+            setSelectedId(id);
+            const prop = filtered.find(p => p.id === id);
+            if (prop) setPinnedAddress(prop.address);
+          }}
+          onDeselect={() => { setSelectedId(null); setPinnedAddress(null); }}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          pinnedAddress={pinnedAddress}
+          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>

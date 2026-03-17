@@ -1290,13 +1290,16 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
   topOffset?: number;
   onDeleteProperties?: (ids: Set<number>) => void;
+  /** 핀 클릭 시 해당 주소로 필터링 */
+  pinnedAddress?: string | null;
+  onClearPin?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
@@ -1329,6 +1332,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     setExternalModalPos(pos);
     setExternalModal({ url, title });
   }, [width]);
+
+  // 핀 클릭 필터: pinnedAddress가 있으면 해당 주소(또는 동일 건물명) 매물만 표시
+  const displayProperties = pinnedAddress
+    ? properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress)
+    : properties;
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
@@ -1632,6 +1640,22 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
+            {/* 핀 선택 모드 배너 */}
+            {pinnedAddress && (
+              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                style={{ background: "hsl(var(--primary)/0.08)" }}>
+                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
+                <button
+                  onClick={() => onClearPin?.()}
+                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                  style={{ color: "hsl(var(--primary))" }}
+                >
+                  <X className="w-2.5 h-2.5" />
+                  전체보기
+                </button>
+              </div>
+            )}
             {/* 상단: 매물 수 + 주요 액션 */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1643,11 +1667,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {properties.length}
+                    {displayProperties.length}
                     <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
+                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary ml-1">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : "지도에서 핀 클릭"}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : "지도에서 핀 클릭"}
                   </p>
                 </div>
               </div>
@@ -1755,14 +1780,14 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
           {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
-            {properties.length === 0 ? (
+            {displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                 {[...properties]
+                 {[...displayProperties]
                   .sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
