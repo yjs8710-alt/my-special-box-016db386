@@ -1333,6 +1333,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     setExternalModal({ url, title });
   }, [width]);
 
+  // 핀 클릭 필터: pinnedAddress가 있으면 해당 주소(또는 동일 건물명) 매물만 표시
+  const displayProperties = pinnedAddress
+    ? properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress)
+    : properties;
+
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
     const list = properties.filter(p => checkedIds.has(p.id));
