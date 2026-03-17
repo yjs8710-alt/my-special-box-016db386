@@ -627,10 +627,18 @@ const MyProperties = () => {
     setProperties(prev => prev.map(p => p.id === prop.id ? { ...p, status: newStatus } : p));
   };
 
+  const isAdminView = agentName === "관리자";
+
+  // 등록자 탭 목록 (관리자 전용)
+  const agentList = isAdminView
+    ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
+    : [];
+
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    return matchStatus && matchSearch;
+    const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
+    return matchStatus && matchSearch && matchAgent;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
