@@ -734,7 +734,9 @@ const MyProperties = () => {
                 onEdit={setEditTarget}
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
+                isAdmin={agentName === "관리자"}
               />
+            ))}
             ))}
           </div>
         )}
