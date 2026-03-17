@@ -104,6 +104,7 @@ const INITIAL: FormState = {
   options: [], roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
+  salePrice: "", keyMoney: "",
   lhType: "관계없음", exitCleanFee: "", brokerFee: "",
   myMemo: "",
   description: "",
