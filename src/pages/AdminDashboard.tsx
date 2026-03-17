@@ -1301,6 +1301,13 @@ const AdminDashboard = () => {
     setDbProperties((prev) => prev.filter((p) => p.id !== prop.id));
   };
 
+  // ─── 임의 매물(MAP_PROPERTIES) 숨김 처리 ─────────────────────────────────
+  const deleteMockProperty = (numId: number, title: string) => {
+    if (!window.confirm(`'${title}' 매물을 숨기겠습니까?\n(임의 등록 매물은 목록에서 제거되며 복구하려면 관리자에게 문의하세요.)`)) return;
+    hideMockId(numId);
+  };
+
+
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
   const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
     // 세션 확인 (RLS 통과를 위해 필수)
