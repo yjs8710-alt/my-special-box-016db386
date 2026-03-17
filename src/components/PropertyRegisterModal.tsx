@@ -555,10 +555,10 @@ function Step2({
         ))}
       </div>
 
-      {/* 방 옵션 - 토지/건물매매/상가류+매매 제외 */}
+      {/* 옵션 - 토지/건물매매/상가류+매매 제외 */}
       {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" &&
         !(["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && form.tradeType === "매매") && (
-        <Section label="방 옵션">
+        <Section label="옵션">
           <div className="flex flex-wrap gap-2">
             {ROOM_OPTIONS.map((opt) => (
               <button key={opt} type="button" onClick={() => toggleOption(opt)}
