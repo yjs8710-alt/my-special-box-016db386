@@ -2221,7 +2221,7 @@ const AdminDashboard = () => {
                    <span>동/읍/면</span>
                    <span>번지수</span>
                    <span>대표전화</span>
-                   <span>건물주</span>
+                   <span>소유주</span>
                    <span>관리인</span>
                    <span>부동산</span>
                   <span className="text-center">노출상태</span>
