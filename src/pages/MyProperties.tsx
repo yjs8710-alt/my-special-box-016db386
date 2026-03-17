@@ -640,11 +640,14 @@ const MyProperties = () => {
           <div>
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Building2 className="w-5 h-5 text-primary" />
-              내 임대·매매 관리
+              {agentName === "관리자" ? "전체 임대·매매 관리" : "내 임대·매매 관리"}
             </h1>
             {agentName && (
               <p className="text-sm text-muted-foreground mt-1">
-                <span className="font-semibold text-foreground">{agentName}</span> 담당 매물 관리
+                {agentName === "관리자"
+                  ? "모든 담당자의 매물을 조회·관리합니다"
+                  : <><span className="font-semibold text-foreground">{agentName}</span> 담당 매물 관리</>
+                }
               </p>
             )}
           </div>
