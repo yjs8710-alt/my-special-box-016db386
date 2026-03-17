@@ -4,8 +4,9 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
-import { Map, List } from "lucide-react";
+import { LayoutGrid, Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
@@ -20,7 +21,10 @@ const MapSearch = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("map");
 
   // DB에서 실시간으로 매물 불러오기
-  const { properties: allProperties } = useDBProperties();
+  const { properties: dbProperties } = useDBProperties();
+
+  // 정적 목 데이터 + DB 데이터 병합
+  const allProperties = [...MAP_PROPERTIES, ...dbProperties];
 
   const handleDeleteProperties = (ids: Set<number>) => {
     setDeletedIds(prev => new Set([...prev, ...ids]));
