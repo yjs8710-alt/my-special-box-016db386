@@ -601,7 +601,7 @@ const PropertyFormModal = ({
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { key: "agent_name", label: "부동산 연락처", placeholder: "043-123-4567" },
-                    { key: "building_name", label: "건물주 연락처", placeholder: "010-1234-5678" },
+                    { key: "building_name", label: "소유주 연락처", placeholder: "010-1234-5678" },
                   ].map(({ key, label, placeholder }) => (
                     <div key={key + label} className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-muted-foreground">{label}</label>
@@ -1036,7 +1036,7 @@ const ContactEditModal = ({
           </div>
           {[
             { key: "phone", label: "대표 전화번호", placeholder: "043-XXX-XXXX" },
-            { key: "contact_owner", label: "건물주 전화번호", placeholder: "010-XXXX-XXXX" },
+            { key: "contact_owner", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX" },
             { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX" },
             { key: "contact_broker", label: "부동산 전화번호", placeholder: "043-XXXX-XXXX" },
             { key: "memo", label: "메모", placeholder: "비고" },
@@ -2221,7 +2221,7 @@ const AdminDashboard = () => {
                    <span>동/읍/면</span>
                    <span>번지수</span>
                    <span>대표전화</span>
-                   <span>건물주</span>
+                   <span>소유주</span>
                    <span>관리인</span>
                    <span>부동산</span>
                   <span className="text-center">노출상태</span>

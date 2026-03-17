@@ -815,7 +815,7 @@ function Step3({
   onImageSetMain: (url: string) => void;
 }) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
-    { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
+    { key: "contactOwner", label: "소유주 연락처", placeholder: "예) 010-1234-5678" },
     { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
     { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
     { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
