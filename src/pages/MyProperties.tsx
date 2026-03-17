@@ -585,7 +585,10 @@ const MyProperties = () => {
     const channel = supabase
       .channel("my-properties-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, async () => {
-        const { data } = await supabase.from("properties").select("*").eq("agent_name", agentName).order("registered_date", { ascending: false });
+        const isAdmin = agentName === "관리자";
+        let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+        if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
+        const { data } = await q;
         if (data) setProperties(data as DBProperty[]);
       })
       .subscribe();
