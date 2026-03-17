@@ -390,11 +390,13 @@ const PropertyRow = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  isAdmin,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  isAdmin?: boolean;
 }) => {
   const [expanded, setExpanded] = useState(false);
   return (
