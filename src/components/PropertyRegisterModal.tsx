@@ -240,6 +240,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.contactBroker && `부동산: ${form.contactBroker}`,
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
+        form.keyMoney && `권리금: ${form.keyMoney}`,
       ].filter(Boolean).join("\n") || null,
     };
 
