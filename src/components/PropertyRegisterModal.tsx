@@ -55,6 +55,8 @@ const ROOM_OPTIONS = [
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
   "옷장","전자키","복층","옥탑","테라스","주차",
 ] as const;
+const FACILITY_OPTIONS = ["수도","유선TV","인터넷","CCTV"] as const;
+type PetType = "가능" | "불가" | "";
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const FLOOR_OPTIONS = [
@@ -87,6 +89,8 @@ interface FormState {
   buildingArea: string;  // 건물매매: 건평
   buildingSaleType: BuildingSaleType; // 건물매매: 일반건물/집합건물/토지
   options: string[];
+  facilities: string[];
+  pet: PetType;
   roomPassword: string;
   direction: string;
   vacancy: VacancyType;
@@ -119,7 +123,8 @@ const INITIAL: FormState = {
   sido: "충북", sigungu: "", dong: "", lotNumber: "",
   buildingName: "", floor: "", unitNo: "", area: "",
   landArea: "", buildingArea: "", buildingSaleType: "일반건물",
-  options: [], roomPassword: "", direction: "",
+  options: [], facilities: [], pet: "",
+  roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
   salePrice: "", keyMoney: "",
@@ -287,7 +292,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       description: form.description,
       room_memo: form.myMemo || null,
       room_password: form.roomPassword || null,
-      options: form.options,
+      options: [
+        ...form.options,
+        ...form.facilities,
+        ...(form.pet ? [`반려동물_${form.pet}`] : []),
+      ],
       images: form.images,
       views: 0,
       lat,
@@ -585,6 +594,17 @@ function Step2({
   toggleOption: (opt: string) => void;
   errors: Record<string, string>;
 }) {
+  const isLand = form.detailType === "토지" || form.buildingType === "토지";
+  const isBuildingSale = form.detailType === "건물매매";
+  const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
+  const showRoomOptions = !isLand && !isBuildingSale && !(isCommercial && form.tradeType === "매매");
+  const showFacilities = !isLand && !isBuildingSale;
+
+  const toggleFacility = (f: string) => {
+    const cur = form.facilities;
+    set("facilities", cur.includes(f) ? cur.filter((x) => x !== f) : [...cur, f]);
+  };
+
   return (
     <div className="flex flex-col gap-5">
       {/* 요약 칩 */}
@@ -594,10 +614,60 @@ function Step2({
         ))}
       </div>
 
-      {/* 옵션 - 토지/건물매매/상가류+매매 제외 */}
-      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" &&
-        !(["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && form.tradeType === "매매") && (
-        <Section label="옵션">
+      {/* 반려동물 - 토지/건물매매 제외 */}
+      {showRoomOptions && (
+        <Section label="반려동물">
+          <div className="flex gap-3">
+            {(["가능", "불가"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => set("pet", form.pet === v ? "" : v)}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${
+                  form.pet === v
+                    ? v === "불가"
+                      ? "bg-[hsl(var(--header-bg))] text-white border-[hsl(var(--header-bg))]"
+                      : "bg-background text-foreground border-border"
+                    : "bg-background text-foreground border-border hover:border-primary/40"
+                }`}
+                style={form.pet === v && v === "가능" ? { borderColor: "hsl(var(--border))" } : {}}
+              >
+                {v === "가능" ? "🐾 가능" : "🚫 불가"}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 부가 시설 - 토지/건물매매 제외 */}
+      {showFacilities && (
+        <Section label="부가 시설">
+          <div className="flex flex-wrap gap-2">
+            {FACILITY_OPTIONS.map((f) => {
+              const active = form.facilities.includes(f);
+              const icon = f === "수도" ? "💧" : f === "유선TV" ? "📺" : f === "인터넷" ? "🌐" : "📷";
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => toggleFacility(f)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 ${
+                    active
+                      ? "bg-primary/10 text-primary border-primary"
+                      : "bg-background text-foreground border-border hover:border-primary/40"
+                  }`}
+                >
+                  <span>{icon}</span>{f}
+                </button>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
+      {/* 방 옵션 - 토지/건물매매/상가류+매매 제외 */}
+      {showRoomOptions && (
+        <Section label="방 옵션">
           {/* 풀옵션 체크 버튼 */}
           <FullOptionToggle options={form.options} set={set} />
           <div className="flex flex-wrap gap-2">
@@ -616,14 +686,14 @@ function Step2({
       )}
 
       {/* 비밀번호 - 토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" && (
+      {!isLand && !isBuildingSale && (
         <Section label="비밀번호">
           <input type="text" placeholder="비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
         </Section>
       )}
 
       {/* 방향 - 토지/매매/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
@@ -641,7 +711,7 @@ function Step2({
       )}
 
       {/* 공실 여부 - 토지/매매/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
         <Section label="현재 빈방 여부">
           <div className="flex gap-3">
             {VACANCY_TYPES.map((t) => (
@@ -711,8 +781,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 아파트 외 매매 퇴거일 - 토지/건물매매 제외, 세입자 있을 경우 */}
-      {form.tradeType === "매매" && form.detailType !== "아파트" && form.detailType !== "토지" && form.detailType !== "건물매매" && (
+      {/* 아파트 외 매매 퇴거일 - 토지/건물매매 제외 */}
+      {form.tradeType === "매매" && form.detailType !== "아파트" && !isLand && !isBuildingSale && (
         <Section label="퇴거일">
           <Popover>
             <PopoverTrigger asChild>
@@ -742,7 +812,7 @@ function Step2({
         <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
         <div className="grid grid-cols-2 gap-3">
           {/* 건물매매 선택 시 전용 레이아웃 */}
-          {form.detailType === "건물매매" ? (
+          {isBuildingSale ? (
             <div className="col-span-2 flex flex-col gap-1 p-3 rounded-xl border border-primary/20 bg-primary/5">
               <p className="text-xs font-bold text-primary mb-1">건물매매 금액</p>
               <AmountInput label="매매가 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 150,000" />
@@ -758,13 +828,13 @@ function Step2({
             </>
           )}
           {/* 상가 유형 시 권리금 */}
-          {["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && (
+          {isCommercial && (
             <div className="col-span-2">
               <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
             </div>
           )}
           {/* 관리비·퇴실청소비 - 매매/토지/건물매매 제외 */}
-          {form.detailType !== "건물매매" && form.detailType !== "토지" && form.tradeType !== "매매" && (
+          {!isBuildingSale && !isLand && form.tradeType !== "매매" && (
             <>
               <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
               <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
@@ -777,7 +847,7 @@ function Step2({
       </Section>
 
       {/* LH 전세대출 - 매매/토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
         <Section label="LH (전세대출)">
           <div className="flex gap-3">
             {LH_TYPES.map((t) => (
