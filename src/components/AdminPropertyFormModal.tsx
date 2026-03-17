@@ -1063,12 +1063,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
                 )}
                 <div className="flex flex-col gap-3">
-                  {[
-                    { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678" },
-                    { key: "agent_name" as const, label: "부동산 연락처", placeholder: "예) 043-123-4567" },
-                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
-                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
-                  ].map(({ key, label, placeholder, required }) => (
+                  {([
+                    { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678", required: false },
+                    { key: "agent_name" as const, label: "부동산 연락처", placeholder: "예) 043-123-4567", required: false },
+                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432", required: false },
+                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666", required: false },
+                  ] as { key: "contactOwner"|"agent_name"|"contactTenant"|"contactManager"; label: string; placeholder: string; required: boolean }[]).map(({ key, label, placeholder, required }) => (
                     <ContactField
                       key={key}
                       fieldKey={key}
