@@ -55,6 +55,8 @@ const ROOM_OPTIONS = [
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
   "옷장","전자키","복층","옥탑","테라스","주차",
 ] as const;
+const FACILITY_OPTIONS = ["수도","유선TV","인터넷","CCTV"] as const;
+type PetType = "가능" | "불가" | "";
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const FLOOR_OPTIONS = [
