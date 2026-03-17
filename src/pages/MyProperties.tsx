@@ -492,8 +492,8 @@ const PropertyRow = ({
       {expanded && (
         <div className="px-4 pb-4 pt-2 border-t border-border/50 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">
           {[
-            ["보증금", prop.deposit], ["월세", prop.monthly], ["면적", prop.area],
-            ["관리비", prop.manage_fee], ["층", prop.floor], ["총층수", prop.total_floors],
+            ["보증금", prop.deposit], ["월세", prop.monthly], ["관리비", prop.manage_fee],
+            ["면적", prop.area], ["층", prop.floor], ["총층수", prop.total_floors],
             ["주차", prop.parking], ["준공연도", prop.build_year], ["엘리베이터", prop.elevator ? "있음" : "없음"],
             ["입주가능일", prop.available_from], ["등록일", prop.registered_date], ["조회수", String(prop.views)],
           ].filter(([, v]) => v).map(([k, v]) => (
