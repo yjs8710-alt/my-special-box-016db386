@@ -271,7 +271,7 @@ const ResidentialRental = () => {
   const activeType = activeTypes[0] ?? "전체";
 
   return (
-    <div className="flex flex-col" style={{ height: "100vh" }}>
+    <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
