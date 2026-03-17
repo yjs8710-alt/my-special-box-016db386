@@ -2300,13 +2300,21 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                       {/* 수정 */}
-                      <div className="hidden md:flex justify-center">
+                      <div className="hidden md:flex justify-center gap-1">
                         <button
                           onClick={() => setContactModal(c)}
                           className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
                           style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
                         >
                           <Pencil className="w-3 h-3" />수정
+                        </button>
+                        <button
+                          onClick={() => deleteContact(c)}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
+                          style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                          title="삭제"
+                        >
+                          <Trash2 className="w-3 h-3" />삭제
                         </button>
                       </div>
                     </div>
