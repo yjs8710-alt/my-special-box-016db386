@@ -235,6 +235,7 @@ const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주
 
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -269,6 +270,13 @@ const ResidentialRental = () => {
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
+
+  // 핀 클릭 핸들러: selectedId + pinnedAddress 동시 설정
+  const handlePinSelect = (id: number) => {
+    setSelectedId(id);
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (prop) setPinnedAddress(prop.address);
+  };
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
