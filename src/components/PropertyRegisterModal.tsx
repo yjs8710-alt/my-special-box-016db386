@@ -55,13 +55,6 @@ const ROOM_OPTIONS = [
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
   "옷장","전자키","복층","옥탑","테라스","주차",
 ] as const;
-// 부가 시설 옵션
-const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
-  { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-  { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-  { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: "📷", bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
-];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const FLOOR_OPTIONS = [
@@ -618,35 +611,6 @@ function Step2({
                 {opt}
               </button>
             ))}
-          </div>
-        </Section>
-      )}
-
-      {/* 부가 시설 - 토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" && (
-        <Section label="부가 시설">
-          <div className="flex flex-wrap gap-2">
-            {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
-              const isActive = form.options.includes(key);
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => set("options", isActive
-                    ? form.options.filter((o) => o !== key)
-                    : [...form.options, key]
-                  )}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
-                  style={isActive
-                    ? { background: color, color: "#fff", borderColor: color }
-                    : { background: bg, color, borderColor: border }
-                  }
-                >
-                  <span>{icon}</span>
-                  <span>{label}</span>
-                </button>
-              );
-            })}
           </div>
         </Section>
       )}
