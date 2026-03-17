@@ -555,8 +555,9 @@ function Step2({
         ))}
       </div>
 
-      {/* 방 옵션 - 토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+      {/* 방 옵션 - 토지/건물매매/상가류+매매 제외 */}
+      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" &&
+        !(["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && form.tradeType === "매매") && (
         <Section label="방 옵션">
           <div className="flex flex-wrap gap-2">
             {ROOM_OPTIONS.map((opt) => (
@@ -573,10 +574,10 @@ function Step2({
         </Section>
       )}
 
-      {/* 방 비번 - 토지/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
-        <Section label="방 비번">
-          <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+      {/* 비밀번호 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="비밀번호">
+          <input type="text" placeholder="비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
         </Section>
       )}
 
