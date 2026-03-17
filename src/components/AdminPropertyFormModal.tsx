@@ -1064,7 +1064,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 )}
                 <div className="flex flex-col gap-3">
                   {[
-                    { key: "contactOwner" as const, label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
+                    { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678" },
                     { key: "agent_name" as const, label: "부동산 연락처", placeholder: "예) 043-123-4567" },
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
                     { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },

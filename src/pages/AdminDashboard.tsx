@@ -601,7 +601,7 @@ const PropertyFormModal = ({
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { key: "agent_name", label: "부동산 연락처", placeholder: "043-123-4567" },
-                    { key: "building_name", label: "건물주 연락처", placeholder: "010-1234-5678" },
+                    { key: "building_name", label: "소유주 연락처", placeholder: "010-1234-5678" },
                   ].map(({ key, label, placeholder }) => (
                     <div key={key + label} className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-muted-foreground">{label}</label>
