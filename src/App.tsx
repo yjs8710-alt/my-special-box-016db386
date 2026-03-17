@@ -17,6 +17,7 @@ import NonResidentialRental from "./pages/NonResidentialRental";
 import CommercialRental from "./pages/CommercialRental";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
+import MyProperties from "./pages/MyProperties";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
