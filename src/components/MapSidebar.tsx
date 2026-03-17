@@ -1295,9 +1295,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         )}
       </div>
 
-      {/* 3줄: 특이사항 (description / note / roomMemo 중 첫 번째) */}
-      {(prop.description || prop.note || roomMemo) && (() => {
-        const text = prop.description || prop.note || roomMemo || "";
+      {/* 3줄: 특이사항 (description만 표시 — note에는 연락처 저장됨) */}
+      {prop.description && (() => {
+        const text = prop.description;
         if (!text.trim()) return null;
         return (
           <div className="flex items-start gap-1 min-h-[17px] overflow-hidden">

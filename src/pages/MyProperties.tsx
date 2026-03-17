@@ -531,7 +531,29 @@ const MyProperties = () => {
     const load = async () => {
       setLoading(true);
 
-      // agent_profiles에서 이름 조회
+      // 관리자 여부 확인
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      const isAdmin = !!roleData;
+
+      if (isAdmin) {
+        // 관리자: 전체 매물 조회
+        setAgentName("관리자");
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .order("registered_date", { ascending: false });
+        if (!error && data) setProperties(data as DBProperty[]);
+        setLoading(false);
+        return;
+      }
+
+      // 일반 사용자: agent_profiles에서 이름 조회
       const { data: profile } = await supabase
         .from("agent_profiles")
         .select("name")
@@ -563,7 +585,10 @@ const MyProperties = () => {
     const channel = supabase
       .channel("my-properties-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, async () => {
-        const { data } = await supabase.from("properties").select("*").eq("agent_name", agentName).order("registered_date", { ascending: false });
+        const isAdmin = agentName === "관리자";
+        let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+        if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
+        const { data } = await q;
         if (data) setProperties(data as DBProperty[]);
       })
       .subscribe();
@@ -615,11 +640,14 @@ const MyProperties = () => {
           <div>
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Building2 className="w-5 h-5 text-primary" />
-              내 임대·매매 관리
+              {agentName === "관리자" ? "전체 임대·매매 관리" : "내 임대·매매 관리"}
             </h1>
             {agentName && (
               <p className="text-sm text-muted-foreground mt-1">
-                <span className="font-semibold text-foreground">{agentName}</span> 담당 매물 관리
+                {agentName === "관리자"
+                  ? "모든 담당자의 매물을 조회·관리합니다"
+                  : <><span className="font-semibold text-foreground">{agentName}</span> 담당 매물 관리</>
+                }
               </p>
             )}
           </div>
