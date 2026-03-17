@@ -144,6 +144,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const [saveError, setSaveError] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [myAgentName, setMyAgentName] = useState("");
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
