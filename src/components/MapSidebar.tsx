@@ -1171,6 +1171,12 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             {areaShort}
           </span>
         )}
+        {/* ⑥-b 관리비 */}
+        {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+          <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
+            관{prop.manageFee.replace(/[^0-9]/g, "") ? prop.manageFee : prop.manageFee}
+          </span>
+        )}
         <span className="flex-1" />
         {/* ⑦ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV/CCTV) — 아이콘만 표시 */}
         {(() => {
