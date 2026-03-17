@@ -465,7 +465,7 @@ const PropertyRow = ({
 
         <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
           <span className="font-semibold text-foreground">{prop.deposit}/{prop.monthly || "—"}</span>
-          <span className="text-muted-foreground">{prop.floor} · {prop.area}</span>
+          <span className="text-muted-foreground">{prop.area} · {prop.manage_fee ? `관리비 ${prop.manage_fee}` : prop.floor}</span>
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1">
