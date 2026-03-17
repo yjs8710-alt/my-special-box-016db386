@@ -2151,6 +2151,7 @@ const AdminDashboard = () => {
                       });
                     }}
                     onToggleStatus={togglePropertyStatus}
+                    onDelete={deleteProperty}
                   />
                 );
               })}
