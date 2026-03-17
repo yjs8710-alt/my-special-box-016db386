@@ -206,9 +206,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (form.detailType === "건물매매" || form.tradeType === "매매") {
+    const isSale = form.detailType === "건물매매" || form.tradeType === "매매";
+    const isLand = form.detailType === "토지" || form.buildingType === "토지";
+    if (isSale) {
       if (!form.salePrice.trim()) e.amount = "매매가를 입력해주세요";
-    } else {
+    } else if (!isLand) {
       if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
     }
     setErrors(e);
@@ -245,7 +247,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       dong: form.dong,
       lot_number: form.lotNumber,
       district: districtVal,
-      type: form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
+      type: (form.detailType === "토지" || form.buildingType === "토지")
+        ? "토지"
+        : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
       room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
       unit_number: form.unitNo || null,
       area: isBuildingSale
