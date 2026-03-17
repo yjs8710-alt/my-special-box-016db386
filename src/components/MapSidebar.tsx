@@ -1256,18 +1256,17 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               >
                 {isFull ? "풀옵션 ▾" : `옵션(${prop.options!.length}) ▾`}
               </span>
-              {/* 호버 팝업 — fixed로 overflow:hidden 탈출 */}
+              {/* 호버 팝업 — fixed로 overflow:hidden 탈출, 화면 경계 감지 */}
               {showOptPopup && (
                 <div
                   className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5"
                   style={{
-                    top: optPopupPos.top,
-                    left: optPopupPos.left,
-                    transform: "translateY(-100%)",
+                    ...optPopupStyle,
                     minWidth: "160px",
+                    maxWidth: "220px",
                     boxShadow: "0 4px 20px hsl(var(--primary)/0.15)",
                   }}
-                   onMouseEnter={() => setShowOptPopup(true)}
+                  onMouseEnter={() => setShowOptPopup(true)}
                   onMouseLeave={handleOptMouseLeave}
                 >
                   <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
