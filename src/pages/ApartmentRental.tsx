@@ -358,12 +358,8 @@ const ApartmentRental = () => {
         <MapSidebar
           properties={filtered}
           selectedId={selectedId}
-          onSelect={(id) => {
-            setSelectedId(id);
-            const prop = filtered.find(p => p.id === id);
-            if (prop) setPinnedAddress(prop.address);
-          }}
-          onDeselect={() => { setSelectedId(null); setPinnedAddress(null); }}
+          onSelect={setSelectedId}
+          onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
           pinnedAddress={pinnedAddress}
