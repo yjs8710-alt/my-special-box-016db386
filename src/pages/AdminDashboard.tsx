@@ -1090,6 +1090,7 @@ const AdminDashboard = () => {
   const [propertyModal, setPropertyModal] = useState<{ mode: "add" | "edit"; data: Partial<DBProperty> | null } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [propertyDistrictFilter, setPropertyDistrictFilter] = useState("전체");
+  const { hiddenIds: hiddenMockIds, hideMockId, restoreAll: restoreAllMocks } = useHiddenMockIds();
 
   // 청주 연락처 state
   const [contacts, setContacts] = useState<CheongJuContact[]>([]);
