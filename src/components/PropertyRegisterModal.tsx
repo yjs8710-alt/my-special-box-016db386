@@ -137,6 +137,7 @@ const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처
 interface Props { onClose: () => void; }
 
 export default function PropertyRegisterModal({ onClose }: Props) {
+  const { user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState<FormState>(INITIAL);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
@@ -146,6 +147,19 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [myAgentName, setMyAgentName] = useState("");
+
+  // 로그인 사용자 프로필 이름 자동 로드
+  useEffect(() => {
+    if (!user?.userId) return;
+    supabase
+      .from("agent_profiles")
+      .select("name")
+      .eq("user_id", user.userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.name) setMyAgentName(data.name);
+      });
+  }, [user?.userId]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
