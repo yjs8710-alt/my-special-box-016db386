@@ -428,6 +428,12 @@ const PropertyRow = ({
                 숨김
               </span>
             )}
+            {isAdmin && prop.agent_name && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
+                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                👤 {prop.agent_name}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
