@@ -252,9 +252,13 @@ const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [
 const NON_RESIDENTIAL_SUBTYPES = [
   { label: "전체", group: "전체", key: "전체" },
   { label: "임대전체", group: "임대", key: "임대-전체" },
-  { label: "상가임대", group: "임대", key: "임대-상가" },
-  { label: "기타임대", group: "임대", key: "임대-기타" },
+  { label: "상가", group: "임대", key: "상가" },
+  { label: "식당·카페", group: "임대", key: "식당·카페" },
+  { label: "사무실", group: "임대", key: "사무실" },
+  { label: "공장·창고", group: "임대", key: "공장·창고" },
+  { label: "병원·학원", group: "임대", key: "병원·학원" },
   { label: "매매전체", group: "매매", key: "매매-전체" },
+  { label: "건물매매", group: "매매", key: "건물매매" },
   { label: "원룸건물매매", group: "매매", key: "매매-원룸건물" },
   { label: "주택매매", group: "매매", key: "매매-주택" },
   { label: "상가주택매매", group: "매매", key: "매매-상가주택" },
@@ -265,6 +269,8 @@ const NON_RESIDENTIAL_SUBTYPES = [
 ];
 
 const NON_RESIDENTIAL_DB_TYPES = [
+  "상가", "식당·카페", "사무실", "공장·창고", "병원·학원",
+  "건물매매",
   "상가임대", "기타임대",
   "원룸건물매매", "주택매매", "상가주택매매", "상가건물매매",
   "구분상가매매", "창고/공장매매", "숙박/팬션매매",
