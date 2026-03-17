@@ -216,14 +216,16 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
             커뮤니티
           </button>
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
-            <Button
-              size="sm"
-              onClick={openRegister}
-              className="w-full rounded-lg font-bold"
-              style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
-            >
-              + 매물 등록
-            </Button>
+            {location.pathname !== "/" && (
+              <Button
+                size="sm"
+                onClick={openRegister}
+                className="w-full rounded-lg font-bold"
+                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+              >
+                + 매물 등록
+              </Button>
+            )}
             {isAuthorized && (
               <button
                 className="w-full text-sm text-white/50 font-medium py-2 mt-1"
