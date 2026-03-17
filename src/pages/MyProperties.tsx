@@ -52,6 +52,7 @@ type DBProperty = {
   registered_date: string;
   checked_date?: string;
   agent_name: string;
+  registered_by?: string | null;
   created_at: string;
 };
 
