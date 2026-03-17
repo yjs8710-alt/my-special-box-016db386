@@ -1229,55 +1229,24 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               {/* 호버 팝업 — fixed로 overflow:hidden 탈출 */}
               {showOptPopup && (
                 <div
-                  className="fixed z-[9999] rounded-2xl overflow-hidden"
+                  className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5"
                   style={{
                     top: optPopupPos.top,
                     left: optPopupPos.left,
-                    transform: "translateY(-100%) translateY(-6px)",
-                    minWidth: "220px",
-                    maxWidth: "280px",
-                    background: "white",
-                    border: "1.5px solid hsl(var(--border))",
-                    boxShadow: "0 8px 32px hsl(var(--primary)/0.18), 0 2px 8px rgba(0,0,0,0.08)",
+                    transform: "translateY(-100%)",
+                    minWidth: "160px",
+                    boxShadow: "0 4px 20px hsl(var(--primary)/0.15)",
                   }}
-                  onMouseEnter={() => setShowOptPopup(true)}
+                   onMouseEnter={() => setShowOptPopup(true)}
                   onMouseLeave={handleOptMouseLeave}
                 >
-                  {/* 헤더 */}
-                  <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60"
-                    style={{ background: isFull ? "hsl(var(--primary)/0.06)" : "hsl(var(--muted)/0.5)" }}>
-                    <span className="text-base leading-none">{isFull ? "⭐" : "🔧"}</span>
-                    <p className="text-[11px] font-extrabold tracking-tight" style={{ color: "hsl(var(--primary))" }}>
-                      {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
-                    </p>
-                  </div>
-                  {/* 그리드 옵션 목록 */}
-                  <div className="p-2.5 grid grid-cols-3 gap-1.5">
-                    {prop.options!.map((opt) => {
-                      const iconKey = opt as keyof typeof OPTION_ICONS;
-                      const hasIcon = !!OPTION_ICONS[iconKey];
-                      return (
-                        <div key={opt}
-                          className="flex flex-col items-center gap-1 px-1.5 py-2 rounded-xl border transition-colors"
-                          style={{
-                            background: "hsl(var(--muted)/0.4)",
-                            borderColor: "hsl(var(--border)/0.8)",
-                          }}
-                        >
-                          {hasIcon ? (
-                            <span className="flex items-center justify-center w-6 h-6 rounded-lg"
-                              style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>
-                              <OptionSvgIcon name={opt} size={13} />
-                            </span>
-                          ) : (
-                            <span className="flex items-center justify-center w-6 h-6 rounded-lg text-[12px]"
-                              style={{ background: "hsl(var(--muted))" }}>✓</span>
-                          )}
-                          <span className="text-[9px] font-bold text-center leading-tight whitespace-nowrap"
-                            style={{ color: "hsl(var(--foreground)/0.75)" }}>{opt}</span>
-                        </div>
-                      );
-                    })}
+                  <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                    {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                    {prop.options!.map((opt) => (
+                      <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
+                    ))}
                   </div>
                 </div>
               )}
