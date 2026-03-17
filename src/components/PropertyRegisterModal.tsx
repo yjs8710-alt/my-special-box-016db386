@@ -511,8 +511,8 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             </div>
           </div>
         </>
-      ) : form.detailType === "토지" ? (
-        /* 토지: 평수만 표시 */
+      ) : (form.detailType === "토지" || form.buildingType === "토지") ? (
+        /* 토지: 면적만 표시 (층수/호수 숨김) */
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-foreground/70">면적 (평)</label>
           <input type="text" placeholder="예) 200평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
