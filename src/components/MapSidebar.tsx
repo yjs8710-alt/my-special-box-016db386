@@ -1132,7 +1132,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         </span>
       </div>
 
-      {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 평수 | 옵션 | 비번 */}
+      {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 관리비 | 평수 | 옵션 | 비번 */}
       <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
         {/* 남향 뱃지 */}
         {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
