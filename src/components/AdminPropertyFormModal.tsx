@@ -1077,6 +1077,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     onRemove={(url) =>
                       setForm((f) => ({ ...f, images: (f.images ?? []).filter((u) => u !== url) }))
                     }
+                    onSetMain={(url) =>
+                      setForm((f) => {
+                        const rest = (f.images ?? []).filter((u) => u !== url);
+                        return { ...f, images: [url, ...rest] };
+                      })
+                    }
                   />
                 )}
                 <button type="button" onClick={() => fileInputRef.current?.click()}
