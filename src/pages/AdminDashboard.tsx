@@ -929,6 +929,14 @@ const BuildingGroup = ({
                   >
                     {u.status === "active" ? <><EyeOff className="w-3 h-3" />종료</> : <><Eye className="w-3 h-3" />재개</>}
                   </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(u); }}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
+                    style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                    title="매물 삭제"
+                  >
+                    <Trash2 className="w-3 h-3" />삭제
+                  </button>
                 </div>
               </div>
             );
