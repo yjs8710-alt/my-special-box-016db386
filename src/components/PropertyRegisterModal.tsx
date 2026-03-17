@@ -77,6 +77,9 @@ interface FormState {
   floor: string;
   unitNo: string;
   area: string;
+  landArea: string;      // 건물매매: 대지(평)
+  buildingArea: string;  // 건물매매: 건평
+  buildingSaleType: BuildingSaleType; // 건물매매: 일반건물/집합건물/토지
   options: string[];
   roomPassword: string;
   direction: string;
