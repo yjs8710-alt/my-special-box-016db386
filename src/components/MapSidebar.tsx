@@ -1058,20 +1058,20 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
     <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
 
       {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[20px]">
+      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
         {prop.buildYear && (
           <span
-            className="flex-shrink-0 text-[9px] font-black px-1 py-0.5 whitespace-nowrap"
+            className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap"
             style={{ background: "#fff", color: "#111", border: "1.5px solid #111", borderRadius: "2px", letterSpacing: "-0.02em", lineHeight: 1.2 }}
           >
             준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
           </span>
         )}
-        <p className="text-[12px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
+        <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">{prop.buildingName ?? prop.title}</p>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); setShowFullAddr(v => !v); }}
-          className="text-[11px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
+          className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
           style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
           title="클릭하면 전체 주소 표시"
         >
@@ -1083,53 +1083,53 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}&map_type=TYPE_ROADVIEW`}
           target="_blank" rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="flex-shrink-0 px-1 py-0.5 rounded text-[8px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
+          className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
           style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
         >로드뷰</a>
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
-        <span className="flex-shrink-0 text-[9px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
+        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
           확인:{idx}{regDate ? ` 등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
 
       {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 평수 | 옵션 | 비번 */}
-      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[20px]">
+      <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
         {/* 남향 뱃지 */}
         {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
-          <span className="flex-shrink-0 text-[9px] font-bold px-1 py-0.5 rounded whitespace-nowrap"
+          <span className="flex-shrink-0 text-[10px] font-bold px-1 py-0.5 rounded whitespace-nowrap"
             style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>
             {prop.note.match(/[남북동서]향/)?.[0]}
           </span>
         )}
         {/* ① 세부유형 */}
         {prop.roomType && (
-          <span className="flex-shrink-0 text-[11px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+          <span className="flex-shrink-0 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
             style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.35)" }}>
             {prop.roomType}
           </span>
         )}
         {/* ② 층 */}
         {floorShort && (
-          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{floorShort}</span>
+          <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{floorShort}</span>
         )}
         {/* ③ 호수 */}
         {prop.unitNumber && (
-          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.unitNumber}</span>
+          <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.unitNumber}</span>
         )}
         {/* 구분선 */}
         {(prop.roomType || floorShort || prop.unitNumber) && (
-          <span className="flex-shrink-0 w-px h-3 bg-border" />
+          <span className="flex-shrink-0 w-px h-3.5 bg-border" />
         )}
         {/* ④ 보증금 */}
-        <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-        <span className="flex-shrink-0 text-[10px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
+        <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+        <span className="flex-shrink-0 text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
         {/* ⑤ 월세 */}
-        <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+        <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
         {/* ⑥ 평수 */}
         {areaShort && (
-          <span className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
+          <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
             {areaShort}
           </span>
         )}
@@ -1142,22 +1142,22 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           // 엘리베이터 (boolean 필드)
           if (prop.elevator) badges.push(
-            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
               style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </span>
           );
 
           // 옵션 배열 기반 아이콘 맵
           const ICON_MAP: Record<string, IconBadge> = {
-            "반려동물가능":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "애완동물가능":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "반려동물불가":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "애완동물불가":  { icon: <Dog size={11} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "수도":          { icon: <Droplet size={11} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-            "인터넷":        { icon: <span className="text-[9px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-            "유선TV":        { icon: <Tv size={11} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-            "CCTV":          { icon: <Cctv size={11} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+            "반려동물가능":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "애완동물가능":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물불가":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "애완동물불가":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "수도":          { icon: <Droplet size={12} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+            "인터넷":        { icon: <span className="text-[10px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+            "유선TV":        { icon: <Tv size={12} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+            "CCTV":          { icon: <Cctv size={12} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
           };
 
           // 반려동물 불가는 금지선 오버레이
@@ -1166,19 +1166,19 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           if (isPetDenied) {
             badges.push(
-              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[20px] h-[20px] rounded select-none"
                 style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
-                <Dog size={10} strokeWidth={2}/>
+                <Dog size={11} strokeWidth={2}/>
                 <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
               </span>
             );
           } else if (isPetAllowed) {
             badges.push(
-              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
                 style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>
-                <Dog size={10} strokeWidth={2}/>
+                <Dog size={11} strokeWidth={2}/>
               </span>
             );
           }
@@ -1188,7 +1188,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             const d = ICON_MAP[opt];
             if (!d) return;
             badges.push(
-              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none"
+              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
                 style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}>
                 {d.icon}
               </span>
@@ -1210,7 +1210,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               onClick={(e) => e.stopPropagation()}
             >
               <span
-                className="text-[9px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
+                className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
                 style={isFull
                   ? { background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }
                   : { background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }
@@ -1232,12 +1232,12 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                   onMouseEnter={() => setShowOptPopup(true)}
                   onMouseLeave={() => setShowOptPopup(false)}
                 >
-                  <p className="text-[9px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                  <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
                     {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
                   </p>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                     {prop.options!.map((opt) => (
-                      <span key={opt} className="text-[10px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
+                      <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
                     ))}
                   </div>
                 </div>
@@ -1248,11 +1248,11 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {/* ⑧ 비번 */}
         {(buildingPw || roomPw) && (
           <>
-            <span className="flex-shrink-0 w-px h-3 bg-border" />
+            <span className="flex-shrink-0 w-px h-3.5 bg-border" />
             <div className="flex items-center gap-0.5 flex-shrink-0">
-              <KeyRound className="w-2.5 h-2.5" style={{ color: "hsl(var(--foreground)/0.5)" }} />
-              {buildingPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.7)" }}>{buildingPw}</span>}
-              {roomPw && <span className="text-[10px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
+              <KeyRound className="w-3 h-3" style={{ color: "hsl(var(--foreground)/0.5)" }} />
+              {buildingPw && <span className="text-[11px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.7)" }}>{buildingPw}</span>}
+              {roomPw && <span className="text-[11px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
             </div>
           </>
         )}
@@ -1263,10 +1263,10 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         const text = prop.description || prop.note || roomMemo || "";
         if (!text.trim()) return null;
         return (
-          <div className="flex items-start gap-1 min-h-[16px] overflow-hidden">
-            <span className="flex-shrink-0 text-[9px] font-extrabold mt-0.5 whitespace-nowrap"
+          <div className="flex items-start gap-1 min-h-[17px] overflow-hidden">
+            <span className="flex-shrink-0 text-[10px] font-extrabold mt-0.5 whitespace-nowrap"
               style={{ color: "hsl(var(--muted-foreground))" }}>특이</span>
-            <span className="text-[10px] font-extrabold leading-tight truncate"
+            <span className="text-[11px] font-extrabold leading-tight truncate"
               style={{ color: "hsl(var(--foreground))" }}>
               {text.length > 60 ? text.slice(0, 60) + "…" : text}
             </span>
