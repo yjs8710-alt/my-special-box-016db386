@@ -728,6 +728,7 @@ const BuildingGroup = ({
   onEdit,
   onAddUnit,
   onToggleStatus,
+  onDelete,
 }: {
   rep: DBProperty;
   units: DBProperty[];
@@ -737,6 +738,7 @@ const BuildingGroup = ({
   onEdit: (p: DBProperty) => void;
   onAddUnit: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  onDelete: (p: DBProperty) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const activeCount = units.filter(u => u.status === "active").length;
