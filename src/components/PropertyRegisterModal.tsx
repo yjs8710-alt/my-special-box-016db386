@@ -108,6 +108,7 @@ const INITIAL: FormState = {
   detailType: "",
   sido: "충북", sigungu: "", dong: "", lotNumber: "",
   buildingName: "", floor: "", unitNo: "", area: "",
+  landArea: "", buildingArea: "", buildingSaleType: "일반건물",
   options: [], roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
