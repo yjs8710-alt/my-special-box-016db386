@@ -126,6 +126,7 @@ const INITIAL: FormState = {
   myMemo: "",
   description: "",
   contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
+  tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
   expose: true, allowAddressView: false,
   images: [],
 };
