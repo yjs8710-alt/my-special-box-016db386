@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
+import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
@@ -1089,6 +1090,7 @@ const AdminDashboard = () => {
   const [propertyModal, setPropertyModal] = useState<{ mode: "add" | "edit"; data: Partial<DBProperty> | null } | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [propertyDistrictFilter, setPropertyDistrictFilter] = useState("전체");
+  const { hiddenIds: hiddenMockIds, hideMockId, restoreAll: restoreAllMocks } = useHiddenMockIds();
 
   // 청주 연락처 state
   const [contacts, setContacts] = useState<CheongJuContact[]>([]);
@@ -1298,6 +1300,13 @@ const AdminDashboard = () => {
     if (error) { alert("삭제 오류: " + error.message); return; }
     setDbProperties((prev) => prev.filter((p) => p.id !== prop.id));
   };
+
+  // ─── 임의 매물(MAP_PROPERTIES) 숨김 처리 ─────────────────────────────────
+  const deleteMockProperty = (numId: number, title: string) => {
+    if (!window.confirm(`'${title}' 매물을 숨기겠습니까?\n(임의 등록 매물은 목록에서 제거되며 복구하려면 관리자에게 문의하세요.)`)) return;
+    hideMockId(numId);
+  };
+
 
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
   const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
@@ -2161,6 +2170,66 @@ const AdminDashboard = () => {
                   />
                 );
               })}
+              {/* ── 임의 등록 매물 섹션 ── */}
+              {(() => {
+                const visibleMocks = MAP_PROPERTIES.filter(p => !hiddenMockIds.has(p.id));
+                if (visibleMocks.length === 0 && hiddenMockIds.size === 0) return null;
+                return (
+                  <div className="flex flex-col gap-3 mt-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground">임의 등록 매물</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          코드에 포함된 샘플 데이터 · {visibleMocks.length}개 노출 · {hiddenMockIds.size}개 숨김
+                        </p>
+                      </div>
+                      {hiddenMockIds.size > 0 && (
+                        <button
+                          onClick={() => { if (window.confirm("숨긴 임의 매물을 모두 복원하시겠습니까?")) restoreAllMocks(); }}
+                          className="text-xs px-3 py-1.5 rounded-full border font-semibold transition-colors"
+                          style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
+                        >
+                          전체 복원 ({hiddenMockIds.size})
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {visibleMocks.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-card hover:bg-muted/20 transition-colors"
+                        >
+                          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-border bg-muted flex items-center justify-center">
+                            {p.image ? (
+                              <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <Building2 className="w-5 h-5 text-muted-foreground/40" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-semibold text-foreground truncate">{p.title}</span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
+                                샘플
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.address} · {p.type} · {p.deposit}/{p.monthly}</div>
+                          </div>
+                          <button
+                            onClick={() => deleteMockProperty(p.id, p.title)}
+                            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold shrink-0"
+                            style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                            title="숨기기"
+                          >
+                            <Trash2 className="w-3 h-3" />삭제
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
             );
           })()}

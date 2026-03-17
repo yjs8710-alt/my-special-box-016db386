@@ -6,6 +6,7 @@ import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilt
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import { LayoutGrid, Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
@@ -22,9 +23,11 @@ const MapSearch = () => {
 
   // DB에서 실시간으로 매물 불러오기
   const { properties: dbProperties } = useDBProperties();
+  const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
-  // 정적 목 데이터 + DB 데이터 병합
-  const allProperties = [...MAP_PROPERTIES, ...dbProperties];
+  // 정적 목 데이터(숨긴 것 제외) + DB 데이터 병합
+  const allProperties = [...MAP_PROPERTIES.filter(p => !hiddenMockIds.has(p.id)), ...dbProperties];
+
 
   const handleDeleteProperties = (ids: Set<number>) => {
     setDeletedIds(prev => new Set([...prev, ...ids]));
