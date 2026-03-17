@@ -1290,13 +1290,16 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
   topOffset?: number;
   onDeleteProperties?: (ids: Set<number>) => void;
+  /** 핀 클릭 시 해당 주소로 필터링 */
+  pinnedAddress?: string | null;
+  onClearPin?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
