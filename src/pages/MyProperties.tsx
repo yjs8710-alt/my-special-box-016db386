@@ -392,14 +392,20 @@ const PropertyRow = ({
   onDelete,
   onToggleStatus,
   isAdmin,
+  registrantInfo,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
   isAdmin?: boolean;
+  registrantInfo?: { name: string; email?: string } | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  // 관리자 뷰에서 등록자 표시: registrantInfo(프로필 기반) > agent_name 순으로
+  const displayRegistrant = registrantInfo?.name || prop.agent_name || null;
+
   return (
     <div className="border border-border rounded-xl overflow-hidden" style={{ background: "hsl(var(--card))" }}>
       {/* 요약 행 */}
@@ -429,18 +435,32 @@ const PropertyRow = ({
                 숨김
               </span>
             )}
-            {isAdmin && prop.agent_name && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 border"
-                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                👤 {prop.agent_name}
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{prop.address}</span>
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
+          {/* 관리자 전용: 등록자 정보 */}
+          {isAdmin && displayRegistrant && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                👤 {displayRegistrant}
+              </span>
+              {!registrantInfo && !prop.agent_name && (
+                <span className="text-[10px] text-muted-foreground">등록자 정보 없음</span>
+              )}
+            </div>
+          )}
+          {isAdmin && !displayRegistrant && (
+            <div className="mt-0.5">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
+                👤 등록자 미상
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
