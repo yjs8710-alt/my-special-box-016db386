@@ -728,6 +728,7 @@ const BuildingGroup = ({
   onEdit,
   onAddUnit,
   onToggleStatus,
+  onDelete,
 }: {
   rep: DBProperty;
   units: DBProperty[];
@@ -737,6 +738,7 @@ const BuildingGroup = ({
   onEdit: (p: DBProperty) => void;
   onAddUnit: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  onDelete: (p: DBProperty) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const activeCount = units.filter(u => u.status === "active").length;
@@ -926,6 +928,14 @@ const BuildingGroup = ({
                     title={u.status === "active" ? "노출종료" : "노출재개"}
                   >
                     {u.status === "active" ? <><EyeOff className="w-3 h-3" />종료</> : <><Eye className="w-3 h-3" />재개</>}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(u); }}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
+                    style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                    title="매물 삭제"
+                  >
+                    <Trash2 className="w-3 h-3" />삭제
                   </button>
                 </div>
               </div>
@@ -1280,6 +1290,14 @@ const AdminDashboard = () => {
     if (!error) setDbProperties((prev) => prev.map((p) => p.id === prop.id ? { ...p, status: newStatus } : p));
     else alert("상태 변경 오류: " + error.message);
     setTogglingId(null);
+  };
+
+  // ─── 매물 삭제 ────────────────────────────────────────────────────────────
+  const deleteProperty = async (prop: DBProperty) => {
+    if (!window.confirm(`'${prop.title}' 매물을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("properties").delete().eq("id", prop.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setDbProperties((prev) => prev.filter((p) => p.id !== prop.id));
   };
 
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
@@ -2133,6 +2151,7 @@ const AdminDashboard = () => {
                       });
                     }}
                     onToggleStatus={togglePropertyStatus}
+                    onDelete={deleteProperty}
                   />
                 );
               })}
