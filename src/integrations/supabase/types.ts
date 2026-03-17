@@ -143,6 +143,7 @@ export type Database = {
           note: string | null
           options: string[]
           parking: string
+          registered_by: string | null
           registered_date: string
           room_memo: string | null
           room_password: string | null
@@ -185,6 +186,7 @@ export type Database = {
           note?: string | null
           options?: string[]
           parking?: string
+          registered_by?: string | null
           registered_date?: string
           room_memo?: string | null
           room_password?: string | null
@@ -227,6 +229,7 @@ export type Database = {
           note?: string | null
           options?: string[]
           parking?: string
+          registered_by?: string | null
           registered_date?: string
           room_memo?: string | null
           room_password?: string | null
