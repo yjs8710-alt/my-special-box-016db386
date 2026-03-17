@@ -232,7 +232,7 @@ const APARTMENT_PROPERTIES: MapProperty[] = [
 const APARTMENT_SUBTYPES = ["아파트", "아파트분양권", "오피스텔", "오피스텔분양권", "연립/다세대", "빌라분양권"];
 const APARTMENT_DEAL_TYPES = ["매매+전세+월세", "매매", "전세+월세", "전세", "월세"];
 
-const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "아파트매매", "오피스텔매매"];
+const APARTMENT_DB_TYPES = ["아파트", "오피스텔"];
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -245,18 +245,21 @@ const ApartmentRental = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  // DB 매물 (아파트/오피스텔 - 매매 포함)
-  const { properties: dbProperties } = useDBProperties(APARTMENT_DB_TYPES);
+  // DB 매물 (아파트/오피스텔 - type에 키워드 포함된 모든 물건)
+  // typeFilter를 undefined로 전달하면 전체를 가져온 뒤 클라이언트에서 필터
+  const { properties: dbAllProperties } = useDBProperties(undefined);
 
-  // static + DB 합치기 (아파트/오피스텔 타입만 필터)
+  // 아파트/오피스텔 관련 타입만 필터 (매매 포함)
+  const dbProperties = useMemo(
+    () => dbAllProperties.filter(p =>
+      p.type.includes("아파트") || p.type.includes("오피스텔")
+    ),
+    [dbAllProperties]
+  );
+
+  // static + DB 합치기
   const allProperties = useMemo(
-    () => [
-      ...APARTMENT_PROPERTIES,
-      ...dbProperties.filter(p =>
-        p.type === "아파트" || p.type === "오피스텔" ||
-        p.type.includes("아파트") || p.type.includes("오피스텔")
-      ),
-    ],
+    () => [...APARTMENT_PROPERTIES, ...dbProperties],
     [dbProperties]
   );
 
