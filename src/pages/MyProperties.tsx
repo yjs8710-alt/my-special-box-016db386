@@ -526,6 +526,7 @@ const MyProperties = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
+  const [agentTab, setAgentTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
@@ -626,10 +627,18 @@ const MyProperties = () => {
     setProperties(prev => prev.map(p => p.id === prop.id ? { ...p, status: newStatus } : p));
   };
 
+  const isAdminView = agentName === "관리자";
+
+  // 등록자 탭 목록 (관리자 전용)
+  const agentList = isAdminView
+    ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
+    : [];
+
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    return matchStatus && matchSearch;
+    const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
+    return matchStatus && matchSearch && matchAgent;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
@@ -682,6 +691,42 @@ const MyProperties = () => {
             </div>
           ))}
         </div>
+
+        {/* 관리자 전용: 등록자별 탭 필터 */}
+        {isAdminView && agentList.length > 1 && (
+          <div className="mb-4 -mx-1 px-1 overflow-x-auto">
+            <div className="flex gap-1.5 min-w-max pb-1">
+              {agentList.map(agent => {
+                const count = agent === "전체"
+                  ? properties.length
+                  : properties.filter(p => p.agent_name === agent).length;
+                const isActive = agentTab === agent;
+                return (
+                  <button
+                    key={agent}
+                    onClick={() => setAgentTab(agent)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
+                    style={isActive
+                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
+                      : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                    }
+                  >
+                    {agent === "전체" ? "👥" : "👤"} {agent}
+                    <span
+                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
+                      style={isActive
+                        ? { background: "rgba(255,255,255,0.25)", color: "inherit" }
+                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                      }
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* 검색 & 필터 */}
         <div className="flex items-center gap-3 mb-4 flex-wrap">
