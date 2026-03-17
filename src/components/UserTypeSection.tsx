@@ -3,7 +3,7 @@ import { Building2, Home, Briefcase } from "lucide-react";
 const TYPES = [
   {
     icon: Home,
-    label: "임대인 (건물주)",
+    label: "임대인 (소유주)",
     badge: "방 내놓기",
     badgeColor: "bg-primary/10 text-primary",
     title: "빠르게 임차인을 찾아드려요",

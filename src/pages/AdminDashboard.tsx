@@ -2261,7 +2261,7 @@ const AdminDashboard = () => {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </div>
-                      {/* 건물주 */}
+                      {/* 소유주 */}
                       <div className="hidden md:block text-xs">
                         {c.contact_owner ? (
                           <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>

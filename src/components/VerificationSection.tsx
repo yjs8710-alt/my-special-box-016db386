@@ -5,7 +5,7 @@ const STEPS = [
     num: "1",
     icon: Search,
     title: "매물 전담팀 조사",
-    desc: "전담팀이 건물주에게 직접 연락하여 매물 상태를 인터뷰합니다.",
+    desc: "전담팀이 소유주에게 직접 연락하여 매물 상태를 인터뷰합니다.",
   },
   {
     num: "2",
@@ -40,7 +40,7 @@ const VerificationSection = () => {
             집다는 왜 <span className="text-primary">백퍼센트 실매물</span>인가요?
           </h2>
           <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
-            집다의 모든 매물은 지역별 매물 전담팀이 건물주에게 직접 확인 후 등록됩니다.<br />
+            집다의 모든 매물은 지역별 매물 전담팀이 소유주에게 직접 확인 후 등록됩니다.<br />
             허위매물 없이 검증된 매물만 제공합니다.
           </p>
         </div>
@@ -81,7 +81,7 @@ const VerificationSection = () => {
             <div className="flex justify-start gap-2 items-end">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground font-bold flex-shrink-0">중</div>
               <div className="bg-white border border-border text-foreground text-sm rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-xs shadow-sm">
-                집다요? 거기는 다 실매물이에요. 직접 건물주한테 연락한 물건정보만 올려서요.
+                집다요? 거기는 다 실매물이에요. 직접 소유주한테 연락한 물건정보만 올려서요.
               </div>
             </div>
             <div className="flex justify-end">
