@@ -160,7 +160,7 @@ const ContactIcon = ({ type, active }: { type: string; active?: boolean }) => {
 };
 
 const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
-  const label = type === "owner" ? "건물주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
+  const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
 

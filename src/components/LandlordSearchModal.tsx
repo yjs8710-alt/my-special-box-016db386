@@ -570,7 +570,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                 <div className="flex items-center justify-center gap-1.5">
                   <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
                   <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
-                    승인된 회원 — 건물주·관리인·부동산 번호 제한없이 열람 가능
+                    승인된 회원 — 소유주·관리인·부동산 번호 제한없이 열람 가능
                   </p>
                 </div>
               ) : (
