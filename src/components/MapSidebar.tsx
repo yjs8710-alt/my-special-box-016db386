@@ -1780,14 +1780,14 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
           {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
-            {properties.length === 0 ? (
+            {displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                 {[...properties]
+                 {[...displayProperties]
                   .sort((a, b) => {
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
