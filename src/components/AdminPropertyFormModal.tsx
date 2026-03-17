@@ -886,7 +886,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 방 옵션 */}
               <Section label="방 옵션">
-                {/* 부가 시설 버튼 */}
+                {/* 풀옵션 버튼 */}
                 <div className="mb-2">
                   <button
                     type="button"
@@ -896,8 +896,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         const current = new Set(f.options);
                         const allSelected = FULL_OPTIONS.every(o => current.has(o));
                         if (allSelected) {
+                          // 풀옵션 해제
                           FULL_OPTIONS.forEach(o => current.delete(o));
                         } else {
+                          // 풀옵션 전체 선택
                           FULL_OPTIONS.forEach(o => current.add(o));
                         }
                         return { ...f, options: Array.from(current) };
@@ -910,7 +912,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         : { background: "transparent", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }
                     }
                   >
-                    🏠 부가 시설
+                    ✨ 풀옵션
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">

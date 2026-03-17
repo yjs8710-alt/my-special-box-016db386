@@ -245,17 +245,8 @@ const ApartmentRental = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
-  // DB 매물 (아파트/오피스텔 - type에 키워드 포함된 모든 물건)
-  // typeFilter를 undefined로 전달하면 전체를 가져온 뒤 클라이언트에서 필터
-  const { properties: dbAllProperties } = useDBProperties(undefined);
-
-  // 아파트/오피스텔 관련 타입만 필터 (매매 포함)
-  const dbProperties = useMemo(
-    () => dbAllProperties.filter(p =>
-      p.type.includes("아파트") || p.type.includes("오피스텔")
-    ),
-    [dbAllProperties]
-  );
+  // DB 매물 (아파트/오피스텔)
+  const { properties: dbProperties } = useDBProperties(APARTMENT_DB_TYPES);
 
   // static + DB 합치기
   const allProperties = useMemo(
