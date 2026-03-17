@@ -330,7 +330,7 @@ const ApartmentRental = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handlePinSelect}
           />
           <MapFilterBar
             activeType={activeType}
@@ -358,10 +358,16 @@ const ApartmentRental = () => {
         <MapSidebar
           properties={filtered}
           selectedId={selectedId}
-          onSelect={setSelectedId}
-          onDeselect={() => setSelectedId(null)}
+          onSelect={(id) => {
+            setSelectedId(id);
+            const prop = filtered.find(p => p.id === id);
+            if (prop) setPinnedAddress(prop.address);
+          }}
+          onDeselect={() => { setSelectedId(null); setPinnedAddress(null); }}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          pinnedAddress={pinnedAddress}
+          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>
