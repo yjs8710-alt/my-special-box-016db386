@@ -1635,6 +1635,22 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
+            {/* 핀 선택 모드 배너 */}
+            {pinnedAddress && (
+              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                style={{ background: "hsl(var(--primary)/0.08)" }}>
+                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
+                <button
+                  onClick={() => onClearPin?.()}
+                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                  style={{ color: "hsl(var(--primary))" }}
+                >
+                  <X className="w-2.5 h-2.5" />
+                  전체보기
+                </button>
+              </div>
+            )}
             {/* 상단: 매물 수 + 주요 액션 */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1646,11 +1662,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {properties.length}
+                    {displayProperties.length}
                     <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
+                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary ml-1">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : "지도에서 핀 클릭"}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : "지도에서 핀 클릭"}
                   </p>
                 </div>
               </div>
