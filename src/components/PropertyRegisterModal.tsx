@@ -206,9 +206,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (form.detailType === "건물매매" || form.tradeType === "매매") {
+    const isSale = form.detailType === "건물매매" || form.tradeType === "매매";
+    const isLand = form.detailType === "토지" || form.buildingType === "토지";
+    if (isSale) {
       if (!form.salePrice.trim()) e.amount = "매매가를 입력해주세요";
-    } else {
+    } else if (!isLand) {
       if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
     }
     setErrors(e);
