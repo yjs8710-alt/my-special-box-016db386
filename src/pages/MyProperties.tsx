@@ -809,6 +809,7 @@ const MyProperties = () => {
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
                 isAdmin={agentName === "관리자"}
+                registrantInfo={agentName === "관리자" && prop.registered_by ? registrantMap[prop.registered_by] ?? null : null}
               />
             ))}
           </div>
