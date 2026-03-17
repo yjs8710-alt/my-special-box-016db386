@@ -210,20 +210,26 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       form.contactManager && `관리인:${form.contactManager}`,
     ].filter(Boolean).join("|");
 
+    const isBuildingSale = form.detailType === "건물매매";
+
     const payload = {
-      title: `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
+      title: isBuildingSale
+        ? `${form.dong} 건물매매 (${form.buildingSaleType})`
+        : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
       building_name: form.buildingName || null,
       address,
       dong: form.dong,
       lot_number: form.lotNumber,
       district: districtVal,
       type: form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: form.detailType || null,
+      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
       unit_number: form.unitNo || null,
-      area: form.area,
+      area: isBuildingSale
+        ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
+        : form.area,
       floor: form.floor,
-      deposit: form.tradeType === "매매" ? form.salePrice : form.deposit,
-      monthly: form.tradeType === "매매" ? "" : form.monthlyRent,
+      deposit: (isBuildingSale || form.tradeType === "매매") ? form.salePrice : form.deposit,
+      monthly: (isBuildingSale || form.tradeType === "매매") ? "" : form.monthlyRent,
       manage_fee: form.managementFee,
       parking: "",
       elevator: false,
@@ -249,6 +255,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
         form.keyMoney && `권리금: ${form.keyMoney}`,
+        isBuildingSale && form.landArea && `대지: ${form.landArea}`,
+        isBuildingSale && form.buildingArea && `건평: ${form.buildingArea}`,
       ].filter(Boolean).join("\n") || null,
     };
 
