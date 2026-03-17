@@ -531,7 +531,29 @@ const MyProperties = () => {
     const load = async () => {
       setLoading(true);
 
-      // agent_profiles에서 이름 조회
+      // 관리자 여부 확인
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      const isAdmin = !!roleData;
+
+      if (isAdmin) {
+        // 관리자: 전체 매물 조회
+        setAgentName("관리자");
+        const { data, error } = await supabase
+          .from("properties")
+          .select("*")
+          .order("registered_date", { ascending: false });
+        if (!error && data) setProperties(data as DBProperty[]);
+        setLoading(false);
+        return;
+      }
+
+      // 일반 사용자: agent_profiles에서 이름 조회
       const { data: profile } = await supabase
         .from("agent_profiles")
         .select("name")
