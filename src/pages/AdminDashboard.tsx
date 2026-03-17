@@ -1397,6 +1397,13 @@ const AdminDashboard = () => {
     setTogglingContactId(null);
   };
 
+  const deleteContact = async (c: CheongJuContact) => {
+    if (!window.confirm(`'${c.dong} ${c.lot_number ?? ""}' 연락처를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("cheongju_contacts").delete().eq("id", c.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setContacts((prev) => prev.filter((x) => x.id !== c.id));
+  };
+
   const deletePost = (id: number) => setPosts((prev) => prev.filter((p) => p.id !== id));
   const togglePin = (id: number) => setPosts((prev) => prev.map((p) => p.id === id ? { ...p, pinned: !p.pinned } : p));
 
