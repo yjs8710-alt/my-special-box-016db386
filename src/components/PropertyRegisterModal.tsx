@@ -267,7 +267,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.keyMoney && `권리금: ${form.keyMoney}`,
         isBuildingSale && form.landArea && `대지: ${form.landArea}`,
         isBuildingSale && form.buildingArea && `건평: ${form.buildingArea}`,
+        form.tenantOccupied && `세입자거주: 예`,
+        form.tenantOccupied && form.tenantDeposit && `세입자전세금: ${form.tenantDeposit}`,
+        form.tenantOccupied && form.tenantMonthly && `세입자월세: ${form.tenantMonthly}`,
+        form.vacateDate && `퇴거일: ${form.vacateDate}`,
       ].filter(Boolean).join("\n") || null,
+      vacate_date: form.vacateDate || null,
     };
 
     const { error } = await supabase.from("properties").insert(payload);
