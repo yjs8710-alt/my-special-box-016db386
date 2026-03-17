@@ -183,7 +183,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     const e: Record<string, string> = {};
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
     if (!form.dong) e.dong = "동을 선택해주세요";
-    if (!form.detailType) e.detailType = "세부 종류를 선택해주세요";
+    if (form.buildingType !== "토지" && !form.detailType) e.detailType = "세부 종류를 선택해주세요";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -443,14 +443,16 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         </div>
       </Section>
 
-      {/* 세부 종류 */}
-      <Section label="세부 종류" error={errors.detailType}>
-        <div className="flex flex-wrap gap-x-4 gap-y-2.5">
-          {DETAIL_TYPES.map((t) => (
-            <Radio key={t} checked={form.detailType === t} onClick={() => set("detailType", t)}>{t}</Radio>
-          ))}
-        </div>
-      </Section>
+      {/* 세부 종류 - 매물종류 토지 선택 시 숨김 */}
+      {form.buildingType !== "토지" && (
+        <Section label="세부 종류" error={errors.detailType}>
+          <div className="flex flex-wrap gap-x-4 gap-y-2.5">
+            {DETAIL_TYPES.map((t) => (
+              <Radio key={t} checked={form.detailType === t} onClick={() => set("detailType", t)}>{t}</Radio>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 주소 입력 */}
       <Section label="주소 입력">
