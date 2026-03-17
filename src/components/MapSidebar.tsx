@@ -1237,8 +1237,8 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                     minWidth: "160px",
                     boxShadow: "0 4px 20px hsl(var(--primary)/0.15)",
                   }}
-                  onMouseEnter={() => setShowOptPopup(true)}
-                  onMouseLeave={() => setShowOptPopup(false)}
+                   onMouseEnter={() => setShowOptPopup(true)}
+                  onMouseLeave={handleOptMouseLeave}
                 >
                   <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
                     {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
