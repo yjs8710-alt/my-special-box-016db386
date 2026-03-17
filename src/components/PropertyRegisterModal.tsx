@@ -598,8 +598,8 @@ function Step2({
       {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" &&
         !(["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && form.tradeType === "매매") && (
         <Section label="옵션">
-          {/* 풀옵션 체크 버튼 */}
-          <FullOptionToggle options={form.options} set={set} />
+          {/* 부가 시설 체크박스 */}
+          <ExtraFacilityCheckboxes options={form.options} set={set} />
           <div className="flex flex-wrap gap-2">
             {ROOM_OPTIONS.map((opt) => (
               <button key={opt} type="button" onClick={() => toggleOption(opt)}
@@ -1153,47 +1153,55 @@ function AmountInput({
   );
 }
 
-/* ─── FullOptionToggle ─── */
-const FULL_OPTIONS = [
-  "냉장고","세탁기","에어컨","전자레인지","TV","가스레인지","인덕션","침대","책상","옷장","전자키",
+/* ─── 부가 시설 체크박스 ─── */
+const EXTRA_FACILITY_ITEMS = [
+  { key: "수도",   label: "수도",   icon: "💧" },
+  { key: "유선TV", label: "유선TV", icon: "📺" },
+  { key: "인터넷", label: "인터넷", icon: "🌐" },
+  { key: "CCTV",  label: "CCTV",  icon: "📷" },
 ];
 
-function FullOptionToggle({
+function ExtraFacilityCheckboxes({
   options,
   set,
 }: {
   options: string[];
   set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
 }) {
-  const isFullOption = FULL_OPTIONS.every((o) => options.includes(o));
-
-  const toggleFull = () => {
-    if (isFullOption) {
-      // 풀옵션 해제 → 풀옵션 항목만 제거
-      set("options", options.filter((o) => !FULL_OPTIONS.includes(o)));
+  const toggle = (key: string) => {
+    if (options.includes(key)) {
+      set("options", options.filter((o) => o !== key));
     } else {
-      // 풀옵션 선택 → 기존 옵션 + 풀옵션 합산
-      const merged = Array.from(new Set([...options, ...FULL_OPTIONS]));
-      set("options", merged);
+      set("options", [...options, key]);
     }
   };
 
   return (
-    <button
-      type="button"
-      onClick={toggleFull}
-      className={`flex items-center gap-2 w-full px-4 py-2.5 rounded-xl border-2 text-sm font-extrabold transition-all mb-2 ${
-        isFullOption
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-primary/5 text-primary border-primary/40 hover:border-primary hover:bg-primary/10"
-      }`}
-    >
-      <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-        isFullOption ? "bg-white/30 border-white/50" : "bg-white border-primary/40"
-      }`}>
-        {isFullOption && <span className="text-white text-xs font-black">✓</span>}
-      </span>
-      풀옵션 (냉장고·세탁기·에어컨·전자레인지·TV 등 {FULL_OPTIONS.length}종 일괄 선택)
-    </button>
+    <div className="flex flex-col gap-2 mb-2 p-3 rounded-xl border border-border bg-muted/20">
+      <p className="text-xs font-bold text-muted-foreground">부가 시설</p>
+      <div className="flex flex-wrap gap-3">
+        {EXTRA_FACILITY_ITEMS.map(({ key, label, icon }) => {
+          const checked = options.includes(key);
+          return (
+            <label key={key} className="flex items-center gap-2 cursor-pointer select-none group">
+              <span
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  checked
+                    ? "bg-primary border-primary"
+                    : "bg-background border-border group-hover:border-primary/50"
+                }`}
+                onClick={() => toggle(key)}
+              >
+                {checked && <span className="text-white text-[10px] font-black leading-none">✓</span>}
+              </span>
+              <span className="text-sm font-medium text-foreground flex items-center gap-1" onClick={() => toggle(key)}>
+                <span>{icon}</span>
+                <span>{label}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
   );
 }
