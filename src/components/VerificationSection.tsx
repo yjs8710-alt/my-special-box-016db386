@@ -40,7 +40,7 @@ const VerificationSection = () => {
             집다는 왜 <span className="text-primary">백퍼센트 실매물</span>인가요?
           </h2>
           <p className="text-muted-foreground text-sm max-w-lg mx-auto leading-relaxed">
-            집다의 모든 매물은 지역별 매물 전담팀이 건물주에게 직접 확인 후 등록됩니다.<br />
+            집다의 모든 매물은 지역별 매물 전담팀이 소유주에게 직접 확인 후 등록됩니다.<br />
             허위매물 없이 검증된 매물만 제공합니다.
           </p>
         </div>
