@@ -971,8 +971,26 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               <Section label="금액 입력">
                 <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
-                  <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
+                  {/* 매매 선택 시 매매가액 */}
+                  {form.tradeType === "매매" ? (
+                    <div className="col-span-2">
+                      <AmountInput label="매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
+                    </div>
+                  ) : (
+                    <>
+                      <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
+                      <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
+                    </>
+                  )}
+                  {/* 상가 유형 시 권리금 */}
+                  {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
+                    <div className="col-span-2">
+                      <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
+                        const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
+                        set("note", v ? (existing ? `${existing}\n권리금: ${v}` : `권리금: ${v}`) : existing);
+                      }} placeholder="없으면 0 또는 비워두기" />
+                    </div>
+                  )}
                   <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
                   <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
                   <div className="col-span-2">
