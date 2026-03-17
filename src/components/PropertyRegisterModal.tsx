@@ -548,21 +548,23 @@ function Step2({
         ))}
       </div>
 
-      {/* 방 옵션 */}
-      <Section label="방 옵션">
-        <div className="flex flex-wrap gap-2">
-          {ROOM_OPTIONS.map((opt) => (
-            <button key={opt} type="button" onClick={() => toggleOption(opt)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                form.options.includes(opt)
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              {opt}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {/* 방 옵션 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="방 옵션">
+          <div className="flex flex-wrap gap-2">
+            {ROOM_OPTIONS.map((opt) => (
+              <button key={opt} type="button" onClick={() => toggleOption(opt)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  form.options.includes(opt)
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}>
+                {opt}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 방 비번 - 토지/건물매매 제외 */}
       {form.detailType !== "토지" && form.detailType !== "건물매매" && (
@@ -604,6 +606,85 @@ function Step2({
               </button>
             ))}
           </div>
+        </Section>
+      )}
+
+      {/* 아파트 매매: 세입자 거주 여부 */}
+      {form.detailType === "아파트" && form.tradeType === "매매" && (
+        <Section label="세입자 거주 여부">
+          <div className="flex gap-3 mb-1">
+            <button type="button" onClick={() => set("tenantOccupied", false)}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                !form.tenantOccupied ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:border-primary/50"
+              }`}>
+              공실 (세입자 없음)
+            </button>
+            <button type="button" onClick={() => set("tenantOccupied", true)}
+              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                form.tenantOccupied ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:border-primary/50"
+              }`}>
+              세입자 거주중
+            </button>
+          </div>
+          {form.tenantOccupied && (
+            <div className="flex flex-col gap-3 p-3 rounded-xl border border-border bg-muted/20">
+              <p className="text-xs font-semibold text-muted-foreground">세입자 계약 조건</p>
+              <div className="grid grid-cols-2 gap-3">
+                <AmountInput label="전세금 / 보증금" value={form.tenantDeposit} onChange={(v) => set("tenantDeposit", v)} placeholder="예) 20,000" />
+                <AmountInput label="월세 (없으면 0)" value={form.tenantMonthly} onChange={(v) => set("tenantMonthly", v)} placeholder="예) 0" />
+              </div>
+              {/* 퇴거일 날짜 선택 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground/70">퇴거일</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button type="button" className={cn(
+                      "flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-left",
+                      !form.vacateDate && "text-muted-foreground"
+                    )}>
+                      <CalendarIcon className="w-4 h-4 opacity-50 flex-shrink-0" />
+                      {form.vacateDate ? form.vacateDate : "날짜 선택"}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-[10300]" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.vacateDate ? new Date(form.vacateDate) : undefined}
+                      onSelect={(d) => set("vacateDate", d ? format(d, "yyyy-MM-dd") : "")}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
+        </Section>
+      )}
+
+      {/* 아파트 외 매매 퇴거일 - 토지/건물매매 제외, 세입자 있을 경우 */}
+      {form.tradeType === "매매" && form.detailType !== "아파트" && form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="퇴거일">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button type="button" className={cn(
+                "flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-left",
+                !form.vacateDate && "text-muted-foreground"
+              )}>
+                <CalendarIcon className="w-4 h-4 opacity-50 flex-shrink-0" />
+                {form.vacateDate ? form.vacateDate : "날짜 선택 (없으면 생략)"}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 z-[10300]" align="start">
+              <Calendar
+                mode="single"
+                selected={form.vacateDate ? new Date(form.vacateDate) : undefined}
+                onSelect={(d) => set("vacateDate", d ? format(d, "yyyy-MM-dd") : "")}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+            </PopoverContent>
+          </Popover>
         </Section>
       )}
 
