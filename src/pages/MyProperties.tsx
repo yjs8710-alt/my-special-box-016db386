@@ -737,7 +737,6 @@ const MyProperties = () => {
                 isAdmin={agentName === "관리자"}
               />
             ))}
-            ))}
           </div>
         )}
       </div>
