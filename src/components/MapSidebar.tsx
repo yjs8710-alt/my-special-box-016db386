@@ -1089,7 +1089,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
-        <span className="flex-shrink-0 text-[9px] font-bold text-muted-foreground whitespace-nowrap">
+        <span className="flex-shrink-0 text-[9px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
           확인:{idx}{regDate ? ` 등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
@@ -1264,10 +1264,10 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         if (!text.trim()) return null;
         return (
           <div className="flex items-start gap-1 min-h-[16px] overflow-hidden">
-            <span className="flex-shrink-0 text-[9px] font-bold mt-0.5 whitespace-nowrap"
-              style={{ color: "hsl(var(--muted-foreground)/0.6)" }}>특이</span>
-            <span className="text-[10px] font-medium leading-tight truncate"
-              style={{ color: "hsl(var(--foreground)/0.75)" }}>
+            <span className="flex-shrink-0 text-[9px] font-extrabold mt-0.5 whitespace-nowrap"
+              style={{ color: "hsl(var(--muted-foreground))" }}>특이</span>
+            <span className="text-[10px] font-extrabold leading-tight truncate"
+              style={{ color: "hsl(var(--foreground))" }}>
               {text.length > 60 ? text.slice(0, 60) + "…" : text}
             </span>
           </div>
