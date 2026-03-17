@@ -678,7 +678,7 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
               <div className="h-2 bg-muted/50 my-2" />
               <div className="px-4 pb-3 flex flex-col gap-2">
                 <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
-                <RevealPhone label="건물주" phone={property.contactOwner} />
+                <RevealPhone label="소유주" phone={property.contactOwner} />
                 <RevealPhone label="관리인" phone={property.contactManager} />
                 {property.contact && (
                   <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
