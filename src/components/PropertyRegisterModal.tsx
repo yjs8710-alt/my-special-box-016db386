@@ -338,6 +338,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
                 fileInputRef={fileInputRef}
                 onImageUpload={handleImageUpload}
                 onImageRemove={removeImage}
+                onImageSetMain={setMainImage}
               />
             )}
 
