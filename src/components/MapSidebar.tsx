@@ -1214,7 +1214,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               ref={optBadgeRef}
               className="relative flex-shrink-0"
               onMouseEnter={handleOptMouseEnter}
-              onMouseLeave={() => setShowOptPopup(false)}
+              onMouseLeave={handleOptMouseLeave}
               onClick={(e) => e.stopPropagation()}
             >
               <span
