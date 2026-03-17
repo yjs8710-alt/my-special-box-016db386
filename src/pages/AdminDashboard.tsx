@@ -1292,6 +1292,14 @@ const AdminDashboard = () => {
     setTogglingId(null);
   };
 
+  // ─── 매물 삭제 ────────────────────────────────────────────────────────────
+  const deleteProperty = async (prop: DBProperty) => {
+    if (!window.confirm(`'${prop.title}' 매물을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("properties").delete().eq("id", prop.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setDbProperties((prev) => prev.filter((p) => p.id !== prop.id));
+  };
+
   // ─── 매물 저장 (등록/수정) ────────────────────────────────────────────────
   const saveProperty = async (data: Omit<DBProperty, "id" | "created_at">) => {
     // 세션 확인 (RLS 통과를 위해 필수)
