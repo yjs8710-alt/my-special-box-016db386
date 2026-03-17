@@ -1016,7 +1016,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   const [showFullAddr, setShowFullAddr] = useState(false);
   const [showOptPopup, setShowOptPopup] = useState(false);
   const optBadgeRef = useRef<HTMLDivElement>(null);
-  const [optPopupPos, setOptPopupPos] = useState({ top: 0, left: 0 });
+  const [optPopupStyle, setOptPopupStyle] = useState<React.CSSProperties>({});
 
   const optHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -1024,7 +1024,37 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
     if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     if (optBadgeRef.current) {
       const rect = optBadgeRef.current.getBoundingClientRect();
-      setOptPopupPos({ top: rect.top - 4, left: rect.left });
+      const popupHeight = 200; // 팝업 예상 최대 높이
+      const popupWidth = 200;
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+
+      // 오른쪽 공간 확인 (사이드바 우측이 잘릴 수 있음)
+      const sidebarRight = rect.left + 360; // 사이드바 대략 너비
+      const overflowRight = rect.left + popupWidth > window.innerWidth;
+
+      let leftPos = rect.left;
+      if (overflowRight) {
+        leftPos = Math.max(8, window.innerWidth - popupWidth - 8);
+      }
+
+      if (spaceAbove >= popupHeight || spaceAbove > spaceBelow) {
+        // 위쪽에 표시
+        setOptPopupStyle({
+          position: "fixed",
+          top: rect.top - 4,
+          left: leftPos,
+          transform: "translateY(-100%)",
+        });
+      } else {
+        // 아래쪽에 표시
+        setOptPopupStyle({
+          position: "fixed",
+          top: rect.bottom + 4,
+          left: leftPos,
+          transform: "none",
+        });
+      }
     }
     setShowOptPopup(true);
   };
