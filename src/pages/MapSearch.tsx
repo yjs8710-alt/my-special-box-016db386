@@ -6,6 +6,7 @@ import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilt
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import { LayoutGrid, Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
