@@ -576,6 +576,8 @@ function Step2({
       {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" &&
         !(["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType) && form.tradeType === "매매") && (
         <Section label="옵션">
+          {/* 풀옵션 체크 버튼 */}
+          <FullOptionToggle options={form.options} set={set} />
           <div className="flex flex-wrap gap-2">
             {ROOM_OPTIONS.map((opt) => (
               <button key={opt} type="button" onClick={() => toggleOption(opt)}
