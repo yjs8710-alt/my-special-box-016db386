@@ -464,10 +464,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
       </Section>
 
-      {/* 건물이름 */}
-      <Section label="건물이름">
-        <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
-      </Section>
+      {/* 건물이름 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="건물이름">
+          <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
+        </Section>
+      )}
 
       {/* 층수 / 호수 / 평수 */}
       {form.detailType === "건물매매" ? (
@@ -492,6 +494,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             </div>
           </div>
         </>
+      ) : form.detailType === "토지" ? (
+        /* 토지: 평수만 표시 */
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-foreground/70">면적 (평)</label>
+          <input type="text" placeholder="예) 200평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+        </div>
       ) : (
         <div className="grid grid-cols-3 gap-3">
           <div className="flex flex-col gap-1">
