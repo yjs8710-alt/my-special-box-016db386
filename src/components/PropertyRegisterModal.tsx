@@ -80,6 +80,8 @@ interface FormState {
   deposit: string;
   monthlyRent: string;
   managementFee: string;
+  salePrice: string;
+  keyMoney: string;
   lhType: LhType;
   exitCleanFee: string;
   brokerFee: string;
