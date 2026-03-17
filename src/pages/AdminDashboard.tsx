@@ -2235,7 +2235,7 @@ const AdminDashboard = () => {
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[70px_100px_100px_140px_120px_120px_120px_80px_90px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[70px_100px_100px_140px_120px_120px_80px_90px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -2252,24 +2252,18 @@ const AdminDashboard = () => {
                           >{c.lot_number}</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
-                      {/* 대표전화 */}
+                      {/* 소유주 (phone) */}
                       <div className="hidden md:flex items-center gap-1 text-xs">
                         {c.phone ? (
-                          <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--primary))" }}>{c.phone}</a>
+                          <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.phone}</a>
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
                       </div>
-                      {/* 소유주 */}
+                      {/* 관리인 (contact_owner) */}
                       <div className="hidden md:block text-xs">
                         {c.contact_owner ? (
-                          <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.contact_owner}</a>
-                        ) : <span className="text-muted-foreground">—</span>}
-                      </div>
-                       {/* 관리인 */}
-                      <div className="hidden md:block text-xs">
-                        {c.contact_manager ? (
-                          <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                          <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_owner}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
                       {/* 부동산 */}
