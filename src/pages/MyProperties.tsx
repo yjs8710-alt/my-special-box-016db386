@@ -532,6 +532,8 @@ const MyProperties = () => {
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const [agentName, setAgentName] = useState("");
+  // 관리자 전용: user_id → {name, email} 맵
+  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; email?: string }>>({});
 
   // 프로필 및 매물 로드
   useEffect(() => {
@@ -552,18 +554,24 @@ const MyProperties = () => {
       const isAdmin = !!roleData;
 
       if (isAdmin) {
-        // 관리자: 전체 매물 조회
+        // 관리자: 전체 매물 + agent_profiles 매핑 조회
         setAgentName("관리자");
-        const { data, error } = await supabase
-          .from("properties")
-          .select("*")
-          .order("registered_date", { ascending: false });
-        if (!error && data) setProperties(data as DBProperty[]);
+        const [{ data: props }, { data: profiles }] = await Promise.all([
+          supabase.from("properties").select("*").order("registered_date", { ascending: false }),
+          supabase.from("agent_profiles").select("user_id, name, phone"),
+        ]);
+        if (props) setProperties(props as DBProperty[]);
+        if (profiles) {
+          const map: Record<string, { name: string; email?: string }> = {};
+          profiles.forEach(p => { map[p.user_id] = { name: p.name }; });
+          setRegistrantMap(map);
+        }
         setLoading(false);
         return;
       }
 
       // 일반 사용자: agent_profiles에서 이름 조회
+      // 본인 registered_by OR agent_name 기준 매물 조회
       const { data: profile } = await supabase
         .from("agent_profiles")
         .select("name")
@@ -573,13 +581,13 @@ const MyProperties = () => {
       const name = profile?.name ?? "";
       setAgentName(name);
 
-      if (!name) { setLoading(false); return; }
+      if (!name && !user.userId) { setLoading(false); return; }
 
-      // 본인 agent_name 매물 조회
+      // registered_by = 본인 userId OR agent_name = 본인 이름 (둘 다 커버)
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .eq("agent_name", name)
+        .or(`registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`)
         .order("registered_date", { ascending: false });
 
       if (!error && data) setProperties(data as DBProperty[]);
