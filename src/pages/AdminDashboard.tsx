@@ -1397,6 +1397,13 @@ const AdminDashboard = () => {
     setTogglingContactId(null);
   };
 
+  const deleteContact = async (c: CheongJuContact) => {
+    if (!window.confirm(`'${c.dong} ${c.lot_number ?? ""}' 연락처를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    const { error } = await supabase.from("cheongju_contacts").delete().eq("id", c.id);
+    if (error) { alert("삭제 오류: " + error.message); return; }
+    setContacts((prev) => prev.filter((x) => x.id !== c.id));
+  };
+
   const deletePost = (id: number) => setPosts((prev) => prev.filter((p) => p.id !== id));
   const togglePin = (id: number) => setPosts((prev) => prev.map((p) => p.id === id ? { ...p, pinned: !p.pinned } : p));
 
@@ -2293,13 +2300,21 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                       {/* 수정 */}
-                      <div className="hidden md:flex justify-center">
+                      <div className="hidden md:flex justify-center gap-1">
                         <button
                           onClick={() => setContactModal(c)}
                           className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
                           style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
                         >
                           <Pencil className="w-3 h-3" />수정
+                        </button>
+                        <button
+                          onClick={() => deleteContact(c)}
+                          className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
+                          style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
+                          title="삭제"
+                        >
+                          <Trash2 className="w-3 h-3" />삭제
                         </button>
                       </div>
                     </div>
