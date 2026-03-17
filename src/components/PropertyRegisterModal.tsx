@@ -464,10 +464,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
       </Section>
 
-      {/* 건물이름 */}
-      <Section label="건물이름">
-        <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
-      </Section>
+      {/* 건물이름 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="건물이름">
+          <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
+        </Section>
+      )}
 
       {/* 층수 / 호수 / 평수 */}
       {form.detailType === "건물매매" ? (
@@ -492,6 +494,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             </div>
           </div>
         </>
+      ) : form.detailType === "토지" ? (
+        /* 토지: 평수만 표시 */
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-semibold text-foreground/70">면적 (평)</label>
+          <input type="text" placeholder="예) 200평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+        </div>
       ) : (
         <div className="grid grid-cols-3 gap-3">
           <div className="flex flex-col gap-1">
@@ -546,42 +554,48 @@ function Step2({
         </div>
       </Section>
 
-      {/* 방 비번 */}
-      <Section label="방 비번">
-        <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
-      </Section>
+      {/* 방 비번 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="방 비번">
+          <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+        </Section>
+      )}
 
-      {/* 방향 */}
-      <Section label="방향">
-        <div className="flex flex-wrap gap-2">
-          {DIRECTION_OPTIONS.map((d) => (
-            <button key={d} type="button" onClick={() => set("direction", form.direction === d ? "" : d)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                form.direction === d
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {/* 방향 - 토지/매매/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="방향">
+          <div className="flex flex-wrap gap-2">
+            {DIRECTION_OPTIONS.map((d) => (
+              <button key={d} type="button" onClick={() => set("direction", form.direction === d ? "" : d)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  form.direction === d
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}>
+                {d}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
-      {/* 공실 여부 */}
-      <Section label="현재 빈방 여부">
-        <div className="flex gap-3">
-          {VACANCY_TYPES.map((t) => (
-            <button key={t} type="button" onClick={() => set("vacancy", t)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                form.vacancy === t
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              {t}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {/* 공실 여부 - 토지/매매/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="현재 빈방 여부">
+          <div className="flex gap-3">
+            {VACANCY_TYPES.map((t) => (
+              <button key={t} type="button" onClick={() => set("vacancy", t)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                  form.vacancy === t
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 금액 입력 */}
       <Section label="금액 입력" error={errors.amount}>
@@ -609,7 +623,8 @@ function Step2({
               <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
             </div>
           )}
-          {form.detailType !== "건물매매" && (
+          {/* 관리비·퇴실청소비 - 매매/토지/건물매매 제외 */}
+          {form.detailType !== "건물매매" && form.detailType !== "토지" && form.tradeType !== "매매" && (
             <>
               <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
               <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
@@ -621,14 +636,16 @@ function Step2({
         </div>
       </Section>
 
-      {/* LH 전세대출 */}
-      <Section label="LH (전세대출)">
-        <div className="flex gap-3">
-          {LH_TYPES.map((t) => (
-            <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
-          ))}
-        </div>
-      </Section>
+      {/* LH 전세대출 - 매매/토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="LH (전세대출)">
+          <div className="flex gap-3">
+            {LH_TYPES.map((t) => (
+              <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 내 메모 */}
       <Section label="내 메모">
