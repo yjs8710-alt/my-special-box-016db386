@@ -1150,9 +1150,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           // 엘리베이터 (boolean 필드)
           if (prop.elevator) badges.push(
-            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
+            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
               style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </span>
           );
 
