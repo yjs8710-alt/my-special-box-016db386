@@ -394,7 +394,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!init) return {};
     const contacts: Partial<AdminFormExtended> = {};
     const noteStr = init.note ?? init.agent_name ?? "";
-    // "건물주: 010-1234-5678\n관리인: 010-9999-8888" 형태 파싱
+    // "소유주: 010-1234-5678\n관리인: 010-9999-8888" 형태 파싱
     const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
