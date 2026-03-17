@@ -39,7 +39,11 @@ const DETAIL_TYPES = [
   "주인세대","고시원","다가구","단독주택",
   "아파트","오피스텔","빌라",
   "상가","식당·카페","사무실","공장·창고","병원·학원","토지",
+  "건물매매",
 ] as const;
+
+const BUILDING_SALE_TYPES = ["일반건물","집합건물","토지"] as const;
+type BuildingSaleType = typeof BUILDING_SALE_TYPES[number];
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
