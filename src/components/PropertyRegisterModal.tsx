@@ -216,10 +216,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   };
 
   const validateStep3 = () => {
-    const e: Record<string, string> = {};
-    if (!form.contactOwner.trim()) e.contactOwner = "건물주 연락처를 입력해주세요";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async () => {
