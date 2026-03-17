@@ -155,6 +155,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const removeImage = (url: string) =>
     setForm((f) => ({ ...f, images: f.images.filter((u) => u !== url) }));
 
+  const setMainImage = (url: string) =>
+    setForm((f) => ({ ...f, images: [url, ...f.images.filter((u) => u !== url)] }));
+
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
@@ -335,6 +338,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
                 fileInputRef={fileInputRef}
                 onImageUpload={handleImageUpload}
                 onImageRemove={removeImage}
+                onImageSetMain={setMainImage}
               />
             )}
 
@@ -570,7 +574,7 @@ function Step2({
 
 /* ─── Step 3 ─── */
 function Step3({
-  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove,
+  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove, onImageSetMain,
 }: {
   form: FormState;
   set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
@@ -579,6 +583,7 @@ function Step3({
   fileInputRef: React.RefObject<HTMLInputElement>;
   onImageUpload: (files: FileList | null) => Promise<void>;
   onImageRemove: (url: string) => void;
+  onImageSetMain: (url: string) => void;
 }) {
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "건물주 연락처", placeholder: "예) 010-1234-5678", required: true },
@@ -605,7 +610,7 @@ function Step3({
       <Section label="매물 사진">
         {/* 캐러셀 미리보기 */}
         {form.images.length > 0 && (
-          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} />
+          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} />
         )}
         {/* 업로드 버튼 */}
         <button
@@ -674,7 +679,15 @@ function Step3({
 }
 
 /* ─── Image Preview Carousel ─── */
-function ImagePreviewCarousel({ images, onRemove }: { images: string[]; onRemove: (url: string) => void }) {
+function ImagePreviewCarousel({
+  images,
+  onRemove,
+  onSetMain,
+}: {
+  images: string[];
+  onRemove: (url: string) => void;
+  onSetMain?: (url: string) => void;
+}) {
   const [idx, setIdx] = useState(0);
   const safeIdx = Math.min(idx, images.length - 1);
 
@@ -687,76 +700,115 @@ function ImagePreviewCarousel({ images, onRemove }: { images: string[]; onRemove
     onRemove(url);
   };
 
+  const isMain = safeIdx === 0;
+
   return (
-    <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
-      {/* 슬라이드 */}
-      <div
-        className="flex h-full transition-transform duration-300 ease-in-out"
-        style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
-      >
-        {images.map((src, i) => (
-          <div key={src} className="h-full flex-shrink-0 relative" style={{ width: `${100 / images.length}%` }}>
-            <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
-          </div>
-        ))}
-      </div>
-
-      {/* 그라디언트 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-
-      {/* 삭제 버튼 */}
-      <button
-        type="button"
-        onClick={() => handleRemove(images[safeIdx])}
-        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors"
-      >
-        <X className="w-3.5 h-3.5 text-white" />
-      </button>
-
-      {/* 대표 뱃지 */}
-      {safeIdx === 0 && (
-        <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">대표</span>
-      )}
-
-      {/* 이전/다음 버튼 */}
-      {images.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 text-white" />
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
-            <ChevronRight className="w-4 h-4 text-white" />
-          </button>
-        </>
-      )}
-
-      {/* 인디케이터 + 장수 */}
-      <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-1">
-        <div className="flex gap-1">
-          {images.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setIdx(i)}
-              className="w-1.5 h-1.5 rounded-full transition-all"
-              style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
-            />
+    <div className="flex flex-col gap-2">
+      <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
+        {/* 슬라이드 */}
+        <div
+          className="flex h-full transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+        >
+          {images.map((src, i) => (
+            <div key={src} className="h-full flex-shrink-0 relative" style={{ width: `${100 / images.length}%` }}>
+              <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+            </div>
           ))}
         </div>
+
+        {/* 그라디언트 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+        {/* 삭제 버튼 */}
+        <button
+          type="button"
+          onClick={() => handleRemove(images[safeIdx])}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors"
+        >
+          <X className="w-3.5 h-3.5 text-white" />
+        </button>
+
+        {/* 대표 뱃지 or 대표 설정 버튼 */}
+        {isMain ? (
+          <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">⭐ 대표</span>
+        ) : (
+          onSetMain && (
+            <button
+              type="button"
+              onClick={() => { onSetMain(images[safeIdx]); setIdx(0); }}
+              className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors"
+              style={{ background: "rgba(0,0,0,0.55)", color: "#fff", border: "1px solid rgba(255,255,255,0.4)" }}
+            >
+              대표로 설정
+            </button>
+          )
+        )}
+
+        {/* 이전/다음 버튼 */}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={prev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+          </>
+        )}
+
+        {/* 인디케이터 + 장수 */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-1">
+            <div className="flex gap-1">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIdx(i)}
+                  className="w-1.5 h-1.5 rounded-full transition-all"
+                  style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 장수 카운터 */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 right-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+            {safeIdx + 1} / {images.length}
+          </div>
+        )}
       </div>
 
-      {/* 장수 카운터 */}
-      <div className="absolute bottom-2 right-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
-        {safeIdx + 1} / {images.length}
-      </div>
+      {/* 썸네일 스트립 */}
+      {images.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          {images.map((src, i) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setIdx(i)}
+              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
+              style={{ borderColor: i === safeIdx ? "hsl(var(--primary))" : "transparent" }}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+              {i === 0 && (
+                <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,15 @@ import { useState, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
-function ImageCarouselPreview({ images, onRemove }: { images: string[]; onRemove: (url: string) => void }) {
+function ImageCarouselPreview({
+  images,
+  onRemove,
+  onSetMain,
+}: {
+  images: string[];
+  onRemove: (url: string) => void;
+  onSetMain?: (url: string) => void;
+}) {
   const [idx, setIdx] = useState(0);
   const safeIdx = Math.min(idx, images.length - 1);
 
@@ -13,71 +21,107 @@ function ImageCarouselPreview({ images, onRemove }: { images: string[]; onRemove
 
   if (images.length === 0) return null;
 
+  const isMain = safeIdx === 0;
+
   return (
-    <div className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
-      {/* 슬라이드 */}
-      <div
-        className="flex h-full transition-transform duration-300"
-        style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
-      >
-        {images.map((src) => (
-          <div key={src} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }}>
-            <img src={src} alt="매물 사진" className="w-full h-full object-cover" />
-          </div>
-        ))}
+    <div className="flex flex-col gap-2">
+      {/* 메인 캐러셀 */}
+      <div className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
+        {/* 슬라이드 */}
+        <div
+          className="flex h-full transition-transform duration-300"
+          style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+        >
+          {images.map((src) => (
+            <div key={src} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }}>
+              <img src={src} alt="매물 사진" className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+
+        {/* 그라디언트 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+        {/* 삭제 버튼 */}
+        <button
+          type="button"
+          onClick={() => handleRemove(images[safeIdx])}
+          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors z-10"
+        >
+          <X className="w-3.5 h-3.5 text-white" />
+        </button>
+
+        {/* 대표 배지 or 대표 설정 버튼 */}
+        {isMain ? (
+          <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full z-10">⭐ 대표</span>
+        ) : (
+          onSetMain && (
+            <button
+              type="button"
+              onClick={() => { onSetMain(images[safeIdx]); setIdx(0); }}
+              className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full z-10 transition-colors"
+              style={{ background: "rgba(0,0,0,0.55)", color: "#fff", border: "1px solid rgba(255,255,255,0.4)" }}
+            >
+              대표로 설정
+            </button>
+          )
+        )}
+
+        {/* 좌우 화살표 */}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setIdx((i) => (i - 1 + images.length) % images.length)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4 text-white" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIdx((i) => (i + 1) % images.length)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+            {/* 인디케이터 */}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIdx(i)}
+                  className="w-1.5 h-1.5 rounded-full transition-all"
+                  style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
+                />
+              ))}
+            </div>
+            {/* 장수 표시 */}
+            <div className="absolute bottom-2 right-3 text-white text-[10px] font-bold bg-black/50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+              {safeIdx + 1} / {images.length}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* 그라디언트 */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-
-      {/* 삭제 버튼 */}
-      <button
-        type="button"
-        onClick={() => handleRemove(images[safeIdx])}
-        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors z-10"
-      >
-        <X className="w-3.5 h-3.5 text-white" />
-      </button>
-
-      {/* 대표 배지 */}
-      {safeIdx === 0 && (
-        <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-white px-2 py-0.5 rounded-full z-10">대표</span>
-      )}
-
-      {/* 좌우 화살표 */}
+      {/* 썸네일 스트립 */}
       {images.length > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={() => setIdx((i) => (i - 1 + images.length) % images.length)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 text-white" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setIdx((i) => (i + 1) % images.length)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/75 flex items-center justify-center backdrop-blur-sm transition-colors"
-          >
-            <ChevronRight className="w-4 h-4 text-white" />
-          </button>
-          {/* 인디케이터 */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setIdx(i)}
-                className="w-1.5 h-1.5 rounded-full transition-all"
-                style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
-              />
-            ))}
-          </div>
-          {/* 장수 표시 */}
-          <div className="absolute bottom-2 right-3 text-white text-[10px] font-bold bg-black/50 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-            {safeIdx + 1} / {images.length}
-          </div>
-        </>
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          {images.map((src, i) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setIdx(i)}
+              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
+              style={{ borderColor: i === safeIdx ? "hsl(var(--primary))" : "transparent" }}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+              {i === 0 && (
+                <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
+              )}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -1032,6 +1076,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     images={form.images ?? []}
                     onRemove={(url) =>
                       setForm((f) => ({ ...f, images: (f.images ?? []).filter((u) => u !== url) }))
+                    }
+                    onSetMain={(url) =>
+                      setForm((f) => {
+                        const rest = (f.images ?? []).filter((u) => u !== url);
+                        return { ...f, images: [url, ...rest] };
+                      })
                     }
                   />
                 )}
