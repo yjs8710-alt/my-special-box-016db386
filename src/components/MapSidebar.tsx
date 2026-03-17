@@ -1018,12 +1018,20 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   const optBadgeRef = useRef<HTMLDivElement>(null);
   const [optPopupPos, setOptPopupPos] = useState({ top: 0, left: 0 });
 
+  const optHoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleOptMouseEnter = () => {
+    if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     if (optBadgeRef.current) {
       const rect = optBadgeRef.current.getBoundingClientRect();
       setOptPopupPos({ top: rect.top - 4, left: rect.left });
     }
     setShowOptPopup(true);
+  };
+
+  const handleOptMouseLeave = () => {
+    if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
+    setShowOptPopup(false);
   };
 
 
