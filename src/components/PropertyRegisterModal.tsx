@@ -155,6 +155,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   const removeImage = (url: string) =>
     setForm((f) => ({ ...f, images: f.images.filter((u) => u !== url) }));
 
+  const setMainImage = (url: string) =>
+    setForm((f) => ({ ...f, images: [url, ...f.images.filter((u) => u !== url)] }));
+
   const validateStep1 = () => {
     const e: Record<string, string> = {};
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
