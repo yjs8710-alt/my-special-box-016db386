@@ -1165,16 +1165,16 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-shrink-0 text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
         {/* ⑤ 월세 */}
         <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
-        {/* ⑥ 평수 */}
-        {areaShort && (
-          <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
-            {areaShort}
-          </span>
-        )}
-        {/* ⑥-b 관리비 */}
+        {/* ⑥ 관리비 */}
         {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
           <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
             관{prop.manageFee.replace(/[^0-9]/g, "") ? prop.manageFee : prop.manageFee}
+          </span>
+        )}
+        {/* ⑦ 평수 */}
+        {areaShort && (
+          <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
+            {areaShort}
           </span>
         )}
         <span className="flex-1" />
