@@ -173,14 +173,16 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                 </button>
               )}
 
-              <Button
-                size="sm"
-                onClick={openRegister}
-                className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
-                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
-              >
-                + 매물 등록
-              </Button>
+              {location.pathname !== "/" && (
+                <Button
+                  size="sm"
+                  onClick={openRegister}
+                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
+                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                >
+                  + 매물 등록
+                </Button>
+              )}
             </div>
 
             {/* 모바일 햄버거 */}
