@@ -103,6 +103,10 @@ interface FormState {
   contactOwner: string;
   contactTenant: string;
   contactManager: string;
+  tenantOccupied: boolean;      // 아파트매매: 세입자 거주여부
+  tenantDeposit: string;        // 아파트매매: 세입자 전세/보증금
+  tenantMonthly: string;        // 아파트매매: 세입자 월세
+  vacateDate: string;           // 아파트매매: 퇴거일
   expose: boolean;
   allowAddressView: boolean;
   images: string[];
