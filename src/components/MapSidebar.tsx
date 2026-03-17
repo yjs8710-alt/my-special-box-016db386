@@ -1089,7 +1089,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
-        <span className="flex-shrink-0 text-[9px] font-bold text-muted-foreground whitespace-nowrap">
+        <span className="flex-shrink-0 text-[9px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
           확인:{idx}{regDate ? ` 등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
