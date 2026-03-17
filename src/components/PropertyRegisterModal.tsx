@@ -554,42 +554,48 @@ function Step2({
         </div>
       </Section>
 
-      {/* 방 비번 */}
-      <Section label="방 비번">
-        <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
-      </Section>
+      {/* 방 비번 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="방 비번">
+          <input type="text" placeholder="방 비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+        </Section>
+      )}
 
-      {/* 방향 */}
-      <Section label="방향">
-        <div className="flex flex-wrap gap-2">
-          {DIRECTION_OPTIONS.map((d) => (
-            <button key={d} type="button" onClick={() => set("direction", form.direction === d ? "" : d)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                form.direction === d
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {/* 방향 - 토지/매매/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="방향">
+          <div className="flex flex-wrap gap-2">
+            {DIRECTION_OPTIONS.map((d) => (
+              <button key={d} type="button" onClick={() => set("direction", form.direction === d ? "" : d)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  form.direction === d
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}>
+                {d}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
-      {/* 공실 여부 */}
-      <Section label="현재 빈방 여부">
-        <div className="flex gap-3">
-          {VACANCY_TYPES.map((t) => (
-            <button key={t} type="button" onClick={() => set("vacancy", t)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                form.vacancy === t
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              {t}
-            </button>
-          ))}
-        </div>
-      </Section>
+      {/* 공실 여부 - 토지/매매/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="현재 빈방 여부">
+          <div className="flex gap-3">
+            {VACANCY_TYPES.map((t) => (
+              <button key={t} type="button" onClick={() => set("vacancy", t)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                  form.vacancy === t
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 금액 입력 */}
       <Section label="금액 입력" error={errors.amount}>
@@ -617,7 +623,8 @@ function Step2({
               <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
             </div>
           )}
-          {form.detailType !== "건물매매" && (
+          {/* 관리비·퇴실청소비 - 매매/토지/건물매매 제외 */}
+          {form.detailType !== "건물매매" && form.detailType !== "토지" && form.tradeType !== "매매" && (
             <>
               <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
               <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
@@ -629,14 +636,16 @@ function Step2({
         </div>
       </Section>
 
-      {/* LH 전세대출 */}
-      <Section label="LH (전세대출)">
-        <div className="flex gap-3">
-          {LH_TYPES.map((t) => (
-            <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
-          ))}
-        </div>
-      </Section>
+      {/* LH 전세대출 - 매매/토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.tradeType !== "매매" && (
+        <Section label="LH (전세대출)">
+          <div className="flex gap-3">
+            {LH_TYPES.map((t) => (
+              <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* 내 메모 */}
       <Section label="내 메모">
