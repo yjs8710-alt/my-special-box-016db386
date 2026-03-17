@@ -1130,3 +1130,48 @@ function AmountInput({
     </div>
   );
 }
+
+/* ─── FullOptionToggle ─── */
+const FULL_OPTIONS = [
+  "냉장고","세탁기","에어컨","전자레인지","TV","가스레인지","인덕션","침대","책상","옷장","전자키",
+];
+
+function FullOptionToggle({
+  options,
+  set,
+}: {
+  options: string[];
+  set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+}) {
+  const isFullOption = FULL_OPTIONS.every((o) => options.includes(o));
+
+  const toggleFull = () => {
+    if (isFullOption) {
+      // 풀옵션 해제 → 풀옵션 항목만 제거
+      set("options", options.filter((o) => !FULL_OPTIONS.includes(o)));
+    } else {
+      // 풀옵션 선택 → 기존 옵션 + 풀옵션 합산
+      const merged = Array.from(new Set([...options, ...FULL_OPTIONS]));
+      set("options", merged);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggleFull}
+      className={`flex items-center gap-2 w-full px-4 py-2.5 rounded-xl border-2 text-sm font-extrabold transition-all mb-2 ${
+        isFullOption
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-primary/5 text-primary border-primary/40 hover:border-primary hover:bg-primary/10"
+      }`}
+    >
+      <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+        isFullOption ? "bg-white/30 border-white/50" : "bg-white border-primary/40"
+      }`}>
+        {isFullOption && <span className="text-white text-xs font-black">✓</span>}
+      </span>
+      풀옵션 (냉장고·세탁기·에어컨·전자레인지·TV 등 {FULL_OPTIONS.length}종 일괄 선택)
+    </button>
+  );
+}
