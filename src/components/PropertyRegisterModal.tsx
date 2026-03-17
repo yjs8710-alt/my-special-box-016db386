@@ -89,6 +89,8 @@ interface FormState {
   buildingArea: string;  // 건물매매: 건평
   buildingSaleType: BuildingSaleType; // 건물매매: 일반건물/집합건물/토지
   options: string[];
+  facilities: string[];
+  pet: PetType;
   roomPassword: string;
   direction: string;
   vacancy: VacancyType;
