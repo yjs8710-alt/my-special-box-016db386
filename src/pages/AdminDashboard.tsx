@@ -1807,7 +1807,7 @@ const AdminDashboard = () => {
 
                       {/* 확장 패널 */}
                       {expandedMember === m.id && (
-                        <div className="mx-5 mb-4 rounded-xl p-4 flex flex-col gap-4 border" style={{ background: "hsl(var(--muted) / 0.4)", borderColor: "hsl(var(--border))" }}>
+                        <div className="mx-5 mb-4 rounded-xl p-4 flex flex-col gap-4 border" onClick={(e) => e.stopPropagation()} style={{ background: "hsl(var(--muted) / 0.4)", borderColor: "hsl(var(--border))" }}>
                            {/* 기본 정보 */}
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                              {[
