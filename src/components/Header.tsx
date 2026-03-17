@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building } from "lucide-react";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "아파트/오피스텔", path: "/apartment", icon: Building },
   { label: "주거형 외 임대·매매", path: "/non-residential", icon: Building },
   { label: "토지", path: "/land", icon: Building },
+  { label: "내 임대·매매 관리", path: "/my-properties", icon: ClipboardList },
 ];
 
 interface HeaderProps {
