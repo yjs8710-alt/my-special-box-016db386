@@ -229,6 +229,24 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
     const districtVal = form.sigungu ? form.sigungu.replace("청주시 ", "") : null;
 
+    // ── Geocoding: 주소 → 좌표 ─────────────────────────────────
+    let lat = 0;
+    let lng = 0;
+    try {
+      const geoAddress = ["충북 청주시", form.sigungu.replace("청주시 ", ""), form.dong, form.lotNumber].filter(Boolean).join(" ");
+      const { data: geoData, error: geoErr } = await supabase.functions.invoke("geocode", {
+        body: { address: geoAddress },
+      });
+      if (!geoErr && geoData?.success) {
+        lat = geoData.lat;
+        lng = geoData.lng;
+      } else {
+        console.warn("[geocode] 좌표 변환 실패:", geoErr?.message ?? geoData?.error);
+      }
+    } catch (e) {
+      console.warn("[geocode] 예외:", e);
+    }
+
     const contactParts = [
       form.contactOwner && `건물주:${form.contactOwner}`,
       form.contactBroker && `부동산:${form.contactBroker}`,
@@ -237,6 +255,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     ].filter(Boolean).join("|");
 
     const isBuildingSale = form.detailType === "건물매매";
+    const isCommercialLease = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
 
     const payload = {
       title: isBuildingSale
@@ -270,8 +289,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       options: form.options,
       images: form.images,
       views: 0,
-      lat: 0,
-      lng: 0,
+      lat,
+      lng,
       is_new: true,
       is_hot: false,
       status: "active" as const,
