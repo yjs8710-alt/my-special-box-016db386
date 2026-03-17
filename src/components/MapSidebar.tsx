@@ -1158,14 +1158,14 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           // 옵션 배열 기반 아이콘 맵
           const ICON_MAP: Record<string, IconBadge> = {
-            "반려동물가능":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "애완동물가능":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "반려동물불가":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "애완동물불가":  { icon: <Dog size={12} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "수도":          { icon: <Droplet size={12} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-            "인터넷":        { icon: <span className="text-[10px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-            "유선TV":        { icon: <Tv size={12} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-            "CCTV":          { icon: <Cctv size={12} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+            "반려동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "애완동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "애완동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "수도":          { icon: <Droplet size={14} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+            "인터넷":        { icon: <span className="text-[11px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+            "유선TV":        { icon: <Tv size={14} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+            "CCTV":          { icon: <Cctv size={14} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
           };
 
           // 반려동물 불가는 금지선 오버레이
@@ -1174,19 +1174,19 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           if (isPetDenied) {
             badges.push(
-              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[20px] h-[20px] rounded select-none"
+              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                 style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
-                <Dog size={11} strokeWidth={2}/>
+                <Dog size={14} strokeWidth={2}/>
                 <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg width="15" height="15" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
+                  <svg width="18" height="18" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
               </span>
             );
           } else if (isPetAllowed) {
             badges.push(
-              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
+              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                 style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>
-                <Dog size={11} strokeWidth={2}/>
+                <Dog size={14} strokeWidth={2}/>
               </span>
             );
           }
@@ -1196,7 +1196,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             const d = ICON_MAP[opt];
             if (!d) return;
             badges.push(
-              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[20px] h-[20px] rounded select-none"
+              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                 style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}>
                 {d.icon}
               </span>
