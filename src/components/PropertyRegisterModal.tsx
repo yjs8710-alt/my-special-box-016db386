@@ -39,7 +39,11 @@ const DETAIL_TYPES = [
   "주인세대","고시원","다가구","단독주택",
   "아파트","오피스텔","빌라",
   "상가","식당·카페","사무실","공장·창고","병원·학원","토지",
+  "건물매매",
 ] as const;
+
+const BUILDING_SALE_TYPES = ["일반건물","집합건물","토지"] as const;
+type BuildingSaleType = typeof BUILDING_SALE_TYPES[number];
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
@@ -73,6 +77,9 @@ interface FormState {
   floor: string;
   unitNo: string;
   area: string;
+  landArea: string;      // 건물매매: 대지(평)
+  buildingArea: string;  // 건물매매: 건평
+  buildingSaleType: BuildingSaleType; // 건물매매: 일반건물/집합건물/토지
   options: string[];
   roomPassword: string;
   direction: string;
@@ -101,6 +108,7 @@ const INITIAL: FormState = {
   detailType: "",
   sido: "충북", sigungu: "", dong: "", lotNumber: "",
   buildingName: "", floor: "", unitNo: "", area: "",
+  landArea: "", buildingArea: "", buildingSaleType: "일반건물",
   options: [], roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
@@ -172,8 +180,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   const validateStep2 = () => {
     const e: Record<string, string> = {};
-    if (form.tradeType === "매매") {
-      if (!form.salePrice.trim()) e.amount = "매매가액을 입력해주세요";
+    if (form.detailType === "건물매매" || form.tradeType === "매매") {
+      if (!form.salePrice.trim()) e.amount = "매매가를 입력해주세요";
     } else {
       if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
     }
@@ -202,20 +210,26 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       form.contactManager && `관리인:${form.contactManager}`,
     ].filter(Boolean).join("|");
 
+    const isBuildingSale = form.detailType === "건물매매";
+
     const payload = {
-      title: `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
+      title: isBuildingSale
+        ? `${form.dong} 건물매매 (${form.buildingSaleType})`
+        : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
       building_name: form.buildingName || null,
       address,
       dong: form.dong,
       lot_number: form.lotNumber,
       district: districtVal,
       type: form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: form.detailType || null,
+      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
       unit_number: form.unitNo || null,
-      area: form.area,
+      area: isBuildingSale
+        ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
+        : form.area,
       floor: form.floor,
-      deposit: form.tradeType === "매매" ? form.salePrice : form.deposit,
-      monthly: form.tradeType === "매매" ? "" : form.monthlyRent,
+      deposit: (isBuildingSale || form.tradeType === "매매") ? form.salePrice : form.deposit,
+      monthly: (isBuildingSale || form.tradeType === "매매") ? "" : form.monthlyRent,
       manage_fee: form.managementFee,
       parking: "",
       elevator: false,
@@ -241,6 +255,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
         form.keyMoney && `권리금: ${form.keyMoney}`,
+        isBuildingSale && form.landArea && `대지: ${form.landArea}`,
+        isBuildingSale && form.buildingArea && `건평: ${form.buildingArea}`,
       ].filter(Boolean).join("\n") || null,
     };
 
@@ -454,20 +470,44 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
       </Section>
 
       {/* 층수 / 호수 / 평수 */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-foreground/70">층수</label>
-          <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
+      {form.detailType === "건물매매" ? (
+        <>
+          {/* 건물매매: 건물 유형 */}
+          <Section label="건물 유형">
+            <div className="flex gap-4 flex-wrap">
+              {BUILDING_SALE_TYPES.map((t) => (
+                <Radio key={t} checked={form.buildingSaleType === t} onClick={() => set("buildingSaleType", t)}>{t}</Radio>
+              ))}
+            </div>
+          </Section>
+          {/* 건물매매: 대지·건평 */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">대지 (평)</label>
+              <input type="text" placeholder="예) 100평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic(false)} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">건평</label>
+              <input type="text" placeholder="예) 80평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic(false)} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">층수</label>
+            <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">호수</label>
+            <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">평수</label>
+            <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-foreground/70">호수</label>
-          <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-foreground/70">평수</label>
-          <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -547,8 +587,13 @@ function Step2({
       <Section label="금액 입력" error={errors.amount}>
         <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
         <div className="grid grid-cols-2 gap-3">
-          {/* 매매 선택 시 매매가액 */}
-          {form.tradeType === "매매" ? (
+          {/* 건물매매 선택 시 전용 레이아웃 */}
+          {form.detailType === "건물매매" ? (
+            <div className="col-span-2 flex flex-col gap-1 p-3 rounded-xl border border-primary/20 bg-primary/5">
+              <p className="text-xs font-bold text-primary mb-1">건물매매 금액</p>
+              <AmountInput label="매매가 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 150,000" />
+            </div>
+          ) : form.tradeType === "매매" ? (
             <div className="col-span-2">
               <AmountInput label="매매가액 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 15,000" />
             </div>
@@ -564,8 +609,12 @@ function Step2({
               <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
             </div>
           )}
-          <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
-          <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+          {form.detailType !== "건물매매" && (
+            <>
+              <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
+              <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+            </>
+          )}
           <div className="col-span-2">
             <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
           </div>
