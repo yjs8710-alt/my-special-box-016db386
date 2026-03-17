@@ -622,6 +622,35 @@ function Step2({
         </Section>
       )}
 
+      {/* 부가 시설 - 토지/건물매매 제외 */}
+      {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" && (
+        <Section label="부가 시설">
+          <div className="flex flex-wrap gap-2">
+            {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
+              const isActive = form.options.includes(key);
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => set("options", isActive
+                    ? form.options.filter((o) => o !== key)
+                    : [...form.options, key]
+                  )}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
+                  style={isActive
+                    ? { background: color, color: "#fff", borderColor: color }
+                    : { background: bg, color, borderColor: border }
+                  }
+                >
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
       {/* 비밀번호 - 토지/건물매매 제외 */}
       {form.detailType !== "토지" && form.buildingType !== "토지" && form.detailType !== "건물매매" && (
         <Section label="비밀번호">
