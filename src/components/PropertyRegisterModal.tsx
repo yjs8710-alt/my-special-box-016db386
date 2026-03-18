@@ -188,9 +188,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       });
   }, [user?.userId]);
 
+  // 집합건물 여부 판단: 건물유형이 집합건물이거나 세부유형이 아파트/오피스텔/빌라/연립 등
+  const isCollectiveBuilding = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
+
   // ── 주소(동+번지) 변경 시 전화번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
-    if (!form.dong || form.buildingType === "집합건물") return;
+    if (!form.dong || isCollectiveBuilding) return;
     const run = async () => {
       let q = supabase
         .from("cheongju_contacts")
@@ -208,11 +211,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.lotNumber, form.buildingType]);
+  }, [form.dong, form.lotNumber, form.buildingType, form.detailType]);
 
-  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
+  // ── 집합건물/아파트/오피스텔/빌라 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   useEffect(() => {
-    if (!form.dong || !form.unitNo || form.buildingType !== "집합건물") return;
+    if (!form.dong || !form.unitNo || !isCollectiveBuilding) return;
     const run = async () => {
       // 1순위: cheongju_contacts에서 호수별 소유주 조회
       let q = supabase
