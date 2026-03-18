@@ -1857,13 +1857,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 <Printer className="w-3 h-3" />
                 선택인쇄
               </button>
-              <button
-                onClick={handleDetailPrint}
-                className="toolbar-btn toolbar-btn-primary"
-              >
-                <Printer className="w-3 h-3" />
-                상세인쇄
-              </button>
             </div>
             {/* 외부 링크 바 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
