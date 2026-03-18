@@ -1840,23 +1840,14 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {displayProperties.length}
-                    <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
-                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary ml-1">(동일주소)</span>}
+                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
                     {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : ""}
                   </p>
                 </div>
               </div>
-              {/* 인쇄 버튼들 */}
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn"
-              >
-                <Printer className="w-3 h-3" />
-                선택인쇄
-              </button>
+              {/* 인쇄 버튼 제거 */}
             </div>
             {/* 외부 링크 바 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
@@ -1941,11 +1932,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 <ExternalLink className="w-2.5 h-2.5" />
                 다방
               </a>
-              {/* 선택인쇄 — 다방 우측 */}
+              <span className="flex-1" />
+              {/* 선택인쇄 — 우측 끝 파란색 */}
               <button
                 onClick={handleSelectPrint}
                 className="toolbar-btn flex items-center gap-0.5"
-                style={{ background: "hsl(142 70% 90%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}
+                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
               >
                 <Printer className="w-2.5 h-2.5" />
                 선택인쇄
