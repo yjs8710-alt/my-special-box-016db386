@@ -614,21 +614,57 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
 
           {/* Price block */}
           <div className="px-4 py-4 bg-primary/5 border-b border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
-                <p className="text-xl font-extrabold text-foreground leading-tight">
-                  {property.deposit}
-                  <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
-                  <span className="text-accent">{property.monthly}</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-[11px] text-muted-foreground">관리비</p>
-                <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/60">
+            {/* 임대 방식별 금액 파싱 (note 필드에 월세/반전세/전세 저장됨) */}
+            {(() => {
+              const note = property.note ?? "";
+              const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+              const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+              const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+              const hasMultiRent = wolseMatch || halfMatch || jeonseMatch;
+
+              return hasMultiRent ? (
+                <div className="flex flex-col gap-2 mb-2">
+                  {wolseMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">💰 월세</span>
+                      <span className="text-sm font-extrabold text-foreground">
+                        보증금 {wolseMatch[1]}만원 <span className="text-muted-foreground font-light">/</span> <span className="text-accent">월 {wolseMatch[2]}만원</span>
+                      </span>
+                    </div>
+                  )}
+                  {halfMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">🏠 반전세</span>
+                      <span className="text-sm font-extrabold text-foreground">
+                        보증금 {halfMatch[1]}만원 <span className="text-muted-foreground font-light">/</span> <span className="text-accent">월 {halfMatch[2]}만원</span>
+                      </span>
+                    </div>
+                  )}
+                  {jeonseMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">🏡 전세</span>
+                      <span className="text-sm font-extrabold text-foreground">보증금 {jeonseMatch[1]}만원</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
+                    <p className="text-xl font-extrabold text-foreground leading-tight">
+                      {property.deposit}
+                      <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
+                      <span className="text-accent">{property.monthly}</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[11px] text-muted-foreground">관리비</p>
+                    <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="flex items-center gap-3 pt-2 border-t border-border/60">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Eye className="w-3 h-3" />
                 <span>조회 {property.views.toLocaleString()}</span>
