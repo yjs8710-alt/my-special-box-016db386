@@ -15,7 +15,8 @@ import property5 from "@/assets/property5.jpg";
 import property6 from "@/assets/property6.jpg";
 
 const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [];
-    title: "구로 디지털단지 대형 사무실",
+
+
     buildingName: "구로 IT밸리",
     address: "서울특별시 구로구 구로동 222-10",
     type: "사무실",

@@ -13,7 +13,8 @@ import property3 from "@/assets/property3.jpg";
 
 // 토지 전용 mock 데이터
 const LAND_PROPERTIES: MapProperty[] = [];
-    title: "성남 판교 대지 매매",
+
+
     buildingName: "",
     address: "경기도 성남시 분당구 판교동 123",
     type: "토지",

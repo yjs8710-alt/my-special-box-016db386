@@ -15,7 +15,8 @@ import property5 from "@/assets/property5.jpg";
 import property6 from "@/assets/property6.jpg";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
-    title: "강남 역삼동 신축 원룸",
+
+
     buildingName: "역삼 신축빌라",
     address: "서울특별시 강남구 역삼동 801-5",
     type: "원룸",
