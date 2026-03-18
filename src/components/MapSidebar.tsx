@@ -1175,7 +1175,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         })()}
         {/* 등록일 */}
         {regDate && (
-          <span className="flex-shrink-0 text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+          <span className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums" style={{ color: "#111" }}>
             {regDate.slice(2).replace(/-/g, ".")}
           </span>
         )}
