@@ -263,6 +263,9 @@ const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
+
+// 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
+const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","고시원"] },
   { group: "상가 임대", types: ["상가","식당·카페","사무실","공장·창고","병원·학원"] },
@@ -514,18 +517,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
     if (d) geocodeAddress(fullAddress);
-    // 신규 등록 시 + 단독건물일 때만 주소 기준 연락처 자동 불러오기
-    const isCollective = form.buildingType === "집합건물";
+    // 신규 등록 시 + 집합건물이 아닐 때만 주소 기준 연락처 자동 불러오기
+    const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
     if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
   };
 
-  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
+  // ── 집합건물/아파트/오피스텔/빌라/연립 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   const handleUnitNumberChange = useCallback((unitVal: string) => {
     set("unit_number", unitVal);
-    if (form.buildingType === "집합건물" && form.dong && unitVal) {
+    const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
+    if (isCollective && form.dong && unitVal) {
       fetchContactFromDB(form.dong, form.lot_number, unitVal, true);
     }
-  }, [form.buildingType, form.dong, form.lot_number, fetchContactFromDB]);
+  }, [form.buildingType, form.type, form.dong, form.lot_number, fetchContactFromDB]);
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -847,8 +851,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">
                     호수
-                    {form.buildingType === "집합건물" && (
-                      <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수 입력 시 소유주 자동로드</span>
+                    {(form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
+                      <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
                     )}
                   </label>
                   <input
@@ -858,6 +862,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     onChange={(e) => handleUnitNumberChange(e.target.value)}
                     className={ic}
                   />
+                  {form.unit_number && (form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
+                    <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">평수</label>

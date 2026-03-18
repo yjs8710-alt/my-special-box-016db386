@@ -41,6 +41,9 @@ const DONG_MAP: Record<string, string[]> = {
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
+
+// 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
+const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const DETAIL_TYPES = [
   "원룸","투베이","투룸","쓰리룸","포룸",
   "주인세대","고시원","다가구","단독주택",
@@ -185,9 +188,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       });
   }, [user?.userId]);
 
+  // 집합건물 여부 판단: 건물유형이 집합건물이거나 세부유형이 아파트/오피스텔/빌라/연립 등
+  const isCollectiveBuilding = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
+
   // ── 주소(동+번지) 변경 시 전화번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
-    if (!form.dong || form.buildingType === "집합건물") return;
+    if (!form.dong || isCollectiveBuilding) return;
     const run = async () => {
       let q = supabase
         .from("cheongju_contacts")
@@ -205,11 +211,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.lotNumber, form.buildingType]);
+  }, [form.dong, form.lotNumber, form.buildingType, form.detailType]);
 
-  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
+  // ── 집합건물/아파트/오피스텔/빌라 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   useEffect(() => {
-    if (!form.dong || !form.unitNo || form.buildingType !== "집합건물") return;
+    if (!form.dong || !form.unitNo || !isCollectiveBuilding) return;
     const run = async () => {
       // 1순위: cheongju_contacts에서 호수별 소유주 조회
       let q = supabase
@@ -246,11 +252,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType, form.lotNumber]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
 
   // ── 단독건물: 호수 입력 시 이전 매물 이미지·비밀번호만 자동 로드 ──────────
   useEffect(() => {
-    if (!form.dong || !form.unitNo || form.buildingType === "집합건물") return;
+    if (!form.dong || !form.unitNo || isCollectiveBuilding) return;
     const run = async () => {
       const { data } = await supabase
         .from("properties")
@@ -270,7 +276,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -695,15 +701,15 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">
               호수
-              {form.buildingType === "집합건물" && (
-                <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수별 소유주 자동로드</span>
+              {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+                <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
               )}
             </label>
             <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
-            {form.unitNo && form.buildingType === "집합건물" && (
+            {form.unitNo && (form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
               <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
             )}
-            {form.unitNo && form.buildingType !== "집합건물" && (
+            {form.unitNo && !(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
               <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>
             )}
           </div>
