@@ -1171,6 +1171,12 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                 {isChecked ? daysSince : "?"}
               </span>
             </button>
+            {/* 등록일 */}
+            {regDate && (
+              <span className="flex-shrink-0 text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+                {regDate.slice(2).replace(/-/g, ".")}
+              </span>
+            )}
           );
         })()}
       </div>
