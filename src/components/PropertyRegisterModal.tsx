@@ -325,6 +325,27 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     const isBuildingSale = form.detailType === "건물매매";
     const isCommercialLease = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
 
+    // 임대 방식별 금액 정리 (월세/반전세/전세 복수 가능)
+    const hasWolse = form.rentModes.includes("월세");
+    const hasHalf = form.rentModes.includes("반전세");
+    const hasJeonse = form.rentModes.includes("전세");
+
+    // deposit: 대표 보증금 (월세 우선, 없으면 반전세, 없으면 전세)
+    const mainDeposit = (isBuildingSale || form.tradeType === "매매")
+      ? form.salePrice
+      : hasWolse ? form.deposit : hasHalf ? form.halfDeposit : hasJeonse ? form.jeonseDeposit : form.deposit;
+    const mainMonthly = (isBuildingSale || form.tradeType === "매매")
+      ? ""
+      : hasWolse ? form.monthlyRent : hasHalf ? form.halfMonthly : "";
+
+    // note에 임대 방식별 상세 금액 저장
+    const rentNotes: string[] = [];
+    if (form.tradeType === "임대" && !isBuildingSale) {
+      if (hasWolse && (form.deposit || form.monthlyRent)) rentNotes.push(`월세: 보증금 ${form.deposit || "0"}만원 / 월세 ${form.monthlyRent || "0"}만원`);
+      if (hasHalf && (form.halfDeposit || form.halfMonthly)) rentNotes.push(`반전세: 보증금 ${form.halfDeposit || "0"}만원 / 월세 ${form.halfMonthly || "0"}만원`);
+      if (hasJeonse && form.jeonseDeposit) rentNotes.push(`전세: 보증금 ${form.jeonseDeposit}만원`);
+    }
+
     const payload = {
       title: isBuildingSale
         ? `${form.dong} 건물매매 (${form.buildingSaleType})`
@@ -343,8 +364,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
         : form.area,
       floor: form.floor,
-      deposit: (isBuildingSale || form.tradeType === "매매") ? form.salePrice : form.deposit,
-      monthly: (isBuildingSale || form.tradeType === "매매") ? "" : form.monthlyRent,
+      deposit: mainDeposit,
+      monthly: mainMonthly,
       manage_fee: form.managementFee,
       parking: "",
       elevator: false,
@@ -382,6 +403,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.tenantOccupied && form.tenantDeposit && `세입자전세금: ${form.tenantDeposit}`,
         form.tenantOccupied && form.tenantMonthly && `세입자월세: ${form.tenantMonthly}`,
         form.vacateDate && `퇴거일: ${form.vacateDate}`,
+        ...rentNotes,
       ].filter(Boolean).join("\n") || null,
       vacate_date: form.vacateDate || null,
     };
