@@ -393,14 +393,12 @@ const MapFilterBar = ({
 
           {/* 검색바 */}
           <div
-            className="flex items-center bg-white overflow-hidden"
+            className="flex items-center bg-white overflow-hidden rounded-xl"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
               width: 336,
               flexShrink: 0,
               border: "2px solid hsl(var(--primary))",
-              borderLeft: "none",
-              borderRadius: "0 12px 12px 0",
             }}
           >
             <div className="flex items-center flex-1 px-3 gap-2 h-10">
