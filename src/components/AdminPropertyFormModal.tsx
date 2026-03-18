@@ -362,12 +362,20 @@ function Radio({ checked, onClick, children }: { checked: boolean; onClick: () =
   );
 }
 
-function AmountInput({ label, value, onChange, placeholder = "만원", noUnit = false }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; noUnit?: boolean;
+function AmountInput({ label, prefix, value, onChange, placeholder = "만원", noUnit = false }: {
+  label: string; prefix?: string; value: string; onChange: (v: string) => void; placeholder?: string; noUnit?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold text-foreground/70">{label}</label>
+      <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1">
+        {prefix && (
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded text-[9px] font-black"
+            style={{ background: "hsl(var(--primary))", color: "#fff" }}>
+            {prefix}
+          </span>
+        )}
+        {label}
+      </label>
       <div className="relative">
         <input type="text" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)}
           className={ic + (noUnit ? "" : " pr-10")} />
@@ -1004,7 +1012,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 {form.tradeType === "매매" ? (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <AmountInput label="매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
+                      <AmountInput label="매매가액 *" prefix="매" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
                     </div>
                   </div>
                 ) : (
@@ -1061,7 +1069,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     {form.rentModes.includes("전세") && (
                       <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
                         <p className="text-[11px] font-extrabold text-primary">🏡 전세</p>
-                        <AmountInput label="보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
+                        <AmountInput label="보증금" prefix="전" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
                       </div>
                     )}
                   </div>
