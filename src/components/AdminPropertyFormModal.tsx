@@ -1001,18 +1001,71 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               {/* 금액 입력 */}
               <Section label="금액 입력">
                 <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* 매매 선택 시 매매가액 */}
-                  {form.tradeType === "매매" ? (
+                {form.tradeType === "매매" ? (
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
                       <AmountInput label="매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
                     </div>
-                  ) : (
-                    <>
-                      <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
-                      <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
-                    </>
-                  )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {/* 임대 방식 다중 선택 */}
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[11px] font-bold text-foreground/70">임대 방식 (중복 선택 가능)</p>
+                      <div className="flex gap-2">
+                        {(["월세", "반전세", "전세"] as const).map((mode) => {
+                          const isOn = form.rentModes.includes(mode) || (form.rentModes.length === 0 && mode === "월세");
+                          return (
+                            <button
+                              key={mode}
+                              type="button"
+                              onClick={() => {
+                                const cur = form.rentModes.length === 0 ? ["월세"] : [...form.rentModes];
+                                const next = cur.includes(mode) ? cur.filter(m => m !== mode) : [...cur, mode];
+                                set("rentModes", next.length === 0 ? ["월세"] : next as any);
+                              }}
+                              className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all"
+                              style={isOn
+                                ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                                : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                              }
+                            >
+                              {mode}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 월세 금액 */}
+                    {(form.rentModes.length === 0 || form.rentModes.includes("월세")) && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
+                          <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
+                        </div>
+                      </div>
+                    )}
+                    {/* 반전세 금액 */}
+                    {form.rentModes.includes("반전세") && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">🏠 반전세</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <AmountInput label="보증금" value={form.halfDeposit} onChange={(v) => set("halfDeposit", v as any)} />
+                          <AmountInput label="월세" value={form.halfMonthly} onChange={(v) => set("halfMonthly", v as any)} />
+                        </div>
+                      </div>
+                    )}
+                    {/* 전세 금액 */}
+                    {form.rentModes.includes("전세") && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">🏡 전세</p>
+                        <AmountInput label="보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
+                      </div>
+                    )}
+                  </div>
+                )}
                   {/* 상가 유형 시 권리금 */}
                   {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
                     <div className="col-span-2">
