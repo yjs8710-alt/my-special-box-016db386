@@ -1069,7 +1069,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     {form.rentModes.includes("전세") && (
                       <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
                         <p className="text-[11px] font-extrabold text-primary">🏡 전세</p>
-                        <AmountInput label="보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
+                        <AmountInput label="보증금" prefix="전" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
                       </div>
                     )}
                   </div>
