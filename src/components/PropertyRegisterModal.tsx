@@ -184,14 +184,15 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       });
   }, [user?.userId]);
 
-  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 ──────────────────
+  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
-    if (!form.dong) return;
+    if (!form.dong || form.buildingType === "집합건물") return;
     const run = async () => {
       let q = supabase
         .from("cheongju_contacts")
         .select("contact_owner,contact_manager,contact_broker,phone")
-        .eq("dong", form.dong);
+        .eq("dong", form.dong)
+        .is("unit_number", null);
       if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
       const { data } = await q.maybeSingle();
       if (!data) return;
@@ -203,11 +204,52 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.lotNumber]);
+  }, [form.dong, form.lotNumber, form.buildingType]);
 
-  // ── 호수 입력 시 이전 매물 이미지·비밀번호 자동 로드 ──────────
+  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
   useEffect(() => {
-    if (!form.dong || !form.unitNo) return;
+    if (!form.dong || !form.unitNo || form.buildingType !== "집합건물") return;
+    const run = async () => {
+      // 1순위: cheongju_contacts에서 호수별 소유주 조회
+      let q = supabase
+        .from("cheongju_contacts")
+        .select("contact_owner,contact_manager,contact_broker,phone")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo);
+      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+      const { data: contactData } = await q.maybeSingle();
+      if (contactData) {
+        setForm((prev) => ({
+          ...prev,
+          contactOwner: contactData.contact_owner || contactData.phone || prev.contactOwner,
+          contactManager: prev.contactManager || contactData.contact_manager || "",
+          contactBroker: prev.contactBroker || contactData.contact_broker || "",
+        }));
+      }
+
+      // 2순위: 이전 매물에서 이미지·비밀번호 자동 로드
+      const { data: propData } = await supabase
+        .from("properties")
+        .select("images,building_password,room_password")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo)
+        .order("registered_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!propData) return;
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images.length > 0 ? prev.images : (propData.images ?? []),
+        buildingPassword: prev.buildingPassword || propData.building_password || "",
+        roomPassword: prev.roomPassword || propData.room_password || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.unitNo, form.buildingType, form.lotNumber]);
+
+  // ── 단독건물: 호수 입력 시 이전 매물 이미지·비밀번호만 자동 로드 ──────────
+  useEffect(() => {
+    if (!form.dong || !form.unitNo || form.buildingType === "집합건물") return;
     const run = async () => {
       const { data } = await supabase
         .from("properties")
@@ -227,7 +269,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo]);
+  }, [form.dong, form.unitNo, form.buildingType]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -417,11 +459,17 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       const contactDistrict = districtVal ?? "";
       const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
       if (hasContact) {
+        // 집합건물이고 호수가 있으면 → 호수별 개별 연락처로 저장
+        const isCollective = form.buildingType === "집합건물";
+        const unitVal = isCollective && form.unitNo ? form.unitNo : null;
+
         let q = supabase
           .from("cheongju_contacts")
           .select("id")
           .eq("dong", form.dong);
         if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+        if (unitVal) q = q.eq("unit_number", unitVal);
+        else q = q.is("unit_number", null);
         const { data: existing } = await q.maybeSingle();
 
         if (existing) {
@@ -430,10 +478,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
           if (form.contactManager) upd.contact_manager = form.contactManager;
           if (form.contactBroker) upd.contact_broker = form.contactBroker;
           await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
+        } else {
           await supabase.from("cheongju_contacts").insert({
             district: contactDistrict,
             dong: form.dong,
             lot_number: form.lotNumber || "",
+            unit_number: unitVal,
             phone: form.contactOwner || "",
             contact_owner: form.contactOwner || null,
             contact_manager: form.contactManager || null,
@@ -658,9 +708,19 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70">호수</label>
+            <label className="text-xs font-semibold text-foreground/70">
+              호수
+              {form.buildingType === "집합건물" && (
+                <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수별 소유주 자동로드</span>
+              )}
+            </label>
             <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
-            {form.unitNo && <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>}
+            {form.unitNo && form.buildingType === "집합건물" && (
+              <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
+            )}
+            {form.unitNo && form.buildingType !== "집합건물" && (
+              <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">평수</label>

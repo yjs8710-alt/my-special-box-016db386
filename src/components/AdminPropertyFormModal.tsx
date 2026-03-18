@@ -472,19 +472,31 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   }, []);
 
   // 청주 연락처 자동 불러오기
-  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string) => {
+  // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
+  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string, unitVal?: string, isCollective?: boolean) => {
     if (!dongVal) return;
-    let query = supabase.from("cheongju_contacts").select("contact_owner,contact_manager,phone").eq("dong", dongVal);
+    let query = supabase
+      .from("cheongju_contacts")
+      .select("contact_owner,contact_manager,contact_broker,phone")
+      .eq("dong", dongVal);
     if (lotVal) query = query.eq("lot_number", lotVal);
+    // 집합건물이고 호수가 있으면 호수별 조회, 없으면 null 조회
+    if (isCollective && unitVal) {
+      query = query.eq("unit_number", unitVal);
+    } else {
+      query = query.is("unit_number", null);
+    }
     const { data } = await query.maybeSingle();
     if (data) {
       const owner = data.contact_owner || data.phone || "";
       const manager = data.contact_manager || "";
-      if (owner || manager) {
+      const broker = data.contact_broker || "";
+      if (owner || manager || broker) {
         setForm((f) => ({
           ...f,
-          contactOwner: f.contactOwner || owner,
+          contactOwner: (isCollective && unitVal) ? (owner || f.contactOwner) : (f.contactOwner || owner),
           contactManager: f.contactManager || manager,
+          contactBroker: f.contactBroker || broker,
         }));
         setContactAutoFilled(true);
         setTimeout(() => setContactAutoFilled(false), 4000);
@@ -501,9 +513,18 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
     if (d) geocodeAddress(fullAddress);
-    // 신규 등록 시에만 연락처 자동 불러오기 (기존 연락처 덮어쓰지 않기 위해)
-    if (!initial?.id && d) fetchContactFromDB(d, lot);
+    // 신규 등록 시 + 단독건물일 때만 주소 기준 연락처 자동 불러오기
+    const isCollective = form.buildingType === "집합건물";
+    if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
   };
+
+  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
+  const handleUnitNumberChange = useCallback((unitVal: string) => {
+    set("unit_number", unitVal);
+    if (form.buildingType === "집합건물" && form.dong && unitVal) {
+      fetchContactFromDB(form.dong, form.lot_number, unitVal, true);
+    }
+  }, [form.buildingType, form.dong, form.lot_number, fetchContactFromDB]);
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -642,28 +663,54 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (error) { alert("등록 오류: " + error.message); return; }
       }
 
-      // 청주 연락처 자동 동기화: 동이 있고 연락처가 하나라도 있으면 upsert
+      // 청주 연락처 자동 동기화: 집합건물은 호수별 insert/update, 단독건물은 dong+lot 기준 upsert
       const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
       if (form.dong && hasAnyContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
+        const isCollective = form.buildingType === "집합건물";
+        const unitVal = isCollective && form.unit_number ? form.unit_number : null;
 
-        const upsertPayload = {
-          district: contactDistrict,
-          dong: form.dong,
-          lot_number: lotNum,
-          phone: form.contactOwner || form.contactManager || "",
-          contact_owner: form.contactOwner || null,
-          contact_manager: form.contactManager || null,
-          contact_broker: form.contactBroker || null,
-          is_visible: true,
-        };
-
-        const { error: upsertErr } = await supabase
-          .from("cheongju_contacts")
-          .upsert(upsertPayload, { onConflict: "dong,lot_number" });
-
-        if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
+        if (isCollective && unitVal) {
+          // 집합건물: 호수별 개별 연락처 저장
+          let q = supabase.from("cheongju_contacts").select("id").eq("dong", form.dong).eq("unit_number", unitVal);
+          if (lotNum) q = q.eq("lot_number", lotNum);
+          const { data: existing } = await q.maybeSingle();
+          if (existing) {
+            const upd: Record<string, string | null> = {};
+            if (form.contactOwner) { upd.contact_owner = form.contactOwner; upd.phone = form.contactOwner; }
+            if (form.contactManager) upd.contact_manager = form.contactManager;
+            if (form.contactBroker) upd.contact_broker = form.contactBroker;
+            const { error: updErr } = await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
+            if (updErr) console.error("[청주연락처] update 오류:", updErr.message);
+          } else {
+            const { error: insErr } = await supabase.from("cheongju_contacts").insert({
+              district: contactDistrict, dong: form.dong, lot_number: lotNum,
+              unit_number: unitVal,
+              phone: form.contactOwner || "",
+              contact_owner: form.contactOwner || null,
+              contact_manager: form.contactManager || null,
+              contact_broker: form.contactBroker || null,
+              is_visible: true,
+            });
+            if (insErr) console.error("[청주연락처] insert 오류:", insErr.message);
+          }
+        } else {
+          // 단독건물: dong+lot_number 기준 upsert
+          const upsertPayload = {
+            district: contactDistrict, dong: form.dong, lot_number: lotNum,
+            unit_number: null as string | null,
+            phone: form.contactOwner || form.contactManager || "",
+            contact_owner: form.contactOwner || null,
+            contact_manager: form.contactManager || null,
+            contact_broker: form.contactBroker || null,
+            is_visible: true,
+          };
+          const { error: upsertErr } = await supabase
+            .from("cheongju_contacts")
+            .upsert(upsertPayload, { onConflict: "dong,lot_number" });
+          if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
+        }
       }
 
       onSaved?.();
@@ -821,8 +868,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">호수</label>
-                  <input type="text" placeholder="직접입력" value={form.unit_number ?? ""} onChange={(e) => set("unit_number", e.target.value)} className={ic} />
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    호수
+                    {form.buildingType === "집합건물" && (
+                      <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수 입력 시 소유주 자동로드</span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="직접입력"
+                    value={form.unit_number ?? ""}
+                    onChange={(e) => handleUnitNumberChange(e.target.value)}
+                    className={ic}
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">평수</label>

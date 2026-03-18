@@ -81,6 +81,7 @@ export type Database = {
           lot_number: string
           memo: string | null
           phone: string
+          unit_number: string | null
           updated_at: string
         }
         Insert: {
@@ -95,6 +96,7 @@ export type Database = {
           lot_number?: string
           memo?: string | null
           phone?: string
+          unit_number?: string | null
           updated_at?: string
         }
         Update: {
@@ -109,6 +111,7 @@ export type Database = {
           lot_number?: string
           memo?: string | null
           phone?: string
+          unit_number?: string | null
           updated_at?: string
         }
         Relationships: []
