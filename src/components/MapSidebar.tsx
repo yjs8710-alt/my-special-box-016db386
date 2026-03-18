@@ -1840,9 +1840,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {displayProperties.length}
-                    <span className="text-[11px] font-semibold text-muted-foreground ml-0.5">개 매물</span>
-                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary ml-1">(동일주소)</span>}
+                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
                     {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : ""}
