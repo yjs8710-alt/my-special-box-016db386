@@ -664,54 +664,30 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (error) { alert("등록 오류: " + error.message); return; }
       }
 
-      // 청주 연락처 자동 동기화: 집합건물은 호수별 insert/update, 단독건물은 dong+lot 기준 upsert
+      // 청주 연락처 동기화: 호수(unit_number)가 있으면 주소+호수로, 없으면 주소(dong+lot_number)로 upsert
       const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
       if (form.dong && hasAnyContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
-        const isCollective = form.buildingType === "집합건물";
-        const unitVal = isCollective && form.unit_number ? form.unit_number : null;
+        // 호수가 있으면 항상 호수별로 저장 (집합건물 여부 무관)
+        const unitVal = form.unit_number ? form.unit_number : null;
 
-        if (isCollective && unitVal) {
-          // 집합건물: 호수별 개별 연락처 저장
-          let q = supabase.from("cheongju_contacts").select("id").eq("dong", form.dong).eq("unit_number", unitVal);
-          if (lotNum) q = q.eq("lot_number", lotNum);
-          const { data: existing } = await q.maybeSingle();
-          if (existing) {
-            const upd: Record<string, string | null> = {};
-            if (form.contactOwner) { upd.contact_owner = form.contactOwner; upd.phone = form.contactOwner; }
-            if (form.contactManager) upd.contact_manager = form.contactManager;
-            if (form.contactBroker) upd.contact_broker = form.contactBroker;
-            const { error: updErr } = await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
-            if (updErr) console.error("[청주연락처] update 오류:", updErr.message);
-          } else {
-            const { error: insErr } = await supabase.from("cheongju_contacts").insert({
-              district: contactDistrict, dong: form.dong, lot_number: lotNum,
-              unit_number: unitVal,
-              phone: form.contactOwner || "",
-              contact_owner: form.contactOwner || null,
-              contact_manager: form.contactManager || null,
-              contact_broker: form.contactBroker || null,
-              is_visible: true,
-            });
-            if (insErr) console.error("[청주연락처] insert 오류:", insErr.message);
-          }
-        } else {
-          // 단독건물: dong+lot_number 기준 upsert
-          const upsertPayload = {
-            district: contactDistrict, dong: form.dong, lot_number: lotNum,
-            unit_number: null as string | null,
-            phone: form.contactOwner || form.contactManager || "",
-            contact_owner: form.contactOwner || null,
-            contact_manager: form.contactManager || null,
-            contact_broker: form.contactBroker || null,
-            is_visible: true,
-          };
-          const { error: upsertErr } = await supabase
-            .from("cheongju_contacts")
-            .upsert(upsertPayload, { onConflict: "dong,lot_number" });
-          if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
-        }
+        const upsertPayload = {
+          district: contactDistrict,
+          dong: form.dong,
+          lot_number: lotNum,
+          unit_number: unitVal,
+          phone: form.contactOwner || form.contactManager || "",
+          contact_owner: form.contactOwner || null,
+          contact_manager: form.contactManager || null,
+          contact_broker: form.contactBroker || null,
+          is_visible: true,
+        };
+        // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
+        const { error: upsertErr } = await supabase
+          .from("cheongju_contacts")
+          .upsert(upsertPayload, { onConflict: "dong,lot_number,unit_number" });
+        if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
       }
 
       onSaved?.();
