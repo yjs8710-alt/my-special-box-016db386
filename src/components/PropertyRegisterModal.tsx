@@ -573,7 +573,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
       </Section>
 
       {/* 건물이름 - 토지(detailType/buildingType)/건물매매 제외 */}
