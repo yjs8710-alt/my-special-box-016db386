@@ -312,6 +312,11 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
+  // 다중 임대 방식
+  rentModes: string[]; // ["월세", "반전세", "전세"]
+  halfDeposit: string;
+  halfMonthly: string;
+  jeonseDeposit: string;
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -327,6 +332,10 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   contactTenant: "",
   contactManager: "",
   contactBroker: "",
+  rentModes: [],
+  halfDeposit: "",
+  halfMonthly: "",
+  jeonseDeposit: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
