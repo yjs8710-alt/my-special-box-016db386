@@ -668,19 +668,23 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (error) { alert("등록 오류: " + error.message); return; }
       }
 
-      // 청주 연락처 동기화: 호수(unit_number)가 있으면 주소+호수로, 없으면 주소(dong+lot_number)로 upsert
+      // 청주 연락처 동기화
       const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
-      if (form.dong && hasAnyContact) {
+      const isCollectiveType = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
+      const unitVal = form.unit_number || null;
+
+      // 집합건물 타입이면 반드시 호수가 있어야 저장 (호수 없으면 단독건물 연락처 오염 방지)
+      const canSaveContact = form.dong && hasAnyContact && (isCollectiveType ? !!unitVal : true);
+
+      if (canSaveContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
-        // 호수가 있으면 항상 호수별로 저장 (집합건물 여부 무관)
-        const unitVal = form.unit_number ? form.unit_number : null;
 
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
           lot_number: lotNum,
-          unit_number: unitVal,
+          unit_number: isCollectiveType ? unitVal : null,
           phone: form.contactOwner || form.contactManager || "",
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
