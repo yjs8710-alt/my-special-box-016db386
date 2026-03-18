@@ -384,17 +384,24 @@ const MapFilterBar = ({
   return (
     <div
       className="fixed z-[1000] pointer-events-none"
-      style={{ top: topOffset ?? 96, left: 16, right: "auto", width: "auto", maxWidth: 520 }}
+      style={{ top: topOffset ?? 96, left: 0, right: "auto", width: "auto", maxWidth: 540 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
         {/* 검색바 + 건물주 번호 한 행 */}
-        <div className={`flex items-center gap-2 transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+        <div className={`flex items-center gap-2 pl-0 transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
 
           {/* 검색바 */}
           <div
-            className="flex items-center bg-white rounded-xl overflow-hidden border border-border"
-            style={{ boxShadow: "0 4px 16px rgba(10,45,110,0.13)", width: 320, flexShrink: 0 }}
+            className="flex items-center bg-white overflow-hidden"
+            style={{
+              boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
+              width: 336,
+              flexShrink: 0,
+              border: "2px solid hsl(var(--primary))",
+              borderLeft: "none",
+              borderRadius: "0 12px 12px 0",
+            }}
           >
             <div className="flex items-center flex-1 px-3 gap-2 h-10">
               <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
