@@ -1004,7 +1004,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 {form.tradeType === "매매" ? (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
-                      <AmountInput label="매 매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
+                      <AmountInput label="매  매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
                     </div>
                   </div>
                 ) : (
