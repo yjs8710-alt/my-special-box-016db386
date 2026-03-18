@@ -1954,10 +1954,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   const isSaleA = a.type?.includes("매매") ? 1 : 0;
                   const isSaleB = b.type?.includes("매매") ? 1 : 0;
                   if (isSaleA !== isSaleB) return isSaleA - isSaleB;
-                  // 최근 조사순 (확인일 내림차순)
-                  const dateA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
-                  const dateB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
-                  return dateB - dateA;
+                  // 등록일 내림차순 (최신 등록 우선)
+                  const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
+                  const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
+                  return regB - regA;
                 }).map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
