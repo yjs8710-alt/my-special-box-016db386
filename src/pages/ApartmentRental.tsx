@@ -14,9 +14,7 @@ import property4 from "@/assets/property4.jpg";
 import property5 from "@/assets/property5.jpg";
 import property6 from "@/assets/property6.jpg";
 
-const APARTMENT_PROPERTIES: MapProperty[] = [
-  {
-    id: 501,
+const APARTMENT_PROPERTIES: MapProperty[] = [];
     title: "강남 도곡동 아파트 전세",
     buildingName: "도곡 렉슬아파트",
     address: "서울특별시 강남구 도곡동 467",
