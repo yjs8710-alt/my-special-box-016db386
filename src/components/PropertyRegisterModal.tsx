@@ -459,11 +459,17 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       const contactDistrict = districtVal ?? "";
       const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
       if (hasContact) {
+        // 집합건물이고 호수가 있으면 → 호수별 개별 연락처로 저장
+        const isCollective = form.buildingType === "집합건물";
+        const unitVal = isCollective && form.unitNo ? form.unitNo : null;
+
         let q = supabase
           .from("cheongju_contacts")
           .select("id")
           .eq("dong", form.dong);
         if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+        if (unitVal) q = q.eq("unit_number", unitVal);
+        else q = q.is("unit_number", null);
         const { data: existing } = await q.maybeSingle();
 
         if (existing) {
@@ -472,10 +478,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
           if (form.contactManager) upd.contact_manager = form.contactManager;
           if (form.contactBroker) upd.contact_broker = form.contactBroker;
           await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
+        } else {
           await supabase.from("cheongju_contacts").insert({
             district: contactDistrict,
             dong: form.dong,
             lot_number: form.lotNumber || "",
+            unit_number: unitVal,
             phone: form.contactOwner || "",
             contact_owner: form.contactOwner || null,
             contact_manager: form.contactManager || null,
