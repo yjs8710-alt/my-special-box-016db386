@@ -362,12 +362,20 @@ function Radio({ checked, onClick, children }: { checked: boolean; onClick: () =
   );
 }
 
-function AmountInput({ label, value, onChange, placeholder = "만원", noUnit = false }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; noUnit?: boolean;
+function AmountInput({ label, prefix, value, onChange, placeholder = "만원", noUnit = false }: {
+  label: string; prefix?: string; value: string; onChange: (v: string) => void; placeholder?: string; noUnit?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold text-foreground/70">{label}</label>
+      <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1">
+        {prefix && (
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded text-[9px] font-black"
+            style={{ background: "hsl(var(--primary))", color: "#fff" }}>
+            {prefix}
+          </span>
+        )}
+        {label}
+      </label>
       <div className="relative">
         <input type="text" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)}
           className={ic + (noUnit ? "" : " pr-10")} />
