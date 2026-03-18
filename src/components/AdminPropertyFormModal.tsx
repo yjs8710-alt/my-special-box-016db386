@@ -842,8 +842,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <AdminSelect value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">호수</label>
-                  <input type="text" placeholder="직접입력" value={form.unit_number ?? ""} onChange={(e) => set("unit_number", e.target.value)} className={ic} />
+                  <label className="text-xs font-semibold text-muted-foreground">
+                    호수
+                    {form.buildingType === "집합건물" && (
+                      <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수 입력 시 소유주 자동로드</span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="직접입력"
+                    value={form.unit_number ?? ""}
+                    onChange={(e) => handleUnitNumberChange(e.target.value)}
+                    className={ic}
+                  />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">평수</label>
