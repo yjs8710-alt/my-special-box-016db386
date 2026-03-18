@@ -86,6 +86,7 @@ type CheongJuContact = {
   district: string;
   dong: string;
   lot_number?: string;
+  unit_number?: string | null;
   phone: string;
   contact_owner?: string;
   contact_manager?: string;
