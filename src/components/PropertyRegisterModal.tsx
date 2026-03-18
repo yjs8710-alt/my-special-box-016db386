@@ -72,6 +72,10 @@ type DetailType = typeof DETAIL_TYPES[number] | "";
 type VacancyType = typeof VACANCY_TYPES[number];
 type LhType = typeof LH_TYPES[number];
 
+// 임대 방식 (복수 선택 가능)
+const RENT_MODES = ["월세", "반전세", "전세"] as const;
+type RentMode = typeof RENT_MODES[number];
+
 interface FormState {
   brokerType: BrokerType;
   tradeType: TradeType;
@@ -95,8 +99,16 @@ interface FormState {
   roomPassword: string;
   direction: string;
   vacancy: VacancyType;
+  // 임대 방식 복수 선택
+  rentModes: RentMode[];
+  // 월세
   deposit: string;
   monthlyRent: string;
+  // 반전세
+  halfDeposit: string;
+  halfMonthly: string;
+  // 전세
+  jeonseDeposit: string;
   managementFee: string;
   salePrice: string;
   keyMoney: string;
