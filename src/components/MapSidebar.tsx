@@ -1372,15 +1372,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               onMouseLeave={handleOptMouseLeave}
               onClick={(e) => e.stopPropagation()}
             >
-              <span
-                className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
-                style={isFull
-                  ? { background: "hsl(var(--primary))", color: "#fff", border: "1.5px solid hsl(var(--primary))" }
-                  : { background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }
-                }
-              >
-                {isFull ? "⭐ 풀옵션" : `옵션(${prop.options!.length}) ▾`}
-              </span>
+              {isFull ? (
+                <span
+                  className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
+                  style={{
+                    background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))",
+                    color: "hsl(28 80% 35%)",
+                    border: "1.5px solid hsl(38 80% 70%)",
+                  }}
+                >
+                  <svg width="9" height="9" viewBox="0 0 12 12" fill="hsl(38 95% 50%)" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 1L7.5 4.2L11 4.7L8.5 7.1L9.1 10.6L6 8.9L2.9 10.6L3.5 7.1L1 4.7L4.5 4.2L6 1Z"/>
+                  </svg>
+                  풀옵션
+                </span>
+              ) : (
+                <span
+                  className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
+                  style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}
+                >
+                  {`옵션(${prop.options!.length}) ▾`}
+                </span>
+              )}
               {/* 호버 팝업 — fixed로 overflow:hidden 탈출, 화면 경계 감지 */}
               {showOptPopup && (
                 <div
