@@ -1204,7 +1204,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {(prop.roomType || floorShort || prop.unitNumber) && (
           <span className="flex-shrink-0 w-px h-3.5 bg-border" />
         )}
-        {/* ④ 보증금/월세: note에 다중 임대방식 있으면 파싱, 없으면 기본값 */}
+        {/* ④ 보증금/월세/관리비/평수 — 텍스트 스타일 (박스 없음) */}
         {(() => {
           const note = prop.note ?? "";
           const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
@@ -1216,20 +1216,17 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             return (
               <div className="flex items-center gap-1 flex-shrink-0">
                 {wolseMatch && (
-                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
-                    style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.3)" }}>
-                    월{wolseMatch[1]}/{wolseMatch[2]}
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>
+                    <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
                   </span>
                 )}
                 {halfMatch && (
-                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
-                    style={{ background: "hsl(220 80% 95%)", color: "#1d4ed8", border: "1.5px solid hsl(220 70% 80%)" }}>
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "#1d4ed8" }}>
                     반{halfMatch[1]}/{halfMatch[2]}
                   </span>
                 )}
                 {jeonseMatch && (
-                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
-                    style={{ background: "hsl(142 70% 93%)", color: "#15803d", border: "1.5px solid hsl(142 60% 75%)" }}>
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "#15803d" }}>
                     전{jeonseMatch[1]}
                   </span>
                 )}
@@ -1238,37 +1235,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           }
 
           return (
-            <span
-              className="flex-shrink-0 flex items-center gap-0 whitespace-nowrap rounded overflow-hidden"
-              style={{ border: "1.5px solid hsl(var(--primary)/0.25)" }}
-            >
-              <span className="flex items-center gap-1 px-1.5 py-0.5" style={{ background: "hsl(var(--primary)/0.07)" }}>
-                <span className="text-[10px] font-bold" style={{ color: "hsl(var(--primary)/0.7)" }}>보</span>
-                <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-              </span>
-              <span className="w-px self-stretch" style={{ background: "hsl(var(--primary)/0.2)" }} />
-              <span className="flex items-center gap-1 px-1.5 py-0.5" style={{ background: "hsl(var(--accent)/0.07)" }}>
-                <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent)/0.7)" }}>월</span>
-                <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
-              </span>
+            <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap">
+              <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>보</span>
+              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+              <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>/</span>
+              <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>월</span>
+              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
               {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
                 <>
-                  <span className="w-px self-stretch" style={{ background: "hsl(var(--primary)/0.2)" }} />
-                  <span className="flex items-center gap-1 px-1.5 py-0.5" style={{ background: "hsl(var(--muted)/0.5)" }}>
-                    <span className="text-[10px] font-bold" style={{ color: "hsl(var(--muted-foreground)/0.7)" }}>관</span>
-                    <span className="text-[11px] font-extrabold" style={{ color: "hsl(var(--muted-foreground))" }}>{prop.manageFee}</span>
-                  </span>
+                  <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>/</span>
+                  <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>관</span>
+                  <span className="text-[11px] font-extrabold" style={{ color: "hsl(var(--muted-foreground))" }}>{prop.manageFee}</span>
+                </>
+              )}
+              {areaShort && (
+                <>
+                  <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>·</span>
+                  <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>{areaShort}</span>
                 </>
               )}
             </span>
           );
         })()}
-        {/* ⑦ 평수 */}
-        {areaShort && (
-          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 75%)" }}>
-            {areaShort}
-          </span>
-        )}
         {/* ⑧ 비번 — flex-1 스페이서 앞에 배치해 잘리지 않도록 */}
         {(buildingPw || roomPw) && (
           <>
