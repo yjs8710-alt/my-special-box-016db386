@@ -1982,13 +1982,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                       {/* Row: 3줄 레이아웃 */}
                       <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
 
-                        {/* ①썸네일 90px */}
-                        <div className="w-[90px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "90px" }}>
+                        {/* ①썸네일 96px — 고화질 렌더링 */}
+                        <div className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "96px" }}>
                           {prop.image ? (
                             <img
                               src={prop.image}
                               alt={prop.title}
+                              loading="eager"
+                              decoding="async"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
                             />
                           ) : (
                             /* 이미지 없는 DB 매물 placeholder */
