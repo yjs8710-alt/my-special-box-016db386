@@ -969,7 +969,7 @@ const ContactEditModal = ({
   onSave: (updated: CheongJuContact) => Promise<void>;
 }) => {
   const [form, setForm] = useState<CheongJuContact>(
-    contact ?? { id: "", district: "", dong: "", lot_number: "", phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
+    contact ?? { id: "", district: "", dong: "", lot_number: "", unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
 
@@ -992,7 +992,7 @@ const ContactEditModal = ({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-base font-bold text-foreground">
-            {form.district} {form.dong} 연락처 {contact?.id ? "수정" : "등록"}
+            {form.district} {form.dong} {form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
           </h3>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
             <X className="w-4 h-4" />
@@ -1028,14 +1028,28 @@ const ContactEditModal = ({
             </div>
           )}
           {/* 번지수 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
-            <Input
-              value={form.lot_number ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
-              placeholder="예: 산123-45, 678-9"
-              className="h-9 text-sm"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
+              <Input
+                value={form.lot_number ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
+                placeholder="예: 123-45"
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">
+                호수
+                <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+              </label>
+              <Input
+                value={form.unit_number ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
+                placeholder="예: 101호"
+                className="h-9 text-sm"
+              />
+            </div>
           </div>
           {[
             { key: "phone", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX" },
