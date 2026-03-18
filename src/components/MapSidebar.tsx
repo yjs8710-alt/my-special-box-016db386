@@ -1129,21 +1129,6 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         >
           {showFullAddr ? prop.address : shortAddress(prop.address)}
         </button>
-        {/* 도로 버튼 — 호버 시 전체 주소 툴팁 */}
-        <div className="relative group/roadname flex-shrink-0">
-          <span
-            className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap cursor-default"
-            style={{ color: "hsl(25 90% 45%)", borderColor: "hsl(25 80% 70%)" }}
-          >도로</span>
-          <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/roadname:opacity-100 transition-opacity duration-150 whitespace-nowrap">
-            <div className="text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg"
-              style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))", maxWidth: "280px", whiteSpace: "normal", wordBreak: "keep-all" }}>
-              {prop.address}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0"
-                style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
-            </div>
-          </div>
-        </div>
         {/* 로드뷰 버튼 */}
         <a
           href={prop.lat && prop.lng
