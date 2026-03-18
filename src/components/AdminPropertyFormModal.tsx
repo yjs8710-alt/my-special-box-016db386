@@ -517,18 +517,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
     if (d) geocodeAddress(fullAddress);
-    // 신규 등록 시 + 단독건물일 때만 주소 기준 연락처 자동 불러오기
-    const isCollective = form.buildingType === "집합건물";
+    // 신규 등록 시 + 집합건물이 아닐 때만 주소 기준 연락처 자동 불러오기
+    const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
     if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
   };
 
-  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
+  // ── 집합건물/아파트/오피스텔/빌라/연립 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   const handleUnitNumberChange = useCallback((unitVal: string) => {
     set("unit_number", unitVal);
-    if (form.buildingType === "집합건물" && form.dong && unitVal) {
+    const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
+    if (isCollective && form.dong && unitVal) {
       fetchContactFromDB(form.dong, form.lot_number, unitVal, true);
     }
-  }, [form.buildingType, form.dong, form.lot_number, fetchContactFromDB]);
+  }, [form.buildingType, form.type, form.dong, form.lot_number, fetchContactFromDB]);
 
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
