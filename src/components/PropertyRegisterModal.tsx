@@ -456,42 +456,26 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSaving(false);
 
     if (!error && form.dong) {
-      // ── cheongju_contacts 동기화 ──────────────────────────────
+      // ── cheongju_contacts 동기화: 호수가 있으면 주소+호수, 없으면 주소만으로 upsert ──
       const contactDistrict = districtVal ?? "";
       const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
       if (hasContact) {
-        // 집합건물이고 호수가 있으면 → 호수별 개별 연락처로 저장
-        const isCollective = form.buildingType === "집합건물";
-        const unitVal = isCollective && form.unitNo ? form.unitNo : null;
-
-        let q = supabase
+        const unitVal = form.unitNo ? form.unitNo : null;
+        const upsertPayload = {
+          district: contactDistrict,
+          dong: form.dong,
+          lot_number: form.lotNumber || "",
+          unit_number: unitVal,
+          phone: form.contactOwner || "",
+          contact_owner: form.contactOwner || null,
+          contact_manager: form.contactManager || null,
+          contact_broker: form.contactBroker || null,
+          is_visible: true,
+        };
+        const { error: contactErr } = await supabase
           .from("cheongju_contacts")
-          .select("id")
-          .eq("dong", form.dong);
-        if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
-        if (unitVal) q = q.eq("unit_number", unitVal);
-        else q = q.is("unit_number", null);
-        const { data: existing } = await q.maybeSingle();
-
-        if (existing) {
-          const upd: Record<string, string | null> = {};
-          if (form.contactOwner) { upd.contact_owner = form.contactOwner; upd.phone = form.contactOwner; }
-          if (form.contactManager) upd.contact_manager = form.contactManager;
-          if (form.contactBroker) upd.contact_broker = form.contactBroker;
-          await supabase.from("cheongju_contacts").update(upd).eq("id", existing.id);
-        } else {
-          await supabase.from("cheongju_contacts").insert({
-            district: contactDistrict,
-            dong: form.dong,
-            lot_number: form.lotNumber || "",
-            unit_number: unitVal,
-            phone: form.contactOwner || "",
-            contact_owner: form.contactOwner || null,
-            contact_manager: form.contactManager || null,
-            contact_broker: form.contactBroker || null,
-            is_visible: true,
-          });
-        }
+          .upsert(upsertPayload, { onConflict: "dong,lot_number,unit_number" });
+        if (contactErr) console.error("[청주연락처] upsert 오류:", contactErr.message);
       }
     }
 
