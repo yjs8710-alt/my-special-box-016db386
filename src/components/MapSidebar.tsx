@@ -1012,7 +1012,19 @@ interface AddressToggleCardProps {
   regDate: string | undefined;
   chkDate: string | undefined;
 }
-const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
+const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }: AddressToggleCardProps & { isAdmin?: boolean }) => {
+  const [checking, setChecking] = useState(false);
+  const isChecked = !!chkDate;
+
+  const handleCheckToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!prop.memo) return; // DB 매물만 가능
+    if (checking) return;
+    setChecking(true);
+    const newDate = isChecked ? null : new Date().toISOString().slice(0, 10);
+    await supabase.from("properties").update({ checked_date: newDate }).eq("id", prop.memo);
+    setChecking(false);
+  };
   const [showFullAddr, setShowFullAddr] = useState(false);
   const [showOptPopup, setShowOptPopup] = useState(false);
   const optBadgeRef = useRef<HTMLDivElement>(null);
