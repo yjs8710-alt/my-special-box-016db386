@@ -1012,7 +1012,19 @@ interface AddressToggleCardProps {
   regDate: string | undefined;
   chkDate: string | undefined;
 }
-const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate }: AddressToggleCardProps) => {
+const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }: AddressToggleCardProps & { isAdmin?: boolean }) => {
+  const [checking, setChecking] = useState(false);
+  const isChecked = !!chkDate;
+
+  const handleCheckToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!prop.memo) return; // DB 매물만 가능
+    if (checking) return;
+    setChecking(true);
+    const newDate = isChecked ? null : new Date().toISOString().slice(0, 10);
+    await supabase.from("properties").update({ checked_date: newDate }).eq("id", prop.memo);
+    setChecking(false);
+  };
   const [showFullAddr, setShowFullAddr] = useState(false);
   const [showOptPopup, setShowOptPopup] = useState(false);
   const optBadgeRef = useRef<HTMLDivElement>(null);
@@ -1127,8 +1139,33 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
+        {/* 관리자 확인 체크박스 */}
+        {isAdmin && prop.memo && (
+          <button
+            type="button"
+            title={isChecked ? `확인일: ${chkDate} — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
+            onClick={handleCheckToggle}
+            disabled={checking}
+            className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
+            style={{
+              background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
+              border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+              opacity: checking ? 0.5 : 1,
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              {isChecked
+                ? <path d="M1.5 5L4 7.5L8.5 2.5" stroke="hsl(142 60% 35%)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                : <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
+              }
+            </svg>
+            <span className="text-[9px] font-extrabold whitespace-nowrap" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
+              {isChecked ? chkDate!.slice(2).replace(/-/g, ".") : "확인"}
+            </span>
+          </button>
+        )}
         <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
-          확인:{idx}{regDate ? ` 등록:${regDate.slice(2).replace(/-/g, ".")}` : ""}
+          {idx}{regDate ? ` 등:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
 
@@ -2014,6 +2051,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           roomPw={roomPw}
                           regDate={regDate}
                           chkDate={chkDate}
+                          isAdmin={isAdmin}
                         />
                       </div>
 
