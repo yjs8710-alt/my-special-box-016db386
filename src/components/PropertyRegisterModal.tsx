@@ -125,7 +125,7 @@ const INITIAL: FormState = {
   buildingName: "", floor: "", unitNo: "", area: "",
   landArea: "", buildingArea: "", buildingSaleType: "일반건물",
   options: [], facilities: [], pet: "",
-  roomPassword: "", direction: "",
+  buildingPassword: "", roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
   salePrice: "", keyMoney: "",
