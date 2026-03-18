@@ -1988,10 +1988,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                               decoding="async"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               style={{
-                                imageRendering: "high-quality",
+                                imageRendering: "auto",
                                 WebkitBackfaceVisibility: "hidden",
-                                transform: "translateZ(0)",
+                                transform: "translateZ(0) scale(1.001)",
                                 backfaceVisibility: "hidden",
+                                willChange: "transform",
                               }}
                             />
                           ) : (
