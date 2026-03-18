@@ -91,6 +91,7 @@ interface FormState {
   options: string[];
   facilities: string[];
   pet: PetType;
+  buildingPassword: string;
   roomPassword: string;
   direction: string;
   vacancy: VacancyType;
