@@ -1171,14 +1171,14 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                 {isChecked ? daysSince : "?"}
               </span>
             </button>
-            {/* 등록일 */}
-            {regDate && (
-              <span className="flex-shrink-0 text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
-                {regDate.slice(2).replace(/-/g, ".")}
-              </span>
-            )}
           );
         })()}
+        {/* 등록일 */}
+        {regDate && (
+          <span className="flex-shrink-0 text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+            {regDate.slice(2).replace(/-/g, ".")}
+          </span>
+        )}
       </div>
 
       {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 관리비 | 평수 | 옵션 | 비번 */}
