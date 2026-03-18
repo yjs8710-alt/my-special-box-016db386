@@ -851,8 +851,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">
                     호수
-                    {form.buildingType === "집합건물" && (
-                      <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수 입력 시 소유주 자동로드</span>
+                    {(form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
+                      <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
                     )}
                   </label>
                   <input
@@ -862,6 +862,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     onChange={(e) => handleUnitNumberChange(e.target.value)}
                     className={ic}
                   />
+                  {form.unit_number && (form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
+                    <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">평수</label>
