@@ -91,6 +91,7 @@ interface FormState {
   options: string[];
   facilities: string[];
   pet: PetType;
+  buildingPassword: string;
   roomPassword: string;
   direction: string;
   vacancy: VacancyType;
@@ -124,7 +125,7 @@ const INITIAL: FormState = {
   buildingName: "", floor: "", unitNo: "", area: "",
   landArea: "", buildingArea: "", buildingSaleType: "일반건물",
   options: [], facilities: [], pet: "",
-  roomPassword: "", direction: "",
+  buildingPassword: "", roomPassword: "", direction: "",
   vacancy: "공실",
   deposit: "", monthlyRent: "", managementFee: "",
   salePrice: "", keyMoney: "",
@@ -165,6 +166,51 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         if (data?.name) setMyAgentName(data.name);
       });
   }, [user?.userId]);
+
+  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 ──────────────────
+  useEffect(() => {
+    if (!form.dong) return;
+    const run = async () => {
+      let q = supabase
+        .from("cheongju_contacts")
+        .select("contact_owner,contact_manager,contact_broker,phone")
+        .eq("dong", form.dong);
+      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+      const { data } = await q.maybeSingle();
+      if (!data) return;
+      setForm((prev) => ({
+        ...prev,
+        contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
+        contactManager: prev.contactManager || data.contact_manager || "",
+        contactBroker: prev.contactBroker || data.contact_broker || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.lotNumber]);
+
+  // ── 호수 입력 시 이전 매물 이미지·비밀번호 자동 로드 ──────────
+  useEffect(() => {
+    if (!form.dong || !form.unitNo) return;
+    const run = async () => {
+      const { data } = await supabase
+        .from("properties")
+        .select("images,building_password,room_password")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo)
+        .eq("status", "active")
+        .order("registered_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!data) return;
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images.length > 0 ? prev.images : (data.images ?? []),
+        buildingPassword: prev.buildingPassword || data.building_password || "",
+        roomPassword: prev.roomPassword || data.room_password || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.unitNo]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
@@ -291,6 +337,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       build_year: "",
       description: form.description,
       room_memo: form.myMemo || null,
+      building_password: form.buildingPassword || null,
       room_password: form.roomPassword || null,
       options: [
         ...form.options,
@@ -526,7 +573,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
       </Section>
 
       {/* 건물이름 - 토지(detailType/buildingType)/건물매매 제외 */}
@@ -574,6 +621,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">호수</label>
             <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+            {form.unitNo && <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">평수</label>
@@ -688,7 +736,16 @@ function Step2({
       {/* 비밀번호 - 토지/건물매매 제외 */}
       {!isLand && !isBuildingSale && (
         <Section label="비밀번호">
-          <input type="text" placeholder="비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">건물 비번</label>
+              <input type="text" placeholder="건물 공동현관 비번" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">방(호실) 비번</label>
+              <input type="text" placeholder="방 도어락 비번" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+            </div>
+          </div>
         </Section>
       )}
 
