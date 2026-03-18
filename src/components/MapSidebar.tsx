@@ -1425,8 +1425,8 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         const text = prop.description;
         if (!text.trim()) return null;
         return (
-          <div className="flex items-start gap-1 min-h-[17px] overflow-hidden">
-            <span className="flex-shrink-0 text-[10px] font-extrabold mt-0.5 whitespace-nowrap"
+          <div className="flex items-center gap-1 min-h-[17px] overflow-hidden">
+            <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
               style={{ color: "hsl(var(--muted-foreground))" }}>특이</span>
             <span className="text-[11px] font-extrabold leading-tight truncate"
               style={{ color: "hsl(var(--foreground))" }}>
