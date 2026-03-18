@@ -1980,7 +1980,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   return (
                     <div key={prop.id} className="flex flex-col">
                     <button
-                      onClick={() => onSelect(prop.id)}
+                      onClick={() => selectedId === prop.id ? onDeselect?.() : onSelect(prop.id)}
                       className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
                         selectedId === prop.id
                           ? "ring-2 ring-primary shadow-lg"
