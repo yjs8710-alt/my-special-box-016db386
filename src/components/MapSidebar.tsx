@@ -1140,32 +1140,40 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5}/>} label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/></svg>} label="방메모" initialText={roomMemo ?? ""} />
-        {/* 관리자 확인 체크박스 */}
-        {isAdmin && prop.memo && (
-          <button
-            type="button"
-            title={isChecked ? `확인일: ${chkDate} — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
-            onClick={handleCheckToggle}
-            disabled={checking}
-            className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
-            style={{
-              background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
-              border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
-              opacity: checking ? 0.5 : 1,
-            }}
-          >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              {isChecked
-                ? <path d="M1.5 5L4 7.5L8.5 2.5" stroke="hsl(142 60% 35%)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                : <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
-              }
-            </svg>
-            <span className="text-[9px] font-extrabold whitespace-nowrap" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
-              {isChecked ? chkDate!.slice(2).replace(/-/g, ".") : "확인"}
-            </span>
-          </button>
-        )}
-        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
+        {/* 관리자 확인 체크박스 — 텍스트 없이 아이콘+D숫자만 */}
+        {isAdmin && prop.memo && (() => {
+          const daysSince = chkDate
+            ? Math.floor((Date.now() - new Date(chkDate).getTime()) / 86400000)
+            : null;
+          return (
+            <button
+              type="button"
+              title={isChecked ? `확인일: ${chkDate} (${daysSince}일 경과) — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
+              onClick={handleCheckToggle}
+              disabled={checking}
+              className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
+              style={{
+                background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
+                border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+                opacity: checking ? 0.5 : 1,
+              }}
+            >
+              {isChecked ? (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5L4 7.5L8.5 2.5" stroke="hsl(142 60% 35%)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
+                </svg>
+              )}
+              <span className="text-[10px] font-black whitespace-nowrap tabular-nums" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
+                {isChecked ? daysSince : "?"}
+              </span>
+            </button>
+          );
+        })()}
+        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap tabular-nums" style={{ color: "hsl(var(--destructive))" }}>
           {idx}{regDate ? ` 등:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
