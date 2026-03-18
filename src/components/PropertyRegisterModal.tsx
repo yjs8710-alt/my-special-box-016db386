@@ -252,11 +252,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType, form.lotNumber]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
 
   // ── 단독건물: 호수 입력 시 이전 매물 이미지·비밀번호만 자동 로드 ──────────
   useEffect(() => {
-    if (!form.dong || !form.unitNo || form.buildingType === "집합건물") return;
+    if (!form.dong || !form.unitNo || isCollectiveBuilding) return;
     const run = async () => {
       const { data } = await supabase
         .from("properties")
