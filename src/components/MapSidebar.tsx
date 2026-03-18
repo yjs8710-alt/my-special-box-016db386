@@ -1324,52 +1324,49 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </div>
           );
         })()}
-        {/* ⑧ 비번 — 건물/방 각각 툴팁 */}
-        {(buildingPw || roomPw) && (
-          <>
-            <span className="flex-shrink-0 w-px h-3.5 bg-border" />
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.45)" }} />
-              {buildingPw && (
-                <div className="relative group/bpw flex-shrink-0">
-                  <span
-                    className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1 py-0.5 rounded cursor-default select-none"
-                    style={{ background: "hsl(220 20% 94%)", color: "hsl(220 40% 35%)", border: "1px solid hsl(220 20% 82%)" }}
-                  >
-                    건{buildingPw}
-                  </span>
-                  {/* 툴팁 */}
-                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/bpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
-                    <div className="bg-foreground text-background text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
-                      🏢 건물 공동현관
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {roomPw && (
-                <div className="relative group/rpw flex-shrink-0">
-                  <span
-                    className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1 py-0.5 rounded cursor-default select-none"
-                    style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1px solid hsl(var(--accent)/0.35)" }}
-                  >
-                    방{roomPw}
-                  </span>
-                  {/* 툴팁 */}
-                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/rpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
-                    <div className="bg-foreground text-background text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
-                      🚪 방(호실) 도어락
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </>
-        )}
+      
       </div>
 
-      {/* 3줄: 특이사항 (description만 표시 — note에는 연락처 저장됨) */}
+      {/* 3줄: 비밀번호 (건물/방) — 잘리지 않게 별도 행으로 */}
+      {(buildingPw || roomPw) && (
+        <div className="flex items-center gap-1.5 min-h-[18px] flex-wrap">
+          <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.4)" }} />
+          {buildingPw && (
+            <div className="relative group/bpw flex-shrink-0">
+              <span
+                className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)" }}
+              >
+                건 {buildingPw}
+              </span>
+              <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/bpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                <div className="text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg" style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}>
+                  🏢 건물 공동현관 비밀번호
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                </div>
+              </div>
+            </div>
+          )}
+          {roomPw && (
+            <div className="relative group/rpw flex-shrink-0">
+              <span
+                className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)" }}
+              >
+                방 {roomPw}
+              </span>
+              <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/rpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                <div className="text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg" style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}>
+                  🚪 방(호실) 도어락 비밀번호
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 4줄: 특이사항 (description만 표시 — note에는 연락처 저장됨) */}
       {prop.description && (() => {
         const text = prop.description;
         if (!text.trim()) return null;
@@ -1708,7 +1705,18 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         />
       )}
 
-      <div className="flex h-full flex-shrink-0" style={{ position: "relative" }}>
+      {/* collapsed 시 absolute로 지도 위에 겹치게, 열릴 때는 flex로 공간 차지 */}
+      <div
+        className="flex h-full"
+        style={{
+          position: collapsed ? "absolute" : "relative",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: collapsed ? 50 : "auto",
+          flexShrink: 0,
+        }}
+      >
         {/* Toggle tab — 사이드바 왼쪽 */}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -1725,7 +1733,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         {/* Panel */}
         <aside
           className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
-            collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
+            collapsed ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{
             width: collapsed ? 0 : width,
