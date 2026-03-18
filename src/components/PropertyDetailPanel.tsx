@@ -680,15 +680,15 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
                 <p className="text-xs font-bold text-foreground uppercase tracking-wide">비밀번호</p>
                 <div className="flex flex-col gap-2">
                   {(property.buildingPassword) && (
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-border bg-muted/30">
+                    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-xl border border-border bg-muted/30">
                       <span className="text-xs text-muted-foreground font-medium">🏢 건물 비번</span>
-                      <span className="text-sm font-bold text-foreground tracking-widest">{property.buildingPassword}</span>
+                      <span className="text-base font-bold text-foreground tracking-widest">{property.buildingPassword}</span>
                     </div>
                   )}
                   {(property.roomPassword || property.password) && (
-                    <div className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-border bg-muted/30">
+                    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-xl border border-border bg-muted/30">
                       <span className="text-xs text-muted-foreground font-medium">🔑 방 비번</span>
-                      <span className="text-sm font-bold text-foreground tracking-widest">{property.roomPassword || property.password}</span>
+                      <span className="text-base font-bold text-foreground tracking-widest">{property.roomPassword || property.password}</span>
                     </div>
                   )}
                 </div>
