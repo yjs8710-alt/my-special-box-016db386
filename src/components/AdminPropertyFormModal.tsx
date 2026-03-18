@@ -564,12 +564,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
     }
 
-    // note 필드: 연락처 정보만 저장 (건물주/세입자/관리인)
-    // agent_name 필드: 담당 중개사 이름만 저장 (연락처 X)
+    // note 필드: 연락처 + 다중 임대방식 저장
+    const hasWolse   = form.tradeType === "임대" && (form.rentModes.length === 0 || form.rentModes.includes("월세"));
+    const hasHalf    = form.tradeType === "임대" && form.rentModes.includes("반전세");
+    const hasJeonse  = form.tradeType === "임대" && form.rentModes.includes("전세");
+
+    const rentNotes: string[] = [];
+    if (hasWolse && (form.deposit || form.monthly))
+      rentNotes.push(`월세: 보증금 ${form.deposit || "0"}만원 / 월세 ${form.monthly || "0"}만원`);
+    if (hasHalf && (form.halfDeposit || form.halfMonthly))
+      rentNotes.push(`반전세: 보증금 ${form.halfDeposit || "0"}만원 / 월세 ${form.halfMonthly || "0"}만원`);
+    if (hasJeonse && form.jeonseDeposit)
+      rentNotes.push(`전세: 보증금 ${form.jeonseDeposit}만원`);
+
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
+      ...rentNotes,
     ].filter(Boolean).join("\n");
 
     const payload = {
