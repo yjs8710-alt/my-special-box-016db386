@@ -1829,15 +1829,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </button>
               </div>
             )}
-            {/* 상단: 매물 수 + 주요 액션 */}
+            {/* 상단: 주요 액션 */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div
-                  className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0"
-                  style={{ background: "hsl(var(--primary)/0.08)" }}
-                >
-                  <Building2 className="w-3.5 h-3.5 text-primary" />
-                </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
                     {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
@@ -1848,6 +1842,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
               </div>
               {/* 인쇄 버튼 제거 */}
+              <span className="flex-1" />
+              {/* 선택인쇄 — 우측 파란색 */}
+              <button
+                onClick={handleSelectPrint}
+                className="toolbar-btn flex items-center gap-0.5 ml-auto"
+                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
+              >
+                <Printer className="w-3 h-3" />
+                선택인쇄
+              </button>
             </div>
             {/* 외부 링크 바 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
@@ -1932,16 +1936,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 <ExternalLink className="w-2.5 h-2.5" />
                 다방
               </a>
-              <span className="flex-1" />
-              {/* 선택인쇄 — 우측 끝 파란색 */}
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn flex items-center gap-0.5"
-                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
-              >
-                <Printer className="w-2.5 h-2.5" />
-                선택인쇄
-              </button>
             </div>
           </div>
 
