@@ -86,6 +86,7 @@ type CheongJuContact = {
   district: string;
   dong: string;
   lot_number?: string;
+  unit_number?: string | null;
   phone: string;
   contact_owner?: string;
   contact_manager?: string;
@@ -968,7 +969,7 @@ const ContactEditModal = ({
   onSave: (updated: CheongJuContact) => Promise<void>;
 }) => {
   const [form, setForm] = useState<CheongJuContact>(
-    contact ?? { id: "", district: "", dong: "", lot_number: "", phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
+    contact ?? { id: "", district: "", dong: "", lot_number: "", unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
 
@@ -991,7 +992,7 @@ const ContactEditModal = ({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-base font-bold text-foreground">
-            {form.district} {form.dong} 연락처 {contact?.id ? "수정" : "등록"}
+            {form.district} {form.dong} {form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
           </h3>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
             <X className="w-4 h-4" />
@@ -1027,14 +1028,28 @@ const ContactEditModal = ({
             </div>
           )}
           {/* 번지수 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
-            <Input
-              value={form.lot_number ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
-              placeholder="예: 산123-45, 678-9"
-              className="h-9 text-sm"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
+              <Input
+                value={form.lot_number ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
+                placeholder="예: 123-45"
+                className="h-9 text-sm"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">
+                호수
+                <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+              </label>
+              <Input
+                value={form.unit_number ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
+                placeholder="예: 101호"
+                className="h-9 text-sm"
+              />
+            </div>
           </div>
           {[
             { key: "phone", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX" },
@@ -1382,12 +1397,32 @@ const AdminDashboard = () => {
   const saveContact = async (updated: CheongJuContact) => {
     if (updated.id) {
       const { error } = await supabase.from("cheongju_contacts")
-        .update({ lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, contact_broker: updated.contact_broker, memo: updated.memo, is_visible: updated.is_visible ?? true })
+        .update({
+          lot_number: updated.lot_number ?? "",
+          unit_number: updated.unit_number ?? null,
+          phone: updated.phone,
+          contact_owner: updated.contact_owner,
+          contact_manager: updated.contact_manager,
+          contact_broker: updated.contact_broker,
+          memo: updated.memo,
+          is_visible: updated.is_visible ?? true,
+        })
         .eq("id", updated.id);
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
       const { error } = await supabase.from("cheongju_contacts")
-        .insert({ district: updated.district, dong: updated.dong, lot_number: updated.lot_number ?? "", phone: updated.phone, contact_owner: updated.contact_owner, contact_manager: updated.contact_manager, contact_broker: updated.contact_broker, memo: updated.memo, is_visible: updated.is_visible ?? true });
+        .insert({
+          district: updated.district,
+          dong: updated.dong,
+          lot_number: updated.lot_number ?? "",
+          unit_number: updated.unit_number ?? null,
+          phone: updated.phone,
+          contact_owner: updated.contact_owner,
+          contact_manager: updated.contact_manager,
+          contact_broker: updated.contact_broker,
+          memo: updated.memo,
+          is_visible: updated.is_visible ?? true,
+        });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
@@ -1465,7 +1500,10 @@ const AdminDashboard = () => {
     const matchSearch = !contactSearch
       || c.dong.includes(contactSearch)
       || (c.lot_number ?? "").includes(contactSearch)
+      || (c.unit_number ?? "").includes(contactSearch)
       || c.phone.includes(contactSearch)
+      || (c.contact_owner ?? "").includes(contactSearch)
+      || (c.contact_broker ?? "").includes(contactSearch)
       || (c.memo ?? "").includes(contactSearch);
     return matchDist && matchSearch;
   });
@@ -2267,10 +2305,11 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-               <div className="hidden md:grid grid-cols-[70px_100px_100px_140px_120px_120px_80px_90px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+               <div className="hidden md:grid grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                    <span>구</span>
                    <span>동/읍/면</span>
                    <span>번지수</span>
+                   <span>호수</span>
                    <span>소유주</span>
                    <span>관리인</span>
                    <span>부동산</span>
@@ -2286,7 +2325,7 @@ const AdminDashboard = () => {
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[70px_100px_100px_140px_120px_120px_80px_90px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -2301,6 +2340,15 @@ const AdminDashboard = () => {
                             className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                             style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
                           >{c.lot_number}</span>
+                        ) : <span className="text-muted-foreground/50">—</span>}
+                      </div>
+                      {/* 호수 */}
+                      <div className="hidden md:block text-xs">
+                        {c.unit_number ? (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
+                          >{c.unit_number}호</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 소유주 (phone) */}
