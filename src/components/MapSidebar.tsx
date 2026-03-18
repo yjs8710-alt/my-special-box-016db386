@@ -267,7 +267,7 @@ const MemoNotepad = ({ propId, memoKey, icon, label, initialText }: MemoNotepadP
             {/* 메모장 헤더 */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-primary/5 rounded-t-xl">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm leading-none">{emoji}</span>
+                <span className="flex items-center gap-1 text-sm leading-none">{icon}</span>
                 <span className="text-[11px] font-bold text-foreground">{label}</span>
               </div>
               <button
