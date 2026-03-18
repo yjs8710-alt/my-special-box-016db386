@@ -1324,14 +1324,46 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </div>
           );
         })()}
-        {/* ⑧ 비번 */}
+        {/* ⑧ 비번 — 건물/방 각각 툴팁 */}
         {(buildingPw || roomPw) && (
           <>
             <span className="flex-shrink-0 w-px h-3.5 bg-border" />
-            <div className="flex items-center gap-0.5 flex-shrink-0">
-              <KeyRound className="w-3 h-3" style={{ color: "hsl(var(--foreground)/0.5)" }} />
-              {buildingPw && <span className="text-[11px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.7)" }}>{buildingPw}</span>}
-              {roomPw && <span className="text-[11px] font-extrabold font-mono whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{roomPw}</span>}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.45)" }} />
+              {buildingPw && (
+                <div className="relative group/bpw flex-shrink-0">
+                  <span
+                    className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1 py-0.5 rounded cursor-default select-none"
+                    style={{ background: "hsl(220 20% 94%)", color: "hsl(220 40% 35%)", border: "1px solid hsl(220 20% 82%)" }}
+                  >
+                    건{buildingPw}
+                  </span>
+                  {/* 툴팁 */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/bpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                    <div className="bg-foreground text-background text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
+                      🏢 건물 공동현관
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {roomPw && (
+                <div className="relative group/rpw flex-shrink-0">
+                  <span
+                    className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1 py-0.5 rounded cursor-default select-none"
+                    style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1px solid hsl(var(--accent)/0.35)" }}
+                  >
+                    방{roomPw}
+                  </span>
+                  {/* 툴팁 */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/rpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                    <div className="bg-foreground text-background text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
+                      🚪 방(호실) 도어락
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}
