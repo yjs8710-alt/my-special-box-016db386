@@ -1173,9 +1173,6 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </button>
           );
         })()}
-        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap tabular-nums" style={{ color: "hsl(var(--destructive))" }}>
-          {idx}{regDate ? ` 등:${regDate.slice(2).replace(/-/g, ".")}` : ""}
-        </span>
       </div>
 
       {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 관리비 | 평수 | 옵션 | 비번 */}
