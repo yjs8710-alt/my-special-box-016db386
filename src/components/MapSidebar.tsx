@@ -1175,13 +1175,13 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         })()}
         {/* 등록일 */}
         {regDate && (
-          <span className="flex-shrink-0 text-[10px] text-muted-foreground whitespace-nowrap tabular-nums">
+          <span className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums" style={{ color: "#111" }}>
             {regDate.slice(2).replace(/-/g, ".")}
           </span>
         )}
       </div>
 
-      {/* 2줄: 세부유형 | 층 | 호수 | 보증금 / 월세 | 관리비 | 평수 | 옵션 | 비번 */}
+      {/* 2줄: [세부유형 (층) 호수] | 보증금/월세 관리비 몇평 | 옵션 | 비번 */}
       <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
         {/* 남향 뱃지 */}
         {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
@@ -1190,20 +1190,14 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             {prop.note.match(/[남북동서]향/)?.[0]}
           </span>
         )}
-        {/* ① 세부유형 */}
-        {prop.roomType && (
-          <span className="flex-shrink-0 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+        {/* ① 세부유형 + 층 + 호수를 하나의 네모칸에 */}
+        {(prop.roomType || floorShort || prop.unitNumber) && (
+          <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
             style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.35)" }}>
-            {prop.roomType}
+            {prop.roomType && <span>{prop.roomType}</span>}
+            {floorShort && <span className="opacity-80">({floorShort})</span>}
+            {prop.unitNumber && <span>{prop.unitNumber}</span>}
           </span>
-        )}
-        {/* ② 층 */}
-        {floorShort && (
-          <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{floorShort}</span>
-        )}
-        {/* ③ 호수 */}
-        {prop.unitNumber && (
-          <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.unitNumber}</span>
         )}
         {/* 구분선 */}
         {(prop.roomType || floorShort || prop.unitNumber) && (
@@ -1253,7 +1247,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {/* ⑥ 관리비 */}
         {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
           <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
-            관{prop.manageFee.replace(/[^0-9]/g, "") ? prop.manageFee : prop.manageFee}
+            관{prop.manageFee}
           </span>
         )}
         {/* ⑦ 평수 */}
