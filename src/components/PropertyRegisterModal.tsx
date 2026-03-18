@@ -62,7 +62,8 @@ const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const FLOOR_OPTIONS = [
   "지하5층","지하4층","지하3층","지하2층","지하1층","0층",
-  "1층","2층","3층","4층","5층","6층","7층","8층","9층","10층","10층이상",
+  ...Array.from({ length: 50 }, (_, i) => `${i + 1}층`),
+  "50층이상",
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 
