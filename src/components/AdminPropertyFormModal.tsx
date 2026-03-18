@@ -312,6 +312,11 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
+  // 다중 임대 방식
+  rentModes: string[]; // ["월세", "반전세", "전세"]
+  halfDeposit: string;
+  halfMonthly: string;
+  jeonseDeposit: string;
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -327,6 +332,10 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   contactTenant: "",
   contactManager: "",
   contactBroker: "",
+  rentModes: [],
+  halfDeposit: "",
+  halfMonthly: "",
+  jeonseDeposit: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -389,18 +398,28 @@ interface AdminPropertyFormModalProps {
 }
 
 const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyFormModalProps) => {
-  // note/agent_name에서 연락처 파싱 (수정 시 폼에 자동 채움)
+  // note에서 연락처 + 다중 임대방식 파싱 (수정 시 폼에 자동 채움)
   const parseContactsFromInitial = (init: Partial<DBPropertyForm> | null) => {
     if (!init) return {};
     const contacts: Partial<AdminFormExtended> = {};
     const noteStr = init.note ?? init.agent_name ?? "";
-    // "소유주: 010-1234-5678\n관리인: 010-9999-8888" 형태 파싱
     const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
     if (ownerMatch) contacts.contactOwner = ownerMatch[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+
+    // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
+    const modes: string[] = [];
+    const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+    const halfMatch  = noteStr.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+    const jeonseMatch = noteStr.match(/전세: 보증금 ([^\n]+)만원/);
+    if (wolseMatch)  modes.push("월세");
+    if (halfMatch)   { modes.push("반전세"); contacts.halfDeposit = halfMatch[1].trim(); contacts.halfMonthly = halfMatch[2].trim(); }
+    if (jeonseMatch) { modes.push("전세");  contacts.jeonseDeposit = jeonseMatch[1].trim(); }
+    if (modes.length > 0) contacts.rentModes = modes;
+
     return contacts;
   };
 
@@ -545,12 +564,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
     }
 
-    // note 필드: 연락처 정보만 저장 (건물주/세입자/관리인)
-    // agent_name 필드: 담당 중개사 이름만 저장 (연락처 X)
+    // note 필드: 연락처 + 다중 임대방식 저장
+    const hasWolse   = form.tradeType === "임대" && (form.rentModes.length === 0 || form.rentModes.includes("월세"));
+    const hasHalf    = form.tradeType === "임대" && form.rentModes.includes("반전세");
+    const hasJeonse  = form.tradeType === "임대" && form.rentModes.includes("전세");
+
+    const rentNotes: string[] = [];
+    if (hasWolse && (form.deposit || form.monthly))
+      rentNotes.push(`월세: 보증금 ${form.deposit || "0"}만원 / 월세 ${form.monthly || "0"}만원`);
+    if (hasHalf && (form.halfDeposit || form.halfMonthly))
+      rentNotes.push(`반전세: 보증금 ${form.halfDeposit || "0"}만원 / 월세 ${form.halfMonthly || "0"}만원`);
+    if (hasJeonse && form.jeonseDeposit)
+      rentNotes.push(`전세: 보증금 ${form.jeonseDeposit}만원`);
+
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
+      ...rentNotes,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -970,19 +1001,73 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               {/* 금액 입력 */}
               <Section label="금액 입력">
                 <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* 매매 선택 시 매매가액 */}
-                  {form.tradeType === "매매" ? (
+                {form.tradeType === "매매" ? (
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-2">
                       <AmountInput label="매매가액 *" value={form.deposit} onChange={(v) => set("deposit", v)} placeholder="예) 15,000" />
                     </div>
-                  ) : (
-                    <>
-                      <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
-                      <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
-                    </>
-                  )}
-                  {/* 상가 유형 시 권리금 */}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {/* 임대 방식 다중 선택 */}
+                    <div className="flex flex-col gap-1.5">
+                      <p className="text-[11px] font-bold text-foreground/70">임대 방식 (중복 선택 가능)</p>
+                      <div className="flex gap-2">
+                        {(["월세", "반전세", "전세"] as const).map((mode) => {
+                          const isOn = form.rentModes.includes(mode) || (form.rentModes.length === 0 && mode === "월세");
+                          return (
+                            <button
+                              key={mode}
+                              type="button"
+                              onClick={() => {
+                                const cur = form.rentModes.length === 0 ? ["월세"] : [...form.rentModes];
+                                const next = cur.includes(mode) ? cur.filter(m => m !== mode) : [...cur, mode];
+                                set("rentModes", next.length === 0 ? ["월세"] : next as any);
+                              }}
+                              className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all"
+                              style={isOn
+                                ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                                : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                              }
+                            >
+                              {mode}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 월세 금액 */}
+                    {(form.rentModes.length === 0 || form.rentModes.includes("월세")) && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
+                          <AmountInput label="월세" value={form.monthly} onChange={(v) => set("monthly", v)} />
+                        </div>
+                      </div>
+                    )}
+                    {/* 반전세 금액 */}
+                    {form.rentModes.includes("반전세") && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">🏠 반전세</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <AmountInput label="보증금" value={form.halfDeposit} onChange={(v) => set("halfDeposit", v as any)} />
+                          <AmountInput label="월세" value={form.halfMonthly} onChange={(v) => set("halfMonthly", v as any)} />
+                        </div>
+                      </div>
+                    )}
+                    {/* 전세 금액 */}
+                    {form.rentModes.includes("전세") && (
+                      <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                        <p className="text-[11px] font-extrabold text-primary">🏡 전세</p>
+                        <AmountInput label="보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v as any)} />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* 관리비 + 청소비 + 중개보수 */}
+                <div className="grid grid-cols-2 gap-3 mt-1">
                   {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
                     <div className="col-span-2">
                       <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {

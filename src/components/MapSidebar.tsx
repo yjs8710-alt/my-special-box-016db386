@@ -1160,11 +1160,47 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {(prop.roomType || floorShort || prop.unitNumber) && (
           <span className="flex-shrink-0 w-px h-3.5 bg-border" />
         )}
-        {/* ④ 보증금 */}
-        <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-        <span className="flex-shrink-0 text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
-        {/* ⑤ 월세 */}
-        <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+        {/* ④ 보증금/월세: note에 다중 임대방식 있으면 파싱, 없으면 기본값 */}
+        {(() => {
+          const note = prop.note ?? "";
+          const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+          const halfMatch  = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+          const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+          const hasMulti = wolseMatch || halfMatch || jeonseMatch;
+
+          if (hasMulti) {
+            return (
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {wolseMatch && (
+                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
+                    style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))" }}>
+                    월{wolseMatch[1]}/{wolseMatch[2]}
+                  </span>
+                )}
+                {halfMatch && (
+                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
+                    style={{ background: "hsl(220 80% 95%)", color: "#1d4ed8" }}>
+                    반{halfMatch[1]}/{halfMatch[2]}
+                  </span>
+                )}
+                {jeonseMatch && (
+                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
+                    style={{ background: "hsl(142 70% 93%)", color: "#15803d" }}>
+                    전{jeonseMatch[1]}
+                  </span>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <>
+              <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+              <span className="flex-shrink-0 text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
+              <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+            </>
+          );
+        })()}
         {/* ⑥ 관리비 */}
         {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
           <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--muted-foreground))" }}>
