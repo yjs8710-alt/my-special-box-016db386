@@ -462,16 +462,21 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSaving(false);
 
     if (!error && form.dong) {
-      // ── cheongju_contacts 동기화: 호수가 있으면 주소+호수, 없으면 주소만으로 upsert ──
+      // ── cheongju_contacts 동기화 ──
       const contactDistrict = districtVal ?? "";
       const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
-      if (hasContact) {
-        const unitVal = form.unitNo ? form.unitNo : null;
+      const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
+      const unitVal = form.unitNo || null;
+
+      // 집합건물 타입이면 호수가 있어야만 저장 (호수 없으면 skip → 단독건물 연락처 오염 방지)
+      const canSaveContact = hasContact && (isCollective ? !!unitVal : true);
+
+      if (canSaveContact) {
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
           lot_number: form.lotNumber || "",
-          unit_number: unitVal,
+          unit_number: isCollective ? unitVal : null,
           phone: form.contactOwner || "",
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
