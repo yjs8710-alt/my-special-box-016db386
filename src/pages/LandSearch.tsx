@@ -189,7 +189,7 @@ const LAND_PROPERTIES: MapProperty[] = [
   },
 ];
 
-const LAND_SUBTYPES = ["전체", "대지", "임야", "농지", "공장·창고"];
+const LAND_SUBTYPES = ["전체", "대지", "임야", "농지"];
 
 const LandSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);

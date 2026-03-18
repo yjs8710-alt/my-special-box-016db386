@@ -256,6 +256,7 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "사무실", group: "임대", key: "사무실" },
   { label: "공장·창고", group: "임대", key: "공장·창고" },
   { label: "매매전체", group: "매매", key: "매매-전체" },
+  { label: "상가매매", group: "매매", key: "상가매매" },
   { label: "건물매매", group: "매매", key: "건물매매" },
 ];
 
