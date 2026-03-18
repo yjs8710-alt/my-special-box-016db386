@@ -41,6 +41,9 @@ const DONG_MAP: Record<string, string[]> = {
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
+
+// 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
+const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const DETAIL_TYPES = [
   "원룸","투베이","투룸","쓰리룸","포룸",
   "주인세대","고시원","다가구","단독주택",

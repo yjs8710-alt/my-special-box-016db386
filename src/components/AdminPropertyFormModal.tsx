@@ -263,6 +263,9 @@ const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
+
+// 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
+const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","고시원"] },
   { group: "상가 임대", types: ["상가","식당·카페","사무실","공장·창고","병원·학원"] },
