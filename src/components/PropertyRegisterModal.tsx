@@ -184,14 +184,15 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       });
   }, [user?.userId]);
 
-  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 ──────────────────
+  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
-    if (!form.dong) return;
+    if (!form.dong || form.buildingType === "집합건물") return;
     const run = async () => {
       let q = supabase
         .from("cheongju_contacts")
         .select("contact_owner,contact_manager,contact_broker,phone")
-        .eq("dong", form.dong);
+        .eq("dong", form.dong)
+        .is("unit_number", null);
       if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
       const { data } = await q.maybeSingle();
       if (!data) return;
@@ -203,11 +204,52 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.lotNumber]);
+  }, [form.dong, form.lotNumber, form.buildingType]);
 
-  // ── 호수 입력 시 이전 매물 이미지·비밀번호 자동 로드 ──────────
+  // ── 집합건물: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──────────────
   useEffect(() => {
-    if (!form.dong || !form.unitNo) return;
+    if (!form.dong || !form.unitNo || form.buildingType !== "집합건물") return;
+    const run = async () => {
+      // 1순위: cheongju_contacts에서 호수별 소유주 조회
+      let q = supabase
+        .from("cheongju_contacts")
+        .select("contact_owner,contact_manager,contact_broker,phone")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo);
+      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+      const { data: contactData } = await q.maybeSingle();
+      if (contactData) {
+        setForm((prev) => ({
+          ...prev,
+          contactOwner: contactData.contact_owner || contactData.phone || prev.contactOwner,
+          contactManager: prev.contactManager || contactData.contact_manager || "",
+          contactBroker: prev.contactBroker || contactData.contact_broker || "",
+        }));
+      }
+
+      // 2순위: 이전 매물에서 이미지·비밀번호 자동 로드
+      const { data: propData } = await supabase
+        .from("properties")
+        .select("images,building_password,room_password")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo)
+        .order("registered_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!propData) return;
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images.length > 0 ? prev.images : (propData.images ?? []),
+        buildingPassword: prev.buildingPassword || propData.building_password || "",
+        roomPassword: prev.roomPassword || propData.room_password || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.unitNo, form.buildingType, form.lotNumber]);
+
+  // ── 단독건물: 호수 입력 시 이전 매물 이미지·비밀번호만 자동 로드 ──────────
+  useEffect(() => {
+    if (!form.dong || !form.unitNo || form.buildingType === "집합건물") return;
     const run = async () => {
       const { data } = await supabase
         .from("properties")
@@ -227,7 +269,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo]);
+  }, [form.dong, form.unitNo, form.buildingType]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
