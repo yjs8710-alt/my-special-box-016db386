@@ -306,7 +306,7 @@ const NonResidentialRental = () => {
       return ["상가", "사무실", "공장·창고", "상가임대", "기타임대"];
     }
     if (activeTypes.includes("매매-전체")) {
-      return ["건물매매"];
+      return ["상가매매", "건물매매"];
     }
     return activeTypes;
   }, [activeTypes]);
