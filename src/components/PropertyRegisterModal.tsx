@@ -167,6 +167,51 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       });
   }, [user?.userId]);
 
+  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 ──────────────────
+  useEffect(() => {
+    if (!form.dong) return;
+    const run = async () => {
+      let q = supabase
+        .from("cheongju_contacts")
+        .select("contact_owner,contact_manager,contact_broker,phone")
+        .eq("dong", form.dong);
+      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+      const { data } = await q.maybeSingle();
+      if (!data) return;
+      setForm((prev) => ({
+        ...prev,
+        contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
+        contactManager: prev.contactManager || data.contact_manager || "",
+        contactBroker: prev.contactBroker || data.contact_broker || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.lotNumber]);
+
+  // ── 호수 입력 시 이전 매물 이미지·비밀번호 자동 로드 ──────────
+  useEffect(() => {
+    if (!form.dong || !form.unitNo) return;
+    const run = async () => {
+      const { data } = await supabase
+        .from("properties")
+        .select("images,building_password,room_password")
+        .eq("dong", form.dong)
+        .eq("unit_number", form.unitNo)
+        .eq("status", "active")
+        .order("registered_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!data) return;
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images.length > 0 ? prev.images : (data.images ?? []),
+        buildingPassword: prev.buildingPassword || data.building_password || "",
+        roomPassword: prev.roomPassword || data.room_password || "",
+      }));
+    };
+    run();
+  }, [form.dong, form.unitNo]);
+
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
     setErrors((p) => { const n = { ...p }; delete n[key]; return n; });
