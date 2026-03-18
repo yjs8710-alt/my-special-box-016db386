@@ -299,14 +299,13 @@ const NonResidentialRental = () => {
   };
 
   // key → DB type 변환 후 usePropertyFilter에 전달
-  // key와 label이 같은 항목(상가, 식당·카페 등)은 key를 그대로 사용
   const nonResidentialTypeLabels = useMemo(() => {
     if (activeTypes.includes("전체")) return ["전체"];
     if (activeTypes.includes("임대-전체")) {
-      return ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "상가임대", "기타임대"];
+      return ["상가", "사무실", "공장·창고", "상가임대", "기타임대"];
     }
     if (activeTypes.includes("매매-전체")) {
-      return ["건물매매", "원룸건물매매", "주택매매", "상가주택매매", "상가건물매매", "구분상가매매", "창고/공장매매", "숙박/팬션매매"];
+      return ["건물매매"];
     }
     return activeTypes;
   }, [activeTypes]);
