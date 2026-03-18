@@ -1500,7 +1500,10 @@ const AdminDashboard = () => {
     const matchSearch = !contactSearch
       || c.dong.includes(contactSearch)
       || (c.lot_number ?? "").includes(contactSearch)
+      || (c.unit_number ?? "").includes(contactSearch)
       || c.phone.includes(contactSearch)
+      || (c.contact_owner ?? "").includes(contactSearch)
+      || (c.contact_broker ?? "").includes(contactSearch)
       || (c.memo ?? "").includes(contactSearch);
     return matchDist && matchSearch;
   });
