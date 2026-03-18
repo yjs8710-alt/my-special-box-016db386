@@ -1461,14 +1461,12 @@ const AdminDashboard = () => {
 
   const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const hasLot = !!(c.lot_number && c.lot_number.trim() !== "");
-    const matchLot = contactLotFilter === "전체" || (contactLotFilter === "번지있음" ? hasLot : !hasLot);
     const matchSearch = !contactSearch
       || c.dong.includes(contactSearch)
       || (c.lot_number ?? "").includes(contactSearch)
       || c.phone.includes(contactSearch)
       || (c.memo ?? "").includes(contactSearch);
-    return matchDist && matchLot && matchSearch;
+    return matchDist && matchSearch;
   });
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
