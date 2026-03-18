@@ -1241,27 +1241,30 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
         {/* Footer */}
         <div className="flex-shrink-0 px-6 py-4 border-t border-border flex items-center gap-3">
-          {/* 삭제 버튼 — 수정 모드에서만 표시 */}
+          {/* 매물 종료 버튼 — 수정 모드에서만 표시 */}
           {initial?.id && (
             <button
               type="button"
               disabled={saving}
               onClick={async () => {
-                if (!confirm("이 매물을 삭제하시겠습니까?\n삭제 후 복구할 수 없습니다.")) return;
+                if (!confirm("이 매물을 종료하시겠습니까?\n매물이 목록에서 숨겨지고 종료 상태로 변경됩니다.")) return;
                 setSaving(true);
                 try {
-                  const { error } = await supabase.from("properties").delete().eq("id", initial.id!);
-                  if (error) { alert("삭제 오류: " + error.message); return; }
+                  const { error } = await supabase.from("properties").update({ status: "closed" }).eq("id", initial.id!);
+                  if (error) { alert("오류: " + error.message); return; }
                   onSaved?.();
                   onClose();
                 } finally {
                   setSaving(false);
                 }
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold border transition-colors disabled:opacity-50"
+              style={{ borderColor: "hsl(var(--chart-4))", color: "hsl(var(--chart-4))", background: "transparent" }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "hsl(var(--chart-4))"; (e.currentTarget as HTMLButtonElement).style.color = "white"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "hsl(var(--chart-4))"; }}
             >
               <X className="w-3.5 h-3.5" />
-              삭제
+              매물 종료
             </button>
           )}
           {formStep > 1 && (
