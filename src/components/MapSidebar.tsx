@@ -1381,9 +1381,6 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                     border: "1.5px solid hsl(38 80% 70%)",
                   }}
                 >
-                  <svg width="9" height="9" viewBox="0 0 12 12" fill="hsl(38 95% 50%)" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 1L7.5 4.2L11 4.7L8.5 7.1L9.1 10.6L6 8.9L2.9 10.6L3.5 7.1L1 4.7L4.5 4.2L6 1Z"/>
-                  </svg>
                   풀옵션
                 </span>
               ) : (
