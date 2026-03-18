@@ -2051,6 +2051,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                           roomPw={roomPw}
                           regDate={regDate}
                           chkDate={chkDate}
+                          isAdmin={isAdmin}
                         />
                       </div>
 
