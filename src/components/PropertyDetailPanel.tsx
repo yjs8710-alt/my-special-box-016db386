@@ -678,18 +678,12 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
               <div className="h-2 bg-muted/50 my-2" />
               <div className="px-4 pb-3 flex flex-col gap-2">
                 <p className="text-xs font-bold text-foreground uppercase tracking-wide">비밀번호</p>
-                <div className="flex flex-col gap-2">
-                  {(property.buildingPassword) && (
-                    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-xl border border-border bg-muted/30">
-                      <span className="text-xs text-muted-foreground font-medium">🏢 건물 비번</span>
-                      <span className="text-base font-bold text-foreground tracking-widest">{property.buildingPassword}</span>
-                    </div>
+                <div className="px-3 py-2.5 rounded-xl border border-border bg-muted/30 flex flex-col gap-1">
+                  {property.buildingPassword && (
+                    <span className="text-sm font-bold text-foreground tracking-wide">건{property.buildingPassword}</span>
                   )}
                   {(property.roomPassword || property.password) && (
-                    <div className="flex flex-col gap-1 px-3 py-2.5 rounded-xl border border-border bg-muted/30">
-                      <span className="text-xs text-muted-foreground font-medium">🔑 방 비번</span>
-                      <span className="text-base font-bold text-foreground tracking-widest">{property.roomPassword || property.password}</span>
-                    </div>
+                    <span className="text-sm font-bold text-foreground tracking-wide">방{property.roomPassword || property.password}</span>
                   )}
                 </div>
               </div>
