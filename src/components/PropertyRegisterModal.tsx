@@ -276,7 +276,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
