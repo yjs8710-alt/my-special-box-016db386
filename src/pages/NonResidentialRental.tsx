@@ -262,7 +262,7 @@ const NON_RESIDENTIAL_SUBTYPES = [
 
 const NON_RESIDENTIAL_DB_TYPES = [
   "상가", "사무실", "공장·창고",
-  "건물매매",
+  "상가매매", "건물매매",
   "상가임대", "기타임대",
 ];
 
