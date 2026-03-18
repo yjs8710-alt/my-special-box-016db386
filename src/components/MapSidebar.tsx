@@ -1847,14 +1847,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   </p>
                 </div>
               </div>
-              {/* 인쇄 버튼들 */}
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn"
-              >
-                <Printer className="w-3 h-3" />
-                선택인쇄
-              </button>
+              {/* 인쇄 버튼 제거 */}
             </div>
             {/* 외부 링크 바 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
