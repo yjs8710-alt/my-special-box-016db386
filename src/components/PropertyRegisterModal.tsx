@@ -621,6 +621,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">호수</label>
             <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+            {form.unitNo && <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">평수</label>
