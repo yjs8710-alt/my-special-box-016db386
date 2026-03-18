@@ -1705,7 +1705,18 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         />
       )}
 
-      <div className="flex h-full flex-shrink-0" style={{ position: "relative" }}>
+      {/* collapsed 시 absolute로 지도 위에 겹치게, 열릴 때는 flex로 공간 차지 */}
+      <div
+        className="flex h-full"
+        style={{
+          position: collapsed ? "absolute" : "relative",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: collapsed ? 50 : "auto",
+          flexShrink: 0,
+        }}
+      >
         {/* Toggle tab — 사이드바 왼쪽 */}
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -1722,7 +1733,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         {/* Panel */}
         <aside
           className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
-            collapsed ? "w-0 overflow-hidden opacity-0" : "opacity-100"
+            collapsed ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{
             width: collapsed ? 0 : width,
