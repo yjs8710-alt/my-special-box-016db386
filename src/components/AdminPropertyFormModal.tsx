@@ -472,19 +472,31 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   }, []);
 
   // 청주 연락처 자동 불러오기
-  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string) => {
+  // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
+  const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string, unitVal?: string, isCollective?: boolean) => {
     if (!dongVal) return;
-    let query = supabase.from("cheongju_contacts").select("contact_owner,contact_manager,phone").eq("dong", dongVal);
+    let query = supabase
+      .from("cheongju_contacts")
+      .select("contact_owner,contact_manager,contact_broker,phone")
+      .eq("dong", dongVal);
     if (lotVal) query = query.eq("lot_number", lotVal);
+    // 집합건물이고 호수가 있으면 호수별 조회, 없으면 null 조회
+    if (isCollective && unitVal) {
+      query = query.eq("unit_number", unitVal);
+    } else {
+      query = query.is("unit_number", null);
+    }
     const { data } = await query.maybeSingle();
     if (data) {
       const owner = data.contact_owner || data.phone || "";
       const manager = data.contact_manager || "";
-      if (owner || manager) {
+      const broker = data.contact_broker || "";
+      if (owner || manager || broker) {
         setForm((f) => ({
           ...f,
-          contactOwner: f.contactOwner || owner,
+          contactOwner: (isCollective && unitVal) ? (owner || f.contactOwner) : (f.contactOwner || owner),
           contactManager: f.contactManager || manager,
+          contactBroker: f.contactBroker || broker,
         }));
         setContactAutoFilled(true);
         setTimeout(() => setContactAutoFilled(false), 4000);
