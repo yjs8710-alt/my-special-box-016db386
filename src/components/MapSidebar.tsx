@@ -1253,7 +1253,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         )}
         {/* ⑦ 평수 */}
         {areaShort && (
-          <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.6)" }}>
+          <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 75%)" }}>
             {areaShort}
           </span>
         )}
