@@ -1845,7 +1845,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                     {pinnedAddress && <span className="text-[10px] font-semibold text-primary ml-1">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : "지도에서 핀 클릭"}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : ""}
                   </p>
                 </div>
               </div>
