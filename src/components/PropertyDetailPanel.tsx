@@ -614,21 +614,57 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
 
           {/* Price block */}
           <div className="px-4 py-4 bg-primary/5 border-b border-border">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
-                <p className="text-xl font-extrabold text-foreground leading-tight">
-                  {property.deposit}
-                  <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
-                  <span className="text-accent">{property.monthly}</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-[11px] text-muted-foreground">관리비</p>
-                <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/60">
+            {/* 임대 방식별 금액 파싱 (note 필드에 월세/반전세/전세 저장됨) */}
+            {(() => {
+              const note = property.note ?? "";
+              const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+              const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+              const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+              const hasMultiRent = wolseMatch || halfMatch || jeonseMatch;
+
+              return hasMultiRent ? (
+                <div className="flex flex-col gap-2 mb-2">
+                  {wolseMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">💰 월세</span>
+                      <span className="text-sm font-extrabold text-foreground">
+                        보증금 {wolseMatch[1]}만원 <span className="text-muted-foreground font-light">/</span> <span className="text-accent">월 {wolseMatch[2]}만원</span>
+                      </span>
+                    </div>
+                  )}
+                  {halfMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">🏠 반전세</span>
+                      <span className="text-sm font-extrabold text-foreground">
+                        보증금 {halfMatch[1]}만원 <span className="text-muted-foreground font-light">/</span> <span className="text-accent">월 {halfMatch[2]}만원</span>
+                      </span>
+                    </div>
+                  )}
+                  {jeonseMatch && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-muted-foreground font-medium">🏡 전세</span>
+                      <span className="text-sm font-extrabold text-foreground">보증금 {jeonseMatch[1]}만원</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-[11px] text-muted-foreground font-medium mb-0.5">보증금 / 월세</p>
+                    <p className="text-xl font-extrabold text-foreground leading-tight">
+                      {property.deposit}
+                      <span className="text-muted-foreground font-light mx-1.5 text-base">/</span>
+                      <span className="text-accent">{property.monthly}</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[11px] text-muted-foreground">관리비</p>
+                    <p className="text-sm font-semibold text-foreground">{property.manageFee}</p>
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="flex items-center gap-3 pt-2 border-t border-border/60">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Eye className="w-3 h-3" />
                 <span>조회 {property.views.toLocaleString()}</span>
@@ -678,12 +714,24 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
               <div className="h-2 bg-muted/50 my-2" />
               <div className="px-4 pb-3 flex flex-col gap-2">
                 <p className="text-xs font-bold text-foreground uppercase tracking-wide">비밀번호</p>
-                <div className="px-3 py-2.5 rounded-xl border border-border bg-muted/30 flex flex-col gap-1">
+                <div className="px-3 py-2.5 rounded-xl border border-border bg-muted/30 flex flex-col gap-1.5">
                   {property.buildingPassword && (
-                    <span className="text-sm font-bold text-foreground tracking-wide">건{property.buildingPassword}</span>
+                    <div className="group relative flex flex-col gap-0.5 cursor-default">
+                      <span className="text-[10px] text-muted-foreground font-medium">🏢 건물 공동현관</span>
+                      <span className="text-sm font-bold text-foreground tracking-widest">건{property.buildingPassword}</span>
+                      <span className="pointer-events-none absolute -top-7 left-0 whitespace-nowrap bg-popover text-popover-foreground text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        건물 공동현관 비밀번호
+                      </span>
+                    </div>
                   )}
                   {(property.roomPassword || property.password) && (
-                    <span className="text-sm font-bold text-foreground tracking-wide">방{property.roomPassword || property.password}</span>
+                    <div className="group relative flex flex-col gap-0.5 cursor-default">
+                      <span className="text-[10px] text-muted-foreground font-medium">🚪 방(호실) 도어락</span>
+                      <span className="text-sm font-bold text-foreground tracking-widest">방{property.roomPassword || property.password}</span>
+                      <span className="pointer-events-none absolute -top-7 left-0 whitespace-nowrap bg-popover text-popover-foreground text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        방(호실) 도어락 비밀번호
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
