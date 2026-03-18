@@ -398,18 +398,28 @@ interface AdminPropertyFormModalProps {
 }
 
 const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyFormModalProps) => {
-  // note/agent_name에서 연락처 파싱 (수정 시 폼에 자동 채움)
+  // note에서 연락처 + 다중 임대방식 파싱 (수정 시 폼에 자동 채움)
   const parseContactsFromInitial = (init: Partial<DBPropertyForm> | null) => {
     if (!init) return {};
     const contacts: Partial<AdminFormExtended> = {};
     const noteStr = init.note ?? init.agent_name ?? "";
-    // "소유주: 010-1234-5678\n관리인: 010-9999-8888" 형태 파싱
     const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
     if (ownerMatch) contacts.contactOwner = ownerMatch[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+
+    // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
+    const modes: string[] = [];
+    const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+    const halfMatch  = noteStr.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+    const jeonseMatch = noteStr.match(/전세: 보증금 ([^\n]+)만원/);
+    if (wolseMatch)  modes.push("월세");
+    if (halfMatch)   { modes.push("반전세"); contacts.halfDeposit = halfMatch[1].trim(); contacts.halfMonthly = halfMatch[2].trim(); }
+    if (jeonseMatch) { modes.push("전세");  contacts.jeonseDeposit = jeonseMatch[1].trim(); }
+    if (modes.length > 0) contacts.rentModes = modes;
+
     return contacts;
   };
 
