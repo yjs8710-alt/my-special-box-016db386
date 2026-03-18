@@ -708,9 +708,19 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70">호수</label>
+            <label className="text-xs font-semibold text-foreground/70">
+              호수
+              {form.buildingType === "집합건물" && (
+                <span className="ml-1 text-[10px] text-primary font-normal">집합건물 — 호수별 소유주 자동로드</span>
+              )}
+            </label>
             <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
-            {form.unitNo && <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>}
+            {form.unitNo && form.buildingType === "집합건물" && (
+              <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
+            )}
+            {form.unitNo && form.buildingType !== "집합건물" && (
+              <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-foreground/70">평수</label>
