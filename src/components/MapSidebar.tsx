@@ -1830,7 +1830,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             )}
             {/* 상단: 주요 액션 */}
-            <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
+            <div className="flex items-center gap-2 px-3 py-0.5 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
