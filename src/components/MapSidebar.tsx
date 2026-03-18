@@ -1832,12 +1832,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             {/* 상단: 주요 액션 */}
             <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div
-                  className="flex items-center justify-center w-7 h-7 rounded-lg flex-shrink-0"
-                  style={{ background: "hsl(var(--primary)/0.08)" }}
-                >
-                  <Building2 className="w-3.5 h-3.5 text-primary" />
-                </div>
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
                     {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
