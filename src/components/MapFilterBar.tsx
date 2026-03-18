@@ -428,8 +428,8 @@ const MapFilterBar = ({
             </div>
             <button
               onClick={() => setShowFilter((v) => !v)}
-              className="relative flex items-center gap-1 px-3 h-10 border-l border-border transition-colors"
-              style={{ color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+              className="relative flex items-center gap-1 px-3 h-10 border-l transition-colors"
+              style={{ borderColor: "hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">필터</span>
