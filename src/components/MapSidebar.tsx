@@ -1231,6 +1231,12 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                     전{jeonseMatch[1]}
                   </span>
                 )}
+                {areaShort && (
+                  <>
+                    <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>·</span>
+                    <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>{areaShort}</span>
+                  </>
+                )}
               </div>
             );
           }
