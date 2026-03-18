@@ -1216,20 +1216,20 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             return (
               <div className="flex items-center gap-1 flex-shrink-0">
                 {wolseMatch && (
-                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
-                    style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))" }}>
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
+                    style={{ background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.3)" }}>
                     월{wolseMatch[1]}/{wolseMatch[2]}
                   </span>
                 )}
                 {halfMatch && (
-                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
-                    style={{ background: "hsl(220 80% 95%)", color: "#1d4ed8" }}>
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
+                    style={{ background: "hsl(220 80% 95%)", color: "#1d4ed8", border: "1.5px solid hsl(220 70% 80%)" }}>
                     반{halfMatch[1]}/{halfMatch[2]}
                   </span>
                 )}
                 {jeonseMatch && (
-                  <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap px-1 py-0.5 rounded"
-                    style={{ background: "hsl(142 70% 93%)", color: "#15803d" }}>
+                  <span className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap px-1.5 py-0.5 rounded"
+                    style={{ background: "hsl(142 70% 93%)", color: "#15803d", border: "1.5px solid hsl(142 60% 75%)" }}>
                     전{jeonseMatch[1]}
                   </span>
                 )}
@@ -1238,11 +1238,14 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           }
 
           return (
-            <>
-              <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-              <span className="flex-shrink-0 text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
-              <span className="flex-shrink-0 text-[13px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
-            </>
+            <span
+              className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded whitespace-nowrap"
+              style={{ background: "hsl(var(--muted)/0.7)", border: "1.5px solid hsl(var(--border))" }}
+            >
+              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+              <span className="text-[10px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>/</span>
+              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+            </span>
           );
         })()}
         {/* ⑥ 관리비 */}
