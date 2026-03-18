@@ -1098,7 +1098,6 @@ const AdminDashboard = () => {
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
-  const [contactLotFilter, setContactLotFilter] = useState<"전체" | "번지있음" | "번지없음">("전체");
 
   // 신고/제안 state
   const [reports, setReports] = useState<PropertyReport[]>([]);
