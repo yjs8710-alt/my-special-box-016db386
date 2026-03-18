@@ -225,11 +225,11 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
 interface MemoNotepadProps {
   propId: number;
   memoKey: string; // "building" | "room"
-  emoji: string;
+  icon: React.ReactNode;
   label: string;
   initialText: string;
 }
-const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepadProps) => {
+const MemoNotepad = ({ propId, memoKey, icon, label, initialText }: MemoNotepadProps) => {
   const storageKey = `memo_${propId}_${memoKey}`;
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(() => localStorage.getItem(storageKey) ?? initialText);
@@ -245,9 +245,10 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
         type="button"
         title={label}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="w-4 h-4 flex items-center justify-center text-[11px] leading-none hover:scale-125 transition-transform select-none flex-shrink-0"
+        className="w-[18px] h-[18px] flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
+        style={{ background: "hsl(var(--primary)/0.08)", border: "1px solid hsl(var(--primary)/0.2)" }}
       >
-        {emoji}
+        {icon}
       </button>
       {open && (
         <>
@@ -266,7 +267,7 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
             {/* 메모장 헤더 */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-primary/5 rounded-t-xl">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm leading-none">{emoji}</span>
+                <span className="flex items-center gap-1 text-sm leading-none">{icon}</span>
                 <span className="text-[11px] font-bold text-foreground">{label}</span>
               </div>
               <button
@@ -1137,34 +1138,42 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
         >로드뷰</a>
         <span className="flex-1" />
-        <MemoNotepad propId={prop.id} memoKey="building" emoji="🏢" label="건물메모" initialText={buildingMemo ?? ""} />
-        <MemoNotepad propId={prop.id} memoKey="room" emoji="🚪" label="방메모" initialText={roomMemo ?? ""} />
-        {/* 관리자 확인 체크박스 */}
-        {isAdmin && prop.memo && (
-          <button
-            type="button"
-            title={isChecked ? `확인일: ${chkDate} — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
-            onClick={handleCheckToggle}
-            disabled={checking}
-            className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
-            style={{
-              background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
-              border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
-              opacity: checking ? 0.5 : 1,
-            }}
-          >
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              {isChecked
-                ? <path d="M1.5 5L4 7.5L8.5 2.5" stroke="hsl(142 60% 35%)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                : <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
-              }
-            </svg>
-            <span className="text-[9px] font-extrabold whitespace-nowrap" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
-              {isChecked ? chkDate!.slice(2).replace(/-/g, ".") : "확인"}
-            </span>
-          </button>
-        )}
-        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap" style={{ color: "hsl(var(--destructive))" }}>
+        <MemoNotepad propId={prop.id} memoKey="building" icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5}/>} label="건물메모" initialText={buildingMemo ?? ""} />
+        <MemoNotepad propId={prop.id} memoKey="room" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/></svg>} label="방메모" initialText={roomMemo ?? ""} />
+        {/* 관리자 확인 체크박스 — 텍스트 없이 아이콘+D숫자만 */}
+        {isAdmin && prop.memo && (() => {
+          const daysSince = chkDate
+            ? Math.floor((Date.now() - new Date(chkDate).getTime()) / 86400000)
+            : null;
+          return (
+            <button
+              type="button"
+              title={isChecked ? `확인일: ${chkDate} (${daysSince}일 경과) — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
+              onClick={handleCheckToggle}
+              disabled={checking}
+              className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
+              style={{
+                background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
+                border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+                opacity: checking ? 0.5 : 1,
+              }}
+            >
+              {isChecked ? (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <path d="M1.5 5L4 7.5L8.5 2.5" stroke="hsl(142 60% 35%)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                  <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
+                </svg>
+              )}
+              <span className="text-[10px] font-black whitespace-nowrap tabular-nums" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
+                {isChecked ? daysSince : "?"}
+              </span>
+            </button>
+          );
+        })()}
+        <span className="flex-shrink-0 text-[10px] font-extrabold whitespace-nowrap tabular-nums" style={{ color: "hsl(var(--destructive))" }}>
           {idx}{regDate ? ` 등:${regDate.slice(2).replace(/-/g, ".")}` : ""}
         </span>
       </div>
@@ -1973,13 +1982,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                       {/* Row: 3줄 레이아웃 */}
                       <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
 
-                        {/* ①썸네일 90px */}
-                        <div className="w-[90px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "90px" }}>
+                        {/* ①썸네일 96px — 고화질 렌더링 */}
+                        <div className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "96px" }}>
                           {prop.image ? (
                             <img
                               src={prop.image}
                               alt={prop.title}
+                              loading="eager"
+                              decoding="async"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
                             />
                           ) : (
                             /* 이미지 없는 DB 매물 placeholder */
