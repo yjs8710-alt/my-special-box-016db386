@@ -1066,22 +1066,22 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     )}
                   </div>
                 )}
-                  {/* 상가 유형 시 권리금 + 관리비 + 청소비 + 중개보수 */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
-                      <div className="col-span-2">
-                        <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
-                          const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
-                          set("note", v ? (existing ? `${existing}\n권리금: ${v}` : `권리금: ${v}`) : existing);
-                        }} placeholder="없으면 0 또는 비워두기" />
-                      </div>
-                    )}
-                    <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
-                    <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+                {/* 관리비 + 청소비 + 중개보수 */}
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
                     <div className="col-span-2">
-                      <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
+                      <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
+                        const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
+                        set("note", v ? (existing ? `${existing}\n권리금: ${v}` : `권리금: ${v}`) : existing);
+                      }} placeholder="없으면 0 또는 비워두기" />
                     </div>
+                  )}
+                  <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
+                  <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
+                  <div className="col-span-2">
+                    <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
                   </div>
+                </div>
               </Section>
 
               {/* LH 전세대출 */}
