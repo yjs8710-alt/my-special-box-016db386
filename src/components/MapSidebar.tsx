@@ -1363,7 +1363,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         {/* ⑦-b 옵션 텍스트 배지 — 호버 시 상세 목록 팝업 */}
         {prop.options && prop.options.length > 0 && (() => {
           const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
-          const isFull = FULL_OPT.every(o => prop.options!.includes(o));
+          const isFull = prop.options!.includes("풀옵션") || FULL_OPT.every(o => prop.options!.includes(o));
           return (
             <div
               ref={optBadgeRef}
@@ -1375,11 +1375,11 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
               <span
                 className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
                 style={isFull
-                  ? { background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)" }
+                  ? { background: "hsl(var(--primary))", color: "#fff", border: "1.5px solid hsl(var(--primary))" }
                   : { background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }
                 }
               >
-                {isFull ? "풀옵션 ▾" : `옵션(${prop.options!.length}) ▾`}
+                {isFull ? "⭐ 풀옵션" : `옵션(${prop.options!.length}) ▾`}
               </span>
               {/* 호버 팝업 — fixed로 overflow:hidden 탈출, 화면 경계 감지 */}
               {showOptPopup && (
