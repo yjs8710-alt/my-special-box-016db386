@@ -213,7 +213,7 @@ export type DBPropertyForm = {
 // ─── Address Data (청주시 4개 구 고정) ──────────────────────────────────────
 const FIXED_SIDO_ADMIN = "충북";
 const CHEONGJU_SIGUNGU_ADMIN = [
-  "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구",
+  "청주시 상당구","청주시 서원구","청주시 흥덕구","청주시 청원구",
 ];
 const DONG_MAP: Record<string, string[]> = {
   "청주시 상당구": [

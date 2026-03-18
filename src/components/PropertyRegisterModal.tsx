@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
-  "청주시 상당구","청주시 서원구","청주시 청원구","청주시 흥덕구",
+  "청주시 상당구","청주시 서원구","청주시 흥덕구","청주시 청원구",
 ];
 
 const DONG_MAP: Record<string, string[]> = {
