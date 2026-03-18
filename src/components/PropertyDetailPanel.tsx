@@ -681,7 +681,7 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
             <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: property.area.split(" ")[0], sub: property.area.split(" ")[1] },
+                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: (() => { const a = property.area || ""; const m = a.match(/\((\d+)평\)/) ?? a.match(/^(\d+)평/) ?? a.match(/^(\d+)$/); return m ? m[1] + "평" : a.split(" ")[0]; })(), sub: property.area.includes("(") ? property.area.split(" ")[1] : undefined },
                 { icon: <Layers className="w-3.5 h-3.5" />,    label: "해당층", value: property.floor },
                 { icon: <Building2 className="w-3.5 h-3.5" />, label: "건물층", value: property.totalFloors.replace("지상 ", "") },
                 { icon: <Calendar className="w-3.5 h-3.5" />,  label: "준공",   value: property.buildYear.replace("년", ""), sub: "년" },
