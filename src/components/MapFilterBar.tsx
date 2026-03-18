@@ -447,7 +447,7 @@ const MapFilterBar = ({
           {onLandlordClick && (
             <button
               onClick={onLandlordClick}
-              className="flex items-center gap-1.5 h-10 px-3 rounded-xl text-xs font-bold text-white whitespace-nowrap transition-colors flex-shrink-0"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs font-bold text-white whitespace-nowrap transition-colors flex-shrink-0"
               style={{ background: "hsl(var(--accent))" }}
             >
               <Phone className="w-3.5 h-3.5" />
