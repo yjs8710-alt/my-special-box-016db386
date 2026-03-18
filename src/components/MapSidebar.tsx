@@ -1236,10 +1236,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           return (
             <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap">
-              <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>보</span>
-              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-              <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>/</span>
               <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>월</span>
+              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+              <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>/</span>
               <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
               {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
                 <>
