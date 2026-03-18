@@ -2302,10 +2302,11 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-               <div className="hidden md:grid grid-cols-[70px_100px_100px_140px_120px_120px_80px_90px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+               <div className="hidden md:grid grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                    <span>구</span>
                    <span>동/읍/면</span>
                    <span>번지수</span>
+                   <span>호수</span>
                    <span>소유주</span>
                    <span>관리인</span>
                    <span>부동산</span>
@@ -2321,7 +2322,7 @@ const AdminDashboard = () => {
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[70px_100px_100px_140px_120px_120px_80px_90px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -2336,6 +2337,15 @@ const AdminDashboard = () => {
                             className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
                             style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
                           >{c.lot_number}</span>
+                        ) : <span className="text-muted-foreground/50">—</span>}
+                      </div>
+                      {/* 호수 */}
+                      <div className="hidden md:block text-xs">
+                        {c.unit_number ? (
+                          <span
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
+                          >{c.unit_number}호</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 소유주 (phone) */}
