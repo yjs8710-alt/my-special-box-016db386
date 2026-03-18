@@ -225,11 +225,11 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
 interface MemoNotepadProps {
   propId: number;
   memoKey: string; // "building" | "room"
-  emoji: string;
+  icon: React.ReactNode;
   label: string;
   initialText: string;
 }
-const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepadProps) => {
+const MemoNotepad = ({ propId, memoKey, icon, label, initialText }: MemoNotepadProps) => {
   const storageKey = `memo_${propId}_${memoKey}`;
   const [open, setOpen] = useState(false);
   const [text, setText] = useState(() => localStorage.getItem(storageKey) ?? initialText);
@@ -245,9 +245,10 @@ const MemoNotepad = ({ propId, memoKey, emoji, label, initialText }: MemoNotepad
         type="button"
         title={label}
         onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="w-4 h-4 flex items-center justify-center text-[11px] leading-none hover:scale-125 transition-transform select-none flex-shrink-0"
+        className="w-[18px] h-[18px] flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
+        style={{ background: "hsl(var(--primary)/0.08)", border: "1px solid hsl(var(--primary)/0.2)" }}
       >
-        {emoji}
+        {icon}
       </button>
       {open && (
         <>
