@@ -292,6 +292,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       build_year: "",
       description: form.description,
       room_memo: form.myMemo || null,
+      building_password: form.buildingPassword || null,
       room_password: form.roomPassword || null,
       options: [
         ...form.options,
