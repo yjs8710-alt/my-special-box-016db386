@@ -1987,7 +1987,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                               loading="eager"
                               decoding="async"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                              style={{ imageRendering: "auto", WebkitBackfaceVisibility: "hidden" }}
+                              style={{
+                                imageRendering: "auto",
+                                WebkitBackfaceVisibility: "hidden",
+                                transform: "translateZ(0) scale(1.001)",
+                                backfaceVisibility: "hidden",
+                                willChange: "transform",
+                              }}
                             />
                           ) : (
                             /* 이미지 없는 DB 매물 placeholder */
