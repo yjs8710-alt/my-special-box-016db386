@@ -689,7 +689,16 @@ function Step2({
       {/* 비밀번호 - 토지/건물매매 제외 */}
       {!isLand && !isBuildingSale && (
         <Section label="비밀번호">
-          <input type="text" placeholder="비밀번호 입력" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">건물 비번</label>
+              <input type="text" placeholder="건물 공동현관 비번" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">방(호실) 비번</label>
+              <input type="text" placeholder="방 도어락 비번" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
+            </div>
+          </div>
         </Section>
       )}
 
