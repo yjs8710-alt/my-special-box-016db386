@@ -2241,7 +2241,7 @@ const AdminDashboard = () => {
                  <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {contacts.length}개 · 번지있음 {contacts.filter(c => !!(c.lot_number && c.lot_number.trim())).length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -2253,21 +2253,6 @@ const AdminDashboard = () => {
                           ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                           : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                         }>{d}</button>
-                    ))}
-                  </div>
-                  {/* 번지수 필터 */}
-                  <div className="flex gap-1 border-l border-border pl-2">
-                    {(["전체", "번지있음", "번지없음"] as const).map((f) => (
-                      <button key={f} onClick={() => setContactLotFilter(f)}
-                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                        style={contactLotFilter === f
-                          ? f === "번지있음"
-                            ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "hsl(var(--chart-2))" }
-                            : f === "번지없음"
-                            ? { background: "hsl(var(--destructive))", color: "#fff", borderColor: "hsl(var(--destructive))" }
-                            : { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                        }>{f}</button>
                     ))}
                   </div>
                   <div className="relative">
