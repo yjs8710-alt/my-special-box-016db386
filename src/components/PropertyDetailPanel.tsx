@@ -678,12 +678,24 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
               <div className="h-2 bg-muted/50 my-2" />
               <div className="px-4 pb-3 flex flex-col gap-2">
                 <p className="text-xs font-bold text-foreground uppercase tracking-wide">비밀번호</p>
-                <div className="px-3 py-2.5 rounded-xl border border-border bg-muted/30 flex flex-col gap-1">
+                <div className="px-3 py-2.5 rounded-xl border border-border bg-muted/30 flex flex-col gap-1.5">
                   {property.buildingPassword && (
-                    <span className="text-sm font-bold text-foreground tracking-wide">건{property.buildingPassword}</span>
+                    <div className="group relative flex flex-col gap-0.5 cursor-default">
+                      <span className="text-[10px] text-muted-foreground font-medium">🏢 건물 공동현관</span>
+                      <span className="text-sm font-bold text-foreground tracking-widest">건{property.buildingPassword}</span>
+                      <span className="pointer-events-none absolute -top-7 left-0 whitespace-nowrap bg-popover text-popover-foreground text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        건물 공동현관 비밀번호
+                      </span>
+                    </div>
                   )}
                   {(property.roomPassword || property.password) && (
-                    <span className="text-sm font-bold text-foreground tracking-wide">방{property.roomPassword || property.password}</span>
+                    <div className="group relative flex flex-col gap-0.5 cursor-default">
+                      <span className="text-[10px] text-muted-foreground font-medium">🚪 방(호실) 도어락</span>
+                      <span className="text-sm font-bold text-foreground tracking-widest">방{property.roomPassword || property.password}</span>
+                      <span className="pointer-events-none absolute -top-7 left-0 whitespace-nowrap bg-popover text-popover-foreground text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                        방(호실) 도어락 비밀번호
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
