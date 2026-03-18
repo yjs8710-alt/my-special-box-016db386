@@ -1941,6 +1941,15 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 <ExternalLink className="w-2.5 h-2.5" />
                 다방
               </a>
+              {/* 선택인쇄 — 다방 우측 */}
+              <button
+                onClick={handleSelectPrint}
+                className="toolbar-btn flex items-center gap-0.5"
+                style={{ background: "hsl(142 70% 90%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}
+              >
+                <Printer className="w-2.5 h-2.5" />
+                선택인쇄
+              </button>
             </div>
           </div>
 
