@@ -1841,19 +1841,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   </p>
                 </div>
               </div>
-              {/* 인쇄 버튼 제거 */}
-              <span className="flex-1" />
-              {/* 선택인쇄 — 우측 파란색 */}
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn flex items-center gap-0.5 ml-auto"
-                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
-              >
-                <Printer className="w-3 h-3" />
-                선택인쇄
-              </button>
             </div>
-            {/* 외부 링크 바 */}
+            {/* 외부 링크 바 + 선택인쇄 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
@@ -1936,6 +1925,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 <ExternalLink className="w-2.5 h-2.5" />
                 다방
               </a>
+              {/* 선택인쇄 — 다방 우측 끝 파란색 */}
+              <span className="flex-1 min-w-[4px]" />
+              <button
+                onClick={handleSelectPrint}
+                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
+                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
+              >
+                <Printer className="w-3 h-3" />
+                선택인쇄
+              </button>
             </div>
           </div>
 
