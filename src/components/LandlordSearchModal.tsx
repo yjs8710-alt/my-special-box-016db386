@@ -671,16 +671,20 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
             </div>
           </div>
 
-          {/* ── 우측 매물 상세 패널 ── */}
-          {hasPanel && (
+          {/* ── 우측 매물 정보란 ── */}
+          {hasPanel && selectedItem && (
             <div
-              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
-              style={{ width: "360px", height: "90vh", flexShrink: 0, position: "relative" }}
+              className="relative hidden md:flex flex-col rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
+              style={{ width: "340px", height: "90vh", flexShrink: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <PropertyDetailPanel
-                property={panelProperty}
-                onClose={() => { setSelectedItem(null); setPanelProperty(null); }}
+              <InfoPanel
+                item={selectedItem}
+                isApproved={isApproved}
+                revealed={revealed}
+                onReveal={handleReveal}
+                onClose={() => setSelectedItem(null)}
+                onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
               />
             </div>
           )}
