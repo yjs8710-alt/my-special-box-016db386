@@ -2015,6 +2015,33 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
+            {/* 탭 — 매물목록 / 소유주검색 */}
+            <div className="flex border-b border-border/60">
+              <button
+                onClick={() => onCloseLandlordSearch?.()}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all"
+                style={
+                  !showLandlordSearch
+                    ? { color: "hsl(var(--primary))", borderBottom: "2px solid hsl(var(--primary))", background: "hsl(var(--primary)/0.06)" }
+                    : { color: "hsl(var(--muted-foreground))", borderBottom: "2px solid transparent" }
+                }
+              >
+                <MapPin className="w-3 h-3" />
+                매물 목록
+              </button>
+              <button
+                onClick={() => { /* showLandlordSearch는 부모에서 제어 */ }}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all"
+                style={
+                  showLandlordSearch
+                    ? { color: "hsl(var(--accent))", borderBottom: "2px solid hsl(var(--accent))", background: "hsl(var(--accent)/0.06)" }
+                    : { color: "hsl(var(--muted-foreground))", borderBottom: "2px solid transparent" }
+                }
+              >
+                <Phone className="w-3 h-3" />
+                소유주 번호 찾기
+              </button>
+            </div>
             {/* 핀 클릭 누적 모드 배너 */}
             {pinnedIds && pinnedIds.length > 0 && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
