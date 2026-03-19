@@ -51,7 +51,7 @@ const MapSearch = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
       <Header />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
+      {/* 소유주 검색은 사이드바 내 탭으로 표시 */}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
       <div
