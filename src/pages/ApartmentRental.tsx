@@ -147,8 +147,8 @@ const ApartmentRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+          pinnedAddresses={pinnedAddresses}
+          onClearPin={() => { setPinnedAddresses([]); setSelectedId(null); }}
         />
       </main>
     </div>
