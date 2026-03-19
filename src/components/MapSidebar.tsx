@@ -1,9 +1,10 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Search, BookUser, ShieldCheck, Eye, EyeOff, Images } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import { useAuth } from "@/hooks/useAuth";
 
 /* ── LightboxModal: 여러 장 사진 좌우 탐색 ── */
 function LightboxModal({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
