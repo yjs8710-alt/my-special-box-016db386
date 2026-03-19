@@ -77,6 +77,14 @@ const NonResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
+  const handlePinSelect = (id: number) => {
+    setSelectedId(id);
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (!prop) return;
+    const addr = prop.buildingName ?? prop.address;
+    setPinnedAddresses(prev => prev.includes(addr) ? prev : [...prev, addr]);
+  };
+
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
