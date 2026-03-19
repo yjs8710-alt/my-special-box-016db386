@@ -1619,6 +1619,7 @@ const DEFAULT_WIDTH = 540;
 const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, showLandlordSearch = false, onCloseLandlordSearch }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { isAuthorized, isLoading: authLoading } = useAuth();
+  const isApproved = !authLoading && isAuthorized;
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [landlordQuery, setLandlordQuery] = useState("");
   const [landlordSearched, setLandlordSearched] = useState(false);
@@ -1627,7 +1628,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [landlordError, setLandlordError] = useState("");
   const [landlordRevealed, setLandlordRevealed] = useState<Record<string, boolean>>({});
   const [landlordLightbox, setLandlordLightbox] = useState<{ images: string[]; idx: number } | null>(null);
-  const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
