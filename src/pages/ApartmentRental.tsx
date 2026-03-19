@@ -150,6 +150,8 @@ const ApartmentRental = () => {
           onTypeChange={(t) => toggleType(t)}
           pinnedAddress={pinnedAddress}
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+          pinnedIds={pinnedIds}
+          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>
