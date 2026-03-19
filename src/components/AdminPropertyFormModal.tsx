@@ -820,6 +820,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                           set("type", t);
                           // 수정 모드에서 이미 room_type이 있으면 유지, 없을 때만 자동 설정
                           if (!form.room_type) set("room_type", t);
+                          // 집합건물 타입 선택 시 buildingType 자동 설정
+                          if (COLLECTIVE_TYPES.some(ct => ct === t)) {
+                            set("buildingType", "집합건물");
+                          }
                         }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
