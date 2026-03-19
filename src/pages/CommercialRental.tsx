@@ -6,14 +6,15 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import { MAP_PROPERTIES } from "@/data/mapProperties";
+import PinClickPanel from "@/components/PinClickPanel";
+import { MAP_PROPERTIES, MapProperty } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
 
 const CommercialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [clickedProperties, setClickedProperties] = useState<MapProperty[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -49,10 +50,15 @@ const CommercialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
+  // 핀 클릭 핸들러: 클릭 순서대로 우측 패널에 누적
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    if (!prop) return;
+    setClickedProperties(prev => {
+      const existing = prev.filter(p => p.id !== id);
+      return [prop, ...existing];
+    });
   };
 
   return (
@@ -110,6 +116,15 @@ const CommercialRental = () => {
             showCategoryChips={true}
             showRoomTypes={false}
           />
+          {/* 핀 클릭 패널 (지도 위 우측 오버레이) */}
+          {clickedProperties.length > 0 && (
+            <PinClickPanel
+              properties={clickedProperties}
+              onClose={() => { setClickedProperties([]); setSelectedId(null); }}
+              onSelectProperty={(id) => setSelectedId(id)}
+              selectedId={selectedId}
+            />
+          )}
         </div>
         <MapSidebar
           properties={filtered}
@@ -118,8 +133,6 @@ const CommercialRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>
