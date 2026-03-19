@@ -179,6 +179,8 @@ const NonResidentialRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          pinnedAddresses={pinnedAddresses}
+          onClearPin={() => { setPinnedAddresses([]); setSelectedId(null); }}
         />
       </main>
     </div>
