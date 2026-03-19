@@ -1215,13 +1215,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     {label}
                   </label>
                 ))}
-                {/* 세입자 중도퇴거 */}
-                <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: form.earlyExit ? "hsl(0 85% 50%)" : undefined }}>
-                  <input type="checkbox" checked={form.earlyExit}
-                    onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
-                  <span className={form.earlyExit ? "font-bold" : ""}>세입자 중도퇴거</span>
-                  {form.earlyExit && <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>중도퇴거</span>}
-                </label>
               </div>
 
               {/* 퇴거일 */}
