@@ -1565,8 +1565,8 @@ interface MapSidebarProps {
   onQueryChange?: (v: string) => void;
   topOffset?: number;
   onDeleteProperties?: (ids: Set<number>) => void;
-  /** 핀 클릭 시 해당 주소로 필터링 */
-  pinnedAddress?: string | null;
+  /** 핀 클릭 시 해당 주소들로 필터링 (여러 핀 누적 선택 지원) */
+  pinnedAddresses?: string[];
   onClearPin?: () => void;
 }
 
@@ -1574,13 +1574,12 @@ const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddresses, onClearPin }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
-    // 저장값이 없거나 최소보다 작으면 새 기본값 사용
     return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
   });
   const [collapsed, setCollapsed] = useState(false);
@@ -1592,13 +1591,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  // 상단 바 외부링크 팝업 (등기소/정부24/토지이음 등)
   const [externalModal, setExternalModal] = useState<{ url: string; title: string } | null>(null);
   const [externalModalPos, setExternalModalPos] = useState({ x: 0, y: 97 });
   const getModalInitPos = useCallback(() => {
-    // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
     const x = width;
-    // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
     const y = 97;
     return { x, y };
   }, [width]);
@@ -1608,9 +1604,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     setExternalModal({ url, title });
   }, [width]);
 
-  // 핀 클릭 필터: pinnedAddress가 있으면 해당 주소(또는 동일 건물명) 매물만 표시
-  const displayProperties = pinnedAddress
-    ? properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress)
+  // 핀 클릭 필터: pinnedAddresses가 있으면 해당 주소들의 매물만 표시 (멀티핀 지원)
+  const hasPinnedFilter = pinnedAddresses && pinnedAddresses.length > 0;
+  const displayProperties = hasPinnedFilter
+    ? properties.filter(p => pinnedAddresses.some(addr => p.address === addr || p.buildingName === addr))
     : properties;
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
