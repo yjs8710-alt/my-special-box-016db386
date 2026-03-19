@@ -380,33 +380,27 @@ const MapFilterBar = ({
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const [landlordError, setLandlordError] = useState("");
-  const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
   const landlordInputRef = useRef<HTMLInputElement>(null);
-  const { isAuthorized, isLoading: authLoading } = useAuth();
-  const isApproved = !authLoading && isAuthorized;
-
-  const today = () => new Date().toISOString().slice(0, 10);
-  const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
-  const handleReveal = (id: string) => {
-    localStorage.setItem(`landlord_reveal_${id}`, today());
-    setRevealedIds(prev => ({ ...prev, [id]: true }));
-  };
 
   const handleLandlordSearch = async () => {
     if (!landlordQuery.trim()) return;
     setLandlordSearched(true);
     setLandlordLoading(true);
     setLandlordError("");
+    onLandlordResults?.([], true, true);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: landlordQuery.trim() },
       });
       if (fnErr) throw fnErr;
       if (data?.error) throw new Error(data.error);
-      setLandlordResults((data?.results ?? []) as LandlordResult[]);
+      const results = (data?.results ?? []) as LandlordResult[];
+      setLandlordResults(results);
+      onLandlordResults?.(results, false, true);
     } catch (e: unknown) {
       setLandlordError(e instanceof Error ? e.message : String(e));
       setLandlordResults([]);
+      onLandlordResults?.([], false, true);
     } finally {
       setLandlordLoading(false);
     }
@@ -416,6 +410,7 @@ const MapFilterBar = ({
     setSearchMode("landlord");
     setLandlordSearched(false);
     setLandlordResults([]);
+    onLandlordResults?.([], false, false);
     setTimeout(() => landlordInputRef.current?.focus(), 50);
   };
   const switchToNormal = () => {
@@ -423,10 +418,12 @@ const MapFilterBar = ({
     setLandlordQuery("");
     setLandlordSearched(false);
     setLandlordResults([]);
+    onLandlordResults?.([], false, false);
   };
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
+
 
   const isDefault = (f: FilterState) =>
     f.dealType.length === 0 &&
