@@ -4,17 +4,15 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import PinClickPanel from "@/components/PinClickPanel";
-import { MAP_PROPERTIES, MapProperty } from "@/data/mapProperties";
+import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
-import { Map, List } from "lucide-react";
+import { LayoutGrid, Map, List } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
 const MapSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [clickedProperties, setClickedProperties] = useState<MapProperty[]>([]);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -29,6 +27,7 @@ const MapSearch = () => {
 
   // 정적 목 데이터(숨긴 것 제외) + DB 데이터 병합
   const allProperties = [...MAP_PROPERTIES.filter(p => !hiddenMockIds.has(p.id)), ...dbProperties];
+
 
   const handleDeleteProperties = (ids: Set<number>) => {
     setDeletedIds(prev => new Set([...prev, ...ids]));
@@ -45,19 +44,10 @@ const MapSearch = () => {
     return true;
   });
 
-  // lat/lng가 유효한 매물만 지도에 표시
+  // lat/lng가 유효한 매물만 지도에 표시 (0,0은 제외)
   const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
 
-  // 핀 클릭 핸들러: 클릭 순서대로 패널에 누적
-  const handlePinSelect = (id: number) => {
-    setSelectedId(id);
-    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (!prop) return;
-    setClickedProperties(prev => {
-      const existing = prev.filter(p => p.id !== id);
-      return [prop, ...existing];
-    });
-  };
+  const selected = allProperties.find((p) => p.id === selectedId) ?? null;
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
@@ -137,7 +127,7 @@ const MapSearch = () => {
           <MapView
             properties={mappableProperties}
             selectedId={selectedId}
-            onSelect={handlePinSelect}
+            onSelect={setSelectedId}
           />
           {/* 필터 바 오버레이 */}
           <MapFilterBar
@@ -152,15 +142,6 @@ const MapSearch = () => {
             onLandlordClick={() => setShowLandlord(true)}
             topOffset={96}
           />
-          {/* 핀 클릭 패널 (지도 위 우측 오버레이) */}
-          {clickedProperties.length > 0 && (
-            <PinClickPanel
-              properties={clickedProperties}
-              onClose={() => { setClickedProperties([]); setSelectedId(null); }}
-              onSelectProperty={(id) => setSelectedId(id)}
-              selectedId={selectedId}
-            />
-          )}
         </div>
 
         {/* 우측 사이드바 */}
