@@ -2093,6 +2093,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             </div>
             )}
+            {!showLandlordSearch && (
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
