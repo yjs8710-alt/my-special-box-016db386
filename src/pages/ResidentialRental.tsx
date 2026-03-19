@@ -26,26 +26,8 @@ const ResidentialRental = () => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [landlordProperty, setLandlordProperty] = useState<MapProperty | null>(null);
 
-
-const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "다세대"];
-
-const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원", "연립", "다세대", "주상복합"];
-
-const ResidentialRental = () => {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
-  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
-  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
-  const [query, setQuery] = useState("");
-  const [propertyId, setPropertyId] = useState("");
-  const [showLandlord, setShowLandlord] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-
-  // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
-  // static + DB 합치기 (매매 매물 제외: type에 '매매' 포함되거나 note에 '매매가:' 포함된 것)
   const allProperties = useMemo(
     () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p =>
       !p.type.includes("매매") &&
@@ -55,10 +37,7 @@ const ResidentialRental = () => {
   );
 
   const toggleType = (t: string) => {
-    if (t === "전체") {
-      setActiveTypes(["전체"]);
-      return;
-    }
+    if (t === "전체") { setActiveTypes(["전체"]); return; }
     setActiveTypes(prev => {
       const without전체 = prev.filter(x => x !== "전체");
       if (without전체.includes(t)) {
@@ -70,14 +49,12 @@ const ResidentialRental = () => {
   };
 
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
-
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: 클릭 순서대로 pinnedIds 배열에 누적
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
+    setLandlordProperty(null);
     setPinnedIds(prev => {
-      // 이미 있으면 제거 후 맨 앞에 추가 (최근 클릭 우선)
       const without = prev.filter(x => x !== id);
       return [id, ...without];
     });
@@ -90,7 +67,7 @@ const ResidentialRental = () => {
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 주거 유형 탭 - 다중 선택 */}
+      {/* 주거 유형 탭 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
@@ -99,42 +76,26 @@ const ResidentialRental = () => {
         {RESIDENTIAL_SUBTYPES.map(t => {
           const isActive = activeTypes.includes(t);
           return (
-            <button
-              key={t}
-              onClick={() => toggleType(t)}
+            <button key={t} onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              style={isActive
+                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
               }
-            >
-              {t}
-            </button>
+            >{t}</button>
           );
         })}
-        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
         {!activeTypes.includes("전체") && activeTypes.length > 1 && (
-          <button
-            onClick={() => setActiveTypes(["전체"])}
+          <button onClick={() => setActiveTypes(["전체"])}
             className="ml-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
             style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
-          >
-            선택 삭제
-          </button>
+          >선택 삭제</button>
         )}
       </div>
 
-      <main
-        className="flex-1 overflow-hidden flex relative"
-        style={{ minHeight: 0 }}
-      >
+      <main className="flex-1 overflow-hidden flex relative" style={{ minHeight: 0 }}>
         <div className="flex-1 relative min-w-0">
-          <MapView
-            properties={filtered}
-            selectedId={selectedId}
-            onSelect={handlePinSelect}
-          />
+          <MapView properties={filtered} selectedId={selectedId} onSelect={handlePinSelect} />
           <MapFilterBar
             activeType={activeType}
             activeTypes={activeTypes}
@@ -146,6 +107,7 @@ const ResidentialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            onLandlordSelect={(p) => { setLandlordProperty(p); if (p) setSelectedId(null); }}
             hideSearchBar={showRegister}
             showResidentialTypes={true}
             showBuildingOptions={true}
@@ -164,6 +126,15 @@ const ResidentialRental = () => {
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
         />
+        {/* 소유주 검색 상세 패널 */}
+        {landlordProperty && (
+          <div className="relative hidden md:block" style={{ width: 360, flexShrink: 0 }}>
+            <PropertyDetailPanel
+              property={landlordProperty}
+              onClose={() => setLandlordProperty(null)}
+            />
+          </div>
+        )}
       </main>
     </div>
   );
