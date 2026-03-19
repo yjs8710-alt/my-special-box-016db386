@@ -763,6 +763,8 @@ const MapFilterBar = ({
                     show={isRevealed(item.id)}
                     isApproved={isApproved}
                     onReveal={() => handleReveal(item.id)}
+                    onSelect={() => handleLandlordItemSelect(item)}
+                    isSelected={selectedLandlordId === item.id}
                   />
                 ))}
               </div>
