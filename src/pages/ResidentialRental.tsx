@@ -150,6 +150,8 @@ const ResidentialRental = () => {
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          landlordSearchOpen={showLandlord}
+          onLandlordSearchClose={() => setShowLandlord(false)}
         />
       </main>
     </div>
