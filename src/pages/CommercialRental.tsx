@@ -6,8 +6,7 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MapProperty, MAP_PROPERTIES } from "@/data/mapProperties";
+import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
@@ -22,17 +21,21 @@ const CommercialRental = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [landlordProperty, setLandlordProperty] = useState<MapProperty | null>(null);
 
+  // DB 매물 (상가임대)
   const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
 
+  // static + DB 합치기
   const allProperties = useMemo(
     () => [...MAP_PROPERTIES, ...dbProperties],
     [dbProperties]
   );
 
   const toggleType = (t: string) => {
-    if (t === "전체") { setActiveTypes(["전체"]); return; }
+    if (t === "전체") {
+      setActiveTypes(["전체"]);
+      return;
+    }
     setActiveTypes(prev => {
       const without전체 = prev.filter(x => x !== "전체");
       if (without전체.includes(t)) {
@@ -44,11 +47,11 @@ const CommercialRental = () => {
   };
 
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
+
   const activeType = activeTypes[0] ?? "전체";
 
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
-    setLandlordProperty(null);
     setPinnedIds(prev => {
       const without = prev.filter(x => x !== id);
       return [id, ...without];
@@ -62,7 +65,7 @@ const CommercialRental = () => {
       <Header onRegisterChange={setShowRegister} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 상가 유형 탭 */}
+      {/* 상가 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
@@ -71,20 +74,32 @@ const CommercialRental = () => {
         {COMMERCIAL_SUBTYPES.map(t => {
           const isActive = activeTypes.includes(t);
           return (
-            <button key={t} onClick={() => toggleType(t)}
+            <button
+              key={t}
+              onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive
-                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
               }
-            >{t}</button>
+            >
+              {t}
+            </button>
           );
         })}
       </div>
 
-      <main className="flex-1 overflow-hidden flex relative" style={{ minHeight: 0 }}>
+      <main
+        className="flex-1 overflow-hidden flex relative"
+        style={{ minHeight: 0 }}
+      >
         <div className="flex-1 relative min-w-0">
-          <MapView properties={filtered} selectedId={selectedId} onSelect={handlePinSelect} />
+          <MapView
+            properties={filtered}
+            selectedId={selectedId}
+            onSelect={handlePinSelect}
+          />
           <MapFilterBar
             activeType={activeType}
             activeTypes={activeTypes}
@@ -96,7 +111,6 @@ const CommercialRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
-            onLandlordSelect={(p) => { setLandlordProperty(p); if (p) setSelectedId(null); }}
             hideSearchBar={showRegister}
             showCategoryChips={true}
             showRoomTypes={false}
@@ -114,14 +128,6 @@ const CommercialRental = () => {
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
         />
-        {landlordProperty && (
-          <div className="relative hidden md:block" style={{ width: 360, flexShrink: 0 }}>
-            <PropertyDetailPanel
-              property={landlordProperty}
-              onClose={() => setLandlordProperty(null)}
-            />
-          </div>
-        )}
       </main>
     </div>
   );
