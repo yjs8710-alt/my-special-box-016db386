@@ -1485,18 +1485,63 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
       
       </div>
 
-      {/* 3줄: 특이사항 (description만 표시 — note에는 연락처 저장됨) */}
-      {prop.description && (() => {
-        const text = prop.description;
-        if (!text.trim()) return null;
+      {/* 3줄: 방향·공실·LH·청소비·중개보수 + 특이사항 */}
+      {(() => {
+        const note = prop.note ?? "";
+        const dirMatch = note.match(/방향[:\s]+([^\n|]+)/);
+        const lhMatch = note.match(/LH[:\s]+([^\n|]+)/);
+        const cleanMatch = note.match(/청소비[:\s]+([^\n|]+)/);
+        const brokerMatch = note.match(/중개보수[:\s]+([^\n|]+)/);
+        const direction = dirMatch?.[1]?.trim();
+        const lhVal = lhMatch?.[1]?.trim();
+        const cleanFee = cleanMatch?.[1]?.trim();
+        const brokerFee = brokerMatch?.[1]?.trim();
+        // 공실 여부: available_from 필드
+        const vacancy = prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중")
+          ? prop.availableFrom : null;
+
+        const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
+        if (vacancy) chips.push({
+          label: vacancy === "공실" ? "공실" : "거주중",
+          value: "",
+          bg: vacancy === "공실" ? "hsl(142 70% 93%)" : "hsl(38 95% 92%)",
+          color: vacancy === "공실" ? "hsl(142 60% 30%)" : "hsl(25 90% 40%)",
+          border: vacancy === "공실" ? "hsl(142 60% 70%)" : "hsl(38 80% 65%)",
+        });
+        if (direction) chips.push({ label: direction + "향", value: "", bg: "#fff3e0", color: "#e65100", border: "#ffcc80" });
+        if (lhVal && lhVal !== "관계없음") chips.push({
+          label: lhVal,
+          value: "",
+          bg: lhVal === "LH가능" ? "hsl(217 91% 93%)" : "hsl(0 85% 93%)",
+          color: lhVal === "LH가능" ? "hsl(217 91% 40%)" : "hsl(0 85% 45%)",
+          border: lhVal === "LH가능" ? "hsl(217 91% 70%)" : "hsl(0 85% 70%)",
+        });
+        if (cleanFee) chips.push({ label: `청소비 ${cleanFee}만`, value: "", bg: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" });
+        if (brokerFee) chips.push({ label: `수수료 ${brokerFee}`, value: "", bg: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" });
+
+        const hasChips = chips.length > 0;
+        const hasDesc = !!(prop.description?.trim());
+
+        if (!hasChips && !hasDesc) return null;
         return (
-          <div className="flex items-center gap-1 min-h-[17px] overflow-hidden">
-            <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
-              style={{ color: "hsl(var(--muted-foreground))" }}>특이</span>
-            <span className="text-[11px] font-extrabold leading-tight truncate"
-              style={{ color: "hsl(var(--foreground))" }}>
-              {text.length > 60 ? text.slice(0, 60) + "…" : text}
-            </span>
+          <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
+            {chips.map((chip, i) => (
+              <span key={i} className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}>
+                {chip.label}
+              </span>
+            ))}
+            {hasDesc && (
+              <>
+                {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
+                <span className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
+                  style={{ color: "hsl(var(--muted-foreground))" }}>특이</span>
+                <span className="text-[11px] font-extrabold leading-tight truncate"
+                  style={{ color: "hsl(var(--foreground))" }}>
+                  {prop.description!.length > 40 ? prop.description!.slice(0, 40) + "…" : prop.description}
+                </span>
+              </>
+            )}
           </div>
         );
       })()}
