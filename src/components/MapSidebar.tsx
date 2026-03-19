@@ -774,9 +774,21 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {savedPhotos.map((src, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-border">
-                    {idx === 0 && (
-                      <span className="absolute top-1 left-1 z-10 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary))" }}>대표</span>
+                  <div
+                    key={idx}
+                    className="relative aspect-square rounded-xl overflow-hidden group border-2 transition-all"
+                    style={{ borderColor: idx === 0 ? "hsl(var(--primary))" : "hsl(var(--border))" }}
+                  >
+                    {idx === 0 ? (
+                      <span className="absolute top-1 left-1 z-10 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary))" }}>⭐ 대표</span>
+                    ) : (
+                      <button
+                        onClick={() => setMainPhoto(idx)}
+                        className="absolute top-1 left-1 z-10 text-[8px] font-bold text-white px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.4)" }}
+                      >
+                        대표설정
+                      </button>
                     )}
                     <img src={src} alt="" className="w-full h-full object-cover" />
                     <button
