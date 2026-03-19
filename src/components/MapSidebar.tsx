@@ -2372,6 +2372,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 ))}
               </div>
             ) : (
+              displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
