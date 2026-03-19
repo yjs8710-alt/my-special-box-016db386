@@ -419,15 +419,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const contacts: Partial<AdminFormExtended> = {};
 
     // tradeType 복원: type 필드가 매매 계열이면 "매매", 아니면 "임대"
-    const isSaleType = SALE_TYPES.includes(init.type ?? "") || init.monthly === "" || init.monthly === "0";
-    // note에 "매매가:" 또는 monthly가 없으면 매매로 판단
     const noteStr2 = init.note ?? "";
-    const hasSaleKeyword = noteStr2.includes("매매가") || (!init.monthly && !noteStr2.includes("월세") && !noteStr2.includes("전세") && !noteStr2.includes("반전세"));
     if (SALE_TYPES.includes(init.type ?? "")) {
       contacts.tradeType = "매매";
-    } else if (init.monthly !== undefined && init.monthly !== "" && init.monthly !== "0") {
-      contacts.tradeType = "임대";
     } else if (noteStr2.includes("월세") || noteStr2.includes("전세") || noteStr2.includes("반전세")) {
+      contacts.tradeType = "임대";
+    } else if (init.monthly && init.monthly !== "0") {
       contacts.tradeType = "임대";
     }
 
