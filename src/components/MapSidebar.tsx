@@ -2178,15 +2178,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </a>
               {/* 선택인쇄 — 다방 우측 끝 파란색 */}
               <span className="flex-1 min-w-[4px]" />
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
-                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
-              >
+              <button>
                 <Printer className="w-3 h-3" />
                 선택인쇄
               </button>
             </div>
+            )} {/* end !showLandlordSearch external links */}
           </div>
 
           {/* List or Landlord Search Panel */}
