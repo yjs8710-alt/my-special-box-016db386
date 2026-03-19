@@ -33,9 +33,12 @@ const ResidentialRental = () => {
   // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
-  // static + DB 합치기 (타입에 '매매' 포함된 매물 제외)
+  // static + DB 합치기 (매매 매물 제외: type에 '매매' 포함되거나 note에 '매매가:' 포함된 것)
   const allProperties = useMemo(
-    () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p => !p.type.includes("매매"))],
+    () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p =>
+      !p.type.includes("매매") &&
+      !(p.note ?? "").includes("매매가:")
+    )],
     [dbProperties]
   );
 
