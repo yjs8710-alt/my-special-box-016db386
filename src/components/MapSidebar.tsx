@@ -1778,8 +1778,18 @@ const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, landlordSearchOpen = false, onLandlordSearchClose }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
+  const { isAuthorized, isLoading: authLoading } = useAuth();
+  const isApproved = !authLoading && isAuthorized;
+
+  // ── 소유주 검색 상태 ──
+  const [landlordMode, setLandlordMode] = useState(false);
+  const [landlordQuery, setLandlordQuery] = useState("");
+  const [landlordSearched, setLandlordSearched] = useState(false);
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordResults, setLandlordResults] = useState<LandlordSearchResult[]>([]);
+  const [landlordError, setLandlordError] = useState("");
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
