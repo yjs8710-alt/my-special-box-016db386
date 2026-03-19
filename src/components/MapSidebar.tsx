@@ -1778,6 +1778,32 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
 
+  /* ── 소유주 번호 검색 핸들러 ── */
+  const handleLandlordSearch = async () => {
+    if (!landlordQuery.trim()) return;
+    setLandlordSearched(true);
+    setLandlordLoading(true);
+    setLandlordError("");
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
+        body: { q: landlordQuery.trim() },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setLandlordResults((data?.results ?? []) as LandlordResult[]);
+    } catch (e: unknown) {
+      setLandlordError(e instanceof Error ? e.message : String(e));
+      setLandlordResults([]);
+    } finally {
+      setLandlordLoading(false);
+    }
+  };
+  const handleLandlordReveal = (id: string) => {
+    landlordMarkRevealed(id);
+    setLandlordRevealed((prev) => ({ ...prev, [id]: true }));
+  };
+  const isLandlordRevealed = (id: string) => isApproved || landlordRevealed[id] || landlordRevealedToday(id);
+
   /* ── Resize drag ── */
   const dragging = useRef(false);
   const startX = useRef(0);
