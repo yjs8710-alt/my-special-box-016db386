@@ -1839,6 +1839,35 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     return properties;
   })();
 
+  // 소유주 검색 핸들러
+  const handleLandlordSearch = async () => {
+    if (!landlordQuery.trim()) return;
+    setLandlordSearched(true);
+    setLandlordLoading(true);
+    setLandlordError("");
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
+        body: { q: landlordQuery.trim() },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setLandlordResults((data?.results ?? []) as LandlordSearchResult[]);
+    } catch (e: unknown) {
+      setLandlordError(e instanceof Error ? e.message : String(e));
+      setLandlordResults([]);
+    } finally {
+      setLandlordLoading(false);
+    }
+  };
+
+  // prop으로 소유주 검색 모드 열기
+  useEffect(() => {
+    if (landlordSearchOpen) {
+      setLandlordMode(true);
+      if (collapsed) setCollapsed(false);
+    }
+  }, [landlordSearchOpen]);
+
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
     const list = properties.filter(p => checkedIds.has(p.id));
