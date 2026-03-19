@@ -1941,8 +1941,26 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 핀 선택 모드 배너 */}
-            {pinnedAddress && (
+            {/* 핀 클릭 누적 모드 배너 */}
+            {pinnedIds && pinnedIds.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                style={{ background: "hsl(var(--primary)/0.08)" }}>
+                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                <span className="text-[10px] font-bold text-primary flex-1 min-w-0">
+                  핀 선택 {pinnedIds.length}개 (클릭 순서)
+                </span>
+                <button
+                  onClick={() => onClearPinnedIds?.()}
+                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                  style={{ color: "hsl(var(--primary))" }}
+                >
+                  <X className="w-2.5 h-2.5" />
+                  전체보기
+                </button>
+              </div>
+            )}
+            {/* 주소 필터 모드 배너 (기존) */}
+            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
@@ -1962,10 +1980,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
+                    {pinnedIds && pinnedIds.length > 0 && <span className="text-[10px] font-semibold text-primary">(핀 선택 순서)</span>}
+                    {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : ""}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : (pinnedIds && pinnedIds.length > 0) ? "핀 클릭 순서 필터 중" : pinnedAddress ? "핀 클릭 필터 중" : ""}
                   </p>
                 </div>
               </div>
