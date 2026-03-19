@@ -2062,7 +2062,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             )}
             {/* 주소 필터 모드 배너 (기존) */}
-            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
+            {!showLandlordSearch && pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
