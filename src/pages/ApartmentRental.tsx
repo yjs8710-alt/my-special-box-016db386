@@ -63,13 +63,11 @@ const ApartmentRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        {/* 종류 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">종 류</span>
         {APARTMENT_SUBTYPES.map(t => {
           const isActive = activeTypes.includes(t);
@@ -89,7 +87,6 @@ const ApartmentRental = () => {
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
-        {/* 매전월 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">매전월</span>
         {APARTMENT_DEAL_TYPES.map(t => {
           const isActive = activeDealTypes.includes(t);
@@ -141,18 +138,23 @@ const ApartmentRental = () => {
             onClearApartmentDealTypes={() => setActiveDealTypes([])}
           />
         </div>
-        <MapSidebar
-          properties={filtered}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onDeselect={() => setSelectedId(null)}
-          activeType={activeType}
-          onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
-          pinnedIds={pinnedIds}
-          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
-        />
+        {showLandlord && (
+          <LandlordSearchModal onClose={() => setShowLandlord(false)} />
+        )}
+        {!showLandlord && (
+          <MapSidebar
+            properties={filtered}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onDeselect={() => setSelectedId(null)}
+            activeType={activeType}
+            onTypeChange={(t) => toggleType(t)}
+            pinnedAddress={pinnedAddress}
+            onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+            pinnedIds={pinnedIds}
+            onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          />
+        )}
       </main>
     </div>
   );
