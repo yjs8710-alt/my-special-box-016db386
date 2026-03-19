@@ -441,10 +441,10 @@ const MapFilterBar = ({
               )}
             </button>
             <button
-              className="flex items-center justify-center h-10 px-4 text-xs font-bold text-white rounded-r-xl"
-              style={{ background: "hsl(var(--primary))" }}
+              className="flex items-center justify-center h-10 px-4 text-xs font-bold rounded-r-xl"
+              style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
             >
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>
           </div>
 
