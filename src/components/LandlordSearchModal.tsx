@@ -133,7 +133,7 @@ interface ResultCardProps {
   onReveal: () => void;
   onLightbox: (images: string[], idx: number) => void;
 }
-const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
+const ResultCard = ({ item, show, isApproved, onReveal, onLightbox }: ResultCardProps) => {
   // 승인된 회원은 제한 없이 바로 노출
   const phoneVisible = isApproved || show;
   const [expanded, setExpanded] = useState(false);
