@@ -640,12 +640,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       : (hasJeonse && !hasWolse && !hasHalf) ? "0" : form.monthly;
 
     const rentNotes: string[] = [];
-    if (hasWolse && (form.deposit || form.monthly))
-      rentNotes.push(`월세: 보증금 ${form.deposit || "0"}만원 / 월세 ${form.monthly || "0"}만원`);
-    if (hasHalf && (form.halfDeposit || form.halfMonthly))
-      rentNotes.push(`반전세: 보증금 ${form.halfDeposit || "0"}만원 / 월세 ${form.halfMonthly || "0"}만원`);
-    if (hasJeonse && form.jeonseDeposit)
-      rentNotes.push(`전세: 보증금 ${form.jeonseDeposit}만원`);
+    if (isRent) {
+      if (hasWolse && (form.deposit || form.monthly))
+        rentNotes.push(`월세: 보증금 ${form.deposit || "0"}만원 / 월세 ${form.monthly || "0"}만원`);
+      if (hasHalf && (form.halfDeposit || form.halfMonthly))
+        rentNotes.push(`반전세: 보증금 ${form.halfDeposit || "0"}만원 / 월세 ${form.halfMonthly || "0"}만원`);
+      if (hasJeonse && form.jeonseDeposit)
+        rentNotes.push(`전세: 보증금 ${form.jeonseDeposit}만원`);
+    } else if (isSale && form.deposit) {
+      rentNotes.push(`매매가: ${form.deposit}만원`);
+    }
 
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
