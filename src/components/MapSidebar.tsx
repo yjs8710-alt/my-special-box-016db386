@@ -2175,9 +2175,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                               </svg>
                             )}
                           </button>
-                          <span className={`absolute bottom-1 right-1 text-[8px] font-bold px-1 py-0.5 rounded shadow ${TYPE_BG[prop.type] ?? "bg-primary/10 text-primary"}`}>
-                            {prop.type}
-                          </span>
                           {/* 순번 + 등록일 — 하단 좌측 오버레이 */}
                           <div className="absolute bottom-0 left-0 right-0 flex items-center gap-0.5 px-1 py-0.5" style={{ background: "rgba(0,0,0,0.52)" }}>
                             <span className="text-[9px] font-extrabold text-white leading-none flex-shrink-0">{idx}.</span>
@@ -2220,8 +2217,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                     </button>
 
-                    {/* 선택 시 액션 버튼들 */}
-                    {selectedId === prop.id && (
+                    {/* 선택 시 액션 버튼들 — pinnedIds 누적 모드에서는 숨김 */}
+                    {selectedId === prop.id && (!pinnedIds || pinnedIds.length === 0) && (
                       <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-6" : "grid-cols-5"}`}>
                         {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
                         {isAdmin && (
