@@ -486,6 +486,7 @@ const MapFilterBar = ({
   filters,
   onFiltersChange,
   onLandlordClick,
+  onLandlordSelect,
   hideSearchBar = false,
   topOffset,
   showCategoryChips = false,
@@ -514,9 +515,28 @@ const MapFilterBar = ({
   const [landlordSearched, setLandlordSearched] = useState(false);
   const [landlordError, setLandlordError] = useState("");
   const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
+  const [selectedLandlordId, setSelectedLandlordId] = useState<string | null>(null);
   const landlordInputRef = useRef<HTMLInputElement>(null);
   const { isAuthorized, isLoading: authLoading } = useAuth();
   const isApproved = !authLoading && isAuthorized;
+
+  const today = () => new Date().toISOString().slice(0, 10);
+  const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
+  const handleReveal = (id: string) => {
+    localStorage.setItem(`landlord_reveal_${id}`, today());
+    setRevealedIds(prev => ({ ...prev, [id]: true }));
+  };
+
+  const handleLandlordItemSelect = (item: LandlordResult) => {
+    if (selectedLandlordId === item.id) {
+      setSelectedLandlordId(null);
+      onLandlordSelect?.(null);
+    } else {
+      setSelectedLandlordId(item.id);
+      onLandlordSelect?.(landlordToMapProperty(item));
+    }
+  };
+
 
   const today = () => new Date().toISOString().slice(0, 10);
   const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
