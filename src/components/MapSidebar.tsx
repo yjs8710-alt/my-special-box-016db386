@@ -2449,6 +2449,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 })}
               </div>
             )}
+            </div>
           </div>
         </aside>
       </div>
