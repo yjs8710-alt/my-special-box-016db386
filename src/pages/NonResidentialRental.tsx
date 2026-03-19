@@ -29,6 +29,7 @@ const NON_RESIDENTIAL_DB_TYPES = [
 
 const NonResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddresses, setPinnedAddresses] = useState<string[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
