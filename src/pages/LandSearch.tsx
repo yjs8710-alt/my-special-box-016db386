@@ -113,7 +113,7 @@ const LandSearch = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handlePinSelect}
           />
           <MapFilterBar
             activeType={activeType}
