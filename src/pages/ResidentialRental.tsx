@@ -23,6 +23,7 @@ const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -61,9 +62,14 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: selectedId + pinnedAddress 동시 설정
+  // 핀 클릭 핸들러: 클릭 순서대로 pinnedIds 배열에 누적
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
+    setPinnedIds(prev => {
+      // 이미 있으면 제거 후 맨 앞에 추가 (최근 클릭 우선)
+      const without = prev.filter(x => x !== id);
+      return [id, ...without];
+    });
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (prop) setPinnedAddress(prop.address);
   };
@@ -144,6 +150,8 @@ const ResidentialRental = () => {
           onTypeChange={(t) => toggleType(t)}
           pinnedAddress={pinnedAddress}
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+          pinnedIds={pinnedIds}
+          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>

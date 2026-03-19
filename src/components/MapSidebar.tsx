@@ -1568,13 +1568,16 @@ interface MapSidebarProps {
   /** 핀 클릭 시 해당 주소로 필터링 */
   pinnedAddress?: string | null;
   onClearPin?: () => void;
+  /** 핀 클릭 순서대로 쌓인 id 배열 */
+  pinnedIds?: number[];
+  onClearPinnedIds?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
@@ -1608,10 +1611,22 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     setExternalModal({ url, title });
   }, [width]);
 
-  // 핀 클릭 필터: pinnedAddress가 있으면 해당 주소(또는 동일 건물명) 매물만 표시
-  const displayProperties = pinnedAddress
-    ? properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress)
-    : properties;
+  // pinnedIds 모드: 클릭 순서대로 표시
+  // pinnedAddress 모드: 동일 주소 필터
+  // 둘 다 없으면 전체 표시
+  const displayProperties = (() => {
+    if (pinnedIds && pinnedIds.length > 0) {
+      // 클릭 순서대로 정렬
+      const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
+      return properties
+        .filter(p => idxMap.has(p.id))
+        .sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
+    }
+    if (pinnedAddress) {
+      return properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress);
+    }
+    return properties;
+  })();
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
@@ -1926,8 +1941,26 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 핀 선택 모드 배너 */}
-            {pinnedAddress && (
+            {/* 핀 클릭 누적 모드 배너 */}
+            {pinnedIds && pinnedIds.length > 0 && (
+              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                style={{ background: "hsl(var(--primary)/0.08)" }}>
+                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                <span className="text-[10px] font-bold text-primary flex-1 min-w-0">
+                  핀 선택 {pinnedIds.length}개 (클릭 순서)
+                </span>
+                <button
+                  onClick={() => onClearPinnedIds?.()}
+                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                  style={{ color: "hsl(var(--primary))" }}
+                >
+                  <X className="w-2.5 h-2.5" />
+                  전체보기
+                </button>
+              </div>
+            )}
+            {/* 주소 필터 모드 배너 (기존) */}
+            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
@@ -1947,10 +1980,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {pinnedAddress && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
+                    {pinnedIds && pinnedIds.length > 0 && <span className="text-[10px] font-semibold text-primary">(핀 선택 순서)</span>}
+                    {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress ? "핀 클릭 필터 중" : ""}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : (pinnedIds && pinnedIds.length > 0) ? "핀 클릭 순서 필터 중" : pinnedAddress ? "핀 클릭 필터 중" : ""}
                   </p>
                 </div>
               </div>
@@ -2060,16 +2094,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                 {[...displayProperties]
-                  .sort((a, b) => {
-                  const isSaleA = a.type?.includes("매매") ? 1 : 0;
-                  const isSaleB = b.type?.includes("매매") ? 1 : 0;
-                  if (isSaleA !== isSaleB) return isSaleA - isSaleB;
-                  // 등록일 내림차순 (최신 등록 우선)
-                  const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
-                  const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
-                  return regB - regA;
-                }).map((prop, idx) => {
+                 {(pinnedIds && pinnedIds.length > 0
+                  // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
+                  ? [...displayProperties]
+                  : [...displayProperties].sort((a, b) => {
+                      const isSaleA = a.type?.includes("매매") ? 1 : 0;
+                      const isSaleB = b.type?.includes("매매") ? 1 : 0;
+                      if (isSaleA !== isSaleB) return isSaleA - isSaleB;
+                      // 등록일 내림차순 (최신 등록 우선)
+                      const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
+                      const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
+                      return regB - regA;
+                    })
+                ).map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
