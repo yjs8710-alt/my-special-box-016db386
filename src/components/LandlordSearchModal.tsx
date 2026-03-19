@@ -147,10 +147,9 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox }: ResultCard
     <div
       className="rounded-xl border overflow-hidden transition-all"
       style={{
-        borderColor: isSelected ? "hsl(var(--primary))" : "hsl(var(--border))",
-        background: isSelected ? "hsl(var(--primary) / 0.04)" : "hsl(var(--background))",
+        borderColor: "hsl(var(--border))",
+        background: "hsl(var(--background))",
         opacity: isHidden || isInvisible ? 0.85 : 1,
-        boxShadow: isSelected ? "0 0 0 2px hsl(var(--primary) / 0.2)" : undefined,
       }}
     >
       {/* Photo strip (property only) */}
