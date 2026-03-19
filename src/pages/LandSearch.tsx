@@ -4,11 +4,9 @@ import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
-import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
-import LandlordSearchModal from "@/components/LandlordSearchModal";
+import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
 
-// 토지 전용 mock 데이터
 const LAND_PROPERTIES: MapProperty[] = [];
 
 const LAND_SUBTYPES = ["전체", "대지", "임야", "농지"];
@@ -18,14 +16,14 @@ const LandSearch = () => {
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
-  const [showLandlord, setShowLandlord] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordSearched, setLandlordSearched] = useState(false);
 
-  // DB 매물 (토지)
   const { properties: dbProperties } = useDBProperties(["토지"]);
 
-  // static + DB 합치기
   const allProperties = useMemo(
     () => [...LAND_PROPERTIES, ...dbProperties],
     [dbProperties]
@@ -46,10 +44,8 @@ const LandSearch = () => {
     });
   };
 
-  // 토지 페이지: roomType 기준으로 필터 (지목 일치)
   const landTypeFilter = useMemo(() => {
     if (activeTypes.includes("전체")) return ["전체"];
-    // roomType과 activeTypes 비교
     return activeTypes;
   }, [activeTypes]);
 
@@ -60,9 +56,7 @@ const LandSearch = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 토지 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
@@ -115,7 +109,11 @@ const LandSearch = () => {
             onPropertyIdChange={setPropertyId}
             filters={filters}
             onFiltersChange={setFilters}
-            onLandlordClick={() => setShowLandlord(true)}
+            onLandlordResults={(results, loading, searched) => {
+              setLandlordResults(results);
+              setLandlordLoading(loading);
+              setLandlordSearched(searched);
+            }}
             hideSearchBar={showRegister}
             showRoomTypes={false}
             showFloor={false}
@@ -130,6 +128,9 @@ const LandSearch = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          landlordResults={landlordResults}
+          landlordLoading={landlordLoading}
+          landlordSearched={landlordSearched}
         />
       </main>
     </div>

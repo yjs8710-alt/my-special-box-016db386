@@ -4,17 +4,10 @@ import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
-import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
-import LandlordSearchModal from "@/components/LandlordSearchModal";
+import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
-
-
-
-
-
-
 
 const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "다세대"];
 
@@ -27,9 +20,11 @@ const ResidentialRental = () => {
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
-  const [showLandlord, setShowLandlord] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordSearched, setLandlordSearched] = useState(false);
 
   // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
@@ -66,7 +61,6 @@ const ResidentialRental = () => {
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     setPinnedIds(prev => {
-      // 이미 있으면 제거 후 맨 앞에 추가 (최근 클릭 우선)
       const without = prev.filter(x => x !== id);
       return [id, ...without];
     });
@@ -77,7 +71,6 @@ const ResidentialRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 주거 유형 탭 - 다중 선택 */}
       <div
@@ -102,7 +95,6 @@ const ResidentialRental = () => {
             </button>
           );
         })}
-        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
         {!activeTypes.includes("전체") && activeTypes.length > 1 && (
           <button
             onClick={() => setActiveTypes(["전체"])}
@@ -134,7 +126,11 @@ const ResidentialRental = () => {
             onPropertyIdChange={setPropertyId}
             filters={filters}
             onFiltersChange={setFilters}
-            onLandlordClick={() => setShowLandlord(true)}
+            onLandlordResults={(results, loading, searched) => {
+              setLandlordResults(results);
+              setLandlordLoading(loading);
+              setLandlordSearched(searched);
+            }}
             hideSearchBar={showRegister}
             showResidentialTypes={true}
             showBuildingOptions={true}
@@ -152,6 +148,9 @@ const ResidentialRental = () => {
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          landlordResults={landlordResults}
+          landlordLoading={landlordLoading}
+          landlordSearched={landlordSearched}
         />
       </main>
     </div>
