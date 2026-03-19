@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight, ShieldCheck } from "lucide-react";
+import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MapProperty } from "@/data/mapProperties";
 import { useAuth } from "@/hooks/useAuth";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -23,7 +21,6 @@ interface SearchResult {
   contactOwner: string;
   contactManager: string;
   contactBroker: string;
-  // extended property fields
   floor?: string;
   area?: string;
   deposit?: string;
@@ -33,39 +30,6 @@ interface SearchResult {
   totalFloors?: string;
   availableFrom?: string;
   note?: string;
-}
-
-// ── SearchResult → MapProperty 변환 ───────────────────────────────────────
-let _panelId = 1;
-function toMapProperty(item: SearchResult): MapProperty {
-  return {
-    id: _panelId++,
-    title: item.label,
-    address: item.sublabel,
-    type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
-    area: item.area ? `${item.area}㎡` : "—",
-    floor: item.floor ?? "—",
-    deposit: item.deposit ? `${item.deposit}만` : "—",
-    monthly: item.monthly ? `${item.monthly}만` : "—",
-    views: 0,
-    lat: 0,
-    lng: 0,
-    image: (item.images ?? [])[0] ?? "",
-    images: item.images ?? [],
-    description: item.note ?? "",
-    contact: item.contactBroker ?? "",
-    contactOwner: item.contactOwner ?? "",
-    contactManager: item.contactManager ?? "",
-    agentName: "",
-    manageFee: "—",
-    parking: "—",
-    elevator: false,
-    availableFrom: item.availableFrom ?? "—",
-    totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "—",
-    buildYear: item.buildYear ? `${item.buildYear}년` : "—",
-    isNew: false,
-    isHot: false,
-  };
 }
 
 // ── Photo Lightbox ──────────────────────────────────────────────
@@ -166,11 +130,8 @@ interface ResultCardProps {
   isApproved: boolean;
   onReveal: () => void;
   onLightbox: (images: string[], idx: number) => void;
-  onOpenPanel: (item: SearchResult) => void;
-  isSelected: boolean;
 }
-const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
-  // 승인된 회원은 제한 없이 바로 노출
+const ResultCard = ({ item, show, isApproved, onReveal, onLightbox }: ResultCardProps) => {
   const phoneVisible = isApproved || show;
   const [expanded, setExpanded] = useState(false);
   const isContact = item.source === "contact";
@@ -183,10 +144,9 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
     <div
       className="rounded-xl border overflow-hidden transition-all"
       style={{
-        borderColor: isSelected ? "hsl(var(--primary))" : "hsl(var(--border))",
-        background: isSelected ? "hsl(var(--primary) / 0.04)" : "hsl(var(--background))",
+        borderColor: "hsl(var(--border))",
+        background: "hsl(var(--background))",
         opacity: isHidden || isInvisible ? 0.85 : 1,
-        boxShadow: isSelected ? "0 0 0 2px hsl(var(--primary) / 0.2)" : undefined,
       }}
     >
       {/* Photo strip (property only) */}
@@ -256,19 +216,6 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
               </div>
             )}
           </div>
-
-          {/* 상세보기 버튼 */}
-          <button
-            onClick={() => onOpenPanel(item)}
-            className="flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-all shrink-0"
-            style={isSelected
-              ? { background: "hsl(var(--primary))", color: "#fff" }
-              : { background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }
-            }
-          >
-            {isSelected ? "보는 중" : "상세보기"}
-            <ArrowRight className="w-3 h-3" />
-          </button>
         </div>
 
         {/* Property detail grid */}
@@ -387,11 +334,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [error, setError] = useState("");
   const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
-  const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
-  const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
-  // 승인된 회원(인증된 모든 로그인 사용자)은 번호 제한 없이 바로 노출
-  // authLoading 중에는 false로 처리하되, 로딩 완료 후 isAuthorized 값 사용
   const isApproved = !authLoading && isAuthorized;
 
   const handleReveal = (id: string) => {
@@ -405,8 +348,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     setSearched(true);
     setLoading(true);
     setError("");
-    setSelectedItem(null);
-    setPanelProperty(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: query.trim() },
@@ -422,18 +363,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     }
   };
 
-  const handleOpenPanel = (item: SearchResult) => {
-    if (selectedItem?.id === item.id) {
-      setSelectedItem(null);
-      setPanelProperty(null);
-    } else {
-      setSelectedItem(item);
-      setPanelProperty(toMapProperty(item));
-    }
-  };
-
-  const hasPanel = panelProperty !== null;
-
   return (
     <>
       {lightbox && (
@@ -448,22 +377,15 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
         className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-2 md:px-4"
         onClick={onClose}
       >
-        {/* 컨테이너: 검색모달 + 상세패널 나란히 */}
         <div
-          className="flex gap-3 w-full items-start justify-center"
+          className="w-full max-w-lg"
           style={{ maxHeight: "90vh" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* ── 검색 모달 ── */}
           <div
-            className="bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300"
-            style={{
-              maxHeight: "90vh",
-              width: hasPanel ? "420px" : "100%",
-              maxWidth: hasPanel ? "420px" : "512px",
-              minWidth: "320px",
-              flexShrink: 0,
-            }}
+            className="bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{ maxHeight: "90vh" }}
           >
             {/* Header */}
             <div
@@ -502,7 +424,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     autoFocus
                   />
                   {query && (
-                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); setPanelProperty(null); }} className="text-muted-foreground hover:text-foreground">
+                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); }} className="text-muted-foreground hover:text-foreground">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -519,7 +441,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
               {searched && !loading && (
                 <p className="text-[10px] text-muted-foreground mt-1.5 pl-1">
                   매물(숨김 포함) + 청주 연락처DB 전체 통합 검색
-                  {hasPanel && <span className="ml-1 font-medium" style={{ color: "hsl(var(--primary))" }}>· 우측에서 상세 확인 중</span>}
                 </p>
               )}
             </div>
@@ -559,8 +480,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                   isApproved={isApproved}
                   onReveal={() => handleReveal(item.id)}
                   onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
-                  onOpenPanel={handleOpenPanel}
-                  isSelected={selectedItem?.id === item.id}
                 />
               ))}
             </div>
@@ -580,20 +499,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
               )}
             </div>
           </div>
-
-          {/* ── 우측 매물 상세 패널 ── */}
-          {hasPanel && (
-            <div
-              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
-              style={{ width: "360px", height: "90vh", flexShrink: 0, position: "relative" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <PropertyDetailPanel
-                property={panelProperty}
-                onClose={() => { setSelectedItem(null); setPanelProperty(null); }}
-              />
-            </div>
-          )}
         </div>
       </div>
     </>

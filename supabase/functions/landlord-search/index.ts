@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
+        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, unit_number, status, type, build_year, total_floors, available_from, room_type")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       adminClient
@@ -99,11 +99,16 @@ Deno.serve(async (req) => {
         const manager = parseContact(noteStr, "관리인");
         const broker = parseContact(noteStr, "부동산");
         if (!owner && !manager && !broker) continue;
+        // 집합건물 유형 (호수별 소유주가 다른 유형)
+        const CONDO_TYPES = ["아파트", "오피스텔", "빌라", "연립", "다세대", "주상복합"];
+        const propType = row.room_type ?? row.type ?? "";
+        const isCondo = CONDO_TYPES.some(t => propType.includes(t));
+        const unitSuffix = isCondo && row.unit_number ? ` ${row.unit_number}호` : "";
         results.push({
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
-          label: row.building_name ?? row.title,
+          label: (row.building_name ?? row.title) + unitSuffix,
           sublabel: row.address,
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
           price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
@@ -115,7 +120,7 @@ Deno.serve(async (req) => {
           area: row.area ?? undefined,
           deposit: row.deposit ?? undefined,
           monthly: row.monthly ?? undefined,
-          type: row.room_type ?? row.type ?? undefined,
+          type: propType || undefined,
           buildYear: row.build_year ?? undefined,
           totalFloors: row.total_floors ?? undefined,
           availableFrom: row.available_from ?? undefined,
