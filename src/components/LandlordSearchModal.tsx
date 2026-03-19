@@ -352,7 +352,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [error, setError] = useState("");
   const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
-  const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
   // 승인된 회원(인증된 모든 로그인 사용자)은 번호 제한 없이 바로 노출
   // authLoading 중에는 false로 처리하되, 로딩 완료 후 isAuthorized 값 사용
