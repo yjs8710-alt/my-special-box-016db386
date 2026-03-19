@@ -1517,7 +1517,10 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           border: lhVal === "LH가능" ? "hsl(217 91% 70%)" : "hsl(0 85% 70%)",
         });
         if (cleanFee) chips.push({ label: `청소비 ${cleanFee}만`, value: "", bg: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" });
-        if (brokerFee) chips.push({ label: `수수료 ${brokerFee}`, value: "", bg: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", border: "hsl(var(--border))" });
+        if (brokerFee) chips.push({ label: `수수료 ${brokerFee}`, value: "", bg: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "hsl(0 85% 70%)" });
+        // 중도퇴거 여부
+        const earlyExit = note.includes("중도퇴거:");
+        if (earlyExit) chips.push({ label: "중도퇴거", value: "", bg: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "hsl(0 85% 70%)" });
 
         const hasChips = chips.length > 0;
         const hasDesc = !!(prop.description?.trim());

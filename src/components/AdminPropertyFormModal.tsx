@@ -322,6 +322,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   halfDeposit: string;
   halfMonthly: string;
   jeonseDeposit: string;
+  earlyExit: boolean; // 세입자 중도퇴거
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -341,6 +342,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   halfDeposit: "",
   halfMonthly: "",
   jeonseDeposit: "",
+  earlyExit: false,
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -436,7 +438,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
 
-    // 방향, LH, 청소비, 중개보수 파싱
+    // 방향, LH, 청소비, 중개보수, 중도퇴거 파싱
     const dirMatch = noteStr.match(/방향[:\s]+([^\n|]+)/);
     const lhMatch2 = noteStr.match(/LH[:\s]+([^\n|]+)/);
     const cleanMatch2 = noteStr.match(/청소비[:\s]+([^\n|]+)/);
@@ -445,6 +447,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (lhMatch2) contacts.lhType = lhMatch2[1].trim() as LhType;
     if (cleanMatch2) contacts.exitCleanFee = cleanMatch2[1].trim();
     if (brokerFeeMatch2) contacts.brokerFee = brokerFeeMatch2[1].trim();
+    if (noteStr.includes("중도퇴거:")) contacts.earlyExit = true;
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
@@ -660,6 +663,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
       form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
       form.brokerFee && `중개보수: ${form.brokerFee}`,
+      form.earlyExit && `중도퇴거: 세입자중도퇴거`,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -1204,6 +1208,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     {label}
                   </label>
                 ))}
+                {/* 세입자 중도퇴거 */}
+                <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: form.earlyExit ? "hsl(0 85% 50%)" : undefined }}>
+                  <input type="checkbox" checked={form.earlyExit}
+                    onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
+                  <span className={form.earlyExit ? "font-bold" : ""}>세입자 중도퇴거</span>
+                  {form.earlyExit && <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>중도퇴거</span>}
+                </label>
               </div>
 
               {/* 퇴거일 */}
