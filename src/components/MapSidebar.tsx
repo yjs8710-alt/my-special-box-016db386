@@ -1553,6 +1553,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   );
 };
 
+/* ── LandlordPhoneRow ── */
+const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
+  const colorMap: Record<string, string> = {
+    "소유주": "hsl(var(--primary))",
+    "관리인": "hsl(217 91% 60%)",
+    "부동산": "hsl(25 95% 53%)",
+  };
+  const color = colorMap[label] ?? "hsl(var(--foreground))";
+  return (
+    <div className="flex items-center justify-between py-0.5">
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <a
+        href={`tel:${phone}`}
+        className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg"
+        style={{ color, background: `${color}18` }}
+      >
+        <Phone className="w-3 h-3" />{phone}
+      </a>
+    </div>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
