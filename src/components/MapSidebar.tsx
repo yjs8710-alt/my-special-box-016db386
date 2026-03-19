@@ -1617,7 +1617,7 @@ const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, showLandlordSearch = false, onCloseLandlordSearch }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, showLandlordSearch = false, onCloseLandlordSearch, onOpenLandlordSearch }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { isAuthorized, isLoading: authLoading } = useAuth();
   const isApproved = !authLoading && isAuthorized;
