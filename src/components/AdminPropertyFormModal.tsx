@@ -600,7 +600,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
 
     // note 필드: 연락처 + 다중 임대방식 저장
-    const hasWolse   = form.tradeType === "임대" && (form.rentModes.length === 0 || form.rentModes.includes("월세"));
+    const hasWolse   = form.tradeType === "임대" && (form.rentModes.includes("월세") || (form.rentModes.length === 0 && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세")));
     const hasHalf    = form.tradeType === "임대" && form.rentModes.includes("반전세");
     const hasJeonse  = form.tradeType === "임대" && form.rentModes.includes("전세");
 
