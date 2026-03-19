@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
+import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -62,6 +63,7 @@ const ApartmentRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
+      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
@@ -150,8 +152,6 @@ const ApartmentRental = () => {
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
-          landlordSearchOpen={showLandlord}
-          onLandlordSearchClose={() => setShowLandlord(false)}
         />
       </main>
     </div>

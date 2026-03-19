@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, unit_number, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
+        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       adminClient
@@ -103,13 +103,8 @@ Deno.serve(async (req) => {
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
-          label: row.building_name
-            ? row.unit_number
-              ? `${row.building_name} ${row.unit_number}호`
-              : row.building_name
-            : row.title,
+          label: row.building_name ?? row.title,
           sublabel: row.address,
-          unitNumber: row.unit_number ?? undefined,
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
           price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
           images: Array.isArray(row.images) ? row.images : [],
