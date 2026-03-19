@@ -624,15 +624,20 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     // note 필드: 연락처 + 다중 임대방식 저장
     const isRent = form.tradeType === "임대";
+    const isSale = form.tradeType === "매매";
     const hasWolse  = isRent && (form.rentModes.includes("월세") || form.rentModes.length === 0);
     const hasHalf   = isRent && form.rentModes.includes("반전세");
     const hasJeonse = isRent && form.rentModes.includes("전세");
 
-    // 전세 단독 선택 시 jeonseDeposit → deposit 필드에 반영
-    const finalDeposit = (hasJeonse && !hasWolse && !hasHalf && form.jeonseDeposit)
-      ? form.jeonseDeposit
-      : form.deposit;
-    const finalMonthly = (hasJeonse && !hasWolse && !hasHalf) ? "0" : form.monthly;
+    // 매매: deposit=매매가, monthly="" / 임대: 전세단독이면 jeonseDeposit→deposit
+    const finalDeposit = isSale
+      ? form.deposit
+      : (hasJeonse && !hasWolse && !hasHalf && form.jeonseDeposit)
+        ? form.jeonseDeposit
+        : form.deposit;
+    const finalMonthly = isSale
+      ? ""
+      : (hasJeonse && !hasWolse && !hasHalf) ? "0" : form.monthly;
 
     const rentNotes: string[] = [];
     if (hasWolse && (form.deposit || form.monthly))
