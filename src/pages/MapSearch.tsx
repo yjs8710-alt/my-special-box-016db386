@@ -154,6 +154,7 @@ const MapSearch = () => {
           onDeleteProperties={handleDeleteProperties}
           showLandlordSearch={showLandlord}
           onCloseLandlordSearch={() => setShowLandlord(false)}
+          onOpenLandlordSearch={() => setShowLandlord(true)}
         />
       </main>
     </div>
