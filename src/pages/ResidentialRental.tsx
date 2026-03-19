@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
-import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MapProperty } from "@/data/mapProperties";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
@@ -77,7 +76,6 @@ const ResidentialRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 주거 유형 탭 - 다중 선택 */}
       <div
@@ -152,6 +150,8 @@ const ResidentialRental = () => {
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          landlordSearchOpen={showLandlord}
+          onLandlordSearchClose={() => setShowLandlord(false)}
         />
       </main>
     </div>

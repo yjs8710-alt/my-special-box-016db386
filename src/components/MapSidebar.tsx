@@ -1,9 +1,10 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Search, BookUser, ShieldCheck, Eye, EyeOff, Images } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import { useAuth } from "@/hooks/useAuth";
 
 /* ── LightboxModal: 여러 장 사진 좌우 탐색 ── */
 function LightboxModal({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
@@ -1553,6 +1554,203 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   );
 };
 
+/* ── 소유주 검색 인라인 패널 ── */
+interface LandlordSearchResult {
+  id: string;
+  source: "property" | "contact";
+  status?: string;
+  isVisible?: boolean;
+  label: string;
+  sublabel: string;
+  unitNumber?: string;
+  badge?: string;
+  price?: string;
+  images?: string[];
+  contactOwner: string;
+  contactManager: string;
+  contactBroker: string;
+  floor?: string;
+  area?: string;
+  deposit?: string;
+  monthly?: string;
+  type?: string;
+  buildYear?: string;
+  totalFloors?: string;
+  availableFrom?: string;
+  note?: string;
+}
+
+const today_ls = () => new Date().toISOString().slice(0, 10);
+const revealKeyLS = (id: string) => `landlord_reveal_${id}`;
+const hasRevealedTodayLS = (id: string) => localStorage.getItem(revealKeyLS(id)) === today_ls();
+const markRevealedLS = (id: string) => localStorage.setItem(revealKeyLS(id), today_ls());
+
+interface LandlordCardProps {
+  item: LandlordSearchResult;
+  isApproved: boolean;
+}
+
+const LandlordCard = ({ item, isApproved }: LandlordCardProps) => {
+  const [revealed, setRevealed] = useState(() => isApproved || hasRevealedTodayLS(item.id));
+  const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
+  const isHidden = item.source === "property" && item.status !== "active";
+  const isInvisible = item.source === "contact" && item.isVisible === false;
+  const images = item.images ?? [];
+
+  const handleReveal = () => {
+    markRevealedLS(item.id);
+    setRevealed(true);
+  };
+
+  const phoneVisible = isApproved || revealed;
+
+  const PhoneBtn = ({ label, phone, color }: { label: string; phone: string; color: string }) => (
+    <div className="flex items-center justify-between py-0.5">
+      <div className="flex items-center gap-1">
+        <Phone className="w-3 h-3 flex-shrink-0" style={{ color }} />
+        <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</span>
+      </div>
+      {phoneVisible ? (
+        <a href={`tel:${phone}`} className="text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color, background: `${color}18` }}>
+          {phone}
+        </a>
+      ) : (
+        <button
+          onClick={handleReveal}
+          className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg"
+          style={{ background: "hsl(var(--accent))", color: "#fff" }}
+        >
+          <Eye className="w-3 h-3" />번호 공개
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[10200] bg-black/90 flex flex-col items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <X className="w-4 h-4 text-white" />
+          </button>
+          <img src={lightbox.images[lightbox.idx]} className="max-h-[75vh] max-w-[90vw] rounded-xl object-contain" />
+          <p className="text-white/60 text-xs mt-2">{lightbox.idx + 1} / {lightbox.images.length}</p>
+        </div>
+      )}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{
+          borderColor: "hsl(var(--border))",
+          background: "hsl(var(--background))",
+          opacity: isHidden || isInvisible ? 0.8 : 1,
+        }}
+      >
+        {/* 사진 스트립 */}
+        {images.length > 0 && (
+          <div className="flex gap-0.5 h-20 overflow-hidden">
+            {images.slice(0, 4).map((img, i) => (
+              <button key={i} onClick={() => setLightbox({ images, idx: i })} className="flex-1 min-w-0 relative overflow-hidden hover:brightness-110">
+                <img src={img} alt="" className="w-full h-full object-cover" />
+                {i === 3 && images.length > 4 && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">+{images.length - 4}</span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="p-2.5 flex flex-col gap-1.5">
+          {/* 헤더 */}
+          <div className="flex items-start gap-2">
+            {images.length === 0 && (
+              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                {item.source === "contact" ? <BookUser className="w-4 h-4 text-muted-foreground" /> : <Building2 className="w-4 h-4 text-muted-foreground" />}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1 flex-wrap">
+                <p className="text-xs font-bold text-foreground">{item.label}</p>
+                {item.source === "contact" ? (
+                  <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }}>연락처DB</span>
+                ) : (
+                  <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>매물</span>
+                )}
+                {isHidden && <span className="flex items-center gap-0.5 text-[9px] px-1 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />숨김</span>}
+                {isInvisible && <span className="flex items-center gap-0.5 text-[9px] px-1 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />미노출</span>}
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-tight">{item.sublabel}</p>
+              {(item.badge || item.price) && (
+                <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                  {item.badge && <span className="text-[10px] text-muted-foreground">{item.badge}</span>}
+                  {item.price && <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>{item.price}</span>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 매물 정보 그리드 */}
+          {item.source === "property" && (item.area || item.floor || item.type) && (
+            <div className="grid grid-cols-3 gap-1">
+              {item.area && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">면적</p>
+                  <p className="text-[10px] font-bold text-foreground">{item.area}㎡</p>
+                </div>
+              )}
+              {item.floor && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">층수</p>
+                  <p className="text-[10px] font-bold text-foreground">{item.floor}{item.totalFloors ? `/${item.totalFloors}` : ""}층</p>
+                </div>
+              )}
+              {item.type && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">유형</p>
+                  <p className="text-[10px] font-bold text-foreground truncate">{item.type}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 가격 */}
+          {item.source === "property" && (item.deposit || item.monthly) && (
+            <div className="flex items-center justify-between bg-primary/5 rounded-lg px-2.5 py-1.5 border border-primary/10">
+              <span className="text-[9px] text-muted-foreground">보증금 / 월세</span>
+              <span className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>
+                {item.deposit || "–"}만 / <span style={{ color: "hsl(var(--accent))" }}>{item.monthly || "–"}만</span>
+              </span>
+            </div>
+          )}
+
+          {/* 연락처 */}
+          <div className="border-t border-border/50 pt-1.5 flex flex-col gap-0.5">
+            {isApproved && (
+              <div className="flex items-center gap-1 mb-0.5">
+                <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                <span className="text-[9px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원</span>
+              </div>
+            )}
+            {item.contactOwner ? (
+              <PhoneBtn label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" />
+            ) : (
+              <div className="flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</span>
+              </div>
+            )}
+            {item.contactManager && <PhoneBtn label="관리인" phone={item.contactManager} color="hsl(217 91% 55%)" />}
+            {item.contactBroker && <PhoneBtn label="부동산" phone={item.contactBroker} color="hsl(25 95% 53%)" />}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
@@ -1571,14 +1769,27 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
+  /** 소유주 검색 모드로 전환할 수 있도록 외부에서 제어 */
+  landlordSearchOpen?: boolean;
+  onLandlordSearchClose?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, landlordSearchOpen = false, onLandlordSearchClose }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
+  const { isAuthorized, isLoading: authLoading } = useAuth();
+  const isApproved = !authLoading && isAuthorized;
+
+  // ── 소유주 검색 상태 ──
+  const [landlordMode, setLandlordMode] = useState(false);
+  const [landlordQuery, setLandlordQuery] = useState("");
+  const [landlordSearched, setLandlordSearched] = useState(false);
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordResults, setLandlordResults] = useState<LandlordSearchResult[]>([]);
+  const [landlordError, setLandlordError] = useState("");
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
@@ -1627,6 +1838,35 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     }
     return properties;
   })();
+
+  // 소유주 검색 핸들러
+  const handleLandlordSearch = async () => {
+    if (!landlordQuery.trim()) return;
+    setLandlordSearched(true);
+    setLandlordLoading(true);
+    setLandlordError("");
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
+        body: { q: landlordQuery.trim() },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setLandlordResults((data?.results ?? []) as LandlordSearchResult[]);
+    } catch (e: unknown) {
+      setLandlordError(e instanceof Error ? e.message : String(e));
+      setLandlordResults([]);
+    } finally {
+      setLandlordLoading(false);
+    }
+  };
+
+  // prop으로 소유주 검색 모드 열기
+  useEffect(() => {
+    if (landlordSearchOpen) {
+      setLandlordMode(true);
+      if (collapsed) setCollapsed(false);
+    }
+  }, [landlordSearchOpen]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
@@ -1941,153 +2181,197 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 핀 클릭 누적 모드 배너 */}
-            {pinnedIds && pinnedIds.length > 0 && (
-              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
-                style={{ background: "hsl(var(--primary)/0.08)" }}>
-                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-                <span className="text-[10px] font-bold text-primary flex-1 min-w-0">
-                  핀 선택 {pinnedIds.length}개 (클릭 순서)
-                </span>
-                <button
-                  onClick={() => onClearPinnedIds?.()}
-                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
-                  style={{ color: "hsl(var(--primary))" }}
-                >
-                  <X className="w-2.5 h-2.5" />
-                  전체보기
-                </button>
-              </div>
-            )}
-            {/* 주소 필터 모드 배너 (기존) */}
-            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
-              <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
-                style={{ background: "hsl(var(--primary)/0.08)" }}>
-                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
-                <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
-                <button
-                  onClick={() => onClearPin?.()}
-                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
-                  style={{ color: "hsl(var(--primary))" }}
-                >
-                  <X className="w-2.5 h-2.5" />
-                  전체보기
-                </button>
-              </div>
-            )}
-            {/* 상단: 주요 액션 */}
-            <div className="flex items-center gap-2 px-3 py-0.5 border-b border-border/60">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <div className="min-w-0">
-                  <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {pinnedIds && pinnedIds.length > 0 && <span className="text-[10px] font-semibold text-primary">(핀 선택 순서)</span>}
-                    {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
-                  </p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : (pinnedIds && pinnedIds.length > 0) ? "핀 클릭 순서 필터 중" : pinnedAddress ? "핀 클릭 필터 중" : ""}
-                  </p>
+            {/* 소유주 검색 모드 배너 */}
+            {landlordMode ? (
+              <>
+                <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60"
+                  style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))" }}>
+                  <Phone className="w-3.5 h-3.5 text-white flex-shrink-0" />
+                  <span className="text-[11px] font-bold text-white flex-1">소유주 번호 찾기</span>
+                  <button
+                    onClick={() => {
+                      setLandlordMode(false);
+                      setLandlordQuery("");
+                      setLandlordSearched(false);
+                      setLandlordResults([]);
+                      setLandlordError("");
+                      onLandlordSearchClose?.();
+                    }}
+                    className="w-5 h-5 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors flex-shrink-0"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
                 </div>
-              </div>
-            </div>
-            {/* 외부 링크 바 + 선택인쇄 */}
-            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
-              {/* 구분선 */}
-              <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
-              {/* 인터넷등기소 */}
-              <a
-                href="https://www.iros.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="인터넷등기소"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                등기소
-              </a>
-              {/* 정부24 */}
-              <a
-                href="https://www.gov.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="정부24"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                정부24
-              </a>
-              {/* 토지e음 */}
-              <a
-                href="https://www.eum.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="토지이음"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                토지e음
-              </a>
-              {/* 홈택스 */}
-              <a
-                href="https://www.hometax.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="홈택스"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                홈택스
-              </a>
-              {/* 구분선 */}
-              <div className="w-px h-4 bg-border/60 mx-0.5 flex-shrink-0" />
-              {/* 네이버부동산 */}
-              <a
-                href="https://land.naver.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="네이버부동산"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                네이버
-              </a>
-              {/* 직방 */}
-              <a
-                href="https://www.zigbang.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="직방"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                직방
-              </a>
-              {/* 다방 */}
-              <a
-                href="https://www.dabangapp.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="다방"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                다방
-              </a>
-              {/* 선택인쇄 — 다방 우측 끝 파란색 */}
-              <span className="flex-1 min-w-[4px]" />
-              <button
-                onClick={handleSelectPrint}
-                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
-                style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
-              >
-                <Printer className="w-3 h-3" />
-                선택인쇄
-              </button>
-            </div>
+                {/* 검색창 */}
+                <div className="px-3 py-2 border-b border-border/60">
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 h-9 focus-within:border-primary transition-colors">
+                      <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <input
+                        type="text"
+                        value={landlordQuery}
+                        onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
+                        placeholder="동, 번지, 건물명, 전화번호"
+                        className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                        autoFocus
+                      />
+                      {landlordQuery && (
+                        <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }}>
+                          <X className="w-3 h-3 text-muted-foreground" />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleLandlordSearch}
+                      disabled={!landlordQuery.trim() || landlordLoading}
+                      className="h-9 px-3 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-40"
+                      style={{ background: "hsl(var(--primary))" }}
+                    >
+                      {landlordLoading ? <span className="animate-pulse text-xs">...</span> : <Search className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {isApproved && (
+                    <div className="flex items-center gap-1 mt-1.5">
+                      <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                      <span className="text-[9px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 번호 제한없이 열람</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* 핀 클릭 누적 모드 배너 */}
+                {pinnedIds && pinnedIds.length > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                    style={{ background: "hsl(var(--primary)/0.08)" }}>
+                    <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                    <span className="text-[10px] font-bold text-primary flex-1 min-w-0">
+                      핀 선택 {pinnedIds.length}개 (클릭 순서)
+                    </span>
+                    <button
+                      onClick={() => onClearPinnedIds?.()}
+                      className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                      style={{ color: "hsl(var(--primary))" }}
+                    >
+                      <X className="w-2.5 h-2.5" />
+                      전체보기
+                    </button>
+                  </div>
+                )}
+                {/* 주소 필터 모드 배너 (기존) */}
+                {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
+                    style={{ background: "hsl(var(--primary)/0.08)" }}>
+                    <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                    <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
+                    <button
+                      onClick={() => onClearPin?.()}
+                      className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
+                      style={{ color: "hsl(var(--primary))" }}
+                    >
+                      <X className="w-2.5 h-2.5" />
+                      전체보기
+                    </button>
+                  </div>
+                )}
+                {/* 상단: 주요 액션 */}
+                <div className="flex items-center gap-2 px-3 py-0.5 border-b border-border/60">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-extrabold text-foreground leading-none">
+                        {pinnedIds && pinnedIds.length > 0 && <span className="text-[10px] font-semibold text-primary">(핀 선택 순서)</span>}
+                        {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">
+                        {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : (pinnedIds && pinnedIds.length > 0) ? "핀 클릭 순서 필터 중" : pinnedAddress ? "핀 클릭 필터 중" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  {/* 소유주 검색 버튼 */}
+                  <button
+                    onClick={() => setLandlordMode(true)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors flex-shrink-0"
+                    style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}
+                  >
+                    <Phone className="w-3 h-3" />
+                    소유주 검색
+                  </button>
+                </div>
+                {/* 외부 링크 바 + 선택인쇄 */}
+                <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
+                  {/* 구분선 */}
+                  <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
+                  {/* 인터넷등기소 */}
+                  <a href="https://www.iros.go.kr" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="인터넷등기소">
+                    <ExternalLink className="w-2.5 h-2.5" />등기소
+                  </a>
+                  <a href="https://www.gov.kr" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="정부24">
+                    <ExternalLink className="w-2.5 h-2.5" />정부24
+                  </a>
+                  <a href="https://www.eum.go.kr" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="토지이음">
+                    <ExternalLink className="w-2.5 h-2.5" />토지e음
+                  </a>
+                  <a href="https://www.hometax.go.kr" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="홈택스">
+                    <ExternalLink className="w-2.5 h-2.5" />홈택스
+                  </a>
+                  <div className="w-px h-4 bg-border/60 mx-0.5 flex-shrink-0" />
+                  <a href="https://land.naver.com" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="네이버부동산">
+                    <ExternalLink className="w-2.5 h-2.5" />네이버
+                  </a>
+                  <a href="https://www.zigbang.com" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="직방">
+                    <ExternalLink className="w-2.5 h-2.5" />직방
+                  </a>
+                  <a href="https://www.dabangapp.com" target="_blank" rel="noopener noreferrer" className="toolbar-btn" title="다방">
+                    <ExternalLink className="w-2.5 h-2.5" />다방
+                  </a>
+                  <span className="flex-1 min-w-[4px]" />
+                  <button
+                    onClick={handleSelectPrint}
+                    className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
+                    style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
+                  >
+                    <Printer className="w-3 h-3" />선택인쇄
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
-            {displayProperties.length === 0 ? (
+            {/* ── 소유주 검색 모드 결과 ── */}
+            {landlordMode ? (
+              <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-2">
+                {landlordError && (
+                  <div className="py-3 flex items-center gap-2 text-destructive text-xs px-1">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />{landlordError}
+                  </div>
+                )}
+                {landlordSearched && !landlordLoading && !landlordError && landlordResults.length === 0 && (
+                  <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
+                    <AlertCircle className="w-8 h-8 opacity-30" />
+                    <p className="text-sm">연락처가 등록된 결과가 없습니다.</p>
+                    <p className="text-xs">다른 주소나 동 이름으로 검색해보세요.</p>
+                  </div>
+                )}
+                {!landlordSearched && (
+                  <div className="py-8 flex flex-col items-center gap-1.5 text-muted-foreground">
+                    <Search className="w-7 h-7 opacity-20" />
+                    <p className="text-xs text-center">동 이름, 번지수 또는 건물명을 입력 후 검색하세요.<br/>숨김 매물·미노출 연락처 포함 전체 조회</p>
+                  </div>
+                )}
+                {landlordLoading && (
+                  <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs">검색 중...</p>
+                  </div>
+                )}
+                {!landlordLoading && landlordResults.map((item) => (
+                  <LandlordCard key={item.id} item={item} isApproved={isApproved} />
+                ))}
+              </div>
+            ) : displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
