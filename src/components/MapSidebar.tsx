@@ -1,45 +1,9 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Search, BookUser, EyeOff, ShieldCheck, Images, Layers, Ruler, Home, Calendar } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
-
-/* ── LandlordResult 타입 ── */
-interface LandlordResult {
-  id: string;
-  source: "property" | "contact";
-  status?: string;
-  isVisible?: boolean;
-  label: string;
-  sublabel: string;
-  badge?: string;
-  price?: string;
-  images?: string[];
-  contactOwner: string;
-  contactManager: string;
-  contactBroker: string;
-  floor?: string;
-  area?: string;
-  deposit?: string;
-  monthly?: string;
-  type?: string;
-  buildYear?: string;
-  totalFloors?: string;
-  availableFrom?: string;
-  note?: string;
-}
-
-const landlordRevealKey = (id: string) => `landlord_reveal_${id}`;
-const landlordRevealedToday = (id: string) => {
-  const today = new Date().toISOString().slice(0, 10);
-  return localStorage.getItem(landlordRevealKey(id)) === today;
-};
-const landlordMarkRevealed = (id: string) => {
-  const today = new Date().toISOString().slice(0, 10);
-  localStorage.setItem(landlordRevealKey(id), today);
-};
 
 /* ── LightboxModal: 여러 장 사진 좌우 탐색 ── */
 function LightboxModal({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
@@ -1607,28 +1571,15 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
-  /** 소유주 번호 검색 패널 표시 여부 */
-  showLandlordSearch?: boolean;
-  onCloseLandlordSearch?: () => void;
-  onOpenLandlordSearch?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, showLandlordSearch = false, onCloseLandlordSearch, onOpenLandlordSearch }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
-  const { isAuthorized, isLoading: authLoading } = useAuth();
-  const isApproved = !authLoading && isAuthorized;
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
-  const [landlordQuery, setLandlordQuery] = useState("");
-  const [landlordSearched, setLandlordSearched] = useState(false);
-  const [landlordLoading, setLandlordLoading] = useState(false);
-  const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
-  const [landlordError, setLandlordError] = useState("");
-  const [landlordRevealed, setLandlordRevealed] = useState<Record<string, boolean>>({});
-  const [landlordLightbox, setLandlordLightbox] = useState<{ images: string[]; idx: number } | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
@@ -1778,32 +1729,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     const html = `<html><head><title>매물 상세 인쇄</title><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px}@media print{body{padding:0}}</style></head><body><h2>매물 상세 목록 (${list.length}건)</h2>${cards}</body></html>`;
     const w = window.open("", "_blank"); w?.document.write(html); w?.document.close(); w?.print();
   };
-
-  /* ── 소유주 번호 검색 핸들러 ── */
-  const handleLandlordSearch = async () => {
-    if (!landlordQuery.trim()) return;
-    setLandlordSearched(true);
-    setLandlordLoading(true);
-    setLandlordError("");
-    try {
-      const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
-        body: { q: landlordQuery.trim() },
-      });
-      if (fnErr) throw fnErr;
-      if (data?.error) throw new Error(data.error);
-      setLandlordResults((data?.results ?? []) as LandlordResult[]);
-    } catch (e: unknown) {
-      setLandlordError(e instanceof Error ? e.message : String(e));
-      setLandlordResults([]);
-    } finally {
-      setLandlordLoading(false);
-    }
-  };
-  const handleLandlordReveal = (id: string) => {
-    landlordMarkRevealed(id);
-    setLandlordRevealed((prev) => ({ ...prev, [id]: true }));
-  };
-  const isLandlordRevealed = (id: string) => isApproved || landlordRevealed[id] || landlordRevealedToday(id);
 
   /* ── Resize drag ── */
   const dragging = useRef(false);
@@ -2016,35 +1941,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             className="flex-shrink-0 border-b border-border"
             style={{ background: "hsl(var(--toolbar-bg))" }}
           >
-            {/* 탭 — 매물목록 / 소유주검색 */}
-            <div className="flex border-b border-border/60">
-              <button
-                onClick={() => onCloseLandlordSearch?.()}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all"
-                style={
-                  !showLandlordSearch
-                    ? { color: "hsl(var(--primary))", borderBottom: "2px solid hsl(var(--primary))", background: "hsl(var(--primary)/0.06)" }
-                    : { color: "hsl(var(--muted-foreground))", borderBottom: "2px solid transparent" }
-                }
-              >
-                <MapPin className="w-3 h-3" />
-                매물 목록
-              </button>
-              <button
-                onClick={() => { onOpenLandlordSearch?.(); if (!showLandlordSearch) { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); } }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all"
-                style={
-                  showLandlordSearch
-                    ? { color: "hsl(var(--accent))", borderBottom: "2px solid hsl(var(--accent))", background: "hsl(var(--accent)/0.06)" }
-                    : { color: "hsl(var(--muted-foreground))", borderBottom: "2px solid transparent" }
-                }
-              >
-                <Phone className="w-3 h-3" />
-                소유주 번호 찾기
-              </button>
-            </div>
-            {/* 핀 클릭 누적 모드 배너 — 매물 목록 탭에서만 표시 */}
-            {!showLandlordSearch && pinnedIds && pinnedIds.length > 0 && (
+            {/* 핀 클릭 누적 모드 배너 */}
+            {pinnedIds && pinnedIds.length > 0 && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
@@ -2062,7 +1960,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             )}
             {/* 주소 필터 모드 배너 (기존) */}
-            {!showLandlordSearch && pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
+            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
@@ -2077,8 +1975,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </button>
               </div>
             )}
-            {/* 상단: 주요 액션 — 매물 목록 탭에서만 표시 */}
-            {!showLandlordSearch && (
+            {/* 상단: 주요 액션 */}
             <div className="flex items-center gap-2 px-3 py-0.5 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
@@ -2092,8 +1989,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
               </div>
             </div>
-            )}
-            {!showLandlordSearch && (
+            {/* 외부 링크 바 + 선택인쇄 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
@@ -2187,207 +2083,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 선택인쇄
               </button>
             </div>
-            )} {/* end !showLandlordSearch external links */}
           </div>
 
-          {/* List or Landlord Search Panel */}
-          {showLandlordSearch ? (
-            /* ── 소유주 번호 검색 패널 ── */
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* 검색바 */}
-              <div className="px-4 pt-3 pb-2 flex-shrink-0 border-b border-border/40">
-                <div className="flex gap-2">
-                  <div className="flex-1 flex items-center gap-2 bg-muted/40 border border-border rounded-xl px-3 h-9 focus-within:border-primary transition-colors">
-                    <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                    <input
-                      type="text"
-                      value={landlordQuery}
-                      onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
-                      onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
-                      placeholder="동 이름, 번지수, 건물명, 전화번호"
-                      className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-                      autoFocus
-                    />
-                    {landlordQuery && (
-                      <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }} className="text-muted-foreground hover:text-foreground">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleLandlordSearch}
-                    disabled={!landlordQuery.trim() || landlordLoading}
-                    className="h-9 px-3 rounded-xl text-xs font-bold text-white transition-colors disabled:opacity-40"
-                    style={{ background: "hsl(var(--accent))" }}
-                  >
-                    {landlordLoading ? <span className="animate-pulse">...</span> : <Search className="w-4 h-4" />}
-                  </button>
-                </div>
-                {landlordSearched && !landlordLoading && (
-                  <p className="text-[10px] text-muted-foreground mt-1 pl-1">매물(숨김 포함) + 청주 연락처DB 통합 검색</p>
-                )}
-                {isApproved && (
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
-                    <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 번호 제한없이 열람 가능</span>
-                  </div>
-                )}
-              </div>
-              {/* 결과 목록 */}
-              <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pt-2 pb-3 flex flex-col gap-2">
-                {landlordError && (
-                  <div className="py-3 flex items-center gap-2 text-destructive text-xs">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />{landlordError}
-                  </div>
-                )}
-                {landlordSearched && !landlordLoading && !landlordError && landlordResults.length === 0 && (
-                  <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
-                    <AlertCircle className="w-8 h-8 opacity-30" />
-                    <p className="text-sm">연락처가 등록된 검색 결과가 없습니다.</p>
-                    <p className="text-xs">다른 주소나 동 이름으로 검색해보세요.</p>
-                  </div>
-                )}
-                {!landlordSearched && (
-                  <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
-                    <Search className="w-8 h-8 opacity-20" />
-                    <p className="text-xs text-center">동 이름, 번지수 또는 건물명을 입력 후 검색하세요.</p>
-                  </div>
-                )}
-                {landlordLoading && (
-                  <div className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-xs">검색 중...</p>
-                  </div>
-                )}
-                {landlordLightbox && (
-                  <div className="fixed inset-0 z-[10200] flex flex-col items-center justify-center bg-black/90" onClick={() => setLandlordLightbox(null)}>
-                    <button onClick={() => setLandlordLightbox(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                      <X className="w-4 h-4 text-white" />
-                    </button>
-                    <div className="relative flex items-center px-12 max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
-                      {landlordLightbox.images.length > 1 && (
-                        <button onClick={() => setLandlordLightbox(p => p ? { ...p, idx: (p.idx - 1 + p.images.length) % p.images.length } : null)} className="absolute left-2 w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><ChevronLeft className="w-5 h-5 text-white" /></button>
-                      )}
-                      <img src={landlordLightbox.images[landlordLightbox.idx]} className="max-h-[75vh] max-w-full rounded-xl object-contain shadow-2xl" alt="" />
-                      {landlordLightbox.images.length > 1 && (
-                        <button onClick={() => setLandlordLightbox(p => p ? { ...p, idx: (p.idx + 1) % p.images.length } : null)} className="absolute right-2 w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><ChevronRight className="w-5 h-5 text-white" /></button>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {!landlordLoading && landlordResults.map((item) => {
-                  const phoneVisible = isLandlordRevealed(item.id);
-                  const isContact = item.source === "contact";
-                  const isHidden = item.source === "property" && item.status !== "active";
-                  const isInvisible = item.source === "contact" && item.isVisible === false;
-                  const images = item.images ?? [];
-                  return (
-                    <div key={item.id} className="rounded-xl border overflow-hidden" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))", opacity: isHidden || isInvisible ? 0.85 : 1 }}>
-                      {/* 사진 스트립 */}
-                      {!isContact && images.length > 0 && (
-                        <div className="flex gap-0.5 h-24 overflow-hidden">
-                          {images.slice(0, 4).map((img, i) => (
-                            <button key={i} onClick={() => setLandlordLightbox({ images, idx: i })} className="flex-1 min-w-0 overflow-hidden hover:brightness-110 transition-all">
-                              <img src={img} alt="" className="w-full h-full object-cover" />
-                              {i === 3 && images.length > 4 && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                  <span className="text-white font-bold text-sm">+{images.length - 4}</span>
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      <div className="p-3 flex flex-col gap-1.5">
-                        {/* 헤더 */}
-                        <div className="flex items-start gap-2">
-                          {images.length === 0 && (
-                            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                              {isContact ? <BookUser className="w-4 h-4 text-muted-foreground" /> : <Building2 className="w-4 h-4 text-muted-foreground" />}
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1 flex-wrap">
-                              <p className="text-xs font-bold text-foreground">{item.label}</p>
-                              {isContact
-                                ? <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }}>연락처DB</span>
-                                : <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>매물</span>
-                              }
-                              {isHidden && <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />숨김</span>}
-                              {isInvisible && <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />미노출</span>}
-                            </div>
-                            <p className="text-[11px] text-muted-foreground">{item.sublabel}</p>
-                            {(item.badge || item.price) && (
-                              <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                                {item.badge && <span className="text-[10px] text-muted-foreground">{item.badge}</span>}
-                                {item.price && <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>{item.price}</span>}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {/* 매물 상세 */}
-                        {!isContact && (
-                          <div className="grid grid-cols-3 gap-1">
-                            {item.area && <div className="bg-muted/60 rounded-lg px-2 py-1"><p className="text-[9px] text-muted-foreground">면적</p><p className="text-[11px] font-bold">{item.area}㎡</p></div>}
-                            {item.floor && <div className="bg-muted/60 rounded-lg px-2 py-1"><p className="text-[9px] text-muted-foreground">층수</p><p className="text-[11px] font-bold">{item.floor}{item.totalFloors ? `/${item.totalFloors}` : ""}층</p></div>}
-                            {item.type && <div className="bg-muted/60 rounded-lg px-2 py-1"><p className="text-[9px] text-muted-foreground">유형</p><p className="text-[11px] font-bold truncate">{item.type}</p></div>}
-                          </div>
-                        )}
-                        {!isContact && (item.deposit || item.monthly) && (
-                          <div className="flex items-center justify-between bg-primary/5 rounded-lg px-2.5 py-1.5 border border-primary/10">
-                            <span className="text-[10px] text-muted-foreground">보증금 / 월세</span>
-                            <span className="text-sm font-bold" style={{ color: "hsl(var(--primary))" }}>
-                              {item.deposit || "–"}만 / <span style={{ color: "hsl(var(--accent))" }}>{item.monthly || "–"}만</span>
-                            </span>
-                          </div>
-                        )}
-                        {/* 전화번호 */}
-                        <div className="border-t border-border/40 pt-1.5 flex flex-col gap-1">
-                          {isApproved && (
-                            <div className="flex items-center gap-1 mb-0.5">
-                              <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
-                              <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</span>
-                            </div>
-                          )}
-                          {item.contactOwner ? (
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" style={{ color: "hsl(var(--primary))" }} />소유주(임대인)</span>
-                              {phoneVisible
-                                ? <a href={`tel:${item.contactOwner}`} className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)" }}><Phone className="w-3 h-3 inline mr-1" />{item.contactOwner}</a>
-                                : <button onClick={() => handleLandlordReveal(item.id)} className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white flex items-center gap-1" style={{ background: "hsl(var(--accent))" }}><Phone className="w-3 h-3" />번호 공개</button>
-                              }
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <AlertCircle className="w-3.5 h-3.5" /><span className="text-[11px]">임대인 직접 연락처 미등록</span>
-                            </div>
-                          )}
-                          {item.contactManager && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" style={{ color: "hsl(217 91% 60%)" }} />관리인</span>
-                              {phoneVisible
-                                ? <a href={`tel:${item.contactManager}`} className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ color: "hsl(217 91% 60%)", background: "hsl(217 91% 95%)" }}><Phone className="w-3 h-3 inline mr-1" />{item.contactManager}</a>
-                                : <button onClick={() => handleLandlordReveal(item.id)} className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white flex items-center gap-1" style={{ background: "hsl(var(--accent))" }}><Phone className="w-3 h-3" />번호 공개</button>
-                              }
-                            </div>
-                          )}
-                          {item.contactBroker && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" style={{ color: "hsl(25 95% 53%)" }} />부동산</span>
-                              {phoneVisible
-                                ? <a href={`tel:${item.contactBroker}`} className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ color: "hsl(25 95% 53%)", background: "hsl(25 95% 95%)" }}><Phone className="w-3 h-3 inline mr-1" />{item.contactBroker}</a>
-                                : <button onClick={() => handleLandlordReveal(item.id)} className="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white flex items-center gap-1" style={{ background: "hsl(var(--accent))" }}><Phone className="w-3 h-3" />번호 공개</button>
-                              }
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
+          {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
             {displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
@@ -2595,7 +2293,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             )}
           </div>
-          )} {/* end showLandlordSearch ternary */}
         </aside>
       </div>
     </>

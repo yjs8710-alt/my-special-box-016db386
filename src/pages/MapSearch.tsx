@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
+import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
@@ -51,7 +52,7 @@ const MapSearch = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
       <Header />
-      {/* 소유주 검색은 사이드바 내 탭으로 표시 */}
+      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
       <div
@@ -152,9 +153,6 @@ const MapSearch = () => {
           activeType={activeType}
           onTypeChange={setActiveType}
           onDeleteProperties={handleDeleteProperties}
-          showLandlordSearch={showLandlord}
-          onCloseLandlordSearch={() => setShowLandlord(false)}
-          onOpenLandlordSearch={() => setShowLandlord(true)}
         />
       </main>
     </div>
