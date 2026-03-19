@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, Phone } from "lucide-react";
+import { useState, useRef } from "react";
+import { Search, X, SlidersHorizontal, RotateCcw, Phone, MapPin, AlertCircle, Eye, EyeOff, ShieldCheck, BookUser, Building2, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const SEARCH_CATEGORIES = [
   { value: "residential", short: "주거형임대", label: "주거형임대", desc: "원투룸, 주택, 빌라, 아파트, 오피스텔", route: "/residential" },
