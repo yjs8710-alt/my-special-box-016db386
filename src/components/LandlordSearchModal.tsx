@@ -33,40 +33,17 @@ interface SearchResult {
   totalFloors?: string;
   availableFrom?: string;
   note?: string;
-  unitNumber?: string;
-  manageFee?: string;
-  parking?: string;
-  elevator?: boolean;
-  buildingPassword?: string;
-  roomPassword?: string;
-  buildingMemo?: string;
-  roomMemo?: string;
-  options?: string[];
-  registeredDate?: string;
-  checkedDate?: string;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
 let _panelId = 1;
 function toMapProperty(item: SearchResult): MapProperty {
-  // area: "34.5㎡ (10평)" 형태로 변환
-  const areaStr = item.area
-    ? (() => {
-        const n = parseFloat(item.area);
-        if (isNaN(n)) return item.area;
-        const pyeong = Math.round(n / 3.3058);
-        return `${n}㎡ (${pyeong}평)`;
-      })()
-    : "—";
-
   return {
     id: _panelId++,
     title: item.label,
-    buildingName: item.label,
     address: item.sublabel,
     type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
-    unitNumber: item.unitNumber,
-    area: areaStr,
+    area: item.area ? `${item.area}㎡` : "—",
     floor: item.floor ?? "—",
     deposit: item.deposit ? `${item.deposit}만` : "—",
     monthly: item.monthly ? `${item.monthly}만` : "—",
@@ -76,24 +53,16 @@ function toMapProperty(item: SearchResult): MapProperty {
     image: (item.images ?? [])[0] ?? "",
     images: item.images ?? [],
     description: item.note ?? "",
-    note: item.note,
     contact: item.contactBroker ?? "",
     contactOwner: item.contactOwner ?? "",
     contactManager: item.contactManager ?? "",
     agentName: "",
-    manageFee: item.manageFee ?? "—",
-    parking: item.parking ?? "—",
-    elevator: item.elevator ?? false,
+    manageFee: "—",
+    parking: "—",
+    elevator: false,
     availableFrom: item.availableFrom ?? "—",
     totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "—",
     buildYear: item.buildYear ? `${item.buildYear}년` : "—",
-    buildingMemo: item.buildingMemo,
-    roomMemo: item.roomMemo,
-    options: item.options ?? [],
-    registeredDate: item.registeredDate,
-    checkedDate: item.checkedDate,
-    buildingPassword: item.buildingPassword,
-    roomPassword: item.roomPassword,
     isNew: false,
     isHot: false,
   };

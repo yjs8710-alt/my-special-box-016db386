@@ -601,14 +601,7 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
 
           {/* Bottom title overlay */}
           <div className="absolute bottom-3 left-4 right-4 z-10">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <p className="text-white font-bold text-[15px] line-clamp-1 drop-shadow-sm">{property.title}</p>
-              {property.unitNumber && (
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white/25 text-white backdrop-blur-sm flex-shrink-0">
-                  {property.unitNumber}호
-                </span>
-              )}
-            </div>
+            <p className="text-white font-bold text-[15px] line-clamp-1 drop-shadow-sm">{property.title}</p>
             <div className="flex items-center gap-1 mt-0.5">
               <MapPin className="w-3 h-3 text-white/70 flex-shrink-0" />
               <p className="text-white/80 text-xs line-clamp-1">{property.address}</p>
