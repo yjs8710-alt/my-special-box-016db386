@@ -75,12 +75,12 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
+        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number, manage_fee, parking, elevator, building_password, room_password, building_memo, room_memo, options, registered_date, checked_date")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       adminClient
         .from("cheongju_contacts")
-        .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible")
+        .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible, unit_number")
         .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,contact_owner.ilike.%${keyword}%,contact_manager.ilike.%${keyword}%,contact_broker.ilike.%${keyword}%,phone.ilike.%${keyword}%`)
         .limit(30),
     ]);
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
           status: row.status,
           label: row.building_name ?? row.title,
           sublabel: row.address,
-          badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
+          badge: [row.unit_number ? `${row.unit_number}호` : undefined, row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
           price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
           images: Array.isArray(row.images) ? row.images : [],
           contactOwner: owner,
@@ -120,6 +120,17 @@ Deno.serve(async (req) => {
           totalFloors: row.total_floors ?? undefined,
           availableFrom: row.available_from ?? undefined,
           note: row.note ?? undefined,
+          unitNumber: row.unit_number ?? undefined,
+          manageFee: row.manage_fee ?? undefined,
+          parking: row.parking ?? undefined,
+          elevator: row.elevator ?? undefined,
+          buildingPassword: row.building_password ?? undefined,
+          roomPassword: row.room_password ?? undefined,
+          buildingMemo: row.building_memo ?? undefined,
+          roomMemo: row.room_memo ?? undefined,
+          options: Array.isArray(row.options) ? row.options : [],
+          registeredDate: row.registered_date ?? undefined,
+          checkedDate: row.checked_date ?? undefined,
         });
       }
     }
