@@ -83,6 +83,19 @@ const TYPE_BG: Record<string, string> = {
   "식당·카페": "bg-orange-50 text-accent",
   "공장·창고": "bg-green-50 text-green-700",
   "병원·학원": "bg-red-50 text-red-700",
+  "연립": "bg-blue-50 text-blue-700",
+  "다세대": "bg-sky-50 text-sky-700",
+  "단독주택": "bg-amber-50 text-amber-700",
+  "빌라": "bg-indigo-50 text-indigo-700",
+  "아파트": "bg-teal-50 text-teal-700",
+  "오피스텔": "bg-violet-50 text-violet-700",
+  "원룸": "bg-pink-50 text-pink-700",
+  "투룸": "bg-rose-50 text-rose-700",
+  "쓰리룸": "bg-red-50 text-red-700",
+  "고시원": "bg-gray-100 text-gray-600",
+  "토지": "bg-lime-50 text-lime-700",
+  "건물매매": "bg-orange-100 text-orange-800",
+  "단독매매": "bg-yellow-50 text-yellow-700",
 };
 
 /* 옵션 SVG 아이콘 컴포넌트 */
@@ -1171,15 +1184,20 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5}/>} label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/></svg>} label="방메모" initialText={roomMemo ?? ""} />
-        {/* 관리자 확인 체크박스 — 텍스트 없이 아이콘+D숫자만 */}
+        {/* 관리자 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 */}
         {isAdmin && prop.memo && (() => {
+          // 확인일(chkDate) 기준 경과일 (확인 체크용)
           const daysSince = chkDate
             ? Math.floor((Date.now() - new Date(chkDate).getTime()) / 86400000)
+            : null;
+          // 등록일(regDate) 기준 경과일 — 오늘 등록=0, 내일=1, ...
+          const daysFromReg = regDate
+            ? Math.floor((Date.now() - new Date(regDate).getTime()) / 86400000)
             : null;
           return (
             <button
               type="button"
-              title={isChecked ? `확인일: ${chkDate} (${daysSince}일 경과) — 클릭 시 초기화` : "오늘 확인 완료로 표시"}
+              title={isChecked ? `확인: ${chkDate} (확인 후 ${daysSince}일) | 등록 후 ${daysFromReg}일 — 클릭 시 초기화` : `등록 후 ${daysFromReg}일 경과 — 클릭하여 확인 완료 표시`}
               onClick={handleCheckToggle}
               disabled={checking}
               className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
@@ -1198,8 +1216,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                   <rect x="1" y="1" width="8" height="8" rx="1.5" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5"/>
                 </svg>
               )}
+              {/* 등록일 기준 경과일 (D+N) */}
               <span className="text-[10px] font-black whitespace-nowrap tabular-nums" style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
-                {isChecked ? daysSince : "?"}
+                {daysFromReg !== null ? daysFromReg : (isChecked ? daysSince : "?")}
               </span>
             </button>
           );
