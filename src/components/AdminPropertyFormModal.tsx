@@ -436,6 +436,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
 
+    // 방향, LH, 청소비, 중개보수 파싱
+    const dirMatch = noteStr.match(/방향[:\s]+([^\n|]+)/);
+    const lhMatch2 = noteStr.match(/LH[:\s]+([^\n|]+)/);
+    const cleanMatch2 = noteStr.match(/청소비[:\s]+([^\n|]+)/);
+    const brokerFeeMatch2 = noteStr.match(/중개보수[:\s]+([^\n|]+)/);
+    if (dirMatch) contacts.direction = dirMatch[1].trim();
+    if (lhMatch2) contacts.lhType = lhMatch2[1].trim() as LhType;
+    if (cleanMatch2) contacts.exitCleanFee = cleanMatch2[1].trim();
+    if (brokerFeeMatch2) contacts.brokerFee = brokerFeeMatch2[1].trim();
+
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
     const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
