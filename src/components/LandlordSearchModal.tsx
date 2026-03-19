@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MapProperty } from "@/data/mapProperties";
 import { useAuth } from "@/hooks/useAuth";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -35,38 +33,139 @@ interface SearchResult {
   note?: string;
 }
 
-// ── SearchResult → MapProperty 변환 ───────────────────────────────────────
-let _panelId = 1;
-function toMapProperty(item: SearchResult): MapProperty {
-  return {
-    id: _panelId++,
-    title: item.label,
-    address: item.sublabel,
-    type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
-    area: item.area ? `${item.area}㎡` : "—",
-    floor: item.floor ?? "—",
-    deposit: item.deposit ? `${item.deposit}만` : "—",
-    monthly: item.monthly ? `${item.monthly}만` : "—",
-    views: 0,
-    lat: 0,
-    lng: 0,
-    image: (item.images ?? [])[0] ?? "",
-    images: item.images ?? [],
-    description: item.note ?? "",
-    contact: item.contactBroker ?? "",
-    contactOwner: item.contactOwner ?? "",
-    contactManager: item.contactManager ?? "",
-    agentName: "",
-    manageFee: "—",
-    parking: "—",
-    elevator: false,
-    availableFrom: item.availableFrom ?? "—",
-    totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "—",
-    buildYear: item.buildYear ? `${item.buildYear}년` : "—",
-    isNew: false,
-    isHot: false,
-  };
+// ── 우측 컴팩트 매물 정보 패널 ──────────────────────────────────────────────
+interface InfoPanelProps {
+  item: SearchResult;
+  isApproved: boolean;
+  revealed: Record<string, boolean>;
+  onReveal: (id: string) => void;
+  onClose: () => void;
+  onLightbox: (images: string[], idx: number) => void;
 }
+const InfoPanel = ({ item, isApproved, revealed, onReveal, onClose, onLightbox }: InfoPanelProps) => {
+  const phoneVisible = isApproved || revealed[item.id] || hasRevealedToday(item.id);
+  const images = item.images ?? [];
+  const isContact = item.source === "contact";
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* 헤더 */}
+      <div
+        className="flex items-start justify-between px-4 py-3.5 flex-shrink-0"
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(218 88% 32%))" }}
+      >
+        <div className="flex flex-col gap-0.5">
+          <p className="text-base font-bold text-white leading-tight">{item.label}</p>
+          <p className="text-[11px] text-white/70 font-medium">{item.sublabel}</p>
+          {item.type && (
+            <span className="mt-1 inline-flex text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-semibold w-fit">
+              {item.type}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={onClose}
+          className="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"
+        >
+          <X className="w-3.5 h-3.5 text-white" />
+        </button>
+      </div>
+
+      {/* 사진 */}
+      {!isContact && images.length > 0 && (
+        <div className="flex gap-0.5 h-28 flex-shrink-0 overflow-hidden relative">
+          {images.slice(0, 3).map((img, i) => (
+            <button key={i} onClick={() => onLightbox(images, i)} className="flex-1 min-w-0 overflow-hidden hover:brightness-110 transition-all">
+              <img src={img} alt="" className="w-full h-full object-cover" />
+              {i === 2 && images.length > 3 && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">+{images.length - 3}</span>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 본문 */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3">
+        {/* 기본 정보 */}
+        {!isContact && (
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { icon: <Layers className="w-3 h-3" />, label: "층수", value: item.floor ? `${item.floor}층${item.totalFloors ? `/${item.totalFloors}층` : ""}` : null },
+              { icon: <Ruler className="w-3 h-3" />, label: "면적", value: item.area ? `${item.area}㎡` : null },
+              { icon: <Calendar className="w-3 h-3" />, label: "준공", value: item.buildYear ? `${item.buildYear}년` : null },
+              { icon: <Home className="w-3 h-3" />, label: "입주", value: item.availableFrom ?? null },
+            ].filter(d => d.value).map((d, i) => (
+              <div key={i} className="bg-muted/50 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-1 text-muted-foreground mb-0.5">
+                  {d.icon}
+                  <span className="text-[9px]">{d.label}</span>
+                </div>
+                <p className="text-xs font-bold text-foreground">{d.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 가격 */}
+        {!isContact && (item.deposit || item.monthly) && (
+          <div className="rounded-xl px-3 py-2.5 border border-primary/20 bg-primary/5">
+            <p className="text-[10px] text-muted-foreground mb-1">보증금 / 월세</p>
+            <p className="text-sm font-bold" style={{ color: "hsl(var(--primary))" }}>
+              {item.deposit || "–"}만
+              <span className="text-muted-foreground mx-1">/</span>
+              <span style={{ color: "hsl(var(--accent))" }}>{item.monthly || "–"}만</span>
+            </p>
+          </div>
+        )}
+
+        {/* note */}
+        {item.note && (
+          <p className="text-[11px] text-muted-foreground bg-muted/40 rounded-lg px-3 py-2 leading-relaxed">{item.note}</p>
+        )}
+
+        {/* 연락처 */}
+        <div className="border-t border-border/50 pt-2 flex flex-col gap-2">
+          {isApproved && (
+            <div className="flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+              <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람</span>
+            </div>
+          )}
+          {[
+            { label: "소유주(임대인)", phone: item.contactOwner, color: "hsl(var(--primary))" },
+            { label: "관리인", phone: item.contactManager, color: "hsl(var(--chart-4))" },
+            { label: "부동산", phone: item.contactBroker, color: "hsl(var(--chart-3))" },
+          ].filter(r => r.phone).map((r, i) => (
+            <div key={i} className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" style={{ color: r.color }} />
+                <span className="text-[11px] font-semibold text-muted-foreground">{r.label}</span>
+              </div>
+              {phoneVisible ? (
+                <a href={`tel:${r.phone}`} className="flex items-center gap-1.5 text-sm font-bold rounded-lg px-3 py-1.5 transition-colors" style={{ color: r.color, background: `${r.color}18` }}>
+                  <Phone className="w-3.5 h-3.5" />{r.phone}
+                </a>
+              ) : (
+                <button onClick={() => onReveal(item.id)} className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-all hover:scale-105" style={{ background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }}>
+                  <Eye className="w-3.5 h-3.5" />번호 공개
+                </button>
+              )}
+            </div>
+          ))}
+          {!item.contactOwner && !item.contactManager && !item.contactBroker && (
+            <div className="flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground">등록된 연락처 없음</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ── Photo Lightbox ──────────────────────────────────────────────
 interface LightboxProps {
@@ -388,10 +487,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [error, setError] = useState("");
   const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
-  const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
   // 승인된 회원(인증된 모든 로그인 사용자)은 번호 제한 없이 바로 노출
-  // authLoading 중에는 false로 처리하되, 로딩 완료 후 isAuthorized 값 사용
   const isApproved = !authLoading && isAuthorized;
 
   const handleReveal = (id: string) => {
@@ -406,7 +503,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     setLoading(true);
     setError("");
     setSelectedItem(null);
-    setPanelProperty(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: query.trim() },
@@ -423,16 +519,10 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   };
 
   const handleOpenPanel = (item: SearchResult) => {
-    if (selectedItem?.id === item.id) {
-      setSelectedItem(null);
-      setPanelProperty(null);
-    } else {
-      setSelectedItem(item);
-      setPanelProperty(toMapProperty(item));
-    }
+    setSelectedItem(prev => prev?.id === item.id ? null : item);
   };
 
-  const hasPanel = panelProperty !== null;
+  const hasPanel = selectedItem !== null;
 
   return (
     <>
@@ -502,7 +592,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     autoFocus
                   />
                   {query && (
-                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); setPanelProperty(null); }} className="text-muted-foreground hover:text-foreground">
+                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); }} className="text-muted-foreground hover:text-foreground">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -581,16 +671,20 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
             </div>
           </div>
 
-          {/* ── 우측 매물 상세 패널 ── */}
-          {hasPanel && (
+          {/* ── 우측 매물 정보란 ── */}
+          {hasPanel && selectedItem && (
             <div
-              className="relative hidden md:block rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
-              style={{ width: "360px", height: "90vh", flexShrink: 0, position: "relative" }}
+              className="relative hidden md:flex flex-col rounded-2xl overflow-hidden shadow-2xl bg-card border border-border"
+              style={{ width: "340px", height: "90vh", flexShrink: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <PropertyDetailPanel
-                property={panelProperty}
-                onClose={() => { setSelectedItem(null); setPanelProperty(null); }}
+              <InfoPanel
+                item={selectedItem}
+                isApproved={isApproved}
+                revealed={revealed}
+                onReveal={handleReveal}
+                onClose={() => setSelectedItem(null)}
+                onLightbox={(imgs, idx) => setLightbox({ images: imgs, idx })}
               />
             </div>
           )}
