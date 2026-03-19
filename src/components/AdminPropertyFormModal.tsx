@@ -600,9 +600,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
 
     // note 필드: 연락처 + 다중 임대방식 저장
-    const hasWolse   = form.tradeType === "임대" && (form.rentModes.includes("월세") || (form.rentModes.length === 0 && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세")));
-    const hasHalf    = form.tradeType === "임대" && form.rentModes.includes("반전세");
-    const hasJeonse  = form.tradeType === "임대" && form.rentModes.includes("전세");
+    const isRent = form.tradeType === "임대";
+    const hasWolse  = isRent && (form.rentModes.includes("월세") || form.rentModes.length === 0);
+    const hasHalf   = isRent && form.rentModes.includes("반전세");
+    const hasJeonse = isRent && form.rentModes.includes("전세");
+
+    // 전세 단독 선택 시 jeonseDeposit → deposit 필드에 반영
+    const finalDeposit = (hasJeonse && !hasWolse && !hasHalf && form.jeonseDeposit)
+      ? form.jeonseDeposit
+      : form.deposit;
+    const finalMonthly = (hasJeonse && !hasWolse && !hasHalf) ? "0" : form.monthly;
 
     const rentNotes: string[] = [];
     if (hasWolse && (form.deposit || form.monthly))
@@ -631,8 +638,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       unit_number: form.unit_number || null,
       area: form.area ?? "",
       floor: form.floor ?? "",
-      deposit: form.deposit ?? "",
-      monthly: form.monthly ?? "",
+      deposit: finalDeposit ?? "",
+      monthly: finalMonthly ?? "",
       manage_fee: form.manage_fee ?? "",
       parking: form.parking ?? "",
       elevator: form.elevator ?? false,
@@ -1093,7 +1100,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
 
                     {/* 월세 금액 */}
-                    {(form.rentModes.includes("월세") || form.rentModes.length === 0) && (
+                    {(form.rentModes.includes("월세") || (form.rentModes.length === 0 && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세"))) && (
                       <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
                         <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
                         <div className="grid grid-cols-2 gap-2">
