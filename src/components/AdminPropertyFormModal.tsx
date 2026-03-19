@@ -1100,7 +1100,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
 
                     {/* 월세 금액 */}
-                    {(form.rentModes.includes("월세") || (form.rentModes.length === 0)) && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세") ? (
+                    {(form.rentModes.includes("월세") || (form.rentModes.length === 0 && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세"))) && (
                       <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
                         <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
                         <div className="grid grid-cols-2 gap-2">
