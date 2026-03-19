@@ -572,6 +572,7 @@ const MapFilterBar = ({
                 {landlordLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" strokeWidth={2.5} />}
               </button>
             )}
+          </div>
         </div>
 
         {/* 상세 필터 패널 */}
