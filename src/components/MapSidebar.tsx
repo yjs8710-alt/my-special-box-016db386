@@ -2591,6 +2591,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             )}
           </div>
+          )} {/* end showLandlordSearch ternary */}
         </aside>
       </div>
     </>
