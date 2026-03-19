@@ -420,7 +420,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     // tradeType 복원: type 필드가 매매 계열이면 "매매", 아니면 "임대"
     const noteStr2 = init.note ?? "";
-    if (SALE_TYPES.includes(init.type ?? "")) {
+    if (SALE_TYPES.includes(init.type ?? "") || noteStr2.includes("매매가:")) {
       contacts.tradeType = "매매";
     } else if (noteStr2.includes("월세") || noteStr2.includes("전세") || noteStr2.includes("반전세")) {
       contacts.tradeType = "임대";
