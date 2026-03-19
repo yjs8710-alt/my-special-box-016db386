@@ -662,6 +662,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
       form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
       form.brokerFee && `중개보수: ${form.brokerFee}`,
+      form.earlyExit && `중도퇴거: 세입자중도퇴거`,
     ].filter(Boolean).join("\n");
 
     const payload = {
