@@ -1571,6 +1571,10 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
+  /** 소유주 번호 검색 결과 */
+  landlordResults?: import("@/components/MapFilterBar").LandlordResult[];
+  landlordLoading?: boolean;
+  landlordSearched?: boolean;
 }
 
 const MIN_WIDTH = 260;
