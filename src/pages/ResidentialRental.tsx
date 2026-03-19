@@ -6,14 +6,25 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MapProperty } from "@/data/mapProperties";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
+const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "다세대"];
+const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원", "연립", "다세대", "주상복합"];
 
-
-
-
+const ResidentialRental = () => {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
+  const [query, setQuery] = useState("");
+  const [propertyId, setPropertyId] = useState("");
+  const [showLandlord, setShowLandlord] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [landlordProperty, setLandlordProperty] = useState<MapProperty | null>(null);
 
 
 const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "다세대"];
