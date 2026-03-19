@@ -16,9 +16,9 @@ const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
 
 
-const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "다세대", "연립"];
+const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라"];
 
-const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원", "다세대", "연립"];
+const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원"];
 
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
