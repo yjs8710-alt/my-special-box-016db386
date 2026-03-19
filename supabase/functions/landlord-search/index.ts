@@ -154,9 +154,11 @@ Deno.serve(async (req) => {
           isVisible: row.is_visible,
           label: addrLabel,
           sublabel: `청주시 ${row.district} ${row.dong}`,
+          badge: row.unit_number ? `${row.unit_number}호` : undefined,
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
+          unitNumber: row.unit_number ?? undefined,
         });
       }
     }
