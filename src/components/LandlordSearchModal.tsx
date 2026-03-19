@@ -33,38 +33,6 @@ interface SearchResult {
   note?: string;
 }
 
-// ── SearchResult → MapProperty 변환 ───────────────────────────────────────
-let _panelId = 1;
-function toMapProperty(item: SearchResult): MapProperty {
-  return {
-    id: _panelId++,
-    title: item.label,
-    address: item.sublabel,
-    type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
-    area: item.area ? `${item.area}㎡` : "—",
-    floor: item.floor ?? "—",
-    deposit: item.deposit ? `${item.deposit}만` : "—",
-    monthly: item.monthly ? `${item.monthly}만` : "—",
-    views: 0,
-    lat: 0,
-    lng: 0,
-    image: (item.images ?? [])[0] ?? "",
-    images: item.images ?? [],
-    description: item.note ?? "",
-    contact: item.contactBroker ?? "",
-    contactOwner: item.contactOwner ?? "",
-    contactManager: item.contactManager ?? "",
-    agentName: "",
-    manageFee: "—",
-    parking: "—",
-    elevator: false,
-    availableFrom: item.availableFrom ?? "—",
-    totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "—",
-    buildYear: item.buildYear ? `${item.buildYear}년` : "—",
-    isNew: false,
-    isHot: false,
-  };
-}
 
 // ── Photo Lightbox ──────────────────────────────────────────────
 interface LightboxProps {
