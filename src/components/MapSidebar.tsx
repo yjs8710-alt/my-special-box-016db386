@@ -2030,7 +2030,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 매물 목록
               </button>
               <button
-                onClick={() => { /* showLandlordSearch는 부모에서 제어 */ }}
+                onClick={() => { if (!showLandlordSearch) { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); } }}
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-bold transition-all"
                 style={
                   showLandlordSearch
