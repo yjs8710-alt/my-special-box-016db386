@@ -149,6 +149,8 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  /** 소유주 검색 결과를 부모로 전달 */
+  onLandlordResults?: (results: LandlordResult[], loading: boolean, searched: boolean) => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
