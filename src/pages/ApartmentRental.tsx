@@ -13,7 +13,7 @@ const APARTMENT_PROPERTIES: MapProperty[] = [];
 const APARTMENT_SUBTYPES = ["아파트", "오피스텔", "연립/다세대", "분양권"];
 const APARTMENT_DEAL_TYPES = ["매매", "전세", "월세"];
 
-const APARTMENT_DB_TYPES = ["아파트", "오피스텔"];
+const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "연립", "다세대", "주상복합"];
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
