@@ -463,7 +463,7 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
                     autoFocus
                   />
                   {query && (
-                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); setPanelProperty(null); }} className="text-muted-foreground hover:text-foreground">
+                    <button onClick={() => { setQuery(""); setSearched(false); setResults([]); setSelectedItem(null); }} className="text-muted-foreground hover:text-foreground">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
