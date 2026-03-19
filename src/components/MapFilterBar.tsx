@@ -537,14 +537,6 @@ const MapFilterBar = ({
     }
   };
 
-
-  const today = () => new Date().toISOString().slice(0, 10);
-  const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
-  const handleReveal = (id: string) => {
-    localStorage.setItem(`landlord_reveal_${id}`, today());
-    setRevealedIds(prev => ({ ...prev, [id]: true }));
-  };
-
   const handleLandlordSearch = async () => {
     if (!landlordQuery.trim()) return;
     setLandlordSearched(true);
