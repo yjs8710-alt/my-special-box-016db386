@@ -322,6 +322,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   halfDeposit: string;
   halfMonthly: string;
   jeonseDeposit: string;
+  earlyExit: boolean; // 세입자 중도퇴거
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -341,6 +342,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   halfDeposit: "",
   halfMonthly: "",
   jeonseDeposit: "",
+  earlyExit: false,
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
