@@ -2094,16 +2094,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                 {[...displayProperties]
-                  .sort((a, b) => {
-                  const isSaleA = a.type?.includes("매매") ? 1 : 0;
-                  const isSaleB = b.type?.includes("매매") ? 1 : 0;
-                  if (isSaleA !== isSaleB) return isSaleA - isSaleB;
-                  // 등록일 내림차순 (최신 등록 우선)
-                  const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
-                  const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
-                  return regB - regA;
-                }).map((prop, idx) => {
+                 {(pinnedIds && pinnedIds.length > 0
+                  // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
+                  ? [...displayProperties]
+                  : [...displayProperties].sort((a, b) => {
+                      const isSaleA = a.type?.includes("매매") ? 1 : 0;
+                      const isSaleB = b.type?.includes("매매") ? 1 : 0;
+                      if (isSaleA !== isSaleB) return isSaleA - isSaleB;
+                      // 등록일 내림차순 (최신 등록 우선)
+                      const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
+                      const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
+                      return regB - regA;
+                    })
+                ).map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo ?? prop.memo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
