@@ -2077,7 +2077,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </button>
               </div>
             )}
-            {/* 상단: 주요 액션 */}
+            {/* 상단: 주요 액션 — 매물 목록 탭에서만 표시 */}
+            {!showLandlordSearch && (
             <div className="flex items-center gap-2 px-3 py-0.5 border-b border-border/60">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
@@ -2091,7 +2092,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
               </div>
             </div>
-            {/* 외부 링크 바 + 선택인쇄 */}
+            )}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {/* 구분선 */}
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
