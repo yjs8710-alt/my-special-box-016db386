@@ -676,6 +676,41 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
             </div>
           </div>
 
+            {/* ── 추가 조건 정보 (방향·빈방여부·LH·청소비·중개보수) ── */}
+            {(() => {
+              const note = property.note ?? "";
+              const directionMatch = note.match(/방향[:\s]+([^\n|]+)/);
+              const lhMatch = note.match(/LH[:\s]+([^\n|]+)/);
+              const cleanMatch = note.match(/청소비[:\s]+([^\n|]+)/);
+              const brokerFeeMatch = note.match(/중개보수[:\s]+([^\n|]+)/);
+
+              const direction = directionMatch?.[1]?.trim();
+              const lhType = lhMatch?.[1]?.trim();
+              const cleanFee = cleanMatch?.[1]?.trim();
+              const brokerFee = brokerFeeMatch?.[1]?.trim();
+              const availableFrom = property.availableFrom;
+
+              const items = [
+                availableFrom && { label: "빈방여부", value: availableFrom, color: availableFrom === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
+                direction && { label: "방향", value: direction, color: "hsl(var(--foreground))" },
+                lhType && { label: "LH 대출", value: lhType, color: lhType === "LH가능" ? "hsl(217 91% 60%)" : lhType === "LH불가" ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" },
+                cleanFee && { label: "퇴실청소비", value: cleanFee.endsWith("만원") ? cleanFee : `${cleanFee}만원`, color: "hsl(var(--foreground))" },
+                brokerFee && { label: "중개보수", value: brokerFee, color: "hsl(var(--foreground))" },
+              ].filter(Boolean) as { label: string; value: string; color: string }[];
+
+              if (items.length === 0) return null;
+              return (
+                <div className="mx-4 mb-3 rounded-xl border border-border bg-muted/30 overflow-hidden">
+                  {items.map((item, i) => (
+                    <div key={item.label} className={`flex items-center justify-between px-3 py-2 text-xs ${i > 0 ? "border-t border-border/50" : ""}`}>
+                      <span className="text-muted-foreground font-medium">{item.label}</span>
+                      <span className="font-bold" style={{ color: item.color }}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
           {/* Info grid */}
           <div className="px-4 pt-4 pb-2">
             <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
