@@ -5,6 +5,7 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import PinClickPanel from "@/components/PinClickPanel";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -17,7 +18,7 @@ const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "연립", "다세대", 
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [clickedProperties, setClickedProperties] = useState<MapProperty[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -43,16 +44,21 @@ const ApartmentRental = () => {
     setActiveDealTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
   };
 
-  // activeTypes가 빈 배열이면 전체 표시 (아파트 페이지 특성)
+  // activeTypes가 빈 배열이면 전체 표시
   const aptTypeFilter = activeTypes.length === 0 ? ["전체"] : activeTypes;
   const filtered = usePropertyFilter(allProperties, filters, aptTypeFilter, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
 
+  // 핀 클릭 핸들러: 클릭 순서대로 패널에 누적
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    if (!prop) return;
+    setClickedProperties(prev => {
+      const existing = prev.filter(p => p.id !== id);
+      return [prop, ...existing];
+    });
   };
 
   return (
@@ -135,6 +141,15 @@ const ApartmentRental = () => {
             onApartmentDealTypeChange={toggleDealType}
             onClearApartmentDealTypes={() => setActiveDealTypes([])}
           />
+          {/* 핀 클릭 패널 (지도 위 우측 오버레이) */}
+          {clickedProperties.length > 0 && (
+            <PinClickPanel
+              properties={clickedProperties}
+              onClose={() => { setClickedProperties([]); setSelectedId(null); }}
+              onSelectProperty={(id) => setSelectedId(id)}
+              selectedId={selectedId}
+            />
+          )}
         </div>
         <MapSidebar
           properties={filtered}
@@ -143,8 +158,6 @@ const ApartmentRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>
