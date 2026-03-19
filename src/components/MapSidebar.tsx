@@ -1571,6 +1571,9 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
+  /** 소유주 번호 검색 패널 표시 여부 */
+  showLandlordSearch?: boolean;
+  onCloseLandlordSearch?: () => void;
 }
 
 const MIN_WIDTH = 260;
