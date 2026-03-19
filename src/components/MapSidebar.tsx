@@ -612,6 +612,19 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
     setPendingPreviews(prev => prev.filter((_, i) => i !== idx));
   };
 
+  // 대표사진 설정 (해당 사진을 배열 첫 번째로 이동)
+  const setMainPhoto = async (idx: number) => {
+    if (idx === 0) return;
+    const next = [savedPhotos[idx], ...savedPhotos.filter((_, i) => i !== idx)];
+    if (isDBProperty) {
+      await supabase.from("properties").update({ images: next }).eq("id", dbId);
+    } else {
+      localStorage.setItem(storageKey, JSON.stringify(next));
+    }
+    setSavedPhotos(next);
+    onImagesUpdated?.(next);
+  };
+
   // 저장된 사진 제거
   const removeSaved = async (idx: number) => {
     const url = savedPhotos[idx];
