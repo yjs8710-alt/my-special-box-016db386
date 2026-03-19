@@ -1554,6 +1554,203 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   );
 };
 
+/* ── 소유주 검색 인라인 패널 ── */
+interface LandlordSearchResult {
+  id: string;
+  source: "property" | "contact";
+  status?: string;
+  isVisible?: boolean;
+  label: string;
+  sublabel: string;
+  unitNumber?: string;
+  badge?: string;
+  price?: string;
+  images?: string[];
+  contactOwner: string;
+  contactManager: string;
+  contactBroker: string;
+  floor?: string;
+  area?: string;
+  deposit?: string;
+  monthly?: string;
+  type?: string;
+  buildYear?: string;
+  totalFloors?: string;
+  availableFrom?: string;
+  note?: string;
+}
+
+const today_ls = () => new Date().toISOString().slice(0, 10);
+const revealKeyLS = (id: string) => `landlord_reveal_${id}`;
+const hasRevealedTodayLS = (id: string) => localStorage.getItem(revealKeyLS(id)) === today_ls();
+const markRevealedLS = (id: string) => localStorage.setItem(revealKeyLS(id), today_ls());
+
+interface LandlordCardProps {
+  item: LandlordSearchResult;
+  isApproved: boolean;
+}
+
+const LandlordCard = ({ item, isApproved }: LandlordCardProps) => {
+  const [revealed, setRevealed] = useState(() => isApproved || hasRevealedTodayLS(item.id));
+  const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
+  const isHidden = item.source === "property" && item.status !== "active";
+  const isInvisible = item.source === "contact" && item.isVisible === false;
+  const images = item.images ?? [];
+
+  const handleReveal = () => {
+    markRevealedLS(item.id);
+    setRevealed(true);
+  };
+
+  const phoneVisible = isApproved || revealed;
+
+  const PhoneBtn = ({ label, phone, color }: { label: string; phone: string; color: string }) => (
+    <div className="flex items-center justify-between py-0.5">
+      <div className="flex items-center gap-1">
+        <Phone className="w-3 h-3 flex-shrink-0" style={{ color }} />
+        <span className="text-[10px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>{label}</span>
+      </div>
+      {phoneVisible ? (
+        <a href={`tel:${phone}`} className="text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color, background: `${color}18` }}>
+          {phone}
+        </a>
+      ) : (
+        <button
+          onClick={handleReveal}
+          className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg"
+          style={{ background: "hsl(var(--accent))", color: "#fff" }}
+        >
+          <Eye className="w-3 h-3" />번호 공개
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[10200] bg-black/90 flex flex-col items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <X className="w-4 h-4 text-white" />
+          </button>
+          <img src={lightbox.images[lightbox.idx]} className="max-h-[75vh] max-w-[90vw] rounded-xl object-contain" />
+          <p className="text-white/60 text-xs mt-2">{lightbox.idx + 1} / {lightbox.images.length}</p>
+        </div>
+      )}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{
+          borderColor: "hsl(var(--border))",
+          background: "hsl(var(--background))",
+          opacity: isHidden || isInvisible ? 0.8 : 1,
+        }}
+      >
+        {/* 사진 스트립 */}
+        {images.length > 0 && (
+          <div className="flex gap-0.5 h-20 overflow-hidden">
+            {images.slice(0, 4).map((img, i) => (
+              <button key={i} onClick={() => setLightbox({ images, idx: i })} className="flex-1 min-w-0 relative overflow-hidden hover:brightness-110">
+                <img src={img} alt="" className="w-full h-full object-cover" />
+                {i === 3 && images.length > 4 && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">+{images.length - 4}</span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="p-2.5 flex flex-col gap-1.5">
+          {/* 헤더 */}
+          <div className="flex items-start gap-2">
+            {images.length === 0 && (
+              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                {item.source === "contact" ? <BookUser className="w-4 h-4 text-muted-foreground" /> : <Building2 className="w-4 h-4 text-muted-foreground" />}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1 flex-wrap">
+                <p className="text-xs font-bold text-foreground">{item.label}</p>
+                {item.source === "contact" ? (
+                  <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }}>연락처DB</span>
+                ) : (
+                  <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>매물</span>
+                )}
+                {isHidden && <span className="flex items-center gap-0.5 text-[9px] px-1 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />숨김</span>}
+                {isInvisible && <span className="flex items-center gap-0.5 text-[9px] px-1 py-0.5 rounded-full font-semibold bg-muted text-muted-foreground"><EyeOff className="w-2.5 h-2.5" />미노출</span>}
+              </div>
+              <p className="text-[10px] text-muted-foreground leading-tight">{item.sublabel}</p>
+              {(item.badge || item.price) && (
+                <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                  {item.badge && <span className="text-[10px] text-muted-foreground">{item.badge}</span>}
+                  {item.price && <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>{item.price}</span>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 매물 정보 그리드 */}
+          {item.source === "property" && (item.area || item.floor || item.type) && (
+            <div className="grid grid-cols-3 gap-1">
+              {item.area && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">면적</p>
+                  <p className="text-[10px] font-bold text-foreground">{item.area}㎡</p>
+                </div>
+              )}
+              {item.floor && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">층수</p>
+                  <p className="text-[10px] font-bold text-foreground">{item.floor}{item.totalFloors ? `/${item.totalFloors}` : ""}층</p>
+                </div>
+              )}
+              {item.type && (
+                <div className="bg-muted/60 rounded-lg px-2 py-1">
+                  <p className="text-[8px] text-muted-foreground">유형</p>
+                  <p className="text-[10px] font-bold text-foreground truncate">{item.type}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 가격 */}
+          {item.source === "property" && (item.deposit || item.monthly) && (
+            <div className="flex items-center justify-between bg-primary/5 rounded-lg px-2.5 py-1.5 border border-primary/10">
+              <span className="text-[9px] text-muted-foreground">보증금 / 월세</span>
+              <span className="text-xs font-bold" style={{ color: "hsl(var(--primary))" }}>
+                {item.deposit || "–"}만 / <span style={{ color: "hsl(var(--accent))" }}>{item.monthly || "–"}만</span>
+              </span>
+            </div>
+          )}
+
+          {/* 연락처 */}
+          <div className="border-t border-border/50 pt-1.5 flex flex-col gap-0.5">
+            {isApproved && (
+              <div className="flex items-center gap-1 mb-0.5">
+                <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                <span className="text-[9px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원</span>
+              </div>
+            )}
+            {item.contactOwner ? (
+              <PhoneBtn label="소유주(임대인)" phone={item.contactOwner} color="hsl(var(--primary))" />
+            ) : (
+              <div className="flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</span>
+              </div>
+            )}
+            {item.contactManager && <PhoneBtn label="관리인" phone={item.contactManager} color="hsl(217 91% 55%)" />}
+            {item.contactBroker && <PhoneBtn label="부동산" phone={item.contactBroker} color="hsl(25 95% 53%)" />}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
@@ -1572,6 +1769,9 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
+  /** 소유주 검색 모드로 전환할 수 있도록 외부에서 제어 */
+  landlordSearchOpen?: boolean;
+  onLandlordSearchClose?: () => void;
 }
 
 const MIN_WIDTH = 260;
