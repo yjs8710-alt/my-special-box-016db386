@@ -768,12 +768,9 @@ function Step2({
                 onClick={() => set("pet", form.pet === v ? "" : v)}
                 className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${
                   form.pet === v
-                    ? v === "불가"
-                      ? "bg-[hsl(var(--header-bg))] text-white border-[hsl(var(--header-bg))]"
-                      : "bg-background text-foreground border-border"
+                    ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background text-foreground border-border hover:border-primary/40"
                 }`}
-                style={form.pet === v && v === "가능" ? { borderColor: "hsl(var(--border))" } : {}}
               >
                 {v === "가능" ? "🐾 가능" : "🚫 불가"}
               </button>
