@@ -17,7 +17,7 @@ const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "연립", "다세대", 
 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [pinnedAddresses, setPinnedAddresses] = useState<string[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -52,7 +52,11 @@ const ApartmentRental = () => {
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    if (!prop) return;
+    const addr = prop.buildingName ?? prop.address;
+    setPinnedAddresses(prev =>
+      prev.includes(addr) ? prev : [...prev, addr]
+    );
   };
 
   return (
@@ -143,8 +147,8 @@ const ApartmentRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+          pinnedAddresses={pinnedAddresses}
+          onClearPin={() => { setPinnedAddresses([]); setSelectedId(null); }}
         />
       </main>
     </div>

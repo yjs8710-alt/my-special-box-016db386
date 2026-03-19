@@ -15,6 +15,7 @@ const LAND_SUBTYPES = ["전체", "대지", "임야", "농지"];
 
 const LandSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddresses, setPinnedAddresses] = useState<string[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -56,6 +57,14 @@ const LandSearch = () => {
   const filtered = usePropertyFilter(allProperties, filters, landTypeFilter, query, propertyId);
 
   const activeType = activeTypes[0] ?? "전체";
+
+  const handlePinSelect = (id: number) => {
+    setSelectedId(id);
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (!prop) return;
+    const addr = prop.buildingName ?? prop.address;
+    setPinnedAddresses(prev => prev.includes(addr) ? prev : [...prev, addr]);
+  };
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -104,7 +113,7 @@ const LandSearch = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handlePinSelect}
           />
           <MapFilterBar
             activeType={activeType}
@@ -130,6 +139,8 @@ const LandSearch = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
+          pinnedAddresses={pinnedAddresses}
+          onClearPin={() => { setPinnedAddresses([]); setSelectedId(null); }}
         />
       </main>
     </div>
