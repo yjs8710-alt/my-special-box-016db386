@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Eye, ShieldCheck, Loader2 } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
-// ── 소유주 번호 검색 타입 ──────────────────────────────────────────────────
-interface LandlordResult {
+// ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
+export interface LandlordResult {
   id: string;
   source: "property" | "contact";
   status?: string;
