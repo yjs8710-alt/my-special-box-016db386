@@ -329,7 +329,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     if (isSale) {
       if (!form.salePrice.trim()) e.amount = "매매가를 입력해주세요";
     } else if (!isLand && !isCommercial) {
-      if (!form.deposit.trim() && !form.monthlyRent.trim()) e.amount = "보증금 또는 월세를 입력해주세요";
+      const hasJeonse = form.rentModes.includes("전세") && form.jeonseDeposit.trim();
+      const hasHalf = form.rentModes.includes("반전세") && (form.halfDeposit.trim() || form.halfMonthly.trim());
+      const hasWolse = form.rentModes.includes("월세") && (form.deposit.trim() || form.monthlyRent.trim());
+      if (!hasJeonse && !hasHalf && !hasWolse && !form.deposit.trim() && !form.monthlyRent.trim()) {
+        e.amount = "보증금 또는 월세를 입력해주세요";
+      }
     }
     setErrors(e);
     return Object.keys(e).length === 0;
