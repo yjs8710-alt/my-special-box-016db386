@@ -77,6 +77,7 @@ const ResidentialRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
+      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 주거 유형 탭 - 다중 선택 */}
       <div
@@ -101,6 +102,7 @@ const ResidentialRental = () => {
             </button>
           );
         })}
+        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
         {!activeTypes.includes("전체") && activeTypes.length > 1 && (
           <button
             onClick={() => setActiveTypes(["전체"])}
@@ -139,23 +141,18 @@ const ResidentialRental = () => {
             showRoomTypes={false}
           />
         </div>
-        {showLandlord && (
-          <LandlordSearchModal onClose={() => setShowLandlord(false)} />
-        )}
-        {!showLandlord && (
-          <MapSidebar
-            properties={filtered}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onDeselect={() => setSelectedId(null)}
-            activeType={activeType}
-            onTypeChange={(t) => toggleType(t)}
-            pinnedAddress={pinnedAddress}
-            onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
-            pinnedIds={pinnedIds}
-            onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
-          />
-        )}
+        <MapSidebar
+          properties={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onDeselect={() => setSelectedId(null)}
+          activeType={activeType}
+          onTypeChange={(t) => toggleType(t)}
+          pinnedAddress={pinnedAddress}
+          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
+          pinnedIds={pinnedIds}
+          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+        />
       </main>
     </div>
   );
