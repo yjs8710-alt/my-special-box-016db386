@@ -1289,17 +1289,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             );
           }
 
+          // 매매 여부 판별: note에 매매가 포함되거나 monthly가 비어있고 deposit이 있는 경우
+          const isSaleProp = (note.includes("매매가:") || (!prop.monthly && !!prop.deposit));
           return (
             <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap">
-              <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>월</span>
-              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
-              <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>/</span>
-              <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
-              {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+              {isSaleProp ? (
                 <>
-                  <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>/</span>
-                  <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>관</span>
-                  <span className="text-[11px] font-extrabold" style={{ color: "hsl(var(--muted-foreground))" }}>{prop.manageFee}</span>
+                  <span className="text-[11px] font-bold" style={{ color: "hsl(0 85% 55%)" }}>매</span>
+                  <span className="text-[12px] font-extrabold" style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>월</span>
+                  <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>{prop.deposit}</span>
+                  <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>/</span>
+                  <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span>
+                  {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+                    <>
+                      <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>/</span>
+                      <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>관</span>
+                      <span className="text-[11px] font-extrabold" style={{ color: "hsl(var(--muted-foreground))" }}>{prop.manageFee}</span>
+                    </>
+                  )}
                 </>
               )}
               {areaShort && (

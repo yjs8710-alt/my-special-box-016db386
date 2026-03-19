@@ -267,8 +267,8 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 // 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
 const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS = [
-  { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","연립","다세대","고시원"] },
-  { group: "상가 임대", types: ["상가","사무실","공장·창고"] },
+  { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","주인세대","아파트","오피스텔","빌라","연립","다세대","주상복합","고시원"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원"] },
   { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","원룸건물매매","주택매매","단독매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","숙박/팬션매매"] },
   { group: "토지", types: ["토지"] },
 ];
@@ -820,6 +820,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                           set("type", t);
                           // 수정 모드에서 이미 room_type이 있으면 유지, 없을 때만 자동 설정
                           if (!form.room_type) set("room_type", t);
+                          // 집합건물 타입 선택 시 buildingType 자동 설정
+                          if (COLLECTIVE_TYPES.some(ct => ct === t)) {
+                            set("buildingType", "집합건물");
+                          }
                         }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
