@@ -152,6 +152,8 @@ const MapSearch = () => {
           activeType={activeType}
           onTypeChange={setActiveType}
           onDeleteProperties={handleDeleteProperties}
+          showLandlordSearch={showLandlord}
+          onCloseLandlordSearch={() => setShowLandlord(false)}
         />
       </main>
     </div>
