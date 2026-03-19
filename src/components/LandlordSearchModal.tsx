@@ -369,7 +369,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     setLoading(true);
     setError("");
     setSelectedItem(null);
-    setPanelProperty(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: query.trim() },
