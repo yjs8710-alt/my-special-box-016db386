@@ -100,24 +100,8 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
     </svg>
   `;
 
-  // 가격 라벨 (줌 7 이상이면 숨김)
-  const priceLabel = fontSize > 0 && price
-    ? `<div style="
-        background:${mainColor};
-        color:white;
-        font-size:${fontSize}px;
-        font-weight:800;
-        font-family:'Noto Sans KR',sans-serif;
-        padding:1px 4px;
-        border-radius:4px;
-        white-space:nowrap;
-        letter-spacing:-0.4px;
-        line-height:1.3;
-        margin-top:1px;
-        border:1px solid rgba(255,255,255,0.4);
-        box-shadow:0 1px 4px rgba(0,0,0,0.25);
-      ">${price}</div>`
-    : "";
+  // 가격 라벨 숨김
+  const priceLabel = "";
 
   return `
     <div style="
