@@ -3,7 +3,43 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+
+/* ── LandlordResult 타입 ── */
+interface LandlordResult {
+  id: string;
+  source: "property" | "contact";
+  status?: string;
+  isVisible?: boolean;
+  label: string;
+  sublabel: string;
+  badge?: string;
+  price?: string;
+  images?: string[];
+  contactOwner: string;
+  contactManager: string;
+  contactBroker: string;
+  floor?: string;
+  area?: string;
+  deposit?: string;
+  monthly?: string;
+  type?: string;
+  buildYear?: string;
+  totalFloors?: string;
+  availableFrom?: string;
+  note?: string;
+}
+
+const landlordRevealKey = (id: string) => `landlord_reveal_${id}`;
+const landlordRevealedToday = (id: string) => {
+  const today = new Date().toISOString().slice(0, 10);
+  return localStorage.getItem(landlordRevealKey(id)) === today;
+};
+const landlordMarkRevealed = (id: string) => {
+  const today = new Date().toISOString().slice(0, 10);
+  localStorage.setItem(landlordRevealKey(id), today);
+};
 
 /* ── LightboxModal: 여러 장 사진 좌우 탐색 ── */
 function LightboxModal({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
