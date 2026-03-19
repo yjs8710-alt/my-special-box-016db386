@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ChevronRight as ArrowRight, ShieldCheck } from "lucide-react";
+import { Search, Phone, X, MapPin, Building2, Eye, AlertCircle, BookUser, EyeOff, ChevronLeft, ChevronRight, Images, Home, Layers, Calendar, Ruler, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MapProperty } from "@/data/mapProperties";
 import { useAuth } from "@/hooks/useAuth";
 
 const today = () => new Date().toISOString().slice(0, 10);
