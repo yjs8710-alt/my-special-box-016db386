@@ -66,10 +66,14 @@ function LightboxModal({ images, startIdx, onClose }: { images: string[]; startI
 }
 
 
-// 주소에서 동+번지수만 추출 (예: "서울시 강남구 역삼동 123-45" → "역삼동 123-45")
+// 주소에서 시/군/구 앞까지 제거 (예: "충북 청주시 서원구 남문로1가 190" → "남문로1가 190")
 const shortAddress = (addr: string) => {
-  const match = addr.match(/([가-힣]+동)\s*([\d\-]+)?/);
-  if (match) return match[2] ? `${match[1]} ${match[2]}` : match[1];
+  // "시 구" 또는 "시 군" 이후 문자열 추출
+  const matchSiGu = addr.match(/(?:시|군)\s+(?:[가-힣]+구\s+)?(.+)/);
+  if (matchSiGu) return matchSiGu[1].trim();
+  // fallback: 동+번지 패턴
+  const matchDong = addr.match(/([가-힣]+동)\s*([\d\-]+)?/);
+  if (matchDong) return matchDong[2] ? `${matchDong[1]} ${matchDong[2]}` : matchDong[1];
   return addr;
 };
 
