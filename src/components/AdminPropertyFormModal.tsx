@@ -1068,16 +1068,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <div className="flex flex-col gap-1.5">
                       <p className="text-[11px] font-bold text-foreground/70">임대 방식 (중복 선택 가능)</p>
                       <div className="flex gap-2">
-                        {(["월세", "반전세", "전세"] as const).map((mode) => {
-                          const isOn = form.rentModes.includes(mode) || (form.rentModes.length === 0 && mode === "월세");
+                      {(["월세", "반전세", "전세"] as const).map((mode) => {
+                          const isOn = form.rentModes.includes(mode);
                           return (
                             <button
                               key={mode}
                               type="button"
                               onClick={() => {
-                                const cur = form.rentModes.length === 0 ? ["월세"] : [...form.rentModes];
+                                const cur = [...form.rentModes];
                                 const next = cur.includes(mode) ? cur.filter(m => m !== mode) : [...cur, mode];
-                                set("rentModes", next.length === 0 ? ["월세"] : next as any);
+                                set("rentModes", next as any);
                               }}
                               className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all"
                               style={isOn
