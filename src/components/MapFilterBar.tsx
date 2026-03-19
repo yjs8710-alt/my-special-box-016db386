@@ -13,6 +13,7 @@ export interface LandlordResult {
   sublabel: string;
   badge?: string;
   price?: string;
+  images?: string[];
   contactOwner: string;
   contactManager: string;
   contactBroker: string;
