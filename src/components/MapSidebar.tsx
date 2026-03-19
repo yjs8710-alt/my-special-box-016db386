@@ -83,6 +83,19 @@ const TYPE_BG: Record<string, string> = {
   "식당·카페": "bg-orange-50 text-accent",
   "공장·창고": "bg-green-50 text-green-700",
   "병원·학원": "bg-red-50 text-red-700",
+  "연립": "bg-blue-50 text-blue-700",
+  "다세대": "bg-sky-50 text-sky-700",
+  "단독주택": "bg-amber-50 text-amber-700",
+  "빌라": "bg-indigo-50 text-indigo-700",
+  "아파트": "bg-teal-50 text-teal-700",
+  "오피스텔": "bg-violet-50 text-violet-700",
+  "원룸": "bg-pink-50 text-pink-700",
+  "투룸": "bg-rose-50 text-rose-700",
+  "쓰리룸": "bg-red-50 text-red-700",
+  "고시원": "bg-gray-100 text-gray-600",
+  "토지": "bg-lime-50 text-lime-700",
+  "건물매매": "bg-orange-100 text-orange-800",
+  "단독매매": "bg-yellow-50 text-yellow-700",
 };
 
 /* 옵션 SVG 아이콘 컴포넌트 */
