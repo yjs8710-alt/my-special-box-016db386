@@ -572,64 +572,6 @@ const MapFilterBar = ({
                 {landlordLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" strokeWidth={2.5} />}
               </button>
             )}
-          </div>
-
-          {/* 소유주 검색 결과 드롭다운 */}
-          {searchMode === "landlord" && (landlordSearched || landlordLoading) && (
-            <div
-              className="bg-white rounded-xl border border-border mt-1.5 overflow-hidden flex flex-col"
-              style={{
-                boxShadow: "0 8px 32px rgba(10,45,110,0.18)",
-                width: 380,
-                maxHeight: 480,
-              }}
-            >
-              {/* 헤더 */}
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50" style={{ background: "hsl(var(--accent)/0.06)" }}>
-                <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
-                <span className="text-[11px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색</span>
-                <span className="text-[10px] text-muted-foreground ml-auto">숨김 매물·미노출 연락처 포함</span>
-              </div>
-              <div className="overflow-y-auto flex-1 px-3 py-2 flex flex-col gap-2">
-                {landlordLoading && (
-                  <div className="py-6 flex flex-col items-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
-                    <p className="text-xs">검색 중...</p>
-                  </div>
-                )}
-                {landlordError && (
-                  <div className="py-3 flex items-center gap-2 text-destructive text-xs">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />{landlordError}
-                  </div>
-                )}
-                {!landlordLoading && !landlordError && landlordResults.length === 0 && landlordSearched && (
-                  <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground">
-                    <AlertCircle className="w-6 h-6 opacity-30" />
-                    <p className="text-xs">연락처가 등록된 검색 결과가 없습니다.</p>
-                  </div>
-                )}
-                {!landlordLoading && landlordResults.map((item) => (
-                  <LandlordResultCard
-                    key={item.id}
-                    item={item}
-                    show={isRevealed(item.id)}
-                    isApproved={isApproved}
-                    onReveal={() => handleReveal(item.id)}
-                  />
-                ))}
-              </div>
-              {isApproved ? (
-                <div className="flex items-center justify-center gap-1 px-3 py-1.5 border-t border-border/50">
-                  <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
-                  <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</p>
-                </div>
-              ) : (
-                <p className="text-[10px] text-muted-foreground text-center px-3 py-1.5 border-t border-border/50">
-                  연락처는 일 1회 열람 가능 · 승인 회원은 무제한
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* 상세 필터 패널 */}
