@@ -487,10 +487,8 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const [error, setError] = useState("");
   const [lightbox, setLightbox] = useState<{ images: string[]; idx: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<SearchResult | null>(null);
-  const [panelProperty, setPanelProperty] = useState<MapProperty | null>(null);
 
   // 승인된 회원(인증된 모든 로그인 사용자)은 번호 제한 없이 바로 노출
-  // authLoading 중에는 false로 처리하되, 로딩 완료 후 isAuthorized 값 사용
   const isApproved = !authLoading && isAuthorized;
 
   const handleReveal = (id: string) => {
@@ -505,7 +503,6 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
     setLoading(true);
     setError("");
     setSelectedItem(null);
-    setPanelProperty(null);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: query.trim() },
@@ -522,16 +519,10 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   };
 
   const handleOpenPanel = (item: SearchResult) => {
-    if (selectedItem?.id === item.id) {
-      setSelectedItem(null);
-      setPanelProperty(null);
-    } else {
-      setSelectedItem(item);
-      setPanelProperty(toMapProperty(item));
-    }
+    setSelectedItem(prev => prev?.id === item.id ? null : item);
   };
 
-  const hasPanel = panelProperty !== null;
+  const hasPanel = selectedItem !== null;
 
   return (
     <>
