@@ -637,6 +637,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
       ...rentNotes,
+      form.direction && `방향: ${form.direction}`,
+      form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
+      form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
+      form.brokerFee && `중개보수: ${form.brokerFee}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
