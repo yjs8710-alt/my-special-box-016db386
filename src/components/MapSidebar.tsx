@@ -1610,6 +1610,7 @@ interface MapSidebarProps {
   /** 소유주 번호 검색 패널 표시 여부 */
   showLandlordSearch?: boolean;
   onCloseLandlordSearch?: () => void;
+  onOpenLandlordSearch?: () => void;
 }
 
 const MIN_WIDTH = 260;
