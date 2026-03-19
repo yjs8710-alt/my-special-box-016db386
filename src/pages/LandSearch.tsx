@@ -63,7 +63,7 @@ const LandSearch = () => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
     const addr = prop.buildingName ?? prop.address;
-    setPinnedAddresses(prev => prev.includes(addr) ? prev : [...prev, addr]);
+    setPinnedAddresses([addr]);
   };
 
   return (
