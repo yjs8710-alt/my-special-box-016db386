@@ -698,7 +698,8 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
                 direction && { label: "방향", value: direction + "향", color: "hsl(var(--foreground))" },
                 lhType && lhType !== "관계없음" && { label: "LH 대출", value: lhType, color: lhType === "LH가능" ? "hsl(217 91% 60%)" : lhType === "LH불가" ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" },
                 cleanFee && { label: "퇴실청소비", value: cleanFee.endsWith("만원") ? cleanFee : `${cleanFee}만원`, color: "hsl(var(--foreground))" },
-                brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(var(--foreground))" },
+                brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(0 85% 45%)" },
+                note.includes("중도퇴거:") && { label: "중도퇴거", value: "세입자 중도퇴거", color: "hsl(0 85% 45%)" },
               ].filter(Boolean) as { label: string; value: string; color: string }[];
 
               if (items.length === 0) return null;
