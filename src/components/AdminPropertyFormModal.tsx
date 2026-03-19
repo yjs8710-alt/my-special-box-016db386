@@ -600,7 +600,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
 
     // note 필드: 연락처 + 다중 임대방식 저장
-    const hasWolse   = form.tradeType === "임대" && (form.rentModes.length === 0 || form.rentModes.includes("월세"));
+    const hasWolse   = form.tradeType === "임대" && (form.rentModes.includes("월세") || (form.rentModes.length === 0 && !form.rentModes.includes("전세") && !form.rentModes.includes("반전세")));
     const hasHalf    = form.tradeType === "임대" && form.rentModes.includes("반전세");
     const hasJeonse  = form.tradeType === "임대" && form.rentModes.includes("전세");
 
@@ -1068,16 +1068,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <div className="flex flex-col gap-1.5">
                       <p className="text-[11px] font-bold text-foreground/70">임대 방식 (중복 선택 가능)</p>
                       <div className="flex gap-2">
-                        {(["월세", "반전세", "전세"] as const).map((mode) => {
-                          const isOn = form.rentModes.includes(mode) || (form.rentModes.length === 0 && mode === "월세");
+                      {(["월세", "반전세", "전세"] as const).map((mode) => {
+                          const isOn = form.rentModes.includes(mode);
                           return (
                             <button
                               key={mode}
                               type="button"
                               onClick={() => {
-                                const cur = form.rentModes.length === 0 ? ["월세"] : [...form.rentModes];
+                                const cur = [...form.rentModes];
                                 const next = cur.includes(mode) ? cur.filter(m => m !== mode) : [...cur, mode];
-                                set("rentModes", next.length === 0 ? ["월세"] : next as any);
+                                set("rentModes", next as any);
                               }}
                               className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all"
                               style={isOn
@@ -1093,7 +1093,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
 
                     {/* 월세 금액 */}
-                    {(form.rentModes.length === 0 || form.rentModes.includes("월세")) && (
+                    {(form.rentModes.includes("월세") || form.rentModes.length === 0) && (
                       <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
                         <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
                         <div className="grid grid-cols-2 gap-2">
