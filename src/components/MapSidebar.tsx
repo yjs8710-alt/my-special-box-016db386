@@ -1568,13 +1568,16 @@ interface MapSidebarProps {
   /** 핀 클릭 시 해당 주소로 필터링 */
   pinnedAddress?: string | null;
   onClearPin?: () => void;
+  /** 핀 클릭 순서대로 쌓인 id 배열 */
+  pinnedIds?: number[];
+  onClearPinnedIds?: () => void;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
@@ -1608,10 +1611,22 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     setExternalModal({ url, title });
   }, [width]);
 
-  // 핀 클릭 필터: pinnedAddress가 있으면 해당 주소(또는 동일 건물명) 매물만 표시
-  const displayProperties = pinnedAddress
-    ? properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress)
-    : properties;
+  // pinnedIds 모드: 클릭 순서대로 표시
+  // pinnedAddress 모드: 동일 주소 필터
+  // 둘 다 없으면 전체 표시
+  const displayProperties = (() => {
+    if (pinnedIds && pinnedIds.length > 0) {
+      // 클릭 순서대로 정렬
+      const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
+      return properties
+        .filter(p => idxMap.has(p.id))
+        .sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
+    }
+    if (pinnedAddress) {
+      return properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress);
+    }
+    return properties;
+  })();
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
