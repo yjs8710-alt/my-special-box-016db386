@@ -62,7 +62,6 @@ const CommercialRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 상가 유형 탭 - 다중 선택 */}
       <div
