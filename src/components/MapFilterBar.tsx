@@ -284,6 +284,7 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  onLandlordSelect?: (property: MapProperty | null) => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
