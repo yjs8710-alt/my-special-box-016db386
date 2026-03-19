@@ -459,6 +459,10 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.tenantOccupied && form.tenantMonthly && `세입자월세: ${form.tenantMonthly}`,
         form.vacateDate && `퇴거일: ${form.vacateDate}`,
         ...rentNotes,
+        form.direction && `방향: ${form.direction}`,
+        form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
+        form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
+        form.brokerFee && `중개보수: ${form.brokerFee}`,
       ].filter(Boolean).join("\n") || null,
       vacate_date: form.vacateDate || null,
     };
