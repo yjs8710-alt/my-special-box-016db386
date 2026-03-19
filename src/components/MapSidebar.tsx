@@ -2114,66 +2114,138 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
           {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
 
-            {/* 소유주 번호 검색 결과 패널 */}
-            {landlordSearched && (
-              <div className="mx-3 mt-3 mb-2 rounded-xl border overflow-hidden" style={{ borderColor: "hsl(var(--accent)/0.4)" }}>
-                {/* 헤더 */}
-                <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ background: "hsl(var(--accent)/0.08)", borderColor: "hsl(var(--accent)/0.2)" }}>
-                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
-                  <span className="text-[11px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색</span>
-                  <span className="text-[10px] text-muted-foreground ml-auto">숨김·미노출 포함</span>
+            {/* 소유주 번호 검색 결과: 매물 카드와 동일한 레이아웃으로 표시 */}
+            {landlordSearched ? (
+              landlordLoading ? (
+                <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
+                  <p className="text-xs">검색 중...</p>
                 </div>
-                {landlordLoading ? (
-                  <div className="py-6 flex flex-col items-center gap-2 text-muted-foreground bg-background">
-                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
-                    <p className="text-xs">검색 중...</p>
+              ) : (landlordResults ?? []).length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                  <Phone className="w-10 h-10 mb-3 opacity-20" />
+                  <p className="text-sm font-medium">연락처가 등록된 결과가 없습니다</p>
+                </div>
+              ) : (
+                <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
+                  {/* 소유주 검색 결과 헤더 배너 */}
+                  <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg mb-0.5" style={{ background: "hsl(var(--accent)/0.08)", border: "1px solid hsl(var(--accent)/0.2)" }}>
+                    <Phone className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
+                    <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색 결과</span>
+                    <span className="text-[10px] text-muted-foreground ml-auto">{(landlordResults ?? []).length}건 (숨김·미노출 포함)</span>
                   </div>
-                ) : (landlordResults ?? []).length === 0 ? (
-                  <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground bg-background">
-                    <AlertCircle className="w-6 h-6 opacity-30" />
-                    <p className="text-xs">연락처가 등록된 결과가 없습니다.</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2 p-3 bg-background">
-                    {(landlordResults ?? []).map((item) => {
-                      const isHidden = item.source === "property" && item.status !== "active";
-                      const isInvisible = item.source === "contact" && item.isVisible === false;
-                      return (
-                        <div key={item.id} className="rounded-lg border p-2.5 flex flex-col gap-1.5" style={{ borderColor: "hsl(var(--border))", opacity: isHidden || isInvisible ? 0.8 : 1 }}>
-                          <div className="flex items-start gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1 flex-wrap">
-                                <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
-                                <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
-                                  style={item.source === "contact"
-                                    ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
-                                    : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
-                                  }>
-                                  {item.source === "contact" ? "연락처DB" : "매물"}
-                                </span>
-                                {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
-                                {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
+                  {(landlordResults ?? []).map((item, idx) => {
+                    const isHidden = item.source === "property" && item.status !== "active";
+                    const isInvisible = item.source === "contact" && item.isVisible === false;
+                    // LandlordResult → MapProperty 형태로 변환하여 카드 렌더링 재사용
+                    const fakePropId = idx + 900000;
+                    return (
+                      <div key={item.id} className="flex flex-col">
+                        <div
+                          className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white shadow-sm ${isHidden || isInvisible ? "opacity-80" : ""}`}
+                          style={{ border: "1px solid hsl(var(--border))" }}
+                        >
+                          {/* Row: 동일 3컬럼 레이아웃 */}
+                          <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
+                            {/* ①썸네일 */}
+                            <div className="w-[96px] flex-shrink-0 overflow-hidden relative" style={{ minHeight: "96px" }}>
+                              {item.images && item.images.length > 0 ? (
+                                <img
+                                  src={item.images[0]}
+                                  alt={item.label}
+                                  loading="eager"
+                                  decoding="async"
+                                  className="w-full h-full object-cover"
+                                  style={{ imageRendering: "auto", transform: "translateZ(0)", willChange: "transform" }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-0.5" style={{ background: "hsl(var(--muted))" }}>
+                                  <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
+                                  <span className="text-[8px] font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>사진없음</span>
+                                </div>
+                              )}
+                              {/* 순번 + 상태 배지 오버레이 */}
+                              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-0.5 px-1 py-0.5" style={{ background: "rgba(0,0,0,0.52)" }}>
+                                <span className="text-[9px] font-extrabold text-white leading-none">{idx + 1}.</span>
+                                {isHidden && <span className="text-[8px] text-red-300 leading-none ml-0.5">숨김</span>}
+                                {isInvisible && <span className="text-[8px] text-yellow-300 leading-none ml-0.5">미노출</span>}
                               </div>
-                              <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
+                            </div>
+
+                            {/* ②연락처 컬럼 — 소유주/관리인/부동산 */}
+                            <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
+                              <ContactEmojiRow propId={fakePropId} type="owner" number={item.contactOwner || null} />
+                              <ContactEmojiRow propId={fakePropId + 1} type="manager" number={item.contactManager || null} />
+                              <ContactEmojiRow propId={fakePropId + 2} type="broker" number={item.contactBroker || null} />
+                            </div>
+
+                            {/* ③메인 정보 */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between px-2 py-1.5 gap-0.5">
+                              {/* 1행: 건물명/주소 + 유형 배지 */}
+                              <div className="flex items-start gap-1">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[12px] font-extrabold text-foreground leading-tight truncate">
+                                    {item.label}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground truncate leading-tight">{item.sublabel}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                                  {item.type && (
+                                    <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                                      style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>
+                                      {item.type}
+                                    </span>
+                                  )}
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                                    style={item.source === "contact"
+                                      ? { background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))" }
+                                      : { background: "hsl(217 91% 60%/0.12)", color: "hsl(217 91% 45%)" }
+                                    }>
+                                    {item.source === "contact" ? "연락처DB" : "매물"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* 2행: 층·면적·금액 */}
+                              {(item.badge || item.price) && (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {item.badge && (
+                                    <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{item.badge}</span>
+                                  )}
+                                  {item.price && (
+                                    <span className="text-[10px] font-bold" style={{ color: "hsl(var(--primary))" }}>{item.price}</span>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* 3행: 연락처 직접 표시 (텍스트) */}
+                              <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                {item.contactOwner && (
+                                  <a href={`tel:${item.contactOwner}`} className="flex items-center gap-0.5 text-[10px] font-bold" style={{ color: "hsl(var(--primary))" }}>
+                                    <Phone className="w-2.5 h-2.5" />소유주 {item.contactOwner}
+                                  </a>
+                                )}
+                                {item.contactManager && (
+                                  <a href={`tel:${item.contactManager}`} className="flex items-center gap-0.5 text-[10px] font-bold" style={{ color: "hsl(217 91% 55%)" }}>
+                                    <Phone className="w-2.5 h-2.5" />관리인 {item.contactManager}
+                                  </a>
+                                )}
+                                {item.contactBroker && (
+                                  <a href={`tel:${item.contactBroker}`} className="flex items-center gap-0.5 text-[10px] font-bold" style={{ color: "hsl(25 95% 53%)" }}>
+                                    <Phone className="w-2.5 h-2.5" />부동산 {item.contactBroker}
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <div className="border-t pt-1.5 flex flex-col gap-0.5" style={{ borderColor: "hsl(var(--border)/0.4)" }}>
-                            {item.contactOwner
-                              ? <LandlordPhoneRow phone={item.contactOwner} label="소유주" />
-                              : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
-                            }
-                            {item.contactManager && <LandlordPhoneRow phone={item.contactManager} label="관리인" />}
-                            {item.contactBroker && <LandlordPhoneRow phone={item.contactBroker} label="부동산" />}
-                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {displayProperties.length === 0 ? (
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            ) : (
+            displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />
                 <p className="text-sm font-medium">검색 결과가 없습니다</p>
