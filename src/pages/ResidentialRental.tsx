@@ -61,15 +61,13 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: 누적 선택 (이미 선택된 핀이면 제거, 새 핀이면 추가)
+  // 핀 클릭 핸들러: 클릭한 핀 주소로 교체 (단일 선택)
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
     const addr = prop.buildingName ?? prop.address;
-    setPinnedAddresses(prev =>
-      prev.includes(addr) ? prev : [...prev, addr]
-    );
+    setPinnedAddresses([addr]);
   };
 
   return (
