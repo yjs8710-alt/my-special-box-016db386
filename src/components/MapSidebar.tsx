@@ -1184,10 +1184,15 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         <MemoNotepad propId={prop.id} memoKey="building" icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5}/>} label="건물메모" initialText={buildingMemo ?? ""} />
         <MemoNotepad propId={prop.id} memoKey="room" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/></svg>} label="방메모" initialText={roomMemo ?? ""} />
-        {/* 관리자 확인 체크박스 — 텍스트 없이 아이콘+D숫자만 */}
+        {/* 관리자 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 */}
         {isAdmin && prop.memo && (() => {
+          // 확인일(chkDate) 기준 경과일 (확인 체크용)
           const daysSince = chkDate
             ? Math.floor((Date.now() - new Date(chkDate).getTime()) / 86400000)
+            : null;
+          // 등록일(regDate) 기준 경과일 — 오늘 등록=0, 내일=1, ...
+          const daysFromReg = regDate
+            ? Math.floor((Date.now() - new Date(regDate).getTime()) / 86400000)
             : null;
           return (
             <button
