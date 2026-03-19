@@ -11,19 +11,13 @@ import { MapProperty } from "@/data/mapProperties";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
-
-
-
-
-
-
 const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "다세대"];
 
 const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원", "연립", "다세대", "주상복합"];
 
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [clickedProperties, setClickedProperties] = useState<MapProperty[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -34,7 +28,7 @@ const ResidentialRental = () => {
   // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
-  // static + DB 합치기 (매매 매물 제외: type에 '매매' 포함되거나 note에 '매매가:' 포함된 것)
+  // static + DB 합치기 (매매 매물 제외)
   const allProperties = useMemo(
     () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p =>
       !p.type.includes("매매") &&
@@ -62,11 +56,16 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: selectedId + pinnedAddress 동시 설정
+  // 핀 클릭 핸들러: 클릭 순서대로 우측 패널에 누적
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    if (!prop) return;
+    setClickedProperties(prev => {
+      // 이미 있으면 맨 앞으로 이동
+      const existing = prev.filter(p => p.id !== id);
+      return [prop, ...existing];
+    });
   };
 
   return (
@@ -97,7 +96,7 @@ const ResidentialRental = () => {
             </button>
           );
         })}
-        {/* 선택 삭제 - 전체 외 2개 이상 선택 시 표시 */}
+        {/* 선택 삭제 */}
         {!activeTypes.includes("전체") && activeTypes.length > 1 && (
           <button
             onClick={() => setActiveTypes(["전체"])}
@@ -135,6 +134,15 @@ const ResidentialRental = () => {
             showBuildingOptions={true}
             showRoomTypes={false}
           />
+          {/* 핀 클릭 패널 (지도 위 우측 오버레이) */}
+          {clickedProperties.length > 0 && (
+            <PinClickPanel
+              properties={clickedProperties}
+              onClose={() => { setClickedProperties([]); setSelectedId(null); }}
+              onSelectProperty={(id) => setSelectedId(id)}
+              selectedId={selectedId}
+            />
+          )}
         </div>
         <MapSidebar
           properties={filtered}
@@ -143,8 +151,6 @@ const ResidentialRental = () => {
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
-          pinnedAddress={pinnedAddress}
-          onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
         />
       </main>
     </div>
