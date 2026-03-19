@@ -3,6 +3,7 @@ import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Eye, Shiel
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MapProperty } from "@/data/mapProperties";
 
 // ── 소유주 번호 검색 타입 ──────────────────────────────────────────────────
 interface LandlordResult {
