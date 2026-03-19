@@ -351,6 +351,58 @@ const MapFilterBar = ({
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
+  // ── 소유주 번호 통합 검색 상태 ──
+  const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
+  const [landlordQuery, setLandlordQuery] = useState("");
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
+  const [landlordSearched, setLandlordSearched] = useState(false);
+  const [landlordError, setLandlordError] = useState("");
+  const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
+  const landlordInputRef = useRef<HTMLInputElement>(null);
+  const { isAuthorized, isLoading: authLoading } = useAuth();
+  const isApproved = !authLoading && isAuthorized;
+
+  const today = () => new Date().toISOString().slice(0, 10);
+  const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
+  const handleReveal = (id: string) => {
+    localStorage.setItem(`landlord_reveal_${id}`, today());
+    setRevealedIds(prev => ({ ...prev, [id]: true }));
+  };
+
+  const handleLandlordSearch = async () => {
+    if (!landlordQuery.trim()) return;
+    setLandlordSearched(true);
+    setLandlordLoading(true);
+    setLandlordError("");
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
+        body: { q: landlordQuery.trim() },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setLandlordResults((data?.results ?? []) as LandlordResult[]);
+    } catch (e: unknown) {
+      setLandlordError(e instanceof Error ? e.message : String(e));
+      setLandlordResults([]);
+    } finally {
+      setLandlordLoading(false);
+    }
+  };
+
+  const switchToLandlord = () => {
+    setSearchMode("landlord");
+    setLandlordSearched(false);
+    setLandlordResults([]);
+    setTimeout(() => landlordInputRef.current?.focus(), 50);
+  };
+  const switchToNormal = () => {
+    setSearchMode("normal");
+    setLandlordQuery("");
+    setLandlordSearched(false);
+    setLandlordResults([]);
+  };
+
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
 
@@ -390,76 +442,174 @@ const MapFilterBar = ({
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
-        {/* 검색바 + 건물주 번호 한 행 */}
-        <div className={`flex items-center gap-2 pl-0 transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
-
-          {/* 검색바 */}
+        {/* 검색바 */}
+        <div className={`flex flex-col transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
           <div
             className="flex items-center bg-white overflow-hidden rounded-xl"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
-              width: 336,
+              width: 380,
               flexShrink: 0,
-              border: "2px solid hsl(var(--primary))",
+              border: `2px solid ${searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--primary))"}`,
+              transition: "border-color 0.2s",
             }}
           >
-            <div className="flex items-center flex-1 px-3 gap-2 h-10">
-              <Search className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  onQueryChange(v);
-                  if (/^\d+$/.test(v.trim())) {
-                    onPropertyIdChange(v.trim());
-                  } else {
-                    onPropertyIdChange("");
-                  }
-                }}
-                placeholder="주소, 건물명, 매물번호 검색"
-                className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
-              />
-              {query && (
-                <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+            {/* 모드 탭 */}
             <button
-              onClick={() => setShowFilter((v) => !v)}
-              className="relative flex items-center gap-1 px-3 h-10 transition-colors"
-              style={{ borderLeft: "1px solid hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+              onClick={() => searchMode === "normal" ? switchToLandlord() : switchToNormal()}
+              title={searchMode === "normal" ? "소유주 번호 검색으로 전환" : "일반 검색으로 전환"}
+              className="flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all"
+              style={{
+                borderRight: `1px solid ${searchMode === "landlord" ? "hsl(var(--accent)/0.4)" : "hsl(var(--primary)/0.3)"}`,
+                background: searchMode === "landlord" ? "hsl(var(--accent)/0.08)" : "transparent",
+                color: searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))",
+              }}
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">필터</span>
-              {activeFilterCount > 0 && (
-                <span
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                  style={{ background: "hsl(var(--accent))" }}
+              {searchMode === "landlord"
+                ? <Phone className="w-3.5 h-3.5" />
+                : <Search className="w-3.5 h-3.5" />
+              }
+              <span className="text-[10px] font-bold hidden sm:block">
+                {searchMode === "landlord" ? "소유주" : "검색"}
+              </span>
+            </button>
+
+            {/* 입력창 */}
+            {searchMode === "normal" ? (
+              <div className="flex items-center flex-1 px-3 gap-2 h-10">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    onQueryChange(v);
+                    if (/^\d+$/.test(v.trim())) {
+                      onPropertyIdChange(v.trim());
+                    } else {
+                      onPropertyIdChange("");
+                    }
+                  }}
+                  placeholder="주소, 건물명, 매물번호 검색"
+                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                />
+                {query && (
+                  <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center flex-1 px-3 gap-2 h-10">
+                <input
+                  ref={landlordInputRef}
+                  type="text"
+                  value={landlordQuery}
+                  onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
+                  onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
+                  placeholder="동명, 번지, 건물명, 전화번호 검색"
+                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                />
+                {landlordQuery && (
+                  <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }} className="text-muted-foreground hover:text-foreground">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* 우측 버튼들 */}
+            {searchMode === "normal" ? (
+              <>
+                <button
+                  onClick={() => setShowFilter((v) => !v)}
+                  className="relative flex items-center gap-1 px-3 h-10 transition-colors"
+                  style={{ borderLeft: "1px solid hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
                 >
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-            <button
-              className="flex items-center justify-center h-10 px-4 text-xs font-bold"
-              style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
-            >
-              <Search className="w-3.5 h-3.5" strokeWidth={2.5} />
-            </button>
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">필터</span>
+                  {activeFilterCount > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
+                      style={{ background: "hsl(var(--accent))" }}
+                    >
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  className="flex items-center justify-center h-10 px-4 text-xs font-bold"
+                  style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
+                >
+                  <Search className="w-3.5 h-3.5" strokeWidth={2.5} />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleLandlordSearch}
+                disabled={!landlordQuery.trim() || landlordLoading}
+                className="flex items-center justify-center h-10 px-4 text-xs font-bold transition-colors disabled:opacity-40"
+                style={{ background: "hsl(var(--accent))", color: "#fff", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
+              >
+                {landlordLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" strokeWidth={2.5} />}
+              </button>
+            )}
           </div>
 
-          {/* 소유주 번호 */}
-          {onLandlordClick && (
-            <button
-              onClick={onLandlordClick}
-              className="flex items-center gap-1.5 h-9 px-3 rounded-xl text-xs font-bold text-white whitespace-nowrap transition-colors flex-shrink-0"
-              style={{ background: "hsl(var(--accent))" }}
+          {/* 소유주 검색 결과 드롭다운 */}
+          {searchMode === "landlord" && (landlordSearched || landlordLoading) && (
+            <div
+              className="bg-white rounded-xl border border-border mt-1.5 overflow-hidden flex flex-col"
+              style={{
+                boxShadow: "0 8px 32px rgba(10,45,110,0.18)",
+                width: 380,
+                maxHeight: 480,
+              }}
             >
-              <Phone className="w-3.5 h-3.5" />
-              소유주 번호 검색
-            </button>
+              {/* 헤더 */}
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50" style={{ background: "hsl(var(--accent)/0.06)" }}>
+                <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
+                <span className="text-[11px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색</span>
+                <span className="text-[10px] text-muted-foreground ml-auto">숨김 매물·미노출 연락처 포함</span>
+              </div>
+              <div className="overflow-y-auto flex-1 px-3 py-2 flex flex-col gap-2">
+                {landlordLoading && (
+                  <div className="py-6 flex flex-col items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
+                    <p className="text-xs">검색 중...</p>
+                  </div>
+                )}
+                {landlordError && (
+                  <div className="py-3 flex items-center gap-2 text-destructive text-xs">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />{landlordError}
+                  </div>
+                )}
+                {!landlordLoading && !landlordError && landlordResults.length === 0 && landlordSearched && (
+                  <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground">
+                    <AlertCircle className="w-6 h-6 opacity-30" />
+                    <p className="text-xs">연락처가 등록된 검색 결과가 없습니다.</p>
+                  </div>
+                )}
+                {!landlordLoading && landlordResults.map((item) => (
+                  <LandlordResultCard
+                    key={item.id}
+                    item={item}
+                    show={isRevealed(item.id)}
+                    isApproved={isApproved}
+                    onReveal={() => handleReveal(item.id)}
+                  />
+                ))}
+              </div>
+              {isApproved ? (
+                <div className="flex items-center justify-center gap-1 px-3 py-1.5 border-t border-border/50">
+                  <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
+                  <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</p>
+                </div>
+              ) : (
+                <p className="text-[10px] text-muted-foreground text-center px-3 py-1.5 border-t border-border/50">
+                  연락처는 일 1회 열람 가능 · 승인 회원은 무제한
+                </p>
+              )}
+            </div>
           )}
         </div>
 
