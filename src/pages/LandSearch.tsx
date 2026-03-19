@@ -15,6 +15,7 @@ const LAND_SUBTYPES = ["전체", "대지", "임야", "농지"];
 
 const LandSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [pinnedAddresses, setPinnedAddresses] = useState<string[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
