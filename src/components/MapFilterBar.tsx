@@ -1,8 +1,90 @@
 import { useState, useRef } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, Phone, MapPin, AlertCircle, Eye, EyeOff, ShieldCheck, BookUser, Building2, Loader2 } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Eye, ShieldCheck, Loader2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+
+// ── 소유주 번호 검색 타입 ──────────────────────────────────────────────────
+interface LandlordResult {
+  id: string;
+  source: "property" | "contact";
+  status?: string;
+  isVisible?: boolean;
+  label: string;
+  sublabel: string;
+  badge?: string;
+  price?: string;
+  contactOwner: string;
+  contactManager: string;
+  contactBroker: string;
+  type?: string;
+}
+
+// ── 소유주 번호 카드 (인라인 compact) ─────────────────────────────────────
+const today = () => new Date().toISOString().slice(0, 10);
+
+const LandlordResultCard = ({
+  item,
+  show,
+  isApproved,
+  onReveal,
+}: {
+  item: LandlordResult;
+  show: boolean;
+  isApproved: boolean;
+  onReveal: () => void;
+}) => {
+  const phoneVisible = isApproved || show;
+  const isHidden = item.source === "property" && item.status !== "active";
+  const isInvisible = item.source === "contact" && item.isVisible === false;
+
+  const PhoneBtn = ({ phone, label, color }: { phone: string; label: string; color: string }) => (
+    <div className="flex items-center justify-between py-0.5">
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      {phoneVisible ? (
+        <a href={`tel:${phone}`} className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color, background: `${color}18` }}>
+          <Phone className="w-3 h-3" />{phone}
+        </a>
+      ) : (
+        <button onClick={onReveal} className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg text-white" style={{ background: "hsl(var(--accent))" }}>
+          <Eye className="w-2.5 h-2.5" />공개
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="rounded-lg border p-2.5 flex flex-col gap-1.5" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))", opacity: isHidden || isInvisible ? 0.8 : 1 }}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 flex-wrap">
+            <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
+            <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
+              style={item.source === "contact"
+                ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
+                : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
+              }>
+              {item.source === "contact" ? "연락처DB" : "매물"}
+            </span>
+            {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
+            {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
+          </div>
+          <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
+        </div>
+        {isApproved && <ShieldCheck className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: "hsl(var(--chart-2))" }} />}
+      </div>
+      <div className="border-t border-border/40 pt-1.5 flex flex-col gap-0.5">
+        {item.contactOwner
+          ? <PhoneBtn phone={item.contactOwner} label="소유주" color="hsl(var(--primary))" />
+          : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
+        }
+        {item.contactManager && <PhoneBtn phone={item.contactManager} label="관리인" color="hsl(var(--chart-4))" />}
+        {item.contactBroker && <PhoneBtn phone={item.contactBroker} label="부동산" color="hsl(var(--chart-3))" />}
+      </div>
+    </div>
+  );
+};
+
 
 const SEARCH_CATEGORIES = [
   { value: "residential", short: "주거형임대", label: "주거형임대", desc: "원투룸, 주택, 빌라, 아파트, 오피스텔", route: "/residential" },
