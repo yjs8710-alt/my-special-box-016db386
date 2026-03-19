@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type")
+        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, room_type, unit_number, build_year, total_floors, available_from")
         .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       adminClient
@@ -92,6 +92,10 @@ Deno.serve(async (req) => {
       return m ? m[1].trim() : "";
     }
 
+    // 집합건물 유형 목록
+    const COMPLEX_TYPES = ["아파트", "오피스텔", "빌라", "연립", "다세대", "주상복합"];
+    const isComplex = (type?: string) => type ? COMPLEX_TYPES.some(t => type.includes(t)) : false;
+
     if (!propRes.error && propRes.data) {
       for (const row of propRes.data) {
         const noteStr = row.note ?? row.agent_name ?? "";
@@ -99,11 +103,19 @@ Deno.serve(async (req) => {
         const manager = parseContact(noteStr, "관리인");
         const broker = parseContact(noteStr, "부동산");
         if (!owner && !manager && !broker) continue;
+
+        const propType = row.room_type ?? row.type ?? undefined;
+        // 집합건물이면 건물명 뒤에 호수 병기
+        const baseLabel = row.building_name ?? row.title;
+        const labelWithUnit = isComplex(propType) && row.unit_number
+          ? `${baseLabel} ${row.unit_number}호`
+          : baseLabel;
+
         results.push({
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
-          label: row.building_name ?? row.title,
+          label: labelWithUnit,
           sublabel: row.address,
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
           price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
@@ -111,11 +123,12 @@ Deno.serve(async (req) => {
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
+          unitNumber: row.unit_number ?? undefined,
           floor: row.floor ?? undefined,
           area: row.area ?? undefined,
           deposit: row.deposit ?? undefined,
           monthly: row.monthly ?? undefined,
-          type: row.room_type ?? row.type ?? undefined,
+          type: propType,
           buildYear: row.build_year ?? undefined,
           totalFloors: row.total_floors ?? undefined,
           availableFrom: row.available_from ?? undefined,
