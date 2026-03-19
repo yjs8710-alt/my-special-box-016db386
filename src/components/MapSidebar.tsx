@@ -2043,8 +2043,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 소유주 번호 찾기
               </button>
             </div>
-            {/* 핀 클릭 누적 모드 배너 */}
-            {pinnedIds && pinnedIds.length > 0 && (
+            {/* 핀 클릭 누적 모드 배너 — 매물 목록 탭에서만 표시 */}
+            {!showLandlordSearch && pinnedIds && pinnedIds.length > 0 && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
                 <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
