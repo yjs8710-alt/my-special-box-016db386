@@ -5,6 +5,7 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -12,7 +13,6 @@ const APARTMENT_PROPERTIES: MapProperty[] = [];
 
 const APARTMENT_SUBTYPES = ["아파트", "오피스텔", "연립/다세대", "분양권"];
 const APARTMENT_DEAL_TYPES = ["매매", "전세", "월세"];
-
 const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "연립", "다세대", "주상복합"];
 
 const ApartmentRental = () => {
@@ -26,11 +26,10 @@ const ApartmentRental = () => {
   const [showLandlord, setShowLandlord] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [landlordProperty, setLandlordProperty] = useState<MapProperty | null>(null);
 
-  // DB 매물 (아파트/오피스텔)
   const { properties: dbProperties } = useDBProperties(APARTMENT_DB_TYPES);
 
-  // static + DB 합치기
   const allProperties = useMemo(
     () => [...APARTMENT_PROPERTIES, ...dbProperties],
     [dbProperties]
@@ -44,14 +43,13 @@ const ApartmentRental = () => {
     setActiveDealTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
   };
 
-  // activeTypes가 빈 배열이면 전체 표시 (아파트 페이지 특성)
   const aptTypeFilter = activeTypes.length === 0 ? ["전체"] : activeTypes;
   const filtered = usePropertyFilter(allProperties, filters, aptTypeFilter, query, propertyId);
-
   const activeType = activeTypes[0] ?? "전체";
 
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
+    setLandlordProperty(null);
     setPinnedIds(prev => {
       const without = prev.filter(x => x !== id);
       return [id, ...without];
@@ -69,14 +67,16 @@ const ApartmentRental = () => {
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        {/* 종류 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">종 류</span>
         {APARTMENT_SUBTYPES.map(t => {
           const isActive = activeTypes.includes(t);
           return (
             <button key={t} onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+              style={isActive
+                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
             >{t}</button>
           );
         })}
@@ -89,14 +89,16 @@ const ApartmentRental = () => {
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
-        {/* 매전월 */}
         <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">매전월</span>
         {APARTMENT_DEAL_TYPES.map(t => {
           const isActive = activeDealTypes.includes(t);
           return (
             <button key={t} onClick={() => toggleDealType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+              style={isActive
+                ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
             >{t}</button>
           );
         })}
@@ -108,16 +110,9 @@ const ApartmentRental = () => {
         )}
       </div>
 
-      <main
-        className="flex-1 overflow-hidden flex relative"
-        style={{ minHeight: 0 }}
-      >
+      <main className="flex-1 overflow-hidden flex relative" style={{ minHeight: 0 }}>
         <div className="flex-1 relative min-w-0">
-          <MapView
-            properties={filtered}
-            selectedId={selectedId}
-            onSelect={handlePinSelect}
-          />
+          <MapView properties={filtered} selectedId={selectedId} onSelect={handlePinSelect} />
           <MapFilterBar
             activeType={activeType}
             activeTypes={activeTypes}
@@ -129,6 +124,7 @@ const ApartmentRental = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            onLandlordSelect={(p) => { setLandlordProperty(p); if (p) setSelectedId(null); }}
             hideSearchBar={showRegister}
             showCategoryChips={false}
             showRoomTypes={false}
@@ -153,6 +149,14 @@ const ApartmentRental = () => {
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
         />
+        {landlordProperty && (
+          <div className="relative hidden md:block" style={{ width: 360, flexShrink: 0 }}>
+            <PropertyDetailPanel
+              property={landlordProperty}
+              onClose={() => setLandlordProperty(null)}
+            />
+          </div>
+        )}
       </main>
     </div>
   );

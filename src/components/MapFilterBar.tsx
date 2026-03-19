@@ -3,6 +3,7 @@ import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Eye, Shiel
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MapProperty } from "@/data/mapProperties";
 
 // ── 소유주 번호 검색 타입 ──────────────────────────────────────────────────
 interface LandlordResult {
@@ -18,6 +19,50 @@ interface LandlordResult {
   contactManager: string;
   contactBroker: string;
   type?: string;
+  // 상세 패널용 추가 필드
+  floor?: string;
+  area?: string;
+  deposit?: string;
+  monthly?: string;
+  buildYear?: string;
+  totalFloors?: string;
+  availableFrom?: string;
+  note?: string;
+  images?: string[];
+}
+
+// LandlordResult → MapProperty 변환
+let _landlordPanelId = 9000000;
+function landlordToMapProperty(item: LandlordResult): MapProperty {
+  return {
+    id: _landlordPanelId++,
+    title: item.label,
+    address: item.sublabel,
+    type: item.type ?? (item.source === "contact" ? "연락처DB" : "매물"),
+    area: item.area ? `${item.area}㎡` : "",
+    floor: item.floor ?? "",
+    deposit: item.deposit ? `${item.deposit}만` : "",
+    monthly: item.monthly ? `${item.monthly}만` : "",
+    views: 0,
+    lat: 0,
+    lng: 0,
+    image: (item.images ?? [])[0] ?? "",
+    images: item.images ?? [],
+    description: item.note ?? "",
+    contact: item.contactBroker ?? "",
+    contactOwner: item.contactOwner ?? "",
+    contactManager: item.contactManager ?? "",
+    agentName: "",
+    manageFee: "",
+    parking: "",
+    elevator: false,
+    availableFrom: item.availableFrom ?? "",
+    totalFloors: item.totalFloors ? `지상 ${item.totalFloors}층` : "",
+    buildYear: item.buildYear ? `${item.buildYear}년` : "",
+    isNew: false,
+    isHot: false,
+    note: item.note,
+  };
 }
 
 // ── 소유주 번호 카드 (인라인 compact) ─────────────────────────────────────
@@ -28,11 +73,15 @@ const LandlordResultCard = ({
   show,
   isApproved,
   onReveal,
+  onSelect,
+  isSelected,
 }: {
   item: LandlordResult;
   show: boolean;
   isApproved: boolean;
   onReveal: () => void;
+  onSelect: () => void;
+  isSelected: boolean;
 }) => {
   const phoneVisible = isApproved || show;
   const isHidden = item.source === "property" && item.status !== "active";
@@ -54,36 +103,59 @@ const LandlordResultCard = ({
   );
 
   return (
-    <div className="rounded-lg border p-2.5 flex flex-col gap-1.5" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))", opacity: isHidden || isInvisible ? 0.8 : 1 }}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 flex-wrap">
-            <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
-            <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
-              style={item.source === "contact"
-                ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
-                : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
-              }>
-              {item.source === "contact" ? "연락처DB" : "매물"}
-            </span>
-            {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
-            {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
+    <div
+      className="rounded-lg border overflow-hidden transition-all"
+      style={{
+        borderColor: isSelected ? "hsl(var(--primary))" : "hsl(var(--border))",
+        background: isSelected ? "hsl(var(--primary)/0.04)" : "hsl(var(--background))",
+        opacity: isHidden || isInvisible ? 0.8 : 1,
+        boxShadow: isSelected ? "0 0 0 2px hsl(var(--primary)/0.2)" : undefined,
+      }}
+    >
+      <div className="p-2.5 flex flex-col gap-1.5">
+        <div className="flex items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 flex-wrap">
+              <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
+              <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
+                style={item.source === "contact"
+                  ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
+                  : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
+                }>
+                {item.source === "contact" ? "연락처DB" : "매물"}
+              </span>
+              {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
+              {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
+            </div>
+            <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
           </div>
-          <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
+          {/* 상세보기 버튼 */}
+          <button
+            onClick={onSelect}
+            className="flex-shrink-0 flex items-center gap-0.5 text-[10px] font-bold px-2 py-1 rounded-lg transition-all"
+            style={isSelected
+              ? { background: "hsl(var(--primary))", color: "#fff" }
+              : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
+            }
+          >
+            {isSelected ? "보는 중" : "상세보기"}
+          </button>
+          {isApproved && <ShieldCheck className="w-3 h-3 flex-shrink-0 mt-1" style={{ color: "hsl(var(--chart-2))" }} />}
         </div>
-        {isApproved && <ShieldCheck className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: "hsl(var(--chart-2))" }} />}
-      </div>
-      <div className="border-t border-border/40 pt-1.5 flex flex-col gap-0.5">
-        {item.contactOwner
-          ? <PhoneBtn phone={item.contactOwner} label="소유주" color="hsl(var(--primary))" />
-          : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
-        }
-        {item.contactManager && <PhoneBtn phone={item.contactManager} label="관리인" color="hsl(var(--chart-4))" />}
-        {item.contactBroker && <PhoneBtn phone={item.contactBroker} label="부동산" color="hsl(var(--chart-3))" />}
+        <div className="border-t border-border/40 pt-1.5 flex flex-col gap-0.5">
+          {item.contactOwner
+            ? <PhoneBtn phone={item.contactOwner} label="소유주" color="hsl(var(--primary))" />
+            : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
+          }
+          {item.contactManager && <PhoneBtn phone={item.contactManager} label="관리인" color="hsl(var(--chart-4))" />}
+          {item.contactBroker && <PhoneBtn phone={item.contactBroker} label="부동산" color="hsl(var(--chart-3))" />}
+        </div>
       </div>
     </div>
   );
 };
+
+
 
 
 const SEARCH_CATEGORIES = [
@@ -212,6 +284,7 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  onLandlordSelect?: (property: MapProperty | null) => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
@@ -413,6 +486,7 @@ const MapFilterBar = ({
   filters,
   onFiltersChange,
   onLandlordClick,
+  onLandlordSelect,
   hideSearchBar = false,
   topOffset,
   showCategoryChips = false,
@@ -441,6 +515,7 @@ const MapFilterBar = ({
   const [landlordSearched, setLandlordSearched] = useState(false);
   const [landlordError, setLandlordError] = useState("");
   const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
+  const [selectedLandlordId, setSelectedLandlordId] = useState<string | null>(null);
   const landlordInputRef = useRef<HTMLInputElement>(null);
   const { isAuthorized, isLoading: authLoading } = useAuth();
   const isApproved = !authLoading && isAuthorized;
@@ -450,6 +525,16 @@ const MapFilterBar = ({
   const handleReveal = (id: string) => {
     localStorage.setItem(`landlord_reveal_${id}`, today());
     setRevealedIds(prev => ({ ...prev, [id]: true }));
+  };
+
+  const handleLandlordItemSelect = (item: LandlordResult) => {
+    if (selectedLandlordId === item.id) {
+      setSelectedLandlordId(null);
+      onLandlordSelect?.(null);
+    } else {
+      setSelectedLandlordId(item.id);
+      onLandlordSelect?.(landlordToMapProperty(item));
+    }
   };
 
   const handleLandlordSearch = async () => {
@@ -678,6 +763,8 @@ const MapFilterBar = ({
                     show={isRevealed(item.id)}
                     isApproved={isApproved}
                     onReveal={() => handleReveal(item.id)}
+                    onSelect={() => handleLandlordItemSelect(item)}
+                    isSelected={selectedLandlordId === item.id}
                   />
                 ))}
               </div>
