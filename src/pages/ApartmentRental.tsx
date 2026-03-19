@@ -18,6 +18,7 @@ const APARTMENT_DB_TYPES = ["아파트", "오피스텔", "연립", "다세대", 
 const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -51,6 +52,10 @@ const ApartmentRental = () => {
 
   const handlePinSelect = (id: number) => {
     setSelectedId(id);
+    setPinnedIds(prev => {
+      const without = prev.filter(x => x !== id);
+      return [id, ...without];
+    });
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (prop) setPinnedAddress(prop.address);
   };
