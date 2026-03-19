@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
@@ -1553,6 +1553,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   );
 };
 
+/* ── LandlordPhoneRow ── */
+const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
+  const colorMap: Record<string, string> = {
+    "소유주": "hsl(var(--primary))",
+    "관리인": "hsl(217 91% 60%)",
+    "부동산": "hsl(25 95% 53%)",
+  };
+  const color = colorMap[label] ?? "hsl(var(--foreground))";
+  return (
+    <div className="flex items-center justify-between py-0.5">
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <a
+        href={`tel:${phone}`}
+        className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg"
+        style={{ color, background: `${color}18` }}
+      >
+        <Phone className="w-3 h-3" />{phone}
+      </a>
+    </div>
+  );
+};
+
 /* ── MapSidebar ── */
 interface MapSidebarProps {
   properties: MapProperty[];
@@ -1571,13 +1593,17 @@ interface MapSidebarProps {
   /** 핀 클릭 순서대로 쌓인 id 배열 */
   pinnedIds?: number[];
   onClearPinnedIds?: () => void;
+  /** 소유주 번호 검색 결과 */
+  landlordResults?: import("@/components/MapFilterBar").LandlordResult[];
+  landlordLoading?: boolean;
+  landlordSearched?: boolean;
 }
 
 const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
 const DEFAULT_WIDTH = 540;
 
-const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds }: MapSidebarProps) => {
+const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 0, onDeleteProperties, pinnedAddress, onClearPin, pinnedIds, onClearPinnedIds, landlordResults, landlordLoading, landlordSearched }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
@@ -2087,6 +2113,66 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
           {/* List */}
           <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
+
+            {/* 소유주 번호 검색 결과 패널 */}
+            {landlordSearched && (
+              <div className="mx-3 mt-3 mb-2 rounded-xl border overflow-hidden" style={{ borderColor: "hsl(var(--accent)/0.4)" }}>
+                {/* 헤더 */}
+                <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ background: "hsl(var(--accent)/0.08)", borderColor: "hsl(var(--accent)/0.2)" }}>
+                  <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
+                  <span className="text-[11px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto">숨김·미노출 포함</span>
+                </div>
+                {landlordLoading ? (
+                  <div className="py-6 flex flex-col items-center gap-2 text-muted-foreground bg-background">
+                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
+                    <p className="text-xs">검색 중...</p>
+                  </div>
+                ) : (landlordResults ?? []).length === 0 ? (
+                  <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground bg-background">
+                    <AlertCircle className="w-6 h-6 opacity-30" />
+                    <p className="text-xs">연락처가 등록된 결과가 없습니다.</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 p-3 bg-background">
+                    {(landlordResults ?? []).map((item) => {
+                      const isHidden = item.source === "property" && item.status !== "active";
+                      const isInvisible = item.source === "contact" && item.isVisible === false;
+                      return (
+                        <div key={item.id} className="rounded-lg border p-2.5 flex flex-col gap-1.5" style={{ borderColor: "hsl(var(--border))", opacity: isHidden || isInvisible ? 0.8 : 1 }}>
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1 flex-wrap">
+                                <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
+                                <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
+                                  style={item.source === "contact"
+                                    ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
+                                    : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
+                                  }>
+                                  {item.source === "contact" ? "연락처DB" : "매물"}
+                                </span>
+                                {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
+                                {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
+                              </div>
+                              <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
+                            </div>
+                          </div>
+                          <div className="border-t pt-1.5 flex flex-col gap-0.5" style={{ borderColor: "hsl(var(--border)/0.4)" }}>
+                            {item.contactOwner
+                              ? <LandlordPhoneRow phone={item.contactOwner} label="소유주" />
+                              : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
+                            }
+                            {item.contactManager && <LandlordPhoneRow phone={item.contactManager} label="관리인" />}
+                            {item.contactBroker && <LandlordPhoneRow phone={item.contactBroker} label="부동산" />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {displayProperties.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
                 <MapPin className="w-10 h-10 mb-3 opacity-20" />

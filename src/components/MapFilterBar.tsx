@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, Phone, AlertCircle, Eye, ShieldCheck, Loader2 } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 
-// ── 소유주 번호 검색 타입 ──────────────────────────────────────────────────
-interface LandlordResult {
+// ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
+export interface LandlordResult {
   id: string;
   source: "property" | "contact";
   status?: string;
@@ -20,70 +19,8 @@ interface LandlordResult {
   type?: string;
 }
 
-// ── 소유주 번호 카드 (인라인 compact) ─────────────────────────────────────
-const today = () => new Date().toISOString().slice(0, 10);
 
-const LandlordResultCard = ({
-  item,
-  show,
-  isApproved,
-  onReveal,
-}: {
-  item: LandlordResult;
-  show: boolean;
-  isApproved: boolean;
-  onReveal: () => void;
-}) => {
-  const phoneVisible = isApproved || show;
-  const isHidden = item.source === "property" && item.status !== "active";
-  const isInvisible = item.source === "contact" && item.isVisible === false;
 
-  const PhoneBtn = ({ phone, label, color }: { phone: string; label: string; color: string }) => (
-    <div className="flex items-center justify-between py-0.5">
-      <span className="text-[10px] text-muted-foreground">{label}</span>
-      {phoneVisible ? (
-        <a href={`tel:${phone}`} className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg" style={{ color, background: `${color}18` }}>
-          <Phone className="w-3 h-3" />{phone}
-        </a>
-      ) : (
-        <button onClick={onReveal} className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg text-white" style={{ background: "hsl(var(--accent))" }}>
-          <Eye className="w-2.5 h-2.5" />공개
-        </button>
-      )}
-    </div>
-  );
-
-  return (
-    <div className="rounded-lg border p-2.5 flex flex-col gap-1.5" style={{ borderColor: "hsl(var(--border))", background: "hsl(var(--background))", opacity: isHidden || isInvisible ? 0.8 : 1 }}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 flex-wrap">
-            <p className="text-[11px] font-bold text-foreground truncate">{item.label}</p>
-            <span className="text-[9px] px-1 py-0.5 rounded-full font-semibold flex-shrink-0"
-              style={item.source === "contact"
-                ? { background: "hsl(var(--accent)/0.15)", color: "hsl(var(--accent))" }
-                : { background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }
-              }>
-              {item.source === "contact" ? "연락처DB" : "매물"}
-            </span>
-            {isHidden && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">숨김</span>}
-            {isInvisible && <span className="text-[9px] px-1 py-0.5 rounded-full bg-muted text-muted-foreground">미노출</span>}
-          </div>
-          <p className="text-[10px] text-muted-foreground truncate">{item.sublabel}</p>
-        </div>
-        {isApproved && <ShieldCheck className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: "hsl(var(--chart-2))" }} />}
-      </div>
-      <div className="border-t border-border/40 pt-1.5 flex flex-col gap-0.5">
-        {item.contactOwner
-          ? <PhoneBtn phone={item.contactOwner} label="소유주" color="hsl(var(--primary))" />
-          : <p className="text-[10px] text-muted-foreground">임대인 직접 연락처 미등록</p>
-        }
-        {item.contactManager && <PhoneBtn phone={item.contactManager} label="관리인" color="hsl(var(--chart-4))" />}
-        {item.contactBroker && <PhoneBtn phone={item.contactBroker} label="부동산" color="hsl(var(--chart-3))" />}
-      </div>
-    </div>
-  );
-};
 
 
 const SEARCH_CATEGORIES = [
@@ -212,6 +149,8 @@ interface MapFilterBarProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onLandlordClick?: () => void;
+  /** 소유주 검색 결과를 부모로 전달 */
+  onLandlordResults?: (results: LandlordResult[], loading: boolean, searched: boolean) => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
@@ -413,6 +352,7 @@ const MapFilterBar = ({
   filters,
   onFiltersChange,
   onLandlordClick,
+  onLandlordResults,
   hideSearchBar = false,
   topOffset,
   showCategoryChips = false,
@@ -440,33 +380,27 @@ const MapFilterBar = ({
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const [landlordError, setLandlordError] = useState("");
-  const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
   const landlordInputRef = useRef<HTMLInputElement>(null);
-  const { isAuthorized, isLoading: authLoading } = useAuth();
-  const isApproved = !authLoading && isAuthorized;
-
-  const today = () => new Date().toISOString().slice(0, 10);
-  const isRevealed = (id: string) => isApproved || revealedIds[id] || localStorage.getItem(`landlord_reveal_${id}`) === today();
-  const handleReveal = (id: string) => {
-    localStorage.setItem(`landlord_reveal_${id}`, today());
-    setRevealedIds(prev => ({ ...prev, [id]: true }));
-  };
 
   const handleLandlordSearch = async () => {
     if (!landlordQuery.trim()) return;
     setLandlordSearched(true);
     setLandlordLoading(true);
     setLandlordError("");
+    onLandlordResults?.([], true, true);
     try {
       const { data, error: fnErr } = await supabase.functions.invoke("landlord-search", {
         body: { q: landlordQuery.trim() },
       });
       if (fnErr) throw fnErr;
       if (data?.error) throw new Error(data.error);
-      setLandlordResults((data?.results ?? []) as LandlordResult[]);
+      const results = (data?.results ?? []) as LandlordResult[];
+      setLandlordResults(results);
+      onLandlordResults?.(results, false, true);
     } catch (e: unknown) {
       setLandlordError(e instanceof Error ? e.message : String(e));
       setLandlordResults([]);
+      onLandlordResults?.([], false, true);
     } finally {
       setLandlordLoading(false);
     }
@@ -476,6 +410,7 @@ const MapFilterBar = ({
     setSearchMode("landlord");
     setLandlordSearched(false);
     setLandlordResults([]);
+    onLandlordResults?.([], false, false);
     setTimeout(() => landlordInputRef.current?.focus(), 50);
   };
   const switchToNormal = () => {
@@ -483,10 +418,12 @@ const MapFilterBar = ({
     setLandlordQuery("");
     setLandlordSearched(false);
     setLandlordResults([]);
+    onLandlordResults?.([], false, false);
   };
 
   const set = <K extends keyof FilterState>(key: K, val: FilterState[K]) =>
     onFiltersChange({ ...filters, [key]: val });
+
 
   const isDefault = (f: FilterState) =>
     f.dealType.length === 0 &&
@@ -636,63 +573,6 @@ const MapFilterBar = ({
               </button>
             )}
           </div>
-
-          {/* 소유주 검색 결과 드롭다운 */}
-          {searchMode === "landlord" && (landlordSearched || landlordLoading) && (
-            <div
-              className="bg-white rounded-xl border border-border mt-1.5 overflow-hidden flex flex-col"
-              style={{
-                boxShadow: "0 8px 32px rgba(10,45,110,0.18)",
-                width: 380,
-                maxHeight: 480,
-              }}
-            >
-              {/* 헤더 */}
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50" style={{ background: "hsl(var(--accent)/0.06)" }}>
-                <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "hsl(var(--accent))" }} />
-                <span className="text-[11px] font-bold" style={{ color: "hsl(var(--accent))" }}>소유주 번호 검색</span>
-                <span className="text-[10px] text-muted-foreground ml-auto">숨김 매물·미노출 연락처 포함</span>
-              </div>
-              <div className="overflow-y-auto flex-1 px-3 py-2 flex flex-col gap-2">
-                {landlordLoading && (
-                  <div className="py-6 flex flex-col items-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: "hsl(var(--accent))" }} />
-                    <p className="text-xs">검색 중...</p>
-                  </div>
-                )}
-                {landlordError && (
-                  <div className="py-3 flex items-center gap-2 text-destructive text-xs">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />{landlordError}
-                  </div>
-                )}
-                {!landlordLoading && !landlordError && landlordResults.length === 0 && landlordSearched && (
-                  <div className="py-6 flex flex-col items-center gap-1.5 text-muted-foreground">
-                    <AlertCircle className="w-6 h-6 opacity-30" />
-                    <p className="text-xs">연락처가 등록된 검색 결과가 없습니다.</p>
-                  </div>
-                )}
-                {!landlordLoading && landlordResults.map((item) => (
-                  <LandlordResultCard
-                    key={item.id}
-                    item={item}
-                    show={isRevealed(item.id)}
-                    isApproved={isApproved}
-                    onReveal={() => handleReveal(item.id)}
-                  />
-                ))}
-              </div>
-              {isApproved ? (
-                <div className="flex items-center justify-center gap-1 px-3 py-1.5 border-t border-border/50">
-                  <ShieldCheck className="w-3 h-3" style={{ color: "hsl(var(--chart-2))" }} />
-                  <p className="text-[10px] font-semibold" style={{ color: "hsl(var(--chart-2))" }}>승인 회원 — 제한없이 열람 가능</p>
-                </div>
-              ) : (
-                <p className="text-[10px] text-muted-foreground text-center px-3 py-1.5 border-t border-border/50">
-                  연락처는 일 1회 열람 가능 · 승인 회원은 무제한
-                </p>
-              )}
-            </div>
-          )}
         </div>
 
         {/* 상세 필터 패널 */}

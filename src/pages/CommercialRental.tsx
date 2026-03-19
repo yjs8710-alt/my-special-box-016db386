@@ -4,8 +4,7 @@ import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
-import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
-import LandlordSearchModal from "@/components/LandlordSearchModal";
+import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
@@ -18,14 +17,14 @@ const CommercialRental = () => {
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
-  const [showLandlord, setShowLandlord] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
+  const [landlordLoading, setLandlordLoading] = useState(false);
+  const [landlordSearched, setLandlordSearched] = useState(false);
 
-  // DB 매물 (상가임대)
   const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
 
-  // static + DB 합치기
   const allProperties = useMemo(
     () => [...MAP_PROPERTIES, ...dbProperties],
     [dbProperties]
@@ -63,9 +62,7 @@ const CommercialRental = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
-      {/* 상가 유형 탭 - 다중 선택 */}
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
@@ -110,7 +107,11 @@ const CommercialRental = () => {
             onPropertyIdChange={setPropertyId}
             filters={filters}
             onFiltersChange={setFilters}
-            onLandlordClick={() => setShowLandlord(true)}
+            onLandlordResults={(results, loading, searched) => {
+              setLandlordResults(results);
+              setLandlordLoading(loading);
+              setLandlordSearched(searched);
+            }}
             hideSearchBar={showRegister}
             showCategoryChips={true}
             showRoomTypes={false}
@@ -127,6 +128,9 @@ const CommercialRental = () => {
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
           onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          landlordResults={landlordResults}
+          landlordLoading={landlordLoading}
+          landlordSearched={landlordSearched}
         />
       </main>
     </div>
