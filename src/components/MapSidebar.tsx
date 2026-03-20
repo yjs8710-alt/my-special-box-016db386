@@ -1944,11 +1944,11 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
           />
         );
       })()}
-      {/* Lightbox — 여러 장 좌우 탐색 */}
+      {/* Lightbox — 호실별 탭 + 여러 장 좌우 탐색 */}
       {lightbox && (
         <LightboxModal
-          images={lightbox.images}
-          startIdx={lightbox.idx}
+          units={lightbox.units}
+          startUnitIdx={lightbox.unitIdx}
           onClose={() => setLightbox(null)}
         />
       )}
