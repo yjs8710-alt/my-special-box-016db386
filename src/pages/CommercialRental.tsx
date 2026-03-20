@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
-import MapView from "@/components/MapView";
+import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -12,6 +12,7 @@ const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·�
 
 const CommercialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [showAllFromSearch, setShowAllFromSearch] = useState(false);
@@ -23,65 +24,56 @@ const CommercialRental = () => {
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
+  const mapBoundsRef = useRef<MapBounds | null>(null);
 
   const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
-
-  const allProperties = useMemo(
-    () => [...MAP_PROPERTIES, ...dbProperties],
-    [dbProperties]
-  );
+  const allProperties = useMemo(() => [...MAP_PROPERTIES, ...dbProperties], [dbProperties]);
 
   const toggleType = (t: string) => {
-    if (t === "전체") {
-      setActiveTypes(["전체"]);
-      return;
-    }
+    if (t === "전체") { setActiveTypes(["전체"]); return; }
     setActiveTypes(prev => {
-      const without전체 = prev.filter(x => x !== "전체");
-      if (without전체.includes(t)) {
-        const next = without전체.filter(x => x !== t);
-        return next.length === 0 ? ["전체"] : next;
-      }
-      return [...without전체, t];
+      const w = prev.filter(x => x !== "전체");
+      if (w.includes(t)) { const n = w.filter(x => x !== t); return n.length === 0 ? ["전체"] : n; }
+      return [...w, t];
     });
   };
 
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
-
   const activeType = activeTypes[0] ?? "전체";
 
-  const handleSearchClick = () => {
-    setPinnedIds([]);
-    setPinnedAddress(null);
-    setSelectedId(null);
-    setShowAllFromSearch(true);
-  };
+  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; }, []);
 
-  const handlePinSelect = (id: number) => {
+  const handleSearchClick = useCallback(() => {
+    setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(true);
+  }, []);
+
+  const handlePinSelect = useCallback((id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
     setShowAllFromSearch(false);
     if (pinnedIds.includes(id)) {
+      setSuppressPan(true);
       const next = pinnedIds.filter(x => x !== id);
       setPinnedIds(next);
-      if (selectedId === id) setSelectedId(next.length > 0 ? next[0] : null);
-      if (next.length === 0) { setPinnedAddress(null); setSelectedId(null); }
+      setSelectedId(null);
+      if (next.length === 0) setPinnedAddress(null);
+      setTimeout(() => setSuppressPan(false), 100);
       return;
     }
-    const sameAddrIds = allProperties
-      .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
-      .map(p => p.id);
-    setPinnedIds(prev => {
-      const merged = [...prev];
-      sameAddrIds.forEach(sid => { if (!merged.includes(sid)) merged.push(sid); });
-      return merged;
-    });
+    const sameAddrIds = allProperties.filter(p => p.address === prop.address).map(p => p.id);
+    setSuppressPan(false);
+    setPinnedIds(prev => { const m = [...prev]; sameAddrIds.forEach(s => { if (!m.includes(s)) m.push(s); }); return m; });
     setSelectedId(id);
     setPinnedAddress(prop.address);
-  };
+  }, [filtered, allProperties, pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
-    if (showAllFromSearch || pinnedIds.length === 0) return filtered;
+    if (showAllFromSearch) {
+      const b = mapBoundsRef.current;
+      if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
+      return filtered;
+    }
+    if (pinnedIds.length === 0) return filtered;
     return filtered.filter(p => pinnedIds.includes(p.id));
   }, [filtered, pinnedIds, showAllFromSearch]);
 
@@ -122,6 +114,8 @@ const CommercialRental = () => {
             properties={filtered}
             selectedId={selectedId}
             onSelect={handlePinSelect}
+            onBoundsChange={handleBoundsChange}
+            suppressPan={suppressPan}
           />
           <MapFilterBar
             activeType={activeType}
