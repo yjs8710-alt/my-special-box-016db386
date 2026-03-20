@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
   onClose: () => void;
+  sameProperties?: MapProperty[]; // 동일 주소 다른 호실 매물
 }
 
 const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
