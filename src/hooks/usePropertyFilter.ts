@@ -100,9 +100,10 @@ export function usePropertyFilter(
         const dongLotMatch = dongLotPattern !== null &&
           addr.includes(dongLotPattern[1]) &&
           addr.includes(dongLotPattern[2]);
-        // 번지수만 입력 (예: "1994" or "1994번지")
+        // 번지수만 입력 (예: "1994" or "1994번지") — 단어 경계로 정확 매칭
         const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
-        const lotOnlyMatch = lotOnlyPattern !== null && addr.includes(lotOnlyPattern[1]);
+        const lotOnlyMatch = lotOnlyPattern !== null &&
+          new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
         const matchText =
           addr.includes(qNorm) ||
           addr.includes(q) ||
