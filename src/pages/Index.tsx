@@ -70,6 +70,7 @@ const Index = () => {
           <PropertyDetailPanel
             property={selected}
             onClose={() => setSelectedId(null)}
+            sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
           />
         )}
       </div>
