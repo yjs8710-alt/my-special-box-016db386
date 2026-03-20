@@ -619,7 +619,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           <ImageCarousel
             images={allImages}
             title={property.title}
-            onImageClick={(i) => setLightboxIdx(i)}
+            onImageClick={(i) => setLightboxUnitIdx(0)}
           />
 
           {/* Badges */}
