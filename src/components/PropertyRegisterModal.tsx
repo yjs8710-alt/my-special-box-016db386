@@ -129,7 +129,8 @@ interface FormState {
   tenantOccupied: boolean;      // 아파트매매: 세입자 거주여부
   tenantDeposit: string;        // 아파트매매: 세입자 전세/보증금
   tenantMonthly: string;        // 아파트매매: 세입자 월세
-  vacateDate: string;           // 아파트매매: 퇴거일
+  vacateDate: string;           // 퇴거 예정일 (임대/매매 공통)
+  earlyExit: boolean;           // 세입자 중도퇴거 여부 (임대 전용)
   expose: boolean;
   allowAddressView: boolean;
   images: string[];
@@ -155,6 +156,7 @@ const INITIAL: FormState = {
   description: "",
   contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
   tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
+  earlyExit: false,
   expose: true, allowAddressView: false,
   images: [],
 };
@@ -458,6 +460,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.tenantOccupied && form.tenantDeposit && `세입자전세금: ${form.tenantDeposit}`,
         form.tenantOccupied && form.tenantMonthly && `세입자월세: ${form.tenantMonthly}`,
         form.vacateDate && `퇴거일: ${form.vacateDate}`,
+        form.earlyExit && `중도퇴거: 세입자중도퇴거`,
         ...rentNotes,
         form.direction && `방향: ${form.direction}`,
         form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
@@ -882,6 +885,52 @@ function Step2({
                 {t}
               </button>
             ))}
+          </div>
+
+          {/* 세입자 중도퇴거 — 항상 표시 */}
+          <div className="flex items-center gap-3 mt-2 px-3 py-2.5 rounded-xl border transition-all"
+            style={{
+              background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
+              borderColor: form.earlyExit ? "hsl(0 85% 70%)" : "hsl(var(--border))",
+            }}>
+            <label className="flex items-center gap-2 text-sm cursor-pointer w-full">
+              <input
+                type="checkbox"
+                checked={form.earlyExit}
+                onChange={(e) => set("earlyExit", e.target.checked)}
+                className="w-4 h-4 accent-destructive"
+              />
+              <span className="font-semibold" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
+                세입자 중도퇴거
+              </span>
+              {form.earlyExit && (
+                <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
+                  style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
+                  중도퇴거
+                </span>
+              )}
+            </label>
+          </div>
+
+          {/* 퇴거 예정일 — 항상 표시 */}
+          <div className="flex flex-col gap-1 mt-1">
+            <label className="text-xs font-semibold text-muted-foreground">
+              퇴거 예정일
+              <span className="ml-1 text-[10px] font-normal text-muted-foreground/70">(예: 2025.03.15)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="예) 2025.03.15"
+              value={form.vacateDate}
+              onChange={(e) => set("vacateDate", e.target.value)}
+              className="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
+              style={form.vacateDate ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
+            />
+            {form.vacateDate && (
+              <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
+                🚪 퇴거 예정: {form.vacateDate}
+              </p>
+            )}
           </div>
         </Section>
       )}
