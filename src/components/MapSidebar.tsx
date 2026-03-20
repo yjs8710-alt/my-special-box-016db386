@@ -1362,6 +1362,18 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
                   <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>{areaShort}</span>
                 </>
               )}
+              {(() => {
+                const bam = (prop.note ?? "").match(/건평[:\s]+([^\n|]+)/);
+                const bv = bam ? bam[1].trim() : null;
+                if (!bv) return null;
+                return (
+                  <>
+                    <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>·</span>
+                    <span className="text-[10px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>건평</span>
+                    <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>{bv}</span>
+                  </>
+                );
+              })()}
             </span>
           );
         })()}
