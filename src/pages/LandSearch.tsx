@@ -125,6 +125,8 @@ const LandSearch = () => {
             properties={filtered}
             selectedId={selectedId}
             onSelect={handlePinSelect}
+            onBoundsChange={handleBoundsChange}
+            suppressPan={suppressPan}
           />
           <MapFilterBar
             activeType={activeType}
