@@ -569,10 +569,10 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   );
 }
 
-const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) => {
+const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
   const [buildingOpen, setBuildingOpen] = useState(false);
-  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
 
   if (!property) return null;
@@ -585,14 +585,25 @@ const PropertyDetailPanel = ({ property, onClose }: PropertyDetailPanelProps) =>
     ? property.images
     : property.image ? [property.image] : [];
 
+  // 동일주소 호실별 라이트박스 유닛 구성
+  const otherUnits = sameProperties
+    .filter(p => p.id !== property.id && (p.images && p.images.length > 0 || p.image));
+  const lightboxUnits: LightboxUnit[] = [
+    { label: property.unitNumber ? `${property.unitNumber}호` : (property.title || "현재 매물"), images: allImages },
+    ...otherUnits.map(p => ({
+      label: p.unitNumber ? `${p.unitNumber}호` : (p.title || p.address),
+      images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+    })),
+  ].filter(u => u.images.length > 0);
+
   return (
     <>
       {/* ── 풀스크린 라이트박스 ── */}
-      {lightboxIdx !== null && (
+      {lightboxUnitIdx !== null && (
         <Lightbox
-          images={allImages}
-          startIdx={lightboxIdx}
-          onClose={() => setLightboxIdx(null)}
+          units={lightboxUnits}
+          startUnitIdx={lightboxUnitIdx}
+          onClose={() => setLightboxUnitIdx(null)}
         />
       )}
 
