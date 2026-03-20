@@ -94,11 +94,7 @@ export function usePropertyFilter(
         const matchText =
           p.address.toLowerCase().includes(q) ||
           p.title.toLowerCase().includes(q) ||
-          (p.buildingName ?? "").toLowerCase().includes(q) ||
-          (p.dong ?? "").toLowerCase().includes(q) ||
-          (p.lotNumber ?? "").toLowerCase().includes(q) ||
-          // 동+번지 조합 검색 (예: "남문로1가 190")
-          (`${p.dong ?? ""} ${p.lotNumber ?? ""}`.trim().toLowerCase()).includes(q);
+          (p.buildingName ?? "").toLowerCase().includes(q);
         if (!matchText) return false;
       }
 
