@@ -5,11 +5,29 @@ import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 
-/* ── LightboxModal: 여러 장 사진 좌우 탐색 ── */
-function LightboxModal({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
-  const [idx, setIdx] = useState(startIdx);
-  const prev = useCallback(() => setIdx((i) => (i - 1 + images.length) % images.length), [images.length]);
-  const next = useCallback(() => setIdx((i) => (i + 1) % images.length), [images.length]);
+/* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
+interface LightboxUnit {
+  label: string; // 예) "101호", "A동" 또는 단일 매물명
+  images: string[];
+}
+function LightboxModal({ units, startUnitIdx = 0, startImgIdx = 0, onClose }: {
+  units: LightboxUnit[];
+  startUnitIdx?: number;
+  startImgIdx?: number;
+  onClose: () => void;
+}) {
+  const [unitIdx, setUnitIdx] = useState(startUnitIdx);
+  const [imgIdx, setImgIdx] = useState(startImgIdx);
+
+  const currentImages = units[unitIdx]?.images ?? [];
+  const prev = useCallback(() => setImgIdx((i) => (i - 1 + currentImages.length) % currentImages.length), [currentImages.length]);
+  const next = useCallback(() => setImgIdx((i) => (i + 1) % currentImages.length), [currentImages.length]);
+
+  // 호실 탭 변경 시 사진 인덱스 초기화
+  const handleUnitChange = useCallback((i: number) => {
+    setUnitIdx(i);
+    setImgIdx(0);
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -26,22 +44,47 @@ function LightboxModal({ images, startIdx, onClose }: { images: string[]; startI
       <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10">
         <X className="w-5 h-5 text-white" />
       </button>
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10">
-        {idx + 1} / {images.length}
+
+      {/* 호실 탭 — 2개 이상일 때만 표시 */}
+      {units.length > 1 && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+          {units.map((u, i) => (
+            <button
+              key={i}
+              onClick={() => handleUnitChange(i)}
+              className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+              style={i === unitIdx
+                ? { background: "hsl(var(--primary))", color: "#fff" }
+                : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
+              }
+            >
+              {u.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 사진 카운터 — 탭 없을 때 중앙, 탭 있을 때 우측 상단 */}
+      <div
+        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {imgIdx + 1} / {currentImages.length}
       </div>
-      <div className="relative w-full h-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+
+      <div className="relative w-full h-full overflow-hidden" style={{ paddingTop: units.length > 1 ? "56px" : "0" }} onClick={(e) => e.stopPropagation()}>
         {/* 슬라이드 트랙 */}
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${idx * 100}vw)`, width: `${images.length * 100}vw` }}
+          style={{ transform: `translateX(-${imgIdx * 100}vw)`, width: `${currentImages.length * 100}vw` }}
         >
-          {images.map((src, i) => (
+          {currentImages.map((src, i) => (
             <div key={i} className="flex-shrink-0 h-full flex items-center justify-center px-16" style={{ width: "100vw" }}>
               <img src={src} alt={`사진 ${i + 1}`} className="max-w-full max-h-full object-contain rounded-lg select-none" draggable={false} />
             </div>
           ))}
         </div>
-        {images.length > 1 && (
+        {currentImages.length > 1 && (
           <>
             <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors">
               <ChevronLeft className="w-6 h-6 text-white" />
@@ -52,10 +95,10 @@ function LightboxModal({ images, startIdx, onClose }: { images: string[]; startI
           </>
         )}
       </div>
-      {images.length > 1 && (
+      {currentImages.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10" onClick={(e) => e.stopPropagation()}>
-          {images.map((src, i) => (
-            <button key={i} onClick={() => setIdx(i)} className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all" style={{ borderColor: i === idx ? "hsl(var(--primary))" : "transparent", opacity: i === idx ? 1 : 0.5 }}>
+          {currentImages.map((src, i) => (
+            <button key={i} onClick={() => setImgIdx(i)} className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all" style={{ borderColor: i === imgIdx ? "hsl(var(--primary))" : "transparent", opacity: i === imgIdx ? 1 : 0.5 }}>
               <img src={src} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
