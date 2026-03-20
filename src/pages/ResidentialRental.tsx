@@ -57,21 +57,27 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: 같은 핀 재클릭 시 선택 해제, 다른 핀은 누적
+  // 핀 클릭 핸들러: 같은 주소 매물 전체 누적 / 재클릭 시 해당 주소 해제
   const handlePinSelect = (id: number) => {
-    if (selectedId === id) {
-      // 같은 핀 재클릭 → 선택 해제
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (!prop) return;
+
+    // 같은 핀(같은 주소) 재클릭 → 해제
+    if (pinnedAddress === prop.address && pinnedIds.includes(id)) {
       setSelectedId(null);
-      setPinnedIds(prev => prev.filter(x => x !== id));
+      setPinnedIds([]);
+      setPinnedAddress(null);
       return;
     }
+
+    // 같은 주소의 모든 매물 id 수집
+    const sameAddrIds = allProperties
+      .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
+      .map(p => p.id);
+
     setSelectedId(id);
-    setPinnedIds(prev => {
-      const without = prev.filter(x => x !== id);
-      return [id, ...without];
-    });
-    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    setPinnedIds(sameAddrIds);
+    setPinnedAddress(prop.address);
   };
 
   return (

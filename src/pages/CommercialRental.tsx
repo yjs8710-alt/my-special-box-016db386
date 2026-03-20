@@ -50,18 +50,20 @@ const CommercialRental = () => {
   const activeType = activeTypes[0] ?? "전체";
 
   const handlePinSelect = (id: number) => {
-    if (selectedId === id) {
+    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
+    if (!prop) return;
+    if (pinnedAddress === prop.address && pinnedIds.includes(id)) {
       setSelectedId(null);
-      setPinnedIds(prev => prev.filter(x => x !== id));
+      setPinnedIds([]);
+      setPinnedAddress(null);
       return;
     }
+    const sameAddrIds = allProperties
+      .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
+      .map(p => p.id);
     setSelectedId(id);
-    setPinnedIds(prev => {
-      const without = prev.filter(x => x !== id);
-      return [id, ...without];
-    });
-    const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
-    if (prop) setPinnedAddress(prop.address);
+    setPinnedIds(sameAddrIds);
+    setPinnedAddress(prop.address);
   };
 
   return (
