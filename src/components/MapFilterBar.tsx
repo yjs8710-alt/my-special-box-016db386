@@ -508,13 +508,10 @@ const MapFilterBar = ({
                   onChange={(e) => {
                     const v = e.target.value;
                     onQueryChange(v);
-                    if (/^\d+$/.test(v.trim())) {
-                      onPropertyIdChange(v.trim());
-                    } else {
-                      onPropertyIdChange("");
-                    }
+                    // 번지수(숫자)도 주소 검색으로 처리 — propertyId 설정 안 함
+                    onPropertyIdChange("");
                   }}
-                  placeholder="주소, 건물명, 매물번호 검색"
+                  placeholder="주소, 건물명, 동명, 번지수 검색"
                   className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {query && (
