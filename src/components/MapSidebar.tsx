@@ -2023,9 +2023,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             {pinnedIds && pinnedIds.length > 0 && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
-                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
                 <span className="text-[10px] font-bold text-primary flex-1 min-w-0">
-                  핀 선택 {pinnedIds.length}개 (클릭 순서)
+                  핀 선택 {pinnedIds.length}개
                 </span>
                 <button
                   onClick={() => onClearPinnedIds?.()}
@@ -2041,7 +2040,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
               <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
                 style={{ background: "hsl(var(--primary)/0.08)" }}>
-                <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
                 <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
                 <button
                   onClick={() => onClearPin?.()}
@@ -2058,11 +2056,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <div className="min-w-0">
                   <p className="text-[13px] font-extrabold text-foreground leading-none">
-                    {pinnedIds && pinnedIds.length > 0 && <span className="text-[10px] font-semibold text-primary">(핀 선택 순서)</span>}
                     {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && <span className="text-[10px] font-semibold text-primary">(동일주소)</span>}
                   </p>
                   <p className="text-[9px] text-muted-foreground mt-0.5">
-                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : (pinnedIds && pinnedIds.length > 0) ? "핀 클릭 순서 필터 중" : pinnedAddress ? "핀 클릭 필터 중" : ""}
+                    {checkedIds.size > 0 ? `${checkedIds.size}개 선택됨` : pinnedAddress && (!pinnedIds || pinnedIds.length === 0) ? "핀 클릭 필터 중" : ""}
                   </p>
                 </div>
               </div>
