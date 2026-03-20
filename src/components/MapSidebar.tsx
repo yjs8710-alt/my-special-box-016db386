@@ -172,25 +172,38 @@ const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => 
       <circle cx="12" cy="18" r="1.8" fill="currentColor"/>
     </svg>,
     "주차":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 17V8h4a3 3 0 0 1 0 6H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-    /* ── 반려동물가능: 강아지 발바닥 ── */
-    "애완동물가능": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-      <ellipse cx="6" cy="7.5" rx="2" ry="2.5" stroke="currentColor" strokeWidth="1.7"/>
-      <ellipse cx="10.5" cy="4.5" rx="1.8" ry="2.2" stroke="currentColor" strokeWidth="1.7"/>
-      <ellipse cx="13.5" cy="4.5" rx="1.8" ry="2.2" stroke="currentColor" strokeWidth="1.7"/>
-      <ellipse cx="18" cy="7.5" rx="2" ry="2.5" stroke="currentColor" strokeWidth="1.7"/>
-      <path d="M5 13.5C5 11 7.5 9.5 12 9.5C16.5 9.5 19 11 19 13.5C19 17 16 20 12 20C8 20 5 17 5 13.5Z" stroke="currentColor" strokeWidth="1.7" fill="currentColor" fillOpacity="0.12"/>
+    /* ── 반려동물가능: 옆모습 강아지 ── */
+    "애완동물가능": <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
+      {/* 몸통 */}
+      <ellipse cx="15" cy="20" rx="9" ry="6" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.6"/>
+      {/* 머리 */}
+      <circle cx="24" cy="14" r="4.5" fill="currentColor" fillOpacity="0.18" stroke="currentColor" strokeWidth="1.6"/>
+      {/* 귀 */}
+      <path d="M21.5 11C20 9 18.5 9.5 19 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="currentColor" fillOpacity="0.25"/>
+      {/* 꼬리 */}
+      <path d="M6 17C4 15 3 12 5 11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      {/* 앞다리 */}
+      <path d="M20 24V27M22 24V27" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+      {/* 뒷다리 */}
+      <path d="M10 25V28M12 25V28" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+      {/* 코 */}
+      <circle cx="27.5" cy="15.5" r="1" fill="currentColor"/>
+      {/* 눈 */}
+      <circle cx="25.5" cy="12.5" r="0.9" fill="currentColor"/>
     </svg>,
-    "애완동물불가": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.8"/>
-      <line x1="5.5" y1="5.5" x2="18.5" y2="18.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+    "애완동물불가": <svg width={s} height={s} viewBox="0 0 32 32" fill="none">
+      {/* 강아지 옆모습 (흐리게) */}
+      <ellipse cx="15" cy="20" rx="9" ry="6" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.4"/>
+      <circle cx="24" cy="14" r="4.5" fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.4"/>
+      {/* 금지 사선 */}
+      <line x1="4" y1="4" x2="28" y2="28" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+      {/* 금지 원 */}
+      <circle cx="16" cy="16" r="13" stroke="currentColor" strokeWidth="1.9"/>
     </svg>,
-    /* ── 수도: 수도꼭지 ── */
+    /* ── 수도: 큰 물방울 ── */
     "수도": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-      <path d="M6 6H10V10H6V6Z" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M10 8H16C17.1 8 18 8.9 18 10V10C18 11.1 17.1 12 16 12H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-      <path d="M14 12V18C14 19.1 13.1 20 12 20H12C10.9 20 10 19.1 10 18V15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-      <path d="M11 21H13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-      <path d="M5 9V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M12 3C12 3 5 10.5 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10.5 12 3 12 3Z" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M9 16.5C9.5 18 10.8 19 12.5 19" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>,
     /* ── 유선: 랜케이블/유선인터넷 ── */
     "유선": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
