@@ -152,6 +152,8 @@ interface MapFilterBarProps {
   onLandlordClick?: () => void;
   /** 소유주 검색 결과를 부모로 전달 */
   onLandlordResults?: (results: LandlordResult[], loading: boolean, searched: boolean) => void;
+  /** 돋보기 버튼 클릭 시 현재 필터 매물 전체 표시 요청 */
+  onSearchClick?: () => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
