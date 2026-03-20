@@ -323,6 +323,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   halfMonthly: string;
   jeonseDeposit: string;
   earlyExit: boolean; // 세입자 중도퇴거
+  buildingArea: string; // 건평
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -343,6 +344,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   halfMonthly: "",
   jeonseDeposit: "",
   earlyExit: false,
+  buildingArea: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -448,6 +450,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (cleanMatch2) contacts.exitCleanFee = cleanMatch2[1].trim();
     if (brokerFeeMatch2) contacts.brokerFee = brokerFeeMatch2[1].trim();
     if (noteStr.includes("중도퇴거:")) contacts.earlyExit = true;
+    const buildingAreaMatch = noteStr.match(/건평[:\s]+([^\n|]+)/);
+    if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
@@ -664,6 +668,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
       form.brokerFee && `중개보수: ${form.brokerFee}`,
       form.earlyExit && `중도퇴거: 세입자중도퇴거`,
+      form.buildingArea && `건평: ${form.buildingArea}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -924,6 +929,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">평수</label>
                   <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic} />
+                </div>
+              </div>
+
+              {/* 건평 */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                  <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
                 </div>
               </div>
 
