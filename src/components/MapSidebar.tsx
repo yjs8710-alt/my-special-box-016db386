@@ -1521,6 +1521,8 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         // 중도퇴거 여부
         const earlyExit = note.includes("중도퇴거:");
         if (earlyExit) chips.push({ label: "중도퇴거", value: "", bg: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "hsl(0 85% 70%)" });
+        // 퇴거 예정일
+        if (prop.vacateDate) chips.push({ label: `퇴거 ${prop.vacateDate}`, value: "", bg: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "hsl(0 85% 65%)" });
 
         const hasChips = chips.length > 0;
         const hasDesc = !!(prop.description?.trim());
