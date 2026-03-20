@@ -137,7 +137,7 @@ const NonResidentialRental = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={(id) => setSelectedId(prev => prev === id ? null : id)}
           />
           <MapFilterBar
             activeType={activeType}
