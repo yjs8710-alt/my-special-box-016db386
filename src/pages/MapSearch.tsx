@@ -26,7 +26,19 @@ const MapSearch = () => {
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
   // 정적 목 데이터(숨긴 것 제외) + DB 데이터 병합
-  const allProperties = [...MAP_PROPERTIES.filter(p => !hiddenMockIds.has(p.id)), ...dbProperties];
+  // DB 매물 우선, 최신 등록순 정렬
+  const allProperties = useMemo(() => {
+    const dbIds = new Set(dbProperties.map((p) => p.id));
+    const merged = [
+      ...dbProperties,
+      ...MAP_PROPERTIES.filter(p => !hiddenMockIds.has(p.id) && !dbIds.has(p.id)),
+    ];
+    return merged.sort((a, b) => {
+      const da = a.registeredDate ?? "";
+      const db2 = b.registeredDate ?? "";
+      return da > db2 ? -1 : da < db2 ? 1 : 0;
+    });
+  }, [dbProperties, hiddenMockIds]);
 
 
   const handleDeleteProperties = (ids: Set<number>) => {
