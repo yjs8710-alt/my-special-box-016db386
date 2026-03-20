@@ -1109,6 +1109,25 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <span className={form.earlyExit ? "font-bold" : ""}>세입자 중도퇴거</span>
                   {form.earlyExit && <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>중도퇴거</span>}
                 </label>
+                {/* 퇴거일 — 세입자 중도퇴거 체크 시 표시 */}
+                {form.earlyExit && (
+                  <div className="flex flex-col gap-1 mt-1 pl-6">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      퇴거 예정일 <span className="text-destructive">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={form.vacate_date ?? ""}
+                      onChange={(e) => set("vacate_date", e.target.value)}
+                      className={ic}
+                    />
+                    {form.vacate_date && (
+                      <p className="text-[11px] text-destructive font-semibold">
+                        🚪 퇴거 예정: {new Date(form.vacate_date).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+                    )}
+                  </div>
+                )}
               </Section>
 
               {/* 금액 입력 */}
