@@ -91,19 +91,18 @@ export function usePropertyFilter(
       // 텍스트 검색
       if (query) {
         const q = query.toLowerCase().trim();
-        // "율량동 1994" → dong + lotNumber 분리 시도
-        const spaceIdx = q.lastIndexOf(" ");
-        const qDong = spaceIdx > 0 ? q.slice(0, spaceIdx) : q;
-        const qLot = spaceIdx > 0 ? q.slice(spaceIdx + 1) : "";
-        const dongLotMatch = qLot !== "" &&
-          (p.dong ?? "").toLowerCase().includes(qDong) &&
-          (p.lotNumber ?? "").toLowerCase().includes(qLot);
+        // "율량동 1994번지" 형태 검색: 주소 내 동+번지 분리 매칭
+        // address 예: "충북 청주시 청원구 율량동 1994"
+        const addr = p.address.toLowerCase();
+        // 쿼리에서 동이름 + 번지 패턴 분리 (예: "율량동 1994")
+        const dongLotPattern = q.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+        const dongLotMatch = dongLotPattern !== null &&
+          addr.includes(dongLotPattern[1]) &&
+          addr.includes(dongLotPattern[2]);
         const matchText =
-          p.address.toLowerCase().includes(q) ||
+          addr.includes(q) ||
           p.title.toLowerCase().includes(q) ||
           (p.buildingName ?? "").toLowerCase().includes(q) ||
-          (p.dong ?? "").toLowerCase().includes(q) ||
-          ((p.dong ?? "") + " " + (p.lotNumber ?? "")).toLowerCase().includes(q) ||
           dongLotMatch;
         if (!matchText) return false;
       }
