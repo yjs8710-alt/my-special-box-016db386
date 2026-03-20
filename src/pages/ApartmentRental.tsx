@@ -49,6 +49,11 @@ const ApartmentRental = () => {
   const activeType = activeTypes[0] ?? "전체";
 
   const handlePinSelect = (id: number) => {
+    if (selectedId === id) {
+      setSelectedId(null);
+      setPinnedIds(prev => prev.filter(x => x !== id));
+      return;
+    }
     setSelectedId(id);
     setPinnedIds(prev => {
       const without = prev.filter(x => x !== id);
