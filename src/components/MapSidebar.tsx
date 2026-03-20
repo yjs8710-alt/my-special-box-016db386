@@ -150,7 +150,12 @@ const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => 
     "드럼세탁기":<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="13" r="5" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="13" r="2" stroke="currentColor" strokeWidth="1.5"/></svg>,
     "건조기":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 12 Q12 8 15 12 Q12 16 9 12Z" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>,
     "스타일러": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M8 8 Q12 6 16 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/><path d="M8 12h8M8 15h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
-    "TV":       <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 19 L7 22M15 19 L17 22M7 22 h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+    "TV": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="4" width="20" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.9"/>
+      <rect x="5" y="7" width="14" height="8" rx="1" fill="currentColor" fillOpacity="0.12"/>
+      <line x1="9" y1="22" x2="15" y2="22" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+      <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+    </svg>,
     "에어컨":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="8" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M6 17 Q9 14 12 17 Q15 14 18 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/><circle cx="8" cy="9" r="1" fill="currentColor"/></svg>,
     "가스레인지":<svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="8" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/><circle cx="16" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5"/></svg>,
     "인덕션":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8"/><circle cx="8" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 1.5"/><circle cx="16" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 1.5"/></svg>,
@@ -159,10 +164,42 @@ const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => 
     "책상":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M3 8H21V10H3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M5 10V18M19 10V18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
     "옷장":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="1.5" stroke="currentColor" strokeWidth="1.8"/><line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" strokeWidth="1.5"/><line x1="9.5" y1="12" x2="11" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><line x1="13" y1="12" x2="14.5" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>,
     "전자키":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M8 8V6a4 4 0 1 1 8 0v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><circle cx="12" cy="14.5" r="1.5" fill="currentColor"/></svg>,
-    "인터넷":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 3 Q8 12 12 21" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M12 3 Q16 12 12 21" stroke="currentColor" strokeWidth="1.5" fill="none"/><path d="M3 12 h18" stroke="currentColor" strokeWidth="1.5"/></svg>,
+    /* ── 인터넷: 와이파이 신호 아이콘 ── */
+    "인터넷": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path d="M1.5 8.5C5.5 4.5 10.5 2.5 12 2.5C13.5 2.5 18.5 4.5 22.5 8.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M4.5 11.5C7.5 8.5 10.5 7 12 7C13.5 7 16.5 8.5 19.5 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M7.5 14.5C9.5 12.5 11 11.5 12 11.5C13 11.5 14.5 12.5 16.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <circle cx="12" cy="18" r="1.8" fill="currentColor"/>
+    </svg>,
     "주차":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 17V8h4a3 3 0 0 1 0 6H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-    "애완동물가능": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="4.5" cy="9" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="9.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="14.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.5"/><circle cx="19.5" cy="9" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M12 12 C7 12 5 16 5 19 Q8 22 12 22 Q16 22 19 19 C19 16 17 12 12 12Z" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>,
-    "애완동물불가": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+    /* ── 반려동물가능: 강아지 발바닥 ── */
+    "애완동물가능": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <ellipse cx="6" cy="7.5" rx="2" ry="2.5" stroke="currentColor" strokeWidth="1.7"/>
+      <ellipse cx="10.5" cy="4.5" rx="1.8" ry="2.2" stroke="currentColor" strokeWidth="1.7"/>
+      <ellipse cx="13.5" cy="4.5" rx="1.8" ry="2.2" stroke="currentColor" strokeWidth="1.7"/>
+      <ellipse cx="18" cy="7.5" rx="2" ry="2.5" stroke="currentColor" strokeWidth="1.7"/>
+      <path d="M5 13.5C5 11 7.5 9.5 12 9.5C16.5 9.5 19 11 19 13.5C19 17 16 20 12 20C8 20 5 17 5 13.5Z" stroke="currentColor" strokeWidth="1.7" fill="currentColor" fillOpacity="0.12"/>
+    </svg>,
+    "애완동물불가": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="9.5" stroke="currentColor" strokeWidth="1.8"/>
+      <line x1="5.5" y1="5.5" x2="18.5" y2="18.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+    </svg>,
+    /* ── 수도: 수도꼭지 ── */
+    "수도": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <path d="M6 6H10V10H6V6Z" rx="1" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M10 8H16C17.1 8 18 8.9 18 10V10C18 11.1 17.1 12 16 12H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M14 12V18C14 19.1 13.1 20 12 20H12C10.9 20 10 19.1 10 18V15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M11 21H13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M5 9V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    </svg>,
+    /* ── 유선: 랜케이블/유선인터넷 ── */
+    "유선": <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="14" width="6" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8"/>
+      <rect x="16" y="14" width="6" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8"/>
+      <path d="M8 16.5H11C11.6 16.5 12 16 12 15.4V8.6C12 8 12.4 7.5 13 7.5H16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M5 14V11.5C5 11.2 5.2 11 5.5 11H6.5C6.8 11 7 11.2 7 11.5V14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M17 14V11.5C17 11.2 17.2 11 17.5 11H18.5C18.8 11 19 11.2 19 11.5V14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+    </svg>,
   };
   return icons[name] ?? <span className="text-[10px] leading-none">{name.slice(0, 1)}</span>;
 };
@@ -173,6 +210,7 @@ const OPTION_ICONS: Record<string, string> = {
   "인덕션": "인덕션", "전자레인지": "전자레인지", "침대": "침대", "책상": "책상",
   "옷장": "옷장", "전자키": "전자키", "인터넷": "인터넷", "주차": "주차",
   "애완동물가능": "애완동물가능", "애완동물불가": "애완동물불가",
+  "수도": "수도", "유선": "유선",
 };
 
 /* Daily-limit helpers */
