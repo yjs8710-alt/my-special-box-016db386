@@ -1457,64 +1457,100 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         <span className="flex-1" />
         {/* ⑨ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV/CCTV) — 아이콘만 표시 */}
         {(() => {
-          type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
           const badges: JSX.Element[] = [];
           const opts = prop.options ?? [];
 
           // 엘리베이터 (boolean 필드)
           if (prop.elevator) badges.push(
-            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+            <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
               style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M9 10l3-3 3 3M9 14l3 3 3-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </span>
           );
 
-          // 옵션 배열 기반 아이콘 맵
-          const ICON_MAP: Record<string, IconBadge> = {
-            "반려동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "애완동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "반려동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "애완동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "수도":          { icon: <Droplet size={14} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-            "인터넷":        { icon: <span className="text-[11px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-            "유선TV":        { icon: <Tv size={14} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-            "CCTV":          { icon: <Cctv size={14} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
-          };
-
-          // 반려동물 불가는 금지선 오버레이
+          // 반려동물
           const isPetDenied = opts.includes("반려동물불가") || opts.includes("애완동물불가");
           const isPetAllowed = opts.includes("반려동물가능") || opts.includes("애완동물가능");
 
           if (isPetDenied) {
             badges.push(
-              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+              <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
                 style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
-                <Dog size={14} strokeWidth={2}/>
+                {/* 강아지 발바닥 SVG */}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <ellipse cx="6" cy="7.5" rx="1.8" ry="2.3" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="10.5" cy="4.5" rx="1.6" ry="2" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="13.5" cy="4.5" rx="1.6" ry="2" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="18" cy="7.5" rx="1.8" ry="2.3" stroke="currentColor" strokeWidth="1.7"/>
+                  <path d="M5 13.5C5 11 7.5 9.5 12 9.5C16.5 9.5 19 11 19 13.5C19 17 16 20 12 20C8 20 5 17 5 13.5Z" stroke="currentColor" strokeWidth="1.7" fill="currentColor" fillOpacity="0.15"/>
+                </svg>
                 <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg width="18" height="18" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#b91c1c" strokeWidth="2.2" strokeLinecap="round"/></svg>
                 </span>
               </span>
             );
           } else if (isPetAllowed) {
             badges.push(
-              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+              <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
                 style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>
-                <Dog size={14} strokeWidth={2}/>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                  <ellipse cx="6" cy="7.5" rx="1.8" ry="2.3" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="10.5" cy="4.5" rx="1.6" ry="2" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="13.5" cy="4.5" rx="1.6" ry="2" stroke="currentColor" strokeWidth="1.7"/>
+                  <ellipse cx="18" cy="7.5" rx="1.8" ry="2.3" stroke="currentColor" strokeWidth="1.7"/>
+                  <path d="M5 13.5C5 11 7.5 9.5 12 9.5C16.5 9.5 19 11 19 13.5C19 17 16 20 12 20C8 20 5 17 5 13.5Z" stroke="currentColor" strokeWidth="1.7" fill="currentColor" fillOpacity="0.15"/>
+                </svg>
               </span>
             );
           }
 
-          const EXTRA_KEYS = ["수도", "인터넷", "유선TV", "CCTV"];
-          opts.filter(o => EXTRA_KEYS.includes(o)).forEach(opt => {
-            const d = ICON_MAP[opt];
-            if (!d) return;
-            badges.push(
-              <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}>
-                {d.icon}
-              </span>
-            );
-          });
+          // 수도 — 수도꼭지 아이콘
+          if (opts.includes("수도")) badges.push(
+            <span key="water" title="수도" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
+              style={{ background: "#eff6ff", color: "#1d4ed8", border: "1.5px solid #93c5fd" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M5 5H11V10H5V5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+                <path d="M11 7.5H16C17.1 7.5 18 8.4 18 9.5C18 10.6 17.1 11.5 16 11.5H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M14 11.5V17.5C14 18.6 13.1 19.5 12 19.5C10.9 19.5 10 18.6 10 17.5V14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M10 20.5H14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M4.5 8V6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </span>
+          );
+
+          // 인터넷 — 와이파이 신호 아이콘
+          if (opts.includes("인터넷")) badges.push(
+            <span key="internet" title="인터넷" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
+              style={{ background: "#f0fdf4", color: "#15803d", border: "1.5px solid #86efac" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <path d="M2 8.5C5.5 5 9.5 3 12 3C14.5 3 18.5 5 22 8.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M5 11.5C7.5 9 10 7.8 12 7.8C14 7.8 16.5 9 19 11.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 14.5C9.5 13 11 12.3 12 12.3C13 12.3 14.5 13 16 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="12" cy="18.5" r="1.8" fill="currentColor"/>
+              </svg>
+            </span>
+          );
+
+          // 유선TV — 모던 TV 아이콘
+          if (opts.includes("유선TV")) badges.push(
+            <span key="cable-tv" title="유선TV" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
+              style={{ background: "#faf5ff", color: "#7e22ce", border: "1.5px solid #d8b4fe" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="4" width="20" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.9"/>
+                <rect x="5" y="7" width="14" height="7" rx="1" fill="currentColor" fillOpacity="0.15"/>
+                <line x1="9" y1="21" x2="15" y2="21" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+                <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+              </svg>
+            </span>
+          );
+
+          // CCTV
+          if (opts.includes("CCTV")) badges.push(
+            <span key="cctv" title="CCTV" className="flex-shrink-0 flex items-center justify-center w-[26px] h-[26px] rounded-md select-none"
+              style={{ background: "#f8fafc", color: "#475569", border: "1.5px solid #cbd5e1" }}>
+              <Cctv size={15} strokeWidth={2}/>
+            </span>
+          );
 
           return badges;
         })()}
