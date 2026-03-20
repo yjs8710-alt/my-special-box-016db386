@@ -1263,11 +1263,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 ))}
               </div>
 
-              {/* 퇴거일 */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-muted-foreground">퇴거일</label>
-                <input type="text" placeholder="예) 2026-05-01" value={form.vacate_date ?? ""} onChange={(e) => set("vacate_date", e.target.value)} className={ic} />
-              </div>
 
               {/* 메모 */}
               <Section label="메모">
