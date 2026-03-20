@@ -22,11 +22,20 @@ const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
 };
 
 /* ─── 풀스크린 라이트박스 ─── */
-function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: number; onClose: () => void }) {
-  const [idx, setIdx] = useState(startIdx);
+interface LightboxUnit { label: string; images: string[] }
+function Lightbox({ units, startUnitIdx = 0, startImgIdx = 0, onClose }: {
+  units: LightboxUnit[];
+  startUnitIdx?: number;
+  startImgIdx?: number;
+  onClose: () => void;
+}) {
+  const [unitIdx, setUnitIdx] = useState(startUnitIdx);
+  const [imgIdx, setImgIdx] = useState(startImgIdx);
+  const currentImages = units[unitIdx]?.images ?? [];
 
-  const prev = useCallback(() => setIdx((i) => (i - 1 + images.length) % images.length), [images.length]);
-  const next = useCallback(() => setIdx((i) => (i + 1) % images.length), [images.length]);
+  const prev = useCallback(() => setImgIdx((i) => (i - 1 + currentImages.length) % currentImages.length), [currentImages.length]);
+  const next = useCallback(() => setImgIdx((i) => (i + 1) % currentImages.length), [currentImages.length]);
+  const handleUnitChange = (i: number) => { setUnitIdx(i); setImgIdx(0); };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -49,18 +58,42 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
       >
         <X className="w-5 h-5 text-white" />
       </button>
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10">
-        {idx + 1} / {images.length}
+
+      {/* 호실 탭 — 2개 이상일 때만 */}
+      {units.length > 1 && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+          {units.map((u, i) => (
+            <button
+              key={i}
+              onClick={() => handleUnitChange(i)}
+              className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+              style={i === unitIdx
+                ? { background: "hsl(var(--primary))", color: "#fff" }
+                : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }}
+            >
+              {u.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div
+        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {imgIdx + 1} / {currentImages.length}
       </div>
+
       <div
         className="relative w-full h-full overflow-hidden"
+        style={{ paddingTop: units.length > 1 ? "56px" : "0" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${idx * 100}vw)`, width: `${images.length * 100}vw` }}
+          style={{ transform: `translateX(-${imgIdx * 100}vw)`, width: `${currentImages.length * 100}vw` }}
         >
-          {images.map((src, i) => (
+          {currentImages.map((src, i) => (
             <div
               key={i}
               className="flex-shrink-0 h-full flex items-center justify-center px-16"
@@ -75,7 +108,7 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
             </div>
           ))}
         </div>
-        {images.length > 1 && (
+        {currentImages.length > 1 && (
           <>
             <button
               onClick={prev}
@@ -92,17 +125,17 @@ function Lightbox({ images, startIdx, onClose }: { images: string[]; startIdx: n
           </>
         )}
       </div>
-      {images.length > 1 && (
+      {currentImages.length > 1 && (
         <div
           className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
           onClick={(e) => e.stopPropagation()}
         >
-          {images.map((src, i) => (
+          {currentImages.map((src, i) => (
             <button
               key={i}
-              onClick={() => setIdx(i)}
+              onClick={() => setImgIdx(i)}
               className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all"
-              style={{ borderColor: i === idx ? "hsl(var(--primary))" : "transparent", opacity: i === idx ? 1 : 0.5 }}
+              style={{ borderColor: i === imgIdx ? "hsl(var(--primary))" : "transparent", opacity: i === imgIdx ? 1 : 0.5 }}
             >
               <img src={src} alt="" className="w-full h-full object-cover" />
             </button>
