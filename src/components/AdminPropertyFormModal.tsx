@@ -344,6 +344,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   halfMonthly: "",
   jeonseDeposit: "",
   earlyExit: false,
+  buildingArea: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
