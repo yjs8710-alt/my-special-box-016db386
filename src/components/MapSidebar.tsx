@@ -2381,8 +2381,16 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                const imgs = prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [];
-                                setLightbox({ images: imgs, idx: 0 });
+                                // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
+                                const sameAddr = properties.filter(p => p.address === prop.address && (p.images && p.images.length > 0 || p.image));
+                                const units: LightboxUnit[] = sameAddr.length > 1
+                                  ? sameAddr.map(p => ({
+                                      label: p.unitNumber ? `${p.unitNumber}호` : (p.title || p.address),
+                                      images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                    }))
+                                  : [{ label: prop.title, images: prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [] }];
+                                const unitIdx = sameAddr.length > 1 ? sameAddr.findIndex(p => p.id === prop.id) : 0;
+                                setLightbox({ units, unitIdx: Math.max(0, unitIdx) });
                               }}
                               className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                             >
