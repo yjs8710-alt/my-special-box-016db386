@@ -3,6 +3,8 @@ export interface MapProperty {
   title: string;
   buildingName?: string;
   address: string;
+  dong?: string;       // 동 (예: 남문로1가)
+  lotNumber?: string;  // 지번 (예: 190)
   type: string;
   roomType?: string; // 원룸, 투베이, 투룸, 쓰리룸 등
   unitNumber?: string; // 호수
