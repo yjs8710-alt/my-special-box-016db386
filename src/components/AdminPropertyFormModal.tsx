@@ -1102,32 +1102,31 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       }`}>{t}</button>
                   ))}
                 </div>
-                {/* 세입자 중도퇴거 */}
-                <label className="flex items-center gap-2 text-sm cursor-pointer mt-1" style={{ color: form.earlyExit ? "hsl(0 85% 50%)" : undefined }}>
-                  <input type="checkbox" checked={form.earlyExit}
-                    onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
-                  <span className={form.earlyExit ? "font-bold" : ""}>세입자 중도퇴거</span>
-                  {form.earlyExit && <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>중도퇴거</span>}
-                </label>
-                {/* 퇴거일 — 세입자 중도퇴거 체크 시 표시 */}
-                {form.earlyExit && (
-                  <div className="flex flex-col gap-1 mt-1 pl-6">
-                    <label className="text-xs font-semibold text-muted-foreground">
-                      퇴거 예정일 <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={form.vacate_date ?? ""}
-                      onChange={(e) => set("vacate_date", e.target.value)}
-                      className={ic}
-                    />
-                    {form.vacate_date && (
-                      <p className="text-[11px] text-destructive font-semibold">
-                        🚪 퇴거 예정: {new Date(form.vacate_date).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
-                      </p>
-                    )}
-                  </div>
-                )}
+                {/* 세입자 중도퇴거 + 퇴거일 (항상 표시) */}
+                <div className="flex items-center gap-3 mt-1">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: form.earlyExit ? "hsl(0 85% 50%)" : undefined }}>
+                    <input type="checkbox" checked={form.earlyExit}
+                      onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
+                    <span className={form.earlyExit ? "font-bold" : ""}>세입자 중도퇴거</span>
+                    {form.earlyExit && <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>중도퇴거</span>}
+                  </label>
+                </div>
+                {/* 퇴거 예정일 — 항상 표시, 숫자 직접 입력 */}
+                <div className="flex flex-col gap-1 mt-1">
+                  <label className="text-xs font-semibold text-muted-foreground">퇴거 예정일 <span className="text-[10px] font-normal">(예: 2025.03.15 또는 25.3.15)</span></label>
+                  <input
+                    type="text"
+                    placeholder="예) 2025.03.15"
+                    value={form.vacate_date ?? ""}
+                    onChange={(e) => set("vacate_date", e.target.value)}
+                    className={ic}
+                  />
+                  {form.vacate_date && (
+                    <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
+                      🚪 퇴거 예정: {form.vacate_date}
+                    </p>
+                  )}
+                </div>
               </Section>
 
               {/* 금액 입력 */}
