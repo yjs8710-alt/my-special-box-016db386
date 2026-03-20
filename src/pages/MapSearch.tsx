@@ -50,8 +50,23 @@ const MapSearch = () => {
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
-      const q = query.toLowerCase();
-      if (!p.address.toLowerCase().includes(q) && !p.title.toLowerCase().includes(q) && !(p.buildingName ?? "").toLowerCase().includes(q)) return false;
+      const q = query.toLowerCase().trim();
+      const addr = p.address.toLowerCase();
+      // 동+번지 패턴 매칭 (예: "율량동 1994")
+      const dongLotPattern = q.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+      const dongLotMatch = dongLotPattern !== null &&
+        addr.includes(dongLotPattern[1]) &&
+        addr.includes(dongLotPattern[2]);
+      // 번지수만 입력 (예: "1994")
+      const lotOnlyPattern = q.match(/^(\d[\d\-]*)$/);
+      const lotOnlyMatch = lotOnlyPattern !== null && addr.includes(lotOnlyPattern[1]);
+      const matchText =
+        addr.includes(q) ||
+        p.title.toLowerCase().includes(q) ||
+        (p.buildingName ?? "").toLowerCase().includes(q) ||
+        dongLotMatch ||
+        lotOnlyMatch;
+      if (!matchText) return false;
     }
     return true;
   });
