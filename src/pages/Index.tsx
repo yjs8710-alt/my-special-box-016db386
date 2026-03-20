@@ -18,10 +18,16 @@ const Index = () => {
 
   const allProperties = useMemo(() => {
     const dbIds = new Set(dbProperties.map((p) => p.id));
-    return [
+    const merged = [
       ...dbProperties,
       ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id) && !hiddenMockIds.has(p.id)),
     ];
+    // 최신 등록순 정렬
+    return merged.sort((a, b) => {
+      const da = a.registeredDate ?? "";
+      const db2 = b.registeredDate ?? "";
+      return da > db2 ? -1 : da < db2 ? 1 : 0;
+    });
   }, [dbProperties, hiddenMockIds]);
 
   const filtered = allProperties
