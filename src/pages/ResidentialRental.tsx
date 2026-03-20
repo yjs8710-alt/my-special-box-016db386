@@ -15,8 +15,8 @@ const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주
 
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
-  // pinnedIds: 비어 있으면 "전체 표시", 값이 있으면 해당 id들만 사이드바에 표시
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
   const [showAllFromSearch, setShowAllFromSearch] = useState(false);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
@@ -27,11 +27,10 @@ const ResidentialRental = () => {
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
+  const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  // DB 매물 (주거형) - 매매 물건 제외
   const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
-  // static + DB 합치기 (매매 매물 제외: type에 '매매' 포함되거나 note에 '매매가:' 포함된 것)
   const allProperties = useMemo(
     () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p =>
       !p.type.includes("매매") &&
@@ -41,10 +40,7 @@ const ResidentialRental = () => {
   );
 
   const toggleType = (t: string) => {
-    if (t === "전체") {
-      setActiveTypes(["전체"]);
-      return;
-    }
+    if (t === "전체") { setActiveTypes(["전체"]); return; }
     setActiveTypes(prev => {
       const without전체 = prev.filter(x => x !== "전체");
       if (without전체.includes(t)) {
@@ -56,46 +52,46 @@ const ResidentialRental = () => {
   };
 
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
-
   const activeType = activeTypes[0] ?? "전체";
 
-  // 돋보기 버튼 클릭 → 현재 filtered 전체를 사이드바에 표시
-  const handleSearchClick = () => {
-    setPinnedIds([]);
+  // 돋보기 클릭 → 현재 지도 화면 내 매물만 사이드바에 표시
+  const handleSearchClick = useCallback(() => {
+    const b = mapBoundsRef.current;
     setPinnedAddress(null);
     setSelectedId(null);
     setShowAllFromSearch(true);
-  };
+    if (b) {
+      // bounds 필터링은 sidebarProperties에서 처리
+    }
+  }, []);
 
-  // 핀 클릭 핸들러:
-  // - 처음 클릭 → 해당 핀의 주소 기준 매물들만 표시 (pinnedIds 설정)
-  // - 이미 pinnedIds에 있는 핀 추가 클릭 → 누적
-  // - 이미 선택된 핀 재클릭 → 해제
-  const handlePinSelect = (id: number) => {
+  const handleBoundsChange = useCallback((b: MapBounds) => {
+    mapBoundsRef.current = b;
+  }, []);
+
+  // 핀 클릭: 정확한 주소 매칭만, buildingName 제거
+  const handlePinSelect = useCallback((id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
-
     setShowAllFromSearch(false);
 
-    // 이미 선택된 핀 재클릭 → 해당 핀만 해제
+    // 이미 선택된 핀 재클릭 → 해제 (지도 이동 없음)
     if (pinnedIds.includes(id)) {
+      setSuppressPan(true);
       const next = pinnedIds.filter(x => x !== id);
       setPinnedIds(next);
-      if (selectedId === id) {
-        setSelectedId(next.length > 0 ? next[0] : null);
-      }
-      if (next.length === 0) {
-        setPinnedAddress(null);
-        setSelectedId(null);
-      }
+      setSelectedId(null); // next[0]으로 이동하지 않음
+      if (next.length === 0) setPinnedAddress(null);
+      setTimeout(() => setSuppressPan(false), 100);
       return;
     }
 
-    // 같은 주소의 모든 매물 id 수집 (새 핀 클릭 시 해당 주소 그룹 누적)
+    // 정확한 주소 매칭만 (buildingName 제거 → 다른 동네 묶임 방지)
     const sameAddrIds = allProperties
-      .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
+      .filter(p => p.address === prop.address)
       .map(p => p.id);
 
+    setSuppressPan(false);
     setPinnedIds(prev => {
       const merged = [...prev];
       sameAddrIds.forEach(sid => { if (!merged.includes(sid)) merged.push(sid); });
@@ -103,11 +99,20 @@ const ResidentialRental = () => {
     });
     setSelectedId(id);
     setPinnedAddress(prop.address);
-  };
+  }, [filtered, allProperties, pinnedIds]);
 
-  // 사이드바에 표시할 매물: pinnedIds가 있으면 그것만, showAllFromSearch면 filtered 전체, 아니면 filtered 전체
+  // 사이드바 매물: 돋보기 → 지도 내 매물, 핀 선택 → 해당 id들, 기본 → filtered 전체
   const sidebarProperties = useMemo(() => {
-    if (showAllFromSearch || pinnedIds.length === 0) return filtered;
+    if (showAllFromSearch) {
+      const b = mapBoundsRef.current;
+      if (b) return filtered.filter(p =>
+        p.lat && p.lng &&
+        p.lat >= b.swLat && p.lat <= b.neLat &&
+        p.lng >= b.swLng && p.lng <= b.neLng
+      );
+      return filtered;
+    }
+    if (pinnedIds.length === 0) return filtered;
     return filtered.filter(p => pinnedIds.includes(p.id));
   }, [filtered, pinnedIds, showAllFromSearch]);
 
