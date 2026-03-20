@@ -2207,8 +2207,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                                   alt={item.label}
                                   loading="eager"
                                   decoding="async"
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover cursor-zoom-in"
                                   style={{ imageRendering: "auto", transform: "translateZ(0)", willChange: "transform" }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setLightbox({ units: [{ label: item.label, images: item.images! }], unitIdx: 0 });
+                                  }}
                                 />
                               ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center gap-0.5" style={{ background: "hsl(var(--muted))" }}>
@@ -2221,6 +2225,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                                 <span className="text-[9px] font-extrabold text-white leading-none">{idx + 1}.</span>
                                 {isHidden && <span className="text-[8px] text-red-300 leading-none ml-0.5">숨김</span>}
                                 {isInvisible && <span className="text-[8px] text-yellow-300 leading-none ml-0.5">미노출</span>}
+                                {item.images && item.images.length > 1 && (
+                                  <span className="text-[8px] text-white/80 leading-none ml-auto">📷{item.images.length}</span>
+                                )}
                               </div>
                             </div>
 
@@ -2238,6 +2245,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[12px] font-extrabold text-foreground leading-tight truncate">
                                     {item.label}
+                                    {item.unitNumber && (
+                                      <span className="ml-1 text-[11px] font-bold px-1 py-0.5 rounded"
+                                        style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}>
+                                        {item.unitNumber}호
+                                      </span>
+                                    )}
                                   </p>
                                   <p className="text-[10px] text-muted-foreground truncate leading-tight">{item.sublabel}</p>
                                 </div>
