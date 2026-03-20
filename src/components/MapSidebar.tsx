@@ -175,6 +175,7 @@ const OPTION_ICONS: Record<string, string> = {
   "옷장": "옷장", "전자키": "전자키", "인터넷": "인터넷", "주차": "주차",
   "애완동물가능": "애완동물가능", "애완동물불가": "애완동물불가",
   "반려동물_가능": "반려동물_가능",
+};
 
 /* Daily-limit helpers */
 const today = () => new Date().toISOString().slice(0, 10);
