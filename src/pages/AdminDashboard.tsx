@@ -1411,7 +1411,7 @@ const AdminDashboard = () => {
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
       const { error } = await supabase.from("cheongju_contacts")
-        .insert({
+        .upsert({
           district: updated.district,
           dong: updated.dong,
           lot_number: updated.lot_number ?? "",
@@ -1422,7 +1422,7 @@ const AdminDashboard = () => {
           contact_broker: updated.contact_broker,
           memo: updated.memo,
           is_visible: updated.is_visible ?? true,
-        });
+        }, { onConflict: "dong,lot_number,unit_number" });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
