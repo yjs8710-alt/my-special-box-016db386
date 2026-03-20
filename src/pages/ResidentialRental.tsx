@@ -16,7 +16,9 @@ const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주
 const ResidentialRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
+  // pinnedIds: 비어 있으면 "전체 표시", 값이 있으면 해당 id들만 사이드바에 표시
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [showAllFromSearch, setShowAllFromSearch] = useState(false);
   const [activeTypes, setActiveTypes] = useState<string[]>(["전체"]);
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -57,28 +59,57 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: 같은 주소 매물 전체 누적 / 재클릭 시 해당 주소 해제
+  // 돋보기 버튼 클릭 → 현재 filtered 전체를 사이드바에 표시
+  const handleSearchClick = () => {
+    setPinnedIds([]);
+    setPinnedAddress(null);
+    setSelectedId(null);
+    setShowAllFromSearch(true);
+  };
+
+  // 핀 클릭 핸들러:
+  // - 처음 클릭 → 해당 핀의 주소 기준 매물들만 표시 (pinnedIds 설정)
+  // - 이미 pinnedIds에 있는 핀 추가 클릭 → 누적
+  // - 이미 선택된 핀 재클릭 → 해제
   const handlePinSelect = (id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
 
-    // 같은 핀(같은 주소) 재클릭 → 해제
-    if (pinnedAddress === prop.address && pinnedIds.includes(id)) {
-      setSelectedId(null);
-      setPinnedIds([]);
-      setPinnedAddress(null);
+    setShowAllFromSearch(false);
+
+    // 이미 선택된 핀 재클릭 → 해당 핀만 해제
+    if (pinnedIds.includes(id)) {
+      const next = pinnedIds.filter(x => x !== id);
+      setPinnedIds(next);
+      if (selectedId === id) {
+        setSelectedId(next.length > 0 ? next[0] : null);
+      }
+      if (next.length === 0) {
+        setPinnedAddress(null);
+        setSelectedId(null);
+      }
       return;
     }
 
-    // 같은 주소의 모든 매물 id 수집
+    // 같은 주소의 모든 매물 id 수집 (새 핀 클릭 시 해당 주소 그룹 누적)
     const sameAddrIds = allProperties
       .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
       .map(p => p.id);
 
+    setPinnedIds(prev => {
+      const merged = [...prev];
+      sameAddrIds.forEach(sid => { if (!merged.includes(sid)) merged.push(sid); });
+      return merged;
+    });
     setSelectedId(id);
-    setPinnedIds(sameAddrIds);
     setPinnedAddress(prop.address);
   };
+
+  // 사이드바에 표시할 매물: pinnedIds가 있으면 그것만, showAllFromSearch면 filtered 전체, 아니면 filtered 전체
+  const sidebarProperties = useMemo(() => {
+    if (showAllFromSearch || pinnedIds.length === 0) return filtered;
+    return filtered.filter(p => pinnedIds.includes(p.id));
+  }, [filtered, pinnedIds, showAllFromSearch]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -143,6 +174,7 @@ const ResidentialRental = () => {
               setLandlordLoading(loading);
               setLandlordSearched(searched);
             }}
+            onSearchClick={handleSearchClick}
             hideSearchBar={showRegister}
             showResidentialTypes={true}
             showBuildingOptions={true}
@@ -150,7 +182,7 @@ const ResidentialRental = () => {
           />
         </div>
         <MapSidebar
-          properties={filtered}
+          properties={sidebarProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}
@@ -159,7 +191,12 @@ const ResidentialRental = () => {
           pinnedAddress={pinnedAddress}
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
-          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          onClearPinnedIds={() => {
+            setPinnedIds([]);
+            setPinnedAddress(null);
+            setSelectedId(null);
+            setShowAllFromSearch(false);
+          }}
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}

@@ -152,6 +152,8 @@ interface MapFilterBarProps {
   onLandlordClick?: () => void;
   /** 소유주 검색 결과를 부모로 전달 */
   onLandlordResults?: (results: LandlordResult[], loading: boolean, searched: boolean) => void;
+  /** 돋보기 버튼 클릭 시 현재 필터 매물 전체 표시 요청 */
+  onSearchClick?: () => void;
   hideSearchBar?: boolean;
   topOffset?: number;
   showCategoryChips?: boolean;
@@ -354,6 +356,7 @@ const MapFilterBar = ({
   onFiltersChange,
   onLandlordClick,
   onLandlordResults,
+  onSearchClick,
   hideSearchBar = false,
   topOffset,
   showCategoryChips = false,
@@ -557,6 +560,7 @@ const MapFilterBar = ({
                   )}
                 </button>
                 <button
+                  onClick={() => onSearchClick?.()}
                   className="flex items-center justify-center h-10 px-4 text-xs font-bold"
                   style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
                 >

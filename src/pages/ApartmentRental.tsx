@@ -18,6 +18,7 @@ const ApartmentRental = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
+  const [showAllFromSearch, setShowAllFromSearch] = useState(false);
   const [activeTypes, setActiveTypes] = useState<string[]>([]);
   const [activeDealTypes, setActiveDealTypes] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -48,22 +49,40 @@ const ApartmentRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
+  const handleSearchClick = () => {
+    setPinnedIds([]);
+    setPinnedAddress(null);
+    setSelectedId(null);
+    setShowAllFromSearch(true);
+  };
+
   const handlePinSelect = (id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
-    if (pinnedAddress === prop.address && pinnedIds.includes(id)) {
-      setSelectedId(null);
-      setPinnedIds([]);
-      setPinnedAddress(null);
+    setShowAllFromSearch(false);
+    if (pinnedIds.includes(id)) {
+      const next = pinnedIds.filter(x => x !== id);
+      setPinnedIds(next);
+      if (selectedId === id) setSelectedId(next.length > 0 ? next[0] : null);
+      if (next.length === 0) { setPinnedAddress(null); setSelectedId(null); }
       return;
     }
     const sameAddrIds = allProperties
       .filter(p => p.address === prop.address || (prop.buildingName && p.buildingName === prop.buildingName))
       .map(p => p.id);
+    setPinnedIds(prev => {
+      const merged = [...prev];
+      sameAddrIds.forEach(sid => { if (!merged.includes(sid)) merged.push(sid); });
+      return merged;
+    });
     setSelectedId(id);
-    setPinnedIds(sameAddrIds);
     setPinnedAddress(prop.address);
   };
+
+  const sidebarProperties = useMemo(() => {
+    if (showAllFromSearch || pinnedIds.length === 0) return filtered;
+    return filtered.filter(p => pinnedIds.includes(p.id));
+  }, [filtered, pinnedIds, showAllFromSearch]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -135,6 +154,7 @@ const ApartmentRental = () => {
               setLandlordLoading(loading);
               setLandlordSearched(searched);
             }}
+            onSearchClick={handleSearchClick}
             hideSearchBar={showRegister}
             showCategoryChips={false}
             showRoomTypes={false}
@@ -148,7 +168,7 @@ const ApartmentRental = () => {
           />
         </div>
         <MapSidebar
-          properties={filtered}
+          properties={sidebarProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}
@@ -157,7 +177,9 @@ const ApartmentRental = () => {
           pinnedAddress={pinnedAddress}
           onClearPin={() => { setPinnedAddress(null); setSelectedId(null); }}
           pinnedIds={pinnedIds}
-          onClearPinnedIds={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); }}
+          onClearPinnedIds={() => {
+            setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false);
+          }}
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
