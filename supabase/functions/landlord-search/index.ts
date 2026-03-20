@@ -120,6 +120,7 @@ Deno.serve(async (req) => {
           totalFloors: row.total_floors ?? undefined,
           availableFrom: row.available_from ?? undefined,
           note: row.note ?? undefined,
+          unitNumber: row.unit_number ?? undefined,
         });
       }
     }
