@@ -90,11 +90,21 @@ export function usePropertyFilter(
 
       // 텍스트 검색
       if (query) {
-        const q = query.toLowerCase();
+        const q = query.toLowerCase().trim();
+        // "율량동 1994" → dong + lotNumber 분리 시도
+        const spaceIdx = q.lastIndexOf(" ");
+        const qDong = spaceIdx > 0 ? q.slice(0, spaceIdx) : q;
+        const qLot = spaceIdx > 0 ? q.slice(spaceIdx + 1) : "";
+        const dongLotMatch = qLot !== "" &&
+          (p.dong ?? "").toLowerCase().includes(qDong) &&
+          (p.lotNumber ?? "").toLowerCase().includes(qLot);
         const matchText =
           p.address.toLowerCase().includes(q) ||
           p.title.toLowerCase().includes(q) ||
-          (p.buildingName ?? "").toLowerCase().includes(q);
+          (p.buildingName ?? "").toLowerCase().includes(q) ||
+          (p.dong ?? "").toLowerCase().includes(q) ||
+          ((p.dong ?? "") + " " + (p.lotNumber ?? "")).toLowerCase().includes(q) ||
+          dongLotMatch;
         if (!matchText) return false;
       }
 
