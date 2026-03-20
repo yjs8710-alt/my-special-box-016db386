@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
-import MapView from "@/components/MapView";
+import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
