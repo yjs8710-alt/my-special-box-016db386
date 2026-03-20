@@ -18,6 +18,8 @@ export interface LandlordResult {
   contactManager: string;
   contactBroker: string;
   type?: string;
+  unitNumber?: string;
+  note?: string;
 }
 
 
