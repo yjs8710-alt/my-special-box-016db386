@@ -156,6 +156,7 @@ const INITIAL: FormState = {
   description: "",
   contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
   tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
+  earlyExit: false,
   expose: true, allowAddressView: false,
   images: [],
 };
