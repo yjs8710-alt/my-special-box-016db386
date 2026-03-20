@@ -1644,14 +1644,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   // 둘 다 없으면 전체 표시
   const displayProperties = (() => {
     if (pinnedIds && pinnedIds.length > 0) {
-      // 클릭 순서대로 정렬
+      // 클릭 순서대로 정렬 (properties는 이미 부모에서 pinnedIds 기준 필터링됨)
       const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
-      return properties
-        .filter(p => idxMap.has(p.id))
-        .sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
-    }
-    if (pinnedAddress) {
-      return properties.filter(p => p.address === pinnedAddress || p.buildingName === pinnedAddress);
+      return [...properties].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
     }
     return properties;
   })();
