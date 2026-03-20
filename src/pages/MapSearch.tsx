@@ -51,19 +51,23 @@ const MapSearch = () => {
     if (propertyId && !String(p.id).includes(propertyId)) return false;
     if (query) {
       const q = query.toLowerCase().trim();
+      // "번지" 접미사 제거 (예: "율량동 1994번지" → "율량동 1994")
+      const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
-      // 동+번지 패턴 매칭 (예: "율량동 1994")
-      const dongLotPattern = q.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+      // 동+번지 패턴 매칭 (예: "율량동 1994", "율량동 1994번지")
+      const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
       const dongLotMatch = dongLotPattern !== null &&
         addr.includes(dongLotPattern[1]) &&
         addr.includes(dongLotPattern[2]);
-      // 번지수만 입력 (예: "1994")
-      const lotOnlyPattern = q.match(/^(\d[\d\-]*)$/);
-      const lotOnlyMatch = lotOnlyPattern !== null && addr.includes(lotOnlyPattern[1]);
+      // 번지수만 입력 (예: "1994" or "1994번지") — 단어 경계로 정확 매칭
+      const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
+      const lotOnlyMatch = lotOnlyPattern !== null &&
+        new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
       const matchText =
+        addr.includes(qNorm) ||
         addr.includes(q) ||
-        p.title.toLowerCase().includes(q) ||
-        (p.buildingName ?? "").toLowerCase().includes(q) ||
+        p.title.toLowerCase().includes(qNorm) ||
+        (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
         dongLotMatch ||
         lotOnlyMatch;
       if (!matchText) return false;
