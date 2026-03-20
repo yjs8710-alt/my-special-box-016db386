@@ -1435,25 +1435,28 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
 
           // 옵션 배열 기반 아이콘 맵
           const ICON_MAP: Record<string, IconBadge> = {
-            "반려동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "애완동물가능":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
-            "반려동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
-            "애완동물불가":  { icon: <Dog size={14} strokeWidth={2}/>,   title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "반려동물가능":  { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>, title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "애완동물가능":  { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>, title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물_가능": { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>, title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+            "반려동물불가":  { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>, title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
+            "애완동물불가":  { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>, title: "반려동물 불가", bg: "#fef2f2", color: "#b91c1c", border: "#fca5a5" },
             "수도":          { icon: <Droplet size={14} strokeWidth={2}/>, title: "수도",       bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-            "인터넷":        { icon: <span className="text-[11px] font-black italic leading-none">e</span>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+            "인터넷":        { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.55a11 11 0 0 1 14.08 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M1.42 9a16 16 0 0 1 21.16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="20" r="1.5" fill="currentColor"/></svg>, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
             "유선TV":        { icon: <Tv size={14} strokeWidth={2}/>,    title: "유선TV",      bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
             "CCTV":          { icon: <Cctv size={14} strokeWidth={2}/>,  title: "CCTV",        bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
           };
 
           // 반려동물 불가는 금지선 오버레이
           const isPetDenied = opts.includes("반려동물불가") || opts.includes("애완동물불가");
-          const isPetAllowed = opts.includes("반려동물가능") || opts.includes("애완동물가능");
+          const isPetAllowed = opts.includes("반려동물가능") || opts.includes("애완동물가능") || opts.includes("반려동물_가능");
+
+          const dogIcon = <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="10.5" cy="15" rx="6" ry="3.5"/><circle cx="18" cy="10.5" r="3"/><ellipse cx="16.5" cy="7.8" rx="1.6" ry="2" transform="rotate(-15 16.5 7.8)"/><ellipse cx="21" cy="11.5" rx="0.9" ry="0.7"/><path d="M4.5 13.5 Q2.5 11 3.5 8.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" fill="none"/><rect x="14.5" y="18" width="2" height="3.5" rx="1"/><rect x="8" y="18" width="2" height="3.5" rx="1"/></svg>;
 
           if (isPetDenied) {
             badges.push(
               <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                 style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
-                <Dog size={14} strokeWidth={2}/>
+                {dogIcon}
                 <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <svg width="18" height="18" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
@@ -1463,7 +1466,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             badges.push(
               <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                 style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>
-                <Dog size={14} strokeWidth={2}/>
+                {dogIcon}
               </span>
             );
           }
