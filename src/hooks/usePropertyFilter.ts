@@ -91,19 +91,25 @@ export function usePropertyFilter(
       // 텍스트 검색
       if (query) {
         const q = query.toLowerCase().trim();
-        // "율량동 1994번지" 형태 검색: 주소 내 동+번지 분리 매칭
+        // "번지" 접미사 제거 (예: "율량동 1994번지" → "율량동 1994")
+        const qNorm = q.replace(/번지$/, "").trim();
         // address 예: "충북 청주시 청원구 율량동 1994"
         const addr = p.address.toLowerCase();
-        // 쿼리에서 동이름 + 번지 패턴 분리 (예: "율량동 1994")
-        const dongLotPattern = q.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+        // 쿼리에서 동이름 + 번지 패턴 분리 (예: "율량동 1994" or "율량동 1994번지")
+        const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
         const dongLotMatch = dongLotPattern !== null &&
           addr.includes(dongLotPattern[1]) &&
           addr.includes(dongLotPattern[2]);
+        // 번지수만 입력 (예: "1994" or "1994번지")
+        const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
+        const lotOnlyMatch = lotOnlyPattern !== null && addr.includes(lotOnlyPattern[1]);
         const matchText =
+          addr.includes(qNorm) ||
           addr.includes(q) ||
-          p.title.toLowerCase().includes(q) ||
-          (p.buildingName ?? "").toLowerCase().includes(q) ||
-          dongLotMatch;
+          p.title.toLowerCase().includes(qNorm) ||
+          (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
+          dongLotMatch ||
+          lotOnlyMatch;
         if (!matchText) return false;
       }
 
