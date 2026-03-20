@@ -450,6 +450,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (cleanMatch2) contacts.exitCleanFee = cleanMatch2[1].trim();
     if (brokerFeeMatch2) contacts.brokerFee = brokerFeeMatch2[1].trim();
     if (noteStr.includes("중도퇴거:")) contacts.earlyExit = true;
+    const buildingAreaMatch = noteStr.match(/건평[:\s]+([^\n|]+)/);
+    if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
