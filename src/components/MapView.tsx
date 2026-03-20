@@ -165,13 +165,21 @@ function loadKakaoScript(cb: () => void) {
   document.head.appendChild(script);
 }
 
+export interface MapBounds {
+  swLat: number; swLng: number; neLat: number; neLng: number;
+}
+
 interface MapViewProps {
   properties: MapProperty[];
   selectedId: number | null;
   onSelect: (id: number) => void;
+  /** 지도 이동/줌 시 현재 화면 범위 콜백 */
+  onBoundsChange?: (bounds: MapBounds) => void;
+  /** true이면 selectedId 변경 시 panTo 억제 */
+  suppressPan?: boolean;
 }
 
-const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
+const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -179,10 +187,22 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
   const zoomLevelRef = useRef<number>(5);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, onSelect });
+  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, onSelect };
+    propsRef.current = { properties, selectedId, onSelect, onBoundsChange };
   });
+
+  const fireBounds = useCallback((map: any) => {
+    try {
+      const b = map.getBounds();
+      const sw = b.getSouthWest();
+      const ne = b.getNorthEast();
+      propsRef.current.onBoundsChange?.({
+        swLat: sw.getLat(), swLng: sw.getLng(),
+        neLat: ne.getLat(), neLng: ne.getLng(),
+      });
+    } catch (_) {}
+  }, []);
 
   const clearOverlays = useCallback(() => {
     overlaysRef.current.forEach((o) => {
@@ -217,7 +237,7 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
     [clearOverlays]
   );
 
-  // 지도 초기화 + zoom_changed 이벤트 등록
+  // 지도 초기화 + zoom_changed / drag_end 이벤트 등록
   useEffect(() => {
     mountedRef.current = true;
 
@@ -234,12 +254,22 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
       zoomLevelRef.current = map.getLevel();
       renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
 
-      // 줌 변경 시 핀 크기 자동 재렌더
+      // 초기 bounds 전달
+      setTimeout(() => fireBounds(map), 300);
+
+      // 줌 변경 시 핀 크기 자동 재렌더 + bounds 전달
       window.kakao.maps.event.addListener(map, "zoom_changed", () => {
         if (!mountedRef.current) return;
         const newZoom = map.getLevel();
         zoomLevelRef.current = newZoom;
         renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
+        fireBounds(map);
+      });
+
+      // 드래그 후 bounds 전달
+      window.kakao.maps.event.addListener(map, "dragend", () => {
+        if (!mountedRef.current) return;
+        fireBounds(map);
       });
     });
 
@@ -257,14 +287,15 @@ const MapView = ({ properties, selectedId, onSelect }: MapViewProps) => {
     renderOverlays(mapRef.current, properties, selectedId, onSelect, zoomLevelRef.current);
   }, [properties, selectedId, onSelect, renderOverlays]);
 
-  // 선택된 매물로 이동
+  // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
   useEffect(() => {
     if (!mapRef.current || selectedId === null || !window.kakao?.maps) return;
+    if (suppressPan) return;
     const prop = properties.find((p) => p.id === selectedId);
     if (prop && prop.lat && prop.lng) {
       mapRef.current.panTo(new window.kakao.maps.LatLng(prop.lat, prop.lng));
     }
-  }, [selectedId, properties]);
+  }, [selectedId, properties, suppressPan]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 };
