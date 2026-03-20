@@ -2374,8 +2374,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                     </button>
 
-                    {/* 선택 시 액션 버튼들 — pinnedIds 누적 모드에서는 숨김 */}
-                    {selectedId === prop.id && (!pinnedIds || pinnedIds.length === 0) && (
+                    {/* 선택 시 액션 버튼들 — 항상 표시 */}
+                    {selectedId === prop.id && (
                       <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-6" : "grid-cols-5"}`}>
                         {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
                         {isAdmin && (

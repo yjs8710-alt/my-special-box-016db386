@@ -57,8 +57,14 @@ const ResidentialRental = () => {
 
   const activeType = activeTypes[0] ?? "전체";
 
-  // 핀 클릭 핸들러: 클릭 순서대로 pinnedIds 배열에 누적
+  // 핀 클릭 핸들러: 같은 핀 재클릭 시 선택 해제, 다른 핀은 누적
   const handlePinSelect = (id: number) => {
+    if (selectedId === id) {
+      // 같은 핀 재클릭 → 선택 해제
+      setSelectedId(null);
+      setPinnedIds(prev => prev.filter(x => x !== id));
+      return;
+    }
     setSelectedId(id);
     setPinnedIds(prev => {
       const without = prev.filter(x => x !== id);
