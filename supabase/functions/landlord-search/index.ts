@@ -103,7 +103,11 @@ Deno.serve(async (req) => {
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
-          label: row.building_name ?? row.title,
+          label: row.building_name
+            ? row.building_name
+            : (row.dong && row.lot_number
+                ? `${row.dong} ${row.lot_number}`
+                : (row.dong ?? row.title)),
           sublabel: row.address,
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
           price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
