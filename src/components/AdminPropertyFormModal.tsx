@@ -985,17 +985,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 / 대지 */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
-                  <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+              {/* 건평 / 대지 — 매매 타입일 때만 표시 */}
+              {SALE_TYPES.includes(form.type) && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                    <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">대지 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                    <input type="text" placeholder="예) 120㎡, 36평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic} />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">대지 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
-                  <input type="text" placeholder="예) 120㎡, 36평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic} />
-                </div>
-              </div>
+              )}
 
               {/* 전체 층수 / 건축연도 / 중개사 */}
               {/* 건물 매매 타입일 때 강조 박스로 표시 */}
