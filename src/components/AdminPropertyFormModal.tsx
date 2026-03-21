@@ -454,6 +454,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (noteStr.includes("중도퇴거:")) contacts.earlyExit = true;
     const buildingAreaMatch = noteStr.match(/건평[:\s]+([^\n|]+)/);
     if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
+    const buildingDongMatch = noteStr.match(/동\(棟\)[:\s]+([^\n|]+)/);
+    if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
