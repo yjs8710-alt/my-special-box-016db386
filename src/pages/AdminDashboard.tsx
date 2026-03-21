@@ -2360,11 +2360,14 @@ const AdminDashboard = () => {
                       </div>
                       {/* 호수 */}
                       <div className="hidden md:block text-xs">
-                        {c.unit_number ? (
+                        {c.building_dong || c.unit_number ? (
                           <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
                             style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
-                          >{c.unit_number}호</span>
+                          >
+                            {c.building_dong && <span>{c.building_dong}</span>}
+                            {c.unit_number && <span>{c.unit_number}호</span>}
+                          </span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 소유주 (phone) */}
