@@ -736,18 +736,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-        {done ? (
-          <div className="p-8 flex flex-col items-center gap-3 text-center">
-            <Send className="w-10 h-10 text-primary" />
-            <p className="text-sm font-bold text-foreground">임대 제안서가 전송되었습니다</p>
-            <p className="text-xs text-muted-foreground">관리자가 확인 후 연락드립니다.</p>
-            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
-          </div>
-        ) : (
-          <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-5">
 
-            {/* 대상 매물 */}
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
+
               <p className="text-[10px] text-muted-foreground mb-0.5">임대 제안 대상 매물</p>
               <p className="text-xs font-semibold text-foreground truncate">{property.title}</p>
               <p className="text-[11px] text-muted-foreground">{property.address}</p>
