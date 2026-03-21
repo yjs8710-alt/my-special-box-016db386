@@ -1,7 +1,7 @@
 import {
   X, MapPin, Eye, Heart, Phone, Calendar, Building2, Car, Maximize2,
   Layers, BadgeCheck, Share2, ArrowUpRight, FileText, ExternalLink,
-  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
+  ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
   AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
