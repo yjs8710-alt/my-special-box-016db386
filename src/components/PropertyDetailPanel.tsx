@@ -435,11 +435,13 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   const [proposerCompany, setProposerCompany] = useState("");
   const [period, setPeriod] = useState("");
   const [loanAmount, setLoanAmount] = useState(""); // 융자금
+  const [loanItems, setLoanItems] = useState<{ label: string; amount: string }[]>([{ label: "", amount: "" }]); // 융자 내역
   const [content, setContent] = useState("");
   // 호실별 행
   const [rooms, setRooms] = useState<RoomRow[]>([{ unit: "", deposit: "", monthly: "" }]);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [loadingRooms, setLoadingRooms] = useState(false);
 
   const ic = "w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
@@ -449,11 +451,56 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   const addRoom = () => setRooms((r) => [...r, { unit: "", deposit: "", monthly: "" }]);
   const removeRoom = (i: number) => setRooms((r) => r.filter((_, idx) => idx !== i));
 
-  // 보증금 합계 (숫자만 추출해서 합산)
+  const setLoanItem = (i: number, key: "label" | "amount", v: string) =>
+    setLoanItems((l) => l.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
+  const addLoanItem = () => setLoanItems((l) => [...l, { label: "", amount: "" }]);
+  const removeLoanItem = (i: number) => setLoanItems((l) => l.filter((_, idx) => idx !== i));
+
+  // 보증금 합계
   const totalDeposit = rooms.reduce((sum, r) => {
     const num = parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0;
     return sum + num;
   }, 0);
+
+  // 월세 합계
+  const totalMonthly = rooms.reduce((sum, r) => {
+    const num = parseFloat(r.monthly.replace(/[^0-9.]/g, "")) || 0;
+    return sum + num;
+  }, 0);
+
+  // 융자 합계
+  const totalLoan = loanItems.reduce((sum, l) => {
+    const num = parseFloat(l.amount.replace(/[^0-9.]/g, "")) || 0;
+    return sum + num;
+  }, 0);
+
+  // 동일 주소 매물에서 호실별 월세 자동 불러오기
+  const loadRoomsFromDB = useCallback(async () => {
+    if (!property.address) return;
+    setLoadingRooms(true);
+    try {
+      const { data } = await supabase
+        .from("properties")
+        .select("unit_number,deposit,monthly,building_dong")
+        .eq("dong", property.address.split(" ").slice(-2, -1)[0] || "")
+        .eq("lot_number", property.address.split(" ").slice(-1)[0] || "")
+        .eq("status", "active")
+        .order("unit_number", { ascending: true });
+
+      if (data && data.length > 0) {
+        const loaded: RoomRow[] = data.map((r) => ({
+          unit: r.unit_number || "-",
+          deposit: r.deposit || "",
+          monthly: r.monthly || "",
+        }));
+        setRooms(loaded);
+      }
+    } catch (e) {
+      console.error("호실 자동 로드 실패:", e);
+    } finally {
+      setLoadingRooms(false);
+    }
+  }, [property.address]);
 
   const handleSubmit = async () => {
     if (!proposerName.trim() || !proposerPhone.trim()) return;
