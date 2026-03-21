@@ -843,16 +843,16 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               const lhType = lhMatch?.[1]?.trim();
               const cleanFee = cleanMatch?.[1]?.trim();
               const brokerFee = brokerFeeMatch?.[1]?.trim();
-              // 공실여부: available_from이 공실/세입자 거주중인 경우만 표시
-              const vacancy = property.availableFrom &&
-                (property.availableFrom === "공실" || property.availableFrom === "세입자 거주중")
-                ? property.availableFrom : null;
-
               const earlyExit = note.includes("중도퇴거:");
               const vacateDate = property.vacateDate;
               // 임대 매물 여부 (매매 타입 제외: 모든 임대 유형에 중도퇴거/퇴거일 항시 표시)
               const SALE_TYPES = ["매매","단독매매","건물매매","주택매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","숙박/팬션매매","원룸건물매매"];
               const isRentType = !SALE_TYPES.includes(property.type);
+
+              // 공실여부: 임대 매물일 때만 표시 (매매 타입 제외)
+              const vacancy = isRentType && property.availableFrom &&
+                (property.availableFrom === "공실" || property.availableFrom === "세입자 거주중")
+                ? property.availableFrom : null;
 
               const items = [
                 vacancy && { label: "빈방여부", value: vacancy, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
