@@ -980,11 +980,27 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 */}
+              {/* 건평 / 대지면적 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
                   <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">대지면적 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                  <input type="text" placeholder="예) 120㎡ 또는 36평" value={form.landArea ?? ""} onChange={(e) => {
+                    // ㎡ 입력 시 평수 자동 표시 도움말
+                    set("landArea" as keyof AdminFormExtended, e.target.value as AdminFormExtended[keyof AdminFormExtended]);
+                  }} className={ic} />
+                  {(() => {
+                    const v = form.landArea ?? "";
+                    const sqmMatch = v.match(/^(\d+(?:\.\d+)?)\s*㎡?$/);
+                    if (sqmMatch) {
+                      const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                      return <p className="text-[11px] text-primary font-semibold">≈ {pyong}평</p>;
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
 
