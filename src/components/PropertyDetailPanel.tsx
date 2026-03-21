@@ -7,6 +7,8 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPhone } from "@/lib/utils";
+
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
