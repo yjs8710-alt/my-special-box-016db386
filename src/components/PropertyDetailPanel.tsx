@@ -481,7 +481,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
     try {
       const { data } = await supabase
         .from("properties")
-        .select("unit_number,deposit,monthly,building_dong")
+        .select("unit_number,deposit,monthly")
         .eq("dong", property.address.split(" ").slice(-2, -1)[0] || "")
         .eq("lot_number", property.address.split(" ").slice(-1)[0] || "")
         .eq("status", "active")
