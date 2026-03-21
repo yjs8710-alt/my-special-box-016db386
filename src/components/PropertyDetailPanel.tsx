@@ -956,7 +956,17 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: (() => { const a = property.area || ""; const m = a.match(/\((\d+)평\)/) ?? a.match(/^(\d+)평/) ?? a.match(/^(\d+)$/); return m ? m[1] + "평" : a.split(" ")[0]; })(), sub: property.area.includes("(") ? property.area.split(" ")[1] : undefined },
+                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적", value: (() => {
+                  const a = property.area || "";
+                  const m = a.match(/\((\d+)평\)/) ?? a.match(/^(\d+)평/) ?? a.match(/^(\d+)$/);
+                  // ㎡ → 평 변환 (1평 ≈ 3.305785㎡)
+                  const sqmMatch = a.match(/(\d+(?:\.\d+)?)\s*㎡/);
+                  if (sqmMatch) {
+                    const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                    return pyong + "평";
+                  }
+                  return m ? m[1] + "평" : a.split(" ")[0];
+                })(), sub: undefined },
                 { icon: <Layers className="w-3.5 h-3.5" />,    label: "해당층", value: property.floor },
                 { icon: <Building2 className="w-3.5 h-3.5" />, label: "건물층", value: property.totalFloors.replace("지상 ", "") },
                 { icon: <Calendar className="w-3.5 h-3.5" />,  label: "준공",   value: property.buildYear.replace("년", ""), sub: "년" },
