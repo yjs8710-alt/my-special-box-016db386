@@ -974,6 +974,22 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
+                // 대지면적: note에서 파싱, ㎡→평 자동 변환
+                ...((() => {
+                  const m = (property.note ?? "").match(/대지면적[:\s]+([^\n|]+)/);
+                  if (!m) return [];
+                  const raw = m[1].trim();
+                  const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
+                  const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
+                  let display = raw;
+                  if (sqmMatch) {
+                    const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                    display = `${pyong}평 (${sqmMatch[1]}㎡)`;
+                  } else if (!pyongMatch) {
+                    display = raw + "평";
+                  }
+                  return [{ icon: <Maximize2 className="w-3.5 h-3.5" />, label: "대지면적", value: display }];
+                })()),
               ].map(({ icon, label, value, sub }) => (
                 <div key={label} className="bg-muted/50 rounded-lg px-2.5 py-2 flex flex-col gap-0.5 text-center">
                   <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
