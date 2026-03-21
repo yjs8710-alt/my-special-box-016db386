@@ -1435,7 +1435,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           );
 
           // 옵션 배열 기반 아이콘 맵
-          const fatDogIcon = <svg width="14" height="14" viewBox="0 0 36 36" fill="currentColor"><ellipse cx="18" cy="26" rx="9" ry="5.5"/><ellipse cx="27" cy="17" rx="4.5" ry="4.5"/><ellipse cx="25" cy="10" rx="3" ry="4" transform="rotate(-20 25 10)"/><ellipse cx="31" cy="16" rx="1.8" ry="1.2"/><path d="M9 24 Q5 20 7 14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"/><rect x="14" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/><rect x="21" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/></svg>;
+          const fatDogIcon = <svg width="15" height="15" viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="44" rx="18" ry="11"/><circle cx="32" cy="26" r="12"/><ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)"/><ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)"/><ellipse cx="24" cy="28" rx="3" ry="2" fill="white"/><ellipse cx="40" cy="28" rx="3" ry="2" fill="white"/><circle cx="25" cy="28" r="1.5" fill="#333"/><circle cx="41" cy="28" r="1.5" fill="#333"/><ellipse cx="32" cy="33" rx="4" ry="2.5"/><path d="M26 37 Q32 41 38 37" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round"/><rect x="22" y="53" width="6" height="9" rx="3"/><rect x="36" y="53" width="6" height="9" rx="3"/></svg>;
 
           const ICON_MAP: Record<string, IconBadge> = {
             "반려동물가능":  { icon: fatDogIcon, title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
