@@ -934,10 +934,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 ? rawVacancy : null;
 
               // "세입자 거주중" / "세입자" → 모두 "세입자"로 표시
-              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : vacancy;
+              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : (vacancy ?? "");
 
               const items = [
-                vacancy && { label: "빈방여부", value: vacancyLabel!, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
+                vacancy && { label: "빈방여부", value: vacancyLabel, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
                 direction && { label: "방향", value: direction + "향", color: "hsl(var(--foreground))" },
                 lhType && lhType !== "관계없음" && { label: "LH 대출", value: lhType, color: lhType === "LH가능" ? "hsl(217 91% 60%)" : lhType === "LH불가" ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" },
                 cleanFee && { label: "퇴실청소비", value: cleanFee.endsWith("만원") ? cleanFee : `${cleanFee}만원`, color: "hsl(var(--foreground))" },
