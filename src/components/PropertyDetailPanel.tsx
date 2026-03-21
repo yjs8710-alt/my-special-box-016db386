@@ -731,52 +731,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
 
-      // 호실별 내용을 proposal_content에 구조화
-      const roomLines = rooms
-        .filter(r => r.unit || r.deposit || r.monthly)
-        .map(r => `[${r.unit || "-"}호] 보증금 ${r.deposit || "0"}만원 / 월세 ${r.monthly || "0"}만원`)
-        .join("\n");
 
-      const fullContent = [
-        roomLines && `■ 호실별 임대 조건\n${roomLines}`,
-        totalDeposit > 0 && `■ 보증금 합계: ${totalDeposit.toLocaleString()}만원`,
-        loanAmount && `■ 융자금: ${loanAmount}만원`,
-        content && `■ 추가 내용\n${content}`,
-      ].filter(Boolean).join("\n\n");
-
-      // 대표 보증금·월세 (첫 번째 유효 행 기준)
-      const firstRoom = rooms.find(r => r.deposit || r.monthly);
-
-      const { error } = await supabase.from("property_reports").insert({
-        property_id: String(property.id),
-        property_title: property.title,
-        property_address: property.address,
-        report_type: "rental_proposal",
-        proposer_name: proposerName.trim(),
-        proposer_phone: proposerPhone.trim(),
-        proposer_company: proposerCompany.trim() || null,
-        proposal_deposit: firstRoom?.deposit?.trim() || null,
-        proposal_monthly: firstRoom?.monthly?.trim() || null,
-        proposal_period: period.trim() || null,
-        proposal_content: fullContent || null,
-        submitted_by: session?.user?.id ?? null,
-      });
-      if (error) throw error;
-      setDone(true);
-    } catch (e) {
-      console.error("임대제안서 저장 실패:", e);
-      alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-primary" />
