@@ -737,21 +737,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-  const ic = "w-full px-2 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
-  // 동일 주소(dong + lot_number)의 임대 매물 자동 로드
-  useEffect(() => {
-    const loadSameAddressRentals = async () => {
-      if (!property.address) { setLoadingUnits(false); return; }
-      try {
-        // 주소에서 dong, lot_number 추출 (memo 필드에 property id 저장됨)
-        const { data } = await supabase
-          .from("properties")
-          .select("unit_number, deposit, monthly, available_from, type, room_type")
-          .eq("address", property.address)
-          .eq("status", "active")
-          .not("type", "ilike", "%매매%")
-          .order("unit_number", { ascending: true });
+
 
         if (data && data.length > 0) {
           setRooms(data.map(p => ({
