@@ -974,6 +974,34 @@ const ContactEditModal = ({
     contact ?? { id: "", district: "", dong: "", lot_number: "", building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
+  // 중복 번호 체크
+  const [dupWarnings, setDupWarnings] = useState<Record<string, string>>({});
+
+  // 전화번호 중복 검사 (디바운스)
+  const checkDuplicate = useCallback(async (key: string, value: string) => {
+    if (!value || value.length < 9) {
+      setDupWarnings((w) => ({ ...w, [key]: "" }));
+      return;
+    }
+    const { data } = await supabase
+      .from("cheongju_contacts")
+      .select("id, dong, lot_number, unit_number, phone, contact_owner, contact_broker")
+      .or(`phone.eq.${value},contact_owner.eq.${value},contact_broker.eq.${value}`)
+      .limit(3);
+    if (data && data.length > 0) {
+      // 자기 자신이면 무시
+      const others = data.filter((r) => r.id !== form.id);
+      if (others.length > 0) {
+        const r = others[0] as Record<string, unknown>;
+        setDupWarnings((w) => ({
+          ...w,
+          [key]: `중복 — ${r.dong} ${r.lot_number}${r.unit_number ? " " + String(r.unit_number) + "호" : ""}`,
+        }));
+        return;
+      }
+    }
+    setDupWarnings((w) => ({ ...w, [key]: "" }));
+  }, [form.id]);
 
   const handleSave = async () => {
     setSaving(true);
