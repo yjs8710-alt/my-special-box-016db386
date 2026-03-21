@@ -476,10 +476,17 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     return contacts;
   };
 
-  const [form, setForm] = useState<AdminFormExtended>({
-    ...EMPTY_EXTENDED,
-    ...(initial ?? {}),
-    ...parseContactsFromInitial(initial),
+  const [form, setForm] = useState<AdminFormExtended>(() => {
+    const base = {
+      ...EMPTY_EXTENDED,
+      ...(initial ?? {}),
+      ...parseContactsFromInitial(initial),
+    };
+    // "세입자 거주중" → "세입자" 정규화 (기존 저장 데이터 호환)
+    if (base.available_from === "세입자 거주중") {
+      base.available_from = "세입자";
+    }
+    return base;
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
