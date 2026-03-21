@@ -1103,10 +1103,22 @@ const ContactEditModal = ({
               <label className="text-xs font-semibold text-muted-foreground">{label}</label>
               <Input
                 value={(form as Record<string, unknown>)[key] as string ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: isPhone ? formatPhone(e.target.value) : e.target.value }))}
+                onChange={(e) => {
+                  const v = isPhone ? formatPhone(e.target.value) : e.target.value;
+                  setForm((f) => ({ ...f, [key]: v }));
+                  if (isPhone) {
+                    clearTimeout((window as Record<string, unknown>)[`_dupTimer_${key}`] as ReturnType<typeof setTimeout>);
+                    (window as Record<string, unknown>)[`_dupTimer_${key}`] = setTimeout(() => checkDuplicate(key, v), 500);
+                  }
+                }}
                 placeholder={placeholder}
-                className="h-9 text-sm"
+                className={`h-9 text-sm ${dupWarnings[key] ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
               />
+              {dupWarnings[key] && (
+                <p className="text-[11px] font-semibold text-destructive flex items-center gap-1">
+                  <span>⚠</span> {dupWarnings[key]}
+                </p>
+              )}
             </div>
           ))}
         </div>
