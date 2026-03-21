@@ -1168,7 +1168,13 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
   const rawArea = pyeong ? pyeong[1] + "평" : (prop.area ? prop.area.split(" ")[0] : "");
-  const areaShort = rawArea && /^\d+$/.test(rawArea) ? rawArea + "평" : rawArea;
+  const areaFromField = rawArea && /^\d+$/.test(rawArea) ? rawArea + "평" : rawArea;
+  // area 필드가 비어있으면 note의 건평 값을 fallback으로 사용
+  const buildingAreaFromNote = !areaFromField ? (() => {
+    const m = (prop.note ?? "").match(/건평[:\s]+([^\n|]+)/);
+    return m ? m[1].trim() : "";
+  })() : "";
+  const areaShort = areaFromField || buildingAreaFromNote;
   // floor에서 층 숫자만 (예: "3층" → "3F")
   const floorShort = prop.floor ? prop.floor.replace(/층/g, "F").replace(/지상\s*/g, "") : "";
   // 연락처 버튼 목록
