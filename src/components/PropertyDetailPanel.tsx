@@ -7,6 +7,8 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPhone } from "@/lib/utils";
+
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -511,10 +513,10 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
                   <label className="text-[11px] font-semibold text-muted-foreground">이름 *</label>
                   <input value={form.proposer_name} onChange={(e) => set("proposer_name", e.target.value)} placeholder="홍길동" className={ic} />
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-muted-foreground">연락처 *</label>
-                  <input value={form.proposer_phone} onChange={(e) => set("proposer_phone", e.target.value)} placeholder="010-0000-0000" className={ic} />
-                </div>
+                 <div className="flex flex-col gap-1">
+                   <label className="text-[11px] font-semibold text-muted-foreground">연락처 *</label>
+                   <input value={form.proposer_phone} onChange={(e) => set("proposer_phone", formatPhone(e.target.value))} placeholder="010-0000-0000" className={ic} />
+                 </div>
               </div>
               <div className="mt-2 flex flex-col gap-1">
                 <label className="text-[11px] font-semibold text-muted-foreground">회사/부동산명 (선택)</label>

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { formatPhone } from "@/lib/utils";
 
 const STEPS = ["기본 정보", "자격 인증", "약관 동의"];
 
@@ -252,7 +253,7 @@ const SignupPage = () => {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label>휴대폰 번호 <span className="text-destructive">*</span></Label>
-                    <Input placeholder="010-0000-0000" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                    <Input placeholder="010-0000-0000" value={form.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
