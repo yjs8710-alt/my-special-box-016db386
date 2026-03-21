@@ -974,6 +974,34 @@ const ContactEditModal = ({
     contact ?? { id: "", district: "", dong: "", lot_number: "", building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
+  // 중복 번호 체크
+  const [dupWarnings, setDupWarnings] = useState<Record<string, string>>({});
+
+  // 전화번호 중복 검사 (디바운스)
+  const checkDuplicate = useCallback(async (key: string, value: string) => {
+    if (!value || value.length < 9) {
+      setDupWarnings((w) => ({ ...w, [key]: "" }));
+      return;
+    }
+    const { data } = await supabase
+      .from("cheongju_contacts")
+      .select("id, dong, lot_number, unit_number, phone, contact_owner, contact_broker")
+      .or(`phone.eq.${value},contact_owner.eq.${value},contact_broker.eq.${value}`)
+      .limit(3);
+    if (data && data.length > 0) {
+      // 자기 자신이면 무시
+      const others = data.filter((r) => r.id !== form.id);
+      if (others.length > 0) {
+        const r = others[0] as Record<string, unknown>;
+        setDupWarnings((w) => ({
+          ...w,
+          [key]: `중복 — ${r.dong} ${r.lot_number}${r.unit_number ? " " + String(r.unit_number) + "호" : ""}`,
+        }));
+        return;
+      }
+    }
+    setDupWarnings((w) => ({ ...w, [key]: "" }));
+  }, [form.id]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -1075,10 +1103,22 @@ const ContactEditModal = ({
               <label className="text-xs font-semibold text-muted-foreground">{label}</label>
               <Input
                 value={(form as Record<string, unknown>)[key] as string ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: isPhone ? formatPhone(e.target.value) : e.target.value }))}
+                onChange={(e) => {
+                  const v = isPhone ? formatPhone(e.target.value) : e.target.value;
+                  setForm((f) => ({ ...f, [key]: v }));
+                  if (isPhone) {
+                    clearTimeout((window as unknown as Record<string, ReturnType<typeof setTimeout>>)[`_dupTimer_${key}`]);
+                    (window as unknown as Record<string, ReturnType<typeof setTimeout>>)[`_dupTimer_${key}`] = setTimeout(() => checkDuplicate(key, v), 500);
+                  }
+                }}
                 placeholder={placeholder}
-                className="h-9 text-sm"
+                className={`h-9 text-sm ${dupWarnings[key] ? "border-destructive focus-visible:ring-destructive/40" : ""}`}
               />
+              {dupWarnings[key] && (
+                <p className="text-[11px] font-semibold text-destructive flex items-center gap-1">
+                  <span>⚠</span> {dupWarnings[key]}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -1409,36 +1449,41 @@ const AdminDashboard = () => {
 
   // ─── 연락처 저장 ─────────────────────────────────────────────────────────
   const saveContact = async (updated: CheongJuContact) => {
+    // building_dong은 DB에 추가된 컬럼이지만 types.ts 자동생성 전이므로 unknown 캐스트
+    type ContactRow = Record<string, unknown>;
+
     if (updated.id) {
-      const { error } = await supabase.from("cheongju_contacts")
-        .update({
-          lot_number: updated.lot_number ?? "",
-          building_dong: updated.building_dong ?? null,
-          unit_number: updated.unit_number ?? null,
-          phone: updated.phone,
-          contact_owner: updated.contact_owner,
-          contact_manager: updated.contact_manager,
-          contact_broker: updated.contact_broker,
-          memo: updated.memo,
-          is_visible: updated.is_visible ?? true,
-        })
-        .eq("id", updated.id);
+      const payload: ContactRow = {
+        lot_number: updated.lot_number ?? "",
+        building_dong: updated.building_dong ?? null,
+        unit_number: updated.unit_number ?? null,
+        phone: updated.phone,
+        contact_owner: updated.contact_owner ?? null,
+        contact_manager: updated.contact_manager ?? null,
+        contact_broker: updated.contact_broker ?? null,
+        memo: updated.memo ?? null,
+        is_visible: updated.is_visible ?? true,
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("cheongju_contacts").update(payload as any).eq("id", updated.id);
       if (error) { alert("수정 오류: " + error.message); return; }
     } else {
+      const payload: ContactRow = {
+        district: updated.district,
+        dong: updated.dong,
+        lot_number: updated.lot_number ?? "",
+        building_dong: updated.building_dong ?? null,
+        unit_number: updated.unit_number ?? null,
+        phone: updated.phone,
+        contact_owner: updated.contact_owner ?? null,
+        contact_manager: updated.contact_manager ?? null,
+        contact_broker: updated.contact_broker ?? null,
+        memo: updated.memo ?? null,
+        is_visible: updated.is_visible ?? true,
+      };
       const { error } = await supabase.from("cheongju_contacts")
-        .upsert({
-          district: updated.district,
-          dong: updated.dong,
-          lot_number: updated.lot_number ?? "",
-          building_dong: updated.building_dong ?? null,
-          unit_number: updated.unit_number ?? null,
-          phone: updated.phone,
-          contact_owner: updated.contact_owner,
-          contact_manager: updated.contact_manager,
-          contact_broker: updated.contact_broker,
-          memo: updated.memo,
-          is_visible: updated.is_visible ?? true,
-        }, { onConflict: "dong,lot_number,unit_number" });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert(payload as any, { onConflict: "dong,lot_number,unit_number" });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
