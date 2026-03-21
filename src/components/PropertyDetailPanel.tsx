@@ -750,31 +750,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-      const { error } = await supabase.from("property_reports").insert({
-        property_id: String(property.id),
-        property_title: property.title,
-        property_address: property.address,
-        report_type: "rental_proposal",
-        proposer_name: "관리자",
-        proposer_phone: "-",
-        proposal_deposit: String(totalDeposit),
-        proposal_monthly: String(totalMonthly),
-        proposal_content: fullContent || null,
-        submitted_by: session?.user?.id ?? null,
-      });
-      if (error) throw error;
-      setDone(true);
-    } catch (e) {
-      console.error("임대제안서 저장 실패:", e);
-      alert("저장 중 오류가 발생했습니다.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[95vh]" onClick={e => e.stopPropagation()}>
+
 
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
