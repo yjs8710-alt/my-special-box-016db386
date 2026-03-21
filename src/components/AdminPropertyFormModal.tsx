@@ -130,6 +130,8 @@ import { X, Phone, Eye, EyeOff, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
+import { formatPhone } from "@/lib/utils";
+
 function ContactField({
   fieldKey, label, placeholder, required, value, onChange,
 }: {
@@ -150,7 +152,7 @@ function ContactField({
           type={revealed ? "tel" : "password"}
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => onChange(formatPhone(e.target.value))}
           className={ic + " pl-9 pr-9"}
         />
         <button
