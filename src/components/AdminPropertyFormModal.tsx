@@ -261,7 +261,7 @@ const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: st
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
-const VACANCY_TYPES = ["공실","세입자"] as const;
+const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
@@ -327,7 +327,6 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   earlyExit: boolean; // 세입자 중도퇴거
   buildingArea: string; // 건평
   buildingDong: string; // 집합건물 동(棟)
-  landArea: string; // 대지면적
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -350,7 +349,6 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   earlyExit: false,
   buildingArea: "",
   buildingDong: "",
-  landArea: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -460,8 +458,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
     const buildingDongMatch = noteStr.match(/동\(棟\)[:\s]+([^\n|]+)/);
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
-    const landAreaMatch = noteStr.match(/대지면적[:\s]+([^\n|]+)/);
-    if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
@@ -476,17 +472,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     return contacts;
   };
 
-  const [form, setForm] = useState<AdminFormExtended>(() => {
-    const base = {
-      ...EMPTY_EXTENDED,
-      ...(initial ?? {}),
-      ...parseContactsFromInitial(initial),
-    };
-    // "세입자 거주중" → "세입자" 정규화 (기존 저장 데이터 호환)
-    if (base.available_from === "세입자 거주중") {
-      base.available_from = "세입자";
-    }
-    return base;
+  const [form, setForm] = useState<AdminFormExtended>({
+    ...EMPTY_EXTENDED,
+    ...(initial ?? {}),
+    ...parseContactsFromInitial(initial),
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -710,7 +699,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.earlyExit && `중도퇴거: 세입자중도퇴거`,
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
-      form.landArea && `대지면적: ${form.landArea}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -992,26 +980,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 / 대지면적 */}
+              {/* 건평 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
                   <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">대지면적 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
-                  <input type="text" placeholder="예) 120㎡ 또는 36평" value={form.landArea ?? ""} onChange={(e) => {
-                    set("landArea", e.target.value);
-                  }} className={ic} />
-                  {(() => {
-                    const v = form.landArea ?? "";
-                    const sqmMatch = v.match(/^(\d+(?:\.\d+)?)\s*㎡?$/);
-                    if (sqmMatch) {
-                      const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
-                      return <p className="text-[11px] text-primary font-semibold">≈ {pyong}평</p>;
-                    }
-                    return null;
-                  })()}
                 </div>
               </div>
 
