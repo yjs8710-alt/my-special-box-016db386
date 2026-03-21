@@ -747,22 +747,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-        .join("\n");
 
-      const mortgageLines = mortgages
-        .filter(m => m.creditor || m.amount)
-        .map(m => `${m.creditor || "-"}: ${m.amount || "0"}만원${m.memo ? ` (${m.memo})` : ""}`)
-        .join("\n");
 
-      const fullContent = [
-        `■ 건물: ${property.title} / ${property.address}`,
-        roomLines && `■ 호실별 임대 현황\n${roomLines}`,
-        `■ 보증금 합계: ${totalDeposit.toLocaleString()}만원`,
-        `■ 월세 합계: ${totalMonthly.toLocaleString()}만원`,
-        mortgageLines && `■ 근저당 내역\n${mortgageLines}`,
-        totalMortgage > 0 && `■ 근저당 합계: ${totalMortgage.toLocaleString()}만원`,
-        memo && `■ 메모\n${memo}`,
-      ].filter(Boolean).join("\n\n");
 
       const { error } = await supabase.from("property_reports").insert({
         property_id: String(property.id),
