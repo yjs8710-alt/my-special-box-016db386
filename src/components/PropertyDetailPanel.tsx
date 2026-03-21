@@ -1,7 +1,7 @@
 import {
   X, MapPin, Eye, Heart, Phone, Calendar, Building2, Car, Maximize2,
   Layers, BadgeCheck, Share2, ArrowUpRight, FileText, ExternalLink,
-  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
+  ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
   AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -753,13 +753,18 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
-  const [buildingOpen, setBuildingOpen] = useState(false);
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
 
   if (!property) return null;
 
-  const buildingSearchUrl = `https://www.eais.go.kr`;
+  // 건축물대장: 세움터 주소 검색 (정부24 건축물대장 직접 주소 검색)
+  const buildingRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000015&HighCtgCD=A01001&Mcode=10200`;
+  // 토지대장: 정부24 토지대장 열람
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000013&HighCtgCD=A01001&Mcode=10200`;
+  // 세움터 (건축물대장 전문 열람 - 주소 자동 입력 불가, 사이트 직접 연결)
+  const eaisUrl = `https://www.eais.go.kr/modiMain.do`;
+  // 부동산 공시가격 알리미 (공시가격 조회)
   const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
@@ -934,10 +939,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 ? rawVacancy : null;
 
               // "세입자 거주중" / "세입자" → 모두 "세입자"로 표시
-              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : vacancy;
+              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : (vacancy ?? "");
 
               const items = [
-                vacancy && { label: "빈방여부", value: vacancyLabel!, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
+                vacancy && { label: "빈방여부", value: vacancyLabel, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
                 direction && { label: "방향", value: direction + "향", color: "hsl(var(--foreground))" },
                 lhType && lhType !== "관계없음" && { label: "LH 대출", value: lhType, color: lhType === "LH가능" ? "hsl(217 91% 60%)" : lhType === "LH불가" ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" },
                 cleanFee && { label: "퇴실청소비", value: cleanFee.endsWith("만원") ? cleanFee : `${cleanFee}만원`, color: "hsl(var(--foreground))" },
@@ -984,12 +989,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
                 // 대지면적: note에서 파싱 (저장 형식: "대지면적: XXX")
                 ...((() => {
-                  const note = property.note ?? "";
-                  // 우선순위: "대지면적:" > "대지 :" > area 필드
-                  const m = note.match(/대지면적\s*[:\s：]+([^\n|]+)/)
-                    ?? note.match(/대지\s*[:\s：]+([^\n|]+)/);
-                  const areaM = (property.area || "").match(/대지\s+([^\s/]+)/);
-                  const raw = m ? m[1].trim() : areaM ? areaM[1].trim() : null;
+                  const noteField = property.note ?? "";
+                  // 우선순위: "대지면적:" (정확 매칭) > area 필드
+                  const m = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/);
+                  const raw = m ? m[1].trim() : null;
                   if (!raw) return [];
                   const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
                   const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
@@ -1102,43 +1105,49 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           {/* Divider */}
           <div className="h-2 bg-muted/50 my-2" />
 
-          {/* 건축물대장 */}
+          {/* 건축물대장 / 토지대장 바로가기 */}
           <div className="px-4 pb-3">
-            <button onClick={() => setBuildingOpen(!buildingOpen)} className="w-full flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-3.5 h-3.5 text-primary" />
-                </div>
-                <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물대장</span>
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-primary" />
               </div>
-              {buildingOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-            </button>
-
-            {buildingOpen && (
-              <div className="mt-2 rounded-xl border border-border overflow-hidden">
-                <div className="px-3 py-2.5 bg-muted/40 border-b border-border">
-                  <p className="text-[10px] text-muted-foreground font-medium mb-0.5">조회 주소</p>
-                  <p className="text-xs font-semibold text-foreground">{property.address}</p>
+              <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물 / 토지대장</span>
+            </div>
+            {/* 조회 주소 표시 */}
+            <div className="mb-2.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/30">
+              <p className="text-[10px] text-muted-foreground">조회 주소</p>
+              <p className="text-xs font-semibold text-foreground">{property.address}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={eaisUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all hover:shadow-sm"
+                style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.12)" }}>
+                  <FileText className="w-4 h-4 text-primary" />
                 </div>
-                <div className="px-3 py-3 grid grid-cols-2 gap-y-2 gap-x-4 bg-white text-xs">
-                  <div><p className="text-[10px] text-muted-foreground">건물 유형</p><p className="font-semibold text-foreground">{property.type}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">준공연도</p><p className="font-semibold text-foreground">{property.buildYear}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">총 층수</p><p className="font-semibold text-foreground">{property.totalFloors}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">엘리베이터</p><p className="font-semibold text-foreground">{property.elevator ? "있음" : "없음"}</p></div>
+                <span className="text-[11px] font-extrabold text-primary text-center leading-tight">건축물대장</span>
+                <span className="text-[9px] text-muted-foreground text-center">세움터 바로가기</span>
+                <ExternalLink className="w-3 h-3 text-primary/60" />
+              </a>
+              <a
+                href={landRegisterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all hover:shadow-sm"
+                style={{ borderColor: "hsl(var(--chart-2) / 0.4)", background: "hsl(var(--chart-2) / 0.04)" }}
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--chart-2) / 0.12)" }}>
+                  <FileText className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
                 </div>
-                <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
-                  <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
-                  <div className="flex gap-2">
-                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />세움터 열람
-                    </a>
-                    <a href={naverBuildingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-accent text-white text-[11px] font-bold hover:bg-accent/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />네이버 건물정보
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
+                <span className="text-[11px] font-extrabold text-center leading-tight" style={{ color: "hsl(var(--chart-2))" }}>토지대장</span>
+                <span className="text-[9px] text-muted-foreground text-center">정부24 바로가기</span>
+                <ExternalLink className="w-3 h-3" style={{ color: "hsl(var(--chart-2) / 0.6)" }} />
+              </a>
+            </div>
           </div>
 
           {/* Divider */}
