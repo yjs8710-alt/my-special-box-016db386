@@ -971,6 +971,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="rounded-xl border-2 p-3 flex flex-col gap-3"
                   style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}>
                   <p className="text-xs font-extrabold text-primary">🏢 건물 기본 정보</p>
+                  {/* 건물명 — 매매 필수 강조 */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건물명 <span className="text-primary font-bold">*</span></label>
+                    <input type="text" placeholder="예) 복대프라자, OO빌딩" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-muted-foreground">전체 층수 <span className="text-primary">*</span></label>
