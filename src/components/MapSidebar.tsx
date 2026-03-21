@@ -1386,6 +1386,36 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             </span>
           );
         })()}
+        {/* ⑨ 매매 타입 — 대지·건평 명시 태그 */}
+        {(() => {
+          const isSale = prop.type?.includes("매매");
+          if (!isSale) return null;
+          const note = prop.note ?? "";
+          const landM = note.match(/대지[:\s]+([^\n|]+)/);
+          const bldgM = note.match(/건평[:\s]+([^\n|]+)/);
+          const landV = landM ? landM[1].trim() : null;
+          const bldgV = bldgM ? bldgM[1].trim() : null;
+          if (!landV && !bldgV) return null;
+          return (
+            <>
+              <span className="flex-shrink-0 w-px h-3.5 bg-border" />
+              {landV && (
+                <span className="flex-shrink-0 flex items-center gap-0.5 text-[11px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  style={{ background: "hsl(142 60% 93%)", color: "hsl(142 50% 30%)", border: "1px solid hsl(142 50% 75%)" }}>
+                  <span className="text-[10px] font-bold opacity-70">대지</span>
+                  {landV}
+                </span>
+              )}
+              {bldgV && (
+                <span className="flex-shrink-0 flex items-center gap-0.5 text-[11px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  style={{ background: "hsl(217 80% 93%)", color: "hsl(217 60% 35%)", border: "1px solid hsl(217 60% 75%)" }}>
+                  <span className="text-[10px] font-bold opacity-70">건평</span>
+                  {bldgV}
+                </span>
+              )}
+            </>
+          );
+        })()}
         {/* ⑧ 비번 — flex-1 스페이서 앞에 배치해 잘리지 않도록 */}
         {(buildingPw || roomPw) && (
           <>
