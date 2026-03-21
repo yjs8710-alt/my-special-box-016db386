@@ -982,18 +982,21 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
-                // 대지면적: note에서 파싱, ㎡→평 자동 변환
+                // 대지면적: note에서 파싱 (두 가지 저장 형식 지원: "대지면적:", "대지:")
                 ...((() => {
-                  const m = (property.note ?? "").match(/대지면적[:\s]+([^\n|]+)/);
-                  if (!m) return [];
-                  const raw = m[1].trim();
+                  const note = property.note ?? "";
+                  const m = note.match(/대지면적[:\s]+([^\n|]+)/) ?? note.match(/대지[:\s]+([^\n|]+)/);
+                  // area 필드에서도 "대지 XX" 패턴 파싱
+                  const areaM = (property.area || "").match(/대지\s+([^\s/]+)/);
+                  const raw = m ? m[1].trim() : areaM ? areaM[1].trim() : null;
+                  if (!raw) return [];
                   const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
                   const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
                   let display = raw;
                   if (sqmMatch) {
                     const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
                     display = `${pyong}평 (${sqmMatch[1]}㎡)`;
-                  } else if (!pyongMatch) {
+                  } else if (!pyongMatch && /^\d/.test(raw)) {
                     display = raw + "평";
                   }
                   return [{ icon: <Maximize2 className="w-3.5 h-3.5" />, label: "대지면적", value: display }];
