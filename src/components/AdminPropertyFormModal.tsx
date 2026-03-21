@@ -985,11 +985,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 */}
+              {/* 건평 / 대지 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
                   <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">대지 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                  <input type="text" placeholder="예) 120㎡, 36평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic} />
                 </div>
               </div>
 
