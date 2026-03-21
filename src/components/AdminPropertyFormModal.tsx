@@ -324,6 +324,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   jeonseDeposit: string;
   earlyExit: boolean; // 세입자 중도퇴거
   buildingArea: string; // 건평
+  buildingDong: string; // 집합건물 동(棟)
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
