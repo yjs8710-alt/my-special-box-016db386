@@ -742,14 +742,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-    setRooms(r => r.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
-  const addRoom = () => setRooms(r => [...r, { unit: "", deposit: "", monthly: "", status: "임대중" }]);
-  const removeRoom = (i: number) => setRooms(r => r.filter((_, idx) => idx !== i));
 
-  const setMortgage = (i: number, key: keyof MortgageRow, v: string) =>
-    setMortgages(r => r.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
-  const addMortgage = () => setMortgages(r => [...r, { creditor: "", amount: "", memo: "" }]);
-  const removeMortgage = (i: number) => setMortgages(r => r.filter((_, idx) => idx !== i));
+
 
   // 합계 계산
   const totalDeposit = rooms.reduce((s, r) => s + (parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0), 0);
