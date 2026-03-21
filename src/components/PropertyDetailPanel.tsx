@@ -745,19 +745,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-  // 합계 계산
-  const totalDeposit = rooms.reduce((s, r) => s + (parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0), 0);
-  const totalMonthly = rooms.reduce((s, r) => s + (parseFloat(r.monthly.replace(/[^0-9.]/g, "")) || 0), 0);
-  const totalMortgage = mortgages.reduce((s, m) => s + (parseFloat(m.amount.replace(/[^0-9.]/g, "")) || 0), 0);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
 
-      const roomLines = rooms
-        .filter(r => r.unit || r.deposit || r.monthly)
-        .map(r => `[${r.unit || "-"}호] ${r.status} / 보증금 ${r.deposit || "0"}만원 / 월세 ${r.monthly || "0"}만원`)
         .join("\n");
 
       const mortgageLines = mortgages
