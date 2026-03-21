@@ -740,24 +740,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-        if (data && data.length > 0) {
-          setRooms(data.map(p => ({
-            unit: p.unit_number ?? "",
-            deposit: p.deposit ?? "",
-            monthly: p.monthly ?? "",
-            status: p.available_from === "공실" ? "공실" : p.available_from === "세입자 거주중" ? "임대중" : (p.available_from ?? "임대중"),
-          })));
-        }
-      } catch (e) {
-        console.error("임대 매물 로드 실패:", e);
-      } finally {
-        setLoadingUnits(false);
-      }
-    };
-    loadSameAddressRentals();
-  }, [property.address]);
 
-  const setRoom = (i: number, key: keyof RoomRow, v: string) =>
+
     setRooms(r => r.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
   const addRoom = () => setRooms(r => [...r, { unit: "", deposit: "", monthly: "", status: "임대중" }]);
   const removeRoom = (i: number) => setRooms(r => r.filter((_, idx) => idx !== i));
