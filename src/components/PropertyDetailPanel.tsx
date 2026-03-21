@@ -984,12 +984,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
                 // 대지면적: note에서 파싱 (저장 형식: "대지면적: XXX")
                 ...((() => {
-                  const note = property.note ?? "";
-                  // 우선순위: "대지면적:" > "대지 :" > area 필드
-                  const m = note.match(/대지면적\s*[:\s：]+([^\n|]+)/)
-                    ?? note.match(/대지\s*[:\s：]+([^\n|]+)/);
-                  const areaM = (property.area || "").match(/대지\s+([^\s/]+)/);
-                  const raw = m ? m[1].trim() : areaM ? areaM[1].trim() : null;
+                  const noteField = property.note ?? "";
+                  // 우선순위: "대지면적:" (정확 매칭) > area 필드
+                  const m = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/);
+                  const raw = m ? m[1].trim() : null;
                   if (!raw) return [];
                   const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
                   const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
