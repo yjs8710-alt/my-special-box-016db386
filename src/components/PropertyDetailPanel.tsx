@@ -440,14 +440,15 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
   const ic = "w-full px-2 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
-  // 동일 주소 임대 매물 자동 로드 (중복 호수 제거)
+  // 동일 주소(정확히 일치) 임대 매물 자동 로드 (중복 호수 제거)
   useEffect(() => {
     const loadSameAddressRentals = async () => {
       if (!property.address) { setLoadingUnits(false); return; }
       try {
+        // 정확히 같은 주소인 매물만 가져옴 (다른 건물 혼입 방지)
         const { data } = await supabase
           .from("properties")
-          .select("unit_number, deposit, monthly, available_from")
+          .select("unit_number, deposit, monthly, available_from, address")
           .eq("address", property.address)
           .eq("status", "active")
           .not("type", "ilike", "%매매%")
