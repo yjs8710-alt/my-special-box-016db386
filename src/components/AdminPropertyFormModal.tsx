@@ -261,7 +261,7 @@ const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: st
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
-const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
+const VACANCY_TYPES = ["공실","세입자"] as const;
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
 const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
