@@ -427,12 +427,12 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
 }
 
 /* ─── 임대제안서 모달 (건물매매 전용: 동일주소 임대매물 자동로드 + 근저당/보증금 합계) ─── */
-interface RoomRow { unit: string; deposit: string; monthly: string; status: string; editing?: boolean }
+interface RoomRow { unit: string; deposit: string; monthly: string; status: string }
 interface MortgageRow { creditor: string; amount: string; memo: string }
 
 function RentalProposalModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
-  const [rooms, setRooms] = useState<RoomRow[]>([{ unit: "", deposit: "", monthly: "", status: "임대중" }]);
-  const [mortgages, setMortgages] = useState<MortgageRow[]>([{ creditor: "", amount: "", memo: "" }]);
+  const [rooms, setRooms] = useState<RoomRow[]>([]);
+  const [mortgages, setMortgages] = useState<MortgageRow[]>([]);
   const [memo, setMemo] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
@@ -440,16 +440,15 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
   const ic = "w-full px-2 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
-  // 동일 주소(정확히 일치) 임대 매물 자동 로드 (중복 호수 제거)
+  // 정확히 동일한 주소(address)의 임대 매물만 로드, 중복 호수 제거
   useEffect(() => {
     const loadSameAddressRentals = async () => {
       if (!property.address) { setLoadingUnits(false); return; }
       try {
-        // 정확히 같은 주소인 매물만 가져옴 (다른 건물 혼입 방지)
         const { data } = await supabase
           .from("properties")
           .select("unit_number, deposit, monthly, available_from, address")
-          .eq("address", property.address)
+          .eq("address", property.address)   // 정확히 같은 주소만
           .eq("status", "active")
           .not("type", "ilike", "%매매%")
           .order("unit_number", { ascending: true });
