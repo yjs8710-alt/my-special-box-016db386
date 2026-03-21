@@ -759,7 +759,13 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
   if (!property) return null;
 
-  const buildingSearchUrl = `https://www.eais.go.kr`;
+  // 건축물대장: 세움터 주소 검색 (정부24 건축물대장 직접 주소 검색)
+  const buildingRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000015&HighCtgCD=A01001&Mcode=10200`;
+  // 토지대장: 정부24 토지대장 열람
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000013&HighCtgCD=A01001&Mcode=10200`;
+  // 세움터 (건축물대장 전문 열람 - 주소 자동 입력 불가, 사이트 직접 연결)
+  const eaisUrl = `https://www.eais.go.kr/modiMain.do`;
+  // 부동산 공시가격 알리미 (공시가격 조회)
   const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
