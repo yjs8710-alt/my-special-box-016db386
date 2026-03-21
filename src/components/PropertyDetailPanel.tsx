@@ -729,8 +729,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
-    setSaving(true);
+
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
 
