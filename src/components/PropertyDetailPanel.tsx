@@ -733,15 +733,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-          <div className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">임대 제안서 작성</h3>
-          </div>
-          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
+
+
 
         {done ? (
           <div className="p-8 flex flex-col items-center gap-3 text-center">
