@@ -346,6 +346,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   jeonseDeposit: "",
   earlyExit: false,
   buildingArea: "",
+  buildingDong: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
