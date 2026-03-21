@@ -930,11 +930,11 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               // 공실여부: 임대 매물일 때만 표시 (매매 타입 전체 제외)
               const rawVacancy = property.availableFrom;
               const vacancy = isRentType && rawVacancy &&
-                (rawVacancy === "공실" || rawVacancy === "세입자 거주중")
+                (rawVacancy === "공실" || rawVacancy === "세입자 거주중" || rawVacancy === "세입자")
                 ? rawVacancy : null;
 
-              // "세입자 거주중" → "세입자"로 간략 표시
-              const vacancyLabel = vacancy === "세입자 거주중" ? "세입자" : vacancy;
+              // "세입자 거주중" / "세입자" → 모두 "세입자"로 표시
+              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : vacancy;
 
               const items = [
                 vacancy && { label: "빈방여부", value: vacancyLabel!, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
