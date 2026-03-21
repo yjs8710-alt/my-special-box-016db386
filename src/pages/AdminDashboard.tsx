@@ -87,6 +87,7 @@ type CheongJuContact = {
   district: string;
   dong: string;
   lot_number?: string;
+  building_dong?: string | null; // 집합건물 동(棟) 번호
   unit_number?: string | null;
   phone: string;
   contact_owner?: string;
@@ -970,7 +971,7 @@ const ContactEditModal = ({
   onSave: (updated: CheongJuContact) => Promise<void>;
 }) => {
   const [form, setForm] = useState<CheongJuContact>(
-    contact ?? { id: "", district: "", dong: "", lot_number: "", unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
+    contact ?? { id: "", district: "", dong: "", lot_number: "", building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
 
@@ -993,7 +994,7 @@ const ContactEditModal = ({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-base font-bold text-foreground">
-            {form.district} {form.dong} {form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
+            {form.district} {form.dong} {form.building_dong ? `${form.building_dong} ` : ""}{form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
           </h3>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
             <X className="w-4 h-4" />
@@ -1041,16 +1042,28 @@ const ContactEditModal = ({
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-muted-foreground">
-                호수
+                동(棟)
                 <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
               </label>
               <Input
-                value={form.unit_number ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
-                placeholder="예: 101호"
+                value={form.building_dong ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, building_dong: e.target.value || null }))}
+                placeholder="예: 101동"
                 className="h-9 text-sm"
               />
             </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground">
+              호수
+              <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+            </label>
+            <Input
+              value={form.unit_number ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
+              placeholder="예: 301호"
+              className="h-9 text-sm"
+            />
           </div>
           {[
             { key: "phone", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
@@ -1400,6 +1413,7 @@ const AdminDashboard = () => {
       const { error } = await supabase.from("cheongju_contacts")
         .update({
           lot_number: updated.lot_number ?? "",
+          building_dong: updated.building_dong ?? null,
           unit_number: updated.unit_number ?? null,
           phone: updated.phone,
           contact_owner: updated.contact_owner,
@@ -1416,6 +1430,7 @@ const AdminDashboard = () => {
           district: updated.district,
           dong: updated.dong,
           lot_number: updated.lot_number ?? "",
+          building_dong: updated.building_dong ?? null,
           unit_number: updated.unit_number ?? null,
           phone: updated.phone,
           contact_owner: updated.contact_owner,
@@ -2345,11 +2360,14 @@ const AdminDashboard = () => {
                       </div>
                       {/* 호수 */}
                       <div className="hidden md:block text-xs">
-                        {c.unit_number ? (
+                        {c.building_dong || c.unit_number ? (
                           <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
                             style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
-                          >{c.unit_number}호</span>
+                          >
+                            {c.building_dong && <span>{c.building_dong}</span>}
+                            {c.unit_number && <span>{c.unit_number}호</span>}
+                          </span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 소유주 (phone) */}
