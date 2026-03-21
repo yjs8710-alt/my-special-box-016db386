@@ -966,20 +966,42 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </div>
 
               {/* 전체 층수 / 건축연도 / 중개사 */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
-                  <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
+              {/* 건물 매매 타입일 때 강조 박스로 표시 */}
+              {SALE_TYPES.includes(form.type) ? (
+                <div className="rounded-xl border-2 p-3 flex flex-col gap-3"
+                  style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}>
+                  <p className="text-xs font-extrabold text-primary">🏢 건물 기본 정보</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">전체 층수 <span className="text-primary">*</span></label>
+                      <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">건축연도 <span className="text-primary">*</span></label>
+                      <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
+                    <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
-                  <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
+                    <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
+                    <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
+                    <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
-                  <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
-                </div>
-              </div>
+              )}
             </div>
           )}
 
