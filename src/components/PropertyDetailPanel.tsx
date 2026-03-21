@@ -427,7 +427,7 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
 }
 
 /* ─── 임대제안서 모달 (건물매매 전용: 동일주소 임대매물 자동로드 + 근저당/보증금 합계) ─── */
-interface RoomRow { unit: string; deposit: string; monthly: string; status: string }
+interface RoomRow { unit: string; deposit: string; monthly: string; status: string; editing?: boolean }
 interface MortgageRow { creditor: string; amount: string; memo: string }
 
 function RentalProposalModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
