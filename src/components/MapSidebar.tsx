@@ -1285,12 +1285,13 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             {prop.note.match(/[남북동서]향/)?.[0]}
           </span>
         )}
-        {/* ① 유형 + 층 + 호수를 하나의 네모칸에 */}
+        {/* ① 유형 + 층 + 동 + 호수를 하나의 네모칸에 */}
         {(prop.type || floorShort || prop.unitNumber) && (
           <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
             style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.35)" }}>
             {prop.type && <span>{prop.type}</span>}
             {floorShort && <span className="opacity-80">({floorShort})</span>}
+            {(() => { const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/); return m ? <span className="opacity-80">{m[1].trim()}</span> : null; })()}
             {prop.unitNumber && <span>{prop.unitNumber}</span>}
           </span>
         )}
