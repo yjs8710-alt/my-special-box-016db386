@@ -753,7 +753,6 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
-  const [buildingOpen, setBuildingOpen] = useState(false);
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
 
