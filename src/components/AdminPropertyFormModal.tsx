@@ -327,6 +327,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   earlyExit: boolean; // 세입자 중도퇴거
   buildingArea: string; // 건평
   buildingDong: string; // 집합건물 동(棟)
+  landArea: string; // 대지면적
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -349,6 +350,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   earlyExit: false,
   buildingArea: "",
   buildingDong: "",
+  landArea: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -458,6 +460,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
     const buildingDongMatch = noteStr.match(/동\(棟\)[:\s]+([^\n|]+)/);
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
+    const landAreaMatch = noteStr.match(/대지면적[:\s]+([^\n|]+)/);
+    if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
@@ -699,6 +703,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.earlyExit && `중도퇴거: 세입자중도퇴거`,
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
+      form.landArea && `대지면적: ${form.landArea}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -980,11 +985,26 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 */}
+              {/* 건평 / 대지면적 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
                   <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-muted-foreground">대지면적 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                  <input type="text" placeholder="예) 120㎡ 또는 36평" value={form.landArea ?? ""} onChange={(e) => {
+                    set("landArea", e.target.value);
+                  }} className={ic} />
+                  {(() => {
+                    const v = form.landArea ?? "";
+                    const sqmMatch = v.match(/^(\d+(?:\.\d+)?)\s*㎡?$/);
+                    if (sqmMatch) {
+                      const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                      return <p className="text-[11px] text-primary font-semibold">≈ {pyong}평</p>;
+                    }
+                    return null;
+                  })()}
                 </div>
               </div>
 

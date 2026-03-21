@@ -435,11 +435,13 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   const [proposerCompany, setProposerCompany] = useState("");
   const [period, setPeriod] = useState("");
   const [loanAmount, setLoanAmount] = useState(""); // 융자금
+  const [loanItems, setLoanItems] = useState<{ label: string; amount: string }[]>([{ label: "", amount: "" }]); // 융자 내역
   const [content, setContent] = useState("");
   // 호실별 행
   const [rooms, setRooms] = useState<RoomRow[]>([{ unit: "", deposit: "", monthly: "" }]);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [loadingRooms, setLoadingRooms] = useState(false);
 
   const ic = "w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
@@ -449,11 +451,56 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   const addRoom = () => setRooms((r) => [...r, { unit: "", deposit: "", monthly: "" }]);
   const removeRoom = (i: number) => setRooms((r) => r.filter((_, idx) => idx !== i));
 
-  // 보증금 합계 (숫자만 추출해서 합산)
+  const setLoanItem = (i: number, key: "label" | "amount", v: string) =>
+    setLoanItems((l) => l.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
+  const addLoanItem = () => setLoanItems((l) => [...l, { label: "", amount: "" }]);
+  const removeLoanItem = (i: number) => setLoanItems((l) => l.filter((_, idx) => idx !== i));
+
+  // 보증금 합계
   const totalDeposit = rooms.reduce((sum, r) => {
     const num = parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0;
     return sum + num;
   }, 0);
+
+  // 월세 합계
+  const totalMonthly = rooms.reduce((sum, r) => {
+    const num = parseFloat(r.monthly.replace(/[^0-9.]/g, "")) || 0;
+    return sum + num;
+  }, 0);
+
+  // 융자 합계
+  const totalLoan = loanItems.reduce((sum, l) => {
+    const num = parseFloat(l.amount.replace(/[^0-9.]/g, "")) || 0;
+    return sum + num;
+  }, 0);
+
+  // 동일 주소 매물에서 호실별 월세 자동 불러오기
+  const loadRoomsFromDB = useCallback(async () => {
+    if (!property.address) return;
+    setLoadingRooms(true);
+    try {
+      const { data } = await supabase
+        .from("properties")
+        .select("unit_number,deposit,monthly")
+        .eq("dong", property.address.split(" ").slice(-2, -1)[0] || "")
+        .eq("lot_number", property.address.split(" ").slice(-1)[0] || "")
+        .eq("status", "active")
+        .order("unit_number", { ascending: true });
+
+      if (data && data.length > 0) {
+        const loaded: RoomRow[] = data.map((r) => ({
+          unit: r.unit_number || "-",
+          deposit: r.deposit || "",
+          monthly: r.monthly || "",
+        }));
+        setRooms(loaded);
+      }
+    } catch (e) {
+      console.error("호실 자동 로드 실패:", e);
+    } finally {
+      setLoadingRooms(false);
+    }
+  }, [property.address]);
 
   const handleSubmit = async () => {
     if (!proposerName.trim() || !proposerPhone.trim()) return;
@@ -461,20 +508,27 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
     try {
       const { data: { session } } = await supabase.auth.getSession();
 
-      // 호실별 내용을 proposal_content에 구조화
+      // 호실별 내용 구조화
       const roomLines = rooms
         .filter(r => r.unit || r.deposit || r.monthly)
         .map(r => `[${r.unit || "-"}호] 보증금 ${r.deposit || "0"}만원 / 월세 ${r.monthly || "0"}만원`)
         .join("\n");
 
+      // 융자 내역 구조화
+      const loanLines = loanItems
+        .filter(l => l.label || l.amount)
+        .map(l => `  - ${l.label || "항목"}: ${l.amount || "0"}만원`)
+        .join("\n");
+
       const fullContent = [
         roomLines && `■ 호실별 임대 조건\n${roomLines}`,
         totalDeposit > 0 && `■ 보증금 합계: ${totalDeposit.toLocaleString()}만원`,
-        loanAmount && `■ 융자금: ${loanAmount}만원`,
+        totalMonthly > 0 && `■ 월세 합계: ${totalMonthly.toLocaleString()}만원`,
+        loanLines && `■ 융자 내역\n${loanLines}`,
+        totalLoan > 0 && `■ 융자 총액: ${totalLoan.toLocaleString()}만원`,
         content && `■ 추가 내용\n${content}`,
       ].filter(Boolean).join("\n\n");
 
-      // 대표 보증금·월세 (첫 번째 유효 행 기준)
       const firstRoom = rooms.find(r => r.deposit || r.monthly);
 
       const { error } = await supabase.from("property_reports").insert({
@@ -526,13 +580,18 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
             {/* 대상 매물 */}
             <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-[10px] text-muted-foreground mb-0.5">임대 제안 대상 매물</p>
+              <p className="text-[10px] text-muted-foreground mb-0.5">임대 제안 대상 건물 주소</p>
               <p className="text-xs font-semibold text-foreground truncate">{property.title}</p>
               <p className="text-[11px] text-muted-foreground">{property.address}</p>
-              <div className="flex gap-3 mt-1.5 text-[11px] text-muted-foreground">
-                <span>현재 보증금: <strong className="text-foreground">{property.deposit}</strong></span>
-                <span>월세: <strong className="text-foreground">{property.monthly}</strong></span>
-              </div>
+              <button
+                type="button"
+                onClick={loadRoomsFromDB}
+                disabled={loadingRooms}
+                className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors"
+                style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
+              >
+                {loadingRooms ? "불러오는 중..." : "🔄 이 주소 등록 매물 자동 불러오기"}
+              </button>
             </div>
 
             {/* 제안자 정보 */}
@@ -568,7 +627,6 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
                 </button>
               </div>
 
-              {/* 헤더 */}
               <div className="grid grid-cols-[60px_1fr_1fr_28px] gap-1.5 mb-1 px-0.5">
                 <span className="text-[10px] font-bold text-muted-foreground text-center">호실</span>
                 <span className="text-[10px] font-bold text-muted-foreground text-center">보증금 (만원)</span>
@@ -579,69 +637,85 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
               <div className="flex flex-col gap-1.5">
                 {rooms.map((row, i) => (
                   <div key={i} className="grid grid-cols-[60px_1fr_1fr_28px] gap-1.5 items-center">
-                    <input
-                      type="text"
-                      placeholder="예) 101"
-                      value={row.unit}
+                    <input type="text" placeholder="101" value={row.unit}
                       onChange={(e) => setRoom(i, "unit", e.target.value)}
                       className="px-2 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 text-center"
                     />
-                    <input
-                      type="text"
-                      placeholder="500"
-                      value={row.deposit}
-                      onChange={(e) => setRoom(i, "deposit", e.target.value)}
-                      className={ic}
-                    />
-                    <input
-                      type="text"
-                      placeholder="50"
-                      value={row.monthly}
-                      onChange={(e) => setRoom(i, "monthly", e.target.value)}
-                      className={ic}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeRoom(i)}
-                      disabled={rooms.length === 1}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-destructive/10"
-                    >
+                    <input type="text" placeholder="500" value={row.deposit}
+                      onChange={(e) => setRoom(i, "deposit", e.target.value)} className={ic} />
+                    <input type="text" placeholder="50" value={row.monthly}
+                      onChange={(e) => setRoom(i, "monthly", e.target.value)} className={ic} />
+                    <button type="button" onClick={() => removeRoom(i)} disabled={rooms.length === 1}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-destructive/10">
                       <X className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                   </div>
                 ))}
               </div>
 
-              {/* 보증금 합계 */}
-              {totalDeposit > 0 && (
-                <div className="mt-2 flex items-center justify-between px-3 py-2 rounded-xl border bg-primary/5"
-                  style={{ borderColor: "hsl(var(--primary) / 0.3)" }}>
-                  <span className="text-xs font-bold text-foreground">보증금 합계</span>
-                  <span className="text-sm font-extrabold text-primary">{totalDeposit.toLocaleString()}만원</span>
+              {/* 합산 요약 */}
+              {(totalDeposit > 0 || totalMonthly > 0) && (
+                <div className="mt-2 rounded-xl border overflow-hidden" style={{ borderColor: "hsl(var(--primary) / 0.3)" }}>
+                  {totalDeposit > 0 && (
+                    <div className="flex items-center justify-between px-3 py-2 bg-primary/5 text-xs">
+                      <span className="font-bold text-foreground">보증금 합계</span>
+                      <span className="font-extrabold text-primary">{totalDeposit.toLocaleString()}만원</span>
+                    </div>
+                  )}
+                  {totalMonthly > 0 && (
+                    <div className="flex items-center justify-between px-3 py-2 bg-primary/5 text-xs border-t" style={{ borderColor: "hsl(var(--primary) / 0.2)" }}>
+                      <span className="font-bold text-foreground">월세 합계</span>
+                      <span className="font-extrabold text-primary">{totalMonthly.toLocaleString()}만원</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* 융자금 */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                <span className="w-4 h-4 rounded text-[9px] font-black flex items-center justify-center" style={{ background: "hsl(0 85% 45%)", color: "#fff" }}>융</span>
-                융자금 (만원)
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="예) 5,000"
-                  value={loanAmount}
-                  onChange={(e) => setLoanAmount(e.target.value)}
-                  className={ic + " pr-10"}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">만원</span>
+            {/* 융자 내역 */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded text-[9px] font-black flex items-center justify-center" style={{ background: "hsl(0 85% 45%)", color: "#fff" }}>융</span>
+                  융자 내역
+                </label>
+                <button type="button" onClick={addLoanItem}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors"
+                  style={{ background: "hsl(0 85% 95%)", color: "hsl(0 85% 45%)" }}>
+                  + 항목 추가
+                </button>
               </div>
-              {loanAmount && (
-                <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
-                  ⚠ 융자금 {loanAmount}만원
-                </p>
+
+              <div className="grid grid-cols-[1fr_120px_28px] gap-1.5 mb-1 px-0.5">
+                <span className="text-[10px] font-bold text-muted-foreground">융자 항목</span>
+                <span className="text-[10px] font-bold text-muted-foreground text-center">금액 (만원)</span>
+                <span />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                {loanItems.map((row, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_120px_28px] gap-1.5 items-center">
+                    <input type="text" placeholder="예) 1금융 근저당" value={row.label}
+                      onChange={(e) => setLoanItem(i, "label", e.target.value)} className={ic} />
+                    <div className="relative">
+                      <input type="text" placeholder="10,000" value={row.amount}
+                        onChange={(e) => setLoanItem(i, "amount", e.target.value)} className={ic + " pr-8"} />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">만</span>
+                    </div>
+                    <button type="button" onClick={() => removeLoanItem(i)} disabled={loanItems.length === 1}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-destructive/10">
+                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {totalLoan > 0 && (
+                <div className="mt-2 flex items-center justify-between px-3 py-2 rounded-xl border text-xs"
+                  style={{ borderColor: "hsl(0 85% 70%)", background: "hsl(0 85% 97%)" }}>
+                  <span className="font-bold" style={{ color: "hsl(0 85% 45%)" }}>융자 총액</span>
+                  <span className="font-extrabold" style={{ color: "hsl(0 85% 45%)" }}>⚠ {totalLoan.toLocaleString()}만원</span>
+                </div>
               )}
             </div>
 
@@ -654,9 +728,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
             {/* 추가 내용 */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-foreground">추가 제안 내용 (선택)</label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+              <textarea value={content} onChange={(e) => setContent(e.target.value)}
                 placeholder="특별 요청사항, 입주 희망일, 업종 등을 자유롭게 작성해주세요."
                 rows={3}
                 className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
@@ -884,7 +956,17 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 정보</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적",   value: (() => { const a = property.area || ""; const m = a.match(/\((\d+)평\)/) ?? a.match(/^(\d+)평/) ?? a.match(/^(\d+)$/); return m ? m[1] + "평" : a.split(" ")[0]; })(), sub: property.area.includes("(") ? property.area.split(" ")[1] : undefined },
+                { icon: <Maximize2 className="w-3.5 h-3.5" />, label: "면적", value: (() => {
+                  const a = property.area || "";
+                  const m = a.match(/\((\d+)평\)/) ?? a.match(/^(\d+)평/) ?? a.match(/^(\d+)$/);
+                  // ㎡ → 평 변환 (1평 ≈ 3.305785㎡)
+                  const sqmMatch = a.match(/(\d+(?:\.\d+)?)\s*㎡/);
+                  if (sqmMatch) {
+                    const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                    return pyong + "평";
+                  }
+                  return m ? m[1] + "평" : a.split(" ")[0];
+                })(), sub: undefined },
                 { icon: <Layers className="w-3.5 h-3.5" />,    label: "해당층", value: property.floor },
                 { icon: <Building2 className="w-3.5 h-3.5" />, label: "건물층", value: property.totalFloors.replace("지상 ", "") },
                 { icon: <Calendar className="w-3.5 h-3.5" />,  label: "준공",   value: property.buildYear.replace("년", ""), sub: "년" },
@@ -892,6 +974,22 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
+                // 대지면적: note에서 파싱, ㎡→평 자동 변환
+                ...((() => {
+                  const m = (property.note ?? "").match(/대지면적[:\s]+([^\n|]+)/);
+                  if (!m) return [];
+                  const raw = m[1].trim();
+                  const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
+                  const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
+                  let display = raw;
+                  if (sqmMatch) {
+                    const pyong = Math.round(parseFloat(sqmMatch[1]) / 3.3058);
+                    display = `${pyong}평 (${sqmMatch[1]}㎡)`;
+                  } else if (!pyongMatch) {
+                    display = raw + "평";
+                  }
+                  return [{ icon: <Maximize2 className="w-3.5 h-3.5" />, label: "대지면적", value: display }];
+                })()),
               ].map(({ icon, label, value, sub }) => (
                 <div key={label} className="bg-muted/50 rounded-lg px-2.5 py-2 flex flex-col gap-0.5 text-center">
                   <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
