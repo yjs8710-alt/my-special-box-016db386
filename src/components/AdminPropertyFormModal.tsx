@@ -350,6 +350,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   earlyExit: false,
   buildingArea: "",
   buildingDong: "",
+  landArea: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
