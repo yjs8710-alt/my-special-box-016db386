@@ -460,6 +460,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingAreaMatch) contacts.buildingArea = buildingAreaMatch[1].trim();
     const buildingDongMatch = noteStr.match(/동\(棟\)[:\s]+([^\n|]+)/);
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
+    const landAreaMatch = noteStr.match(/대지면적[:\s]+([^\n|]+)/);
+    if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
