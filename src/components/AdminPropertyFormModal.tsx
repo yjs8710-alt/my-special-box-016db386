@@ -703,6 +703,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.earlyExit && `중도퇴거: 세입자중도퇴거`,
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
+      form.landArea && `대지면적: ${form.landArea}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
