@@ -1413,6 +1413,7 @@ const AdminDashboard = () => {
       const { error } = await supabase.from("cheongju_contacts")
         .update({
           lot_number: updated.lot_number ?? "",
+          building_dong: updated.building_dong ?? null,
           unit_number: updated.unit_number ?? null,
           phone: updated.phone,
           contact_owner: updated.contact_owner,
@@ -1429,6 +1430,7 @@ const AdminDashboard = () => {
           district: updated.district,
           dong: updated.dong,
           lot_number: updated.lot_number ?? "",
+          building_dong: updated.building_dong ?? null,
           unit_number: updated.unit_number ?? null,
           phone: updated.phone,
           contact_owner: updated.contact_owner,
