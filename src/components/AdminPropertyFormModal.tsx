@@ -937,6 +937,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
+              {/* 집합건물 동(棟) 입력 */}
+              {(form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      동(棟) <span className="text-muted-foreground/60 font-normal">(집합건물 전용)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="예) 101동, A동"
+                      value={form.buildingDong}
+                      onChange={(e) => set("buildingDong", e.target.value)}
+                      className={ic}
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* 건평 */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
