@@ -673,6 +673,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.brokerFee && `중개보수: ${form.brokerFee}`,
       form.earlyExit && `중도퇴거: 세입자중도퇴거`,
       form.buildingArea && `건평: ${form.buildingArea}`,
+      form.buildingDong && `동(棟): ${form.buildingDong}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
