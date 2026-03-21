@@ -556,7 +556,30 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     // 신규 등록 시 + 집합건물이 아닐 때만 주소 기준 연락처 자동 불러오기
     const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
     if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
+    // 동+번지 입력 시 기존 등록 매물에서 총층수·건축년도 자동 조회
+    if (d && lot) fetchBuildingInfoFromDB(d, lot);
   };
+
+  // 기존 매물에서 총층수·건축년도 자동 조회
+  const fetchBuildingInfoFromDB = useCallback(async (dongVal: string, lotVal: string) => {
+    if (!dongVal || !lotVal) return;
+    const { data } = await supabase
+      .from("properties")
+      .select("total_floors,build_year")
+      .eq("dong", dongVal)
+      .eq("lot_number", lotVal)
+      .not("total_floors", "eq", "")
+      .order("registered_date", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      setForm((f) => ({
+        ...f,
+        total_floors: f.total_floors || data.total_floors || f.total_floors,
+        build_year:   f.build_year   || data.build_year   || f.build_year,
+      }));
+    }
+  }, []);
 
   // ── 집합건물/아파트/오피스텔/빌라/연립 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   const handleUnitNumberChange = useCallback((unitVal: string) => {
