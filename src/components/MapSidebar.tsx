@@ -161,8 +161,8 @@ const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => 
     "전자키":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M8 8V6a4 4 0 1 1 8 0v2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><circle cx="12" cy="14.5" r="1.5" fill="currentColor"/></svg>,
     "인터넷":   <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M5 12.55a11 11 0 0 1 14.08 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M1.42 9a16 16 0 0 1 21.16 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><circle cx="12" cy="20" r="1.2" fill="currentColor"/></svg>,
     "주차":     <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M9 17V8h4a3 3 0 0 1 0 6H9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-    "애완동물가능": <svg width={s} height={s} viewBox="0 0 36 36" fill="currentColor"><ellipse cx="18" cy="26" rx="9" ry="5.5"/><ellipse cx="27" cy="17" rx="4.5" ry="4.5"/><ellipse cx="25" cy="10" rx="3" ry="4" transform="rotate(-20 25 10)"/><ellipse cx="31" cy="16" rx="1.8" ry="1.2"/><path d="M9 24 Q5 20 7 14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"/><rect x="14" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/><rect x="21" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/></svg>,
-    "반려동물_가능": <svg width={s} height={s} viewBox="0 0 36 36" fill="currentColor"><ellipse cx="18" cy="26" rx="9" ry="5.5"/><ellipse cx="27" cy="17" rx="4.5" ry="4.5"/><ellipse cx="25" cy="10" rx="3" ry="4" transform="rotate(-20 25 10)"/><ellipse cx="31" cy="16" rx="1.8" ry="1.2"/><path d="M9 24 Q5 20 7 14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"/><rect x="14" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/><rect x="21" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/></svg>,
+    "애완동물가능": <svg width={s} height={s} viewBox="0 0 64 64" fill="currentColor"><ellipse cx="32" cy="44" rx="18" ry="11"/><circle cx="32" cy="26" r="12"/><ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)"/><ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)"/><ellipse cx="25" cy="28" rx="2.5" ry="1.8" fill="white"/><ellipse cx="39" cy="28" rx="2.5" ry="1.8" fill="white"/><circle cx="25.5" cy="28" r="1.2" fill="#333"/><circle cx="39.5" cy="28" r="1.2" fill="#333"/><ellipse cx="32" cy="33" rx="3.5" ry="2"/><rect x="22" y="53" width="6" height="9" rx="3"/><rect x="36" y="53" width="6" height="9" rx="3"/></svg>,
+    "반려동물_가능": <svg width={s} height={s} viewBox="0 0 64 64" fill="currentColor"><ellipse cx="32" cy="44" rx="18" ry="11"/><circle cx="32" cy="26" r="12"/><ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)"/><ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)"/><ellipse cx="25" cy="28" rx="2.5" ry="1.8" fill="white"/><ellipse cx="39" cy="28" rx="2.5" ry="1.8" fill="white"/><circle cx="25.5" cy="28" r="1.2" fill="#333"/><circle cx="39.5" cy="28" r="1.2" fill="#333"/><ellipse cx="32" cy="33" rx="3.5" ry="2"/><rect x="22" y="53" width="6" height="9" rx="3"/><rect x="36" y="53" width="6" height="9" rx="3"/></svg>,
     "애완동물불가": <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
   };
   return icons[name] ?? <span className="text-[10px] leading-none">{name.slice(0, 1)}</span>;
@@ -1285,12 +1285,13 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
             {prop.note.match(/[남북동서]향/)?.[0]}
           </span>
         )}
-        {/* ① 유형 + 층 + 호수를 하나의 네모칸에 */}
+        {/* ① 유형 + 층 + 동 + 호수를 하나의 네모칸에 */}
         {(prop.type || floorShort || prop.unitNumber) && (
           <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
             style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.35)" }}>
             {prop.type && <span>{prop.type}</span>}
             {floorShort && <span className="opacity-80">({floorShort})</span>}
+            {(() => { const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/); return m ? <span className="opacity-80">{m[1].trim()}</span> : null; })()}
             {prop.unitNumber && <span>{prop.unitNumber}</span>}
           </span>
         )}
@@ -1434,7 +1435,7 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           );
 
           // 옵션 배열 기반 아이콘 맵
-          const fatDogIcon = <svg width="14" height="14" viewBox="0 0 36 36" fill="currentColor"><ellipse cx="18" cy="26" rx="9" ry="5.5"/><ellipse cx="27" cy="17" rx="4.5" ry="4.5"/><ellipse cx="25" cy="10" rx="3" ry="4" transform="rotate(-20 25 10)"/><ellipse cx="31" cy="16" rx="1.8" ry="1.2"/><path d="M9 24 Q5 20 7 14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none"/><rect x="14" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/><rect x="21" y="30" width="3.5" height="5" rx="1.5" fill="currentColor"/></svg>;
+          const fatDogIcon = <svg width="15" height="15" viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="44" rx="18" ry="11"/><circle cx="32" cy="26" r="12"/><ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)"/><ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)"/><ellipse cx="24" cy="28" rx="3" ry="2" fill="white"/><ellipse cx="40" cy="28" rx="3" ry="2" fill="white"/><circle cx="25" cy="28" r="1.5" fill="#333"/><circle cx="41" cy="28" r="1.5" fill="#333"/><ellipse cx="32" cy="33" rx="4" ry="2.5"/><path d="M26 37 Q32 41 38 37" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round"/><rect x="22" y="53" width="6" height="9" rx="3"/><rect x="36" y="53" width="6" height="9" rx="3"/></svg>;
 
           const ICON_MAP: Record<string, IconBadge> = {
             "반려동물가능":  { icon: fatDogIcon, title: "반려동물 가능", bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
