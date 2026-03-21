@@ -994,7 +994,7 @@ const ContactEditModal = ({
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h3 className="text-base font-bold text-foreground">
-            {form.district} {form.dong} {form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
+            {form.district} {form.dong} {form.building_dong ? `${form.building_dong} ` : ""}{form.unit_number ? `${form.unit_number}호` : ""} 연락처 {contact?.id ? "수정" : "등록"}
           </h3>
           <button onClick={onClose} className="p-1 rounded-md hover:bg-muted/50 text-muted-foreground">
             <X className="w-4 h-4" />
