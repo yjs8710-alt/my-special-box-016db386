@@ -1107,8 +1107,8 @@ const ContactEditModal = ({
                   const v = isPhone ? formatPhone(e.target.value) : e.target.value;
                   setForm((f) => ({ ...f, [key]: v }));
                   if (isPhone) {
-                    clearTimeout((window as Record<string, unknown>)[`_dupTimer_${key}`] as ReturnType<typeof setTimeout>);
-                    (window as Record<string, unknown>)[`_dupTimer_${key}`] = setTimeout(() => checkDuplicate(key, v), 500);
+                    clearTimeout((window as unknown as Record<string, ReturnType<typeof setTimeout>>)[`_dupTimer_${key}`]);
+                    (window as unknown as Record<string, ReturnType<typeof setTimeout>>)[`_dupTimer_${key}`] = setTimeout(() => checkDuplicate(key, v), 500);
                   }
                 }}
                 placeholder={placeholder}
