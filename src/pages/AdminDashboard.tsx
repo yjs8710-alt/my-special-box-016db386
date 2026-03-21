@@ -1464,10 +1464,9 @@ const AdminDashboard = () => {
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
-      const { error } = await (supabase.from("cheongju_contacts") as unknown as {
-        update: (p: ContactRow) => { eq: (k: string, v: string) => Promise<{ error: unknown }> }
-      }).update(payload).eq("id", updated.id);
-      if (error) { alert("수정 오류: " + (error as Error).message); return; }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("cheongju_contacts").update(payload as any).eq("id", updated.id);
+      if (error) { alert("수정 오류: " + error.message); return; }
     } else {
       const payload: ContactRow = {
         district: updated.district,
