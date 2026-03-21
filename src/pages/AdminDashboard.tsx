@@ -1449,36 +1449,42 @@ const AdminDashboard = () => {
 
   // ─── 연락처 저장 ─────────────────────────────────────────────────────────
   const saveContact = async (updated: CheongJuContact) => {
+    // building_dong은 DB에 추가된 컬럼이지만 types.ts 자동생성 전이므로 unknown 캐스트
+    type ContactRow = Record<string, unknown>;
+
     if (updated.id) {
-      const { error } = await supabase.from("cheongju_contacts")
-        .update({
-          lot_number: updated.lot_number ?? "",
-          building_dong: updated.building_dong ?? null,
-          unit_number: updated.unit_number ?? null,
-          phone: updated.phone,
-          contact_owner: updated.contact_owner,
-          contact_manager: updated.contact_manager,
-          contact_broker: updated.contact_broker,
-          memo: updated.memo,
-          is_visible: updated.is_visible ?? true,
-        })
-        .eq("id", updated.id);
-      if (error) { alert("수정 오류: " + error.message); return; }
+      const payload: ContactRow = {
+        lot_number: updated.lot_number ?? "",
+        building_dong: updated.building_dong ?? null,
+        unit_number: updated.unit_number ?? null,
+        phone: updated.phone,
+        contact_owner: updated.contact_owner ?? null,
+        contact_manager: updated.contact_manager ?? null,
+        contact_broker: updated.contact_broker ?? null,
+        memo: updated.memo ?? null,
+        is_visible: updated.is_visible ?? true,
+      };
+      const { error } = await (supabase.from("cheongju_contacts") as unknown as {
+        update: (p: ContactRow) => { eq: (k: string, v: string) => Promise<{ error: unknown }> }
+      }).update(payload).eq("id", updated.id);
+      if (error) { alert("수정 오류: " + (error as Error).message); return; }
     } else {
+      const payload: ContactRow = {
+        district: updated.district,
+        dong: updated.dong,
+        lot_number: updated.lot_number ?? "",
+        building_dong: updated.building_dong ?? null,
+        unit_number: updated.unit_number ?? null,
+        phone: updated.phone,
+        contact_owner: updated.contact_owner ?? null,
+        contact_manager: updated.contact_manager ?? null,
+        contact_broker: updated.contact_broker ?? null,
+        memo: updated.memo ?? null,
+        is_visible: updated.is_visible ?? true,
+      };
       const { error } = await supabase.from("cheongju_contacts")
-        .upsert({
-          district: updated.district,
-          dong: updated.dong,
-          lot_number: updated.lot_number ?? "",
-          building_dong: updated.building_dong ?? null,
-          unit_number: updated.unit_number ?? null,
-          phone: updated.phone,
-          contact_owner: updated.contact_owner,
-          contact_manager: updated.contact_manager,
-          contact_broker: updated.contact_broker,
-          memo: updated.memo,
-          is_visible: updated.is_visible ?? true,
-        }, { onConflict: "dong,lot_number,unit_number" });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert(payload as any, { onConflict: "dong,lot_number,unit_number" });
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
