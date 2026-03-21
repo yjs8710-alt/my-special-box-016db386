@@ -426,40 +426,69 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
   );
 }
 
-/* ─── 임대제안서 모달 ─── */
+/* ─── 임대제안서 모달 (호실별 보증금·월세 + 합계 + 융자금) ─── */
+interface RoomRow { unit: string; deposit: string; monthly: string }
+
 function RentalProposalModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
-  const [form, setForm] = useState({
-    proposer_name: "",
-    proposer_phone: "",
-    proposer_company: "",
-    proposal_deposit: "",
-    proposal_monthly: "",
-    proposal_period: "",
-    proposal_content: "",
-  });
+  const [proposerName, setProposerName] = useState("");
+  const [proposerPhone, setProposerPhone] = useState("");
+  const [proposerCompany, setProposerCompany] = useState("");
+  const [period, setPeriod] = useState("");
+  const [loanAmount, setLoanAmount] = useState(""); // 융자금
+  const [content, setContent] = useState("");
+  // 호실별 행
+  const [rooms, setRooms] = useState<RoomRow[]>([{ unit: "", deposit: "", monthly: "" }]);
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const ic = "w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
+  const setRoom = (i: number, key: keyof RoomRow, v: string) =>
+    setRooms((r) => r.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
+
+  const addRoom = () => setRooms((r) => [...r, { unit: "", deposit: "", monthly: "" }]);
+  const removeRoom = (i: number) => setRooms((r) => r.filter((_, idx) => idx !== i));
+
+  // 보증금 합계 (숫자만 추출해서 합산)
+  const totalDeposit = rooms.reduce((sum, r) => {
+    const num = parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0;
+    return sum + num;
+  }, 0);
+
   const handleSubmit = async () => {
-    if (!form.proposer_name.trim() || !form.proposer_phone.trim()) return;
+    if (!proposerName.trim() || !proposerPhone.trim()) return;
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+
+      // 호실별 내용을 proposal_content에 구조화
+      const roomLines = rooms
+        .filter(r => r.unit || r.deposit || r.monthly)
+        .map(r => `[${r.unit || "-"}호] 보증금 ${r.deposit || "0"}만원 / 월세 ${r.monthly || "0"}만원`)
+        .join("\n");
+
+      const fullContent = [
+        roomLines && `■ 호실별 임대 조건\n${roomLines}`,
+        totalDeposit > 0 && `■ 보증금 합계: ${totalDeposit.toLocaleString()}만원`,
+        loanAmount && `■ 융자금: ${loanAmount}만원`,
+        content && `■ 추가 내용\n${content}`,
+      ].filter(Boolean).join("\n\n");
+
+      // 대표 보증금·월세 (첫 번째 유효 행 기준)
+      const firstRoom = rooms.find(r => r.deposit || r.monthly);
+
       const { error } = await supabase.from("property_reports").insert({
         property_id: String(property.id),
         property_title: property.title,
         property_address: property.address,
         report_type: "rental_proposal",
-        proposer_name: form.proposer_name.trim(),
-        proposer_phone: form.proposer_phone.trim(),
-        proposer_company: form.proposer_company.trim() || null,
-        proposal_deposit: form.proposal_deposit.trim() || null,
-        proposal_monthly: form.proposal_monthly.trim() || null,
-        proposal_period: form.proposal_period.trim() || null,
-        proposal_content: form.proposal_content.trim() || null,
+        proposer_name: proposerName.trim(),
+        proposer_phone: proposerPhone.trim(),
+        proposer_company: proposerCompany.trim() || null,
+        proposal_deposit: firstRoom?.deposit?.trim() || null,
+        proposal_monthly: firstRoom?.monthly?.trim() || null,
+        proposal_period: period.trim() || null,
+        proposal_content: fullContent || null,
         submitted_by: session?.user?.id ?? null,
       });
       if (error) throw error;
@@ -474,7 +503,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-primary" />
@@ -493,7 +522,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
             <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
           </div>
         ) : (
-          <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
+          <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-5">
+
             {/* 대상 매물 */}
             <div className="rounded-xl border border-border bg-muted/30 p-3">
               <p className="text-[10px] text-muted-foreground mb-0.5">임대 제안 대상 매물</p>
@@ -511,44 +541,122 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
                   <label className="text-[11px] font-semibold text-muted-foreground">이름 *</label>
-                  <input value={form.proposer_name} onChange={(e) => set("proposer_name", e.target.value)} placeholder="홍길동" className={ic} />
+                  <input value={proposerName} onChange={(e) => setProposerName(e.target.value)} placeholder="홍길동" className={ic} />
                 </div>
-                 <div className="flex flex-col gap-1">
-                   <label className="text-[11px] font-semibold text-muted-foreground">연락처 *</label>
-                   <input value={form.proposer_phone} onChange={(e) => set("proposer_phone", formatPhone(e.target.value))} placeholder="010-0000-0000" className={ic} />
-                 </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">연락처 *</label>
+                  <input value={proposerPhone} onChange={(e) => setProposerPhone(formatPhone(e.target.value))} placeholder="010-0000-0000" className={ic} />
+                </div>
               </div>
               <div className="mt-2 flex flex-col gap-1">
                 <label className="text-[11px] font-semibold text-muted-foreground">회사/부동산명 (선택)</label>
-                <input value={form.proposer_company} onChange={(e) => set("proposer_company", e.target.value)} placeholder="예) OO공인중개사" className={ic} />
+                <input value={proposerCompany} onChange={(e) => setProposerCompany(e.target.value)} placeholder="예) OO공인중개사" className={ic} />
               </div>
             </div>
 
-            {/* 제안 조건 */}
+            {/* 호실별 임대 조건 */}
             <div>
-              <p className="text-xs font-bold text-foreground mb-2">제안 임대 조건</p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-muted-foreground">제안 보증금</label>
-                  <input value={form.proposal_deposit} onChange={(e) => set("proposal_deposit", e.target.value)} placeholder="예) 500만원" className={ic} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[11px] font-semibold text-muted-foreground">제안 월세</label>
-                  <input value={form.proposal_monthly} onChange={(e) => set("proposal_monthly", e.target.value)} placeholder="예) 80만원" className={ic} />
-                </div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold text-foreground">호실별 임대 조건</p>
+                <button
+                  type="button"
+                  onClick={addRoom}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors"
+                  style={{ background: "hsl(var(--primary) / 0.1)", color: "hsl(var(--primary))" }}
+                >
+                  + 호실 추가
+                </button>
               </div>
-              <div className="mt-2 flex flex-col gap-1">
-                <label className="text-[11px] font-semibold text-muted-foreground">계약 희망 기간</label>
-                <input value={form.proposal_period} onChange={(e) => set("proposal_period", e.target.value)} placeholder="예) 1년, 2년, 협의" className={ic} />
+
+              {/* 헤더 */}
+              <div className="grid grid-cols-[60px_1fr_1fr_28px] gap-1.5 mb-1 px-0.5">
+                <span className="text-[10px] font-bold text-muted-foreground text-center">호실</span>
+                <span className="text-[10px] font-bold text-muted-foreground text-center">보증금 (만원)</span>
+                <span className="text-[10px] font-bold text-muted-foreground text-center">월세 (만원)</span>
+                <span />
               </div>
+
+              <div className="flex flex-col gap-1.5">
+                {rooms.map((row, i) => (
+                  <div key={i} className="grid grid-cols-[60px_1fr_1fr_28px] gap-1.5 items-center">
+                    <input
+                      type="text"
+                      placeholder="예) 101"
+                      value={row.unit}
+                      onChange={(e) => setRoom(i, "unit", e.target.value)}
+                      className="px-2 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 text-center"
+                    />
+                    <input
+                      type="text"
+                      placeholder="500"
+                      value={row.deposit}
+                      onChange={(e) => setRoom(i, "deposit", e.target.value)}
+                      className={ic}
+                    />
+                    <input
+                      type="text"
+                      placeholder="50"
+                      value={row.monthly}
+                      onChange={(e) => setRoom(i, "monthly", e.target.value)}
+                      className={ic}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeRoom(i)}
+                      disabled={rooms.length === 1}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30 hover:bg-destructive/10"
+                    >
+                      <X className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* 보증금 합계 */}
+              {totalDeposit > 0 && (
+                <div className="mt-2 flex items-center justify-between px-3 py-2 rounded-xl border bg-primary/5"
+                  style={{ borderColor: "hsl(var(--primary) / 0.3)" }}>
+                  <span className="text-xs font-bold text-foreground">보증금 합계</span>
+                  <span className="text-sm font-extrabold text-primary">{totalDeposit.toLocaleString()}만원</span>
+                </div>
+              )}
             </div>
 
-            {/* 제안 내용 */}
+            {/* 융자금 */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded text-[9px] font-black flex items-center justify-center" style={{ background: "hsl(0 85% 45%)", color: "#fff" }}>융</span>
+                융자금 (만원)
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="예) 5,000"
+                  value={loanAmount}
+                  onChange={(e) => setLoanAmount(e.target.value)}
+                  className={ic + " pr-10"}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">만원</span>
+              </div>
+              {loanAmount && (
+                <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
+                  ⚠ 융자금 {loanAmount}만원
+                </p>
+              )}
+            </div>
+
+            {/* 계약 기간 */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">계약 희망 기간</label>
+              <input value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="예) 1년, 2년, 협의" className={ic} />
+            </div>
+
+            {/* 추가 내용 */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-foreground">추가 제안 내용 (선택)</label>
               <textarea
-                value={form.proposal_content}
-                onChange={(e) => set("proposal_content", e.target.value)}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
                 placeholder="특별 요청사항, 입주 희망일, 업종 등을 자유롭게 작성해주세요."
                 rows={3}
                 className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
@@ -557,7 +665,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
             <button
               onClick={handleSubmit}
-              disabled={!form.proposer_name.trim() || !form.proposer_phone.trim() || saving}
+              disabled={!proposerName.trim() || !proposerPhone.trim() || saving}
               className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ background: "hsl(var(--primary))" }}
             >
