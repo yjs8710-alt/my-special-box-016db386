@@ -923,23 +923,21 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               const earlyExit = note.includes("중도퇴거:");
               const vacateDate = property.vacateDate;
 
-              // 매매 타입 판별 — 모든 매매 유형 포함
-              const SALE_TYPES = [
-                "매매","단독매매","건물매매","주택매매","상가주택매매","상가건물매매",
-                "구분상가매매","창고/공장매매","숙박/팬션매매","원룸건물매매",
-                "다가구매매","다세대매매","아파트매매","오피스텔매매","빌라매매","토지매매",
-              ];
-              const isRentType = !SALE_TYPES.includes(property.type)
-                && !property.type.endsWith("매매");
+              // 매매 타입 판별 — type에 "매매" 포함되거나 끝나면 모두 매매
+              const isSaleType = property.type.includes("매매") || property.type.endsWith("매매");
+              const isRentType = !isSaleType;
 
               // 공실여부: 임대 매물일 때만 표시 (매매 타입 전체 제외)
               const rawVacancy = property.availableFrom;
-              const vacancy = isRentType && rawVacancy &&
-                (rawVacancy === "공실" || rawVacancy === "세입자 거주중" || rawVacancy === "세입자")
-                ? rawVacancy : null;
-
-              // "세입자 거주중" / "세입자" → 모두 "세입자"로 표시
-              const vacancyLabel = (vacancy === "세입자 거주중" || vacancy === "세입자") ? "세입자" : (vacancy ?? "");
+              // "거주중", "세입자 거주중", "세입자" → 모두 "세입자"로 통일
+              const normalizeVacancy = (v: string) => {
+                if (v === "거주중" || v === "세입자 거주중" || v === "세입자") return "세입자";
+                if (v === "공실") return "공실";
+                return null;
+              };
+              const vacancyNorm = rawVacancy ? normalizeVacancy(rawVacancy) : null;
+              const vacancy = isRentType && vacancyNorm ? vacancyNorm : null;
+              const vacancyLabel = vacancy ?? "";
 
               const items = [
                 vacancy && { label: "빈방여부", value: vacancyLabel, color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)" },
@@ -987,12 +985,17 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
-                // 대지면적: note에서 파싱 (저장 형식: "대지면적: XXX")
+                // 대지면적: note 또는 area 필드에서 파싱
                 ...((() => {
                   const noteField = property.note ?? "";
-                  // 우선순위: "대지면적:" (정확 매칭) > area 필드
-                  const m = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/);
-                  const raw = m ? m[1].trim() : null;
+                  const areaField = property.area ?? "";
+                  // 1순위: note에서 "대지면적:" 또는 "대지:" 패턴
+                  const mNote = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/)
+                    ?? noteField.match(/대지\s*[:：]\s*([^\n|]+)/);
+                  // 2순위: area 필드에서 "대지 XXX" 패턴
+                  const mArea = !mNote ? areaField.match(/대지\s+([^\s/,]+)/) : null;
+                  // 3순위: area 필드 전체가 숫자(평수)인 경우 — 단, 면적 그리드와 중복되지 않도록 "대지" 키워드 있을 때만
+                  const raw = mNote ? mNote[1].trim() : mArea ? mArea[1].trim() : null;
                   if (!raw) return [];
                   const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
                   const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
