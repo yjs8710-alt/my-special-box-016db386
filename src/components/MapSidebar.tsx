@@ -1577,8 +1577,9 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
         const lhVal = lhMatch?.[1]?.trim();
         const cleanFee = cleanMatch?.[1]?.trim();
         const brokerFee = brokerMatch?.[1]?.trim();
-        // 공실 여부: available_from 필드
-        const vacancy = prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중")
+        // 공실 여부: 임대 타입만 표시 (매매 제외)
+        const isSalePropCard = prop.type?.includes("매매");
+        const vacancy = !isSalePropCard && prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중")
           ? prop.availableFrom : null;
 
         const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
