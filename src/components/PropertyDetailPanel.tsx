@@ -781,6 +781,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <Car className="w-3.5 h-3.5" />,       label: "주차",   value: property.parking },
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
+                ...((() => { const m = (property.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동(棟)", value: m[1].trim() }] : []; })()),
               ].map(({ icon, label, value, sub }) => (
                 <div key={label} className="bg-muted/50 rounded-lg px-2.5 py-2 flex flex-col gap-0.5 text-center">
                   <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
