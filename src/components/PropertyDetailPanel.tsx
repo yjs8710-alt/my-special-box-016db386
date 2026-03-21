@@ -726,18 +726,9 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
+
+
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
-
-  const addRoom = () => setRooms((r) => [...r, { unit: "", deposit: "", monthly: "" }]);
-  const removeRoom = (i: number) => setRooms((r) => r.filter((_, idx) => idx !== i));
-
-  // 보증금 합계 (숫자만 추출해서 합산)
-  const totalDeposit = rooms.reduce((sum, r) => {
-    const num = parseFloat(r.deposit.replace(/[^0-9.]/g, "")) || 0;
-    return sum + num;
-  }, 0);
-
-  const handleSubmit = async () => {
     if (!proposerName.trim() || !proposerPhone.trim()) return;
     setSaving(true);
     try {
