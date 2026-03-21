@@ -985,12 +985,17 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 { icon: <ArrowUpRight className="w-3.5 h-3.5" />, label: "엘리베이터", value: property.elevator ? "있음" : "없음" },
                 ...((() => { const m = (property.note ?? "").match(/건평[:\s]+([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "건평", value: m[1].trim() }] : []; })()),
                 ...((() => { const m = (property.note ?? "").match(/동[(\（]棟[)\）][:\s：\s]*([^\n|]+)/); return m ? [{ icon: <Building2 className="w-3.5 h-3.5" />, label: "동", value: m[1].trim() }] : []; })()),
-                // 대지면적: note에서 파싱 (저장 형식: "대지면적: XXX")
+                // 대지면적: note 또는 area 필드에서 파싱
                 ...((() => {
                   const noteField = property.note ?? "";
-                  // 우선순위: "대지면적:" (정확 매칭) > area 필드
-                  const m = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/);
-                  const raw = m ? m[1].trim() : null;
+                  const areaField = property.area ?? "";
+                  // 1순위: note에서 "대지면적:" 또는 "대지:" 패턴
+                  const mNote = noteField.match(/대지면적\s*[:：]\s*([^\n|]+)/)
+                    ?? noteField.match(/대지\s*[:：]\s*([^\n|]+)/);
+                  // 2순위: area 필드에서 "대지 XXX" 패턴
+                  const mArea = !mNote ? areaField.match(/대지\s+([^\s/,]+)/) : null;
+                  // 3순위: area 필드 전체가 숫자(평수)인 경우 — 단, 면적 그리드와 중복되지 않도록 "대지" 키워드 있을 때만
+                  const raw = mNote ? mNote[1].trim() : mArea ? mArea[1].trim() : null;
                   if (!raw) return [];
                   const sqmMatch = raw.match(/(\d+(?:\.\d+)?)\s*㎡/);
                   const pyongMatch = raw.match(/(\d+(?:\.\d+)?)\s*평/);
