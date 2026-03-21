@@ -1106,43 +1106,49 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           {/* Divider */}
           <div className="h-2 bg-muted/50 my-2" />
 
-          {/* 건축물대장 */}
+          {/* 건축물대장 / 토지대장 바로가기 */}
           <div className="px-4 pb-3">
-            <button onClick={() => setBuildingOpen(!buildingOpen)} className="w-full flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-3.5 h-3.5 text-primary" />
-                </div>
-                <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물대장</span>
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-primary" />
               </div>
-              {buildingOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-            </button>
-
-            {buildingOpen && (
-              <div className="mt-2 rounded-xl border border-border overflow-hidden">
-                <div className="px-3 py-2.5 bg-muted/40 border-b border-border">
-                  <p className="text-[10px] text-muted-foreground font-medium mb-0.5">조회 주소</p>
-                  <p className="text-xs font-semibold text-foreground">{property.address}</p>
+              <span className="text-xs font-bold text-foreground uppercase tracking-wide">건축물 / 토지대장</span>
+            </div>
+            {/* 조회 주소 표시 */}
+            <div className="mb-2.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/30">
+              <p className="text-[10px] text-muted-foreground">조회 주소</p>
+              <p className="text-xs font-semibold text-foreground">{property.address}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={eaisUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all hover:shadow-sm"
+                style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.12)" }}>
+                  <FileText className="w-4 h-4 text-primary" />
                 </div>
-                <div className="px-3 py-3 grid grid-cols-2 gap-y-2 gap-x-4 bg-white text-xs">
-                  <div><p className="text-[10px] text-muted-foreground">건물 유형</p><p className="font-semibold text-foreground">{property.type}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">준공연도</p><p className="font-semibold text-foreground">{property.buildYear}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">총 층수</p><p className="font-semibold text-foreground">{property.totalFloors}</p></div>
-                  <div><p className="text-[10px] text-muted-foreground">엘리베이터</p><p className="font-semibold text-foreground">{property.elevator ? "있음" : "없음"}</p></div>
+                <span className="text-[11px] font-extrabold text-primary text-center leading-tight">건축물대장</span>
+                <span className="text-[9px] text-muted-foreground text-center">세움터 바로가기</span>
+                <ExternalLink className="w-3 h-3 text-primary/60" />
+              </a>
+              <a
+                href={landRegisterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all hover:shadow-sm"
+                style={{ borderColor: "hsl(var(--chart-2) / 0.4)", background: "hsl(var(--chart-2) / 0.04)" }}
+              >
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--chart-2) / 0.12)" }}>
+                  <FileText className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
                 </div>
-                <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
-                  <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
-                  <div className="flex gap-2">
-                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />세움터 열람
-                    </a>
-                    <a href={naverBuildingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-accent text-white text-[11px] font-bold hover:bg-accent/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />네이버 건물정보
-                    </a>
-                  </div>
-                </div>
-              </div>
-            )}
+                <span className="text-[11px] font-extrabold text-center leading-tight" style={{ color: "hsl(var(--chart-2))" }}>토지대장</span>
+                <span className="text-[9px] text-muted-foreground text-center">정부24 바로가기</span>
+                <ExternalLink className="w-3 h-3" style={{ color: "hsl(var(--chart-2) / 0.6)" }} />
+              </a>
+            </div>
           </div>
 
           {/* Divider */}
