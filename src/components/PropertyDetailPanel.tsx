@@ -735,13 +735,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 }
 
 
-function RentalProposalModal({ property, onClose }: { property: MapProperty; onClose: () => void }) {
-  const [rooms, setRooms] = useState<RoomRow[]>([{ unit: "", deposit: "", monthly: "", status: "임대중" }]);
-  const [mortgages, setMortgages] = useState<MortgageRow[]>([{ creditor: "", amount: "", memo: "" }]);
-  const [memo, setMemo] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
-  const [loadingUnits, setLoadingUnits] = useState(true);
+
 
   const ic = "w-full px-2 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
 
