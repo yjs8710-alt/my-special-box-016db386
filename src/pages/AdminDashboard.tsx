@@ -1042,16 +1042,28 @@ const ContactEditModal = ({
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-muted-foreground">
-                호수
+                동(棟)
                 <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
               </label>
               <Input
-                value={form.unit_number ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
-                placeholder="예: 101호"
+                value={form.building_dong ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, building_dong: e.target.value || null }))}
+                placeholder="예: 101동"
                 className="h-9 text-sm"
               />
             </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground">
+              호수
+              <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+            </label>
+            <Input
+              value={form.unit_number ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
+              placeholder="예: 301호"
+              className="h-9 text-sm"
+            />
           </div>
           {[
             { key: "phone", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
