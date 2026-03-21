@@ -725,12 +725,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
 
 
 
+
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
-
-  const ic = "w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/20";
-
-  const setRoom = (i: number, key: keyof RoomRow, v: string) =>
-    setRooms((r) => r.map((row, idx) => idx === i ? { ...row, [key]: v } : row));
 
   const addRoom = () => setRooms((r) => [...r, { unit: "", deposit: "", monthly: "" }]);
   const removeRoom = (i: number) => setRooms((r) => r.filter((_, idx) => idx !== i));
