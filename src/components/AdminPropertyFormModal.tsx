@@ -971,6 +971,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="rounded-xl border-2 p-3 flex flex-col gap-3"
                   style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}>
                   <p className="text-xs font-extrabold text-primary">🏢 건물 기본 정보</p>
+                  {/* 건물명 — 매매 필수 강조 */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-muted-foreground">건물명 <span className="text-primary font-bold">*</span></label>
+                    <input type="text" placeholder="예) 복대프라자, OO빌딩" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1">
                       <label className="text-xs font-semibold text-muted-foreground">전체 층수 <span className="text-primary">*</span></label>
@@ -1150,59 +1155,61 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </Section>
 
-              {/* 공실 여부 */}
-              <Section label="공실여부">
-                <div className="flex gap-3">
-                  {VACANCY_TYPES.map((t) => (
-                    <button key={t} type="button" onClick={() => set("available_from", t)}
-                      className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                        form.available_from === t
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background text-foreground border-border hover:border-primary/50"
-                      }`}>{t}</button>
-                  ))}
-                </div>
+              {/* 공실 여부 — 매매 타입일 때 숨김 */}
+              {form.tradeType !== "매매" && (
+                <Section label="공실여부">
+                  <div className="flex gap-3">
+                    {VACANCY_TYPES.map((t) => (
+                      <button key={t} type="button" onClick={() => set("available_from", t)}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
+                          form.available_from === t
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground border-border hover:border-primary/50"
+                        }`}>{t}</button>
+                    ))}
+                  </div>
 
-                {/* 세입자 중도퇴거 체크박스 — 항상 표시 */}
-                <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-xl border transition-all"
-                  style={{
-                    background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
-                    borderColor: form.earlyExit ? "hsl(0 85% 70%)" : "hsl(var(--border))",
-                  }}>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer w-full" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
-                    <input type="checkbox" checked={form.earlyExit}
-                      onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
-                    <span className={`font-semibold ${form.earlyExit ? "text-[hsl(0_85%_45%)]" : ""}`}>세입자 중도퇴거</span>
-                    {form.earlyExit && (
-                      <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
-                        style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
-                        중도퇴거
-                      </span>
+                  {/* 세입자 중도퇴거 체크박스 */}
+                  <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-xl border transition-all"
+                    style={{
+                      background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
+                      borderColor: form.earlyExit ? "hsl(0 85% 70%)" : "hsl(var(--border))",
+                    }}>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer w-full" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
+                      <input type="checkbox" checked={form.earlyExit}
+                        onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
+                      <span className={`font-semibold ${form.earlyExit ? "text-[hsl(0_85%_45%)]" : ""}`}>세입자 중도퇴거</span>
+                      {form.earlyExit && (
+                        <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
+                          style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
+                          중도퇴거
+                        </span>
+                      )}
+                    </label>
+                  </div>
+
+                  {/* 퇴거 예정일 */}
+                  <div className="flex flex-col gap-1 mt-1">
+                    <label className="text-xs font-semibold text-muted-foreground">
+                      퇴거 예정일
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground/70">(예: 2025.03.15)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="예) 2025.03.15"
+                      value={form.vacate_date ?? ""}
+                      onChange={(e) => set("vacate_date", e.target.value)}
+                      className={ic}
+                      style={form.vacate_date ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
+                    />
+                    {form.vacate_date && (
+                      <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
+                        🚪 퇴거 예정: {form.vacate_date}
+                      </p>
                     )}
-                  </label>
-                </div>
-
-                {/* 퇴거 예정일 — 항상 표시 */}
-                <div className="flex flex-col gap-1 mt-1">
-                  <label className="text-xs font-semibold text-muted-foreground">
-                    퇴거 예정일
-                    <span className="ml-1 text-[10px] font-normal text-muted-foreground/70">(예: 2025.03.15)</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="예) 2025.03.15"
-                    value={form.vacate_date ?? ""}
-                    onChange={(e) => set("vacate_date", e.target.value)}
-                    className={ic}
-                    style={form.vacate_date ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
-                  />
-                  {form.vacate_date && (
-                    <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
-                      🚪 퇴거 예정: {form.vacate_date}
-                    </p>
-                  )}
-                </div>
-              </Section>
+                  </div>
+                </Section>
+              )}
 
               {/* 금액 입력 */}
               <Section label="금액 입력">
