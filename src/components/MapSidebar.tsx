@@ -1008,10 +1008,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
   const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
   const handlePrint = () => window.print();
 
-  // 같은 건물(buildingName 또는 title 기준)의 모든 호실
-  const buildingKey = prop.buildingName ?? prop.title;
+  // 같은 주소(address)의 모든 호실 — 매매 타입 제외
   const sameBuilding = allProperties.filter(
-    p => (p.buildingName ?? p.title) === buildingKey
+    p => p.address === prop.address && !p.type.includes("매매")
   ).sort((a, b) => (a.unitNumber ?? "").localeCompare(b.unitNumber ?? "", "ko"));
 
   // 건물 현황은 첫 번째 매물(또는 현재 매물)로
