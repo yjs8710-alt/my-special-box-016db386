@@ -673,33 +673,35 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
       </Section>
 
-      {/* 건물이름 - 토지(detailType/buildingType)/건물매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.buildingType !== "토지" && (
+      {/* 건물이름 - 토지/건물매매/단독매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.detailType !== "단독매매" && form.buildingType !== "토지" && (
         <Section label="건물이름">
           <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
         </Section>
       )}
 
       {/* 층수 / 호수 / 평수 */}
-      {form.detailType === "건물매매" ? (
+      {(form.detailType === "건물매매" || form.detailType === "단독매매") ? (
         <>
-          {/* 건물매매: 건물 유형 */}
-          <Section label="건물 유형">
-            <div className="flex gap-4 flex-wrap">
-              {BUILDING_SALE_TYPES.map((t) => (
-                <Radio key={t} checked={form.buildingSaleType === t} onClick={() => set("buildingSaleType", t)}>{t}</Radio>
-              ))}
-            </div>
-          </Section>
-          {/* 건물매매: 대지·건평 */}
+          {/* 건물매매/단독매매: 건물 유형 */}
+          {form.detailType === "건물매매" && (
+            <Section label="건물 유형">
+              <div className="flex gap-4 flex-wrap">
+                {BUILDING_SALE_TYPES.map((t) => (
+                  <Radio key={t} checked={form.buildingSaleType === t} onClick={() => set("buildingSaleType", t)}>{t}</Radio>
+                ))}
+              </div>
+            </Section>
+          )}
+          {/* 건물매매/단독매매: 대지·건평 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">대지 (평)</label>
-              <input type="text" placeholder="예) 100평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic(false)} />
+              <input type="text" placeholder="예) 100" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic(false)} />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">건평</label>
-              <input type="text" placeholder="예) 80평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic(false)} />
+              <input type="text" placeholder="예) 80" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic(false)} />
             </div>
           </div>
         </>
