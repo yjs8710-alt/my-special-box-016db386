@@ -614,6 +614,103 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
   );
 };
 
+/* ── DealCompleteModal ── */
+interface DealCompleteModalProps { prop: MapProperty; onClose: () => void; }
+const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
+  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
+  const [memo, setMemo] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = prop.dbId || String(prop.id);
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: propertyId,
+        property_title: prop.title || prop.address,
+        property_address: prop.address,
+        report_type: "deal_complete",
+        deal_date: dealDate,
+        deal_memo: memo.trim() || null,
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setDone(true);
+    } catch (e) {
+      console.error("거래완료 저장 실패:", e);
+      alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ width: "min(400px, 92vw)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+            <h3 className="text-sm font-bold text-foreground">거래 완료 처리</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        {done ? (
+          <div className="p-8 flex flex-col items-center gap-3 text-center">
+            <CheckCircle className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
+            <p className="text-sm font-bold text-foreground">거래완료가 접수되었습니다</p>
+            <p className="text-xs text-muted-foreground">관리자가 확인 후 매물 상태를 변경합니다.</p>
+            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+          </div>
+        ) : (
+          <div className="p-5 flex flex-col gap-4">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
+              <p className="text-xs font-semibold text-foreground truncate">{prop.title}</p>
+              <p className="text-[11px] text-muted-foreground">{prop.address}</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">거래 완료일</label>
+              <input
+                type="date"
+                value={dealDate}
+                onChange={e => setDealDate(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">메모 (선택)</label>
+              <textarea
+                value={memo}
+                onChange={e => setMemo(e.target.value)}
+                placeholder="특이사항이 있다면 입력하세요."
+                rows={3}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: "hsl(var(--chart-2))" }}
+            >
+              {saving ? "처리 중..." : "거래완료 접수"}
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
 /* ── PhotoUploadModal ── */
 interface PhotoUploadModalProps {
   prop: MapProperty;
