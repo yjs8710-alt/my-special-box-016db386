@@ -115,8 +115,10 @@ interface FormState {
   floor: string;
   unitNo: string;
   area: string;
-  landArea: string;      // 건물매매: 대지(평)
-  buildingArea: string;  // 건물매매: 건평
+  landArea: string;      // 매매: 대지(평)
+  buildingArea: string;  // 매매: 건평
+  totalFloors: string;   // 매매: 전체 층수
+  buildYear: string;     // 매매: 건축년도
   buildingSaleType: BuildingSaleType; // 건물매매: 일반건물/집합건물/토지
   options: string[];
   facilities: string[];
