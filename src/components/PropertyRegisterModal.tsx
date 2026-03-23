@@ -637,16 +637,29 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         </div>
       </Section>
 
+
       {/* 세부 종류 - 매물종류 토지 선택 시 숨김 */}
       {form.buildingType !== "토지" && (
         <Section label="세부 종류" error={errors.detailType}>
-          <div className="flex flex-wrap gap-x-4 gap-y-2.5">
-            {DETAIL_TYPES.map((t) => (
-              <Radio key={t} checked={form.detailType === t} onClick={() => set("detailType", t)}>{t}</Radio>
-            ))}
-          </div>
+          {PROPERTY_TYPE_GROUPS_REG.map(({ group, types }) => (
+            <div key={group} className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
+              <div className="flex flex-wrap gap-1.5">
+                {types.map((t) => (
+                  <button key={t} type="button" onClick={() => set("detailType", t)}
+                    className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                    style={form.detailType === t
+                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </Section>
       )}
+
 
       {/* 주소 입력 */}
       <Section label="주소 입력">
