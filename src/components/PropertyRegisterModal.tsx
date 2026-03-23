@@ -49,7 +49,7 @@ const DETAIL_TYPES = [
   "주인세대","고시원","다가구","단독주택",
   "아파트","오피스텔","빌라","연립","다세대",
   "상가","사무실","공장·창고","토지",
-  "건물매매","단독매매",
+  "건물매매","단독매매","창고/공장매매",
 ] as const;
 
 const BUILDING_SALE_TYPES = ["일반건물","집합건물","토지"] as const;
@@ -379,7 +379,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       form.contactManager && `관리인:${form.contactManager}`,
     ].filter(Boolean).join("|");
 
-    const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매";
+    const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매";
     const isCommercialLease = ["상가","사무실","공장·창고"].includes(form.detailType);
 
     // 임대 방식별 금액 정리 (월세/반전세/전세 복수 가능)
@@ -673,15 +673,15 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
       </Section>
 
-      {/* 건물이름 - 토지/건물매매/단독매매 제외 */}
-      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.detailType !== "단독매매" && form.buildingType !== "토지" && (
+      {/* 건물이름 - 토지/건물매매/단독매매/창고/공장매매 제외 */}
+      {form.detailType !== "토지" && form.detailType !== "건물매매" && form.detailType !== "단독매매" && form.detailType !== "창고/공장매매" && form.buildingType !== "토지" && (
         <Section label="건물이름">
           <input type="text" placeholder="건물 이름 (선택)" value={form.buildingName} onChange={(e) => set("buildingName", e.target.value)} className={ic(false)} />
         </Section>
       )}
 
       {/* 층수 / 호수 / 평수 */}
-      {(form.detailType === "건물매매" || form.detailType === "단독매매") ? (
+      {(form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매") ? (
         <>
           {/* 건물매매/단독매매: 건물 유형 */}
           {form.detailType === "건물매매" && (
@@ -752,7 +752,7 @@ function Step2({
   errors: Record<string, string>;
 }) {
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
-  const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매";
+  const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매";
   const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
   const showRoomOptions = !isLand && !isBuildingSale && !(isCommercial && form.tradeType === "매매");
   const showFacilities = !isLand && !isBuildingSale;
