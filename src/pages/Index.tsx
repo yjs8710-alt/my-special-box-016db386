@@ -22,10 +22,10 @@ const Index = () => {
       ...dbProperties,
       ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id) && !hiddenMockIds.has(p.id)),
     ];
-    // 최신 등록순 정렬
+    // 최근 확인일순 정렬 (확인일 없으면 등록일 fallback)
     return merged.sort((a, b) => {
-      const da = a.registeredDate ?? "";
-      const db2 = b.registeredDate ?? "";
+      const da = a.checkedDate ?? a.registeredDate ?? "";
+      const db2 = b.checkedDate ?? b.registeredDate ?? "";
       return da > db2 ? -1 : da < db2 ? 1 : 0;
     });
   }, [dbProperties, hiddenMockIds]);
