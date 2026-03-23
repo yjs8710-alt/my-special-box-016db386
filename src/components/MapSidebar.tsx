@@ -532,8 +532,7 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
             </div>
             <p className="text-sm font-bold text-foreground">제보가 접수되었습니다</p>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              이메일 앱이 열리면 전송을 완료해 주세요.<br />
-              제보 내용은 이 기기에도 저장되었습니다.
+              관리자가 검토 후 처리할 예정입니다.
             </p>
             <button
               onClick={onClose}
