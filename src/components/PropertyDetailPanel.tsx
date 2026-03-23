@@ -383,7 +383,10 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
             <CheckCircle2 className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
             <p className="text-sm font-bold text-foreground">거래완료가 접수되었습니다</p>
             <p className="text-xs text-muted-foreground">관리자가 확인 후 매물 상태를 변경합니다.</p>
-            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+            <div className="flex gap-2 mt-2">
+              <button onClick={onClose} className="px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+              <a href="/admin?tab=reports" className="px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--chart-2))" }}>관리자 페이지에서 확인</a>
+            </div>
           </div>
         ) : (
           <div className="p-5 flex flex-col gap-4">

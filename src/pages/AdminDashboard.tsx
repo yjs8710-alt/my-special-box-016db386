@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { formatPhone } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, MessageSquare,
   LogOut, Home, CheckCircle2, XCircle, Clock,
@@ -1100,7 +1100,8 @@ const ContactEditModal = ({
 // ─── Main Component ──────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("dashboard");
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(() => searchParams.get("tab") ?? "dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
@@ -1571,6 +1572,9 @@ const AdminDashboard = () => {
             {label}
             {key === "members" && pendingCount > 0 && (
               <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{pendingCount}</span>
+            )}
+            {key === "reports" && reports.filter((r) => r.status === "pending").length > 0 && (
+              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{reports.filter((r) => r.status === "pending").length}</span>
             )}
             {key === "community" && reportedPosts > 0 && (
               <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>신고 {reportedPosts}</span>
