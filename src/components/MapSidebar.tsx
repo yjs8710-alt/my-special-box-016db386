@@ -2429,7 +2429,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
               {/* 인터넷등기소 */}
               <a
-                href="https://www.iros.go.kr"
+                href={`https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(pinnedAddress ?? "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="toolbar-btn"
@@ -2440,18 +2440,18 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               </a>
               {/* 정부24 */}
               <a
-                href="https://www.gov.kr"
+                href={`https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(pinnedAddress ?? "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="toolbar-btn"
-                title="정부24"
+                title="정부24 토지대장"
               >
                 <ExternalLink className="w-2.5 h-2.5" />
                 정부24
               </a>
               {/* 토지e음 */}
               <a
-                href="https://www.eum.go.kr"
+                href={`https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(pinnedAddress ?? "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="toolbar-btn"
