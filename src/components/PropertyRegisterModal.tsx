@@ -799,8 +799,12 @@ function Step2({
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
   const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
-  const showRoomOptions = !isLand && !isBuildingSale && !(isCommercial && form.tradeType === "매매");
+  // 상가 임대류 및 토지: 반려동물·옵션·부가시설 숨김
+  const hideResidentialOptions = isLand || isBuildingSale || isCommercial;
+  const showRoomOptions = !hideResidentialOptions;
   const showFacilities = !isLand && !isBuildingSale;
+  // 토지 임대: 방향도 숨김
+  const showDirection = !isLand && !isBuildingSale;
 
   const toggleFacility = (f: string) => {
     const cur = form.facilities;
