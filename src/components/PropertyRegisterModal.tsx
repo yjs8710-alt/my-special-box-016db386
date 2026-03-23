@@ -155,6 +155,10 @@ interface FormState {
   expose: boolean;
   allowAddressView: boolean;
   images: string[];
+  elevator: boolean;
+  isNew: boolean;
+  isHot: boolean;
+  buildingMemo: string;
 }
 
 const INITIAL: FormState = {
@@ -180,6 +184,7 @@ const INITIAL: FormState = {
   earlyExit: false,
   expose: true, allowAddressView: false,
   images: [],
+  elevator: false, isNew: false, isHot: false, buildingMemo: "",
 };
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
@@ -446,12 +451,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       monthly: mainMonthly,
       manage_fee: form.managementFee,
       parking: "",
-      elevator: false,
       available_from: form.vacancy || "",
       total_floors: "",
       build_year: "",
       description: form.description,
       room_memo: form.myMemo || null,
+      building_memo: form.buildingMemo || null,
       building_password: form.buildingPassword || null,
       room_password: form.roomPassword || null,
       options: [
@@ -463,8 +468,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       views: 0,
       lat,
       lng,
-      is_new: true,
-      is_hot: false,
+      is_new: form.isNew,
+      is_hot: form.isHot,
+      elevator: form.elevator,
       status: "active" as const,
       registered_date: new Date().toISOString().split("T")[0],
       agent_name: myAgentName || contactParts,
@@ -890,8 +896,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 방향 - 토지/매매/건물매매 제외 */}
-      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
+      {/* 방향 - 토지/건물매매 제외 */}
+      {!isLand && !isBuildingSale && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
@@ -924,7 +930,32 @@ function Step2({
             ))}
           </div>
 
-          {/* 세입자 중도퇴거 — 항상 표시 */}
+          {/* 단기가능 체크박스 */}
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl border transition-all"
+            style={{
+              background: form.options.includes("단기가능") ? "hsl(217 91% 97%)" : "hsl(var(--muted)/0.3)",
+              borderColor: form.options.includes("단기가능") ? "hsl(217 91% 65%)" : "hsl(var(--border))",
+            }}>
+            <label className="flex items-center gap-2 text-sm cursor-pointer w-full"
+              style={{ color: form.options.includes("단기가능") ? "hsl(217 91% 40%)" : undefined }}>
+              <input type="checkbox"
+                checked={form.options.includes("단기가능")}
+                onChange={(e) => {
+                  const cur = form.options;
+                  set("options", e.target.checked ? [...cur, "단기가능"] : cur.filter((o) => o !== "단기가능"));
+                }}
+                className="w-4 h-4 accent-primary" />
+              <span className="font-semibold">단기 가능</span>
+              {form.options.includes("단기가능") && (
+                <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
+                  style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                  단기가능
+                </span>
+              )}
+            </label>
+          </div>
+
+          {/* 세입자 중도퇴거 */}
           <div className="flex items-center gap-3 mt-2 px-3 py-2.5 rounded-xl border transition-all"
             style={{
               background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
@@ -1159,15 +1190,37 @@ function Step2({
         </Section>
       )}
 
-      {/* 내 메모 */}
-      <Section label="내 메모">
-        <textarea
-          placeholder="관리용 메모 (외부에 노출되지 않음)"
-          value={form.myMemo}
-          onChange={(e) => set("myMemo", e.target.value)}
-          rows={2}
-          className={ic(false) + " resize-none"}
-        />
+      {/* 체크박스 옵션 */}
+      <div className="flex gap-6 flex-wrap">
+        {[
+          { key: "elevator" as const, label: "엘리베이터" },
+          { key: "isNew" as const, label: "신규 매물" },
+          { key: "isHot" as const, label: "인기 매물" },
+        ].map(({ key, label }) => (
+          <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+            <input type="checkbox"
+              checked={form[key] as boolean}
+              onChange={(e) => set(key, e.target.checked)}
+              className="w-4 h-4 accent-primary" />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      {/* 메모 */}
+      <Section label="메모">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">건물 메모</label>
+            <textarea rows={2} value={form.buildingMemo} onChange={(e) => set("buildingMemo", e.target.value)}
+              className={ic(false) + " resize-none"} placeholder="건물 관련 메모" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">방 메모 (내 메모)</label>
+            <textarea rows={2} value={form.myMemo} onChange={(e) => set("myMemo", e.target.value)}
+              className={ic(false) + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
+          </div>
+        </div>
       </Section>
     </div>
   );
