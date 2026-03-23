@@ -1148,7 +1148,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               {!SALE_TYPES.includes(form.type) && form.buildingType !== "토지" && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
+                  <label className="text-xs font-semibold text-muted-foreground">호실 비번</label>
                   <input type="text" placeholder="방 비밀번호" value={form.room_password ?? ""} onChange={(e) => set("room_password", e.target.value)} className={ic} />
                 </div>
                 <div className="flex flex-col gap-1">
