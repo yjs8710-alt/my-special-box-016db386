@@ -508,6 +508,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 창고/공장매매: 층수·호수·평수·방비번·관리비·청소비·권리금 제외, 대지·건평 표시
+  const isWarehouseSale = form.type === "창고/공장매매";
+
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
@@ -957,7 +960,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              {/* 층수 / 호수 / 평수 */}
+              {/* 층수 / 호수 / 평수 — 창고/공장매매 제외 */}
+              {!isWarehouseSale && (
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
@@ -986,6 +990,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic} />
                 </div>
               </div>
+              )}
 
               {/* 집합건물 동(棟) 입력 */}
               {(form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
@@ -1367,7 +1372,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     )}
                   </div>
                 )}
-                {/* 관리비 + 청소비 + 중개보수 */}
+                {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
+                {!isWarehouseSale && (
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
                     <div className="col-span-2">
@@ -1383,6 +1389,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
                   </div>
                 </div>
+                )}
+                {/* 창고/공장매매: 중개보수만 표시 */}
+                {isWarehouseSale && (
+                <div className="grid grid-cols-1 gap-3 mt-1">
+                  <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
+                </div>
+                )}
               </Section>
 
               {/* LH 전세대출 — 매매 타입 제외 */}
