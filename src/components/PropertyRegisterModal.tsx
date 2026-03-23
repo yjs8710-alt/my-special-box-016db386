@@ -681,7 +681,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
       )}
 
       {/* 층수 / 호수 / 평수 */}
-      {(form.detailType === "건물매매" || form.detailType === "단독매매") ? (
+      {(form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매") ? (
         <>
           {/* 건물매매/단독매매: 건물 유형 */}
           {form.detailType === "건물매매" && (
