@@ -470,32 +470,30 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
   const [category, setCategory] = useState(ERROR_CATEGORIES[0]);
   const [text, setText] = useState("");
   const [sent, setSent] = useState(false);
-  const ADMIN_EMAIL = "admin@yourdomain.com"; // 관리자 이메일로 변경하세요
+  const [saving, setSaving] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim()) return;
-
-    // 로컬 저장 (오류 이력)
-    const key = `error_reports`;
-    const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
-    const report = {
-      id: Date.now(),
-      propId: prop.id,
-      address: prop.address,
-      category,
-      text,
-      date: new Date().toLocaleString("ko-KR"),
-    };
-    localStorage.setItem(key, JSON.stringify([report, ...prev]));
-
-    // 관리자 이메일 전송 (mailto)
-    const subject = encodeURIComponent(`[오류제보] ${category} - ${prop.buildingName ?? prop.title} (${prop.unitNumber ?? ""})`);
-    const body = encodeURIComponent(
-      `■ 매물 ID: ${prop.id}\n■ 건물명: ${prop.buildingName ?? prop.title}\n■ 주소: ${prop.address}\n■ 호수: ${prop.unitNumber ?? "-"}\n\n■ 오류 유형: ${category}\n\n■ 오류 내용:\n${text}\n\n■ 제보일시: ${report.date}`
-    );
-    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
-
-    setSent(true);
+    setSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = prop.dbId || String(prop.id);
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: propertyId,
+        property_title: prop.title || prop.address,
+        property_address: prop.address,
+        report_type: "error_report",
+        error_content: `[${category}] ${text.trim()}`,
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (e) {
+      console.error("오류제보 저장 실패:", e);
+      alert("제보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
