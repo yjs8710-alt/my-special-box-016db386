@@ -724,28 +724,29 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         </Section>
       )}
 
-      {/* 층수 / 호수 / 평수 */}
-      {(form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매") ? (
+      {/* 층수 / 호수 / 평수 — 매매 타입은 대지·건평·총층·건축년도 표시 */}
+      {isBuildingSale ? (
         <>
-          {/* 건물매매/단독매매: 건물 유형 */}
-          {form.detailType === "건물매매" && (
-            <Section label="건물 유형">
-              <div className="flex gap-4 flex-wrap">
-                {BUILDING_SALE_TYPES.map((t) => (
-                  <Radio key={t} checked={form.buildingSaleType === t} onClick={() => set("buildingSaleType", t)}>{t}</Radio>
-                ))}
+          {/* 모든 매매 타입: 대지·건평·총층·건축년도 */}
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/4 p-3 flex flex-col gap-3">
+            <p className="text-xs font-extrabold text-primary">🏢 건물 기본 정보</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground/70">대지 (평)</label>
+                <input type="text" placeholder="예) 100" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic(false)} />
               </div>
-            </Section>
-          )}
-          {/* 건물매매/단독매매: 대지·건평 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">대지 (평)</label>
-              <input type="text" placeholder="예) 100" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic(false)} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">건평</label>
-              <input type="text" placeholder="예) 80" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic(false)} />
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground/70">건평</label>
+                <input type="text" placeholder="예) 80" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic(false)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground/70">총 층수</label>
+                <input type="text" placeholder="예) 5층" value={form.totalFloors} onChange={(e) => set("totalFloors", e.target.value)} className={ic(false)} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-foreground/70">건축년도</label>
+                <input type="text" placeholder="예) 2010" value={form.buildYear} onChange={(e) => set("buildYear", e.target.value)} className={ic(false)} />
+              </div>
             </div>
           </div>
         </>
