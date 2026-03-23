@@ -600,12 +600,12 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
             {/* 전송 버튼 */}
             <button
               onClick={handleSend}
-              disabled={!text.trim()}
+              disabled={!text.trim() || saving}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: "hsl(var(--destructive))", color: "#fff" }}
             >
               <Send className="w-4 h-4" />
-              관리자에게 전송
+              {saving ? "제출 중..." : "제보하기"}
             </button>
           </div>
         )}
