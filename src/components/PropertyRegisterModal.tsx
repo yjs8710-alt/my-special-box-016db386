@@ -379,7 +379,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       form.contactManager && `관리인:${form.contactManager}`,
     ].filter(Boolean).join("|");
 
-    const isBuildingSale = form.detailType === "건물매매";
+    const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매";
     const isCommercialLease = ["상가","사무실","공장·창고"].includes(form.detailType);
 
     // 임대 방식별 금액 정리 (월세/반전세/전세 복수 가능)
