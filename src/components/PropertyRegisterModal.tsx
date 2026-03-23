@@ -752,7 +752,7 @@ function Step2({
   errors: Record<string, string>;
 }) {
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
-  const isBuildingSale = form.detailType === "건물매매" || form.detailType === "단독매매" || form.detailType === "창고/공장매매";
+  const isBuildingSale = ["건물매매","단독매매","창고/공장매매","숙박/팬션매매","구분상가매매","상가주택매매","상가건물매매","원룸건물매매","주택매매","다가구매매"].includes(form.detailType);
   const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
   const showRoomOptions = !isLand && !isBuildingSale && !(isCommercial && form.tradeType === "매매");
   const showFacilities = !isLand && !isBuildingSale;
