@@ -451,7 +451,6 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       monthly: mainMonthly,
       manage_fee: form.managementFee,
       parking: "",
-      elevator: false,
       available_from: form.vacancy || "",
       total_floors: "",
       build_year: "",
