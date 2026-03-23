@@ -1181,6 +1181,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
 
                   {/* 단기가능 체크박스 */}
+
                   <div className="flex items-center gap-3 px-3 py-2 rounded-xl border transition-all"
                     style={{
                       background: form.options.includes("단기가능") ? "hsl(217 91% 97%)" : "hsl(var(--muted)/0.3)",
