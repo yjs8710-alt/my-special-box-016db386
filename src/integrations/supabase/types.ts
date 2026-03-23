@@ -68,6 +68,57 @@ export type Database = {
         }
         Relationships: []
       }
+      building_summary: {
+        Row: {
+          approval_date: string | null
+          building_area: string | null
+          building_name: string | null
+          created_at: string
+          elevator: boolean | null
+          floors_above: string | null
+          floors_below: string | null
+          id: string
+          land_area: string | null
+          main_purpose: string | null
+          parking_count: string | null
+          property_id: string
+          total_area: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_date?: string | null
+          building_area?: string | null
+          building_name?: string | null
+          created_at?: string
+          elevator?: boolean | null
+          floors_above?: string | null
+          floors_below?: string | null
+          id?: string
+          land_area?: string | null
+          main_purpose?: string | null
+          parking_count?: string | null
+          property_id: string
+          total_area?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_date?: string | null
+          building_area?: string | null
+          building_name?: string | null
+          created_at?: string
+          elevator?: boolean | null
+          floors_above?: string | null
+          floors_below?: string | null
+          id?: string
+          land_area?: string | null
+          main_purpose?: string | null
+          parking_count?: string | null
+          property_id?: string
+          total_area?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cheongju_contacts: {
         Row: {
           building_dong: string | null
@@ -116,6 +167,45 @@ export type Database = {
           phone?: string
           unit_number?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      land_summary: {
+        Row: {
+          created_at: string
+          id: string
+          land_area: string | null
+          land_category: string | null
+          lot_number: string | null
+          official_price: string | null
+          property_id: string
+          road_access: string | null
+          updated_at: string
+          use_zone: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          land_area?: string | null
+          land_category?: string | null
+          lot_number?: string | null
+          official_price?: string | null
+          property_id: string
+          road_access?: string | null
+          updated_at?: string
+          use_zone?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          land_area?: string | null
+          land_category?: string | null
+          lot_number?: string | null
+          official_price?: string | null
+          property_id?: string
+          road_access?: string | null
+          updated_at?: string
+          use_zone?: string | null
         }
         Relationships: []
       }
