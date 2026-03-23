@@ -820,29 +820,7 @@ function Step2({
         ))}
       </div>
 
-      {/* 반려동물 - 토지/건물매매 제외 */}
-      {showRoomOptions && (
-        <Section label="반려동물">
-          <div className="flex gap-3">
-            {(["가능", "불가"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => set("pet", form.pet === v ? "" : v)}
-                className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${
-                  form.pet === v
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background text-foreground border-border hover:border-primary/40"
-                }`}
-              >
-                {v === "가능" ? "🐾 가능" : "🚫 불가"}
-              </button>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* 부가 시설 - 토지/건물매매 제외 */}
+      {/* 부가 시설 - 토지/건물매매/상가임대류 제외 */}
       {showFacilities && (
         <Section label="부가 시설">
           <div className="flex flex-wrap gap-2">
