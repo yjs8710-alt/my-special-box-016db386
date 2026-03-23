@@ -890,8 +890,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 방향 - 토지/매매/건물매매 제외 */}
-      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
+      {/* 방향 - 토지/건물매매 제외 */}
+      {!isLand && !isBuildingSale && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
