@@ -960,7 +960,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </div>
 
-              {/* 층수 / 호수 / 평수 */}
+              {/* 층수 / 호수 / 평수 — 창고/공장매매 제외 */}
+              {!isWarehouseSale && (
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">층수</label>
@@ -989,6 +990,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic} />
                 </div>
               </div>
+              )}
 
               {/* 집합건물 동(棟) 입력 */}
               {(form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
