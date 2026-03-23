@@ -74,7 +74,7 @@ const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","�
 type BrokerType = typeof BROKER_TYPES[number];
 type TradeType = typeof TRADE_TYPES[number];
 type BuildingType = typeof BUILDING_TYPES[number];
-type DetailType = typeof DETAIL_TYPES[number] | "";
+type DetailType = typeof ALL_DETAIL_TYPES[number] | "";
 type VacancyType = typeof VACANCY_TYPES[number];
 type LhType = typeof LH_TYPES[number];
 
