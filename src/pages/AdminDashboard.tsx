@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { formatPhone } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Users, Building2, MessageSquare,
   LogOut, Home, CheckCircle2, XCircle, Clock,
