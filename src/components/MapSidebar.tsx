@@ -1003,6 +1003,22 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
 };
 
 /* ── LeaseProposalModal ── */
+interface UnitRow {
+  id: string;
+  unitNumber: string;
+  type: string;
+  floor: string;
+  area: string;
+  deposit: string;
+  monthly: string;
+  status: string; // 공실 | 임차중 | 기타
+}
+interface MortgageRow {
+  id: string;
+  creditor: string;
+  amount: string;
+}
+
 interface LeaseProposalModalProps { prop: MapProperty; allProperties: MapProperty[]; onClose: () => void; }
 const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModalProps) => {
   const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
@@ -1012,28 +1028,101 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
   const sameBuilding = allProperties.filter(
     p => p.address === prop.address && !p.type.includes("매매")
   ).sort((a, b) => (a.unitNumber ?? "").localeCompare(b.unitNumber ?? "", "ko"));
-
-  // 건물 현황은 첫 번째 매물(또는 현재 매물)로
   const base = sameBuilding[0] ?? prop;
 
-  const buildingInfo = [
+  // ── 편집 가능 상태 ──
+  const [buildingInfoRows, setBuildingInfoRows] = useState<[string, string][]>([
     ["소재지", base.address],
     ["건물명", base.buildingName ?? base.title],
-    ["건축연도", base.buildYear ?? "-"],
-    ["총 층수", base.totalFloors ?? "-"],
-    ["주차", base.parking ?? "-"],
+    ["건축연도", base.buildYear ?? ""],
+    ["총 층수", base.totalFloors ?? ""],
+    ["주차", base.parking ?? ""],
     ["엘리베이터", base.elevator ? "있음" : "없음"],
-    ["관리비", base.manageFee ?? "-"],
-    ["입주가능일", base.availableFrom ?? "-"],
-    ["담당 중개사", base.agentName ?? "-"],
-  ];
+    ["관리비", base.manageFee ?? ""],
+  ]);
+
+  const [units, setUnits] = useState<UnitRow[]>(() =>
+    sameBuilding.map((p, i) => ({
+      id: String(p.id),
+      unitNumber: p.unitNumber ?? "",
+      type: p.type,
+      floor: p.floor ?? "",
+      area: p.area ?? "",
+      deposit: p.deposit ?? "",
+      monthly: p.monthly ?? "",
+      status: p.availableFrom === "공실" ? "공실" : "임차중",
+    }))
+  );
+
+  const [mortgages, setMortgages] = useState<MortgageRow[]>([
+    { id: "1", creditor: "", amount: "" },
+  ]);
+
+  const [totalDepositInput, setTotalDepositInput] = useState("");
+  const [totalMortgageInput, setTotalMortgageInput] = useState("");
+  const [note, setNote] = useState(prop.buildingMemo ?? prop.memo ?? "");
+  const [saved, setSaved] = useState(false);
+
+  // 호실 편집
+  const updateUnit = (idx: number, key: keyof UnitRow, val: string) =>
+    setUnits(prev => prev.map((u, i) => i === idx ? { ...u, [key]: val } : u));
+  const addUnit = () => setUnits(prev => [...prev, {
+    id: Date.now().toString(), unitNumber: "", type: "", floor: "", area: "", deposit: "", monthly: "", status: "공실"
+  }]);
+  const removeUnit = (idx: number) => setUnits(prev => prev.filter((_, i) => i !== idx));
+
+  // 근저당 편집
+  const updateMortgage = (idx: number, key: keyof MortgageRow, val: string) =>
+    setMortgages(prev => prev.map((m, i) => i === idx ? { ...m, [key]: val } : m));
+  const addMortgage = () => setMortgages(prev => [...prev, { id: Date.now().toString(), creditor: "", amount: "" }]);
+  const removeMortgage = (idx: number) => setMortgages(prev => prev.filter((_, i) => i !== idx));
+
+  // 건물현황 편집
+  const updateBuildingRow = (idx: number, val: string) =>
+    setBuildingInfoRows(prev => prev.map((r, i) => i === idx ? [r[0], val] : r));
+
+  // 저장 (DB에 proposal 내용을 note로 저장)
+  const handleSave = async () => {
+    const content = [
+      "=== 임대제안서 ===",
+      buildingInfoRows.map(([k, v]) => `${k}: ${v}`).join("\n"),
+      "\n--- 호수별 임대현황 ---",
+      units.map(u => `${u.unitNumber}호 | ${u.type} | ${u.floor} | ${u.area} | 보증금 ${u.deposit} | 월세 ${u.monthly} | ${u.status}`).join("\n"),
+      `\n보증금 합계: ${totalDepositInput}`,
+      "\n--- 근저당 내역 ---",
+      mortgages.map(m => `${m.creditor}: ${m.amount}`).join("\n"),
+      `근저당 합계: ${totalMortgageInput}`,
+      note ? `\n--- 특이사항 ---\n${note}` : "",
+    ].filter(Boolean).join("\n");
+
+    if (prop.dbId) {
+      await supabase.from("properties").update({ building_memo: content }).eq("id", prop.dbId);
+    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  // 삭제 (내용 초기화)
+  const handleDelete = async () => {
+    if (!confirm("임대제안서 내용을 초기화하시겠습니까?")) return;
+    setUnits([]);
+    setMortgages([{ id: "1", creditor: "", amount: "" }]);
+    setTotalDepositInput("");
+    setTotalMortgageInput("");
+    setNote("");
+    if (prop.dbId) {
+      await supabase.from("properties").update({ building_memo: null }).eq("id", prop.dbId);
+    }
+  };
+
+  const ic = "px-2 py-1 text-[11px] border border-border rounded bg-background text-foreground outline-none focus:border-primary w-full";
 
   return (
     <>
       <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
-        style={{ width: "min(680px, 94vw)", maxHeight: "92vh" }}
+        style={{ width: "min(760px, 96vw)", maxHeight: "94vh" }}
         onClick={e => e.stopPropagation()}
       >
         {/* 헤더 */}
@@ -1042,10 +1131,26 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <ClipboardList className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-sm font-bold text-foreground">임대제안서</p>
+            <div>
+              <p className="text-sm font-bold text-foreground">임대제안서</p>
+              <p className="text-[10px] text-muted-foreground">직접 수정 후 저장할 수 있습니다</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handlePrint} className="px-2.5 py-1.5 text-[11px] font-bold bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors">🖨️ 인쇄</button>
+            <button
+              onClick={handleSave}
+              className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+              style={{ background: "hsl(var(--primary))", color: "#fff" }}
+            >
+              {saved ? "✓ 저장됨" : "💾 저장"}
+            </button>
+            <button
+              onClick={handleDelete}
+              className="px-2.5 py-1.5 text-[11px] font-bold bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors"
+            >
+              🗑️ 초기화
+            </button>
             <button onClick={onClose} className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
@@ -1061,7 +1166,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             <p className="text-[10px] text-primary-foreground/60 mt-0.5">Lease Proposal · {todayStr}</p>
           </div>
 
-          {/* ① 건물 현황 */}
+          {/* ① 건물 현황 - 편집 가능 */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-primary rounded-full" />
@@ -1070,10 +1175,17 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
                 <tbody>
-                  {buildingInfo.map(([label, value], i) => (
+                  {buildingInfoRows.map(([label, value], i) => (
                     <tr key={label} className={i % 2 === 0 ? "bg-muted/30" : "bg-white"}>
-                      <td className="px-3 py-2 font-semibold text-muted-foreground w-[100px] whitespace-nowrap border-r border-border/40">{label}</td>
-                      <td className="px-3 py-2 text-foreground font-medium">{value}</td>
+                      <td className="px-3 py-1.5 font-semibold text-muted-foreground w-[90px] whitespace-nowrap border-r border-border/40">{label}</td>
+                      <td className="px-2 py-1">
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={e => updateBuildingRow(i, e.target.value)}
+                          className={ic}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -1081,58 +1193,165 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             </div>
           </div>
 
-          {/* ② 호수별 임대 현황 */}
+          {/* ② 호수별 임대 현황 - 편집 가능 */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-1 h-4 bg-accent rounded-full" />
-              <p className="text-[12px] font-extrabold text-foreground">호수별 임대 현황</p>
-              <span className="text-[10px] text-muted-foreground ml-1">총 {sameBuilding.length}개 호실</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-4 bg-accent rounded-full" />
+                <p className="text-[12px] font-extrabold text-foreground">호수별 임대 현황</p>
+                <span className="text-[10px] text-muted-foreground">총 {units.length}개 호실</span>
+              </div>
+              <button
+                onClick={addUnit}
+                className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
+                style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))" }}
+              >
+                + 호실 추가
+              </button>
             </div>
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
                 <thead>
                   <tr className="bg-primary text-primary-foreground">
-                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">호수</th>
-                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">유형</th>
-                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">층</th>
-                    <th className="px-3 py-2 text-left font-bold whitespace-nowrap">면적</th>
-                    <th className="px-3 py-2 text-right font-bold whitespace-nowrap">보증금</th>
-                    <th className="px-3 py-2 text-right font-bold whitespace-nowrap">월 임대료</th>
-                    <th className="px-3 py-2 text-center font-bold whitespace-nowrap">입주가능</th>
+                    <th className="px-2 py-2 text-left font-bold whitespace-nowrap">호수</th>
+                    <th className="px-2 py-2 text-left font-bold whitespace-nowrap">유형</th>
+                    <th className="px-2 py-2 text-left font-bold whitespace-nowrap">층</th>
+                    <th className="px-2 py-2 text-left font-bold whitespace-nowrap">면적</th>
+                    <th className="px-2 py-2 text-right font-bold whitespace-nowrap">보증금</th>
+                    <th className="px-2 py-2 text-right font-bold whitespace-nowrap">월임대료</th>
+                    <th className="px-2 py-2 text-center font-bold whitespace-nowrap">상태</th>
+                    <th className="px-2 py-2 text-center font-bold whitespace-nowrap w-[28px]"></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sameBuilding.map((p, i) => (
-                    <tr
-                      key={p.id}
-                      className={`border-t border-border/40 ${p.id === prop.id ? "bg-accent/10 font-bold" : i % 2 === 0 ? "bg-white" : "bg-muted/20"}`}
-                    >
-                      <td className="px-3 py-2 font-semibold text-foreground whitespace-nowrap">
-                        {p.unitNumber ?? "-"}
-                        {p.id === prop.id && <span className="ml-1 text-[8px] bg-accent text-white px-1 rounded">선택</span>}
+                  {units.map((u, i) => (
+                    <tr key={u.id} className={`border-t border-border/40 ${i % 2 === 0 ? "bg-white" : "bg-muted/20"}`}>
+                      <td className="px-1 py-1"><input value={u.unitNumber} onChange={e => updateUnit(i, "unitNumber", e.target.value)} className={ic} placeholder="호수" /></td>
+                      <td className="px-1 py-1"><input value={u.type} onChange={e => updateUnit(i, "type", e.target.value)} className={ic} placeholder="유형" /></td>
+                      <td className="px-1 py-1"><input value={u.floor} onChange={e => updateUnit(i, "floor", e.target.value)} className={ic} placeholder="층" /></td>
+                      <td className="px-1 py-1"><input value={u.area} onChange={e => updateUnit(i, "area", e.target.value)} className={ic} placeholder="면적" /></td>
+                      <td className="px-1 py-1"><input value={u.deposit} onChange={e => updateUnit(i, "deposit", e.target.value)} className={ic + " text-right"} placeholder="보증금" /></td>
+                      <td className="px-1 py-1"><input value={u.monthly} onChange={e => updateUnit(i, "monthly", e.target.value)} className={ic + " text-right"} placeholder="월세" /></td>
+                      <td className="px-1 py-1">
+                        <select value={u.status} onChange={e => updateUnit(i, "status", e.target.value)} className={ic}>
+                          <option value="공실">공실</option>
+                          <option value="임차중">임차중</option>
+                          <option value="기타">기타</option>
+                        </select>
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.type}</td>
-                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.floor ?? "-"}</td>
-                      <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{p.area ?? "-"}</td>
-                      <td className="px-3 py-2 text-right text-foreground font-semibold whitespace-nowrap">{p.deposit}</td>
-                      <td className="px-3 py-2 text-right text-accent font-extrabold whitespace-nowrap">{p.monthly}</td>
-                      <td className="px-3 py-2 text-center text-muted-foreground whitespace-nowrap">{p.availableFrom ?? "-"}</td>
+                      <td className="px-1 py-1 text-center">
+                        <button onClick={() => removeUnit(i)} className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
+                  {/* 보증금 합계 행 */}
+                  <tr className="border-t-2 border-primary/30 bg-primary/5">
+                    <td colSpan={4} className="px-3 py-2 text-right font-extrabold text-[11px] text-foreground">보증금 합계</td>
+                    <td className="px-1 py-1" colSpan={2}>
+                      <input
+                        type="text"
+                        value={totalDepositInput}
+                        onChange={e => setTotalDepositInput(e.target.value)}
+                        placeholder="합계 직접 입력"
+                        className={ic + " text-right font-extrabold"}
+                        style={{ borderColor: "hsl(var(--primary)/0.5)" }}
+                      />
+                    </td>
+                    <td colSpan={2} />
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* ③ 특이사항 */}
+          {/* ③ 근저당 내역 - 편집 가능 */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full" style={{ background: "hsl(0 85% 55%)" }} />
+                <p className="text-[12px] font-extrabold text-foreground">근저당 내역</p>
+              </div>
+              <button
+                onClick={addMortgage}
+                className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
+                style={{ background: "hsl(0 85% 96%)", color: "hsl(0 85% 45%)" }}
+              >
+                + 내역 추가
+              </button>
+            </div>
+            <div className="border border-border rounded-xl overflow-hidden">
+              <table className="w-full text-[11px]">
+                <thead>
+                  <tr style={{ background: "hsl(0 85% 55%)" }} className="text-white">
+                    <th className="px-3 py-2 text-left font-bold">채권자</th>
+                    <th className="px-3 py-2 text-right font-bold">금액 (만원)</th>
+                    <th className="px-2 py-2 w-[28px]"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mortgages.map((m, i) => (
+                    <tr key={m.id} className={`border-t border-border/40 ${i % 2 === 0 ? "bg-white" : "bg-muted/20"}`}>
+                      <td className="px-1 py-1"><input value={m.creditor} onChange={e => updateMortgage(i, "creditor", e.target.value)} className={ic} placeholder="채권자명" /></td>
+                      <td className="px-1 py-1"><input value={m.amount} onChange={e => updateMortgage(i, "amount", e.target.value)} className={ic + " text-right"} placeholder="금액" /></td>
+                      <td className="px-1 py-1 text-center">
+                        <button onClick={() => removeMortgage(i)} className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* 근저당 합계 행 */}
+                  <tr className="border-t-2 bg-red-50" style={{ borderColor: "hsl(0 85% 75%)" }}>
+                    <td className="px-3 py-2 text-right font-extrabold text-[11px] text-foreground">근저당 합계</td>
+                    <td className="px-1 py-1">
+                      <input
+                        type="text"
+                        value={totalMortgageInput}
+                        onChange={e => setTotalMortgageInput(e.target.value)}
+                        placeholder="합계 직접 입력"
+                        className={ic + " text-right font-extrabold"}
+                        style={{ borderColor: "hsl(0 85% 65%)" }}
+                      />
+                    </td>
+                    <td />
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* ④ 특이사항 - 편집 가능 */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
               <p className="text-[12px] font-extrabold text-foreground">특이사항 / 안내사항</p>
             </div>
-            <div className="border border-border rounded-xl p-3 min-h-[56px] bg-muted/20">
-              <p className="text-[11px] text-muted-foreground/50">{prop.buildingMemo ?? prop.memo ?? "※ 입력된 내용 없음"}</p>
-            </div>
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              rows={4}
+              placeholder="특이사항, 안내사항 등을 입력하세요"
+              className="w-full px-3 py-2 text-[11px] rounded-xl border border-border bg-muted/20 text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary resize-none transition-colors"
+            />
+          </div>
+
+          {/* 하단 저장/초기화 버튼 */}
+          <div className="flex gap-3 pt-1">
+            <button
+              onClick={handleSave}
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+              style={{ background: "hsl(var(--primary))", color: "#fff" }}
+            >
+              💾 {saved ? "저장 완료!" : "저장하기"}
+            </button>
+            <button
+              onClick={handleDelete}
+              className="px-5 py-2.5 rounded-xl text-sm font-bold border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              🗑️ 초기화
+            </button>
           </div>
 
         </div>

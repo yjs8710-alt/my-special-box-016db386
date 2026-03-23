@@ -1033,13 +1033,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
-                    <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
-                  </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
                     <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
@@ -1047,10 +1043,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
                     <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">담당 중개사</label>
-                    <input type="text" placeholder="담당자명" value={form.agent_name} onChange={(e) => set("agent_name", e.target.value)} className={ic} />
                   </div>
                 </div>
               )}
@@ -1189,6 +1181,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
 
                   {/* 단기가능 체크박스 */}
+
                   <div className="flex items-center gap-3 px-3 py-2 rounded-xl border transition-all"
                     style={{
                       background: form.options.includes("단기가능") ? "hsl(217 91% 97%)" : "hsl(var(--muted)/0.3)",
@@ -1416,10 +1409,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="flex flex-col gap-3">
                   {([
                     { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678", required: false },
-                    { key: "agent_name" as const, label: "부동산 연락처", placeholder: "예) 043-123-4567", required: false },
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432", required: false },
                     { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666", required: false },
-                  ] as { key: "contactOwner"|"agent_name"|"contactTenant"|"contactManager"; label: string; placeholder: string; required: boolean }[]).map(({ key, label, placeholder, required }) => (
+                  ] as { key: "contactOwner"|"contactTenant"|"contactManager"; label: string; placeholder: string; required: boolean }[]).map(({ key, label, placeholder, required }) => (
                     <ContactField
                       key={key}
                       fieldKey={key}

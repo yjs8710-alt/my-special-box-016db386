@@ -1231,6 +1231,7 @@ function Step3({
     { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
     { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
   ];
+  // 입주가능/담당중개사는 표시하지 않음
 
   return (
     <div className="flex flex-col gap-5">
