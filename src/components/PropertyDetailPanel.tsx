@@ -421,9 +421,9 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
               onClick={handleSubmit}
               disabled={saving}
               className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
-              style={{ background: "hsl(var(--chart-2))" }}
+              style={{ background: "hsl(var(--primary))" }}
             >
-              {saving ? "처리 중..." : "거래완료 신청"}
+              {saving ? "처리 중..." : "확인"}
             </button>
           </div>
         )}
