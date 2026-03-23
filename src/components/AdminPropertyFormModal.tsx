@@ -1363,7 +1363,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </Section>
 
-              {/* LH 전세대출 */}
+              {/* LH 전세대출 — 매매 타입 제외 */}
+              {!SALE_TYPES.includes(form.type) && form.tradeType !== "매매" && (
               <Section label="LH (전세대출)">
                 <div className="flex gap-5">
                   {LH_TYPES.map((t) => (
@@ -1371,6 +1372,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   ))}
                 </div>
               </Section>
+              )}
 
               {/* 체크박스 옵션 */}
               <div className="flex gap-6 flex-wrap">
