@@ -2379,7 +2379,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                       }`}
                     >
                       {/* Row: 3줄 레이아웃 */}
-                      <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
+                       <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
 
                         {/* ①썸네일 96px — 고화질 렌더링 */}
                         <div className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb" style={{ minHeight: "96px" }}>
