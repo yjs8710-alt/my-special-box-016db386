@@ -2013,6 +2013,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
           onClose={() => setErrorReportProp(null)}
         />
       )}
+      {/* Deal Complete Modal */}
+      {dealCompleteProp && (
+        <DealCompleteModal
+          prop={dealCompleteProp}
+          onClose={() => setDealCompleteProp(null)}
+        />
+      )}
       {/* Admin Property Edit Modal */}
       {adminEditProp && (() => {
         // agent_name(DB)에 저장된 연락처 문자열 파싱
