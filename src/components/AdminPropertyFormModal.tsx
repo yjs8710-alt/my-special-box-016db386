@@ -1068,43 +1068,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 ))}
               </div>
 
-              {/* 반려동물 — 매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && (
-              <Section label="반려동물">
-                <div className="flex gap-3">
-                  {[
-                    { key: "애완동물가능", label: "🐾 가능" },
-                    { key: "애완동물불가", label: "🚫 불가" },
-                  ].map(({ key, label }) => {
-                    const isActive = form.options.includes(key);
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => {
-                          // 가능/불가는 하나만 선택 (서로 배타적)
-                          const other = key === "애완동물가능" ? "애완동물불가" : "애완동물가능";
-                          setForm((f) => {
-                            const without = f.options.filter((o) => o !== key && o !== other);
-                            return { ...f, options: isActive ? without : [...without, key] };
-                          });
-                        }}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                          isActive
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/50"
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Section>
-              )}
-
-              {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && (
+              {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매/상가임대류/토지 제외 */}
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
                   {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
@@ -1136,9 +1101,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 방 옵션 — 매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && (
-              <Section label="방 옵션">
+              {/* 옵션 — 매매/상가임대류/토지 제외 */}
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
+              <Section label="옵션">
                 {/* 풀옵션 버튼 */}
                 <div className="mb-2">
                   <button
@@ -1179,8 +1144,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 방 비번 / 건물 비번 — 건물매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && (
+              {/* 방 비번 / 건물 비번 — 매매/상가임대류/토지 제외 */}
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
@@ -1193,7 +1158,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </div>
               )}
 
-              {/* 방향 */}
+              {/* 방향 — 매매/상가임대류/토지 제외 */}
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="방향">
                 <div className="flex flex-wrap gap-2">
                   {DIRECTION_OPTIONS.map((d) => (
@@ -1206,6 +1172,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   ))}
                 </div>
               </Section>
+              )}
 
               {/* 공실 여부 — 매매 타입일 때 숨김 */}
               {form.tradeType !== "매매" && (

@@ -799,8 +799,12 @@ function Step2({
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
   const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
-  const showRoomOptions = !isLand && !isBuildingSale && !(isCommercial && form.tradeType === "매매");
+  // 상가 임대류 및 토지: 반려동물·옵션·부가시설 숨김
+  const hideResidentialOptions = isLand || isBuildingSale || isCommercial;
+  const showRoomOptions = !hideResidentialOptions;
   const showFacilities = !isLand && !isBuildingSale;
+  // 토지 임대: 방향도 숨김
+  const showDirection = !isLand && !isBuildingSale;
 
   const toggleFacility = (f: string) => {
     const cur = form.facilities;
@@ -816,29 +820,7 @@ function Step2({
         ))}
       </div>
 
-      {/* 반려동물 - 토지/건물매매 제외 */}
-      {showRoomOptions && (
-        <Section label="반려동물">
-          <div className="flex gap-3">
-            {(["가능", "불가"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => set("pet", form.pet === v ? "" : v)}
-                className={`flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all flex items-center justify-center gap-2 ${
-                  form.pet === v
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background text-foreground border-border hover:border-primary/40"
-                }`}
-              >
-                {v === "가능" ? "🐾 가능" : "🚫 불가"}
-              </button>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* 부가 시설 - 토지/건물매매 제외 */}
+      {/* 부가 시설 - 토지/건물매매/상가임대류 제외 */}
       {showFacilities && (
         <Section label="부가 시설">
           <div className="flex flex-wrap gap-2">
@@ -864,9 +846,9 @@ function Step2({
         </Section>
       )}
 
-      {/* 방 옵션 - 토지/건물매매/상가류+매매 제외 */}
+      {/* 옵션 - 토지/건물매매/상가임대류 제외 */}
       {showRoomOptions && (
-        <Section label="방 옵션">
+        <Section label="옵션">
           {/* 풀옵션 체크 버튼 */}
           <FullOptionToggle options={form.options} set={set} />
           <div className="flex flex-wrap gap-2">
@@ -884,8 +866,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 비밀번호 - 토지/건물매매 제외 */}
-      {!isLand && !isBuildingSale && (
+      {/* 비밀번호 - 토지/건물매매/상가임대류 제외 */}
+      {showRoomOptions && (
         <Section label="비밀번호">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
@@ -900,8 +882,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 방향 - 토지/건물매매 제외 */}
-      {!isLand && !isBuildingSale && (
+      {/* 방향 - 토지/건물매매/상가임대류 제외 */}
+      {showDirection && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
