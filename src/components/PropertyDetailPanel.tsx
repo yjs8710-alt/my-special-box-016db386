@@ -795,13 +795,6 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
   const [error, setError] = useState(false);
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
-  const [debugInfo, setDebugInfo] = useState<{
-    propertyId: string;
-    bStatus: string;
-    bError: string | null;
-    lStatus: string;
-    lError: string | null;
-  } | null>(null);
 
   const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(address)}`;
   const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(address)}`;
@@ -815,39 +808,21 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
       setLoading(true);
       setError(false);
 
-      console.log("🔍 [공적장부] 조회 시작");
-      console.log("  property_id:", propertyId);
-      console.log("  address:", address);
+      console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
 
-      const bRes = await supabase.from("building_summary").select("*").eq("property_id", propertyId).maybeSingle();
-      const lRes = await supabase.from("land_summary").select("*").eq("property_id", propertyId).maybeSingle();
+      const [bRes, lRes] = await Promise.all([
+        supabase.from("building_summary").select("*").eq("property_id", propertyId).maybeSingle(),
+        supabase.from("land_summary").select("*").eq("property_id", propertyId).maybeSingle(),
+      ]);
 
-      console.log("📦 [building_summary] error:", bRes.error, "| data:", bRes.data);
-      console.log("🌍 [land_summary]     error:", lRes.error, "| data:", lRes.data);
-
-      const bStatus = bRes.error
-        ? `❌ 오류: ${bRes.error.message}`
-        : bRes.data === null
-        ? "⚠️ 데이터 없음 (null)"
-        : `✅ 데이터 있음`;
-
-      const lStatus = lRes.error
-        ? `❌ 오류: ${lRes.error.message}`
-        : lRes.data === null
-        ? "⚠️ 데이터 없음 (null)"
-        : `✅ 데이터 있음`;
-
-      setDebugInfo({
-        propertyId,
-        bStatus,
-        bError: bRes.error?.message ?? null,
-        lStatus,
-        lError: lRes.error?.message ?? null,
-      });
+      console.log("📦 [building_summary] error:", bRes.error?.message ?? "없음", "| data:", bRes.data === null ? "null (데이터 없음)" : bRes.data);
+      console.log("🌍 [land_summary]     error:", lRes.error?.message ?? "없음", "| data:", lRes.data === null ? "null (데이터 없음)" : lRes.data);
 
       if (bRes.error || lRes.error) {
+        console.error("❌ 조회 오류 - building:", bRes.error?.message, "| land:", lRes.error?.message);
         setError(true);
       } else {
+        console.log("✅ 조회 완료 - building:", bRes.data ? "데이터 있음" : "없음", "| land:", lRes.data ? "데이터 있음" : "없음");
         setBuilding(bRes.data as BuildingSummaryRow | null);
         setLand(lRes.data as LandSummaryRow | null);
       }
