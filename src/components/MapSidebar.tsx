@@ -1590,6 +1590,14 @@ const AddressToggleCard = ({ prop, idx, buildingMemo, roomMemo, buildingPw, room
           color: vacancy === "공실" ? "hsl(142 60% 30%)" : "hsl(25 90% 40%)",
           border: vacancy === "공실" ? "hsl(142 60% 70%)" : "hsl(38 80% 65%)",
         });
+        // 단기가능 배지
+        if (!isSalePropCard && (prop.options ?? []).includes("단기가능")) chips.push({
+          label: "단기",
+          value: "",
+          bg: "hsl(217 91% 93%)",
+          color: "hsl(217 91% 35%)",
+          border: "hsl(217 91% 65%)",
+        });
         if (direction) chips.push({ label: direction + "향", value: "", bg: "#fff3e0", color: "#e65100", border: "#ffcc80" });
         if (lhVal && lhVal !== "관계없음") chips.push({
           label: lhVal,
