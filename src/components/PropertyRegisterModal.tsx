@@ -44,13 +44,14 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 
 // 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
 const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
-const DETAIL_TYPES = [
-  "원룸","투베이","투룸","쓰리룸","포룸",
-  "주인세대","고시원","다가구","단독주택",
-  "아파트","오피스텔","빌라","연립","다세대",
-  "상가","사무실","공장·창고","토지",
-  "건물매매","단독매매","창고/공장매매","다가구매매",
-] as const;
+const PROPERTY_TYPE_GROUPS_REG = [
+  { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","빌라","연립","다세대","주상복합"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원"] },
+  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","원룸건물매매","주택매매","단독매매","다가구매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","숙박/팬션매매"] },
+  { group: "토지", types: ["토지"] },
+];
+// 전체 세부종류 flat 목록 (타입 추론용)
+const ALL_DETAIL_TYPES = PROPERTY_TYPE_GROUPS_REG.flatMap((g) => g.types);
 
 const BUILDING_SALE_TYPES = ["일반건물","집합건물","토지"] as const;
 type BuildingSaleType = typeof BUILDING_SALE_TYPES[number];
