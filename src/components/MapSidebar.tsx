@@ -650,11 +650,11 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
     <>
       <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ width: "min(400px, 92vw)" }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card border border-border rounded-2xl shadow-2xl flex flex-col"
+        style={{ width: "min(400px, 92vw)", maxHeight: "90vh" }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
           <div className="flex items-center gap-2">
             <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
             <h3 className="text-sm font-bold text-foreground">거래 완료 처리</h3>
@@ -671,40 +671,44 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
             <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
           </div>
         ) : (
-          <div className="p-5 flex flex-col gap-4">
-            <div className="rounded-xl border border-border bg-muted/30 p-3">
-              <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
-              <p className="text-xs font-semibold text-foreground truncate">{prop.title}</p>
-              <p className="text-[11px] text-muted-foreground">{prop.address}</p>
+          <>
+            <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
+              <div className="rounded-xl border border-border bg-muted/30 p-3">
+                <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
+                <p className="text-xs font-semibold text-foreground truncate">{prop.title}</p>
+                <p className="text-[11px] text-muted-foreground">{prop.address}</p>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-foreground">거래 완료일</label>
+                <input
+                  type="date"
+                  value={dealDate}
+                  onChange={e => setDealDate(e.target.value)}
+                  className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-foreground">메모 (선택)</label>
+                <textarea
+                  value={memo}
+                  onChange={e => setMemo(e.target.value)}
+                  placeholder="특이사항이 있다면 입력하세요."
+                  rows={3}
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary"
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-foreground">거래 완료일</label>
-              <input
-                type="date"
-                value={dealDate}
-                onChange={e => setDealDate(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground outline-none focus:border-primary"
-              />
+            <div className="px-5 py-4 flex-shrink-0 border-t border-border">
+              <button
+                onClick={handleSubmit}
+                disabled={saving}
+                className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
+                style={{ background: "hsl(var(--chart-2))" }}
+              >
+                {saving ? "처리 중..." : "거래완료 접수"}
+              </button>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-foreground">메모 (선택)</label>
-              <textarea
-                value={memo}
-                onChange={e => setMemo(e.target.value)}
-                placeholder="특이사항이 있다면 입력하세요."
-                rows={3}
-                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary"
-              />
-            </div>
-            <button
-              onClick={handleSubmit}
-              disabled={saving}
-              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
-              style={{ background: "hsl(var(--chart-2))" }}
-            >
-              {saving ? "처리 중..." : "거래완료 접수"}
-            </button>
-          </div>
+          </>
         )}
       </div>
     </>
