@@ -1055,7 +1055,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 ))}
               </div>
 
-              {/* 반려동물 */}
+              {/* 반려동물 — 매매 타입 제외 */}
+              {!SALE_TYPES.includes(form.type) && (
               <Section label="반려동물">
                 <div className="flex gap-3">
                   {[
@@ -1087,6 +1088,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   })}
                 </div>
               </Section>
+              )}
 
               {/* 부가 시설 (수도·유선TV·인터넷·CCTV) */}
               <Section label="부가 시설">
