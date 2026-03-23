@@ -443,6 +443,8 @@ interface AdminPropertyFormModalProps {
 const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyFormModalProps) => {
   // note에서 연락처 + 다중 임대방식 파싱 (수정 시 폼에 자동 채움)
   const SALE_TYPES = ["매매","단독매매","건물매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매"];
+  // 창고/공장매매: 층수·호수·평수·방비번·관리비·청소비·권리금 제외, 대지·건평만 표시
+  const isWarehouseSale = form.type === "창고/공장매매";
 
   const parseContactsFromInitial = (init: Partial<DBPropertyForm> | null) => {
     if (!init) return {};
