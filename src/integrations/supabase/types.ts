@@ -320,60 +320,6 @@ export type Database = {
         }
         Relationships: []
       }
-      public_record_summary: {
-        Row: {
-          building_approval_date: string | null
-          building_floors: string | null
-          building_main_purpose: string | null
-          building_register_url: string | null
-          building_total_area: string | null
-          created_at: string
-          id: string
-          land_address: string | null
-          land_area: string | null
-          land_category: string | null
-          land_register_url: string | null
-          land_use_zone: string | null
-          memo: string | null
-          property_id: string
-          updated_at: string
-        }
-        Insert: {
-          building_approval_date?: string | null
-          building_floors?: string | null
-          building_main_purpose?: string | null
-          building_register_url?: string | null
-          building_total_area?: string | null
-          created_at?: string
-          id?: string
-          land_address?: string | null
-          land_area?: string | null
-          land_category?: string | null
-          land_register_url?: string | null
-          land_use_zone?: string | null
-          memo?: string | null
-          property_id: string
-          updated_at?: string
-        }
-        Update: {
-          building_approval_date?: string | null
-          building_floors?: string | null
-          building_main_purpose?: string | null
-          building_register_url?: string | null
-          building_total_area?: string | null
-          created_at?: string
-          id?: string
-          land_address?: string | null
-          land_area?: string | null
-          land_category?: string | null
-          land_register_url?: string | null
-          land_use_zone?: string | null
-          memo?: string | null
-          property_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           id: string
