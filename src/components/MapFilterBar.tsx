@@ -43,7 +43,7 @@ const CATEGORY_TYPES = [
   { label: "상가건물매매", group: "매매" },
   { label: "구분상가매매", group: "매매" },
   { label: "창고/공장매매", group: "매매" },
-  { label: "숙박/팬션매매", group: "매매" },
+  { label: "다중매매", group: "매매" },
 ];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층", "주인세대"];
