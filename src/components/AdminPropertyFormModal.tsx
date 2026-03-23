@@ -508,8 +508,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 창고/공장매매: 층수·호수·평수·방비번·관리비·청소비·권리금 제외, 대지·건평 표시
-  const isWarehouseSale = form.type === "창고/공장매매";
+  // 창고/공장매매 포함 모든 매매 타입: 층수·호수·평수·관리비·청소비·권리금 제외, 대지·건평 표시
+  const isWarehouseSale = SALE_TYPES.includes(form.type);
 
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -1010,38 +1010,26 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               )}
 
-              {/* 건평 / 대지 — 매매 타입일 때만 표시 */}
-              {SALE_TYPES.includes(form.type) && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
-                    <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">대지 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
-                    <input type="text" placeholder="예) 120㎡, 36평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic} />
-                  </div>
-                </div>
-              )}
-
-              {/* 전체 층수 / 건축연도 / 중개사 */}
-              {/* 건물 매매 타입일 때 강조 박스로 표시 */}
+              {/* 건물 기본 정보 — 매매 타입: 대지·건평·총층·건축년도 통합 박스 */}
               {SALE_TYPES.includes(form.type) ? (
                 <div className="rounded-xl border-2 p-3 flex flex-col gap-3"
                   style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}>
                   <p className="text-xs font-extrabold text-primary">🏢 건물 기본 정보</p>
-                  {/* 건물명 — 매매 필수 강조 */}
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">건물명 <span className="text-primary font-bold">*</span></label>
-                    <input type="text" placeholder="예) 복대프라자, OO빌딩" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
-                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-muted-foreground">전체 층수 <span className="text-primary">*</span></label>
+                      <label className="text-xs font-semibold text-muted-foreground">대지 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                      <input type="text" placeholder="예) 120㎡, 36평" value={form.landArea} onChange={(e) => set("landArea", e.target.value)} className={ic} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">건평 <span className="text-muted-foreground/60 font-normal">(선택)</span></label>
+                      <input type="text" placeholder="예) 50평" value={form.buildingArea} onChange={(e) => set("buildingArea", e.target.value)} className={ic} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
                       <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-muted-foreground">건축연도 <span className="text-primary">*</span></label>
+                      <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
                       <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
                     </div>
                   </div>
