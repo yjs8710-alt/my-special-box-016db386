@@ -155,6 +155,10 @@ interface FormState {
   expose: boolean;
   allowAddressView: boolean;
   images: string[];
+  elevator: boolean;
+  isNew: boolean;
+  isHot: boolean;
+  buildingMemo: string;
 }
 
 const INITIAL: FormState = {
