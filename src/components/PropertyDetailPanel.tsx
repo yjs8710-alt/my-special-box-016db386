@@ -773,8 +773,11 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
   if (!property) return null;
 
-  const buildingSearchUrl = `https://www.eais.go.kr`;
+  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(property.address)}`;
   const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(property.address)}`;
+  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(property.address)}`;
+  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
   const allImages = (property.images && property.images.length > 0)
