@@ -1203,6 +1203,35 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     ))}
                   </div>
 
+                  {/* 단기가능 체크박스 */}
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl border transition-all"
+                    style={{
+                      background: form.options.includes("단기가능") ? "hsl(217 91% 97%)" : "hsl(var(--muted)/0.3)",
+                      borderColor: form.options.includes("단기가능") ? "hsl(217 91% 65%)" : "hsl(var(--border))",
+                    }}>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer w-full"
+                      style={{ color: form.options.includes("단기가능") ? "hsl(217 91% 40%)" : undefined }}>
+                      <input type="checkbox"
+                        checked={form.options.includes("단기가능")}
+                        onChange={(e) => {
+                          setForm((f) => ({
+                            ...f,
+                            options: e.target.checked
+                              ? [...f.options, "단기가능"]
+                              : f.options.filter((o) => o !== "단기가능"),
+                          }));
+                        }}
+                        className="w-4 h-4 accent-primary" />
+                      <span className="font-semibold">단기 가능</span>
+                      {form.options.includes("단기가능") && (
+                        <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
+                          style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                          단기가능
+                        </span>
+                      )}
+                    </label>
+                  </div>
+
                   {/* 세입자 중도퇴거 체크박스 */}
                   <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-xl border transition-all"
                     style={{
