@@ -1573,6 +1573,9 @@ const AdminDashboard = () => {
             {key === "members" && pendingCount > 0 && (
               <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{pendingCount}</span>
             )}
+            {key === "reports" && reports.filter((r) => r.status === "pending").length > 0 && (
+              <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>{reports.filter((r) => r.status === "pending").length}</span>
+            )}
             {key === "community" && reportedPosts > 0 && (
               <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: "hsl(var(--destructive))" }}>신고 {reportedPosts}</span>
             )}
