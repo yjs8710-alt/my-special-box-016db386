@@ -267,9 +267,10 @@ function ErrorReportModal({ property, onClose }: { property: MapProperty; onClos
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = property.dbId || property.memo || String(property.id);
       const { error } = await supabase.from("property_reports").insert({
-        property_id: String(property.id),
-        property_title: property.title,
+        property_id: propertyId,
+        property_title: property.title || property.address,
         property_address: property.address,
         report_type: "error_report",
         error_content: content.trim(),
@@ -347,9 +348,11 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      // dbId(실제 DB UUID) 우선 사용, 없으면 memo(레거시 UUID 저장 필드), 마지막에 숫자 id
+      const propertyId = property.dbId || property.memo || String(property.id);
       const { error } = await supabase.from("property_reports").insert({
-        property_id: String(property.id),
-        property_title: property.title,
+        property_id: propertyId,
+        property_title: property.title || property.address,
         property_address: property.address,
         report_type: "deal_complete",
         deal_date: dealDate,

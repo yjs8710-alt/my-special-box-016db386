@@ -15,6 +15,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
 
   return {
     id: 100000 + idx,
+    dbId: String(row.id ?? ""),  // 실제 DB UUID 저장
     title: String(row.title ?? ""),
     buildingName: row.building_name ? String(row.building_name) : undefined,
     address: String(row.address ?? ""),
