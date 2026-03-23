@@ -765,19 +765,201 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
     </div>
   );
 }
+/* ─── 공적장부 통합 아코디언 컴포넌트 ─── */
+interface BuildingSummaryRow {
+  id: string;
+  building_name: string | null;
+  main_purpose: string | null;
+  approval_date: string | null;
+  land_area: string | null;
+  building_area: string | null;
+  total_area: string | null;
+  floors_above: string | null;
+  floors_below: string | null;
+  parking_count: string | null;
+  elevator: boolean | null;
+}
+interface LandSummaryRow {
+  id: string;
+  lot_number: string | null;
+  land_category: string | null;
+  land_area: string | null;
+  official_price: string | null;
+  use_zone: string | null;
+  road_access: string | null;
+}
+
+function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; address: string }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
+  const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
+
+  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(address)}`;
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(address)}`;
+  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(address)}`;
+  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(address)}`;
+
+  const handleToggle = async () => {
+    const next = !open;
+    setOpen(next);
+    if (next && building === undefined && land === undefined) {
+      setLoading(true);
+      setError(false);
+      try {
+        const [bRes, lRes] = await Promise.all([
+          supabase.from("building_summary").select("*").eq("property_id", propertyId).maybeSingle(),
+          supabase.from("land_summary").select("*").eq("property_id", propertyId).maybeSingle(),
+        ]);
+        if (bRes.error || lRes.error) throw new Error("fetch error");
+        setBuilding(bRes.data as BuildingSummaryRow | null);
+        setLand(lRes.data as LandSummaryRow | null);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const Row = ({ label, value }: { label: string; value?: string | null }) =>
+    value ? (
+      <div className="flex items-start justify-between gap-2 py-1.5 border-b border-border/40 last:border-0">
+        <span className="text-[11px] text-muted-foreground flex-shrink-0">{label}</span>
+        <span className="text-[11px] font-semibold text-foreground text-right">{value}</span>
+      </div>
+    ) : null;
+
+  return (
+    <div className="px-4 pb-3">
+      {/* 토글 버튼 */}
+      <button
+        onClick={handleToggle}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
+        style={{ borderColor: open ? "hsl(var(--primary)/0.4)" : undefined }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(var(--primary)/0.12)" }}>
+            <FileText className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <span className="text-xs font-bold text-foreground">건축물·토지대장 상세보기</span>
+        </div>
+        {open
+          ? <ChevronUp className="w-4 h-4 text-primary" />
+          : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
+
+      {/* 펼침 영역 */}
+      {open && (
+        <div className="mt-3 flex flex-col gap-3">
+          <p className="text-[11px] font-bold text-foreground px-1">📋 공적장부 상세정보</p>
+
+          {loading && (
+            <div className="flex items-center justify-center py-8 gap-2 text-xs text-muted-foreground">
+              <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              불러오는 중...
+            </div>
+          )}
+
+          {error && (
+            <div className="py-6 text-center text-xs text-destructive font-medium">
+              데이터를 불러올 수 없습니다
+            </div>
+          )}
+
+          {!loading && !error && building === null && land === null && (
+            <div className="py-6 text-center text-xs text-muted-foreground">
+              공적장부 데이터 준비중입니다
+            </div>
+          )}
+
+          {!loading && !error && building !== undefined && building !== null && (
+            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
+              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(var(--primary)/0.06)" }}>
+                <Building2 className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-bold text-foreground">건축물대장 요약</span>
+              </div>
+              <div className="px-3 py-2 bg-card">
+                <Row label="건물명" value={building.building_name} />
+                <Row label="주용도" value={building.main_purpose} />
+                <Row label="사용승인일" value={building.approval_date} />
+                <Row label="대지면적" value={building.land_area} />
+                <Row label="건축면적" value={building.building_area} />
+                <Row label="연면적" value={building.total_area} />
+                <Row label="지상층수" value={building.floors_above} />
+                <Row label="지하층수" value={building.floors_below} />
+                <Row label="주차대수" value={building.parking_count} />
+                <Row label="승강기" value={building.elevator === true ? "있음" : building.elevator === false ? "없음" : null} />
+              </div>
+            </div>
+          )}
+
+          {!loading && !error && land !== undefined && land !== null && (
+            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
+              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(142 60% 35% / 0.08)" }}>
+                <MapPin className="w-3.5 h-3.5" style={{ color: "hsl(142 60% 35%)" }} />
+                <span className="text-xs font-bold text-foreground">토지대장 요약</span>
+              </div>
+              <div className="px-3 py-2 bg-card">
+                <Row label="지번" value={land.lot_number} />
+                <Row label="지목" value={land.land_category} />
+                <Row label="면적" value={land.land_area} />
+                <Row label="공시지가" value={land.official_price} />
+                <Row label="용도지역" value={land.use_zone} />
+                <Row label="도로접면" value={land.road_access} />
+              </div>
+            </div>
+          )}
+
+          {/* 공식 열람 링크 */}
+          {!loading && !error && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <div className="px-3 py-2 border-b border-border bg-muted/30">
+                <p className="text-[10px] text-muted-foreground font-medium">공식 원문 열람 (외부 연결)</p>
+              </div>
+              <div className="p-2.5 grid grid-cols-2 gap-2">
+                <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-[11px] font-bold transition-opacity hover:opacity-80"
+                  style={{ background: "hsl(var(--primary))", color: "#fff" }}>
+                  <ExternalLink className="w-3 h-3" />건축물대장(세움터)
+                </a>
+                <a href={landRegisterUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-80"
+                  style={{ background: "hsl(142 60% 35%)" }}>
+                  <ExternalLink className="w-3 h-3" />토지대장(정부24)
+                </a>
+                <a href={irosUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
+                  style={{ background: "hsl(25 90% 45%)" }}>
+                  <ExternalLink className="w-3 h-3" />인터넷등기소
+                </a>
+                <a href={landEumUrl} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
+                  style={{ background: "hsl(180 60% 35%)" }}>
+                  <ExternalLink className="w-3 h-3" />토지e음
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* 안내문 */}
+          <p className="text-[10px] text-muted-foreground leading-relaxed px-1">
+            ※ 본 정보는 공공데이터 기반 요약 정보이며, 실제 계약 전 반드시 공식 원문을 확인하시기 바랍니다.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
-  const [buildingOpen, setBuildingOpen] = useState(false);
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
 
   if (!property) return null;
 
-  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(property.address)}`;
-  const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
-  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(property.address)}`;
-  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(property.address)}`;
-  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
   const allImages = (property.images && property.images.length > 0)
