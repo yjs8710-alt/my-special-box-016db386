@@ -259,12 +259,12 @@ export default function PropertyDetail() {
         .single();
       setProperty(prop as PropertyRow | null);
 
-      const { data: rec } = await supabase
-        .from("public_record_summary" as any)
+      const { data: rec } = await (supabase as any)
+        .from("public_record_summary")
         .select("*")
         .eq("property_id", id)
         .maybeSingle();
-      setRecord((rec as PublicRecord) ?? null);
+      setRecord((rec as unknown as PublicRecord) ?? null);
       setLoading(false);
     })();
   }, [id]);
