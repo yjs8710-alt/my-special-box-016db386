@@ -19,6 +19,7 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import MyProperties from "./pages/MyProperties";
 import AdminDashboard from "./pages/AdminDashboard";
+import PropertyDetail from "./pages/PropertyDetail";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -36,6 +37,9 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<SignupPage />} />
+
+          {/* 매물 상세 페이지 (인증 필요) */}
+          <Route path="/property/:id" element={<ProtectedRoute><PropertyDetail /></ProtectedRoute>} />
 
           {/* 인증 필요 페이지 */}
           <Route path="/" element={<Home />} />
