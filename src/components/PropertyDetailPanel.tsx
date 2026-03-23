@@ -773,8 +773,11 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
   if (!property) return null;
 
-  const buildingSearchUrl = `https://www.eais.go.kr`;
+  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(property.address)}`;
   const naverBuildingUrl = `https://land.naver.com/building/info?address=${encodeURIComponent(property.address)}`;
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(property.address)}`;
+  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(property.address)}`;
+  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(property.address)}`;
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
 
   const allImages = (property.images && property.images.length > 0)
@@ -1102,12 +1105,18 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 </div>
                 <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
                   <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
-                  <div className="flex gap-2">
-                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />세움터 열람
+                   <div className="grid grid-cols-2 gap-2">
+                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-primary-foreground text-[11px] font-bold hover:opacity-90 transition-colors">
+                      <ExternalLink className="w-3 h-3" />건축물대장(세움터)
                     </a>
-                    <a href={naverBuildingUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg bg-accent text-white text-[11px] font-bold hover:bg-accent/90 transition-colors">
-                      <ExternalLink className="w-3 h-3" />네이버 건물정보
+                    <a href={landRegisterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-secondary text-secondary-foreground text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(142 60% 35%)"}}>
+                      <ExternalLink className="w-3 h-3" />토지대장(정부24)
+                    </a>
+                    <a href={irosUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(25 90% 45%)"}}>
+                      <ExternalLink className="w-3 h-3" />인터넷등기소
+                    </a>
+                    <a href={landEumUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(180 60% 35%)"}}>
+                      <ExternalLink className="w-3 h-3" />토지e음
                     </a>
                   </div>
                 </div>
