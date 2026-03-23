@@ -846,9 +846,9 @@ function Step2({
         </Section>
       )}
 
-      {/* 방 옵션 - 토지/건물매매/상가류+매매 제외 */}
+      {/* 옵션 - 토지/건물매매/상가임대류 제외 */}
       {showRoomOptions && (
-        <Section label="방 옵션">
+        <Section label="옵션">
           {/* 풀옵션 체크 버튼 */}
           <FullOptionToggle options={form.options} set={set} />
           <div className="flex flex-wrap gap-2">
@@ -866,8 +866,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 비밀번호 - 토지/건물매매 제외 */}
-      {!isLand && !isBuildingSale && (
+      {/* 비밀번호 - 토지/건물매매/상가임대류 제외 */}
+      {showRoomOptions && (
         <Section label="비밀번호">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
@@ -882,8 +882,8 @@ function Step2({
         </Section>
       )}
 
-      {/* 방향 - 토지/건물매매 제외 */}
-      {!isLand && !isBuildingSale && (
+      {/* 방향 - 토지/건물매매/상가임대류 제외 */}
+      {showDirection && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
