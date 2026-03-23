@@ -1226,16 +1226,6 @@ function Step3({
             </div>
             <OnOffToggle checked={form.expose} onClick={() => set("expose", !form.expose)} />
           </div>
-          <div className="flex items-start justify-between p-3 rounded-xl border border-border bg-muted/20 gap-3">
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">번지·호수 열람 허용</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                다른 중개사가 번지와 호수를 볼 수 없어요.<br />
-                열람해야 번지·호수를 볼 수 있으며 열람 시 알림을 보내드려요.
-              </p>
-            </div>
-            <OnOffToggle checked={form.allowAddressView} onClick={() => set("allowAddressView", !form.allowAddressView)} />
-          </div>
         </div>
       </Section>
     </div>
