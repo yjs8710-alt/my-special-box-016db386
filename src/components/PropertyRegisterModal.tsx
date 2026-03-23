@@ -405,7 +405,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
     const payload = {
       title: isBuildingSale
-        ? `${form.dong} 건물매매 (${form.buildingSaleType})`
+        ? `${form.dong} ${form.detailType} (${form.buildingSaleType})`
         : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
       building_name: form.buildingName || null,
       address,
