@@ -1190,15 +1190,37 @@ function Step2({
         </Section>
       )}
 
-      {/* 내 메모 */}
-      <Section label="내 메모">
-        <textarea
-          placeholder="관리용 메모 (외부에 노출되지 않음)"
-          value={form.myMemo}
-          onChange={(e) => set("myMemo", e.target.value)}
-          rows={2}
-          className={ic(false) + " resize-none"}
-        />
+      {/* 체크박스 옵션 */}
+      <div className="flex gap-6 flex-wrap">
+        {[
+          { key: "elevator" as const, label: "엘리베이터" },
+          { key: "isNew" as const, label: "신규 매물" },
+          { key: "isHot" as const, label: "인기 매물" },
+        ].map(({ key, label }) => (
+          <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+            <input type="checkbox"
+              checked={form[key] as boolean}
+              onChange={(e) => set(key, e.target.checked)}
+              className="w-4 h-4 accent-primary" />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      {/* 메모 */}
+      <Section label="메모">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">건물 메모</label>
+            <textarea rows={2} value={form.buildingMemo} onChange={(e) => set("buildingMemo", e.target.value)}
+              className={ic(false) + " resize-none"} placeholder="건물 관련 메모" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">방 메모 (내 메모)</label>
+            <textarea rows={2} value={form.myMemo} onChange={(e) => set("myMemo", e.target.value)}
+              className={ic(false) + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
+          </div>
+        </div>
       </Section>
     </div>
   );
