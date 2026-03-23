@@ -1090,7 +1090,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 부가 시설 (수도·유선TV·인터넷·CCTV) */}
+              {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매 타입 제외 */}
+              {!SALE_TYPES.includes(form.type) && (
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
                   {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
@@ -1120,9 +1121,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   })}
                 </div>
               </Section>
+              )}
 
-
-              {/* 방 옵션 */}
+              {/* 방 옵션 — 매매 타입 제외 */}
+              {!SALE_TYPES.includes(form.type) && (
               <Section label="방 옵션">
                 {/* 풀옵션 버튼 */}
                 <div className="mb-2">
@@ -1134,10 +1136,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         const current = new Set(f.options);
                         const allSelected = FULL_OPTIONS.every(o => current.has(o));
                         if (allSelected) {
-                          // 풀옵션 해제
                           FULL_OPTIONS.forEach(o => current.delete(o));
                         } else {
-                          // 풀옵션 전체 선택
                           FULL_OPTIONS.forEach(o => current.add(o));
                         }
                         return { ...f, options: Array.from(current) };
@@ -1164,6 +1164,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   ))}
                 </div>
               </Section>
+              )}
 
               {/* 방 비번 / 건물 비번 */}
               <div className="grid grid-cols-2 gap-3">
