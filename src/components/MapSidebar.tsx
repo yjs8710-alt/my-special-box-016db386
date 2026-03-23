@@ -470,32 +470,30 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
   const [category, setCategory] = useState(ERROR_CATEGORIES[0]);
   const [text, setText] = useState("");
   const [sent, setSent] = useState(false);
-  const ADMIN_EMAIL = "admin@yourdomain.com"; // 관리자 이메일로 변경하세요
+  const [saving, setSaving] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!text.trim()) return;
-
-    // 로컬 저장 (오류 이력)
-    const key = `error_reports`;
-    const prev = JSON.parse(localStorage.getItem(key) ?? "[]");
-    const report = {
-      id: Date.now(),
-      propId: prop.id,
-      address: prop.address,
-      category,
-      text,
-      date: new Date().toLocaleString("ko-KR"),
-    };
-    localStorage.setItem(key, JSON.stringify([report, ...prev]));
-
-    // 관리자 이메일 전송 (mailto)
-    const subject = encodeURIComponent(`[오류제보] ${category} - ${prop.buildingName ?? prop.title} (${prop.unitNumber ?? ""})`);
-    const body = encodeURIComponent(
-      `■ 매물 ID: ${prop.id}\n■ 건물명: ${prop.buildingName ?? prop.title}\n■ 주소: ${prop.address}\n■ 호수: ${prop.unitNumber ?? "-"}\n\n■ 오류 유형: ${category}\n\n■ 오류 내용:\n${text}\n\n■ 제보일시: ${report.date}`
-    );
-    window.location.href = `mailto:${ADMIN_EMAIL}?subject=${subject}&body=${body}`;
-
-    setSent(true);
+    setSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = prop.dbId || String(prop.id);
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: propertyId,
+        property_title: prop.title || prop.address,
+        property_address: prop.address,
+        report_type: "error_report",
+        error_content: `[${category}] ${text.trim()}`,
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setSent(true);
+    } catch (e) {
+      console.error("오류제보 저장 실패:", e);
+      alert("제보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -534,8 +532,7 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
             </div>
             <p className="text-sm font-bold text-foreground">제보가 접수되었습니다</p>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              이메일 앱이 열리면 전송을 완료해 주세요.<br />
-              제보 내용은 이 기기에도 저장되었습니다.
+              관리자가 검토 후 처리할 예정입니다.
             </p>
             <button
               onClick={onClose}
@@ -603,12 +600,109 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
             {/* 전송 버튼 */}
             <button
               onClick={handleSend}
-              disabled={!text.trim()}
+              disabled={!text.trim() || saving}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: "hsl(var(--destructive))", color: "#fff" }}
             >
               <Send className="w-4 h-4" />
-              관리자에게 전송
+              {saving ? "제출 중..." : "제보하기"}
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+/* ── DealCompleteModal ── */
+interface DealCompleteModalProps { prop: MapProperty; onClose: () => void; }
+const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
+  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
+  const [memo, setMemo] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = prop.dbId || String(prop.id);
+      const { error } = await supabase.from("property_reports").insert({
+        property_id: propertyId,
+        property_title: prop.title || prop.address,
+        property_address: prop.address,
+        report_type: "deal_complete",
+        deal_date: dealDate,
+        deal_memo: memo.trim() || null,
+        submitted_by: session?.user?.id ?? null,
+      });
+      if (error) throw error;
+      setDone(true);
+    } catch (e) {
+      console.error("거래완료 저장 실패:", e);
+      alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ width: "min(400px, 92vw)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+            <h3 className="text-sm font-bold text-foreground">거래 완료 처리</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        {done ? (
+          <div className="p-8 flex flex-col items-center gap-3 text-center">
+            <CheckCircle className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
+            <p className="text-sm font-bold text-foreground">거래완료가 접수되었습니다</p>
+            <p className="text-xs text-muted-foreground">관리자가 확인 후 매물 상태를 변경합니다.</p>
+            <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
+          </div>
+        ) : (
+          <div className="p-5 flex flex-col gap-4">
+            <div className="rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[10px] text-muted-foreground mb-0.5">대상 매물</p>
+              <p className="text-xs font-semibold text-foreground truncate">{prop.title}</p>
+              <p className="text-[11px] text-muted-foreground">{prop.address}</p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">거래 완료일</label>
+              <input
+                type="date"
+                value={dealDate}
+                onChange={e => setDealDate(e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-foreground">메모 (선택)</label>
+              <textarea
+                value={memo}
+                onChange={e => setMemo(e.target.value)}
+                placeholder="특이사항이 있다면 입력하세요."
+                rows={3}
+                className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none outline-none focus:border-primary"
+              />
+            </div>
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
+              style={{ background: "hsl(var(--chart-2))" }}
+            >
+              {saving ? "처리 중..." : "거래완료 접수"}
             </button>
           </div>
         )}
@@ -1710,6 +1804,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
+  const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
@@ -1916,6 +2011,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         <ErrorReportModal
           prop={errorReportProp}
           onClose={() => setErrorReportProp(null)}
+        />
+      )}
+      {/* Deal Complete Modal */}
+      {dealCompleteProp && (
+        <DealCompleteModal
+          prop={dealCompleteProp}
+          onClose={() => setDealCompleteProp(null)}
         />
       )}
       {/* Admin Property Edit Modal */}
@@ -2533,7 +2635,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); alert(`[거래완료] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          onClick={(e) => { e.stopPropagation(); setDealCompleteProp(prop); }}
                           className="flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
                         >
                           <CheckCircle className="w-3 h-3 text-green-600" />
