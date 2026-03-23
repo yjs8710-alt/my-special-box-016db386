@@ -1144,8 +1144,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 방 비번 / 건물 비번 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
+              {/* 방 비번 / 건물 비번 — 매매/토지 제외 (상가임대류 포함) */}
+              {!SALE_TYPES.includes(form.type) && form.buildingType !== "토지" && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-muted-foreground">방 비번</label>
