@@ -875,7 +875,7 @@ function Step2({
               <input type="text" placeholder="건물 공동현관 비번" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">방(호실) 비번</label>
+              <label className="text-xs font-semibold text-foreground/70">호실 비번</label>
               <input type="text" placeholder="방 도어락 비번" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
             </div>
           </div>
@@ -902,7 +902,7 @@ function Step2({
 
       {/* 공실 여부 - 토지/매매/건물매매 제외 */}
       {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
-        <Section label="현재 빈방 여부">
+        <Section label="공실 여부">
           <div className="flex gap-3">
             {VACANCY_TYPES.map((t) => (
               <button key={t} type="button" onClick={() => set("vacancy", t)}
