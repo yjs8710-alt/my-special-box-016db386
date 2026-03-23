@@ -1804,6 +1804,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
+  const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
