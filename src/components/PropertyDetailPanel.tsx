@@ -876,8 +876,10 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
           )}
 
           {!loading && !error && building === null && land === null && (
-            <div className="py-6 text-center text-xs text-muted-foreground">
-              공적장부 데이터 준비중입니다
+            <div className="rounded-xl border border-border bg-muted/30 px-4 py-5 flex flex-col items-center gap-2 text-center">
+              <FileText className="w-8 h-8 text-muted-foreground/40" />
+              <p className="text-xs font-semibold text-muted-foreground">현재 해당 매물의 공적장부 데이터가 저장되어 있지 않습니다</p>
+              <p className="text-[10px] text-muted-foreground/70">아래 공식 링크에서 직접 조회하실 수 있습니다</p>
             </div>
           )}
 
