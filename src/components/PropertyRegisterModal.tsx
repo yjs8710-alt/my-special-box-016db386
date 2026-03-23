@@ -875,7 +875,7 @@ function Step2({
               <input type="text" placeholder="건물 공동현관 비번" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">방(호실) 비번</label>
+              <label className="text-xs font-semibold text-foreground/70">호실 비번</label>
               <input type="text" placeholder="방 도어락 비번" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
             </div>
           </div>
