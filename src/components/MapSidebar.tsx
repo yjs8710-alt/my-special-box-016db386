@@ -654,9 +654,9 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
         style={{ width: "min(400px, 92vw)", maxHeight: "90vh" }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--chart-2) / 0.08)" }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0" style={{ background: "hsl(var(--primary) / 0.08)" }}>
           <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+            <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
             <h3 className="text-sm font-bold text-foreground">거래 완료 처리</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded hover:bg-muted/50">
@@ -665,7 +665,7 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
         </div>
         {done ? (
           <div className="p-8 flex flex-col items-center gap-3 text-center">
-            <CheckCircle className="w-10 h-10" style={{ color: "hsl(var(--chart-2))" }} />
+            <CheckCircle className="w-10 h-10" style={{ color: "hsl(var(--primary))" }} />
             <p className="text-sm font-bold text-foreground">거래완료가 접수되었습니다</p>
             <p className="text-xs text-muted-foreground">관리자가 확인 후 매물 상태를 변경합니다.</p>
             <button onClick={onClose} className="mt-2 px-5 py-2 rounded-full text-xs font-bold text-white" style={{ background: "hsl(var(--primary))" }}>확인</button>
@@ -703,9 +703,9 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
                 onClick={handleSubmit}
                 disabled={saving}
                 className="w-full h-10 rounded-full text-sm font-bold text-white transition-all disabled:opacity-50"
-                style={{ background: "hsl(var(--chart-2))" }}
+                style={{ background: "hsl(var(--primary))" }}
               >
-                {saving ? "처리 중..." : "거래완료 접수"}
+                {saving ? "처리 중..." : "확인"}
               </button>
             </div>
           </>
