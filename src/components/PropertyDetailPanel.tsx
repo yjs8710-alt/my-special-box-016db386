@@ -267,9 +267,10 @@ function ErrorReportModal({ property, onClose }: { property: MapProperty; onClos
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      const propertyId = property.dbId || property.memo || String(property.id);
       const { error } = await supabase.from("property_reports").insert({
-        property_id: String(property.id),
-        property_title: property.title,
+        property_id: propertyId,
+        property_title: property.title || property.address,
         property_address: property.address,
         report_type: "error_report",
         error_content: content.trim(),
