@@ -862,18 +862,6 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
         <div className="mt-3 flex flex-col gap-3">
           <p className="text-[11px] font-bold text-foreground px-1">📋 공적장부 상세정보</p>
 
-          {/* 🛠 디버그 패널 */}
-          {debugInfo && (
-            <div className="rounded-xl border-2 border-yellow-400 bg-yellow-50 p-3 flex flex-col gap-1 text-[11px]">
-              <p className="font-extrabold text-yellow-800 mb-1">🛠 디버그 정보 (개발 임시)</p>
-              <div className="flex gap-1"><span className="text-yellow-700 font-semibold w-28 flex-shrink-0">property_id:</span><span className="text-yellow-900 font-mono break-all">{debugInfo.propertyId}</span></div>
-              <div className="flex gap-1"><span className="text-yellow-700 font-semibold w-28 flex-shrink-0">건축물대장:</span><span className="font-bold">{debugInfo.bStatus}</span></div>
-              {debugInfo.bError && <div className="flex gap-1"><span className="text-yellow-700 font-semibold w-28 flex-shrink-0">  └ 오류내용:</span><span className="text-red-700 font-mono">{debugInfo.bError}</span></div>}
-              <div className="flex gap-1"><span className="text-yellow-700 font-semibold w-28 flex-shrink-0">토지대장:</span><span className="font-bold">{debugInfo.lStatus}</span></div>
-              {debugInfo.lError && <div className="flex gap-1"><span className="text-yellow-700 font-semibold w-28 flex-shrink-0">  └ 오류내용:</span><span className="text-red-700 font-mono">{debugInfo.lError}</span></div>}
-            </div>
-          )}
-
           {loading && (
             <div className="flex items-center justify-center py-8 gap-2 text-xs text-muted-foreground">
               <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
