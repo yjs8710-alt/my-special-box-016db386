@@ -2635,7 +2635,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); alert(`[거래완료] 매물 ID: ${prop.id}\n${prop.address}`); }}
+                          onClick={(e) => { e.stopPropagation(); setDealCompleteProp(prop); }}
                           className="flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
                         >
                           <CheckCircle className="w-3 h-3 text-green-600" />
