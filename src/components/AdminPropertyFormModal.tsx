@@ -508,6 +508,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 창고/공장매매: 층수·호수·평수·방비번·관리비·청소비·권리금 제외, 대지·건평 표시
+  const isWarehouseSale = form.type === "창고/공장매매";
+
   const set = <K extends keyof AdminFormExtended>(k: K, v: AdminFormExtended[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
