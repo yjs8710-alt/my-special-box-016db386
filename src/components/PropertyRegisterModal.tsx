@@ -902,7 +902,7 @@ function Step2({
 
       {/* 공실 여부 - 토지/매매/건물매매 제외 */}
       {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
-        <Section label="현재 빈방 여부">
+        <Section label="공실 여부">
           <div className="flex gap-3">
             {VACANCY_TYPES.map((t) => (
               <button key={t} type="button" onClick={() => set("vacancy", t)}
