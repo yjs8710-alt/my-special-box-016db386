@@ -1105,17 +1105,17 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 </div>
                 <div className="px-3 py-2.5 bg-muted/20 border-t border-border flex flex-col gap-2">
                   <p className="text-[10px] text-muted-foreground font-medium">공식 열람 (외부 연결)</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary/90 transition-colors">
+                   <div className="grid grid-cols-2 gap-2">
+                    <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-primary text-primary-foreground text-[11px] font-bold hover:opacity-90 transition-colors">
                       <ExternalLink className="w-3 h-3" />건축물대장(세움터)
                     </a>
-                    <a href={landRegisterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-green-600 text-white text-[11px] font-bold hover:bg-green-700 transition-colors">
+                    <a href={landRegisterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-secondary text-secondary-foreground text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(142 60% 35%)"}}>
                       <ExternalLink className="w-3 h-3" />토지대장(정부24)
                     </a>
-                    <a href={irosUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-orange-600 text-white text-[11px] font-bold hover:bg-orange-700 transition-colors">
+                    <a href={irosUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(25 90% 45%)"}}>
                       <ExternalLink className="w-3 h-3" />인터넷등기소
                     </a>
-                    <a href={landEumUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg bg-teal-600 text-white text-[11px] font-bold hover:bg-teal-700 transition-colors">
+                    <a href={landEumUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold hover:opacity-90 transition-colors" style={{background:"hsl(180 60% 35%)"}}>
                       <ExternalLink className="w-3 h-3" />토지e음
                     </a>
                   </div>
