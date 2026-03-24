@@ -189,6 +189,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.floors as Array<Record<string, string>>)
     : [];
 
+  // api_status === "no_data": API 호출 성공했지만 데이터 없음 (서비스 미승인 또는 미등록)
+  const buildingApiNoData = raw?.api_status === "no_data";
+
   const hasAnyBuildingData = building && (
     str(building.building_name) || str(building.main_purpose) ||
     str(building.total_area) || str(building.approval_date) || str(building.floors_above)
