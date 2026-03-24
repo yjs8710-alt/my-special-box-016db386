@@ -147,47 +147,87 @@ async function fetchBuildingApi(
   const encodedKey = encodeURIComponent(apiKey);
   const params = new URLSearchParams({ sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo: "1", _type: "json" });
   const url = `${BUILDING_API_BASE}/${endpoint}?serviceKey=${encodedKey}&${params}`;
-  console.log(`🏢 [${endpoint}]`, url.replace(encodedKey, "***"));
+
+  // ── [진단] 호출 직전 상세 로그 ──
+  console.log(`\n📋 [${endpoint}] 호출 상세`);
+  console.log(`  ▸ 호출 URL: ${url.replace(encodedKey, "***")}`);
+  console.log(`  ▸ serviceKey 존재: ${!!apiKey}`);
+  console.log(`  ▸ sigunguCd: ${sigunguCd}`);
+  console.log(`  ▸ bjdongCd: ${bjdongCd}`);
+  console.log(`  ▸ platGbCd: (미사용-일반건물)`);
+  console.log(`  ▸ bun: ${bun}`);
+  console.log(`  ▸ ji: ${ji}`);
+
   try {
     const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
     const text = await res.text();
-    console.log(`🏢 [${endpoint} 응답]`, text.substring(0, 400));
-    const data  = JSON.parse(text);
-    const total = Number(data?.response?.body?.totalCount ?? 0);
-    const raw   = data?.response?.body?.items?.item;
-    const items = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
-    return { total, items };
+
+    // ── [진단] 응답 원문 전체 로그 ──
+    let parsed: any = {};
+    try { parsed = JSON.parse(text); } catch { parsed = {}; }
+
+    const header    = parsed?.response?.header ?? {};
+    const body      = parsed?.response?.body   ?? {};
+    const resultCode = header?.resultCode ?? "N/A";
+    const resultMsg  = header?.resultMsg  ?? "N/A";
+    const totalCount = Number(body?.totalCount ?? 0);
+    const raw        = body?.items?.item;
+    const items      = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
+
+    console.log(`  ▸ resultCode: ${resultCode}`);
+    console.log(`  ▸ resultMsg: ${resultMsg}`);
+    console.log(`  ▸ totalCount: ${totalCount}`);
+    console.log(`  ▸ items 수: ${items.length}`);
+
+    // ── [진단] totalCount=0 원인 구분 ──
+    if (totalCount === 0) {
+      console.log(`\n⚠️ [${endpoint}] totalCount=0 원인 분석:`);
+      if (resultCode === "30" || resultCode === "31" || resultMsg?.includes("SERVICE KEY")) {
+        console.log(`  ❌ 가능성: serviceKey 문제 또는 API 접근 권한 없음 (resultCode=${resultCode})`);
+      } else if (resultCode === "22" || resultMsg?.includes("LIMITED")) {
+        console.log(`  ❌ 가능성: 일일 호출 한도 초과`);
+      } else if (resultCode === "00" || resultCode === "0000" || resultMsg?.includes("NORMAL")) {
+        console.log(`  ⚠️ 가능성 1: 파라미터 불일치 (sigunguCd=${sigunguCd}, bjdongCd=${bjdongCd}, bun=${bun}, ji=${ji})`);
+        console.log(`  ⚠️ 가능성 2: data.go.kr 서비스 미승인 (1613000/BldRgstHubService 활용신청 필요)`);
+        console.log(`  ⚠️ 가능성 3: 해당 주소에 건축물 정보 미등록 (나대지 등)`);
+        console.log(`  ⚠️ 가능성 4: endpoint 불일치 → 현재: ${BUILDING_API_BASE}/${endpoint}`);
+      } else {
+        console.log(`  ❌ 알 수 없는 오류 (resultCode=${resultCode}, msg=${resultMsg})`);
+      }
+    }
+
+    return { total: totalCount, items, resultCode, resultMsg };
   } catch (e) {
     console.error(`❌ [${endpoint} 오류]`, String(e));
-    return { total: 0, items: [] };
+    return { total: 0, items: [], resultCode: "ERR", resultMsg: String(e) };
   }
 }
 
 // ── 표제부 ───────────────────────────────────────────────────────────────
 async function fetchBuildingTitle(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k);
-  console.log("📊 [표제부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k);
+  console.log("📊 [표제부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 총괄표제부 (다세대·집합건물 폴백) ────────────────────────────────────
 async function fetchBuildingRecap(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrRecapTitleInfo", s, b, bun, ji, k);
-  console.log("📊 [총괄표제부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrRecapTitleInfo", s, b, bun, ji, k);
+  console.log("📊 [총괄표제부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 집합건물 공용부 (오피스텔·아파트 폴백) ──────────────────────────────
 async function fetchBuildingExpos(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k);
-  console.log("📊 [집합건물공용부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k);
+  console.log("📊 [집합건물공용부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 기본개요 ─────────────────────────────────────────────────────────────
 async function fetchBuildingBasic(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrBasisOulnInfo", s, b, bun, ji, k);
-  console.log("📊 [기본개요]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrBasisOulnInfo", s, b, bun, ji, k);
+  console.log("📊 [기본개요]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
@@ -436,9 +476,23 @@ serve(async (req) => {
 
           // 우선순위: 표제부 > 총괄표제부 > 집합건물공용부 > 기본개요
           const bestItem = titleItem || recapItem || exposItem || basicItem;
+          const apiStatus = !bestItem ? "no_data" : "ok";
           console.log("📊 [최종 선택 API]:", titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음");
+          if (!bestItem) {
+            console.log("\n🔴 [건축물대장 조회 결과 없음] 최종 진단:");
+            console.log("  ▸ 호출 endpoint: " + BUILDING_API_BASE + "/getBrTitleInfo (등 4종)");
+            console.log("  ▸ 확인사항 1: data.go.kr → '건축물대장_HUB서비스(1613000)' 활용신청 승인 여부");
+            console.log("  ▸ 확인사항 2: 현재 API키가 해당 서비스에 연결되어 있는지");
+            console.log("  ▸ 확인사항 3: sigunguCd=" + sigunguCd + " bjdongCd=" + bjdongCd + " bun=" + bun + " ji=" + ji);
+            console.log("  ▸ 확인사항 4: 나대지 또는 미등록 건물 가능성");
+          }
 
           const mappedBuilding = mapBuildingData(bestItem, floorItems);
+          // _raw에 api_status 포함: 클라이언트에서 미승인/데이터없음 구분 가능
+          const rawWithStatus = {
+            ...(mappedBuilding?._raw ?? { floors: [] }),
+            api_status: apiStatus,  // "ok" | "no_data"
+          };
 
           if (isBuildingEmpty && buildingData) {
             const { data: updated } = await supabase
@@ -456,7 +510,7 @@ serve(async (req) => {
                 elevator:      mappedBuilding?.elevator      ?? false,
               })
               .eq("property_id", pid).select().single();
-            if (updated) buildingData = { ...updated, _raw: mappedBuilding?._raw ?? { floors: [] } };
+            if (updated) buildingData = { ...updated, _raw: rawWithStatus };
             console.log("✅ [건축물대장 업데이트 완료]", updated ? "성공" : "실패");
           } else {
             const { data: inserted } = await supabase
@@ -475,7 +529,7 @@ serve(async (req) => {
                 elevator:      mappedBuilding?.elevator      ?? false,
               })
               .select().single();
-            if (inserted) buildingData = { ...inserted, _raw: mappedBuilding?._raw ?? { floors: [] } };
+            if (inserted) buildingData = { ...inserted, _raw: rawWithStatus };
             console.log("✅ [건축물대장 저장 완료]");
           }
         }

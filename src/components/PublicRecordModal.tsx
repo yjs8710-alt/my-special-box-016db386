@@ -189,6 +189,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.floors as Array<Record<string, string>>)
     : [];
 
+  // api_status === "no_data": API 호출 성공했지만 데이터 없음 (서비스 미승인 또는 미등록)
+  const buildingApiNoData = raw?.api_status === "no_data";
+
   const hasAnyBuildingData = building && (
     str(building.building_name) || str(building.main_purpose) ||
     str(building.total_area) || str(building.approval_date) || str(building.floors_above)
@@ -347,9 +350,21 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     </>
                   )}
                   {!hasAnyBuildingData && (
-                    <p className="text-[10px] text-muted-foreground/50 pt-1 pb-2 text-center">
-                      국토교통부 미등록 지번이거나 API 조회 실패
-                    </p>
+                    <div className="flex flex-col items-center gap-1.5 pt-2 pb-3">
+                      {buildingApiNoData ? (
+                        <>
+                          <p className="text-[11px] font-semibold" style={{ color: "hsl(38 92% 40%)" }}>건축물대장 API 승인 대기 또는 조회 결과 없음</p>
+                          <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
+                            data.go.kr → 건축물대장_HUB서비스(1613000) 활용신청 승인 후 조회 가능합니다.<br/>
+                            또는 해당 주소가 국토교통부에 미등록된 지번일 수 있습니다.
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-[10px] text-muted-foreground/50 text-center">
+                          국토교통부 미등록 지번이거나 API 조회 실패
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               ) : (
