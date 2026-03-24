@@ -189,8 +189,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.floors as Array<Record<string, string>>)
     : [];
 
-  // api_status === "no_data": API 호출 성공했지만 데이터 없음 (서비스 미승인 또는 미등록)
+  // api_status === "no_data": API 호출 성공했지만 데이터 없음
   const buildingApiNoData = raw?.api_status === "no_data";
+
+  // 위반건축물 정보
+  const violation = raw?.violation && typeof raw.violation === "object"
+    ? (raw.violation as { isViolation: boolean; violationYn: string; items: Array<{ vlttRnCnts?: string; vlttGbCdNm?: string; crtnDay?: string }> })
+    : null;
+  const isViolation = violation?.isViolation === true;
+  const hasViolationInfo = violation !== null; // API가 결과를 반환했는지 여부
 
   const hasAnyBuildingData = building && (
     str(building.building_name) || str(building.main_purpose) ||
