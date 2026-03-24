@@ -476,7 +476,16 @@ serve(async (req) => {
 
           // 우선순위: 표제부 > 총괄표제부 > 집합건물공용부 > 기본개요
           const bestItem = titleItem || recapItem || exposItem || basicItem;
+          const apiStatus = !bestItem ? "no_data" : "ok";
           console.log("📊 [최종 선택 API]:", titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음");
+          if (!bestItem) {
+            console.log("\n🔴 [건축물대장 조회 결과 없음] 최종 진단:");
+            console.log("  ▸ 호출 endpoint: " + BUILDING_API_BASE + "/getBrTitleInfo (등 4종)");
+            console.log("  ▸ 확인사항 1: data.go.kr → '건축물대장_HUB서비스(1613000)' 활용신청 승인 여부");
+            console.log("  ▸ 확인사항 2: 현재 API키가 해당 서비스에 연결되어 있는지");
+            console.log("  ▸ 확인사항 3: sigunguCd=" + sigunguCd + " bjdongCd=" + bjdongCd + " bun=" + bun + " ji=" + ji);
+            console.log("  ▸ 확인사항 4: 나대지 또는 미등록 건물 가능성");
+          }
 
           const mappedBuilding = mapBuildingData(bestItem, floorItems);
 
