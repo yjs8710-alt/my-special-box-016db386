@@ -200,7 +200,7 @@ async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | 
     });
 
     const url = `${LAND_PRICE_API_BASE}/getStdLandPriceInfo?serviceKey=${encodedKey}&${params}`;
-    console.log(`💰 [표준공시지가 API ${year}년 호출] PNU:${pnu}`);
+    console.log(`💰 [표준공시지가 API ${year}년 호출] URL:`, url.replace(encodedKey, "***"));
 
     try {
       const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
