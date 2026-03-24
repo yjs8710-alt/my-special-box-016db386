@@ -2074,6 +2074,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   return (
     <>
 
+      {/* Public Record Modal */}
+      {publicRecordAddress && (
+        <PublicRecordModal
+          address={publicRecordAddress}
+          onClose={() => setPublicRecordAddress(null)}
+        />
+      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
