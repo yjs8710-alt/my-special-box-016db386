@@ -4,7 +4,7 @@ import {
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
   AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
@@ -789,10 +789,73 @@ interface LandSummaryRow {
   road_access: string | null;
 }
 
-function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; address: string }) {
+declare global {
+  interface Window { kakao: any; __kakaoMapReady?: boolean; __kakaoMapCallbacks?: Array<() => void>; }
+}
+const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+function loadKakaoForPublicRecords(cb: () => void) {
+  if (window.kakao && window.kakao.maps) { cb(); return; }
+  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
+  window.__kakaoMapCallbacks.push(cb);
+  if (document.getElementById("kakao-maps-script")) return;
+  const s = document.createElement("script");
+  s.id = "kakao-maps-script";
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  s.async = true;
+  s.onload = () => {
+    window.kakao.maps.load(() => {
+      window.__kakaoMapReady = true;
+      window.__kakaoMapCallbacks?.forEach(fn => fn());
+      window.__kakaoMapCallbacks = [];
+    });
+  };
+  document.head.appendChild(s);
+}
+
+// 미니 카카오 지도 컴포넌트
+function MiniKakaoMap({ address, lat, lng }: { address: string; lat?: number; lng?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    loadKakaoForPublicRecords(() => {
+      if (!containerRef.current) return;
+      const center = (lat && lng && lat !== 0 && lng !== 0)
+        ? new window.kakao.maps.LatLng(lat, lng)
+        : new window.kakao.maps.LatLng(36.6285, 127.4568);
+
+      if (!mapRef.current) {
+        mapRef.current = new window.kakao.maps.Map(containerRef.current, { center, level: 4 });
+      }
+
+      const map = mapRef.current;
+      map.setCenter(center);
+
+      // 마커 추가
+      new window.kakao.maps.Marker({ position: center, map });
+
+      // 주소로 재검색해서 정확한 위치 표시
+      if (address) {
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.addressSearch(address, (result: any[], status: string) => {
+          if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
+            const pos = new window.kakao.maps.LatLng(Number(result[0].y), Number(result[0].x));
+            map.setCenter(pos);
+            new window.kakao.maps.Marker({ position: pos, map });
+          }
+        });
+      }
+    });
+  }, [address, lat, lng]);
+
+  return <div ref={containerRef} className="w-full h-44 rounded-xl overflow-hidden" />;
+}
+
+function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId: string; address: string; lat?: number; lng?: number }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"land" | "building">("land");
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
 
@@ -806,41 +869,50 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
     setOpen(next);
     if (next && building === undefined && land === undefined) {
       setLoading(true);
-      setError(false);
+      setErrorMsg(null);
 
       console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
 
-      const [bRes, lRes] = await Promise.all([
-        supabase.from("building_summary").select("*").eq("property_id", propertyId).maybeSingle(),
-        supabase.from("land_summary").select("*").eq("property_id", propertyId).maybeSingle(),
-      ]);
-
-      console.log("📦 [building_summary] error:", bRes.error?.message ?? "없음", "| data:", bRes.data === null ? "null (데이터 없음)" : bRes.data);
-      console.log("🌍 [land_summary]     error:", lRes.error?.message ?? "없음", "| data:", lRes.data === null ? "null (데이터 없음)" : lRes.data);
-
-      if (bRes.error || lRes.error) {
-        console.error("❌ 조회 오류 - building:", bRes.error?.message, "| land:", lRes.error?.message);
-        setError(true);
-      } else {
-        console.log("✅ 조회 완료 - building:", bRes.data ? "데이터 있음" : "없음", "| land:", lRes.data ? "데이터 있음" : "없음");
-        setBuilding(bRes.data as BuildingSummaryRow | null);
-        setLand(lRes.data as LandSummaryRow | null);
+      try {
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+        const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/property-summary`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": ANON_KEY,
+            "Authorization": `Bearer ${ANON_KEY}`,
+          },
+          body: JSON.stringify({ address, property_id: propertyId }),
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+        const data = await res.json();
+        console.log("📦 [building_summary]:", data.building_summary ? "데이터 있음" : "없음", data.building_summary);
+        console.log("🌍 [land_summary]:", data.land_summary ? "데이터 있음" : "없음", data.land_summary);
+        setBuilding(data.building_summary as BuildingSummaryRow | null ?? null);
+        setLand(data.land_summary as LandSummaryRow | null ?? null);
+      } catch (e: any) {
+        console.error("❌ [공적장부 오류]:", e);
+        setErrorMsg(e?.message ?? "조회 중 오류가 발생했습니다");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
   };
 
   const Row = ({ label, value }: { label: string; value?: string | null }) =>
     value ? (
-      <div className="flex items-start justify-between gap-2 py-1.5 border-b border-border/40 last:border-0">
-        <span className="text-[11px] text-muted-foreground flex-shrink-0">{label}</span>
-        <span className="text-[11px] font-semibold text-foreground text-right">{value}</span>
+      <div className="grid grid-cols-[100px_1fr] gap-2 py-1.5 border-b border-border/30 last:border-0">
+        <span className="text-[11px] text-muted-foreground">{label}</span>
+        <span className="text-[11px] font-semibold text-foreground">{value}</span>
       </div>
     ) : null;
 
   return (
     <div className="px-4 pb-3">
-      {/* 토글 버튼 */}
       <button
         onClick={handleToggle}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/30 hover:bg-muted/60 transition-colors"
@@ -850,79 +922,123 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "hsl(var(--primary)/0.12)" }}>
             <FileText className="w-3.5 h-3.5 text-primary" />
           </div>
-          <span className="text-xs font-bold text-foreground">건축물·토지대장 상세보기</span>
+          <span className="text-xs font-bold text-foreground">건축물대장·토지대장 보기</span>
         </div>
-        {open
-          ? <ChevronUp className="w-4 h-4 text-primary" />
-          : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        {open ? <ChevronUp className="w-4 h-4 text-primary" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
       </button>
 
-      {/* 펼침 영역 */}
       {open && (
         <div className="mt-3 flex flex-col gap-3">
-          <p className="text-[11px] font-bold text-foreground px-1">📋 공적장부 상세정보</p>
 
           {loading && (
-            <div className="flex items-center justify-center py-8 gap-2 text-xs text-muted-foreground">
-              <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              불러오는 중...
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <p className="text-xs text-muted-foreground">공적장부 조회중...</p>
             </div>
           )}
 
-          {error && (
-            <div className="py-6 text-center text-xs text-destructive font-medium">
-              데이터를 불러올 수 없습니다
+          {!loading && errorMsg && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-4 flex flex-col gap-1">
+              <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
+              <p className="text-[10px] text-muted-foreground">{errorMsg}</p>
             </div>
           )}
 
-          {!loading && !error && building === null && land === null && (
+          {!loading && !errorMsg && building === null && land === null && (
             <div className="rounded-xl border border-border bg-muted/30 px-4 py-5 flex flex-col items-center gap-2 text-center">
-              <FileText className="w-8 h-8 text-muted-foreground/40" />
+              <FileText className="w-8 h-8 text-muted-foreground/30" />
               <p className="text-xs font-semibold text-muted-foreground">현재 해당 매물의 공적장부 데이터가 저장되어 있지 않습니다</p>
-              <p className="text-[10px] text-muted-foreground/70">아래 공식 링크에서 직접 조회하실 수 있습니다</p>
+              <p className="text-[10px] text-muted-foreground/60">아래 공식 링크에서 직접 조회하실 수 있습니다</p>
             </div>
           )}
 
-          {!loading && !error && building !== undefined && building !== null && (
-            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(var(--primary)/0.06)" }}>
-                <Building2 className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-bold text-foreground">건축물대장 요약</span>
+          {!loading && !errorMsg && (building != null || land != null) && (
+            <>
+              <div className="flex rounded-xl overflow-hidden border border-border">
+                <button
+                  onClick={() => setActiveTab("land")}
+                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
+                  style={activeTab === "land"
+                    ? { background: "hsl(142 60% 35%)", color: "#fff" }
+                    : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
+                >
+                  🌍 토지대장
+                </button>
+                <button
+                  onClick={() => setActiveTab("building")}
+                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
+                  style={activeTab === "building"
+                    ? { background: "hsl(var(--primary))", color: "#fff" }
+                    : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
+                >
+                  🏢 건축물대장
+                </button>
               </div>
-              <div className="px-3 py-2 bg-card">
-                <Row label="건물명" value={building.building_name} />
-                <Row label="주용도" value={building.main_purpose} />
-                <Row label="사용승인일" value={building.approval_date} />
-                <Row label="대지면적" value={building.land_area} />
-                <Row label="건축면적" value={building.building_area} />
-                <Row label="연면적" value={building.total_area} />
-                <Row label="지상층수" value={building.floors_above} />
-                <Row label="지하층수" value={building.floors_below} />
-                <Row label="주차대수" value={building.parking_count} />
-                <Row label="승강기" value={building.elevator === true ? "있음" : building.elevator === false ? "없음" : null} />
-              </div>
-            </div>
+
+              {activeTab === "land" && (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-xl overflow-hidden border border-border shadow-sm">
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border" style={{ background: "hsl(142 60% 35% / 0.07)" }}>
+                      <MapPin className="w-3.5 h-3.5" style={{ color: "hsl(142 60% 35%)" }} />
+                      <span className="text-xs font-bold text-foreground">지도</span>
+                    </div>
+                    <MiniKakaoMap address={address} lat={lat} lng={lng} />
+                  </div>
+                  <div className="rounded-xl border border-border overflow-hidden shadow-sm" style={{ background: "hsl(142 60% 35% / 0.03)" }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(142 60% 35% / 0.08)" }}>
+                      <MapPin className="w-3.5 h-3.5" style={{ color: "hsl(142 60% 35%)" }} />
+                      <span className="text-xs font-bold text-foreground">토지 정보</span>
+                    </div>
+                    {land ? (
+                      <div className="px-3 py-2">
+                        <Row label="공시지가" value={land.official_price} />
+                        <Row label="토지면적" value={land.land_area} />
+                        <Row label="용도지역" value={land.use_zone} />
+                        <Row label="지목" value={land.land_category} />
+                        <Row label="도로조건" value={land.road_access} />
+                        <Row label="지번" value={land.lot_number} />
+                      </div>
+                    ) : (
+                      <div className="px-3 py-4 text-center text-xs text-muted-foreground">데이터 없음</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "building" && (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-xl border border-border overflow-hidden shadow-sm" style={{ background: "hsl(var(--primary) / 0.03)" }}>
+                    <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(var(--primary)/0.07)" }}>
+                      <Building2 className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-xs font-bold text-foreground">건축물대장 상세정보</span>
+                    </div>
+                    {building ? (
+                      <div className="px-3 py-2">
+                        <Row label="소재지" value={address} />
+                        <Row label="건물명" value={building.building_name} />
+                        <Row label="건축물용도" value={building.main_purpose} />
+                        <Row label="사용승인일" value={building.approval_date} />
+                        <Row label="대지면적" value={building.land_area} />
+                        <Row label="건축면적" value={building.building_area} />
+                        <Row label="연면적" value={building.total_area} />
+                        <Row label="층수" value={
+                          building.floors_above || building.floors_below
+                            ? [building.floors_above && `지상 ${building.floors_above}층`, building.floors_below && `지하 ${building.floors_below}층`].filter(Boolean).join(" / ")
+                            : null
+                        } />
+                        <Row label="주차대수" value={building.parking_count} />
+                        <Row label="엘리베이터" value={building.elevator === true ? "있음" : building.elevator === false ? "없음" : null} />
+                      </div>
+                    ) : (
+                      <div className="px-3 py-4 text-center text-xs text-muted-foreground">데이터 없음</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          {!loading && !error && land !== undefined && land !== null && (
-            <div className="rounded-xl border border-border overflow-hidden shadow-sm">
-              <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border" style={{ background: "hsl(142 60% 35% / 0.08)" }}>
-                <MapPin className="w-3.5 h-3.5" style={{ color: "hsl(142 60% 35%)" }} />
-                <span className="text-xs font-bold text-foreground">토지대장 요약</span>
-              </div>
-              <div className="px-3 py-2 bg-card">
-                <Row label="지번" value={land.lot_number} />
-                <Row label="지목" value={land.land_category} />
-                <Row label="면적" value={land.land_area} />
-                <Row label="공시지가" value={land.official_price} />
-                <Row label="용도지역" value={land.use_zone} />
-                <Row label="도로접면" value={land.road_access} />
-              </div>
-            </div>
-          )}
-
-          {/* 공식 열람 링크 */}
-          {!loading && !error && (
+          {!loading && (
             <div className="rounded-xl border border-border overflow-hidden">
               <div className="px-3 py-2 border-b border-border bg-muted/30">
                 <p className="text-[10px] text-muted-foreground font-medium">공식 원문 열람 (외부 연결)</p>
@@ -952,7 +1068,6 @@ function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; a
             </div>
           )}
 
-          {/* 안내문 */}
           <p className="text-[10px] text-muted-foreground leading-relaxed px-1">
             ※ 본 정보는 공공데이터 기반 요약 정보이며, 실제 계약 전 반드시 공식 원문을 확인하시기 바랍니다.
           </p>
@@ -1274,6 +1389,8 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           <PublicRecordsAccordion
             propertyId={property.dbId || String(property.id)}
             address={property.address}
+            lat={property.lat}
+            lng={property.lng}
           />
 
           {/* Divider */}
