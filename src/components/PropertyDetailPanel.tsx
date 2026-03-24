@@ -1,10 +1,10 @@
 import {
   X, MapPin, Eye, Heart, Phone, Calendar, Building2, Car, Maximize2,
-  Layers, BadgeCheck, Share2, ArrowUpRight, FileText, ExternalLink,
-  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
+  Layers, BadgeCheck, Share2, ArrowUpRight,
+  ChevronDown, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
   AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
