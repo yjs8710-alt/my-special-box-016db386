@@ -532,9 +532,82 @@ function parseLandApiResponse(text: string, epName: string) {
 }
 
 // ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
-// ※ "Unexpected errors" = endpoint 경로 자체가 data.go.kr에 없음
-// ※ 건축물대장(1613000)과 달리 토지 서비스(1611000)는 경로 구조가 다름
-// ※ 비교 진단: 건축물대장 성공 + 토지대장 실패 = endpoint 불일치가 1순위
+// ※ 로그에서 확인된 사실: 1611000 경로는 모두 HTTP 500 "Unexpected errors"
+// ※ data.go.kr/1611000 = VWorld(api.vworld.kr) 를 LINK로 연결하는 방식
+// ※ 실제 정식 REST endpoint = api.vworld.kr/ned/data/getIndvdLandPriceAttr
+// ※ data.go.kr 직접 REST 경로(nsdi/attrList/list 등)는 존재하지 않음
+//
+// 호출 순서:
+//   1순위: VWorld (api.vworld.kr) — 공식 제공 경로
+//   2순위: data.go.kr 직접 경로 (후보 2개, 확인 목적)
+//   → endpoint별 시도 결과를 표 형태 요약 로그로 출력
+
+type EndpointResult = {
+  name: string;
+  httpStatus: number | null;
+  stdrYear: string | null;
+  pnuIncluded: boolean;
+  format: "JSON" | "XML" | "기타";
+  verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error";
+  price?: string | null;
+};
+
+// ── VWorld 공시지가 (1차 공식 경로) ──────────────────────────────────────
+// data.go.kr/1611000은 VWorld 데이터를 LINK로 연결. 실제 REST = api.vworld.kr
+async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
+  price: string | null; category: string | null; area: string | null;
+  useZone: string | null; roadSide: string | null;
+  verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error";
+  httpStatus: number | null;
+}> {
+  const empty = { price: null, category: null, area: null, useZone: null, roadSide: null };
+  if (!pnu || !vworldKey) return { ...empty, verdict: "network_error", httpStatus: null };
+  const currentYear = new Date().getFullYear();
+
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    console.log(`\n💰 [VWorld 공시지가 호출] stdrYear=${year}`);
+    console.log(`  🌐 URL(마스킹): ${url.replace(vworldKey, "***MASKED***")}`);
+    console.log(`  📅 stdrYear=${year} ✅  pnu 포함=${pnu.length===19?"✅":"❌"}  format=JSON`);
+    try {
+      const res   = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const httpS = res.status;
+      const text  = await res.text();
+      console.log(`  📡 HTTP: ${httpS}`);
+      console.log(`  📄 raw(300자): ${text.substring(0, 300)}`);
+      const data  = JSON.parse(text);
+      // INCORRECT_KEY or error
+      if (data?.indvdLandPrices?.resultCode && data.indvdLandPrices.resultCode !== "OK") {
+        console.log(`  ❌ VWorld 오류: ${data.indvdLandPrices.resultCode} / ${data.indvdLandPrices.resultMsg}`);
+        return { ...empty, verdict: "unexpected_error", httpStatus: httpS };
+      }
+      const fields: any[] = data?.indvdLandPrices?.field ?? [];
+      if (fields.length > 0) {
+        const f = fields[0];
+        const price = Number(f.pblntfPclnd ?? 0);
+        if (price > 0) {
+          const out = {
+            price:    `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`,
+            category: f.lndcgrCodeNm || null,
+            area:     f.lndpclAr ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
+            useZone:  f.prposArea1Nm || f.prposArea2Nm || null,
+            roadSide: f.roadSideCodeNm || null,
+          };
+          console.log(`  ✅ [VWorld 공시지가 성공 ${year}] ${out.price}`);
+          return { ...out, verdict: "success", httpStatus: httpS };
+        }
+      }
+      console.log(`  ⚠️ VWorld: fields 없음 → no_data`);
+      return { ...empty, verdict: "no_data", httpStatus: httpS };
+    } catch (e) {
+      console.error(`  ❌ [VWorld 네트워크 오류]`, String(e));
+      return { ...empty, verdict: "network_error", httpStatus: null };
+    }
+  }
+  return { ...empty, verdict: "no_data", httpStatus: null };
+}
+
+// ── data.go.kr 개별공시지가 (확인용, 실제 미작동 예상) ───────────────────
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
@@ -542,169 +615,131 @@ async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   };
   if (!pnu || !apiKey) return result;
 
-  const keyMasked  = apiKey ? apiKey.substring(0, 8) + "***" : "(없음)";
-  const encodedKey = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
+  const encodedKey  = encodeURIComponent(apiKey);
   const currentYear = new Date().getFullYear();
 
-  console.log(`\n🌍 [개별공시지가 조회 시작]`);
-  console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌"}`);
-  console.log(`  🔑 serviceKey: 존재 (앞 8자: ${keyMasked})`);
-
-  // ── endpoint 후보 (다양한 경로 시도) ──────────────────────────────────
-  // 1611000 서비스의 실제 endpoint는 문서마다 달라 아래 순으로 시도
+  // ── 실제 존재하는 것으로 확인된 경로 후보 2개만 시도 ──
+  // (로그에서 4개 모두 HTTP 500 "Unexpected errors" → 경로 구조 자체가 다름)
   const PRICE_ENDPOINTS = [
-    { url: "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice", name: "1611000/nsdi/attrList/getIndvdLandPrice" },
-    { url: "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/list/getIndvdLandPrice",     name: "1611000/nsdi/list/getIndvdLandPrice" },
-    { url: "http://apis.data.go.kr/1611000/IndvdLandPriceService/attrList/getIndvdLandPrice",      name: "1611000/attrList/getIndvdLandPrice (nsdi 없음)" },
-    { url: "http://apis.data.go.kr/1611000/IndvdLandPriceService/list/getIndvdLandPrice",          name: "1611000/list/getIndvdLandPrice (nsdi 없음)" },
+    { url: "http://apis.data.go.kr/1611000/IndvdLandPriceService/attrList/getIndvdLandPrice", name: "1611000/attrList (nsdi 없음)" },
+    { url: "http://apis.data.go.kr/1611000/IndvdLandPriceService/list/getIndvdLandPrice",     name: "1611000/list (nsdi 없음)" },
   ];
 
-  for (const year of [currentYear - 1, currentYear - 2]) {
-    let success = false;
-    for (const ep of PRICE_ENDPOINTS) {
-      const params = new URLSearchParams({
-        pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json",
-      });
-      const url       = `${ep.url}?serviceKey=${encodedKey}&${params}`;
-      const maskedUrl = url.replace(encodedKey, "***MASKED***");
+  const trialLog: EndpointResult[] = [];
+  const year = currentYear - 1;
 
-      console.log(`\n💰 [개별공시지가 호출]`);
-      console.log(`  📌 endpoint: ${ep.name}`);
-      console.log(`  🌐 URL: ${maskedUrl}`);
-      console.log(`  📅 stdrYear: ${year} ✅  PNU: ${pnu} (${pnu.length}자리)`);
+  console.log(`\n🌍 [data.go.kr 공시지가 확인 호출]`);
+  console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌"}`);
+  console.log(`  🔑 serviceKey 존재 (앞 8자: ${keyMasked})`);
 
-      try {
-        const res        = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        const httpStatus = res.status;
-        const text       = await res.text();
-        const trimmed    = text.trim();
+  for (const ep of PRICE_ENDPOINTS) {
+    const params    = new URLSearchParams({ pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json" });
+    const url       = `${ep.url}?serviceKey=${encodedKey}&${params}`;
+    const maskedUrl = url.replace(encodedKey, "***MASKED***");
 
-        console.log(`  📡 HTTP: ${httpStatus}`);
-        console.log(`  📄 raw (600자): ${text.substring(0, 600)}`);
+    console.log(`\n💰 [data.go.kr 공시지가 호출]`);
+    console.log(`  📌 endpoint: ${ep.name}`);
+    console.log(`  🌐 URL: ${maskedUrl}`);
+    console.log(`  📅 stdrYear=${year} ✅  pnu=${pnu} (${pnu.length}자리)  format=JSON`);
 
-        // ── "Unexpected errors" / "API not found" 감지 ─────────────────
-        if (trimmed === "Unexpected errors" || trimmed.startsWith("Unexpected") || trimmed === "API not found") {
-          console.log(`  ❌ [1순위 진단] endpoint 경로 불일치: "${trimmed}"`);
-          console.log(`     → ${ep.name} 경로가 data.go.kr에 존재하지 않음 → 다음 endpoint 시도`);
-          continue;
-        }
+    let httpS = null as number | null;
+    let fmt: "JSON" | "XML" | "기타" = "기타";
+    let verdict: EndpointResult["verdict"] = "network_error";
 
-        // ── JSON 파싱 ──────────────────────────────────────────────────
+    try {
+      const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      httpS       = res.status;
+      const text  = await res.text();
+      const trim  = text.trim();
+
+      console.log(`  📡 HTTP: ${httpS}`);
+      console.log(`  📄 raw(400자): ${text.substring(0, 400)}`);
+
+      if (trim === "Unexpected errors" || trim.startsWith("Unexpected") || trim === "API not found") {
+        verdict = "unexpected_error";
+        fmt     = "기타";
+        console.log(`  🚨 [1순위 원인 확정] endpoint 경로 불일치: "${trim}"`);
+        console.log(`     → ${ep.name} 경로가 data.go.kr에 존재하지 않음 (HTTP ${httpS})`);
+        console.log(`     → data.go.kr/1611000 = VWorld LINK 방식, 직접 REST 미제공으로 판단됨`);
+      } else {
         let parsed: any = null;
-        try { parsed = JSON.parse(text); } catch { /* XML fallback */ }
+        try { parsed = JSON.parse(text); fmt = "JSON"; } catch { /* XML */ }
+        if (!parsed && text.includes("<totalCount>")) { fmt = "XML"; }
 
         if (parsed) {
-          const header     = parsed?.response?.header ?? {};
-          const body       = parsed?.response?.body   ?? {};
-          const resultCode = header?.resultCode ?? "N/A";
-          const resultMsg  = header?.resultMsg  ?? "N/A";
-          const totalCount = Number(body?.totalCount ?? 0);
+          const header = parsed?.response?.header ?? {};
+          const body   = parsed?.response?.body ?? {};
+          const rc     = header?.resultCode ?? "N/A";
+          const total  = Number(body?.totalCount ?? 0);
+          console.log(`  ✅ JSON 파싱: resultCode=${rc} totalCount=${total}`);
 
-          console.log(`  ✅ JSON 파싱 성공: resultCode=${resultCode} resultMsg=${resultMsg} totalCount=${totalCount}`);
-
-          // 구조1: response.body.items.item
           const rawItem = body?.items?.item;
           const items   = rawItem ? (Array.isArray(rawItem) ? rawItem : [rawItem]) : [];
-          console.log(`  📦 아이템 수: ${items.length}`);
-
           if (items.length > 0) {
-            const item  = items[0];
-            const price = Number(item.pblntfPclnd ?? item.pblntfPc ?? item.oficialLandPc ?? 0);
+            const price = Number(items[0]?.pblntfPclnd ?? 0);
             if (price > 0) {
               result.price    = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
-              result.category = item.lndcgrCodeNm || item.lndCatgNm || item.lndcgrCode || null;
-              result.area     = item.lndpclAr ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null;
-              result.useZone  = item.prposArea1Nm || item.prpsArea1CdNm || item.prposArea2Nm || null;
-              result.roadSide = item.roadSideCodeNm || item.rdnmCdNm || null;
-              console.log(`  ✅ [가격 조회 성공 ${year}] ${result.price}`);
-              if (result.category) console.log(`  ✅ [지목] ${result.category}`);
-              if (result.area)     console.log(`  ✅ [면적] ${result.area}`);
-              if (result.useZone)  console.log(`  ✅ [용도지역] ${result.useZone}`);
-              success = true;
-              break;
-            }
-          }
-
-          // totalCount=0 진단
-          if (totalCount === 0 && (resultCode === "00" || resultCode === "0000")) {
-            console.log(`  ⚠️ [2순위 진단] resultCode=00 이지만 totalCount=0`);
-            console.log(`     → 3순위: 조회연도 범위 문제 (stdrYear=${year})`);
-            const bunPart = pnu.substring(11, 15);
-            const jiPart  = pnu.substring(15, 19);
-            console.log(`     → 2순위: bun(${bunPart}) ji(${jiPart}) 파라미터 형식 확인`);
-            console.log(`     → 4순위: 해당 지번 공시지가 미고시 가능성`);
-          }
+              result.category = items[0]?.lndcgrCodeNm || null;
+              result.area     = items[0]?.lndpclAr ? `${Number(items[0].lndpclAr).toFixed(1)}㎡` : null;
+              verdict = "success";
+              console.log(`  ✅ [data.go.kr 공시지가 성공] ${result.price}`);
+            } else { verdict = "no_data"; }
+          } else if (total === 0 && (rc === "00" || rc === "0000")) {
+            verdict = "no_data";
+            console.log(`  ⚠️ resultCode=00 but totalCount=0 → no_data`);
+          } else { verdict = "parse_error"; }
         } else {
-          // ── XML 파싱 ──────────────────────────────────────────────────
-          const priceMatch = text.match(/<pblntfPclnd>([^<]+)<\/pblntfPclnd>/) ||
-                             text.match(/<pblntfPc>([^<]+)<\/pblntfPc>/);
-          const catMatch   = text.match(/<lndcgrCodeNm[^>]*>([^<]+)<\/lndcgrCodeNm>/);
-          const areaMatch  = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
-          const zoneMatch  = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
-          const roadMatch  = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
-
-          if (priceMatch) {
-            const price = Number(priceMatch[1]);
-            if (price > 0) {
-              result.price    = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
-              if (catMatch)  result.category = catMatch[1];
-              if (areaMatch) result.area     = `${Number(areaMatch[1]).toFixed(1)}㎡`;
-              if (zoneMatch) result.useZone  = zoneMatch[1];
-              if (roadMatch) result.roadSide = roadMatch[1];
-              console.log(`  ✅ [가격 조회 성공(XML) ${year}] ${result.price}`);
-              success = true;
-              break;
-            }
-          } else {
-            console.log(`  ⚠️ [응답 파싱 실패] JSON도 XML도 아님 → 3순위: 응답 파싱 불일치`);
-          }
+          verdict = "parse_error";
+          console.log(`  ⚠️ JSON/XML 파싱 실패 → parse_error`);
         }
-      } catch (e) {
-        console.error(`  ❌ [네트워크 오류 / ${ep.name}]`, String(e));
       }
+    } catch (e) {
+      verdict = "network_error";
+      console.error(`  ❌ 네트워크 오류: ${String(e)}`);
     }
-    if (success) break;
+
+    trialLog.push({ name: ep.name, httpStatus: httpS, stdrYear: String(year), pnuIncluded: true, format: fmt, verdict });
+    if (verdict === "success") break;
   }
 
-  // ── 최종 실패 진단 ───────────────────────────────────────────────────
-  if (!result.price) {
-    console.log(`\n🚨 [개별공시지가 최종 진단]`);
-    console.log(`  건축물대장(1613000) 조회 성공 → 주소 파싱 및 API 키 정상`);
-    console.log(`  토지대장(1611000) 실패 원인 우선순위:`);
-    console.log(`  1순위: endpoint 경로 불일치 → 4개 경로 모두 "Unexpected errors" 반환`);
-    console.log(`         data.go.kr 1611000 서비스의 실제 활용 endpoint URL 직접 확인 필요`);
-    console.log(`  2순위: 파라미터 형식 불일치 (PNU=${pnu}, ${pnu.length}자리)`);
-    console.log(`  3순위: 조회연도(stdrYear) 범위 외 (${currentYear-1}~${currentYear-2} 시도)`);
-    console.log(`  4순위: 해당 지번 개별공시지가 미고시 (건축물만 있고 토지 미등록)`);
-    console.log(`  5순위: 서비스 승인 문제 (낮음 - 승인 확인됨)`);
-    console.log(`\n  📌 비교 서비스 endpoint:`);
-    console.log(`     건축물대장: apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo ✅ 성공`);
-    console.log(`     개별공시지가: apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/* ❌ "Unexpected errors"`);
-    console.log(`     LandUseService/getLandUse: ❌ "Unexpected errors"`);
-    console.log(`     LandCharacterService/getLandCharacter: ❌ "Unexpected errors"`);
-    console.log(`  → data.go.kr 마이페이지 → 해당 서비스 → 승인된 실제 호출 URL 확인 필요`);
+  // ── endpoint별 시도 결과 표 요약 로그 ──────────────────────────────────
+  console.log(`\n📊 [data.go.kr 토지 API 시도 결과 요약표]`);
+  trialLog.forEach((r, i) => {
+    const icon = r.verdict === "success" ? "✅" : r.verdict === "unexpected_error" ? "🚨" : r.verdict === "no_data" ? "⚠️" : "❌";
+    console.log(`  ${i + 1}) ${r.name}`);
+    console.log(`     HTTP=${r.httpStatus ?? "N/A"} | stdrYear=${r.stdrYear} | pnu=${r.pnuIncluded?"포함":"없음"} | format=${r.format} | 판정=${icon} ${r.verdict}`);
+  });
+
+  const allUnexpected = trialLog.every(r => r.verdict === "unexpected_error");
+  if (allUnexpected) {
+    console.log(`\n🚨 [data.go.kr 최종 진단]`);
+    console.log(`  🏗️ 건축물대장(1613000) 파라미터 정상`);
+    console.log(`  🌍 토지 API(1611000): 모든 endpoint HTTP 500 "Unexpected errors"`);
+    console.log(`  → 1순위: data.go.kr/1611000 = VWorld LINK 방식, 직접 REST endpoint 미제공`);
+    console.log(`  → 2순위: 토지 정보는 api.vworld.kr/ned/data/getIndvdLandPriceAttr 경로 필요`);
+    console.log(`  → 3순위: 토지 endpoint 또는 응답 형식 점검 필요`);
+    console.log(`  ✅ 서비스 승인 문제는 낮음 (건축물대장 정상 작동 확인)`);
   }
 
   return result;
 }
 
-// ── data.go.kr 토지특성 ──────────────────────────────────────────────────
-// ※ 개별공시지가와 동일한 "Unexpected errors" 패턴이 나타남
-// 모든 endpoint 후보를 시도하고 응답 파싱 다양화
+// ── data.go.kr 토지특성 (확인용) ─────────────────────────────────────────
 async function fetchLandCharacterDataGoKr(pnu: string, apiKey: string) {
   if (!pnu || !apiKey) return null;
 
-  const encodedKey = encodeURIComponent(apiKey);
-  const keyMasked  = apiKey ? apiKey.substring(0, 8) + "***" : "(없음)";
+  const encodedKey  = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
 
+  // 후보 2개만 (로그에서 모두 "Unexpected errors" 확인됨)
   const CHAR_ENDPOINTS = [
-    { url: "http://apis.data.go.kr/1611000/nsdi/LandUseService/attrList/getLandUse",           name: "LandUseService/getLandUse" },
-    { url: "http://apis.data.go.kr/1611000/nsdi/LandCharacterService/attrList/getLandCharacter", name: "LandCharacterService/getLandCharacter" },
-    { url: "http://apis.data.go.kr/1611000/LandUseService/attrList/getLandUse",                 name: "LandUseService/getLandUse (nsdi 없음)" },
-    { url: "http://apis.data.go.kr/1611000/LandCharacterService/attrList/getLandCharacter",     name: "LandCharacterService/getLandCharacter (nsdi 없음)" },
+    { url: "http://apis.data.go.kr/1611000/LandUseService/attrList/getLandUse",           name: "LandUseService/getLandUse (nsdi 없음)" },
+    { url: "http://apis.data.go.kr/1611000/LandCharacterService/attrList/getLandCharacter", name: "LandCharacterService/getLandCharacter (nsdi 없음)" },
   ];
 
-  console.log(`\n🌱 [토지특성 조회 시작] PNU: ${pnu} (serviceKey: ${keyMasked})`);
+  const trialLog: EndpointResult[] = [];
+  console.log(`\n🌱 [data.go.kr 토지특성 확인 호출] PNU: ${pnu} (serviceKey: ${keyMasked})`);
 
   for (const ep of CHAR_ENDPOINTS) {
     const params    = new URLSearchParams({ pnu, numOfRows: "1", pageNo: "1", _type: "json" });
@@ -713,113 +748,106 @@ async function fetchLandCharacterDataGoKr(pnu: string, apiKey: string) {
 
     console.log(`\n🌱 [토지특성 호출] endpoint: ${ep.name}`);
     console.log(`  🌐 URL: ${maskedUrl}`);
+    console.log(`  📅 stdrYear=없음 | pnu=${pnu} (${pnu.length}자리) | format=JSON`);
 
-    try {
-      const res     = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      const httpSt  = res.status;
-      const text    = await res.text();
-      const trimmed = text.trim();
+    let httpS = null as number | null;
+    let verdict: EndpointResult["verdict"] = "network_error";
+    let fmt: "JSON" | "XML" | "기타" = "기타";
 
-      console.log(`  📡 HTTP: ${httpSt}`);
-      console.log(`  📄 raw (400자): ${text.substring(0, 400)}`);
-
-      if (trimmed === "Unexpected errors" || trimmed.startsWith("Unexpected") || trimmed === "API not found") {
-        console.log(`  ❌ [1순위] endpoint 경로 불일치: "${trimmed}" → 다음 시도`);
-        continue;
-      }
-
-      let parsed: any = null;
-      try { parsed = JSON.parse(text); } catch { /* XML */ }
-
-      if (parsed) {
-        const body       = parsed?.response?.body ?? {};
-        const resultCode = parsed?.response?.header?.resultCode ?? "N/A";
-        const totalCount = Number(body?.totalCount ?? 0);
-        console.log(`  ✅ JSON 파싱: resultCode=${resultCode} totalCount=${totalCount}`);
-
-        // 구조 1: response.body.items.item
-        const rawItem = body?.items?.item;
-        const items   = rawItem ? (Array.isArray(rawItem) ? rawItem : [rawItem]) : [];
-
-        if (items.length > 0) {
-          const item = items[0];
-          const res2 = {
-            lndcgrCodeNm:   item.lndcgrCodeNm   || item.lndCatgNm    || item.lndcgrCode   || null,
-            lndpclAr:       item.lndpclAr        ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null,
-            prposArea1Nm:   item.prposArea1Nm    || item.prpsArea1CdNm || item.prposArea2Nm || null,
-            roadSideCodeNm: item.roadSideCodeNm  || item.rdnmCdNm    || null,
-          };
-          console.log(`  ✅ [토지특성 성공] ${ep.name} / 지목: ${res2.lndcgrCodeNm}`);
-          return res2;
-        }
-      } else {
-        // XML에서 핵심 필드 추출
-        const catMatch  = text.match(/<lndcgrCodeNm>([^<]+)<\/lndcgrCodeNm>/);
-        const areaMatch = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
-        const zoneMatch = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
-        const roadMatch = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
-        if (catMatch || areaMatch) {
-          console.log(`  ✅ [토지특성 XML 성공] ${ep.name}`);
-          return {
-            lndcgrCodeNm:   catMatch?.[1]  || null,
-            lndpclAr:       areaMatch ? `${Number(areaMatch[1]).toFixed(1)}㎡` : null,
-            prposArea1Nm:   zoneMatch?.[1] || null,
-            roadSideCodeNm: roadMatch?.[1] || null,
-          };
-        }
-      }
-    } catch (e) {
-      console.error(`  ❌ [토지특성 네트워크 오류 / ${ep.name}]`, String(e));
-    }
-  }
-
-  console.log(`  🚨 [토지특성 최종 실패] 모든 endpoint 응답 없음`);
-  return null;
-}
-
-// ── VWorld 공시지가 폴백 ─────────────────────────────────────────────────
-async function fetchIndvdLandPrice(pnu: string, vworldKey: string): Promise<string | null> {
-  if (!pnu || !vworldKey) return null;
-  const currentYear = new Date().getFullYear();
-  for (const year of [currentYear - 1, currentYear - 2]) {
-    const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
     try {
       const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      const text = await res.text();
-      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 300));
-      const data = JSON.parse(text);
-      const fields: any[] = data?.indvdLandPrices?.field ?? [];
-      if (fields.length > 0) {
-        const price = fields[0]?.pblntfPclnd;
-        if (price && Number(price) > 0)
-          return `${Number(price).toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+      httpS       = res.status;
+      const text  = await res.text();
+      const trim  = text.trim();
+      console.log(`  📡 HTTP: ${httpS}`);
+      console.log(`  📄 raw(400자): ${text.substring(0, 400)}`);
+
+      if (trim === "Unexpected errors" || trim.startsWith("Unexpected") || trim === "API not found") {
+        verdict = "unexpected_error";
+        console.log(`  🚨 [1순위] endpoint 불일치: "${trim}" → data.go.kr 직접 REST 미제공`);
+      } else {
+        let parsed: any = null;
+        try { parsed = JSON.parse(text); fmt = "JSON"; } catch { fmt = "XML"; }
+        if (parsed) {
+          const body  = parsed?.response?.body ?? {};
+          const rc    = parsed?.response?.header?.resultCode ?? "N/A";
+          const total = Number(body?.totalCount ?? 0);
+          const rawItem = body?.items?.item;
+          const items   = rawItem ? (Array.isArray(rawItem) ? rawItem : [rawItem]) : [];
+          if (items.length > 0) {
+            const item = items[0];
+            const out = {
+              lndcgrCodeNm:   item.lndcgrCodeNm   || null,
+              lndpclAr:       item.lndpclAr        ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null,
+              prposArea1Nm:   item.prposArea1Nm    || null,
+              roadSideCodeNm: item.roadSideCodeNm  || null,
+            };
+            console.log(`  ✅ [토지특성 성공] ${ep.name} / 지목: ${out.lndcgrCodeNm}`);
+            verdict = "success";
+            trialLog.push({ name: ep.name, httpStatus: httpS, stdrYear: null, pnuIncluded: true, format: fmt, verdict });
+            // 요약 표 출력 후 반환
+            console.log(`\n📊 [토지특성 API 시도 결과 요약표]`);
+            trialLog.forEach((r, i) => {
+              const icon = r.verdict === "success" ? "✅" : r.verdict === "unexpected_error" ? "🚨" : "❌";
+              console.log(`  ${i + 1}) ${r.name} → HTTP=${r.httpStatus ?? "N/A"} | pnu=${r.pnuIncluded?"포함":"없음"} | format=${r.format} | 판정=${icon} ${r.verdict}`);
+            });
+            return out;
+          }
+          verdict = total === 0 ? "no_data" : "parse_error";
+          console.log(`  ⚠️ resultCode=${rc} totalCount=${total} → ${verdict}`);
+        } else { verdict = "parse_error"; }
       }
-    } catch (_) { /* 해외 IP 차단 무시 */ }
+    } catch (e) {
+      verdict = "network_error";
+      console.error(`  ❌ 네트워크 오류: ${String(e)}`);
+    }
+
+    trialLog.push({ name: ep.name, httpStatus: httpS, stdrYear: null, pnuIncluded: true, format: fmt, verdict });
   }
+
+  // 요약 표
+  console.log(`\n📊 [토지특성 API 시도 결과 요약표]`);
+  trialLog.forEach((r, i) => {
+    const icon = r.verdict === "success" ? "✅" : r.verdict === "unexpected_error" ? "🚨" : "❌";
+    console.log(`  ${i + 1}) ${r.name} → HTTP=${r.httpStatus ?? "N/A"} | pnu=${r.pnuIncluded?"포함":"없음"} | format=${r.format} | 판정=${icon} ${r.verdict}`);
+  });
+
+  console.log(`  🚨 [토지특성 최종 실패] → data.go.kr 직접 REST 미제공 가능성 높음`);
+  console.log(`  → 토지 endpoint 또는 응답 형식 점검 필요`);
   return null;
 }
 
-// ── VWorld 토지특성 폴백 ─────────────────────────────────────────────────
+// ── VWorld 토지특성 ───────────────────────────────────────────────────────
 async function fetchLandCharacter(pnu: string, vworldKey: string) {
   if (!pnu || !vworldKey) return null;
   const currentYear = new Date().getFullYear();
   for (const year of [currentYear - 1, currentYear - 2]) {
     const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    console.log(`\n🌱 [VWorld 토지특성 호출] stdrYear=${year}`);
+    console.log(`  🌐 URL(마스킹): ${url.replace(vworldKey, "***MASKED***")}`);
     try {
       const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
       const text = await res.text();
+      console.log(`  📡 HTTP: ${res.status}`);
+      console.log(`  📄 raw(300자): ${text.substring(0, 300)}`);
       const data = JSON.parse(text);
+      if (data?.landCharacters?.resultCode && data.landCharacters.resultCode !== "OK") {
+        console.log(`  ❌ VWorld 토지특성 오류: ${data.landCharacters.resultCode}`);
+        return null;
+      }
       const fields: any[] = data?.landCharacters?.field ?? [];
       if (fields.length > 0) {
         const f = fields[0];
-        return {
+        const out = {
           lndcgrCodeNm:   f.lndcgrCodeNm   || null,
           lndpclAr:       f.lndpclAr       ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
           prposArea1Nm:   f.prposArea1Nm   || f.prposArea2Nm || null,
           roadSideCodeNm: f.roadSideCodeNm || null,
         };
+        console.log(`  ✅ [VWorld 토지특성 성공] 지목: ${out.lndcgrCodeNm}`);
+        return out;
       }
-    } catch (_) { /* 무시 */ }
+    } catch (e) { console.error(`  ❌ VWorld 토지특성 오류:`, String(e)); }
   }
   return null;
 }
@@ -1095,56 +1123,69 @@ serve(async (req) => {
           console.log(`  1️⃣  bun: ${bun} (${bun.length}자리) ${bun.length === 4 ? "✅" : "❌"}`);
           console.log(`  2️⃣  ji:  ${ji}  (${ji.length}자리) ${ji.length === 4 ? "✅" : "❌"}`);
 
-          // ① data.go.kr 개별공시지가 (1차 시도)
-          const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
-          let officialPrice = landInfo.price;
-          let landCategory  = landInfo.category;
-          let landArea      = landInfo.area;
-          let useZone       = landInfo.useZone;
-          let roadAccess    = landInfo.roadSide;
+          let officialPrice: string | null = null;
+          let landCategory:  string | null = null;
+          let landArea:      string | null = null;
+          let useZone:       string | null = null;
+          let roadAccess:    string | null = null;
 
-          // ② data.go.kr 토지특성 (공시지가에 특성정보 없을 시 추가 조회)
-          if (!landCategory || !landArea) {
-            console.log("🌱 [토지특성 추가 조회 시도] data.go.kr");
-            const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
-            if (charInfo) {
-              if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
-              if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
-              if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
-              if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
-            }
-          }
-
-          // ③ VWorld 폴백 (data.go.kr 전부 실패 시)
-          if (!officialPrice && vworldApiKey) {
-            console.log("🔄 [VWorld 폴백 시도]");
-            const [vPrice, vChar] = await Promise.all([
-              fetchIndvdLandPrice(pnu, vworldApiKey),
+          // ① VWorld 1차 시도 (공식 REST endpoint - api.vworld.kr)
+          // ※ data.go.kr/1611000은 VWorld LINK 방식 → 직접 REST 미제공 확인됨
+          if (vworldApiKey) {
+            console.log("\n🌍 [1순위] VWorld API 시도 (api.vworld.kr — 공식 제공 경로)");
+            const [vRes, vChar] = await Promise.all([
+              fetchVWorldLandPrice(pnu, vworldApiKey),
               fetchLandCharacter(pnu, vworldApiKey),
             ]);
-            if (vPrice) officialPrice = vPrice;
-            if (vChar?.lndcgrCodeNm   && !landCategory) landCategory = vChar.lndcgrCodeNm;
-            if (vChar?.lndpclAr       && !landArea)     landArea     = vChar.lndpclAr;
-            if (vChar?.prposArea1Nm   && !useZone)      useZone      = vChar.prposArea1Nm;
-            if (vChar?.roadSideCodeNm && !roadAccess)   roadAccess   = vChar.roadSideCodeNm;
+            if (vRes.verdict === "success" && vRes.price) {
+              officialPrice = vRes.price;
+              landCategory  = vRes.category;
+              landArea      = vRes.area;
+              useZone       = vRes.useZone;
+              roadAccess    = vRes.roadSide;
+              console.log("✅ [VWorld 1차 성공] 공시지가:", officialPrice);
+            } else {
+              console.log(`⚠️ [VWorld 1차 실패] 판정=${vRes.verdict} HTTP=${vRes.httpStatus}`);
+            }
+            if (vChar && !landCategory) { landCategory = vChar.lndcgrCodeNm; landArea = vChar.lndpclAr; useZone = vChar.prposArea1Nm; roadAccess = vChar.roadSideCodeNm; }
           }
 
-          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단 (승인 완료 전제)
+          // ② data.go.kr 2차 확인 (VWorld 실패 시 또는 확인 목적)
+          if (!officialPrice && dataGoKrApiKey) {
+            console.log("\n🌍 [2순위] data.go.kr API 확인 시도 (HTTP 500 예상)");
+            const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
+            if (landInfo.price) { officialPrice = landInfo.price; landCategory = landInfo.category; landArea = landInfo.area; useZone = landInfo.useZone; roadAccess = landInfo.roadSide; }
+            if (!landCategory || !landArea) {
+              const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
+              if (charInfo) {
+                if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
+                if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
+                if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
+                if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
+              }
+            }
+          }
+
+          // ── 토지 전체 실패 최종 진단 ─────────────────────────────────
           if (!officialPrice && !landCategory && !landArea) {
             const hasBuildingResult = !!(buildingData as any)?.main_purpose;
+            console.log("\n⚠️ [토지대장 최종 진단]");
+            console.log("  ┌─────────────────────────────────────────────────┐");
             if (hasBuildingResult) {
-              console.log("\n⚠️ [토지대장 최종 진단] 건축물대장 조회 성공 / 토지대장 실패");
-              console.log("  🏗️ 건축물대장(1613000)은 조회되었지만 토지대장(1611000) 조회 실패");
-              console.log("  활용상태는 승인으로 확인되었습니다.");
-              console.log("  현재는 승인 문제가 아니라 실제 호출 endpoint,");
-              console.log("  조회연도, 또는 파라미터 형식 불일치 가능성이 높습니다.");
-              console.log(`  → 사용된 PNU: ${pnu} (${pnu.length}자리)`);
-              console.log(`  → 1순위: endpoint 불일치 (attrList/getIndvdLandPrice vs list/getIndvdLandPrice)`);
-              console.log(`  → 2순위: PNU bun/ji 패딩 불일치 (현재 bun=${bun} ji=${ji})`);
-              console.log(`  → 3순위: stdrYear 범위 문제`);
-              console.log(`  → 4순위: 해당 지번 공시지가 미고시`);
-              console.log(`  → 5순위: 서비스 승인 문제 (낮음 - 이미 승인됨)`);
+              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공          │");
             }
+            console.log("  │ 🌍 VWorld 공시지가: 실패                        │");
+            console.log("  │ 🌍 data.go.kr 1611000: HTTP 500 (endpoint 불일치)│");
+            console.log("  ├─────────────────────────────────────────────────┤");
+            console.log("  │ 원인 우선순위:                                  │");
+            console.log("  │  1순위: VWorld API KEY 오류 (INCORRECT_KEY)     │");
+            console.log("  │  2순위: data.go.kr 토지 endpoint 구조 불일치    │");
+            console.log("  │  3순위: 토지 응답 형식 점검 필요                │");
+            console.log("  │  4순위: 해당 지번 공시지가 미고시               │");
+            console.log("  │  5순위: 서비스 승인 (낮음 - 건축물 정상 확인)   │");
+            console.log("  └─────────────────────────────────────────────────┘");
+            console.log(`  → PNU: ${pnu} (${pnu.length}자리)`);
+            console.log("  → 토지 endpoint 또는 응답 형식 점검 필요");
           }
 
           console.log("💰 [공시지가 최종]:", officialPrice);

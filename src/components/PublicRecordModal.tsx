@@ -311,19 +311,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   {!hasAnyLandData && (
                     <div
                       className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                      style={{ background: "hsl(45 100% 96%)", border: "1.5px solid hsl(45 80% 75%)" }}
+                      style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
                     >
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(45 70% 40%)" }} />
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-bold" style={{ color: "hsl(45 60% 35%)" }}>
-                          토지대장 조회 결과 없음
+                        <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
+                          토지 endpoint 또는 응답 형식 점검 필요
                         </span>
-                        <span className="text-[10px] leading-snug" style={{ color: "hsl(45 50% 40%)" }}>
-                          현재 응답은 정상 또는 부분정상으로 보이나,<br />
-                          토지 서비스 승인 상태는 이미 확인되었습니다.<br />
-                          따라서 실제 원인은 <strong>endpoint 불일치</strong>,<br />
-                          <strong>연도 파라미터 누락</strong>, 또는<br />
-                          <strong>토지 속성 조회 조건 불일치</strong> 가능성이 높습니다.
+                        <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
+                          data.go.kr/1611000은 VWorld LINK 방식으로,<br />
+                          직접 REST endpoint가 제공되지 않을 수 있습니다.<br />
+                          <strong>VWorld API KEY</strong> 갱신 또는<br />
+                          <strong>해당 지번 공시지가 미고시</strong> 여부를 확인해주세요.
                         </span>
                       </div>
                     </div>
