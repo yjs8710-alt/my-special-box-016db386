@@ -350,14 +350,22 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     </>
                   )}
                   {!hasAnyBuildingData && (
-                    <div className="flex flex-col items-center gap-1.5 pt-2 pb-3">
+                    <div className="flex flex-col gap-1.5 pt-2 pb-3 px-1">
                       {buildingApiNoData ? (
                         <>
-                          <p className="text-[11px] font-semibold" style={{ color: "hsl(38 92% 40%)" }}>건축물대장 API 승인 대기 또는 조회 결과 없음</p>
-                          <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
-                            data.go.kr → 건축물대장_HUB서비스(1613000) 활용신청 승인 후 조회 가능합니다.<br/>
-                            또는 해당 주소가 국토교통부에 미등록된 지번일 수 있습니다.
+                          <p className="text-[11px] font-bold text-center" style={{ color: "hsl(38 90% 38%)" }}>
+                            건축물대장 API 승인 대기 또는 조회 결과 없음
                           </p>
+                          <div className="rounded-lg p-3 mt-1" style={{ background: "hsl(38 100% 97%)", border: "1px solid hsl(38 80% 85%)" }}>
+                            <p className="text-[10px] leading-relaxed" style={{ color: "hsl(38 60% 30%)" }}>
+                              현재 응답은 <strong>resultCode 00 (정상 서비스)</strong> 이지만 <strong>totalCount = 0</strong>입니다.<br />
+                              이는 data.go.kr에서 <strong>건축물대장_HUB서비스<br />(1613000 / BldRgstHubService)</strong> 활용승인이<br />
+                              완료되지 않았거나, 요청 파라미터와 실제 대장 데이터가<br />
+                              일치하지 않을 때 발생할 수 있습니다.<br /><br />
+                              <strong>✅ 확인방법:</strong> data.go.kr 마이페이지 →<br />
+                              활용신청 / 활용현황에서 상태를 확인하세요.
+                            </p>
+                          </div>
                         </>
                       ) : (
                         <p className="text-[10px] text-muted-foreground/50 text-center">
