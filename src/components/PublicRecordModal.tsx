@@ -353,7 +353,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     <div className="flex flex-col items-center gap-1.5 pt-2 pb-3">
                       {buildingApiNoData ? (
                         <>
-                          <p className="text-[11px] font-semibold text-amber-600">건축물대장 API 승인 대기 또는 조회 결과 없음</p>
+                          <p className="text-[11px] font-semibold" style={{ color: "hsl(38 92% 40%)" }}>건축물대장 API 승인 대기 또는 조회 결과 없음</p>
                           <p className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
                             data.go.kr → 건축물대장_HUB서비스(1613000) 활용신청 승인 후 조회 가능합니다.<br/>
                             또는 해당 주소가 국토교통부에 미등록된 지번일 수 있습니다.
