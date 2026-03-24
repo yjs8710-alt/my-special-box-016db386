@@ -8,6 +8,11 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
+// VWorld (api.vworld.kr) → Supabase eu-central-1 IP 차단 확인됨 (connection closed)
+// data.go.kr nsdi 경로를 사용 (한국 서버 접속 가능, serviceKey 공유)
+const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
+const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/wfs/getLandUse";
+// VWorld URL은 참조용으로만 보관 (실제 호출 불가)
 const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
 const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
 
