@@ -1,9 +1,10 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2 } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2, FileSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import PublicRecordModal from "@/components/PublicRecordModal";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
@@ -1917,7 +1918,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
-    // 저장값이 없거나 최소보다 작으면 새 기본값 사용
     return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
   });
   const [collapsed, setCollapsed] = useState(false);
@@ -1929,6 +1929,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
+  const [publicRecordAddress, setPublicRecordAddress] = useState<string | null>(null);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
@@ -2073,6 +2074,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   return (
     <>
 
+      {/* Public Record Modal */}
+      {publicRecordAddress && (
+        <PublicRecordModal
+          address={publicRecordAddress}
+          onClose={() => setPublicRecordAddress(null)}
+        />
+      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
@@ -2587,7 +2595,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                     {/* 선택 시 액션 버튼들 — 항상 표시 */}
                     {selectedId === prop.id && (
-                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-6" : "grid-cols-5"}`}>
+                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-7" : "grid-cols-6"}`}>
                         {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
                         {isAdmin && (
                           <button
@@ -2613,6 +2621,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             </span>
                           </button>
                         )}
+                        {/* 건축/토지 열람 버튼 */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPublicRecordAddress(prop.address);
+                          }}
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors"
+                          style={{ background: "hsl(142 50% 95%)" }}
+                        >
+                          <FileSearch className="w-3 h-3" style={{ color: "hsl(142 60% 35%)" }} />
+                          <span className="text-[9px] font-bold" style={{ color: "hsl(142 60% 35%)" }}>건축/토지</span>
+                        </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}

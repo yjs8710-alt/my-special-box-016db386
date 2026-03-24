@@ -5,7 +5,6 @@ import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MapProperty } from "@/data/mapProperties";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
@@ -209,18 +208,6 @@ const ResidentialRental = () => {
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
         />
-
-        {/* 매물 상세 패널 (건축물대장·토지대장 버튼 포함) */}
-        {selectedId !== null && (() => {
-          const selected = allProperties.find(p => p.id === selectedId) ?? null;
-          return selected ? (
-            <PropertyDetailPanel
-              property={selected}
-              onClose={() => setSelectedId(null)}
-              sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
-            />
-          ) : null;
-        })()}
       </main>
     </div>
   );
