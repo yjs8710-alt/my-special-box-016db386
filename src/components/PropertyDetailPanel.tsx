@@ -766,209 +766,231 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   );
 }
 
-/* ─── 공적장부 패널 (PropertySummaryPanel) ─── */
-function PropertySummaryPanel({ address }: { address: string }) {
-  const [loading, setLoading] = useState(false);
+/* ─── 공적장부 통합 열람 모달 ─── */
+function PublicRecordModal({ address, onClose }: { address: string; onClose: () => void }) {
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"land" | "building">("land");
   const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
   const [land, setLand] = useState<Record<string, unknown> | null>(null);
 
   const str = (v: unknown) => (v != null && v !== "" ? String(v) : "-");
 
-  const handleClick = async () => {
-    console.log("NEW_PROPERTY_SUMMARY_CLICK");
-    console.log("PROPERTY_SUMMARY_ADDRESS", address);
-
-    setOpen(true);
-    setLoading(true);
-    setError("");
-    setBuilding(null);
-    setLand(null);
-
-    if (!address) {
-      setLoading(false);
-      setError("주소 정보가 없습니다.");
-      return;
-    }
-
-    console.log("CALL_PROPERTY_SUMMARY", address);
-
-    try {
-      const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
-      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: apiKey,
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({ address }),
-      });
-
-      const data = await res.json();
-      console.log("PROPERTY_SUMMARY_RESPONSE", data);
-
-      if (!res.ok) throw new Error(data.error || "조회 실패");
-
-      setBuilding(data.building_summary ?? null);
-      setLand(data.land_summary ?? null);
-    } catch (e: unknown) {
-      console.error("PROPERTY_SUMMARY_ERROR", e);
-      setError(e instanceof Error ? e.message : "오류 발생");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("OPEN_PROPERTY_MODAL", address);
+      if (!address) {
+        setError("주소 정보가 없습니다.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
+        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: apiKey,
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({ address }),
+        });
+        const data = await res.json();
+        console.log("PROPERTY_SUMMARY_RESPONSE", data);
+        if (!res.ok) throw new Error(data.error || "조회 실패");
+        setBuilding(data.building_summary ?? null);
+        setLand(data.land_summary ?? null);
+      } catch (e: unknown) {
+        console.error("PROPERTY_SUMMARY_ERROR", e);
+        setError(e instanceof Error ? e.message : "오류 발생");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [address]);
 
   const Row = ({ label, value }: { label: string; value?: string | null }) => (
-    <div className="flex py-2 border-b border-border/40 last:border-0 gap-2">
-      <span className="w-[84px] flex-shrink-0 text-[11px] text-muted-foreground leading-tight">{label}</span>
-      <span className="text-[11px] font-semibold text-foreground leading-tight">{value ?? "-"}</span>
+    <div className="flex items-start gap-3 py-2.5 border-b border-border/40 last:border-0">
+      <span className="w-[88px] flex-shrink-0 text-xs text-muted-foreground font-medium leading-tight pt-0.5">{label}</span>
+      <span className="text-xs font-semibold text-foreground leading-tight flex-1">{value ?? "-"}</span>
+    </div>
+  );
+
+  const SectionTitle = ({ icon, title, color }: { icon: string; title: string; color: string }) => (
+    <div className="flex items-center gap-2 px-4 py-3 border-b border-border" style={{ background: color }}>
+      <span className="text-base">{icon}</span>
+      <span className="text-sm font-bold text-foreground">{title}</span>
     </div>
   );
 
   return (
-    <div className="px-4 pb-3">
-      {/* 새 버튼 */}
-      <button
-        type="button"
-        onClick={handleClick}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl border bg-muted/30 hover:bg-muted/60 transition-colors"
-        style={{ borderColor: open ? "hsl(var(--primary)/0.5)" : "hsl(var(--border))" }}
+    <div
+      className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: "hsl(var(--primary)/0.12)" }}>
-            <Layers className="w-3.5 h-3.5 text-primary" />
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border flex-shrink-0"
+          style={{ background: "hsl(var(--primary) / 0.06)" }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "hsl(var(--primary) / 0.15)" }}>
+              <Layers className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-foreground">공적장부 열람</h2>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{address}</p>
+            </div>
           </div>
-          <span className="text-xs font-bold text-foreground">건축물대장·토지대장 보기</span>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted/60 transition-colors flex-shrink-0"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
-        <ChevronDown
-          className="w-4 h-4 duration-200 transition-transform"
-          style={{
-            color: open ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            transform: open ? "rotate(180deg)" : "none",
-          }}
-        />
-      </button>
 
-      {/* 결과 영역 */}
-      {open && (
-        <div className="mt-2 rounded-xl border border-border overflow-hidden bg-card">
+        {/* 콘텐츠 */}
+        <div className="overflow-y-auto flex-1">
 
           {/* 로딩 */}
           {loading && (
-            <div className="flex items-center justify-center gap-2.5 py-10">
-              <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              <p className="text-xs text-muted-foreground">공적장부 조회중...</p>
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <p className="text-sm text-muted-foreground">공적장부 조회중...</p>
             </div>
           )}
 
           {/* 오류 */}
           {!loading && error && (
-            <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-              <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
-              <p className="text-[10px] text-muted-foreground">{error}</p>
-              <button
-                type="button"
-                onClick={handleClick}
-                className="mt-1 px-4 py-1.5 rounded-lg text-[11px] font-bold text-white"
-                style={{ background: "hsl(var(--primary))" }}
-              >
-                다시 시도
-              </button>
+            <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: "hsl(var(--destructive) / 0.1)" }}>
+                <AlertTriangle className="w-6 h-6" style={{ color: "hsl(var(--destructive))" }} />
+              </div>
+              <p className="text-sm font-bold text-foreground">공적장부 조회 실패</p>
+              <p className="text-xs text-muted-foreground">{error}</p>
             </div>
           )}
 
           {/* 빈 결과 */}
           {!loading && !error && !building && !land && (
-            <div className="flex flex-col items-center gap-1.5 px-4 py-8 text-center">
-              <Layers className="w-8 h-8 text-muted-foreground/25 mb-1" />
-              <p className="text-xs font-semibold text-muted-foreground">조회 결과 없음</p>
-              <p className="text-[10px] text-muted-foreground/60">해당 주소의 공적장부 데이터가 없습니다</p>
+            <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+              <Layers className="w-10 h-10 text-muted-foreground/25" />
+              <p className="text-sm font-semibold text-muted-foreground">조회 결과 없음</p>
+              <p className="text-xs text-muted-foreground/60">해당 주소의 공적장부 데이터가 없습니다</p>
             </div>
           )}
 
-          {/* 정상 출력 */}
+          {/* 정상 출력 — 토지 + 건축 위아래 동시 표시 */}
           {!loading && !error && (building || land) && (
-            <>
-              {/* 탭 헤더 */}
-              <div className="flex">
-                <button
-                  type="button"
-                  onClick={() => setTab("land")}
-                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
-                  style={tab === "land"
-                    ? { background: "hsl(142 55% 35%)", color: "#fff" }
-                    : { background: "hsl(var(--muted)/0.6)", color: "hsl(var(--muted-foreground))" }}
-                >
-                  🌍 토지대장
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTab("building")}
-                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
-                  style={tab === "building"
-                    ? { background: "hsl(var(--primary))", color: "#fff" }
-                    : { background: "hsl(var(--muted)/0.6)", color: "hsl(var(--muted-foreground))" }}
-                >
-                  🏢 건축물대장
-                </button>
-              </div>
+            <div className="flex flex-col">
 
-              {/* 토지대장 탭 */}
-              {tab === "land" && (
-                <div className="px-4 py-3">
-                  {land ? (
-                    <>
-                      <Row label="주소"    value={address} />
-                      <Row label="토지면적" value={str(land.land_area)} />
-                      <Row label="지목"    value={str(land.land_category)} />
-                      <Row label="용도지역" value={str(land.use_zone)} />
-                      <Row label="공시지가" value={str(land.official_price)} />
-                      <Row label="도로조건" value={str(land.road_access)} />
-                      <Row label="지번"    value={str(land.lot_number)} />
-                    </>
-                  ) : (
-                    <p className="text-xs text-center text-muted-foreground py-4">토지대장 데이터 없음</p>
-                  )}
+              {/* ① 토지 정보 */}
+              <SectionTitle icon="🌍" title="토지 정보" color="hsl(142 50% 95%)" />
+              {land ? (
+                <div className="px-4 py-1">
+                  <Row label="주소" value={address} />
+                  <Row label="공시지가" value={str(land.official_price)} />
+                  <Row label="토지면적" value={str(land.land_area)} />
+                  <Row label="지목" value={str(land.land_category)} />
+                  <Row label="용도지역" value={str(land.use_zone)} />
+                  <Row label="도로조건" value={str(land.road_access)} />
+                  <Row label="지번" value={str(land.lot_number)} />
                 </div>
+              ) : (
+                <p className="text-xs text-center text-muted-foreground py-5">토지대장 데이터 없음</p>
               )}
 
-              {/* 건축물대장 탭 */}
-              {tab === "building" && (
-                <div className="px-4 py-3">
-                  {building ? (
-                    <>
-                      <Row label="주소"      value={address} />
-                      <Row label="건물명"    value={str(building.building_name)} />
-                      <Row label="건축물용도" value={str(building.main_purpose)} />
-                      <Row label="연면적"    value={str(building.total_area)} />
-                      <Row label="대지면적"  value={str(building.land_area)} />
-                      <Row label="사용승인일" value={str(building.approval_date)} />
-                      <Row label="층수" value={
-                        building.floors_above
-                          ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
-                          : "-"
-                      } />
-                      <Row label="주차대수"   value={str(building.parking_count)} />
-                      <Row label="엘리베이터" value={
-                        building.elevator === true ? "있음"
-                          : building.elevator === false ? "없음"
-                          : "-"
-                      } />
-                    </>
-                  ) : (
-                    <p className="text-xs text-center text-muted-foreground py-4">건축물대장 데이터 없음</p>
-                  )}
+              {/* 구분선 */}
+              <div className="h-2 bg-muted/50 my-1" />
+
+              {/* ② 건축물 정보 */}
+              <SectionTitle icon="🏢" title="건축물 정보" color="hsl(var(--primary) / 0.06)" />
+              {building ? (
+                <div className="px-4 py-1">
+                  <Row label="주소" value={address} />
+                  <Row label="건물명" value={str(building.building_name)} />
+                  <Row label="건축물용도" value={str(building.main_purpose)} />
+                  <Row label="연면적" value={str(building.total_area)} />
+                  <Row label="대지면적" value={str(building.land_area)} />
+                  <Row label="사용승인일" value={str(building.approval_date)} />
+                  <Row label="층수" value={
+                    building.floors_above
+                      ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
+                      : "-"
+                  } />
+                  <Row label="주차대수" value={str(building.parking_count)} />
+                  <Row label="엘리베이터" value={
+                    building.elevator === true ? "있음"
+                      : building.elevator === false ? "없음"
+                      : "-"
+                  } />
                 </div>
+              ) : (
+                <p className="text-xs text-center text-muted-foreground py-5">건축물대장 데이터 없음</p>
               )}
-            </>
+
+              {/* 하단 여백 */}
+              <div className="h-4" />
+            </div>
           )}
         </div>
+
+        {/* 푸터 */}
+        <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-muted/20">
+          <button
+            onClick={onClose}
+            className="w-full h-10 rounded-xl text-sm font-bold text-primary border border-primary/40 hover:bg-primary/5 transition-colors"
+          >
+            닫기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── 공적장부 버튼 (매물카드 하단 진입점) ─── */
+function PropertySummaryPanel({ address }: { address: string }) {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleClick = () => {
+    console.log("NEW_PROPERTY_SUMMARY_CLICK");
+    console.log("PROPERTY_SUMMARY_ADDRESS", address);
+    setModalOpen(true);
+  };
+
+  return (
+    <div className="px-4 pb-3">
+      <button
+        type="button"
+        onClick={handleClick}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl border hover:bg-primary/5 transition-colors"
+        style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: "hsl(var(--primary) / 0.15)" }}>
+            <Layers className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <span className="text-xs font-bold text-foreground">건축물·토지대장 열람</span>
+        </div>
+        <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full text-white"
+          style={{ background: "hsl(var(--primary))" }}>
+          열람
+        </span>
+      </button>
+
+      {modalOpen && (
+        <PublicRecordModal
+          address={address}
+          onClose={() => setModalOpen(false)}
+        />
       )}
     </div>
   );
