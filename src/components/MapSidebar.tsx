@@ -2593,10 +2593,10 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                     </button>
 
-                    {/* 선택 시 액션 버튼들 — 항상 표시 */}
+                    {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
                     {selectedId === prop.id && (
-                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-7" : "grid-cols-6"}`}>
-                        {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
+                      <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
+                        {/* 관리자 수정 버튼 */}
                         {isAdmin && (
                           <button
                             type="button"
@@ -2608,15 +2608,15 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                               }
                               setAdminEditProp(prop);
                             }}
-                            className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80"
+                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
                             style={{
                               background: prop.memo
                                 ? "hsl(var(--accent)/0.12)"
                                 : "hsl(var(--muted)/0.5)",
                             }}
                           >
-                            <Pencil className="w-3 h-3" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }} />
-                            <span className="text-[9px] font-bold" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }}>
+                            <Pencil className="w-3 h-3 flex-shrink-0" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }} />
+                            <span className="text-[8px] font-bold leading-none" style={{ color: prop.memo ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }}>
                               {prop.memo ? "수정" : "수정불가"}
                             </span>
                           </button>
@@ -2628,43 +2628,47 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             e.stopPropagation();
                             setPublicRecordAddress(prop.address);
                           }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors"
+                          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
                           style={{ background: "hsl(142 50% 95%)" }}
                         >
-                          <FileSearch className="w-3 h-3" style={{ color: "hsl(142 60% 35%)" }} />
-                          <span className="text-[9px] font-bold" style={{ color: "hsl(142 60% 35%)" }}>건축/토지</span>
+                          <FileSearch className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(142 60% 35%)" }} />
+                          <span className="text-[8px] font-bold leading-none" style={{ color: "hsl(142 60% 35%)" }}>건축/토지</span>
                         </button>
+                        {/* 사진등록 */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20"
+                          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20 min-w-0"
                         >
-                          <Camera className="w-3 h-3 text-blue-600" />
-                          <span className="text-[9px] font-bold text-blue-700">사진등록</span>
+                          <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                          <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
                         </button>
+                        {/* 임대제안서 */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setLeaseProposalProp(prop); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20"
+                          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20 min-w-0"
                         >
-                          <ClipboardList className="w-3 h-3 text-purple-600" />
-                          <span className="text-[9px] font-bold text-purple-700">임대제안서</span>
+                          <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                          <span className="text-[8px] font-bold text-purple-700 leading-none">임대제안서</span>
                         </button>
+                        {/* 거래완료 */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setDealCompleteProp(prop); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20"
+                          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20 min-w-0"
                         >
-                          <CheckCircle className="w-3 h-3 text-green-600" />
-                          <span className="text-[9px] font-bold text-green-700">거래완료</span>
+                          <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                          <span className="text-[8px] font-bold text-green-700 leading-none">거래완료</span>
                         </button>
+                        {/* 오류제보 */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setErrorReportProp(prop); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors"
+                          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors min-w-0"
                         >
-                          <AlertCircle className="w-3 h-3 text-red-500" />
-                          <span className="text-[9px] font-bold text-red-600">오류제보</span>
+                          <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+                          <span className="text-[8px] font-bold text-red-600 leading-none">오류제보</span>
                         </button>
                       </div>
                     )}
