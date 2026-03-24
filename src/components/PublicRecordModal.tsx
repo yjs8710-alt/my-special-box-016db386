@@ -341,11 +341,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
-                            토지 endpoint 또는 응답 형식 점검 필요
+                            토지 endpoint / 기준연도 / 응답 형식 점검 필요
                           </span>
                           <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                            VWorld 응답 없음 또는 해당 지번 공시지가 미고시.<br />
-                            <strong>VWorld API KEY 설정을 확인하세요.</strong>
+                            VWorld 연결 오류 또는 해당 지번 공시지가 미고시.<br />
+                            <strong>VWorld API KEY 값 또는 허용 도메인 설정 확인 필요.</strong>
                           </span>
                         </div>
                       </div>
