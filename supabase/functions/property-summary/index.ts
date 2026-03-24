@@ -553,56 +553,78 @@ type EndpointResult = {
 };
 
 // ── VWorld 공시지가 (1차 공식 경로) ──────────────────────────────────────
-// data.go.kr/1611000은 VWorld 데이터를 LINK로 연결. 실제 REST = api.vworld.kr
-// 진단 우선순위: 1.KEY오류 2.endpoint불일치 3.stdrYear 4.파싱오류 5.데이터미존재 6.승인문제
+// 진단 우선순위: 1.KEY값오류/도메인불일치 2.endpoint불일치 3.stdrYear 4.파싱오류 5.데이터미존재
 async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
   price: string | null; category: string | null; area: string | null;
   useZone: string | null; roadSide: string | null;
   verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error" | "key_error";
   httpStatus: number | null;
-  keyError: boolean;  // INCORRECT_KEY 감지 플래그
+  keyError: boolean;
 }> {
   const empty = { price: null, category: null, area: null, useZone: null, roadSide: null, keyError: false };
   if (!pnu || !vworldKey) return { ...empty, verdict: "network_error", httpStatus: null };
   const currentYear = new Date().getFullYear();
+  const keyMasked = vworldKey.substring(0, 8) + "***";
 
   for (const year of [currentYear - 1, currentYear - 2]) {
+    const qs  = new URLSearchParams({ key: "***MASKED***", pnu, stdrYear: String(year), format: "json", numOfRows: "1", pageNo: "1" });
     const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
-    console.log(`\n💰 [VWorld 공시지가 호출] stdrYear=${year}`);
-    console.log(`  🌐 URL(마스킹): ${url.replace(vworldKey, "***MASKED***")}`);
-    console.log(`  📅 stdrYear=${year} ✅  pnu=${pnu} (${pnu.length}자리${pnu.length===19?" ✅":" ❌"})  format=JSON`);
-    try {
-      const res   = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      const httpS = res.status;
-      const text  = await res.text();
-      console.log(`  📡 HTTP: ${httpS}`);
-      console.log(`  📄 raw(300자): ${text.substring(0, 300)}`);
-      const data  = JSON.parse(text);
 
-      // ── 1순위: KEY 오류 감지 ──────────────────────────────────────────
+    console.log(`\n💰 [VWorld 공시지가 호출]`);
+    console.log(`  📌 endpoint: getIndvdLandPriceAttr`);
+    console.log(`  🌐 전체 URL(마스킹): ${VWORLD_LAND_PRICE_URL}?${qs}`);
+    console.log(`  🔑 serviceKey 마스킹: ${keyMasked}`);
+    console.log(`  📍 pnu: ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌ 19자리 아님"})`);
+    console.log(`  📅 stdrYear: ${year} (포함 ✅)`);
+    console.log(`  📦 querystring 전체: pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`);
+
+    let httpS: number | null = null;
+    try {
+      const res  = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      httpS       = res.status;
+      const text  = await res.text();
+      const raw600 = text.substring(0, 600);
+
+      // ── VWorld 응답 후 필수 출력 ────────────────────────────────────
+      console.log(`\n✅ [VWorld 공시지가 응답 수신]`);
+      console.log(`  📡 HTTP status: ${httpS}`);
+      console.log(`  🔍 INCORRECT_KEY 포함 여부: ${text.includes("INCORRECT_KEY") ? "⚠️ YES" : "NO"}`);
+      console.log(`  📄 raw(600자): ${raw600}`);
+
+      let data: any = null;
+      try { data = JSON.parse(text); } catch {
+        console.log(`  ❌ [4순위] JSON 파싱 실패 → parse_error`);
+        console.log(`  ⚠️ 판정: parse_error`);
+        return { ...empty, verdict: "parse_error", httpStatus: httpS };
+      }
+
+      // ── 1순위: KEY 오류 감지 (INCORRECT_KEY) ─────────────────────────
       const vworldResultCode = data?.indvdLandPrices?.resultCode ?? data?.landCharacters?.resultCode ?? null;
       const vworldResultMsg  = data?.indvdLandPrices?.resultMsg  ?? data?.landCharacters?.resultMsg  ?? "";
+      const isIncorrectKey   = vworldResultCode === "INCORRECT_KEY" || text.includes("INCORRECT_KEY");
+      const isKeyError       = isIncorrectKey ||
+        vworldResultMsg.includes("인증키") || vworldResultMsg.includes("KEY");
+
       if (vworldResultCode && vworldResultCode !== "OK") {
-        const isKeyError = vworldResultCode === "INCORRECT_KEY" ||
-          vworldResultMsg.includes("인증키") || vworldResultMsg.includes("KEY");
         if (isKeyError) {
-          // ★ 1순위 진단 — 다른 모든 진단보다 먼저 출력
           console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지!`);
           console.log(`  ❌ resultCode: ${vworldResultCode}`);
           console.log(`  ❌ resultMsg : ${vworldResultMsg}`);
-          console.log(`  🔑 VWORLD_API_KEY 값 또는 허용 도메인 설정 오류 가능성 높음`);
-          console.log(`  → VWorld API 콘솔에서 KEY 유효성 및 허용 도메인(api.vworld.kr) 확인 필요`);
+          console.log(`  🔑 진단: 키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음`);
+          console.log(`  → VWorld API 콘솔에서 KEY 값 및 허용 IP/도메인 설정 확인 필요`);
           console.log(`  → 다른 no_data 진단보다 KEY 오류를 먼저 해결해야 합니다`);
+          console.log(`  ⚠️ 판정: key_error`);
           return { ...empty, verdict: "key_error", httpStatus: httpS, keyError: true };
         }
         console.log(`  ❌ [2순위] VWorld endpoint 또는 응답 오류: ${vworldResultCode} / ${vworldResultMsg}`);
+        console.log(`  ⚠️ 판정: unexpected_error`);
         return { ...empty, verdict: "unexpected_error", httpStatus: httpS };
       }
 
-      // ── stdrYear 파라미터 확인 (3순위) ───────────────────────────────
+      // ── 3순위: stdrYear 확인 ─────────────────────────────────────────
       const fields: any[] = data?.indvdLandPrices?.field ?? [];
-      if (fields.length === 0 && text.includes("stdrYear")) {
-        console.log(`  ⚠️ [3순위] stdrYear=${year} 형식 또는 범위 문제 가능성`);
+      if (fields.length === 0) {
+        console.log(`  ⚠️ [3순위] stdrYear=${year} 로 조회했지만 fields 없음 → 연도 범위 또는 형식 문제 가능성`);
       }
 
       if (fields.length > 0) {
@@ -617,15 +639,29 @@ async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
             roadSide: f.roadSideCodeNm || null,
           };
           console.log(`  ✅ [VWorld 공시지가 성공 ${year}] ${out.price}`);
+          console.log(`  ⚠️ 판정: success`);
           return { ...out, verdict: "success", httpStatus: httpS };
         }
       }
       // ── 5순위: 데이터 미존재 ─────────────────────────────────────────
       console.log(`  ⚠️ [5순위] VWorld: fields 없음 → 해당 지번 공시지가 미고시 가능성`);
+      console.log(`  ⚠️ 판정: no_data`);
       return { ...empty, verdict: "no_data", httpStatus: httpS };
     } catch (e) {
-      // ── 4순위: 파싱 오류 ─────────────────────────────────────────────
-      console.error(`  ❌ [4순위] VWorld 응답 파싱 오류:`, String(e));
+      // ── 4순위: 네트워크/파싱 오류 ────────────────────────────────────
+      const errMsg = String(e);
+      const isConnClosed = errMsg.includes("connection closed") || errMsg.includes("SendRequest");
+      console.log(`\n✅ [VWorld 공시지가 응답 수신]`);
+      console.log(`  📡 HTTP status: ${httpS ?? "N/A (연결 실패)"}`);
+      console.log(`  🔍 INCORRECT_KEY 포함 여부: NO (연결 자체 실패)`);
+      console.log(`  📄 raw(600자): (연결 실패 - 응답 없음)`);
+      if (isConnClosed) {
+        console.log(`  ❌ [연결 오류] connection closed — VWorld 서버 또는 네트워크 문제`);
+        console.log(`  ⚠️ 판정: parse_error (연결 실패)`);
+      } else {
+        console.log(`  ❌ [4순위] VWorld 응답 오류:`, errMsg);
+        console.log(`  ⚠️ 판정: parse_error`);
+      }
       return { ...empty, verdict: "parse_error", httpStatus: null };
     }
   }
@@ -846,23 +882,60 @@ async function fetchLandCharacterDataGoKr(pnu: string, apiKey: string) {
 async function fetchLandCharacter(pnu: string, vworldKey: string) {
   if (!pnu || !vworldKey) return null;
   const currentYear = new Date().getFullYear();
+  const keyMasked   = vworldKey.substring(0, 8) + "***";
+
   for (const year of [currentYear - 1, currentYear - 2]) {
+    const qs  = new URLSearchParams({ key: "***MASKED***", pnu, stdrYear: String(year), format: "json", numOfRows: "1", pageNo: "1" });
     const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
-    console.log(`\n🌱 [VWorld 토지특성 호출] stdrYear=${year}`);
-    console.log(`  🌐 URL(마스킹): ${url.replace(vworldKey, "***MASKED***")}`);
+
+    console.log(`\n🌱 [VWorld 토지특성 호출]`);
+    console.log(`  📌 endpoint: getLandCharacterAttr`);
+    console.log(`  🌐 전체 URL(마스킹): ${VWORLD_LAND_CHAR_URL}?${qs}`);
+    console.log(`  🔑 serviceKey 마스킹: ${keyMasked}`);
+    console.log(`  📍 pnu: ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌"})`);
+    console.log(`  📅 stdrYear: ${year} (포함 ✅)`);
+
+    let httpS: number | null = null;
     try {
       const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      const text = await res.text();
-      console.log(`  📡 HTTP: ${res.status}`);
-      console.log(`  📄 raw(300자): ${text.substring(0, 300)}`);
-      const data = JSON.parse(text);
-      if (data?.landCharacters?.resultCode && data.landCharacters.resultCode !== "OK") {
-        console.log(`  ❌ VWorld 토지특성 오류: ${data.landCharacters.resultCode}`);
-        return null;
+      httpS       = res.status;
+      const text  = await res.text();
+      const raw600 = text.substring(0, 600);
+
+      console.log(`\n✅ [VWorld 토지특성 응답 수신]`);
+      console.log(`  📡 HTTP status: ${httpS}`);
+      console.log(`  🔍 INCORRECT_KEY 포함 여부: ${text.includes("INCORRECT_KEY") ? "⚠️ YES" : "NO"}`);
+      console.log(`  📄 raw(600자): ${raw600}`);
+
+      let data: any = null;
+      try { data = JSON.parse(text); } catch {
+        console.log(`  ❌ [4순위] JSON 파싱 실패 → parse_error`);
+        console.log(`  ⚠️ 판정: parse_error`);
+        continue;
       }
+
+      // ── 1순위: KEY 오류 감지 ─────────────────────────────────────────
+      const rc  = data?.landCharacters?.resultCode ?? null;
+      const msg = data?.landCharacters?.resultMsg  ?? "";
+      const isIncorrectKey = rc === "INCORRECT_KEY" || text.includes("INCORRECT_KEY");
+      const isKeyErr = isIncorrectKey || msg.includes("인증키") || msg.includes("KEY");
+
+      if (rc && rc !== "OK") {
+        if (isKeyErr) {
+          console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지! (토지특성)`);
+          console.log(`  ❌ resultCode: ${rc}`);
+          console.log(`  🔑 진단: 키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음`);
+          console.log(`  ⚠️ 판정: key_error`);
+          return null;
+        }
+        console.log(`  ❌ [2순위] VWorld 토지특성 오류: ${rc} / ${msg}`);
+        console.log(`  ⚠️ 판정: unexpected_error`);
+        continue;
+      }
+
       const fields: any[] = data?.landCharacters?.field ?? [];
       if (fields.length > 0) {
-        const f = fields[0];
+        const f   = fields[0];
         const out = {
           lndcgrCodeNm:   f.lndcgrCodeNm   || null,
           lndpclAr:       f.lndpclAr       ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
@@ -870,9 +943,25 @@ async function fetchLandCharacter(pnu: string, vworldKey: string) {
           roadSideCodeNm: f.roadSideCodeNm || null,
         };
         console.log(`  ✅ [VWorld 토지특성 성공] 지목: ${out.lndcgrCodeNm}`);
+        console.log(`  ⚠️ 판정: success`);
         return out;
       }
-    } catch (e) { console.error(`  ❌ VWorld 토지특성 오류:`, String(e)); }
+      console.log(`  ⚠️ [5순위] fields 없음 → 해당 지번 데이터 미존재 가능성`);
+      console.log(`  ⚠️ 판정: no_data`);
+    } catch (e) {
+      const errMsg = String(e);
+      const isConnClosed = errMsg.includes("connection closed") || errMsg.includes("SendRequest");
+      console.log(`\n✅ [VWorld 토지특성 응답 수신]`);
+      console.log(`  📡 HTTP status: ${httpS ?? "N/A (연결 실패)"}`);
+      console.log(`  🔍 INCORRECT_KEY 포함 여부: NO (연결 자체 실패)`);
+      console.log(`  📄 raw(600자): (연결 실패 - 응답 없음)`);
+      if (isConnClosed) {
+        console.log(`  ❌ [연결 오류] connection closed — VWorld 서버 또는 네트워크 문제`);
+      } else {
+        console.log(`  ❌ [4순위] VWorld 토지특성 오류:`, errMsg);
+      }
+      console.log(`  ⚠️ 판정: parse_error (연결 실패)`);
+    }
   }
   return null;
 }
