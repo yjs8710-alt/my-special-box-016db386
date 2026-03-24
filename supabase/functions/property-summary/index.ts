@@ -210,28 +210,33 @@ async function fetchBuildingRecapTitle(
 }
 
 
+// ── 건축물대장 API 공통 호출 함수 (serviceKey 이중인코딩 방지) ──────────
+async function fetchBuildingApi(endpoint: string, sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string, numOfRows = "10") {
+  const encodedKey = encodeURIComponent(apiKey);
+  const params = new URLSearchParams({ sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo: "1", _type: "json" });
+  const url = `${BUILDING_API_BASE}/${endpoint}?serviceKey=${encodedKey}&${params}`;
+  console.log(`🏢 [${endpoint}]`, url.replace(encodedKey, "***"));
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    const text = await res.text();
+    console.log(`🏢 [${endpoint} 응답]`, text.substring(0, 400));
+    const data = JSON.parse(text);
+    const total = Number(data?.response?.body?.totalCount ?? 0);
+    const items = data?.response?.body?.items?.item;
+    return { total, items: items ? (Array.isArray(items) ? items : [items]) : [] };
+  } catch (e) {
+    console.error(`❌ [${endpoint} 오류]`, String(e));
+    return { total: 0, items: [] };
+  }
+}
+
 // ── 건축물대장 표제부 ────────────────────────────────────────────────────
 async function fetchBuildingTitle(
   sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
 ) {
-  const params = new URLSearchParams({
-    serviceKey: apiKey, sigunguCd, bjdongCd, bun, ji,
-    numOfRows: "10", pageNo: "1", _type: "json",
-  });
-  const url = `${BUILDING_API_BASE}/getBrTitleInfo?${params}`;
-  console.log("🏢 [표제부 API 호출]", url.replace(apiKey, "***"));
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    const text = await res.text();
-    console.log("🏢 [표제부 응답]", text.substring(0, 300));
-    const data = JSON.parse(text);
-    const items = data?.response?.body?.items?.item;
-    if (!items) return null;
-    return Array.isArray(items) ? items[0] : items;
-  } catch (e) {
-    console.error("❌ [표제부 오류]", String(e));
-    return null;
-  }
+  const { total, items } = await fetchBuildingApi("getBrTitleInfo", sigunguCd, bjdongCd, bun, ji, apiKey);
+  console.log("📊 [표제부]:", total > 0 ? `${total}건 → ${items[0]?.bldNm || "건물명없음"}` : "없음");
+  return total > 0 ? items[0] : null;
 }
 
 // ── data.go.kr 개별공시지가 API (국토교통부) ─────────────────────────────
