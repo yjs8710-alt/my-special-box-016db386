@@ -1,4 +1,4 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, ExternalLink, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2 } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
@@ -359,198 +359,6 @@ const MemoNotepad = ({ propId, memoKey, icon, label, initialText }: MemoNotepadP
         </>
       )}
     </div>
-  );
-};
-
-/* ══════════════════════════════════════════════════════════
-   공적장부 모달 — Edge Function "property-summary" 전용
-   cloud.eais.go.kr·iframe·embed·외부 URL 이동 일체 금지
-   ══════════════════════════════════════════════════════════ */
-type RegModalStatus = "idle" | "loading" | "ok" | "empty" | "error";
-
-interface BuildingRegisterModalProps {
-  address: string;
-  onClose: () => void;
-}
-
-const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
-  const [status, setStatus] = useState<RegModalStatus>("idle");
-  const [tab, setTab] = useState<"land" | "building">("land");
-  const [errText, setErrText] = useState("");
-  const [land, setLand] = useState<Record<string, unknown> | null>(null);
-  const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
-
-  const str = (v: unknown) => (v != null && v !== "" ? String(v) : null);
-
-  // 마운트 시 자동 조회
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log("NEW_PROPERTY_SUMMARY_CLICK");
-      console.log("CALL_PROPERTY_SUMMARY", address);
-      setStatus("loading");
-      try {
-        const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
-        const apiKey   = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const resp = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: apiKey,
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({ address }),
-        });
-        if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
-        const payload = await resp.json();
-        console.log("PROPERTY_SUMMARY_RESPONSE", payload);
-        const b = payload.building_summary ?? null;
-        const l = payload.land_summary ?? null;
-        setBuilding(b);
-        setLand(l);
-        setStatus(b === null && l === null ? "empty" : "ok");
-      } catch (err: unknown) {
-        setErrText(err instanceof Error ? err.message : "알 수 없는 오류");
-        setStatus("error");
-      }
-    };
-    if (address) fetchData();
-  }, [address]);
-
-  const Row = ({ label, value }: { label: string; value?: string | null }) =>
-    value ? (
-      <div className="flex gap-3 py-2 border-b border-border/40 last:border-0">
-        <span className="w-[90px] flex-shrink-0 text-[11px] text-muted-foreground">{label}</span>
-        <span className="text-[11px] font-semibold text-foreground">{value}</span>
-      </div>
-    ) : null;
-
-  return (
-    <>
-      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ width: "min(480px, 94vw)", maxHeight: "85vh" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 헤더 */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0"
-          style={{ background: "hsl(var(--primary)/0.06)" }}>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "hsl(var(--primary)/0.12)" }}>
-              <FileText className="w-4 h-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground">건축물대장·토지대장 보기</p>
-              <p className="text-[10px] text-muted-foreground truncate max-w-[300px]">{address}</p>
-            </div>
-          </div>
-          <button onClick={onClose}
-            className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-
-        {/* 본문 */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-
-          {/* 로딩 */}
-          {status === "loading" && (
-            <div className="flex items-center justify-center gap-2.5 py-16">
-              <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-              <p className="text-xs text-muted-foreground">공적장부 조회중...</p>
-            </div>
-          )}
-
-          {/* 오류 */}
-          {status === "error" && (
-            <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-              <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
-              <p className="text-[10px] text-muted-foreground">{errText}</p>
-            </div>
-          )}
-
-          {/* 빈 결과 */}
-          {status === "empty" && (
-            <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-              <FileText className="w-8 h-8 text-muted-foreground/25 mb-1" />
-              <p className="text-xs font-semibold text-muted-foreground">조회 결과 없음</p>
-              <p className="text-[10px] text-muted-foreground/60">해당 주소의 공적장부 데이터가 없습니다</p>
-            </div>
-          )}
-
-          {/* 데이터 */}
-          {status === "ok" && (
-            <>
-              {/* 탭 */}
-              <div className="flex border-b border-border">
-                <button type="button" onClick={() => setTab("land")}
-                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
-                  style={tab === "land"
-                    ? { background: "hsl(142 55% 35%)", color: "#fff" }
-                    : { background: "transparent", color: "hsl(var(--muted-foreground))" }}>
-                  🌍 토지대장
-                </button>
-                <button type="button" onClick={() => setTab("building")}
-                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
-                  style={tab === "building"
-                    ? { background: "hsl(var(--primary))", color: "#fff" }
-                    : { background: "transparent", color: "hsl(var(--muted-foreground))" }}>
-                  🏢 건축물대장
-                </button>
-              </div>
-
-              {/* 토지대장 */}
-              {tab === "land" && (
-                <div className="px-4 py-3">
-                  {land ? (
-                    <>
-                      <Row label="주소"    value={address} />
-                      <Row label="토지면적" value={str(land.land_area)} />
-                      <Row label="지목"    value={str(land.land_category)} />
-                      <Row label="용도지역" value={str(land.use_zone)} />
-                      <Row label="공시지가" value={str(land.official_price)} />
-                      <Row label="도로조건" value={str(land.road_access)} />
-                      <Row label="지번"    value={str(land.lot_number)} />
-                    </>
-                  ) : (
-                    <p className="text-xs text-center text-muted-foreground py-4">토지대장 데이터 없음</p>
-                  )}
-                </div>
-              )}
-
-              {/* 건축물대장 */}
-              {tab === "building" && (
-                <div className="px-4 py-3">
-                  {building ? (
-                    <>
-                      <Row label="주소"     value={address} />
-                      <Row label="건물명"    value={str(building.building_name)} />
-                      <Row label="건축물용도" value={str(building.main_purpose)} />
-                      <Row label="연면적"    value={str(building.total_area)} />
-                      <Row label="대지면적"  value={str(building.land_area)} />
-                      <Row label="사용승인일" value={str(building.approval_date)} />
-                      <Row label="층수" value={
-                        building.floors_above
-                          ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
-                          : null
-                      } />
-                      <Row label="주차대수"  value={str(building.parking_count)} />
-                      <Row label="엘리베이터" value={
-                        building.elevator === true ? "있음"
-                          : building.elevator === false ? "없음" : null
-                      } />
-                    </>
-                  ) : (
-                    <p className="text-xs text-center text-muted-foreground py-4">건축물대장 데이터 없음</p>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </>
   );
 };
 
@@ -2114,7 +1922,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   });
   const [collapsed, setCollapsed] = useState(false);
   const [lightbox, setLightbox] = useState<{ units: LightboxUnit[]; unitIdx: number } | null>(null);
-  const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
@@ -2122,21 +1929,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  // 상단 바 외부링크 팝업 (등기소/정부24/토지이음 등)
-  const [externalModal, setExternalModal] = useState<{ url: string; title: string } | null>(null);
-  const [externalModalPos, setExternalModalPos] = useState({ x: 0, y: 97 });
-  const getModalInitPos = useCallback(() => {
-    // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
-    const x = width;
-    // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
-    const y = 97;
-    return { x, y };
-  }, [width]);
-  const openExternalModal = useCallback((url: string, title: string) => {
-    const pos = { x: width, y: 97 };
-    setExternalModalPos(pos);
-    setExternalModal({ url, title });
-  }, [width]);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
@@ -2281,13 +2073,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   return (
     <>
 
-      {/* Building Register Modal */}
-      {buildingRegisterAddr && (
-        <BuildingRegisterModal
-          address={buildingRegisterAddr}
-          onClose={() => setBuildingRegisterAddr(null)}
-        />
-      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
@@ -2502,90 +2287,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 </div>
               </div>
             </div>
-            {/* 외부 링크 바 + 선택인쇄 */}
+            {/* 선택인쇄 바 */}
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
-              {/* 구분선 */}
-              <div className="w-px h-4 bg-border/60 mr-0.5 flex-shrink-0" />
-              {/* 인터넷등기소 */}
-              <a
-                href={`https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(pinnedAddress ?? "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="인터넷등기소"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                등기소
-              </a>
-              {/* 정부24 */}
-              <a
-                href={`https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(pinnedAddress ?? "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="정부24 토지대장"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                정부24
-              </a>
-              {/* 토지e음 */}
-              <a
-                href={`https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(pinnedAddress ?? "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="토지이음"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                토지e음
-              </a>
-              {/* 홈택스 */}
-              <a
-                href="https://www.hometax.go.kr"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="홈택스"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                홈택스
-              </a>
-              {/* 구분선 */}
-              <div className="w-px h-4 bg-border/60 mx-0.5 flex-shrink-0" />
-              {/* 네이버부동산 */}
-              <a
-                href="https://land.naver.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="네이버부동산"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                네이버
-              </a>
-              {/* 직방 */}
-              <a
-                href="https://www.zigbang.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="직방"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                직방
-              </a>
-              {/* 다방 */}
-              <a
-                href="https://www.dabangapp.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="toolbar-btn"
-                title="다방"
-              >
-                <ExternalLink className="w-2.5 h-2.5" />
-                다방
-              </a>
-              {/* 선택인쇄 — 다방 우측 끝 파란색 */}
               <span className="flex-1 min-w-[4px]" />
               <button
                 onClick={handleSelectPrint}
@@ -2910,14 +2613,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             </span>
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setModalPos(getModalInitPos()); setBuildingRegisterAddr(prop.address); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-r border-primary/20"
-                        >
-                          <FileText className="w-3 h-3 text-primary" />
-                          <span className="text-[9px] font-bold text-primary">건물/토지대장</span>
-                        </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}
