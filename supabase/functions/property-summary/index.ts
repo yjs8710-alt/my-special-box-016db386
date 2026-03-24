@@ -1253,13 +1253,13 @@ serve(async (req) => {
                 road_access:    roadAccess    ?? (landData as any).road_access,
               })
               .eq("property_id", pid).select().single();
-            if (updated) landData = updated;
+            if (updated) landData = { ...updated, _diagnostics: landDiagnostics };
           } else {
             const { data: inserted } = await supabase
               .from("land_summary")
               .insert({ property_id: pid, lot_number: lotStr, official_price: officialPrice ?? null, land_category: landCategory ?? null, land_area: landArea ?? null, use_zone: useZone ?? null, road_access: roadAccess ?? null })
               .select().single();
-            if (inserted) landData = inserted;
+            if (inserted) landData = { ...inserted, _diagnostics: landDiagnostics };
           }
           console.log("✅ [토지 정보 저장 완료]");
         } else if (needLand && !pnu) {
