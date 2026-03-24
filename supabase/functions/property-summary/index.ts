@@ -481,7 +481,8 @@ async function fetchBuildingViolation(s: string, b: string, bun: string, ji: str
   return { isViolation: false, items: [], resultCode, resultMsg };
 }
 
-// ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
+// ── data.go.kr 개별공시지가 (1611000/nsdi/IndvdLandPriceService) ────────────
+// 정확한 엔드포인트: /attrList/getIndvdLandPrice (JSON/XML 모두 지원)
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
@@ -489,41 +490,155 @@ async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   };
   if (!pnu || !apiKey) return result;
 
+  // PNU 검증
+  console.log(`\n🌍 [토지대장 조회 시작]`);
+  console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
+  if (pnu.length !== 19) {
+    console.log(`  ❌ [진단] PNU 자리수 오류! bun/ji 패딩 또는 bjdongCd 오류 가능성 높음`);
+  }
+
   const encodedKey = encodeURIComponent(apiKey);
   const currentYear = new Date().getFullYear();
+
+  // 엔드포인트 목록 (정확도 순으로 시도)
+  const LAND_PRICE_ENDPOINTS = [
+    "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice",
+    "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/list/getIndvdLandPrice",
+  ];
+
   for (const year of [currentYear - 1, currentYear - 2]) {
-    const params = new URLSearchParams({ pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json" });
-    const url = `http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice?serviceKey=${encodedKey}&${params}`;
-    console.log(`💰 [개별공시지가 호출 ${year}] PNU:${pnu} (${pnu.length}자리)`);
+    let success = false;
+    for (const baseUrl of LAND_PRICE_ENDPOINTS) {
+      const params = new URLSearchParams({
+        pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json"
+      });
+      const url = `${baseUrl}?serviceKey=${encodedKey}&${params}`;
+      const maskedUrl = url.replace(encodedKey, "***MASKED***");
+      console.log(`💰 [개별공시지가 호출 ${year}] PNU:${pnu} (${pnu.length}자리)`);
+      console.log(`  🌐 URL: ${maskedUrl}`);
+      try {
+        const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        const text = await res.text();
+        console.log(`💰 [개별공시지가 응답 ${year}]`, text.substring(0, 600));
+
+        // JSON 응답 파싱
+        let parsed: any = null;
+        try { parsed = JSON.parse(text); } catch { /* XML fallback */ }
+
+        if (parsed) {
+          // JSON 응답 형식 1: response.body.items.item
+          const items = parsed?.response?.body?.items?.item;
+          const item = items ? (Array.isArray(items) ? items[0] : items) : null;
+          const resultCode = parsed?.response?.header?.resultCode;
+          const totalCount = Number(parsed?.response?.body?.totalCount ?? 0);
+          console.log(`  JSON: resultCode=${resultCode} totalCount=${totalCount}`);
+
+          if (item) {
+            const price = Number(item.pblntfPclnd ?? item.pblntfPc ?? 0);
+            if (price > 0) {
+              result.price    = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+              result.category = item.lndcgrCodeNm || item.lndCatgNm || null;
+              result.area     = item.lndpclAr ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null;
+              result.useZone  = item.prposArea1Nm || item.prpsArea1CdNm || null;
+              result.roadSide = item.roadSideCodeNm || item.rdnmCdNm || null;
+              console.log(`✅ [개별공시지가 성공 ${year}] ${result.price}`);
+              success = true;
+              break;
+            }
+          }
+
+          // totalCount=0 원인 분석
+          if (totalCount === 0 && resultCode === "00") {
+            console.log(`  ⚠️ [진단] 공시지가 totalCount=0 원인 분석:`);
+            console.log(`    - PNU 자리수: ${pnu.length}자리 ${pnu.length === 19 ? "(정상)" : "(❌오류)"}`);
+            const bunPart = pnu.substring(11, 15);
+            const jiPart  = pnu.substring(15, 19);
+            console.log(`    - bun(${bunPart}) ji(${jiPart}) 패딩 확인: ${bunPart.length === 4 && jiPart.length === 4 ? "정상" : "❌오류"}`);
+            console.log(`    - bjdongCd(${pnu.substring(5, 10)}) 오류 가능성: 해당 PNU에 대한 공시지가 미등록 가능성`);
+          }
+        } else {
+          // XML 응답 파싱
+          const priceMatch = text.match(/<pblntfPclnd>([^<]+)<\/pblntfPclnd>/);
+          const catNmMatch = text.match(/<lndcgrCodeNm[^>]*>([^<]+)<\/lndcgrCodeNm>/);
+          const areaMatch  = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
+          const zoneMatch  = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
+          const roadMatch  = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
+          if (priceMatch) {
+            const price = Number(priceMatch[1]);
+            if (price > 0) {
+              result.price    = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+              if (catNmMatch) result.category = catNmMatch[1];
+              if (areaMatch)  result.area     = `${Number(areaMatch[1]).toFixed(1)}㎡`;
+              if (zoneMatch)  result.useZone  = zoneMatch[1];
+              if (roadMatch)  result.roadSide = roadMatch[1];
+              console.log(`✅ [개별공시지가(XML) 성공 ${year}] ${result.price}`);
+              success = true;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`❌ [개별공시지가 오류 ${year} / ${baseUrl}]`, String(e));
+      }
+    }
+    if (success) break;
+  }
+
+  // 공시지가 조회 실패 시 건축물대장은 있는데 토지대장만 없는 경우 진단
+  if (!result.price) {
+    console.log(`  ⚠️ [진단] 개별공시지가 조회 실패 → 파라미터 불일치 또는 미등록 가능성 높음`);
+    console.log(`  🏗️ [안내] 건축물대장은 조회되지만 토지대장이 조회되지 않을 경우:`);
+    console.log(`    → 토지대장 파라미터 불일치 가능성 높음 (PNU=${pnu})`);
+    console.log(`    → data.go.kr > 1611000 개별공시지가 서비스 활용신청 여부 확인 필요`);
+  }
+
+  return result;
+}
+
+// ── data.go.kr 토지특성 (1611000/nsdi/getLandInfo) ─────────────────────
+async function fetchLandCharacterDataGoKr(pnu: string, apiKey: string) {
+  if (!pnu || !apiKey) return null;
+  const encodedKey = encodeURIComponent(apiKey);
+
+  // 토지특성 엔드포인트 목록
+  const LAND_CHAR_ENDPOINTS = [
+    "http://apis.data.go.kr/1611000/nsdi/LandUseService/attrList/getLandUse",
+    "http://apis.data.go.kr/1611000/nsdi/LandCharacterService/attrList/getLandCharacter",
+  ];
+
+  for (const baseUrl of LAND_CHAR_ENDPOINTS) {
+    const params = new URLSearchParams({
+      pnu, numOfRows: "1", pageNo: "1", _type: "json"
+    });
+    const url = `${baseUrl}?serviceKey=${encodedKey}&${params}`;
+    const maskedUrl = url.replace(encodedKey, "***MASKED***");
+    console.log(`🌱 [토지특성 호출] URL: ${maskedUrl}`);
     try {
       const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
       const text = await res.text();
-      console.log(`💰 [개별공시지가 응답 ${year}]`, text.substring(0, 500));
+      console.log(`🌱 [토지특성 응답]`, text.substring(0, 600));
+      let parsed: any = null;
+      try { parsed = JSON.parse(text); } catch { /* XML */ }
 
-      const priceMatch = text.match(/<pblntfPclnd>([^<]+)<\/pblntfPclnd>/);
-      const catNmMatch = text.match(/<lndcgrCodeNm[^>]*>([^<]+)<\/lndcgrCodeNm>/);
-      const areaMatch  = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
-      const zoneMatch  = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
-      const roadMatch  = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
-
-      if (priceMatch) {
-        const price = Number(priceMatch[1]);
-        if (price > 0) {
-          result.price = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
-          console.log(`✅ [개별공시지가 성공 ${year}] ${result.price}`);
+      if (parsed) {
+        const items = parsed?.response?.body?.items?.item;
+        const item = items ? (Array.isArray(items) ? items[0] : items) : null;
+        const totalCount = Number(parsed?.response?.body?.totalCount ?? 0);
+        if (item && totalCount > 0) {
+          console.log(`✅ [토지특성 성공] landCategory=${item.lndcgrCodeNm || item.lndCatgNm}`);
+          return {
+            lndcgrCodeNm:   item.lndcgrCodeNm || item.lndCatgNm || null,
+            lndpclAr:       item.lndpclAr ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null,
+            prposArea1Nm:   item.prposArea1Nm || item.prpsArea1CdNm || item.prposArea2Nm || null,
+            roadSideCodeNm: item.roadSideCodeNm || item.rdnmCdNm || null,
+          };
         }
       }
-      if (catNmMatch) result.category = catNmMatch[1];
-      if (areaMatch)  result.area     = `${Number(areaMatch[1]).toFixed(1)}㎡`;
-      if (zoneMatch)  result.useZone  = zoneMatch[1];
-      if (roadMatch)  result.roadSide = roadMatch[1];
-
-      if (result.price) break;
     } catch (e) {
-      console.error(`❌ [개별공시지가 오류 ${year}]`, String(e));
+      console.error(`❌ [토지특성 오류 / ${baseUrl}]`, String(e));
     }
   }
-  return result;
+  return null;
 }
 
 // ── VWorld 공시지가 폴백 ─────────────────────────────────────────────────
