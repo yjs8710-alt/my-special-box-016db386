@@ -8,7 +8,8 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
-const LAND_PRICE_API_BASE = "http://apis.data.go.kr/1611000/nsdi/LandPriceService/wfs";
+const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
+const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
 
 // ── 충청북도 시군구 코드 ──────────────────────────────────────────────────
 const SIGUNGU_MAP: Record<string, string> = {
