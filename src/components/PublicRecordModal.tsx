@@ -49,6 +49,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const str = (v: unknown) => (v != null && v !== "" ? String(v) : null);
 
+  /** 값이 있는지 판단 (null / "" / "조회 결과 없음" 제외) */
+  const hasVal = (v: unknown) =>
+    v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
+
   useEffect(() => {
     const fetchData = async () => {
       console.log("🔍 [공적장부] 조회 시작");
@@ -62,12 +66,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       }
 
       try {
-        // ── 1단계: DB에서 직접 조회 (building_summary + land_summary) ──
-        let buildingRow: Record<string, unknown> | null = null;
-        let landRow: Record<string, unknown> | null = null;
         let pid = propertyId;
 
-        // property_id가 없으면 address로 properties 테이블에서 id 찾기
+        // property_id가 없으면 address로 매물 조회
         if (!pid && address) {
           const { data: propRow } = await supabase
             .from("properties")
@@ -78,33 +79,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("📌 address로 조회한 property_id:", pid ?? "(없음)");
         }
 
-        if (pid) {
-          const [bRes, lRes] = await Promise.all([
-            supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
-            supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
-          ]);
-          buildingRow = bRes.data ?? null;
-          landRow = lRes.data ?? null;
-        }
-
-        console.log("📦 [building_summary] 조회 결과:", buildingRow);
-        console.log("🌍 [land_summary] 조회 결과:", landRow);
-
-        const hasBuildingData = buildingRow && (buildingRow.main_purpose || buildingRow.total_area || buildingRow.approval_date);
-        const hasLandData = landRow && (landRow.land_category || landRow.land_area || landRow.official_price);
-
-        if (hasBuildingData || hasLandData) {
-          // DB에 유효한 데이터 있음 → 바로 사용
-          setBuilding(buildingRow);
-          setLand(landRow);
-          setFetchedFrom("db");
-          console.log("✅ [공적장부] DB 데이터 렌더링 완료");
-          setLoading(false);
-          return;
-        }
-
-        // ── 2단계: DB에 데이터 없음 → Edge Function 호출 ──
-        console.log("⚡ DB 데이터 없음 → Edge Function 호출");
+        // ── 항상 Edge Function 호출 (최신 데이터 보장) ──
+        console.log("⚡ Edge Function 호출 → address:", address, "pid:", pid);
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const res = await fetch(endpoint, {
@@ -117,14 +93,36 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           body: JSON.stringify({ address, property_id: pid }),
         });
         const data = await res.json();
-        console.log("📡 [property-summary] Edge Function 응답:", data);
+        console.log("📡 PROPERTY_SUMMARY_RESPONSE", data);
 
         if (!res.ok) throw new Error(data.error || "공적장부 조회 실패");
 
-        setBuilding(data.building_summary ?? null);
-        setLand(data.land_summary ?? null);
+        const bSum = data.building_summary ?? null;
+        const lSum = data.land_summary ?? null;
+
+        console.log("📦 [building_summary] 조회 결과:", bSum);
+        console.log("🌍 [land_summary] 조회 결과:", lSum);
+
+        // building _raw 파싱해서 최상위 필드로 병합
+        if (bSum && bSum._raw && typeof bSum._raw === "object") {
+          const raw = bSum._raw as Record<string, unknown>;
+          // DB null 필드를 _raw 값으로 보완
+          if (!hasVal(bSum.main_purpose) && hasVal(raw.mainPurpsCdNm)) bSum.main_purpose = raw.mainPurpsCdNm;
+          if (!hasVal(bSum.total_area) && hasVal(raw.totArea)) bSum.total_area = raw.totArea;
+          if (!hasVal(bSum.building_area) && hasVal(raw.archArea)) bSum.building_area = raw.archArea;
+          if (!hasVal(bSum.land_area) && hasVal(raw.platArea)) bSum.land_area = raw.platArea;
+          if (!hasVal(bSum.approval_date) && hasVal(raw.useAprDay)) bSum.approval_date = raw.useAprDay;
+          if (!hasVal(bSum.floors_above) && hasVal(raw.grndFlrCnt)) bSum.floors_above = raw.grndFlrCnt;
+          if (!hasVal(bSum.floors_below) && hasVal(raw.ugrndFlrCnt)) bSum.floors_below = raw.ugrndFlrCnt;
+          if (!hasVal(bSum.parking_count) && hasVal(raw.indrMechUtcnt)) bSum.parking_count = raw.indrMechUtcnt;
+          if (bSum.elevator === false && raw.elevYn === "Y") bSum.elevator = true;
+          if (!hasVal(bSum.building_name) && hasVal(raw.bldNm)) bSum.building_name = raw.bldNm;
+        }
+
+        setBuilding(bSum);
+        setLand(lSum);
         setFetchedFrom("api");
-        console.log("✅ [공적장부] API 데이터 렌더링 완료");
+        console.log("✅ [공적장부] 렌더링 완료");
       } catch (e: unknown) {
         console.error("❌ [공적장부] 조회 실패:", e);
         setError(e instanceof Error ? e.message : "조회 중 오류가 발생했습니다.");
