@@ -765,7 +765,6 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
     </div>
   );
 }
-/* ─── 공적장부 통합 아코디언 컴포넌트 ─── */
 interface BuildingSummaryRow {
   id: string;
   building_name: string | null;
