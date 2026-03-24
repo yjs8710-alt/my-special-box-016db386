@@ -785,6 +785,8 @@ function LandBuildingPanel({ address }: { address: string }) {
   const load = async () => {
     setPanelStatus("loading");
     setErrText("");
+    console.log("NEW_PROPERTY_SUMMARY_CLICK");
+    console.log("CALL_PROPERTY_SUMMARY", address);
     try {
       const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
       const apiKey   = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -799,6 +801,7 @@ function LandBuildingPanel({ address }: { address: string }) {
       });
       if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
       const payload = await resp.json();
+      console.log("PROPERTY_SUMMARY_RESPONSE", payload);
       const b = payload.building_summary ?? null;
       const l = payload.land_summary ?? null;
       setBuilding(b);
