@@ -1936,11 +1936,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     const y = 97;
     return { x, y };
   }, [width]);
-  const openExternalModal = useCallback((url: string, title: string) => {
-    const pos = { x: width, y: 97 };
-    setExternalModalPos(pos);
-    setExternalModal({ url, title });
-  }, [width]);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
