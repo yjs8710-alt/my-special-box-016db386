@@ -106,18 +106,26 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
 
           const bEmpty = !bRes.data || (!bRes.data.main_purpose && !bRes.data.total_area && !bRes.data.approval_date);
+          // land는 official_price가 있어야 유효한 데이터로 판단
           const lEmpty = !lRes.data || !lRes.data.official_price;
 
-          if (!bEmpty || !lEmpty) {
-            // DB에 유효한 데이터 있음
+          // 건축물 + 토지 모두 유효한 경우에만 DB 캐시 사용
+          // 어느 하나라도 비어있으면 Edge Function 실시간 조회
+          if (!bEmpty && !lEmpty) {
             setBuilding(bRes.data as Record<string, unknown> | null);
             setLand(lRes.data as Record<string, unknown> | null);
             setFetchedFrom("db");
-            console.log("✅ [공적장부] DB 캐시 렌더링 완료");
+            console.log("✅ [공적장부] DB 캐시 렌더링 완료 (건축+토지 모두 유효)");
             setLoading(false);
             return;
           }
-          console.log("🔄 [DB 데이터 비어있음] API 실시간 조회로 전환...");
+
+          // 건축물만 있고 토지가 비어있는 경우 — API 재조회
+          if (!bEmpty && lEmpty) {
+            console.log("🔄 [토지 데이터 없음] 건축물은 캐시 사용, 토지만 API 재조회...");
+          } else {
+            console.log("🔄 [DB 데이터 비어있음] API 실시간 조회로 전환...");
+          }
         } else {
           console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
         }
