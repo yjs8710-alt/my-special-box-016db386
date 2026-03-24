@@ -789,10 +789,73 @@ interface LandSummaryRow {
   road_access: string | null;
 }
 
-function PublicRecordsAccordion({ propertyId, address }: { propertyId: string; address: string }) {
+declare global {
+  interface Window { kakao: any; __kakaoMapReady?: boolean; __kakaoMapCallbacks?: Array<() => void>; }
+}
+const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+function loadKakaoForPublicRecords(cb: () => void) {
+  if (window.kakao && window.kakao.maps) { cb(); return; }
+  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
+  window.__kakaoMapCallbacks.push(cb);
+  if (document.getElementById("kakao-maps-script")) return;
+  const s = document.createElement("script");
+  s.id = "kakao-maps-script";
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  s.async = true;
+  s.onload = () => {
+    window.kakao.maps.load(() => {
+      window.__kakaoMapReady = true;
+      window.__kakaoMapCallbacks?.forEach(fn => fn());
+      window.__kakaoMapCallbacks = [];
+    });
+  };
+  document.head.appendChild(s);
+}
+
+// 미니 카카오 지도 컴포넌트
+function MiniKakaoMap({ address, lat, lng }: { address: string; lat?: number; lng?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    loadKakaoForPublicRecords(() => {
+      if (!containerRef.current) return;
+      const center = (lat && lng && lat !== 0 && lng !== 0)
+        ? new window.kakao.maps.LatLng(lat, lng)
+        : new window.kakao.maps.LatLng(36.6285, 127.4568);
+
+      if (!mapRef.current) {
+        mapRef.current = new window.kakao.maps.Map(containerRef.current, { center, level: 4 });
+      }
+
+      const map = mapRef.current;
+      map.setCenter(center);
+
+      // 마커 추가
+      new window.kakao.maps.Marker({ position: center, map });
+
+      // 주소로 재검색해서 정확한 위치 표시
+      if (address) {
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.addressSearch(address, (result: any[], status: string) => {
+          if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
+            const pos = new window.kakao.maps.LatLng(Number(result[0].y), Number(result[0].x));
+            map.setCenter(pos);
+            new window.kakao.maps.Marker({ position: pos, map });
+          }
+        });
+      }
+    });
+  }, [address, lat, lng]);
+
+  return <div ref={containerRef} className="w-full h-44 rounded-xl overflow-hidden" />;
+}
+
+function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId: string; address: string; lat?: number; lng?: number }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"land" | "building">("land");
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
 
