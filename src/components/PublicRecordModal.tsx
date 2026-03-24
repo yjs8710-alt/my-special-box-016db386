@@ -312,27 +312,51 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     const diag = land._diagnostics && typeof land._diagnostics === "object"
                       ? (land._diagnostics as Record<string, unknown>)
                       : null;
-                    const isKeyErr = diag?.vworld_key_error === true;
-                    return isKeyErr ? (
-                      /* ★ 1순위: KEY 오류 배지 — 다른 진단보다 먼저 */
-                      <div
-                        className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                        style={{ background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 75%)" }}
-                      >
-                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
-                            🔴 VWorld API KEY 값 또는 허용 도메인 설정 확인 필요
-                          </span>
-                          <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
-                            키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음.<br />
-                            <strong>다른 원인보다 먼저 KEY를 확인해주세요.</strong><br />
-                            → VWorld API 콘솔에서 KEY 값 및 허용 IP/도메인 설정 확인 필요
-                          </span>
+                    const isKeyErr  = diag?.land_key_error  === true;
+                    const isConnErr = diag?.land_conn_error === true;
+
+                    if (isKeyErr) {
+                      return (
+                        <div
+                          className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
+                          style={{ background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 75%)" }}
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
+                              🔴 DATA_GO_KR API KEY 오류 또는 서비스 미활용
+                            </span>
+                            <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
+                              키가 등록은 되어 있으나 nsdi 서비스 활용신청이 안 됐거나 KEY 값 오류 가능성.<br />
+                              → data.go.kr 마이페이지에서 1611000 서비스 활용현황 확인 필요
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      /* 1순위 외 일반 실패 배지 */
+                      );
+                    }
+
+                    if (isConnErr) {
+                      return (
+                        <div
+                          className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
+                          style={{ background: "hsl(38 100% 97%)", border: "1.5px solid hsl(38 80% 75%)" }}
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(38 70% 40%)" }} />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-bold" style={{ color: "hsl(38 60% 30%)" }}>
+                              🔌 토지 API 연결 실패 (서버 IP 제한)
+                            </span>
+                            <span className="text-[10px] leading-snug" style={{ color: "hsl(38 50% 35%)" }}>
+                              VWorld · nsdi 모두 해외 IP에서 연결 차단 확인됨.<br />
+                              현재 서버(eu-central-1) → 한국 토지 API 서버 접근 불가.<br />
+                              <strong>건축물대장은 정상 조회됩니다.</strong>
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
                       <div
                         className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
                         style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
@@ -340,11 +364,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
-                            토지 endpoint / 기준연도 / 응답 형식 점검 필요
+                            토지 endpoint / 응답 형식 점검 필요
                           </span>
                           <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                            VWorld 연결 오류 또는 해당 지번 공시지가 미고시.<br />
-                            <strong>VWorld API KEY 값 또는 허용 도메인 설정 확인 필요.</strong>
+                            nsdi 경로 조회 결과 없음 — 해당 지번 공시지가 미고시 가능성.
                           </span>
                         </div>
                       </div>
