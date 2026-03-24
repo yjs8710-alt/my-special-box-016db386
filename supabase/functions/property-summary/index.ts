@@ -8,6 +8,10 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
+// VWorld는 해외 서버 차단으로 사용 불가 → data.go.kr 토지임야 API로 대체
+const LAND_JIJOK_URL    = "http://apis.data.go.kr/1611000/nsdi/LandUsePlanService/wfs/getLandUsePlan";
+const LAND_PRICE_URL    = "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
+// VWorld NED API (공시지가 - 국내 IP 차단으로 실패할 수 있음, 폴백용)
 const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
 const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
 
