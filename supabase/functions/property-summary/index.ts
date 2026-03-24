@@ -147,19 +147,59 @@ async function fetchBuildingApi(
   const encodedKey = encodeURIComponent(apiKey);
   const params = new URLSearchParams({ sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo: "1", _type: "json" });
   const url = `${BUILDING_API_BASE}/${endpoint}?serviceKey=${encodedKey}&${params}`;
-  console.log(`🏢 [${endpoint}]`, url.replace(encodedKey, "***"));
+
+  // ── [진단] 호출 직전 상세 로그 ──
+  console.log(`\n📋 [${endpoint}] 호출 상세`);
+  console.log(`  ▸ 호출 URL: ${url.replace(encodedKey, "***")}`);
+  console.log(`  ▸ serviceKey 존재: ${!!apiKey}`);
+  console.log(`  ▸ sigunguCd: ${sigunguCd}`);
+  console.log(`  ▸ bjdongCd: ${bjdongCd}`);
+  console.log(`  ▸ platGbCd: (미사용-일반건물)`);
+  console.log(`  ▸ bun: ${bun}`);
+  console.log(`  ▸ ji: ${ji}`);
+
   try {
     const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
     const text = await res.text();
-    console.log(`🏢 [${endpoint} 응답]`, text.substring(0, 400));
-    const data  = JSON.parse(text);
-    const total = Number(data?.response?.body?.totalCount ?? 0);
-    const raw   = data?.response?.body?.items?.item;
-    const items = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
-    return { total, items };
+
+    // ── [진단] 응답 원문 전체 로그 ──
+    let parsed: any = {};
+    try { parsed = JSON.parse(text); } catch { parsed = {}; }
+
+    const header    = parsed?.response?.header ?? {};
+    const body      = parsed?.response?.body   ?? {};
+    const resultCode = header?.resultCode ?? "N/A";
+    const resultMsg  = header?.resultMsg  ?? "N/A";
+    const totalCount = Number(body?.totalCount ?? 0);
+    const raw        = body?.items?.item;
+    const items      = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
+
+    console.log(`  ▸ resultCode: ${resultCode}`);
+    console.log(`  ▸ resultMsg: ${resultMsg}`);
+    console.log(`  ▸ totalCount: ${totalCount}`);
+    console.log(`  ▸ items 수: ${items.length}`);
+
+    // ── [진단] totalCount=0 원인 구분 ──
+    if (totalCount === 0) {
+      console.log(`\n⚠️ [${endpoint}] totalCount=0 원인 분석:`);
+      if (resultCode === "30" || resultCode === "31" || resultMsg?.includes("SERVICE KEY")) {
+        console.log(`  ❌ 가능성: serviceKey 문제 또는 API 접근 권한 없음 (resultCode=${resultCode})`);
+      } else if (resultCode === "22" || resultMsg?.includes("LIMITED")) {
+        console.log(`  ❌ 가능성: 일일 호출 한도 초과`);
+      } else if (resultCode === "00" || resultCode === "0000" || resultMsg?.includes("NORMAL")) {
+        console.log(`  ⚠️ 가능성 1: 파라미터 불일치 (sigunguCd=${sigunguCd}, bjdongCd=${bjdongCd}, bun=${bun}, ji=${ji})`);
+        console.log(`  ⚠️ 가능성 2: data.go.kr 서비스 미승인 (1613000/BldRgstHubService 활용신청 필요)`);
+        console.log(`  ⚠️ 가능성 3: 해당 주소에 건축물 정보 미등록 (나대지 등)`);
+        console.log(`  ⚠️ 가능성 4: endpoint 불일치 → 현재: ${BUILDING_API_BASE}/${endpoint}`);
+      } else {
+        console.log(`  ❌ 알 수 없는 오류 (resultCode=${resultCode}, msg=${resultMsg})`);
+      }
+    }
+
+    return { total: totalCount, items, resultCode, resultMsg };
   } catch (e) {
     console.error(`❌ [${endpoint} 오류]`, String(e));
-    return { total: 0, items: [] };
+    return { total: 0, items: [], resultCode: "ERR", resultMsg: String(e) };
   }
 }
 
