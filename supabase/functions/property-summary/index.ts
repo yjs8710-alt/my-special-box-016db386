@@ -313,7 +313,6 @@ async function fetchLandCharacter(pnu: string, vworldKey: string): Promise<{
   }
   return null;
 }
-}
 
 // ── 건축물대장 기본개요 ──────────────────────────────────────────────────
 async function fetchBuildingBasic(
