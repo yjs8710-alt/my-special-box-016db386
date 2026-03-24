@@ -876,56 +876,61 @@ async function fetchLandCharacterDataGoKr(pnu: string, apiKey: string) {
 
 // ── VWorld 토지특성 ───────────────────────────────────────────────────────
 async function fetchLandCharacter(pnu: string, vworldKey: string) {
+  const ENDPOINT_NAME = "getLandCharacterAttr";
   if (!pnu || !vworldKey) return null;
   const currentYear = new Date().getFullYear();
   const keyMasked   = vworldKey.substring(0, 8) + "***";
 
   for (const year of [currentYear - 1, currentYear - 2]) {
-    const qs  = new URLSearchParams({ key: "***MASKED***", pnu, stdrYear: String(year), format: "json", numOfRows: "1", pageNo: "1" });
-    const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    const qs  = `pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&${qs}`;
 
-    console.log(`\n🌱 [VWorld 토지특성 호출]`);
-    console.log(`  📌 endpoint: getLandCharacterAttr`);
-    console.log(`  🌐 전체 URL(마스킹): ${VWORLD_LAND_CHAR_URL}?${qs}`);
-    console.log(`  🔑 serviceKey 마스킹: ${keyMasked}`);
-    console.log(`  📍 pnu: ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌"})`);
-    console.log(`  📅 stdrYear: ${year} (포함 ✅)`);
+    // ── [1] 호출 직전 로그 ──────────────────────────────────────────────
+    console.log(`\n🌐 [VWorld] 호출 시작`);
+    console.log(`  - endpoint       : ${ENDPOINT_NAME}`);
+    console.log(`  - url(masked)    : ${VWORLD_LAND_CHAR_URL}?key=${keyMasked}&${qs}`);
+    console.log(`  - querystring    : ${qs}`);
+    console.log(`  - pnu            : ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌ 19자리 아님"})`);
+    console.log(`  - stdrYear 포함  : ✅ (${year})`);
+    console.log(`  - serviceKey     : ${keyMasked}`);
 
     let httpS: number | null = null;
     try {
-      const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      httpS       = res.status;
-      const text  = await res.text();
+      const res    = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      httpS         = res.status;
+      const text   = await res.text();
       const raw600 = text.substring(0, 600);
+      const hasIncorrectKey = text.includes("INCORRECT_KEY");
 
-      console.log(`\n✅ [VWorld 토지특성 응답 수신]`);
-      console.log(`  📡 HTTP status: ${httpS}`);
-      console.log(`  🔍 INCORRECT_KEY 포함 여부: ${text.includes("INCORRECT_KEY") ? "⚠️ YES" : "NO"}`);
-      console.log(`  📄 raw(600자): ${raw600}`);
+      // ── [2] 응답 후 로그 ────────────────────────────────────────────
+      console.log(`\n✅ [VWorld] 응답 수신`);
+      console.log(`  - HTTP status          : ${httpS}`);
+      console.log(`  - raw(600)             : ${raw600}`);
+      console.log(`  - INCORRECT_KEY 포함   : ${hasIncorrectKey ? "⚠️ YES" : "NO"}`);
 
       let data: any = null;
       try { data = JSON.parse(text); } catch {
-        console.log(`  ❌ [4순위] JSON 파싱 실패 → parse_error`);
-        console.log(`  ⚠️ 판정: parse_error`);
+        console.log(`  - 판정                 : parse_error (JSON 파싱 실패)`);
         continue;
       }
 
-      // ── 1순위: KEY 오류 감지 ─────────────────────────────────────────
+      // ── [3] 1순위: KEY 오류 감지 ────────────────────────────────────
       const rc  = data?.landCharacters?.resultCode ?? null;
       const msg = data?.landCharacters?.resultMsg  ?? "";
-      const isIncorrectKey = rc === "INCORRECT_KEY" || text.includes("INCORRECT_KEY");
-      const isKeyErr = isIncorrectKey || msg.includes("인증키") || msg.includes("KEY");
+      const isIncorrectKey = hasIncorrectKey || rc === "INCORRECT_KEY";
+      const isKeyErr = isIncorrectKey || msg.includes("인증키") || msg.toUpperCase().includes("KEY");
 
       if (rc && rc !== "OK") {
         if (isKeyErr) {
-          console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지! (토지특성)`);
-          console.log(`  ❌ resultCode: ${rc}`);
+          console.log(`  - 판정                 : key_error`);
+          console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지!`);
           console.log(`  🔑 진단: 키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음`);
-          console.log(`  ⚠️ 판정: key_error`);
+          console.log(`  → resultCode=${rc} / resultMsg=${msg}`);
+          console.log(`  → 다른 no_data / endpoint / stdrYear 진단보다 KEY 오류를 먼저 해결해야 합니다`);
           return null;
         }
+        console.log(`  - 판정                 : unexpected_error`);
         console.log(`  ❌ [2순위] VWorld 토지특성 오류: ${rc} / ${msg}`);
-        console.log(`  ⚠️ 판정: unexpected_error`);
         continue;
       }
 
@@ -938,25 +943,21 @@ async function fetchLandCharacter(pnu: string, vworldKey: string) {
           prposArea1Nm:   f.prposArea1Nm   || f.prposArea2Nm || null,
           roadSideCodeNm: f.roadSideCodeNm || null,
         };
-        console.log(`  ✅ [VWorld 토지특성 성공] 지목: ${out.lndcgrCodeNm}`);
-        console.log(`  ⚠️ 판정: success`);
+        console.log(`  - 판정                 : success (지목: ${out.lndcgrCodeNm})`);
         return out;
       }
+      console.log(`  - 판정                 : no_data`);
       console.log(`  ⚠️ [5순위] fields 없음 → 해당 지번 데이터 미존재 가능성`);
-      console.log(`  ⚠️ 판정: no_data`);
     } catch (e) {
-      const errMsg = String(e);
-      const isConnClosed = errMsg.includes("connection closed") || errMsg.includes("SendRequest");
-      console.log(`\n✅ [VWorld 토지특성 응답 수신]`);
-      console.log(`  📡 HTTP status: ${httpS ?? "N/A (연결 실패)"}`);
-      console.log(`  🔍 INCORRECT_KEY 포함 여부: NO (연결 자체 실패)`);
-      console.log(`  📄 raw(600자): (연결 실패 - 응답 없음)`);
-      if (isConnClosed) {
-        console.log(`  ❌ [연결 오류] connection closed — VWorld 서버 또는 네트워크 문제`);
-      } else {
-        console.log(`  ❌ [4순위] VWorld 토지특성 오류:`, errMsg);
-      }
-      console.log(`  ⚠️ 판정: parse_error (연결 실패)`);
+      // ── [4] 연결 실패 전용 로그 ─────────────────────────────────────
+      const errMsg    = String(e);
+      const isConnErr = errMsg.includes("connection closed") || errMsg.includes("SendRequest") ||
+                        errMsg.includes("socket hang up") || errMsg.includes("fetch failed") ||
+                        errMsg.includes("network error") || errMsg.includes("ECONNRESET");
+      console.log(`\n${isConnErr ? "🔌" : "❌"} [VWorld] ${isConnErr ? "연결 실패" : "응답 오류"}`);
+      console.log(`  - endpoint    : ${ENDPOINT_NAME}`);
+      console.log(`  - 원인        : ${errMsg.substring(0, 200)}`);
+      console.log(`  - 판정        : ${isConnErr ? "connection_error" : "parse_error"}`);
     }
   }
   return null;
