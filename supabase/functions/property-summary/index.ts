@@ -494,9 +494,15 @@ serve(async (req) => {
     let buildingData = bRes.data as Record<string, unknown> | null;
     let landData = lRes.data as Record<string, unknown> | null;
 
-    const needBuilding = !buildingData;
+    // 빈 껍데기(main_purpose, total_area, approval_date 모두 null) 레코드는 재조회
+    const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
+    const needBuilding = !buildingData || !!isBuildingEmpty;
     // 공시지가가 없으면 다시 조회
     const needLand = !landData || !landData.official_price;
+
+    if (isBuildingEmpty) {
+      console.log("⚠️ [building_summary 빈 레코드 감지] → API 재조회");
+    }
 
     console.log("📦 [building_summary]:", buildingData ? "있음" : "없음");
     console.log("🌍 [land_summary]:", landData ? "있음" : "없음", "| 공시지가:", landData?.official_price || "없음");
