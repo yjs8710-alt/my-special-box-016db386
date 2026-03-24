@@ -1929,7 +1929,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  const [publicRecordAddress, setPublicRecordAddress] = useState<string | null>(null);
+  const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
@@ -2077,7 +2077,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
       {/* Public Record Modal */}
       {publicRecordAddress && (
         <PublicRecordModal
-          address={publicRecordAddress}
+          address={publicRecordAddress.address}
+          propertyId={publicRecordAddress.propertyId}
           onClose={() => setPublicRecordAddress(null)}
         />
       )}
@@ -2621,12 +2622,12 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             </span>
                           </button>
                         )}
-                        {/* 건축/토지 열람 버튼 */}
-                        <button
+                         {/* 건축/토지 열람 버튼 */}
+                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setPublicRecordAddress(prop.address);
+                            setPublicRecordAddress({ address: prop.address, propertyId: prop.dbId ?? prop.memo ?? undefined });
                           }}
                           className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
                           style={{ background: "hsl(142 50% 95%)" }}
