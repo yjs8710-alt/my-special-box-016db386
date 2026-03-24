@@ -1116,15 +1116,17 @@ serve(async (req) => {
           }
         }
 
-        // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 위임) ──────────────
+        // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 우선 위임) ──────────────
         // 배경: Supabase eu-central-1 → 한국 토지 API(nsdi/VWorld) IP 차단 확인됨
-        // 구조: 토지 조회 전용 land-proxy 함수에 위임 → 향후 국내 프록시 교체 용이
+        // 구조: land-proxy 우선 → LAND_PROXY_URL 국내 프록시 → fallback nsdi 직접호출
         if (needLand && pnu) {
-          console.log("\n💰 [공시지가+토지특성 조회 시작 → land-proxy 위임]");
+          const stdrYear = String(new Date().getFullYear() - 1); // 전년도 기준연도
+          console.log("\n💰 [공시지가+토지특성 조회 시작 → land-proxy 우선 위임]");
           console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
           console.log(`  🔢 sigunguCd: ${sigunguCd} | bjdongCd: ${bjdongCd} | platGbCd: ${platGbCd}`);
           console.log(`  1️⃣  bun: ${bun} (${bun.length}자리) ${bun.length === 4 ? "✅" : "❌"}`);
           console.log(`  2️⃣  ji:  ${ji}  (${ji.length}자리) ${ji.length === 4 ? "✅" : "❌"}`);
+          console.log(`  📅 stdrYear: ${stdrYear}`);
 
           let officialPrice: string | null = null;
           let landCategory:  string | null = null;
@@ -1134,10 +1136,13 @@ serve(async (req) => {
           let landKeyError   = false;
           let landConnError  = false;
 
-          // ── land-proxy 내부 호출 ──────────────────────────────────────────
+          // ── land-proxy 우선 호출 (LAND_PROXY_URL 설정 시 국내 프록시 경유) ──
           try {
             const landProxyUrl = `${supabaseUrl}/functions/v1/land-proxy`;
-            console.log(`\n🌏 [land-proxy 호출] ${landProxyUrl}`);
+            console.log(`\n🌐 [land-proxy] 국내 프록시 호출 시작`);
+            console.log(`  - endpoint : ${landProxyUrl}`);
+            console.log(`  - pnu      : ${pnu}`);
+            console.log(`  - stdrYear : ${stdrYear}`);
 
             const landRes = await fetch(landProxyUrl, {
               method: "POST",
@@ -1146,13 +1151,14 @@ serve(async (req) => {
                 "Authorization": `Bearer ${supabaseKey}`,
                 "apikey": supabaseKey,
               },
-              body: JSON.stringify({ pnu, property_id: pid }),
-              signal: AbortSignal.timeout(20000),
+              body: JSON.stringify({ pnu, property_id: pid, stdrYear }),
+              signal: AbortSignal.timeout(25000),
             });
 
             const landText = await landRes.text();
-            console.log(`  - land-proxy HTTP: ${landRes.status}`);
-            console.log(`  - land-proxy raw(300): ${landText.substring(0, 300)}`);
+            console.log(`\n✅ [land-proxy] 국내 프록시 응답 수신`);
+            console.log(`  - HTTP status: ${landRes.status}`);
+            console.log(`  - raw(300)   : ${landText.substring(0, 300)}`);
 
             if (landRes.ok) {
               let landJson: any = null;
@@ -1168,20 +1174,24 @@ serve(async (req) => {
                 useZone       = landJson.use_zone        ?? null;
                 roadAccess    = landJson.road_access     ?? null;
 
+                const proxyUsed = landJson.proxy_used ?? "unknown";
                 if (landJson.verdict === "success") {
-                  console.log(`  ✅ [land-proxy 성공] 공시지가: ${officialPrice}`);
+                  console.log(`  ✅ [land-proxy 성공] proxy_used=${proxyUsed} | 공시지가: ${officialPrice}`);
+                } else if (landJson.land_conn_error) {
+                  console.log(`  🔌 [land-proxy] 국내 프록시 호출 실패 (연결 차단 또는 프록시 미설정)`);
+                  console.log(`  ⚠️  [land-proxy] fallback nsdi 직접호출은 land-proxy 내부에서 이미 시도됨`);
                 } else {
-                  console.log(`  ⚠️  [land-proxy 실패] verdict=${landJson.verdict}`);
+                  console.log(`  ⚠️  [land-proxy 실패] verdict=${landJson.verdict} | proxy_used=${proxyUsed}`);
                 }
               }
             } else {
-              console.log(`  ❌ [land-proxy 응답 오류] HTTP ${landRes.status}`);
+              console.log(`  🔌 [land-proxy] 국내 프록시 호출 실패 — HTTP ${landRes.status}`);
               landConnError = true;
             }
           } catch (e) {
             const errMsg    = String(e);
             const isConnErr = errMsg.includes("connection closed") || errMsg.includes("timed out") || errMsg.includes("AbortError");
-            console.log(`  ${isConnErr ? "🔌" : "❌"} [land-proxy 호출 실패]: ${errMsg.substring(0, 200)}`);
+            console.log(`  ${isConnErr ? "🔌" : "❌"} [land-proxy] 국내 프록시 호출 실패: ${errMsg.substring(0, 200)}`);
             if (isConnErr) landConnError = true;
           }
 
