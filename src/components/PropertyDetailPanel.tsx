@@ -794,13 +794,25 @@ declare global {
 }
 const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
 function loadKakaoForPublicRecords(cb: () => void) {
-  if (window.kakao && window.kakao.maps) { cb(); return; }
+  if (window.kakao && window.kakao.maps && window.kakao.maps.services) { cb(); return; }
   if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
   window.__kakaoMapCallbacks.push(cb);
-  if (document.getElementById("kakao-maps-script")) return;
+  // services 라이브러리 포함 (geocoder용)
+  const existingScript = document.getElementById("kakao-maps-script");
+  if (existingScript) {
+    // 이미 로드 중 or 완료 — services 없으면 재로드
+    if (window.kakao?.maps && !window.kakao.maps.services) {
+      window.kakao.maps.load(() => {
+        window.__kakaoMapReady = true;
+        window.__kakaoMapCallbacks?.forEach(fn => fn());
+        window.__kakaoMapCallbacks = [];
+      });
+    }
+    return;
+  }
   const s = document.createElement("script");
   s.id = "kakao-maps-script";
-  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&libraries=services&autoload=false`;
   s.async = true;
   s.onload = () => {
     window.kakao.maps.load(() => {
