@@ -167,14 +167,12 @@ async function callNsdiFallback(pnu: string, apiKey: string): Promise<LandResult
     console.log(`  - INCORRECT_KEY 포함   : ${hasIncorrectKey ? "⚠️ YES" : "NO"}`);
     console.log(`  - raw 일부             : ${raw600}`);
 
-    // "Unexpected errors" → nsdi/VWorld가 EU IP를 차단하거나 endpoint 불일치
+    // "Unexpected errors" → endpoint 불일치
     const trimmed = text.trim();
     if (trimmed === "Unexpected errors" || trimmed.startsWith("Unexpected") || trimmed === "API not found") {
-      console.log(`  - 판정                 : land_conn_error`);
-      console.log(`  🔌 nsdi 서버 응답 오류: "${trimmed}" (HTTP ${httpS})`);
-      console.log(`  💡 Supabase eu-central-1 → nsdi.go.kr IP 차단 또는 endpoint 불일치`);
-      console.log(`  → LAND_PROXY_URL 시크릿에 국내 서버 프록시 URL 설정 시 즉시 해결 가능`);
-      return emptyResult("land_conn_error", { land_conn_error: true });
+      console.log(`  - 판정                 : unexpected_error`);
+      console.log(`  🚨 endpoint 경로 불일치: "${trimmed}" (HTTP ${httpS})`);
+      return emptyResult("unexpected_error");
     }
 
     let data: any = null;
