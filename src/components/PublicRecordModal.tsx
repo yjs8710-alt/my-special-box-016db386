@@ -134,6 +134,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
+  const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
+
   /* ── 건축물 _raw 데이터 파싱 ── */
   const raw = building?._raw && typeof building._raw === "object"
     ? (building._raw as Record<string, unknown>)
@@ -141,6 +143,22 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const floors = raw?.floors && Array.isArray(raw.floors)
     ? (raw.floors as Array<Record<string, string>>)
     : [];
+
+  /* 건축물 주요 필드 중 실제 값이 하나라도 있는지 */
+  const hasAnyBuildingData = building && (
+    str(building.building_name) ||
+    str(building.main_purpose) ||
+    str(building.total_area) ||
+    str(building.approval_date) ||
+    str(building.floors_above)
+  );
+  /* 토지 주요 필드 중 실제 값이 하나라도 있는지 */
+  const hasAnyLandData = land && (
+    str(land.land_category) ||
+    str(land.land_area) ||
+    str(land.official_price) ||
+    str(land.use_zone)
+  );
 
   return (
     <div
