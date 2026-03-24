@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
+import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원"];
@@ -155,6 +156,16 @@ const CommercialRental = () => {
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
         />
+        {selectedId !== null && (() => {
+          const selected = allProperties.find(p => p.id === selectedId) ?? null;
+          return selected ? (
+            <PropertyDetailPanel
+              property={selected}
+              onClose={() => setSelectedId(null)}
+              sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
+            />
+          ) : null;
+        })()}
       </main>
     </div>
   );
