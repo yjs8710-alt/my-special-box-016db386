@@ -1116,9 +1116,11 @@ serve(async (req) => {
           }
         }
 
-        // ── 3b. 공시지가 + 토지특성 ──
+        // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 위임) ──────────────
+        // 배경: Supabase eu-central-1 → 한국 토지 API(nsdi/VWorld) IP 차단 확인됨
+        // 구조: 토지 조회 전용 land-proxy 함수에 위임 → 향후 국내 프록시 교체 용이
         if (needLand && pnu) {
-          console.log("\n💰 [공시지가+토지특성 조회 시작]");
+          console.log("\n💰 [공시지가+토지특성 조회 시작 → land-proxy 위임]");
           console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
           console.log(`  🔢 sigunguCd: ${sigunguCd} | bjdongCd: ${bjdongCd} | platGbCd: ${platGbCd}`);
           console.log(`  1️⃣  bun: ${bun} (${bun.length}자리) ${bun.length === 4 ? "✅" : "❌"}`);
@@ -1130,80 +1132,87 @@ serve(async (req) => {
           let useZone:       string | null = null;
           let roadAccess:    string | null = null;
           let landKeyError   = false;
-          let landConnError  = false;  // IP 차단 등 연결 실패
+          let landConnError  = false;
 
-          // ① nsdi.go.kr 1차 시도 (data.go.kr 1611000 공식 WFS 경로)
-          // ※ VWorld(api.vworld.kr) → Supabase eu-central-1 IP 차단 확인됨 (connection closed)
-          // ※ nsdi.go.kr = 동일 serviceKey(DATA_GO_KR_API_KEY) 사용 가능
-          if (dataGoKrApiKey) {
-            console.log("\n🌍 [1순위] nsdi.go.kr 공시지가 조회 (data.go.kr 1611000 WFS 경로)");
-            const [nRes, nChar] = await Promise.all([
-              fetchNsdiLandInfo(pnu, dataGoKrApiKey),
-              fetchNsdiLandCharacter(pnu, dataGoKrApiKey),
-            ]);
+          // ── land-proxy 내부 호출 ──────────────────────────────────────────
+          try {
+            const landProxyUrl = `${supabaseUrl}/functions/v1/land-proxy`;
+            console.log(`\n🌏 [land-proxy 호출] ${landProxyUrl}`);
 
-            if (nRes.keyError) {
-              landKeyError = true;
-              console.log("\n🔴 [최우선 진단] DATA_GO_KR API KEY 오류 또는 nsdi 서비스 미활용");
-            } else if (nRes.verdict === "connection_error" || nRes.verdict === "network_error") {
-              landConnError = true;
-              console.log(`\n🔌 [연결 실패] nsdi.go.kr 연결 불가 (${nRes.verdict})`);
-              console.log("  → VWorld와 동일하게 Supabase eu-central-1 → 한국 서버 차단 가능성");
-              console.log("  → 토지 API는 한국 내부 서버에서만 접근 가능한 구조일 수 있음");
-            } else if (nRes.verdict === "success" && nRes.price) {
-              officialPrice = nRes.price;
-              landCategory  = nRes.category;
-              landArea      = nRes.area;
-              useZone       = nRes.useZone;
-              roadAccess    = nRes.roadSide;
-              console.log("✅ [nsdi 성공] 공시지가:", officialPrice);
+            const landRes = await fetch(landProxyUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${supabaseKey}`,
+                "apikey": supabaseKey,
+              },
+              body: JSON.stringify({ pnu, property_id: pid }),
+              signal: AbortSignal.timeout(20000),
+            });
+
+            const landText = await landRes.text();
+            console.log(`  - land-proxy HTTP: ${landRes.status}`);
+            console.log(`  - land-proxy raw(300): ${landText.substring(0, 300)}`);
+
+            if (landRes.ok) {
+              let landJson: any = null;
+              try { landJson = JSON.parse(landText); } catch { /* 무시 */ }
+
+              if (landJson) {
+                if (landJson.key_error)       landKeyError  = true;
+                if (landJson.land_conn_error) landConnError = true;
+
+                officialPrice = landJson.official_price ?? null;
+                landCategory  = landJson.land_category  ?? null;
+                landArea      = landJson.land_area       ?? null;
+                useZone       = landJson.use_zone        ?? null;
+                roadAccess    = landJson.road_access     ?? null;
+
+                if (landJson.verdict === "success") {
+                  console.log(`  ✅ [land-proxy 성공] 공시지가: ${officialPrice}`);
+                } else {
+                  console.log(`  ⚠️  [land-proxy 실패] verdict=${landJson.verdict}`);
+                }
+              }
             } else {
-              const diagLabel = nRes.verdict === "no_data" ? "5순위(데이터미존재)"
-                : nRes.verdict === "unexpected_error" ? "2순위(endpoint불일치)"
-                : nRes.verdict === "parse_error" ? "4순위(파싱오류)"
-                : "연결실패";
-              console.log(`⚠️ [nsdi 실패] ${diagLabel} | 판정=${nRes.verdict} | HTTP=${nRes.httpStatus}`);
+              console.log(`  ❌ [land-proxy 응답 오류] HTTP ${landRes.status}`);
+              landConnError = true;
             }
-            if (nChar && !landCategory) {
-              if (nChar.lndcgrCodeNm)   landCategory = nChar.lndcgrCodeNm;
-              if (nChar.lndpclAr)       landArea     = nChar.lndpclAr;
-              if (nChar.prposArea1Nm)   useZone      = nChar.prposArea1Nm;
-              if (nChar.roadSideCodeNm) roadAccess   = nChar.roadSideCodeNm;
-            }
+          } catch (e) {
+            const errMsg    = String(e);
+            const isConnErr = errMsg.includes("connection closed") || errMsg.includes("timed out") || errMsg.includes("AbortError");
+            console.log(`  ${isConnErr ? "🔌" : "❌"} [land-proxy 호출 실패]: ${errMsg.substring(0, 200)}`);
+            if (isConnErr) landConnError = true;
           }
 
-          // ── 토지 전체 실패 최종 진단 ─────────────────────────────────
+          // ── 토지 전체 실패 최종 진단 ─────────────────────────────────────
           if (!officialPrice && !landCategory && !landArea) {
             const hasBuildingResult = !!(buildingData as any)?.main_purpose;
             console.log("\n⚠️ [토지대장 최종 진단 — 원인 우선순위]");
-            console.log("  ┌──────────────────────────────────────────────────────┐");
+            console.log("  ┌─────────────────────────────────────────────────────────────┐");
             if (hasBuildingResult) {
-              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공               │");
+              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공                      │");
             }
             if (landKeyError) {
-              console.log("  │ 🔴 1순위: API KEY 오류 (nsdi 서비스 미활용 가능성)   │");
+              console.log("  │ 🔴 1순위: API KEY 값 오류 또는 허용 도메인 불일치           │");
             } else if (landConnError) {
-              console.log("  │ 🔌 1순위: 연결 실패 — Supabase eu-central-1 → 한국 서버 차단 │");
-              console.log("  │    VWorld + nsdi 모두 동일 증상 확인됨                │");
-              console.log("  │    → 한국 외 IP에서 토지 API 접근 불가 구조로 판단    │");
+              console.log("  │ 🔌 1순위: 연결 실패 — Supabase eu-central-1 → 한국 서버 차단│");
+              console.log("  │    LAND_PROXY_URL 시크릿에 국내 프록시 URL을 설정하세요      │");
             } else {
-              console.log("  │ 🟡 1순위: nsdi endpoint 경로 불일치                 │");
+              console.log("  │ 🟡 1순위: nsdi endpoint 경로 불일치                        │");
             }
-            console.log("  │ 🟡 2순위: nsdi WFS 파라미터 형식 오류               │");
-            console.log("  │ 🟡 3순위: 응답 파싱 오류 (JSON/XML 구조 차이)       │");
-            console.log("  │ 🟡 4순위: 실제 토지 데이터 미존재                   │");
-            console.log("  │ ⚪ 5순위: 서비스 승인 문제 (낮음 — 건축물 정상)      │");
-            console.log("  └──────────────────────────────────────────────────────┘");
+            console.log("  │ 🟡 2순위: nsdi WFS 파라미터 형식 오류                      │");
+            console.log("  │ 🟡 3순위: 응답 파싱 오류 (JSON/XML 구조 차이)              │");
+            console.log("  │ 🟡 4순위: 실제 토지 데이터 미존재                          │");
+            console.log("  │ ⚪ 5순위: 서비스 승인 문제 (낮음 — 건축물 정상)             │");
+            console.log("  └─────────────────────────────────────────────────────────────┘");
             console.log(`  → PNU: ${pnu} (${pnu.length}자리)`);
             if (landConnError) {
-              console.log("  → nsdi + VWorld 모두 connection_error → 한국 서버 IP 차단으로 판단");
-              console.log("  → 토지 API는 한국 서버에서만 호출 가능할 가능성 높음");
-            } else {
-              console.log("  → nsdi endpoint 또는 파라미터 형식 점검 필요");
+              console.log("  → 국내 서버 프록시 필요 (LAND_PROXY_URL 시크릿 설정)");
             }
           }
 
-          // land_summary에 진단 플래그 저장 (UI 배지 표시용)
+          // land_summary 진단 플래그 저장
           const landDiagnostics: Record<string, unknown> = {};
           if (landKeyError)  landDiagnostics.land_key_error   = true;
           if (landConnError) landDiagnostics.land_conn_error  = true;
@@ -1211,8 +1220,8 @@ serve(async (req) => {
 
           console.log("💰 [공시지가 최종]:", officialPrice);
           console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
-          if (landKeyError)  console.log("🔴 [KEY 오류] DATA_GO_KR_API_KEY 또는 nsdi 서비스 활용신청 확인 필요");
-          if (landConnError) console.log("🔌 [연결 실패] nsdi + VWorld 모두 차단 — 한국 서버 IP 접근 불가");
+          if (landKeyError)  console.log("🔴 [KEY 오류] DATA_GO_KR_API_KEY 값 오류 또는 허용 도메인 불일치");
+          if (landConnError) console.log("🔌 [연결 실패] 한국 서버 IP 접근 차단 — LAND_PROXY_URL 설정 필요");
 
           const dongName = propertyAddress.match(/([가-힣]+동|[가-힣]+면|[가-힣]+읍)/)?.[1] || "";
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "") || "0"}-${ji.replace(/^0+/, "") || "0"}`.trim();
