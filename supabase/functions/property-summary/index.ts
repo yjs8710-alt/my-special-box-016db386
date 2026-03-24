@@ -953,8 +953,13 @@ serve(async (req) => {
 
         // ── 3b. 공시지가 + 토지특성 ──
         if (needLand && pnu) {
-          console.log("💰 [공시지가+토지특성 조회 시작] PNU:", pnu);
+          console.log("\n💰 [공시지가+토지특성 조회 시작]");
+          console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
+          console.log(`  🔢 sigunguCd: ${sigunguCd} | bjdongCd: ${bjdongCd} | platGbCd: ${platGbCd}`);
+          console.log(`  1️⃣  bun: ${bun} (${bun.length}자리) ${bun.length === 4 ? "✅" : "❌"}`);
+          console.log(`  2️⃣  ji:  ${ji}  (${ji.length}자리) ${ji.length === 4 ? "✅" : "❌"}`);
 
+          // ① data.go.kr 개별공시지가 (1차 시도)
           const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
           let officialPrice = landInfo.price;
           let landCategory  = landInfo.category;
@@ -962,6 +967,19 @@ serve(async (req) => {
           let useZone       = landInfo.useZone;
           let roadAccess    = landInfo.roadSide;
 
+          // ② data.go.kr 토지특성 (공시지가에 특성정보 없을 시 추가 조회)
+          if (!landCategory || !landArea) {
+            console.log("🌱 [토지특성 추가 조회 시도] data.go.kr");
+            const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
+            if (charInfo) {
+              if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
+              if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
+              if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
+              if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
+            }
+          }
+
+          // ③ VWorld 폴백 (data.go.kr 전부 실패 시)
           if (!officialPrice && vworldApiKey) {
             console.log("🔄 [VWorld 폴백 시도]");
             const [vPrice, vChar] = await Promise.all([
@@ -969,10 +987,22 @@ serve(async (req) => {
               fetchLandCharacter(pnu, vworldApiKey),
             ]);
             if (vPrice) officialPrice = vPrice;
-            if (vChar?.lndcgrCodeNm)   landCategory = vChar.lndcgrCodeNm;
-            if (vChar?.lndpclAr)       landArea     = vChar.lndpclAr;
-            if (vChar?.prposArea1Nm)   useZone      = vChar.prposArea1Nm;
-            if (vChar?.roadSideCodeNm) roadAccess   = vChar.roadSideCodeNm;
+            if (vChar?.lndcgrCodeNm   && !landCategory) landCategory = vChar.lndcgrCodeNm;
+            if (vChar?.lndpclAr       && !landArea)     landArea     = vChar.lndpclAr;
+            if (vChar?.prposArea1Nm   && !useZone)      useZone      = vChar.prposArea1Nm;
+            if (vChar?.roadSideCodeNm && !roadAccess)   roadAccess   = vChar.roadSideCodeNm;
+          }
+
+          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단
+          if (!officialPrice && !landCategory && !landArea) {
+            const hasBuildingResult = !!buildingData?.main_purpose;
+            if (hasBuildingResult) {
+              console.log("\n⚠️ [토지대장 진단]");
+              console.log("  🏗️ 건축물대장은 조회되었지만 토지대장 조회 실패");
+              console.log("  → 토지대장 파라미터 불일치 가능성 높음");
+              console.log(`  → 사용된 PNU: ${pnu}`);
+              console.log(`  → data.go.kr > 1611000 개별공시지가 서비스 활용신청 여부 확인 필요`);
+            }
           }
 
           console.log("💰 [공시지가 최종]:", officialPrice);
