@@ -525,11 +525,17 @@ serve(async (req) => {
           }
         }
 
-        // ── 3b. 공시지가 조회 (표준공시지가 API) ──────────────────────
+        // ── 3b. 공시지가 + 토지특성 조회 (VWorld API) ────────────────
         if (needLand && pnu) {
-          console.log("💰 [공시지가 조회 시작] PNU:", pnu);
-          const officialPrice = await fetchStdLandPrice(pnu, dataGoKrApiKey);
+          console.log("💰 [공시지가+토지특성 조회 시작] PNU:", pnu);
+
+          // VWorld 공시지가 + 토지특성 병렬 호출
+          const [officialPrice, landChar] = await Promise.all([
+            vworldApiKey ? fetchIndvdLandPrice(pnu, vworldApiKey) : Promise.resolve(null),
+            vworldApiKey ? fetchLandCharacter(pnu, vworldApiKey)  : Promise.resolve(null),
+          ]);
           console.log("💰 [공시지가 결과]:", officialPrice);
+          console.log("🌱 [토지특성 결과]:", landChar);
 
           const { data: propDetail } = await supabase
             .from("properties")
@@ -541,10 +547,16 @@ serve(async (req) => {
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "")}-${ji.replace(/^0+/, "")}`.trim();
 
           if (landData) {
-            // 기존 행 업데이트 (공시지가만)
+            // 기존 행 업데이트 (공시지가 + 토지특성)
             const { data: updated } = await supabase
               .from("land_summary")
-              .update({ official_price: officialPrice })
+              .update({
+                official_price: officialPrice ?? (landData as any).official_price,
+                land_category:  landChar?.lndcgrCodeNm  ?? (landData as any).land_category,
+                land_area:      landChar?.lndpclAr      ?? (landData as any).land_area,
+                use_zone:       landChar?.prposArea1Nm  ?? (landData as any).use_zone,
+                road_access:    landChar?.roadSideCodeNm ?? (landData as any).road_access,
+              })
               .eq("property_id", pid)
               .select()
               .single();
@@ -555,11 +567,11 @@ serve(async (req) => {
               .insert({
                 property_id:    pid,
                 lot_number:     lotStr,
-                land_category:  null,
-                land_area:      null,
-                official_price: officialPrice,
-                use_zone:       null,
-                road_access:    null,
+                land_category:  landChar?.lndcgrCodeNm  ?? null,
+                land_area:      landChar?.lndpclAr      ?? null,
+                official_price: officialPrice           ?? null,
+                use_zone:       landChar?.prposArea1Nm  ?? null,
+                road_access:    landChar?.roadSideCodeNm ?? null,
               })
               .select()
               .single();
