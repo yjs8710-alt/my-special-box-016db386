@@ -794,13 +794,25 @@ declare global {
 }
 const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
 function loadKakaoForPublicRecords(cb: () => void) {
-  if (window.kakao && window.kakao.maps) { cb(); return; }
+  if (window.kakao && window.kakao.maps && window.kakao.maps.services) { cb(); return; }
   if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
   window.__kakaoMapCallbacks.push(cb);
-  if (document.getElementById("kakao-maps-script")) return;
+  // services 라이브러리 포함 (geocoder용)
+  const existingScript = document.getElementById("kakao-maps-script");
+  if (existingScript) {
+    // 이미 로드 중 or 완료 — services 없으면 재로드
+    if (window.kakao?.maps && !window.kakao.maps.services) {
+      window.kakao.maps.load(() => {
+        window.__kakaoMapReady = true;
+        window.__kakaoMapCallbacks?.forEach(fn => fn());
+        window.__kakaoMapCallbacks = [];
+      });
+    }
+    return;
+  }
   const s = document.createElement("script");
   s.id = "kakao-maps-script";
-  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&libraries=services&autoload=false`;
   s.async = true;
   s.onload = () => {
     window.kakao.maps.load(() => {
@@ -858,49 +870,54 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
   const [activeTab, setActiveTab] = useState<"land" | "building">("land");
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
+  const [fetched, setFetched] = useState(false);
 
-  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed 금지)
+  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed/embed 금지)
   const buildingSearchUrl = `https://www.seumteo.go.kr/siteurl.do`;
   const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029`;
   const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp`;
   const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp`;
 
+  const fetchData = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
+    try {
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+      const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/property-summary`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": ANON_KEY,
+          "Authorization": `Bearer ${ANON_KEY}`,
+        },
+        body: JSON.stringify({ address, property_id: propertyId }),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+      const data = await res.json();
+      console.log("📦 [building_summary]:", data.building_summary ? "데이터 있음" : "없음", data.building_summary);
+      console.log("🌍 [land_summary]:", data.land_summary ? "데이터 있음" : "없음", data.land_summary);
+      setBuilding(data.building_summary as BuildingSummaryRow | null ?? null);
+      setLand(data.land_summary as LandSummaryRow | null ?? null);
+      setFetched(true);
+    } catch (e: any) {
+      console.error("❌ [공적장부 오류]:", e);
+      setErrorMsg(e?.message ?? "조회 중 오류가 발생했습니다");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleToggle = async () => {
     const next = !open;
     setOpen(next);
-    if (next && building === undefined && land === undefined) {
-      setLoading(true);
-      setErrorMsg(null);
-
-      console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
-
-      try {
-        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-        const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/property-summary`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": ANON_KEY,
-            "Authorization": `Bearer ${ANON_KEY}`,
-          },
-          body: JSON.stringify({ address, property_id: propertyId }),
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errText}`);
-        }
-        const data = await res.json();
-        console.log("📦 [building_summary]:", data.building_summary ? "데이터 있음" : "없음", data.building_summary);
-        console.log("🌍 [land_summary]:", data.land_summary ? "데이터 있음" : "없음", data.land_summary);
-        setBuilding(data.building_summary as BuildingSummaryRow | null ?? null);
-        setLand(data.land_summary as LandSummaryRow | null ?? null);
-      } catch (e: any) {
-        console.error("❌ [공적장부 오류]:", e);
-        setErrorMsg(e?.message ?? "조회 중 오류가 발생했습니다");
-      } finally {
-        setLoading(false);
-      }
+    // 처음 열 때만 조회 (이후 닫았다 열면 캐시 사용, 에러 상태면 재시도)
+    if (next && !fetched && !loading) {
+      await fetchData();
     }
   };
 
@@ -939,9 +956,16 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
           )}
 
           {!loading && errorMsg && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-4 flex flex-col gap-1">
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-4 flex flex-col gap-2">
               <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
               <p className="text-[10px] text-muted-foreground">{errorMsg}</p>
+              <button
+                onClick={() => { setFetched(false); fetchData(); }}
+                className="self-start px-3 py-1 rounded-lg text-[11px] font-bold text-white mt-1"
+                style={{ background: "hsl(var(--destructive))" }}
+              >
+                다시 시도
+              </button>
             </div>
           )}
 
