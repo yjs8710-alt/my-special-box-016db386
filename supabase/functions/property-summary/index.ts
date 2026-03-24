@@ -205,29 +205,29 @@ async function fetchBuildingApi(
 
 // ── 표제부 ───────────────────────────────────────────────────────────────
 async function fetchBuildingTitle(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k);
-  console.log("📊 [표제부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k);
+  console.log("📊 [표제부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 총괄표제부 (다세대·집합건물 폴백) ────────────────────────────────────
 async function fetchBuildingRecap(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrRecapTitleInfo", s, b, bun, ji, k);
-  console.log("📊 [총괄표제부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrRecapTitleInfo", s, b, bun, ji, k);
+  console.log("📊 [총괄표제부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 집합건물 공용부 (오피스텔·아파트 폴백) ──────────────────────────────
 async function fetchBuildingExpos(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k);
-  console.log("📊 [집합건물공용부]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k);
+  console.log("📊 [집합건물공용부]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
 // ── 기본개요 ─────────────────────────────────────────────────────────────
 async function fetchBuildingBasic(s: string, b: string, bun: string, ji: string, k: string) {
-  const { total, items } = await fetchBuildingApi("getBrBasisOulnInfo", s, b, bun, ji, k);
-  console.log("📊 [기본개요]:", total > 0 ? `${total}건` : "없음");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrBasisOulnInfo", s, b, bun, ji, k);
+  console.log("📊 [기본개요]:", total > 0 ? `${total}건` : `없음 (${resultCode}/${resultMsg})`);
   return total > 0 ? items[0] : null;
 }
 
