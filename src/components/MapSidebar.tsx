@@ -1918,7 +1918,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
     const parsed = saved ? Number(saved) : 0;
-    // 저장값이 없거나 최소보다 작으면 새 기본값 사용
     return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
   });
   const [collapsed, setCollapsed] = useState(false);
@@ -1930,6 +1929,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
+  const [publicRecordAddress, setPublicRecordAddress] = useState<string | null>(null);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
