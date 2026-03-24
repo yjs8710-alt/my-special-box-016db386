@@ -1123,56 +1123,69 @@ serve(async (req) => {
           console.log(`  1️⃣  bun: ${bun} (${bun.length}자리) ${bun.length === 4 ? "✅" : "❌"}`);
           console.log(`  2️⃣  ji:  ${ji}  (${ji.length}자리) ${ji.length === 4 ? "✅" : "❌"}`);
 
-          // ① data.go.kr 개별공시지가 (1차 시도)
-          const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
-          let officialPrice = landInfo.price;
-          let landCategory  = landInfo.category;
-          let landArea      = landInfo.area;
-          let useZone       = landInfo.useZone;
-          let roadAccess    = landInfo.roadSide;
+          let officialPrice: string | null = null;
+          let landCategory:  string | null = null;
+          let landArea:      string | null = null;
+          let useZone:       string | null = null;
+          let roadAccess:    string | null = null;
 
-          // ② data.go.kr 토지특성 (공시지가에 특성정보 없을 시 추가 조회)
-          if (!landCategory || !landArea) {
-            console.log("🌱 [토지특성 추가 조회 시도] data.go.kr");
-            const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
-            if (charInfo) {
-              if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
-              if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
-              if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
-              if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
-            }
-          }
-
-          // ③ VWorld 폴백 (data.go.kr 전부 실패 시)
-          if (!officialPrice && vworldApiKey) {
-            console.log("🔄 [VWorld 폴백 시도]");
-            const [vPrice, vChar] = await Promise.all([
-              fetchIndvdLandPrice(pnu, vworldApiKey),
+          // ① VWorld 1차 시도 (공식 REST endpoint - api.vworld.kr)
+          // ※ data.go.kr/1611000은 VWorld LINK 방식 → 직접 REST 미제공 확인됨
+          if (vworldApiKey) {
+            console.log("\n🌍 [1순위] VWorld API 시도 (api.vworld.kr — 공식 제공 경로)");
+            const [vRes, vChar] = await Promise.all([
+              fetchVWorldLandPrice(pnu, vworldApiKey),
               fetchLandCharacter(pnu, vworldApiKey),
             ]);
-            if (vPrice) officialPrice = vPrice;
-            if (vChar?.lndcgrCodeNm   && !landCategory) landCategory = vChar.lndcgrCodeNm;
-            if (vChar?.lndpclAr       && !landArea)     landArea     = vChar.lndpclAr;
-            if (vChar?.prposArea1Nm   && !useZone)      useZone      = vChar.prposArea1Nm;
-            if (vChar?.roadSideCodeNm && !roadAccess)   roadAccess   = vChar.roadSideCodeNm;
+            if (vRes.verdict === "success" && vRes.price) {
+              officialPrice = vRes.price;
+              landCategory  = vRes.category;
+              landArea      = vRes.area;
+              useZone       = vRes.useZone;
+              roadAccess    = vRes.roadSide;
+              console.log("✅ [VWorld 1차 성공] 공시지가:", officialPrice);
+            } else {
+              console.log(`⚠️ [VWorld 1차 실패] 판정=${vRes.verdict} HTTP=${vRes.httpStatus}`);
+            }
+            if (vChar && !landCategory) { landCategory = vChar.lndcgrCodeNm; landArea = vChar.lndpclAr; useZone = vChar.prposArea1Nm; roadAccess = vChar.roadSideCodeNm; }
           }
 
-          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단 (승인 완료 전제)
+          // ② data.go.kr 2차 확인 (VWorld 실패 시 또는 확인 목적)
+          if (!officialPrice && dataGoKrApiKey) {
+            console.log("\n🌍 [2순위] data.go.kr API 확인 시도 (HTTP 500 예상)");
+            const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
+            if (landInfo.price) { officialPrice = landInfo.price; landCategory = landInfo.category; landArea = landInfo.area; useZone = landInfo.useZone; roadAccess = landInfo.roadSide; }
+            if (!landCategory || !landArea) {
+              const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
+              if (charInfo) {
+                if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
+                if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
+                if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
+                if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
+              }
+            }
+          }
+
+          // ── 토지 전체 실패 최종 진단 ─────────────────────────────────
           if (!officialPrice && !landCategory && !landArea) {
             const hasBuildingResult = !!(buildingData as any)?.main_purpose;
+            console.log("\n⚠️ [토지대장 최종 진단]");
+            console.log("  ┌─────────────────────────────────────────────────┐");
             if (hasBuildingResult) {
-              console.log("\n⚠️ [토지대장 최종 진단] 건축물대장 조회 성공 / 토지대장 실패");
-              console.log("  🏗️ 건축물대장(1613000)은 조회되었지만 토지대장(1611000) 조회 실패");
-              console.log("  활용상태는 승인으로 확인되었습니다.");
-              console.log("  현재는 승인 문제가 아니라 실제 호출 endpoint,");
-              console.log("  조회연도, 또는 파라미터 형식 불일치 가능성이 높습니다.");
-              console.log(`  → 사용된 PNU: ${pnu} (${pnu.length}자리)`);
-              console.log(`  → 1순위: endpoint 불일치 (attrList/getIndvdLandPrice vs list/getIndvdLandPrice)`);
-              console.log(`  → 2순위: PNU bun/ji 패딩 불일치 (현재 bun=${bun} ji=${ji})`);
-              console.log(`  → 3순위: stdrYear 범위 문제`);
-              console.log(`  → 4순위: 해당 지번 공시지가 미고시`);
-              console.log(`  → 5순위: 서비스 승인 문제 (낮음 - 이미 승인됨)`);
+              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공          │");
             }
+            console.log("  │ 🌍 VWorld 공시지가: 실패                        │");
+            console.log("  │ 🌍 data.go.kr 1611000: HTTP 500 (endpoint 불일치)│");
+            console.log("  ├─────────────────────────────────────────────────┤");
+            console.log("  │ 원인 우선순위:                                  │");
+            console.log("  │  1순위: VWorld API KEY 오류 (INCORRECT_KEY)     │");
+            console.log("  │  2순위: data.go.kr 토지 endpoint 구조 불일치    │");
+            console.log("  │  3순위: 토지 응답 형식 점검 필요                │");
+            console.log("  │  4순위: 해당 지번 공시지가 미고시               │");
+            console.log("  │  5순위: 서비스 승인 (낮음 - 건축물 정상 확인)   │");
+            console.log("  └─────────────────────────────────────────────────┘");
+            console.log(`  → PNU: ${pnu} (${pnu.length}자리)`);
+            console.log("  → 토지 endpoint 또는 응답 형식 점검 필요");
           }
 
           console.log("💰 [공시지가 최종]:", officialPrice);
