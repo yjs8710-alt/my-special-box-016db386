@@ -766,28 +766,38 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   );
 }
 
-/* ─── 공적장부 패널 ─── */
-type PanelStatus = "idle" | "loading" | "ok" | "empty" | "error";
-
-function LandBuildingPanel({ address }: { address: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const [panelStatus, setPanelStatus] = useState<PanelStatus>("idle");
+/* ─── 공적장부 패널 (PropertySummaryPanel) ─── */
+function PropertySummaryPanel({ address }: { address: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"land" | "building">("land");
-  const [errText, setErrText] = useState("");
-  const [land, setLand] = useState<Record<string, unknown> | null>(null);
   const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
+  const [land, setLand] = useState<Record<string, unknown> | null>(null);
 
-  const str = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+  const str = (v: unknown) => (v != null && v !== "" ? String(v) : "-");
 
-  const load = async () => {
-    setPanelStatus("loading");
-    setErrText("");
+  const handleClick = async () => {
     console.log("NEW_PROPERTY_SUMMARY_CLICK");
+
+    if (!address) {
+      setError("주소 없음");
+      setOpen(true);
+      return;
+    }
+
+    setOpen(true);
+    setLoading(true);
+    setError("");
+    setBuilding(null);
+    setLand(null);
+
     console.log("CALL_PROPERTY_SUMMARY", address);
+
     try {
       const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
-      const apiKey   = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const resp = await fetch(endpoint, {
+      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -796,42 +806,37 @@ function LandBuildingPanel({ address }: { address: string }) {
         },
         body: JSON.stringify({ address }),
       });
-      if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
-      const payload = await resp.json();
-      console.log("PROPERTY_SUMMARY_RESPONSE", payload);
-      const b = payload.building_summary ?? null;
-      const l = payload.land_summary ?? null;
-      setBuilding(b);
-      setLand(l);
-      setPanelStatus(b === null && l === null ? "empty" : "ok");
-    } catch (err: unknown) {
-      setErrText(err instanceof Error ? err.message : "알 수 없는 오류");
-      setPanelStatus("error");
+
+      const data = await res.json();
+      console.log("PROPERTY_SUMMARY_RESPONSE", data);
+
+      if (!res.ok) throw new Error(data.error || "조회 실패");
+
+      setBuilding(data.building_summary ?? null);
+      setLand(data.land_summary ?? null);
+    } catch (e: unknown) {
+      console.error("PROPERTY_SUMMARY_ERROR", e);
+      setError(e instanceof Error ? e.message : "오류 발생");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggle = () => {
-    const next = !expanded;
-    setExpanded(next);
-    if (next && panelStatus === "idle") load();
-  };
-
-  const Row = ({ label, value }: { label: string; value?: string | null }) =>
-    value ? (
-      <div className="flex py-2 border-b border-border/40 last:border-0 gap-2">
-        <span className="w-[84px] flex-shrink-0 text-[11px] text-muted-foreground leading-tight">{label}</span>
-        <span className="text-[11px] font-semibold text-foreground leading-tight">{value}</span>
-      </div>
-    ) : null;
+  const Row = ({ label, value }: { label: string; value?: string | null }) => (
+    <div className="flex py-2 border-b border-border/40 last:border-0 gap-2">
+      <span className="w-[84px] flex-shrink-0 text-[11px] text-muted-foreground leading-tight">{label}</span>
+      <span className="text-[11px] font-semibold text-foreground leading-tight">{value ?? "-"}</span>
+    </div>
+  );
 
   return (
     <div className="px-4 pb-3">
-      {/* 버튼 */}
+      {/* 새 버튼 */}
       <button
         type="button"
-        onClick={toggle}
+        onClick={handleClick}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl border bg-muted/30 hover:bg-muted/60 transition-colors"
-        style={{ borderColor: expanded ? "hsl(var(--primary)/0.5)" : "hsl(var(--border))" }}
+        style={{ borderColor: open ? "hsl(var(--primary)/0.5)" : "hsl(var(--border))" }}
       >
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -843,18 +848,18 @@ function LandBuildingPanel({ address }: { address: string }) {
         <ChevronDown
           className="w-4 h-4 duration-200 transition-transform"
           style={{
-            color: expanded ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            transform: expanded ? "rotate(180deg)" : "none",
+            color: open ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+            transform: open ? "rotate(180deg)" : "none",
           }}
         />
       </button>
 
-      {/* 확장 패널 */}
-      {expanded && (
+      {/* 결과 영역 */}
+      {open && (
         <div className="mt-2 rounded-xl border border-border overflow-hidden bg-card">
 
           {/* 로딩 */}
-          {panelStatus === "loading" && (
+          {loading && (
             <div className="flex items-center justify-center gap-2.5 py-10">
               <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
               <p className="text-xs text-muted-foreground">공적장부 조회중...</p>
@@ -862,13 +867,13 @@ function LandBuildingPanel({ address }: { address: string }) {
           )}
 
           {/* 오류 */}
-          {panelStatus === "error" && (
+          {!loading && error && (
             <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
               <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
-              <p className="text-[10px] text-muted-foreground">{errText}</p>
+              <p className="text-[10px] text-muted-foreground">{error}</p>
               <button
                 type="button"
-                onClick={() => { setPanelStatus("idle"); load(); }}
+                onClick={handleClick}
                 className="mt-1 px-4 py-1.5 rounded-lg text-[11px] font-bold text-white"
                 style={{ background: "hsl(var(--primary))" }}
               >
@@ -878,7 +883,7 @@ function LandBuildingPanel({ address }: { address: string }) {
           )}
 
           {/* 빈 결과 */}
-          {panelStatus === "empty" && (
+          {!loading && !error && !building && !land && (
             <div className="flex flex-col items-center gap-1.5 px-4 py-8 text-center">
               <Layers className="w-8 h-8 text-muted-foreground/25 mb-1" />
               <p className="text-xs font-semibold text-muted-foreground">조회 결과 없음</p>
@@ -886,8 +891,8 @@ function LandBuildingPanel({ address }: { address: string }) {
             </div>
           )}
 
-          {/* 데이터 */}
-          {panelStatus === "ok" && (
+          {/* 정상 출력 */}
+          {!loading && !error && (building || land) && (
             <>
               {/* 탭 헤더 */}
               <div className="flex">
@@ -918,13 +923,13 @@ function LandBuildingPanel({ address }: { address: string }) {
                 <div className="px-4 py-3">
                   {land ? (
                     <>
-                      <Row label="주소"     value={address} />
-                      <Row label="토지면적"  value={str(land.land_area)} />
-                      <Row label="지목"     value={str(land.land_category)} />
-                      <Row label="용도지역"  value={str(land.use_zone)} />
-                      <Row label="공시지가"  value={str(land.official_price)} />
-                      <Row label="도로조건"  value={str(land.road_access)} />
-                      <Row label="지번"     value={str(land.lot_number)} />
+                      <Row label="주소"    value={address} />
+                      <Row label="토지면적" value={str(land.land_area)} />
+                      <Row label="지목"    value={str(land.land_category)} />
+                      <Row label="용도지역" value={str(land.use_zone)} />
+                      <Row label="공시지가" value={str(land.official_price)} />
+                      <Row label="도로조건" value={str(land.road_access)} />
+                      <Row label="지번"    value={str(land.lot_number)} />
                     </>
                   ) : (
                     <p className="text-xs text-center text-muted-foreground py-4">토지대장 데이터 없음</p>
@@ -938,21 +943,21 @@ function LandBuildingPanel({ address }: { address: string }) {
                   {building ? (
                     <>
                       <Row label="주소"      value={address} />
-                      <Row label="건물명"     value={str(building.building_name)} />
-                      <Row label="건축물용도"  value={str(building.main_purpose)} />
-                      <Row label="연면적"     value={str(building.total_area)} />
-                      <Row label="대지면적"   value={str(building.land_area)} />
-                      <Row label="사용승인일"  value={str(building.approval_date)} />
+                      <Row label="건물명"    value={str(building.building_name)} />
+                      <Row label="건축물용도" value={str(building.main_purpose)} />
+                      <Row label="연면적"    value={str(building.total_area)} />
+                      <Row label="대지면적"  value={str(building.land_area)} />
+                      <Row label="사용승인일" value={str(building.approval_date)} />
                       <Row label="층수" value={
                         building.floors_above
                           ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
-                          : null
+                          : "-"
                       } />
                       <Row label="주차대수"   value={str(building.parking_count)} />
                       <Row label="엘리베이터" value={
                         building.elevator === true ? "있음"
                           : building.elevator === false ? "없음"
-                          : null
+                          : "-"
                       } />
                     </>
                   ) : (
@@ -967,6 +972,7 @@ function LandBuildingPanel({ address }: { address: string }) {
     </div>
   );
 }
+
 
 const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: PropertyDetailPanelProps) => {
   const [liked, setLiked] = useState(false);
@@ -1298,7 +1304,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
           {/* ── 건축물대장·토지대장 ── */}
           <div className="h-2 bg-muted/50 my-2" />
-          <LandBuildingPanel address={property.address} />
+          <PropertySummaryPanel address={property.address} />
 
           {/* ── 추가 액션 버튼 ── */}
           <div className="h-2 bg-muted/50 my-2" />
