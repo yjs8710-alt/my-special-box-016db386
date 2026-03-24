@@ -1,9 +1,10 @@
-import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2 } from "lucide-react";
+import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2, FileSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import PublicRecordModal from "@/components/PublicRecordModal";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
