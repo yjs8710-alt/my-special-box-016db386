@@ -932,8 +932,9 @@ async function fetchLandCharacter(pnu: string, vworldKey: string) {
       // ── [2] 응답 후 로그 ────────────────────────────────────────────
       console.log(`\n✅ [VWorld] 응답 수신`);
       console.log(`  - HTTP status          : ${httpS}`);
-      console.log(`  - raw(600)             : ${raw600}`);
+      console.log(`  - stdrYear 포함 여부   : ✅ (${year})`);
       console.log(`  - INCORRECT_KEY 포함   : ${hasIncorrectKey ? "⚠️ YES" : "NO"}`);
+      console.log(`  - raw 일부             : ${raw600}`);
 
       let data: any = null;
       try { data = JSON.parse(text); } catch {
@@ -942,26 +943,44 @@ async function fetchLandCharacter(pnu: string, vworldKey: string) {
       }
 
       // ── [3] 1순위: KEY 오류 감지 ────────────────────────────────────
-      const rc  = data?.landCharacters?.resultCode ?? null;
-      const msg = data?.landCharacters?.resultMsg  ?? "";
-      const isIncorrectKey = hasIncorrectKey || rc === "INCORRECT_KEY";
-      const isKeyErr = isIncorrectKey || msg.includes("인증키") || msg.toUpperCase().includes("KEY");
+      const errorCode   = data?.error?.errorCode  ?? null;
+      const statusField = data?.status            ?? null;
+      const rc          = data?.landCharacters?.resultCode ?? errorCode ?? null;
+      const msg         = data?.landCharacters?.resultMsg  ?? data?.error?.errorMsg ?? "";
 
-      if (rc && rc !== "OK") {
-        if (isKeyErr) {
-          console.log(`  - 판정                 : key_error`);
-          console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지!`);
-          console.log(`  🔑 진단: 키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음`);
-          console.log(`  → resultCode=${rc} / resultMsg=${msg}`);
-          console.log(`  → 다른 no_data / endpoint / stdrYear 진단보다 KEY 오류를 먼저 해결해야 합니다`);
-          return null;
-        }
+      const isKeyErr = hasIncorrectKey
+        || errorCode === "INCORRECT_KEY"
+        || rc === "INCORRECT_KEY"
+        || (statusField === "ERROR" && (text.includes("INCORRECT") || text.includes("KEY")))
+        || msg.includes("인증키")
+        || (rc && rc !== "OK" && (rc.toUpperCase().includes("KEY") || rc.toUpperCase().includes("AUTH")));
+
+      console.log(`  - status(VWorld)       : ${statusField ?? "없음"}`);
+      console.log(`  - errorCode            : ${errorCode ?? "없음"}`);
+      console.log(`  - resultCode           : ${rc ?? "없음"}`);
+      console.log(`  - resultMsg            : ${msg || "없음"}`);
+
+      if (isKeyErr) {
+        console.log(`  - 판정                 : key_error`);
+        console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지! (getLandCharacterAttr)`);
+        console.log(`  🔑 진단: 키가 등록은 되어 있으나 값 오류 또는 허용 도메인/IP 불일치 가능성 높음`);
+        console.log(`  → errorCode=${errorCode} / resultCode=${rc} / resultMsg=${msg}`);
+        console.log(`  → Supabase Edge Function IP가 VWorld 허용 목록에 없으면 이 오류 발생`);
+        return null;
+      }
+
+      if (statusField === "ERROR" || (rc && rc !== "OK")) {
         console.log(`  - 판정                 : unexpected_error`);
-        console.log(`  ❌ [2순위] VWorld 토지특성 오류: ${rc} / ${msg}`);
+        console.log(`  ❌ [2순위] VWorld 토지특성 오류: status=${statusField} / rc=${rc} / msg=${msg}`);
         continue;
       }
 
       const fields: any[] = data?.landCharacters?.field ?? [];
+      if (fields.length === 0) {
+        console.log(`  ⚠️ [3순위] stdrYear=${year} landCharacters.field 없음`);
+        console.log(`     → 실제 VWorld 응답 최상위 키: ${Object.keys(data ?? {}).join(", ")}`);
+      }
+
       if (fields.length > 0) {
         const f   = fields[0];
         const out = {
@@ -980,11 +999,16 @@ async function fetchLandCharacter(pnu: string, vworldKey: string) {
       const errMsg    = String(e);
       const isConnErr = errMsg.includes("connection closed") || errMsg.includes("SendRequest") ||
                         errMsg.includes("socket hang up") || errMsg.includes("fetch failed") ||
-                        errMsg.includes("network error") || errMsg.includes("ECONNRESET");
+                        errMsg.includes("network error") || errMsg.includes("ECONNRESET") ||
+                        errMsg.includes("timed out") || errMsg.includes("AbortError");
+      const connType  = isConnErr ? "connection_error" : "parse_error";
       console.log(`\n${isConnErr ? "🔌" : "❌"} [VWorld] ${isConnErr ? "연결 실패" : "응답 오류"}`);
       console.log(`  - endpoint    : ${ENDPOINT_NAME}`);
-      console.log(`  - 원인        : ${errMsg.substring(0, 200)}`);
-      console.log(`  - 판정        : ${isConnErr ? "connection_error" : "parse_error"}`);
+      console.log(`  - 원인        : ${errMsg.substring(0, 300)}`);
+      console.log(`  - 판정        : ${connType}`);
+      if (isConnErr) {
+        console.log(`  💡 Supabase Edge Function IP가 VWorld 허용 목록에 없거나 네트워크 차단 가능성`);
+      }
     }
   }
   return null;
