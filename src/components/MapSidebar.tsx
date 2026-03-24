@@ -2288,13 +2288,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
           onClose={() => setBuildingRegisterAddr(null)}
         />
       )}
-      {/* External Link Modal (등기소/정부24/토지이음 등) — address 있을 때만 */}
-      {externalModal && externalModal.address && (
-        <BuildingRegisterModal
-          address={externalModal.address}
-          onClose={() => setExternalModal(null)}
-        />
-      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
