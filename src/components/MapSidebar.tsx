@@ -1922,7 +1922,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   });
   const [collapsed, setCollapsed] = useState(false);
   const [lightbox, setLightbox] = useState<{ units: LightboxUnit[]; unitIdx: number } | null>(null);
-  const [buildingRegisterAddr, setBuildingRegisterAddr] = useState<string | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
@@ -1930,9 +1929,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  // 상단 바 외부링크 팝업 (등기소/정부24/토지이음 등)
-  const [externalModal, setExternalModal] = useState<{ url: string; title: string } | null>(null);
-  const [externalModalPos, setExternalModalPos] = useState({ x: 0, y: 97 });
   const getModalInitPos = useCallback(() => {
     // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
     const x = width;
