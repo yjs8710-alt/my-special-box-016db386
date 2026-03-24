@@ -526,27 +526,54 @@ serve(async (req) => {
 
           const mappedBuilding = mapBuildingData(titleItem, basicItem, floorItems);
 
-          const { data: inserted } = await supabase
-            .from("building_summary")
-            .insert({
-              property_id:   pid,
-              building_name: mappedBuilding?.building_name ?? null,
-              main_purpose:  mappedBuilding?.main_purpose  ?? null,
-              approval_date: mappedBuilding?.approval_date ?? null,
-              land_area:     mappedBuilding?.land_area     ?? null,
-              building_area: mappedBuilding?.building_area ?? null,
-              total_area:    mappedBuilding?.total_area    ?? null,
-              floors_above:  mappedBuilding?.floors_above  ?? null,
-              floors_below:  mappedBuilding?.floors_below  ?? null,
-              parking_count: mappedBuilding?.parking_count ?? null,
-              elevator:      mappedBuilding?.elevator      ?? false,
-            })
-            .select()
-            .single();
+          let savedBuilding: Record<string, unknown> | null = null;
 
-          if (inserted) {
-            buildingData = { ...inserted, _raw: mappedBuilding?._raw ?? { floors: [] } };
+          if (isBuildingEmpty && buildingData) {
+            // 빈 껍데기 → UPDATE
+            const { data: updated } = await supabase
+              .from("building_summary")
+              .update({
+                building_name: mappedBuilding?.building_name ?? null,
+                main_purpose:  mappedBuilding?.main_purpose  ?? null,
+                approval_date: mappedBuilding?.approval_date ?? null,
+                land_area:     mappedBuilding?.land_area     ?? null,
+                building_area: mappedBuilding?.building_area ?? null,
+                total_area:    mappedBuilding?.total_area    ?? null,
+                floors_above:  mappedBuilding?.floors_above  ?? null,
+                floors_below:  mappedBuilding?.floors_below  ?? null,
+                parking_count: mappedBuilding?.parking_count ?? null,
+                elevator:      mappedBuilding?.elevator      ?? false,
+              })
+              .eq("property_id", pid)
+              .select()
+              .single();
+            savedBuilding = updated;
+            console.log("✅ [건축물대장 업데이트 완료]", updated ? "성공" : "실패");
+          } else {
+            // 신규 INSERT
+            const { data: inserted } = await supabase
+              .from("building_summary")
+              .insert({
+                property_id:   pid,
+                building_name: mappedBuilding?.building_name ?? null,
+                main_purpose:  mappedBuilding?.main_purpose  ?? null,
+                approval_date: mappedBuilding?.approval_date ?? null,
+                land_area:     mappedBuilding?.land_area     ?? null,
+                building_area: mappedBuilding?.building_area ?? null,
+                total_area:    mappedBuilding?.total_area    ?? null,
+                floors_above:  mappedBuilding?.floors_above  ?? null,
+                floors_below:  mappedBuilding?.floors_below  ?? null,
+                parking_count: mappedBuilding?.parking_count ?? null,
+                elevator:      mappedBuilding?.elevator      ?? false,
+              })
+              .select()
+              .single();
+            savedBuilding = inserted;
             console.log("✅ [건축물대장 저장 완료]");
+          }
+
+          if (savedBuilding) {
+            buildingData = { ...savedBuilding, _raw: mappedBuilding?._raw ?? { floors: [] } };
           }
         }
 
