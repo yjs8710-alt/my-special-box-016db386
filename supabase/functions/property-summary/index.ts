@@ -575,17 +575,37 @@ serve(async (req) => {
           }
         }
 
-        // ── 3b. 공시지가 + 토지특성 조회 (VWorld API) ────────────────
+        // ── 3b. 공시지가 + 토지특성 조회 (data.go.kr 우선, VWorld 폴백) ─────
         if (needLand && pnu) {
           console.log("💰 [공시지가+토지특성 조회 시작] PNU:", pnu);
 
-          // VWorld 공시지가 + 토지특성 병렬 호출
-          const [officialPrice, landChar] = await Promise.all([
-            vworldApiKey ? fetchIndvdLandPrice(pnu, vworldApiKey) : Promise.resolve(null),
-            vworldApiKey ? fetchLandCharacter(pnu, vworldApiKey)  : Promise.resolve(null),
-          ]);
-          console.log("💰 [공시지가 결과]:", officialPrice);
-          console.log("🌱 [토지특성 결과]:", landChar);
+          // ① data.go.kr 개별공시지가 API (해외 서버에서도 접근 가능)
+          const landInfo = dataGoKrApiKey
+            ? await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey)
+            : { price: null, category: null, area: null, useZone: null, roadSide: null };
+
+          let officialPrice = landInfo.price;
+          let landCategory  = landInfo.category;
+          let landArea      = landInfo.area;
+          let useZone       = landInfo.useZone;
+          let roadAccess    = landInfo.roadSide;
+
+          // ② VWorld 폴백 (한국 IP일 때만 동작)
+          if (!officialPrice && vworldApiKey) {
+            console.log("🔄 [VWorld 폴백 시도]");
+            const [vPrice, vChar] = await Promise.all([
+              fetchIndvdLandPrice(pnu, vworldApiKey),
+              fetchLandCharacter(pnu, vworldApiKey),
+            ]);
+            if (vPrice) officialPrice = vPrice;
+            if (vChar?.lndcgrCodeNm)  landCategory = vChar.lndcgrCodeNm;
+            if (vChar?.lndpclAr)      landArea     = vChar.lndpclAr;
+            if (vChar?.prposArea1Nm)  useZone      = vChar.prposArea1Nm;
+            if (vChar?.roadSideCodeNm) roadAccess  = vChar.roadSideCodeNm;
+          }
+
+          console.log("💰 [공시지가 최종]:", officialPrice);
+          console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
 
           const { data: propDetail } = await supabase
             .from("properties")
@@ -597,15 +617,14 @@ serve(async (req) => {
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "")}-${ji.replace(/^0+/, "")}`.trim();
 
           if (landData) {
-            // 기존 행 업데이트 (공시지가 + 토지특성)
             const { data: updated } = await supabase
               .from("land_summary")
               .update({
                 official_price: officialPrice ?? (landData as any).official_price,
-                land_category:  landChar?.lndcgrCodeNm  ?? (landData as any).land_category,
-                land_area:      landChar?.lndpclAr      ?? (landData as any).land_area,
-                use_zone:       landChar?.prposArea1Nm  ?? (landData as any).use_zone,
-                road_access:    landChar?.roadSideCodeNm ?? (landData as any).road_access,
+                land_category:  landCategory  ?? (landData as any).land_category,
+                land_area:      landArea      ?? (landData as any).land_area,
+                use_zone:       useZone       ?? (landData as any).use_zone,
+                road_access:    roadAccess    ?? (landData as any).road_access,
               })
               .eq("property_id", pid)
               .select()
@@ -617,11 +636,11 @@ serve(async (req) => {
               .insert({
                 property_id:    pid,
                 lot_number:     lotStr,
-                land_category:  landChar?.lndcgrCodeNm  ?? null,
-                land_area:      landChar?.lndpclAr      ?? null,
-                official_price: officialPrice           ?? null,
-                use_zone:       landChar?.prposArea1Nm  ?? null,
-                road_access:    landChar?.roadSideCodeNm ?? null,
+                land_category:  landCategory  ?? null,
+                land_area:      landArea      ?? null,
+                official_price: officialPrice ?? null,
+                use_zone:       useZone       ?? null,
+                road_access:    roadAccess    ?? null,
               })
               .select()
               .single();
