@@ -481,12 +481,60 @@ async function fetchBuildingViolation(s: string, b: string, bun: string, ji: str
   return { isViolation: false, items: [], resultCode, resultMsg };
 }
 
-// ── data.go.kr 개별공시지가 (1611000/nsdi/IndvdLandPriceService) ────────────
-// 승인된 서비스명: 개별공시지가정보서비스 (1611000)
-// 실제 엔드포인트:
-//   - /attrList/getIndvdLandPrice (속성조회)
-//   - /list/getIndvdLandPrice (목록조회)
-// 비교 서비스군: LandUseService/getLandUse, LandCharacterService/getLandCharacter (토지특성)
+// ── 토지 API 응답 파싱 헬퍼 (모든 구조 처리) ──────────────────────────────
+function parseLandApiResponse(text: string, epName: string) {
+  // "Unexpected errors" 또는 "API not found" 감지
+  const trimmed = text.trim();
+  if (trimmed === "Unexpected errors" || trimmed.startsWith("Unexpected") || trimmed === "API not found") {
+    console.log(`  ⚠️ [${epName}] API 경로 오류 응답: "${trimmed}"`);
+    console.log(`     → 이 endpoint 경로가 data.go.kr에 존재하지 않거나, 파라미터가 잘못됐을 가능성`);
+    return { ok: false, reason: "endpoint_not_found", items: [], totalCount: 0, resultCode: "N/A", resultMsg: trimmed };
+  }
+
+  let parsed: any = null;
+  try { parsed = JSON.parse(text); } catch { /* XML 시도 */ }
+
+  if (parsed) {
+    const header     = parsed?.response?.header ?? {};
+    const body       = parsed?.response?.body   ?? {};
+    const resultCode = header?.resultCode ?? "N/A";
+    const resultMsg  = header?.resultMsg  ?? "N/A";
+    const totalCount = Number(body?.totalCount ?? 0);
+
+    // 구조 1: response.body.items.item (건축물대장 방식)
+    const rawItem1 = body?.items?.item;
+    if (rawItem1) {
+      const items = Array.isArray(rawItem1) ? rawItem1 : [rawItem1];
+      return { ok: true, items, totalCount, resultCode, resultMsg };
+    }
+    // 구조 2: response.body.items (배열)
+    const rawItem2 = body?.items;
+    if (Array.isArray(rawItem2)) {
+      return { ok: true, items: rawItem2, totalCount, resultCode, resultMsg };
+    }
+    // 구조 3: field[] (VWorld 방식)
+    const fields = parsed?.indvdLandPrices?.field ?? parsed?.landCharacters?.field ?? [];
+    if (fields.length > 0) {
+      return { ok: true, items: fields, totalCount: fields.length, resultCode: "VW", resultMsg: "VWorld" };
+    }
+    return { ok: true, items: [], totalCount, resultCode, resultMsg };
+  }
+
+  // XML 파싱
+  const totalMatch = text.match(/<totalCount>(\d+)<\/totalCount>/);
+  const codeMatch  = text.match(/<resultCode>([^<]+)<\/resultCode>/);
+  const msgMatch   = text.match(/<resultMsg>([^<]+)<\/resultMsg>/);
+  if (totalMatch) {
+    return { ok: true, items: ["xml"], totalCount: Number(totalMatch[1]), resultCode: codeMatch?.[1] ?? "N/A", resultMsg: msgMatch?.[1] ?? "XML" };
+  }
+
+  return { ok: false, reason: "parse_failed", items: [], totalCount: 0, resultCode: "N/A", resultMsg: "파싱 실패" };
+}
+
+// ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
+// 서비스명: 국토교통부_개별공시지가정보 (data.go.kr 1611000 / VWorld 기반)
+// ※ "Unexpected errors" = endpoint 경로가 data.go.kr에 등록되지 않은 것
+// 실제 endpoint 후보를 다양하게 시도
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
