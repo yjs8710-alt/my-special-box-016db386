@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Layers, AlertTriangle, Building2, MapPin, Loader2 } from "lucide-react";
+import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PublicRecordModalProps {
@@ -8,37 +8,45 @@ interface PublicRecordModalProps {
   onClose: () => void;
 }
 
-/* ── Row 컴포넌트 ── */
-const Row = ({ label, value }: { label: string; value?: string | null }) => (
-  <div className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
-    <span className="w-[90px] flex-shrink-0 text-[11px] text-muted-foreground font-medium leading-tight pt-0.5">{label}</span>
-    <span className="text-[11px] font-semibold text-foreground leading-tight flex-1">{value ?? "-"}</span>
-  </div>
-);
+/* ── Row 컴포넌트 (ref 없음) ── */
+function Row({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <div className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+      <span className="w-[90px] flex-shrink-0 text-[11px] text-muted-foreground font-medium leading-tight pt-0.5">{label}</span>
+      <span className="text-[11px] font-semibold text-foreground leading-tight flex-1">{value ?? "-"}</span>
+    </div>
+  );
+}
 
 /* ── SectionHeader ── */
-const SectionHeader = ({ emoji, title, bg }: { emoji: string; title: string; bg: string }) => (
-  <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border" style={{ background: bg }}>
-    <span className="text-base leading-none">{emoji}</span>
-    <span className="text-[12px] font-extrabold text-foreground">{title}</span>
-  </div>
-);
+function SectionHeader({ emoji, title, bg }: { emoji: string; title: string; bg: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border" style={{ background: bg }}>
+      <span className="text-base leading-none">{emoji}</span>
+      <span className="text-[12px] font-extrabold text-foreground">{title}</span>
+    </div>
+  );
+}
 
 /* ── EmptySection ── */
-const EmptySection = ({ message }: { message: string }) => (
-  <div className="flex items-center justify-center gap-2 py-5 px-4">
-    <AlertTriangle className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-    <p className="text-[11px] text-muted-foreground">{message}</p>
-  </div>
-);
+function EmptySection({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center gap-2 py-5 px-4">
+      <AlertTriangle className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+      <p className="text-[11px] text-muted-foreground">{message}</p>
+    </div>
+  );
+}
 
 /* ── SkeletonRow ── */
-const SkeletonRow = () => (
-  <div className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0 animate-pulse">
-    <div className="w-[90px] h-3 bg-muted rounded" />
-    <div className="flex-1 h-3 bg-muted/70 rounded" />
-  </div>
-);
+function SkeletonRow() {
+  return (
+    <div className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0 animate-pulse">
+      <div className="w-[90px] h-3 bg-muted rounded" />
+      <div className="flex-1 h-3 bg-muted/70 rounded" />
+    </div>
+  );
+}
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
@@ -47,9 +55,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [land, setLand] = useState<Record<string, unknown> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
 
-  
-
-  /** 값이 있는지 판단 (null / "" / "조회 결과 없음" 제외) */
+  /** 값이 있는지 판단 */
   const hasVal = (v: unknown) =>
     v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
 
@@ -68,22 +74,61 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       try {
         let pid = propertyId;
 
-        // property_id가 없으면 address로 매물 조회
+        // ── Step 1: property_id 없으면 address로 DB에서 조회 ──
         if (!pid && address) {
-          const { data: propRow } = await supabase
+          console.log("🔎 [property_id 없음] address로 DB 조회:", address);
+          const { data: propRow, error: propErr } = await supabase
             .from("properties")
             .select("id")
             .eq("address", address)
             .maybeSingle();
-          if (propRow) pid = propRow.id;
-          console.log("📌 address로 조회한 property_id:", pid ?? "(없음)");
+          if (propErr) console.warn("⚠️ [properties 조회 오류]", propErr.message);
+          if (propRow) {
+            pid = propRow.id;
+            console.log("📌 address로 조회한 property_id:", pid);
+          } else {
+            console.log("⚠️ [properties] address 완전일치 없음:", address);
+          }
         }
 
-        // ── 항상 Edge Function 호출 (최신 데이터 보장) ──
-        console.log("⚡ Edge Function 호출 → address:", address, "pid:", pid);
+        // ── Step 2: DB에서 building_summary / land_summary 조회 (property_id 우선) ──
+        if (pid) {
+          console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
+          const [bRes, lRes] = await Promise.all([
+            supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
+            supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
+          ]);
+
+          if (bRes.error) console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
+          if (lRes.error) console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
+
+          console.log("📦 [building_summary] DB 조회 결과:", bRes.data ?? "없음");
+          console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
+
+          const bEmpty = !bRes.data || (!bRes.data.main_purpose && !bRes.data.total_area && !bRes.data.approval_date);
+          const lEmpty = !lRes.data || !lRes.data.official_price;
+
+          if (!bEmpty || !lEmpty) {
+            // DB에 유효한 데이터 있음
+            setBuilding(bRes.data as Record<string, unknown> | null);
+            setLand(lRes.data as Record<string, unknown> | null);
+            setFetchedFrom("db");
+            console.log("✅ [공적장부] DB 캐시 렌더링 완료");
+            setLoading(false);
+            return;
+          }
+          console.log("🔄 [DB 데이터 비어있음] API 실시간 조회로 전환...");
+        } else {
+          console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
+        }
+
+        // ── Step 3: Edge Function 호출 (실시간 조회) ──
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
-        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const res = await fetch(endpoint, {
+        const apiKey   = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+        console.log("⚡ [Edge Function 호출] address:", address, "| property_id:", pid ?? "(없음)");
+
+        const res  = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -93,20 +138,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           body: JSON.stringify({ address, property_id: pid }),
         });
         const data = await res.json();
-        console.log("📡 PROPERTY_SUMMARY_RESPONSE", data);
+        console.log("📡 [PROPERTY_SUMMARY_RESPONSE]", data);
 
         if (!res.ok) throw new Error(data.error || "공적장부 조회 실패");
 
         const bSum = data.building_summary ?? null;
         const lSum = data.land_summary ?? null;
 
-        console.log("📦 [building_summary] 조회 결과:", bSum);
-        console.log("🌍 [land_summary] 조회 결과:", lSum);
+        console.log("📦 [building_summary] API 조회 결과:", bSum ?? "없음");
+        console.log("🌍 [land_summary] API 조회 결과:", lSum ?? "없음");
 
-        // building _raw 파싱해서 최상위 필드로 병합
+        // _raw 파싱 → 빈 DB 필드 보완
         if (bSum && bSum._raw && typeof bSum._raw === "object") {
           const raw = bSum._raw as Record<string, unknown>;
-          // DB null 필드를 _raw 값으로 보완
           if (!hasVal(bSum.main_purpose) && hasVal(raw.mainPurpsCdNm)) bSum.main_purpose = raw.mainPurpsCdNm;
           if (!hasVal(bSum.total_area) && hasVal(raw.totArea)) bSum.total_area = raw.totArea;
           if (!hasVal(bSum.building_area) && hasVal(raw.archArea)) bSum.building_area = raw.archArea;
@@ -125,7 +169,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         console.log("✅ [공적장부] 렌더링 완료");
       } catch (e: unknown) {
         console.error("❌ [공적장부] 조회 실패:", e);
-        setError(e instanceof Error ? e.message : "조회 중 오류가 발생했습니다.");
+        const reason = e instanceof Error ? e.message : "조회 중 오류가 발생했습니다.";
+        console.error("❌ 조회 실패 사유:", reason);
+        setError(reason);
       } finally {
         setLoading(false);
       }
@@ -136,7 +182,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
-  /* ── 건축물 _raw 데이터 파싱 ── */
   const raw = building?._raw && typeof building._raw === "object"
     ? (building._raw as Record<string, unknown>)
     : null;
@@ -144,20 +189,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.floors as Array<Record<string, string>>)
     : [];
 
-  /* 건축물 주요 필드 중 실제 값이 하나라도 있는지 */
   const hasAnyBuildingData = building && (
-    str(building.building_name) ||
-    str(building.main_purpose) ||
-    str(building.total_area) ||
-    str(building.approval_date) ||
-    str(building.floors_above)
+    str(building.building_name) || str(building.main_purpose) ||
+    str(building.total_area) || str(building.approval_date) || str(building.floors_above)
   );
-  /* 토지 주요 필드 중 실제 값이 하나라도 있는지 */
   const hasAnyLandData = land && (
-    str(land.land_category) ||
-    str(land.land_area) ||
-    str(land.official_price) ||
-    str(land.use_zone)
+    str(land.land_category) || str(land.land_area) ||
+    str(land.official_price) || str(land.use_zone)
   );
 
   return (
@@ -203,7 +241,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             <div className="flex flex-col items-center gap-3 py-10">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
               <p className="text-[12px] text-muted-foreground font-medium">공적장부 조회 중...</p>
-              {/* 스켈레톤 미리보기 */}
               <div className="w-full px-4 mt-2 space-y-1">
                 {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
               </div>
@@ -258,7 +295,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <EmptySection message="토지대장 데이터 없음" />
               )}
 
-
               <div className="h-1.5 bg-muted/40 my-1" />
 
               {/* ② 건축물 정보 */}
@@ -266,10 +302,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {building ? (
                 <div className="px-4 py-1">
                   <Row label="건물명" value={str(building.building_name)} />
-                  <Row
-                    label="건축물용도"
-                    value={str(building.main_purpose) === "조회 결과 없음" ? null : str(building.main_purpose)}
-                  />
+                  <Row label="건축물용도" value={str(building.main_purpose) === "조회 결과 없음" ? null : str(building.main_purpose)} />
                   <Row label="연면적" value={str(building.total_area)} />
                   <Row label="대지면적" value={str(building.land_area)} />
                   <Row label="건축면적" value={str(building.building_area)} />
@@ -297,19 +330,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   <Row
                     label="엘리베이터"
                     value={
-                      building.elevator === true
-                        ? "있음"
-                        : building.elevator === false
-                        ? "없음"
-                        : null
+                      building.elevator === true ? "있음"
+                      : building.elevator === false ? "없음"
+                      : null
                     }
                   />
-                  {/* _raw 추가 필드 */}
                   {raw && (
                     <>
                       {raw.strctCdNm && <Row label="구조" value={str(raw.strctCdNm)} />}
-                      {raw.bcRat && <Row label="건폐율" value={str(raw.bcRat)} />}
-                      {raw.vlRat && <Row label="용적률" value={str(raw.vlRat)} />}
+                      {raw.bcRat     && <Row label="건폐율" value={str(raw.bcRat)} />}
+                      {raw.vlRat     && <Row label="용적률" value={str(raw.vlRat)} />}
                       {raw.hhldCnt && Number(raw.hhldCnt) > 0 && (
                         <Row label="세대수" value={`${raw.hhldCnt}세대`} />
                       )}
@@ -333,9 +363,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   <SectionHeader emoji="📐" title="층별 개요" bg="hsl(221 90% 97%)" />
                   <div className="px-4 py-2">
                     <div className="grid grid-cols-3 gap-0 text-[10px] font-bold text-muted-foreground border-b border-border/40 pb-1.5 mb-1">
-                      <span>층</span>
-                      <span>면적</span>
-                      <span>용도</span>
+                      <span>층</span><span>면적</span><span>용도</span>
                     </div>
                     {floors.map((f, i) => (
                       <div

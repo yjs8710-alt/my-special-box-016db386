@@ -2625,10 +2625,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                          {/* 건축/토지 열람 버튼 */}
                          <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPublicRecordAddress({ address: prop.address, propertyId: prop.dbId ?? prop.memo ?? undefined });
-                          }}
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             const pid = prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined);
+                             console.log("📄 [건축/토지 클릭] property 전체 객체:", JSON.stringify({ id: prop.id, dbId: prop.dbId, address: prop.address, memo: prop.memo }));
+                             console.log("🆔 전달 property_id:", pid ?? "(없음)");
+                             setPublicRecordAddress({ address: prop.address, propertyId: pid });
+                           }}
                           className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
                           style={{ background: "hsl(142 50% 95%)" }}
                         >
