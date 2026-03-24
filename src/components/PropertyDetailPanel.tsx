@@ -859,10 +859,11 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
 
-  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(address)}`;
-  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(address)}`;
-  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(address)}`;
-  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(address)}`;
+  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed 금지)
+  const buildingSearchUrl = `https://www.seumteo.go.kr/siteurl.do`;
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029`;
+  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp`;
+  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp`;
 
   const handleToggle = async () => {
     const next = !open;
