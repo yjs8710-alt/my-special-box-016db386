@@ -185,10 +185,13 @@ async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | 
 
   const currentYear = new Date().getFullYear();
 
+  // serviceKey는 URLSearchParams를 통한 자동 인코딩 대신 수동으로 직접 붙임
+  // (+ 등 특수문자가 %2B로 인코딩되면 data.go.kr에서 "Unexpected errors" 반환)
+  const encodedKey = encodeURIComponent(apiKey);
+
   // 최근 3개년 순서로 시도 (가장 최신 공시지가 확보)
   for (const year of [currentYear, currentYear - 1, currentYear - 2]) {
     const params = new URLSearchParams({
-      serviceKey: apiKey,
       pnu,
       stdrYear: String(year),
       numOfRows: "1",
@@ -196,7 +199,7 @@ async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | 
       _type: "json",
     });
 
-    const url = `${LAND_PRICE_API_BASE}/getStdLandPriceInfo?${params}`;
+    const url = `${LAND_PRICE_API_BASE}/getStdLandPriceInfo?serviceKey=${encodedKey}&${params}`;
     console.log(`💰 [표준공시지가 API ${year}년 호출] PNU:${pnu}`);
 
     try {
