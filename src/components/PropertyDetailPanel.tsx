@@ -870,49 +870,54 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
   const [activeTab, setActiveTab] = useState<"land" | "building">("land");
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
+  const [fetched, setFetched] = useState(false);
 
-  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed 금지)
+  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed/embed 금지)
   const buildingSearchUrl = `https://www.seumteo.go.kr/siteurl.do`;
   const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029`;
   const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp`;
   const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp`;
 
+  const fetchData = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
+    try {
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+      const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/property-summary`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": ANON_KEY,
+          "Authorization": `Bearer ${ANON_KEY}`,
+        },
+        body: JSON.stringify({ address, property_id: propertyId }),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+      const data = await res.json();
+      console.log("📦 [building_summary]:", data.building_summary ? "데이터 있음" : "없음", data.building_summary);
+      console.log("🌍 [land_summary]:", data.land_summary ? "데이터 있음" : "없음", data.land_summary);
+      setBuilding(data.building_summary as BuildingSummaryRow | null ?? null);
+      setLand(data.land_summary as LandSummaryRow | null ?? null);
+      setFetched(true);
+    } catch (e: any) {
+      console.error("❌ [공적장부 오류]:", e);
+      setErrorMsg(e?.message ?? "조회 중 오류가 발생했습니다");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleToggle = async () => {
     const next = !open;
     setOpen(next);
-    if (next && building === undefined && land === undefined) {
-      setLoading(true);
-      setErrorMsg(null);
-
-      console.log("🔍 [공적장부] 조회 시작 | property_id:", propertyId, "| address:", address);
-
-      try {
-        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-        const ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/property-summary`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": ANON_KEY,
-            "Authorization": `Bearer ${ANON_KEY}`,
-          },
-          body: JSON.stringify({ address, property_id: propertyId }),
-        });
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errText}`);
-        }
-        const data = await res.json();
-        console.log("📦 [building_summary]:", data.building_summary ? "데이터 있음" : "없음", data.building_summary);
-        console.log("🌍 [land_summary]:", data.land_summary ? "데이터 있음" : "없음", data.land_summary);
-        setBuilding(data.building_summary as BuildingSummaryRow | null ?? null);
-        setLand(data.land_summary as LandSummaryRow | null ?? null);
-      } catch (e: any) {
-        console.error("❌ [공적장부 오류]:", e);
-        setErrorMsg(e?.message ?? "조회 중 오류가 발생했습니다");
-      } finally {
-        setLoading(false);
-      }
+    // 처음 열 때만 조회 (이후 닫았다 열면 캐시 사용, 에러 상태면 재시도)
+    if (next && !fetched && !loading) {
+      await fetchData();
     }
   };
 
