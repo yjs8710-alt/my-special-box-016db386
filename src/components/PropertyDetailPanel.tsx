@@ -1074,17 +1074,6 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           {/* Divider */}
           <div className="h-2 bg-muted/50 my-2" />
 
-          {/* 공적장부 통합 아코디언 */}
-          <PublicRecordsAccordion
-            propertyId={property.dbId || String(property.id)}
-            address={property.address}
-            lat={property.lat}
-            lng={property.lng}
-          />
-
-          {/* Divider */}
-          <div className="h-2 bg-muted/50 my-2" />
-
           {/* Agent card */}
           <div className="px-4 pb-4">
             <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">담당 공인중개사</p>
