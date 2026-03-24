@@ -2595,7 +2595,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                     {/* 선택 시 액션 버튼들 — 항상 표시 */}
                     {selectedId === prop.id && (
-                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-6" : "grid-cols-5"}`}>
+                      <div className={`grid border-t border-primary/20 ${isAdmin ? "grid-cols-7" : "grid-cols-6"}`}>
                         {/* 관리자 수정 버튼 - 관리자 로그인 시 항상 표시 */}
                         {isAdmin && (
                           <button
@@ -2621,6 +2621,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                             </span>
                           </button>
                         )}
+                        {/* 건축/토지 열람 버튼 */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPublicRecordAddress(prop.address);
+                          }}
+                          className="flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors"
+                          style={{ background: "hsl(142 50% 95%)" }}
+                        >
+                          <FileSearch className="w-3 h-3" style={{ color: "hsl(142 60% 35%)" }} />
+                          <span className="text-[9px] font-bold" style={{ color: "hsl(142 60% 35%)" }}>건축/토지</span>
+                        </button>
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}
