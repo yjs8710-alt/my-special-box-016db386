@@ -1389,6 +1389,8 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           <PublicRecordsAccordion
             propertyId={property.dbId || String(property.id)}
             address={property.address}
+            lat={property.lat}
+            lng={property.lng}
           />
 
           {/* Divider */}
