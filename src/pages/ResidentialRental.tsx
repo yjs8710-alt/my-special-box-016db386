@@ -208,18 +208,6 @@ const ResidentialRental = () => {
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
         />
-
-        {/* 매물 상세 패널 (건축물대장·토지대장 버튼 포함) */}
-        {selectedId !== null && (() => {
-          const selected = allProperties.find(p => p.id === selectedId) ?? null;
-          return selected ? (
-            <PropertyDetailPanel
-              property={selected}
-              onClose={() => setSelectedId(null)}
-              sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
-            />
-          ) : null;
-        })()}
       </main>
     </div>
   );
