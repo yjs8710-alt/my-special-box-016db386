@@ -8,6 +8,10 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
+// VWorld는 해외 서버 차단으로 사용 불가 → data.go.kr 토지임야 API로 대체
+const LAND_JIJOK_URL    = "http://apis.data.go.kr/1611000/nsdi/LandUsePlanService/wfs/getLandUsePlan";
+const LAND_PRICE_URL    = "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
+// VWorld NED API (공시지가 - 국내 IP 차단으로 실패할 수 있음, 폴백용)
 const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
 const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
 
@@ -69,8 +73,7 @@ const BJDONG_MAP: Record<string, string> = {
   "신봉동":     "43112113",
   "원평동":     "43112112",
   "운천동":     "43112111",
-  "수곡1동":    "43112114",
-  "수곡2동":    "43112115",
+  "수곡동_흥덕": "43112114",  // 흥덕구 수곡동 법정동
   "오송읍":     "43112250",
   "옥산면":     "43112350",
   "오창읍":     "43112210",
@@ -206,73 +209,6 @@ async function fetchBuildingRecapTitle(
   }
 }
 
-// ── VWorld 개별공시지가 API ─────────────────────────────────────────────
-async function fetchIndvdLandPrice(pnu: string, vworldKey: string): Promise<string | null> {
-  if (!pnu || !vworldKey) {
-    console.log("💰 [공시지가 스킵] PNU 또는 VWORLD_API_KEY 없음");
-    return null;
-  }
-  const currentYear = new Date().getFullYear();
-  // 당해연도 → 직전연도 순으로 시도 (공시지가는 1년 지연 공표)
-  for (const year of [currentYear, currentYear - 1]) {
-    const url = `${VWORLD_LAND_PRICE_URL}?key=${encodeURIComponent(vworldKey)}&pnu=${encodeURIComponent(pnu)}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
-    console.log(`💰 [VWorld 공시지가 호출] PNU:${pnu} 연도:${year}`);
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      const text = await res.text();
-      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 400));
-      const data = JSON.parse(text);
-      // 응답 구조: indvdLandPrices.field[] (배열 안 객체)
-      const fields: any[] = data?.indvdLandPrices?.field ?? [];
-      if (fields.length > 0) {
-        const price = fields[0]?.pblntfPclnd;
-        if (price) {
-          const formatted = Number(price).toLocaleString("ko-KR");
-          console.log(`✅ [공시지가 조회 성공] ${year}년 ${formatted}원/㎡`);
-          return `${formatted}원/㎡ (${year}년 기준)`;
-        }
-      }
-    } catch (e) {
-      console.error(`❌ [VWorld 공시지가 오류 ${year}]`, String(e));
-    }
-  }
-  console.log("⚠️ [공시지가] 최근 2개 연도 데이터 없음");
-  return null;
-}
-
-// ── VWorld 토지특성 API (지목·면적·용도지역·도로접면) ──────────────────
-async function fetchLandCharacter(pnu: string, vworldKey: string): Promise<{
-  lndcgrCodeNm: string | null;
-  lndpclAr: string | null;
-  prposArea1Nm: string | null;
-  roadSideCodeNm: string | null;
-} | null> {
-  if (!pnu || !vworldKey) return null;
-  const currentYear = new Date().getFullYear();
-  for (const year of [currentYear, currentYear - 1]) {
-    const url = `${VWORLD_LAND_CHAR_URL}?key=${encodeURIComponent(vworldKey)}&pnu=${encodeURIComponent(pnu)}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
-    console.log(`🌱 [VWorld 토지특성 호출] PNU:${pnu} 연도:${year}`);
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-      const text = await res.text();
-      console.log(`🌱 [VWorld 토지특성 응답 ${year}]`, text.substring(0, 400));
-      const data = JSON.parse(text);
-      const fields: any[] = data?.landCharacters?.field ?? [];
-      if (fields.length > 0) {
-        const f = fields[0];
-        return {
-          lndcgrCodeNm:  f.lndcgrCodeNm  || null,
-          lndpclAr:      f.lndpclAr      ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
-          prposArea1Nm:  f.prposArea1Nm  || f.prposArea2Nm || null,
-          roadSideCodeNm: f.roadSideCodeNm || null,
-        };
-      }
-    } catch (e) {
-      console.error(`❌ [VWorld 토지특성 오류 ${year}]`, String(e));
-    }
-  }
-  return null;
-}
 
 // ── 건축물대장 표제부 ────────────────────────────────────────────────────
 async function fetchBuildingTitle(
@@ -296,6 +232,111 @@ async function fetchBuildingTitle(
     console.error("❌ [표제부 오류]", String(e));
     return null;
   }
+}
+
+// ── data.go.kr 개별공시지가 API (국토교통부) ─────────────────────────────
+// 서비스: 개별공시지가정보조회 (getIndvdLandPrice)
+async function fetchLandPriceDataGoKr(
+  pnu: string, apiKey: string
+): Promise<{ price: string | null; category: string | null; area: string | null; useZone: string | null; roadSide: string | null }> {
+  const result = { price: null as string | null, category: null as string | null, area: null as string | null, useZone: null as string | null, roadSide: null as string | null };
+  if (!pnu || !apiKey) return result;
+
+  // 개별공시지가 서비스 (국토교통부 부동산 공시가격 알리미 API)
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const params = new URLSearchParams({
+      serviceKey: apiKey,
+      pnu, stdrYear: String(year),
+      numOfRows: "1", pageNo: "1", _type: "json",
+    });
+    const url = `http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice?${params}`;
+    console.log(`💰 [개별공시지가 호출 ${year}] PNU:${pnu}`);
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+      const text = await res.text();
+      console.log(`💰 [개별공시지가 응답 ${year}]`, text.substring(0, 500));
+      // XML 응답 파싱
+      const priceMatch = text.match(/<pblntfPclnd>([^<]+)<\/pblntfPclnd>/);
+      const categoryMatch = text.match(/<lndcgrCode[^>]*>([^<]+)<\/lndcgrCode>/);
+      const categoryNmMatch = text.match(/<lndcgrCodeNm[^>]*>([^<]+)<\/lndcgrCodeNm>/);
+      const areaMatch = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
+      const useZoneMatch = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
+      const roadMatch = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
+
+      if (priceMatch) {
+        const price = Number(priceMatch[1]);
+        if (price > 0) {
+          result.price = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+          console.log(`✅ [개별공시지가 성공 ${year}] ${result.price}`);
+        }
+      }
+      if (categoryNmMatch) result.category = categoryNmMatch[1];
+      if (areaMatch) result.area = `${Number(areaMatch[1]).toFixed(1)}㎡`;
+      if (useZoneMatch) result.useZone = useZoneMatch[1];
+      if (roadMatch) result.roadSide = roadMatch[1];
+
+      if (result.price) break; // 공시지가 찾으면 중단
+    } catch (e) {
+      console.error(`❌ [개별공시지가 오류 ${year}]`, String(e));
+    }
+  }
+  return result;
+}
+
+// ── VWorld 개별공시지가 API (폴백용, 한국 IP에서만 동작) ─────────────────
+async function fetchIndvdLandPrice(pnu: string, vworldKey: string): Promise<string | null> {
+  if (!pnu || !vworldKey) return null;
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    console.log(`💰 [VWorld 공시지가 호출] PNU:${pnu} 연도:${year}`);
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const text = await res.text();
+      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 300));
+      const data = JSON.parse(text);
+      const fieldsA: any[] = data?.indvdLandPrices?.field ?? [];
+      if (fieldsA.length > 0) {
+        const price = fieldsA[0]?.pblntfPclnd;
+        if (price && Number(price) > 0) {
+          const formatted = Number(price).toLocaleString("ko-KR");
+          return `${formatted}원/㎡ (${year}년 기준)`;
+        }
+      }
+    } catch (_) { /* VWorld 한국 IP 차단 시 무시 */ }
+  }
+  return null;
+}
+
+// ── VWorld 토지특성 API (폴백용) ─────────────────────────────────────────
+async function fetchLandCharacter(pnu: string, vworldKey: string): Promise<{
+  lndcgrCodeNm: string | null;
+  lndpclAr: string | null;
+  prposArea1Nm: string | null;
+  roadSideCodeNm: string | null;
+} | null> {
+  if (!pnu || !vworldKey) return null;
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const text = await res.text();
+      const data = JSON.parse(text);
+      const fieldsA: any[] = data?.landCharacters?.field ?? [];
+      if (fieldsA.length > 0) {
+        const f = fieldsA[0];
+        return {
+          lndcgrCodeNm:   f.lndcgrCodeNm   || null,
+          lndpclAr:       f.lndpclAr       ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
+          prposArea1Nm:   f.prposArea1Nm   || f.prposArea2Nm || null,
+          roadSideCodeNm: f.roadSideCodeNm || null,
+        };
+      }
+    } catch (_) { /* 무시 */ }
+  }
+  return null;
 }
 
 // ── 건축물대장 기본개요 ──────────────────────────────────────────────────
@@ -412,8 +453,8 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const dataGoKrApiKey = Deno.env.get("DATA_GO_KR_API_KEY");
-    const vworldApiKey   = Deno.env.get("VWORLD_API_KEY");
+    const dataGoKrApiKey = Deno.env.get("DATA_GO_KR_API_KEY")?.trim();
+    const vworldApiKey   = Deno.env.get("VWORLD_API_KEY")?.trim();
 
     console.log("🔑 [API키 로드]:", { dataGoKr: !!dataGoKrApiKey, vworld: !!vworldApiKey });
 
@@ -475,9 +516,15 @@ serve(async (req) => {
     let buildingData = bRes.data as Record<string, unknown> | null;
     let landData = lRes.data as Record<string, unknown> | null;
 
-    const needBuilding = !buildingData;
+    // 빈 껍데기(main_purpose, total_area, approval_date 모두 null) 레코드는 재조회
+    const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
+    const needBuilding = !buildingData || !!isBuildingEmpty;
     // 공시지가가 없으면 다시 조회
     const needLand = !landData || !landData.official_price;
+
+    if (isBuildingEmpty) {
+      console.log("⚠️ [building_summary 빈 레코드 감지] → API 재조회");
+    }
 
     console.log("📦 [building_summary]:", buildingData ? "있음" : "없음");
     console.log("🌍 [land_summary]:", landData ? "있음" : "없음", "| 공시지가:", landData?.official_price || "없음");
@@ -501,41 +548,88 @@ serve(async (req) => {
 
           const mappedBuilding = mapBuildingData(titleItem, basicItem, floorItems);
 
-          const { data: inserted } = await supabase
-            .from("building_summary")
-            .insert({
-              property_id:   pid,
-              building_name: mappedBuilding?.building_name ?? null,
-              main_purpose:  mappedBuilding?.main_purpose  ?? null,
-              approval_date: mappedBuilding?.approval_date ?? null,
-              land_area:     mappedBuilding?.land_area     ?? null,
-              building_area: mappedBuilding?.building_area ?? null,
-              total_area:    mappedBuilding?.total_area    ?? null,
-              floors_above:  mappedBuilding?.floors_above  ?? null,
-              floors_below:  mappedBuilding?.floors_below  ?? null,
-              parking_count: mappedBuilding?.parking_count ?? null,
-              elevator:      mappedBuilding?.elevator      ?? false,
-            })
-            .select()
-            .single();
+          let savedBuilding: Record<string, unknown> | null = null;
 
-          if (inserted) {
-            buildingData = { ...inserted, _raw: mappedBuilding?._raw ?? { floors: [] } };
+          if (isBuildingEmpty && buildingData) {
+            // 빈 껍데기 → UPDATE
+            const { data: updated } = await supabase
+              .from("building_summary")
+              .update({
+                building_name: mappedBuilding?.building_name ?? null,
+                main_purpose:  mappedBuilding?.main_purpose  ?? null,
+                approval_date: mappedBuilding?.approval_date ?? null,
+                land_area:     mappedBuilding?.land_area     ?? null,
+                building_area: mappedBuilding?.building_area ?? null,
+                total_area:    mappedBuilding?.total_area    ?? null,
+                floors_above:  mappedBuilding?.floors_above  ?? null,
+                floors_below:  mappedBuilding?.floors_below  ?? null,
+                parking_count: mappedBuilding?.parking_count ?? null,
+                elevator:      mappedBuilding?.elevator      ?? false,
+              })
+              .eq("property_id", pid)
+              .select()
+              .single();
+            savedBuilding = updated;
+            console.log("✅ [건축물대장 업데이트 완료]", updated ? "성공" : "실패");
+          } else {
+            // 신규 INSERT
+            const { data: inserted } = await supabase
+              .from("building_summary")
+              .insert({
+                property_id:   pid,
+                building_name: mappedBuilding?.building_name ?? null,
+                main_purpose:  mappedBuilding?.main_purpose  ?? null,
+                approval_date: mappedBuilding?.approval_date ?? null,
+                land_area:     mappedBuilding?.land_area     ?? null,
+                building_area: mappedBuilding?.building_area ?? null,
+                total_area:    mappedBuilding?.total_area    ?? null,
+                floors_above:  mappedBuilding?.floors_above  ?? null,
+                floors_below:  mappedBuilding?.floors_below  ?? null,
+                parking_count: mappedBuilding?.parking_count ?? null,
+                elevator:      mappedBuilding?.elevator      ?? false,
+              })
+              .select()
+              .single();
+            savedBuilding = inserted;
             console.log("✅ [건축물대장 저장 완료]");
+          }
+
+          if (savedBuilding) {
+            buildingData = { ...savedBuilding, _raw: mappedBuilding?._raw ?? { floors: [] } };
           }
         }
 
-        // ── 3b. 공시지가 + 토지특성 조회 (VWorld API) ────────────────
+        // ── 3b. 공시지가 + 토지특성 조회 (data.go.kr 우선, VWorld 폴백) ─────
         if (needLand && pnu) {
           console.log("💰 [공시지가+토지특성 조회 시작] PNU:", pnu);
 
-          // VWorld 공시지가 + 토지특성 병렬 호출
-          const [officialPrice, landChar] = await Promise.all([
-            vworldApiKey ? fetchIndvdLandPrice(pnu, vworldApiKey) : Promise.resolve(null),
-            vworldApiKey ? fetchLandCharacter(pnu, vworldApiKey)  : Promise.resolve(null),
-          ]);
-          console.log("💰 [공시지가 결과]:", officialPrice);
-          console.log("🌱 [토지특성 결과]:", landChar);
+          // ① data.go.kr 개별공시지가 API (해외 서버에서도 접근 가능)
+          const landInfo = dataGoKrApiKey
+            ? await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey)
+            : { price: null, category: null, area: null, useZone: null, roadSide: null };
+
+          let officialPrice = landInfo.price;
+          let landCategory  = landInfo.category;
+          let landArea      = landInfo.area;
+          let useZone       = landInfo.useZone;
+          let roadAccess    = landInfo.roadSide;
+
+          // ② VWorld 폴백 (한국 IP일 때만 동작)
+          if (!officialPrice && vworldApiKey) {
+            console.log("🔄 [VWorld 폴백 시도]");
+            const [vPrice, vChar] = await Promise.all([
+              fetchIndvdLandPrice(pnu, vworldApiKey),
+              fetchLandCharacter(pnu, vworldApiKey),
+            ]);
+            if (vPrice) officialPrice = vPrice;
+            if (vChar?.lndcgrCodeNm)  landCategory = vChar.lndcgrCodeNm;
+            if (vChar?.lndpclAr)      landArea     = vChar.lndpclAr;
+            if (vChar?.prposArea1Nm)  useZone      = vChar.prposArea1Nm;
+            if (vChar?.roadSideCodeNm) roadAccess  = vChar.roadSideCodeNm;
+          }
+
+          console.log("💰 [공시지가 최종]:", officialPrice);
+          console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
 
           const { data: propDetail } = await supabase
             .from("properties")
@@ -547,15 +641,14 @@ serve(async (req) => {
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "")}-${ji.replace(/^0+/, "")}`.trim();
 
           if (landData) {
-            // 기존 행 업데이트 (공시지가 + 토지특성)
             const { data: updated } = await supabase
               .from("land_summary")
               .update({
                 official_price: officialPrice ?? (landData as any).official_price,
-                land_category:  landChar?.lndcgrCodeNm  ?? (landData as any).land_category,
-                land_area:      landChar?.lndpclAr      ?? (landData as any).land_area,
-                use_zone:       landChar?.prposArea1Nm  ?? (landData as any).use_zone,
-                road_access:    landChar?.roadSideCodeNm ?? (landData as any).road_access,
+                land_category:  landCategory  ?? (landData as any).land_category,
+                land_area:      landArea      ?? (landData as any).land_area,
+                use_zone:       useZone       ?? (landData as any).use_zone,
+                road_access:    roadAccess    ?? (landData as any).road_access,
               })
               .eq("property_id", pid)
               .select()
@@ -567,11 +660,11 @@ serve(async (req) => {
               .insert({
                 property_id:    pid,
                 lot_number:     lotStr,
-                land_category:  landChar?.lndcgrCodeNm  ?? null,
-                land_area:      landChar?.lndpclAr      ?? null,
-                official_price: officialPrice           ?? null,
-                use_zone:       landChar?.prposArea1Nm  ?? null,
-                road_access:    landChar?.roadSideCodeNm ?? null,
+                land_category:  landCategory  ?? null,
+                land_area:      landArea      ?? null,
+                official_price: officialPrice ?? null,
+                use_zone:       useZone       ?? null,
+                road_access:    roadAccess    ?? null,
               })
               .select()
               .single();
