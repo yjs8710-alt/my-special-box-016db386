@@ -894,13 +894,12 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
               <SectionTitle icon="🌍" title="토지 정보" color="hsl(142 50% 95%)" />
               {land ? (
                 <div className="px-4 py-1">
-                  <Row label="주소" value={address} />
+                  <Row label="지번주소" value={str(land.lot_number) !== "-" ? str(land.lot_number) : address} />
                   <Row label="공시지가" value={str(land.official_price)} />
                   <Row label="토지면적" value={str(land.land_area)} />
                   <Row label="지목" value={str(land.land_category)} />
                   <Row label="용도지역" value={str(land.use_zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
-                  <Row label="지번" value={str(land.lot_number)} />
                 </div>
               ) : (
                 <p className="text-xs text-center text-muted-foreground py-5">토지대장 데이터 없음</p>
@@ -913,30 +912,66 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
               <SectionTitle icon="🏢" title="건축물 정보" color="hsl(var(--primary) / 0.06)" />
               {building ? (
                 <div className="px-4 py-1">
-                  <Row label="주소" value={address} />
                   <Row label="건물명" value={str(building.building_name)} />
-                  <Row label="건축물용도" value={str(building.main_purpose)} />
+                  <Row label="건축물용도" value={str(building.main_purpose) === "조회 결과 없음" ? "-" : str(building.main_purpose)} />
                   <Row label="연면적" value={str(building.total_area)} />
                   <Row label="대지면적" value={str(building.land_area)} />
+                  <Row label="건축면적" value={str(building.building_area)} />
                   <Row label="사용승인일" value={str(building.approval_date)} />
                   <Row label="층수" value={
                     building.floors_above
-                      ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
+                      ? `지상 ${building.floors_above}층${building.floors_below && String(building.floors_below) !== "0" ? ` / 지하 ${building.floors_below}층` : ""}`
                       : "-"
                   } />
-                  <Row label="주차대수" value={str(building.parking_count)} />
-                  <Row label="엘리베이터" value={
-                    building.elevator === true ? "있음"
-                      : building.elevator === false ? "없음"
-                      : "-"
-                  } />
+                  <Row label="주차대수" value={str(building.parking_count) !== "-" && str(building.parking_count) !== "0" ? `${building.parking_count}대` : str(building.parking_count)} />
+                  <Row label="엘리베이터" value={building.elevator === true ? "있음" : building.elevator === false ? "없음" : "-"} />
+                  {/* _raw 추가 정보 (data.go.kr 실제 데이터 존재 시) */}
+                  {building._raw && typeof building._raw === "object" && (() => {
+                    const raw = building._raw as Record<string, unknown>;
+                    return (
+                      <>
+                        {raw.strctCdNm && <Row label="구조" value={str(raw.strctCdNm)} />}
+                        {raw.bcRat && <Row label="건폐율" value={str(raw.bcRat)} />}
+                        {raw.vlRat && <Row label="용적률" value={str(raw.vlRat)} />}
+                        {raw.hhldCnt && Number(raw.hhldCnt) > 0 && <Row label="세대수" value={`${raw.hhldCnt}세대`} />}
+                        {raw.roofCdNm && <Row label="지붕구조" value={str(raw.roofCdNm)} />}
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <p className="text-xs text-center text-muted-foreground py-5">건축물대장 데이터 없음</p>
               )}
 
-              {/* 하단 여백 */}
-              <div className="h-4" />
+              {/* ③ 층별 정보 (data.go.kr 실제 데이터 존재 시) */}
+              {building?._raw && typeof building._raw === "object" && Array.isArray((building._raw as Record<string, unknown>).floors) && ((building._raw as Record<string, unknown>).floors as unknown[]).length > 0 && (() => {
+                const floors = ((building._raw as Record<string, unknown>).floors as Array<Record<string, string>>);
+                return (
+                  <>
+                    <div className="h-2 bg-muted/50 my-1" />
+                    <SectionTitle icon="📐" title="층별 개요" color="hsl(221 90% 97%)" />
+                    <div className="px-4 py-2">
+                      <div className="grid grid-cols-3 gap-0 text-[10px] font-bold text-muted-foreground border-b border-border/40 pb-1.5 mb-1">
+                        <span>층</span><span>면적</span><span>용도</span>
+                      </div>
+                      {floors.map((f, i) => (
+                        <div key={i} className="grid grid-cols-3 gap-0 text-xs py-1.5 border-b border-border/20 last:border-0">
+                          <span className="font-medium text-foreground">{f.flrNoNm || f.flrNo || "-"}</span>
+                          <span className="text-muted-foreground">{f.area || "-"}</span>
+                          <span className="text-muted-foreground">{f.mainPurpsCdNm || "-"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+
+              {/* 데이터 출처 안내 */}
+              <div className="px-4 py-3 mt-1">
+                <p className="text-[10px] text-muted-foreground/50 text-center">
+                  출처: 국토교통부 건축물대장 공공데이터 (data.go.kr)
+                </p>
+              </div>
             </div>
           )}
         </div>
