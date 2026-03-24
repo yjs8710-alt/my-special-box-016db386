@@ -497,16 +497,21 @@ serve(async (req) => {
           ]);
 
           // 우선순위: 표제부 > 총괄표제부 > 집합건물공용부 > 기본개요
-          const bestItem = titleItem || recapItem || exposItem || basicItem;
-          const apiStatus = !bestItem ? "no_data" : "ok";
-          console.log("📊 [최종 선택 API]:", titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음");
+          const bestItem   = titleItem || recapItem || exposItem || basicItem;
+          const bestSource = titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음";
+          const apiStatus  = !bestItem ? "no_data" : "ok";
+
+          console.log(`\n📊 [최종 선택 API]: ${bestSource}`);
+
+          // ── 모든 endpoint totalCount=0 → 최종 진단 출력 ──────────────
           if (!bestItem) {
-            console.log("\n🔴 [건축물대장 조회 결과 없음] 최종 진단:");
-            console.log("  ▸ 호출 endpoint: " + BUILDING_API_BASE + "/getBrTitleInfo (등 4종)");
-            console.log("  ▸ 확인사항 1: data.go.kr → '건축물대장_HUB서비스(1613000)' 활용신청 승인 여부");
-            console.log("  ▸ 확인사항 2: 현재 API키가 해당 서비스에 연결되어 있는지");
-            console.log("  ▸ 확인사항 3: sigunguCd=" + sigunguCd + " bjdongCd=" + bjdongCd + " bun=" + bun + " ji=" + ji);
-            console.log("  ▸ 확인사항 4: 나대지 또는 미등록 건물 가능성");
+            console.log("\n🚨 [최종 진단]");
+            console.log("현재 resultCode=00 / 정상 서비스 / totalCount=0 이므로 API 키 자체는 동작 중입니다.");
+            console.log("하지만 data.go.kr 에서 1613000/BldRgstHubService(건축물대장_HUB서비스) 활용신청이");
+            console.log("미승인 상태일 가능성이 높습니다.");
+            console.log("→ data.go.kr → 마이페이지 → 활용신청(또는 활용현황)에서 건축물대장_HUB서비스 승인 여부를 확인해주세요.");
+            console.log(`→ 조회 파라미터: sigunguCd=${sigunguCd} bjdongCd=${bjdongCd} bun=${bun} ji=${ji}`);
+            console.log("→ 또는 해당 주소가 나대지 또는 국토교통부 미등록 건물일 수도 있습니다.");
           }
 
           const mappedBuilding = mapBuildingData(bestItem, floorItems);
