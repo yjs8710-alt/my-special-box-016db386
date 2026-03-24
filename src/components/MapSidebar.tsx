@@ -2286,19 +2286,13 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         <BuildingRegisterModal
           address={buildingRegisterAddr}
           onClose={() => setBuildingRegisterAddr(null)}
-          pos={modalPos}
-          onPosChange={setModalPos}
         />
       )}
-      {/* External Link Modal (등기소/정부24/토지이음 등) */}
-      {externalModal && (
+      {/* External Link Modal (등기소/정부24/토지이음 등) — address 있을 때만 */}
+      {externalModal && externalModal.address && (
         <BuildingRegisterModal
-          address=""
-          customUrl={externalModal.url}
-          title={externalModal.title}
+          address={externalModal.address}
           onClose={() => setExternalModal(null)}
-          pos={externalModalPos}
-          onPosChange={setExternalModalPos}
         />
       )}
       {/* Photo Upload Modal */}
