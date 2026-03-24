@@ -306,8 +306,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           토지대장 조회 결과 없음
                         </span>
                         <span className="text-[10px] leading-snug" style={{ color: "hsl(45 50% 40%)" }}>
-                          파라미터 또는 지번 불일치 가능성이 있습니다.<br />
-                          data.go.kr &gt; 1611000 개별공시지가 서비스 활용신청 여부를 확인해주세요.
+                          현재 응답은 정상 또는 부분정상으로 보이나,<br />
+                          토지 서비스 승인 상태는 이미 확인되었습니다.<br />
+                          따라서 실제 원인은 <strong>endpoint 불일치</strong>,<br />
+                          <strong>연도 파라미터 누락</strong>, 또는<br />
+                          <strong>토지 속성 조회 조건 불일치</strong> 가능성이 높습니다.
                         </span>
                       </div>
                     </div>
