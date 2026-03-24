@@ -316,6 +316,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       {raw.roofCdNm && <Row label="지붕구조" value={str(raw.roofCdNm)} />}
                     </>
                   )}
+                  {!hasAnyBuildingData && (
+                    <p className="text-[10px] text-muted-foreground/50 pt-1 pb-2 text-center">
+                      국토교통부 미등록 지번이거나 API 조회 실패
+                    </p>
+                  )}
                 </div>
               ) : (
                 <EmptySection message="건축물대장 데이터 없음" />
