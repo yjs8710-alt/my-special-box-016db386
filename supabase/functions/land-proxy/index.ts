@@ -332,11 +332,12 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { pnu, property_id } = body;
+    const { pnu, property_id, stdrYear } = body;
 
     console.log(`\n🗺️  [land-proxy] 요청`);
     console.log(`  - pnu        : ${pnu}`);
     console.log(`  - property_id: ${property_id ?? "(없음)"}`);
+    console.log(`  - stdrYear   : ${stdrYear ?? "(미전달 — fallback 내부에서 자동 설정)"}`);
 
     if (!pnu || pnu.length !== 19) {
       return new Response(
@@ -345,11 +346,11 @@ serve(async (req) => {
       );
     }
 
-    const apiKey      = Deno.env.get("DATA_GO_KR_API_KEY")?.trim() ?? "";
-    const proxyUrl    = Deno.env.get("LAND_PROXY_URL")?.trim();  // 국내 서버 프록시 URL (선택)
+    const apiKey   = Deno.env.get("DATA_GO_KR_API_KEY")?.trim() ?? "";
+    const proxyUrl = Deno.env.get("LAND_PROXY_URL")?.trim(); // 국내 서버 프록시 URL (선택)
 
-    console.log(`  - apiKey 존재: ${!!apiKey}`);
-    console.log(`  - LAND_PROXY_URL: ${proxyUrl ? "✅ 설정됨" : "❌ 미설정 (fallback 사용)"}`);
+    console.log(`  - apiKey 존재  : ${!!apiKey}`);
+    console.log(`  - LAND_PROXY_URL: ${proxyUrl ? `✅ 설정됨 (${proxyUrl})` : "❌ 미설정 (nsdi fallback 사용)"}`);
 
     if (!apiKey) {
       return new Response(
@@ -361,20 +362,34 @@ serve(async (req) => {
     let result: LandResult;
 
     if (proxyUrl) {
-      // ── 국내 프록시 경로 (설정된 경우 우선) ────────────────────────────
-      console.log(`\n✅ [경로 선택] 국내 서버 프록시 사용: ${proxyUrl}`);
+      // ── 🌐 국내 프록시 우선 호출 ────────────────────────────────────────
+      console.log(`\n🌐 [land-proxy] 국내 프록시 호출 시작`);
+      console.log(`  - proxy endpoint : ${proxyUrl}`);
+      console.log(`  - pnu            : ${pnu}`);
+      console.log(`  - stdrYear       : ${stdrYear ?? "(미전달)"}`);
+
       result = await callDomesticProxy(proxyUrl, pnu, apiKey);
 
-      // 프록시 실패 시 fallback (비활성화하려면 아래 주석 처리)
-      if (result.verdict !== "success" && result.verdict !== "key_error") {
-        console.log(`\n⚠️  [프록시 실패] nsdi 직접 fallback 시도`);
+      if (result.verdict === "success") {
+        console.log(`\n✅ [land-proxy] 국내 프록시 응답 수신 — 성공`);
+      } else if (result.verdict !== "key_error") {
+        // 프록시 실패 시 nsdi 직접 fallback 시도
+        console.log(`\n🔌 [land-proxy] 국내 프록시 호출 실패 (verdict=${result.verdict})`);
+        console.log(`\n⚠️  [land-proxy] fallback nsdi 직접호출 시작`);
         const fallbackResult = await callNsdiFallback(pnu, apiKey);
-        if (fallbackResult.verdict === "success") result = fallbackResult;
+        if (fallbackResult.verdict === "success") {
+          result = fallbackResult;
+          console.log(`  ✅ [land-proxy] fallback nsdi 직접호출 성공`);
+        } else {
+          console.log(`  ❌ [land-proxy] fallback nsdi 직접호출도 실패 (verdict=${fallbackResult.verdict})`);
+        }
       }
     } else {
-      // ── 프록시 미설정: nsdi 직접 호출 (EU IP 차단 상태이므로 conn_error 예상) ──
-      console.log(`\n⚠️  [경로 선택] LAND_PROXY_URL 미설정 → nsdi 직접 호출 (conn_error 예상)`);
-      console.log(`    국내 프록시 서버를 설정하려면 LAND_PROXY_URL 시크릿을 추가하세요.`);
+      // ── ⚠️ 프록시 미설정: nsdi 직접 호출 (EU IP 차단으로 conn_error 예상) ──
+      console.log(`\n⚠️  [경로 선택] LAND_PROXY_URL 미설정`);
+      console.log(`    → nsdi 직접 호출 시작 (EU IP 차단으로 connection_error 가능성 높음)`);
+      console.log(`    → 국내 프록시 설정: LAND_PROXY_URL 시크릿에 국내 서버 URL 등록`);
+      console.log(`\n⚠️  [land-proxy] fallback nsdi 직접호출 시작`);
 
       const [priceResult, charResult] = await Promise.all([
         callNsdiFallback(pnu, apiKey),
