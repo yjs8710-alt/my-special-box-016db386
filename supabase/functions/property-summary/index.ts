@@ -532,9 +532,26 @@ function parseLandApiResponse(text: string, epName: string) {
 }
 
 // ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
-// ※ "Unexpected errors" = endpoint 경로 자체가 data.go.kr에 없음
-// ※ 건축물대장(1613000)과 달리 토지 서비스(1611000)는 경로 구조가 다름
-// ※ 비교 진단: 건축물대장 성공 + 토지대장 실패 = endpoint 불일치가 1순위
+// ※ 로그에서 확인된 사실: 1611000 경로는 모두 HTTP 500 "Unexpected errors"
+// ※ data.go.kr/1611000 = VWorld(api.vworld.kr) 를 LINK로 연결하는 방식
+// ※ 실제 정식 REST endpoint = api.vworld.kr/ned/data/getIndvdLandPriceAttr
+// ※ data.go.kr 직접 REST 경로(nsdi/attrList/list 등)는 존재하지 않음
+//
+// 호출 순서:
+//   1순위: VWorld (api.vworld.kr) — 공식 제공 경로
+//   2순위: data.go.kr 직접 경로 (후보 2개, 확인 목적)
+//   → endpoint별 시도 결과를 표 형태 요약 로그로 출력
+
+type EndpointResult = {
+  name: string;
+  httpStatus: number | null;
+  stdrYear: string | null;
+  pnuIncluded: boolean;
+  format: "JSON" | "XML" | "기타";
+  verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error";
+  price?: string | null;
+};
+
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
