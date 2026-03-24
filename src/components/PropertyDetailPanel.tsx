@@ -859,10 +859,11 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
   const [building, setBuilding] = useState<BuildingSummaryRow | null | undefined>(undefined);
   const [land, setLand] = useState<LandSummaryRow | null | undefined>(undefined);
 
-  const buildingSearchUrl = `https://www.eais.go.kr/buld/retrieveUseBuilddtlInfo.do?searchAddress=${encodeURIComponent(address)}`;
-  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029&searchAddress=${encodeURIComponent(address)}`;
-  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp?searchKeyword=${encodeURIComponent(address)}`;
-  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp?searchAddr=${encodeURIComponent(address)}`;
+  // 외부 원문 링크 — 모두 새 탭으로만 열기 (iframe/embed 금지)
+  const buildingSearchUrl = `https://www.seumteo.go.kr/siteurl.do`;
+  const landRegisterUrl = `https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09001&CappBizCD=13500000029`;
+  const irosUrl = `https://www.iros.go.kr/pos1/searchLand.jsp`;
+  const landEumUrl = `https://www.eum.go.kr/web/ar/lu/luLandUseDetailR.jsp`;
 
   const handleToggle = async () => {
     const next = !open;
@@ -1041,26 +1042,26 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
           {!loading && (
             <div className="rounded-xl border border-border overflow-hidden">
               <div className="px-3 py-2 border-b border-border bg-muted/30">
-                <p className="text-[10px] text-muted-foreground font-medium">공식 원문 열람 (외부 연결)</p>
+                <p className="text-[10px] text-muted-foreground font-medium">📎 원문 새창 열기 (외부 공식 사이트)</p>
               </div>
               <div className="p-2.5 grid grid-cols-2 gap-2">
                 <a href={buildingSearchUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-[11px] font-bold transition-opacity hover:opacity-80"
+                  className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-[11px] font-bold transition-opacity hover:opacity-80"
                   style={{ background: "hsl(var(--primary))", color: "#fff" }}>
-                  <ExternalLink className="w-3 h-3" />건축물대장(세움터)
+                  <ExternalLink className="w-3 h-3" />건축물대장 원문
                 </a>
                 <a href={landRegisterUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-80"
+                  className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-80"
                   style={{ background: "hsl(142 60% 35%)" }}>
-                  <ExternalLink className="w-3 h-3" />토지대장(정부24)
+                  <ExternalLink className="w-3 h-3" />토지대장 원문
                 </a>
                 <a href={irosUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
+                  className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
                   style={{ background: "hsl(25 90% 45%)" }}>
                   <ExternalLink className="w-3 h-3" />인터넷등기소
                 </a>
                 <a href={landEumUrl} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 h-8 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
+                  className="flex items-center justify-center gap-1.5 h-9 rounded-lg text-white text-[11px] font-bold transition-opacity hover:opacity-80"
                   style={{ background: "hsl(180 60% 35%)" }}>
                   <ExternalLink className="w-3 h-3" />토지e음
                 </a>
