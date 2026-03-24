@@ -230,13 +230,12 @@ async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | 
   console.log("💡 [개별공시지가 폴백 시도]");
   try {
     const params = new URLSearchParams({
-      serviceKey: apiKey,
       pnu,
       numOfRows: "1",
       pageNo: "1",
       _type: "json",
     });
-    const url = `${LAND_PRICE_API_BASE}/getIndvdLandPrice?${params}`;
+    const url = `${LAND_PRICE_API_BASE}/getIndvdLandPrice?serviceKey=${encodedKey}&${params}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
     const text = await res.text();
     console.log("💡 [개별공시지가 응답]", text.substring(0, 400));
@@ -248,8 +247,8 @@ async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | 
       const price = item?.pblntfPclnd ?? item?.landPrice;
       if (price != null && Number(price) > 0) {
         const formatted = Number(price).toLocaleString("ko-KR");
-        const year = item?.stdrYear || item?.baseYear || "";
-        return `${formatted}원/㎡${year ? ` (${year}년 공시)` : ""}`;
+        const yr = item?.stdrYear || item?.baseYear || "";
+        return `${formatted}원/㎡${yr ? ` (${yr}년 공시)` : ""}`;
       }
     }
   } catch (e) {
