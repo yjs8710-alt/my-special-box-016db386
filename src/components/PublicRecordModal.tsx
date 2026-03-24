@@ -324,11 +324,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
-                              🔴 DATA_GO_KR API KEY 오류 또는 서비스 미활용
+                              🔴 VWorld API KEY 확인 필요
                             </span>
                             <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
-                              키가 등록은 되어 있으나 nsdi 서비스 활용신청이 안 됐거나 KEY 값 오류 가능성.<br />
-                              → data.go.kr 마이페이지에서 1611000 서비스 활용현황 확인 필요
+                              키가 등록은 되어 있으나 KEY 값 오류 또는 허용 도메인 불일치 가능성.<br />
+                              → VWorld 포털에서 API KEY 및 허용 IP/도메인 설정을 확인하세요.
                             </span>
                           </div>
                         </div>
@@ -344,11 +344,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(38 70% 40%)" }} />
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[11px] font-bold" style={{ color: "hsl(38 60% 30%)" }}>
-                              🔌 토지 API 연결 실패 (서버 IP 제한)
+                              🔌 현재 서버 IP 또는 리전 제한으로 토지 API 연결 실패
                             </span>
                             <span className="text-[10px] leading-snug" style={{ color: "hsl(38 50% 35%)" }}>
-                              VWorld · nsdi 모두 해외 IP에서 연결 차단 확인됨.<br />
-                              현재 서버(eu-central-1) → 한국 토지 API 서버 접근 불가.<br />
+                              국내 서버 프록시 필요 (eu-central-1 → 한국 토지 API 차단 확인됨).<br />
+                              LAND_PROXY_URL 시크릿에 국내 프록시 URL을 설정하면 즉시 해결됩니다.<br />
                               <strong>건축물대장은 정상 조회됩니다.</strong>
                             </span>
                           </div>
@@ -364,10 +364,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
-                            토지 endpoint / 응답 형식 점검 필요
+                            토지 endpoint / 기준연도 / 응답 형식 점검 필요
                           </span>
                           <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                            nsdi 경로 조회 결과 없음 — 해당 지번 공시지가 미고시 가능성.
+                            nsdi 경로 조회 결과 없음 — endpoint 불일치 또는 해당 지번 미고시 가능성.
                           </span>
                         </div>
                       </div>
