@@ -179,82 +179,50 @@ function parseKoreanAddress(address: string): {
   return { sigunguCd, bjdongCd, bun, ji, pnu };
 }
 
-// ── 표준공시지가 API (getStdLandPriceInfo) ──────────────────────────────
+// ── 토지 정보 보강 (총괄표제부: getBrRecapTitleInfo) ──────────────────────
+// 건물 전체의 대지면적, 지번, 층수 총합 등 토지 관련 정보 포함
+async function fetchBuildingRecapTitle(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const encodedKey = encodeURIComponent(apiKey);
+  const params = new URLSearchParams({
+    sigunguCd, bjdongCd, bun, ji,
+    numOfRows: "5", pageNo: "1", _type: "json",
+  });
+  const url = `${BUILDING_API_BASE}/getBrRecapTitleInfo?serviceKey=${encodedKey}&${params}`;
+  console.log("🏛️ [총괄표제부 API 호출]", url.replace(encodedKey, "***"));
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const text = await res.text();
+    console.log("🏛️ [총괄표제부 응답]", text.substring(0, 300));
+    const data = JSON.parse(text);
+    const items = data?.response?.body?.items?.item;
+    if (!items) return null;
+    return Array.isArray(items) ? items[0] : items;
+  } catch (e) {
+    console.error("❌ [총괄표제부 오류]", String(e));
+    return null;
+  }
+}
+
+// ── 표준공시지가 API ─────────────────────────────────────────────────────
+// ※ getStdLandPriceInfo / getIndvdLandPrice 는 vworld.kr 기반 WFS 서비스로
+//    apis.data.go.kr 서비스키가 아닌 별도 vworld API 키가 필요합니다.
+//    data.go.kr에서 "국토교통부_개별공시지가정보" 서비스를 별도 신청 후
+//    VWORLD_API_KEY 시크릿을 추가해야 합니다.
 async function fetchStdLandPrice(pnu: string, apiKey: string): Promise<string | null> {
-  if (!pnu) return null;
+  if (!pnu || !apiKey) {
+    console.log("💰 [공시지가 스킵] PNU 또는 API키 없음");
+    return null;
+  }
 
   const currentYear = new Date().getFullYear();
 
-  // serviceKey는 URLSearchParams를 통한 자동 인코딩 대신 수동으로 직접 붙임
-  // (+ 등 특수문자가 %2B로 인코딩되면 data.go.kr에서 "Unexpected errors" 반환)
-  const encodedKey = encodeURIComponent(apiKey);
-
-  // 최근 3개년 순서로 시도 (가장 최신 공시지가 확보)
-  for (const year of [currentYear, currentYear - 1, currentYear - 2]) {
-    const params = new URLSearchParams({
-      pnu,
-      stdrYear: String(year),
-      numOfRows: "1",
-      pageNo: "1",
-      _type: "json",
-    });
-
-    const url = `${LAND_PRICE_API_BASE}/getStdLandPriceInfo?serviceKey=${encodedKey}&${params}`;
-    console.log(`💰 [표준공시지가 API ${year}년 호출] URL:`, url.replace(encodedKey, "***"));
-
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      const text = await res.text();
-      console.log(`💰 [공시지가 ${year}년 응답]`, text.substring(0, 400));
-
-      const data = JSON.parse(text);
-      const items = data?.response?.body?.items?.item;
-      if (!items) continue;
-
-      const item = Array.isArray(items) ? items[0] : items;
-      if (!item) continue;
-
-      // 공시지가 필드: pblntfPclnd (원/㎡)
-      const price = item.pblntfPclnd ?? item.landPrice ?? item.stdPrice;
-      if (price != null && price !== "" && Number(price) > 0) {
-        const formatted = Number(price).toLocaleString("ko-KR");
-        console.log(`✅ [공시지가] ${year}년: ${formatted}원/㎡`);
-        return `${formatted}원/㎡ (${year}년 공시)`;
-      }
-    } catch (e) {
-      console.error(`❌ [공시지가 ${year}년 오류]`, String(e));
-    }
-  }
-
-  // 개별공시지가 폴백 (getIndvdLandPrice)
-  console.log("💡 [개별공시지가 폴백 시도]");
-  try {
-    const params = new URLSearchParams({
-      pnu,
-      numOfRows: "1",
-      pageNo: "1",
-      _type: "json",
-    });
-    const url = `${LAND_PRICE_API_BASE}/getIndvdLandPrice?serviceKey=${encodedKey}&${params}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    const text = await res.text();
-    console.log("💡 [개별공시지가 응답]", text.substring(0, 400));
-
-    const data = JSON.parse(text);
-    const items = data?.response?.body?.items?.item;
-    if (items) {
-      const item = Array.isArray(items) ? items[0] : items;
-      const price = item?.pblntfPclnd ?? item?.landPrice;
-      if (price != null && Number(price) > 0) {
-        const formatted = Number(price).toLocaleString("ko-KR");
-        const yr = item?.stdrYear || item?.baseYear || "";
-        return `${formatted}원/㎡${yr ? ` (${yr}년 공시)` : ""}`;
-      }
-    }
-  } catch (e) {
-    console.error("❌ [개별공시지가 오류]", String(e));
-  }
-
+  // vworld 개별공시지가 API (별도 VWORLD_API_KEY 필요)
+  // 현재 DATA_GO_KR_API_KEY (apis.data.go.kr 기반)로는 호출 불가
+  // → 대신 건축물대장 API 내에서 추출 가능한 지번 기반 토지 정보를 활용
+  console.log(`💰 [공시지가] PNU:${pnu} | 연도:${currentYear}`);
+  console.log("⚠️ [공시지가] vworld API 미설정 - 해당 정보를 표시하려면 VWORLD_API_KEY 시크릿이 필요합니다");
   return null;
 }
 
