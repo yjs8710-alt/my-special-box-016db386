@@ -1231,7 +1231,9 @@ serve(async (req) => {
           const landDiagnostics: Record<string, unknown> = {};
           if (landKeyError)  landDiagnostics.land_key_error   = true;
           if (landConnError) landDiagnostics.land_conn_error  = true;
-          if (!officialPrice && !landKeyError && !landConnError) landDiagnostics.land_no_data = true;
+          if (!officialPrice && !landKeyError && !landConnError) {
+            landDiagnostics.land_no_data = true;
+          }
 
           console.log("💰 [공시지가 최종]:", officialPrice);
           console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
