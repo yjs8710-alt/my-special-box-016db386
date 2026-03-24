@@ -144,55 +144,77 @@ async function fetchBuildingApi(
   endpoint: string, sigunguCd: string, bjdongCd: string,
   bun: string, ji: string, apiKey: string, numOfRows = "10"
 ) {
-  const encodedKey = encodeURIComponent(apiKey);
-  const params = new URLSearchParams({ sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo: "1", _type: "json" });
-  const url = `${BUILDING_API_BASE}/${endpoint}?serviceKey=${encodedKey}&${params}`;
+  const encodedKey   = encodeURIComponent(apiKey);
+  const keyMasked    = apiKey ? apiKey.substring(0, 8) + "***" : "(없음)";
+  const params       = new URLSearchParams({ sigunguCd, bjdongCd, bun, ji, numOfRows, pageNo: "1", _type: "json" });
+  const url          = `${BUILDING_API_BASE}/${endpoint}?serviceKey=${encodedKey}&${params}`;
+  const maskedUrl    = url.replace(encodedKey, "***MASKED***");
 
-  // ── [진단] 호출 직전 상세 로그 ──
-  console.log(`\n📋 [${endpoint}] 호출 상세`);
-  console.log(`  ▸ 호출 URL: ${url.replace(encodedKey, "***")}`);
-  console.log(`  ▸ serviceKey 존재: ${!!apiKey}`);
-  console.log(`  ▸ sigunguCd: ${sigunguCd}`);
-  console.log(`  ▸ bjdongCd: ${bjdongCd}`);
-  console.log(`  ▸ platGbCd: (미사용-일반건물)`);
-  console.log(`  ▸ bun: ${bun}`);
-  console.log(`  ▸ ji: ${ji}`);
+  // ── ① 호출 직전 상세 로그 ──────────────────────────────────────────
+  console.log(`\n🔍 [건축물대장 API] 호출 시작 → ${endpoint}`);
+  console.log(`  🌐 호출 URL: ${maskedUrl}`);
+  console.log(`  🔑 serviceKey 존재 여부: ${!!apiKey} (앞 8자: ${keyMasked})`);
+  console.log(`  📦 요청 파라미터:`);
+  console.log(`    📍 sigunguCd : ${sigunguCd}`);
+  console.log(`    🏘  bjdongCd : ${bjdongCd}`);
+  console.log(`    🗂  platGbCd : 0 (일반건물)`);
+  console.log(`    1️⃣  bun      : ${bun}`);
+  console.log(`    2️⃣  ji       : ${ji}`);
+  console.log(`    numOfRows  : ${numOfRows}`);
 
   try {
     const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
     const text = await res.text();
 
-    // ── [진단] 응답 원문 전체 로그 ──
+    // ── ② 응답 파싱 ────────────────────────────────────────────────────
     let parsed: any = {};
-    try { parsed = JSON.parse(text); } catch { parsed = {}; }
+    try { parsed = JSON.parse(text); } catch { /* XML 또는 파싱 실패 */ }
 
-    const header    = parsed?.response?.header ?? {};
-    const body      = parsed?.response?.body   ?? {};
+    const header     = parsed?.response?.header ?? {};
+    const body       = parsed?.response?.body   ?? {};
     const resultCode = header?.resultCode ?? "N/A";
     const resultMsg  = header?.resultMsg  ?? "N/A";
     const totalCount = Number(body?.totalCount ?? 0);
-    const raw        = body?.items?.item;
-    const items      = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
+    const rawItem    = body?.items?.item;
+    const items      = rawItem ? (Array.isArray(rawItem) ? rawItem : [rawItem]) : [];
 
-    console.log(`  ▸ resultCode: ${resultCode}`);
-    console.log(`  ▸ resultMsg: ${resultMsg}`);
-    console.log(`  ▸ totalCount: ${totalCount}`);
-    console.log(`  ▸ items 수: ${items.length}`);
+    // ── ③ 응답 전체 로그 ────────────────────────────────────────────────
+    console.log(`\n✅ [건축물대장 API] 응답 수신 → ${endpoint}`);
+    console.log(`  🔖 코드    : ${resultCode}`);
+    console.log(`  💬 메시지  : ${resultMsg}`);
+    console.log(`  🔢 총 수   : ${totalCount}`);
+    console.log(`  📋 아이템 수: ${items.length}`);
+    console.log(`  📄 원문 응답: ${text.substring(0, 600)}`);
 
-    // ── [진단] totalCount=0 원인 구분 ──
+    // ── ④ totalCount=0 자동 원인 분석 ─────────────────────────────────
     if (totalCount === 0) {
-      console.log(`\n⚠️ [${endpoint}] totalCount=0 원인 분석:`);
-      if (resultCode === "30" || resultCode === "31" || resultMsg?.includes("SERVICE KEY")) {
-        console.log(`  ❌ 가능성: serviceKey 문제 또는 API 접근 권한 없음 (resultCode=${resultCode})`);
-      } else if (resultCode === "22" || resultMsg?.includes("LIMITED")) {
-        console.log(`  ❌ 가능성: 일일 호출 한도 초과`);
-      } else if (resultCode === "00" || resultCode === "0000" || resultMsg?.includes("NORMAL")) {
-        console.log(`  ⚠️ 가능성 1: 파라미터 불일치 (sigunguCd=${sigunguCd}, bjdongCd=${bjdongCd}, bun=${bun}, ji=${ji})`);
-        console.log(`  ⚠️ 가능성 2: data.go.kr 서비스 미승인 (1613000/BldRgstHubService 활용신청 필요)`);
-        console.log(`  ⚠️ 가능성 3: 해당 주소에 건축물 정보 미등록 (나대지 등)`);
-        console.log(`  ⚠️ 가능성 4: endpoint 불일치 → 현재: ${BUILDING_API_BASE}/${endpoint}`);
+      const isNormalService = (resultCode === "00" || resultCode === "0000") &&
+        (resultMsg?.includes("NORMAL") || resultMsg?.includes("정상"));
+      const isKeyError = ["30","31","22","03","04","20","21"].includes(resultCode) ||
+        resultMsg?.includes("SERVICE KEY") || resultMsg?.includes("Invalid");
+      const isLimitExceeded = resultCode === "22" || resultMsg?.includes("LIMITED") || resultMsg?.includes("초과");
+
+      console.log(`\n⚠️ [진단] totalCount=0 원인 분석 시작 → ${endpoint}`);
+      if (isKeyError) {
+        console.log(`  - serviceKey 자체 오류 가능성: 높음 (resultCode=${resultCode})`);
+        console.log(`  - 활용신청 미승인 가능성: 낮음`);
+        console.log(`  - 파라미터 불일치 가능성: 낮음`);
+        console.log(`  - endpoint 불일치 가능성: 낮음`);
+      } else if (isLimitExceeded) {
+        console.log(`  - serviceKey 자체 오류 가능성: 낮음`);
+        console.log(`  - 활용신청 미승인 가능성: 낮음`);
+        console.log(`  - 파라미터 불일치 가능성: 낮음`);
+        console.log(`  - 일일 호출 한도 초과 가능성: 높음`);
+      } else if (isNormalService) {
+        console.log(`  - serviceKey 자체 오류 가능성: 낮음 (resultCode=00 정상 응답)`);
+        console.log(`  - 활용신청 미승인 가능성: 높음 ← 핵심 의심 원인`);
+        console.log(`  - 파라미터 불일치 가능성: 중간 (sigunguCd=${sigunguCd} bjdongCd=${bjdongCd} bun=${bun} ji=${ji})`);
+        console.log(`  - endpoint 불일치 가능성: 낮음 (${BUILDING_API_BASE}/${endpoint})`);
       } else {
-        console.log(`  ❌ 알 수 없는 오류 (resultCode=${resultCode}, msg=${resultMsg})`);
+        console.log(`  - serviceKey 자체 오류 가능성: 중간`);
+        console.log(`  - 활용신청 미승인 가능성: 중간`);
+        console.log(`  - 파라미터 불일치 가능성: 중간`);
+        console.log(`  - endpoint 불일치 가능성: 중간 (resultCode=${resultCode})`);
       }
     }
 
