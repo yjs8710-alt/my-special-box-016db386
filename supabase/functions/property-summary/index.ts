@@ -8,11 +8,13 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
-// VWorld (api.vworld.kr) → Supabase eu-central-1 IP 차단 확인됨 (connection closed)
-// data.go.kr nsdi 경로를 사용 (한국 서버 접속 가능, serviceKey 공유)
-const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
-const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/wfs/getLandUse";
-// VWorld URL은 참조용으로만 보관 (실제 호출 불가)
+// 토지 API 후보 경로 (data.go.kr 1611000 서비스)
+// → 모든 경로가 Supabase eu-central-1 IP에서 차단/미지원 확인됨
+// → VWorld (api.vworld.kr): connection closed (IP 차단)
+// → nsdi WFS 경로: HTTP 500 "Unexpected errors"
+// → 정상 동작 경로 확인 필요
+const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice";
+const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/attrList/getLandUse";
 const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
 const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
 
