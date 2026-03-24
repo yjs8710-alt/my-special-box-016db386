@@ -641,7 +641,7 @@ serve(async (req) => {
       land_summary:     landData     ?? null,
       has_building:     buildingData !== null,
       has_land:         landData     !== null,
-      data_source:      dataGoKrApiKey ? "data.go.kr" : "fallback",
+      data_source:      dataGoKrApiKey ? (vworldApiKey ? "data.go.kr + vworld" : "data.go.kr") : "fallback",
     };
 
     console.log("📤 [응답]:", {
