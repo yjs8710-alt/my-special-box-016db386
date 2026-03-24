@@ -1033,15 +1033,21 @@ serve(async (req) => {
             if (vChar?.roadSideCodeNm && !roadAccess)   roadAccess   = vChar.roadSideCodeNm;
           }
 
-          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단
+          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단 (승인 완료 전제)
           if (!officialPrice && !landCategory && !landArea) {
-            const hasBuildingResult = !!buildingData?.main_purpose;
+            const hasBuildingResult = !!(buildingData as any)?.main_purpose;
             if (hasBuildingResult) {
-              console.log("\n⚠️ [토지대장 진단]");
-              console.log("  🏗️ 건축물대장은 조회되었지만 토지대장 조회 실패");
-              console.log("  → 토지대장 파라미터 불일치 가능성 높음");
-              console.log(`  → 사용된 PNU: ${pnu}`);
-              console.log(`  → data.go.kr > 1611000 개별공시지가 서비스 활용신청 여부 확인 필요`);
+              console.log("\n⚠️ [토지대장 최종 진단] 건축물대장 조회 성공 / 토지대장 실패");
+              console.log("  🏗️ 건축물대장(1613000)은 조회되었지만 토지대장(1611000) 조회 실패");
+              console.log("  활용상태는 승인으로 확인되었습니다.");
+              console.log("  현재는 승인 문제가 아니라 실제 호출 endpoint,");
+              console.log("  조회연도, 또는 파라미터 형식 불일치 가능성이 높습니다.");
+              console.log(`  → 사용된 PNU: ${pnu} (${pnu.length}자리)`);
+              console.log(`  → 1순위: endpoint 불일치 (attrList/getIndvdLandPrice vs list/getIndvdLandPrice)`);
+              console.log(`  → 2순위: PNU bun/ji 패딩 불일치 (현재 bun=${bun} ji=${ji})`);
+              console.log(`  → 3순위: stdrYear 범위 문제`);
+              console.log(`  → 4순위: 해당 지번 공시지가 미고시`);
+              console.log(`  → 5순위: 서비스 승인 문제 (낮음 - 이미 승인됨)`);
             }
           }
 
