@@ -322,13 +322,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
                         <div className="flex flex-col gap-0.5">
                           <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
-                            🔴 VWORLD_API_KEY 오류 (INCORRECT_KEY)
+                            🔴 VWorld API KEY 값 또는 허용 도메인 설정 확인 필요
                           </span>
                           <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
-                            VWorld API KEY 값 또는 허용 도메인 설정 오류 가능성 높음.<br />
+                            키가 등록은 되어 있으나 값 오류 또는 허용 도메인 불일치 가능성 높음.<br />
                             <strong>다른 원인보다 먼저 KEY를 확인해주세요.</strong><br />
-                            → 토지 endpoint 또는 응답 형식 점검 필요<br />
-                            → <strong>VWorld API KEY 설정을 확인하세요</strong>
+                            → VWorld API 콘솔에서 KEY 값 및 허용 IP/도메인 설정 확인 필요
                           </span>
                         </div>
                       </div>
