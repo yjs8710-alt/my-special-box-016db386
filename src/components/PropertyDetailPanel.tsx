@@ -956,9 +956,16 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
           )}
 
           {!loading && errorMsg && (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-4 flex flex-col gap-1">
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-4 flex flex-col gap-2">
               <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
               <p className="text-[10px] text-muted-foreground">{errorMsg}</p>
+              <button
+                onClick={() => { setFetched(false); fetchData(); }}
+                className="self-start px-3 py-1 rounded-lg text-[11px] font-bold text-white mt-1"
+                style={{ background: "hsl(var(--destructive))" }}
+              >
+                다시 시도
+              </button>
             </div>
           )}
 
