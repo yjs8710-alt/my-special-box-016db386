@@ -209,6 +209,31 @@ async function fetchBuildingRecapTitle(
   }
 }
 
+
+// ── 건축물대장 표제부 ────────────────────────────────────────────────────
+async function fetchBuildingTitle(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const params = new URLSearchParams({
+    serviceKey: apiKey, sigunguCd, bjdongCd, bun, ji,
+    numOfRows: "10", pageNo: "1", _type: "json",
+  });
+  const url = `${BUILDING_API_BASE}/getBrTitleInfo?${params}`;
+  console.log("🏢 [표제부 API 호출]", url.replace(apiKey, "***"));
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const text = await res.text();
+    console.log("🏢 [표제부 응답]", text.substring(0, 300));
+    const data = JSON.parse(text);
+    const items = data?.response?.body?.items?.item;
+    if (!items) return null;
+    return Array.isArray(items) ? items[0] : items;
+  } catch (e) {
+    console.error("❌ [표제부 오류]", String(e));
+    return null;
+  }
+}
+
 // ── data.go.kr 개별공시지가 API (국토교통부) ─────────────────────────────
 // 서비스: 개별공시지가정보조회 (getIndvdLandPrice)
 async function fetchLandPriceDataGoKr(
