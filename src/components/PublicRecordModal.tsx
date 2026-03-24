@@ -248,10 +248,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   <Row label="지목" value={str(land.land_category)} />
                   <Row label="용도지역" value={str(land.use_zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
+                  {!hasAnyLandData && (
+                    <p className="text-[10px] text-muted-foreground/50 pt-1 pb-2 text-center">
+                      국토교통부 미등록 지번이거나 API 조회 실패
+                    </p>
+                  )}
                 </div>
               ) : (
                 <EmptySection message="토지대장 데이터 없음" />
               )}
+
 
               <div className="h-1.5 bg-muted/40 my-1" />
 
