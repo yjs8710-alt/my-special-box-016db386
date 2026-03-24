@@ -1127,52 +1127,46 @@ serve(async (req) => {
           let landArea:      string | null = null;
           let useZone:       string | null = null;
           let roadAccess:    string | null = null;
-          let vworldKeyError = false;  // INCORRECT_KEY 감지 플래그
+          let landKeyError   = false;
+          let landConnError  = false;  // IP 차단 등 연결 실패
 
-          // ① VWorld 1차 시도 (공식 REST endpoint - api.vworld.kr)
-          // ※ data.go.kr/1611000은 VWorld LINK 방식 → 직접 REST 미제공 확인됨
-          // ※ 1순위 진단: INCORRECT_KEY → 다른 진단보다 먼저 출력
-          if (vworldApiKey) {
-            console.log("\n🌍 [1순위] VWorld API 시도 (api.vworld.kr — 공식 제공 경로)");
-            const [vRes, vChar] = await Promise.all([
-              fetchVWorldLandPrice(pnu, vworldApiKey),
-              fetchLandCharacter(pnu, vworldApiKey),
+          // ① nsdi.go.kr 1차 시도 (data.go.kr 1611000 공식 WFS 경로)
+          // ※ VWorld(api.vworld.kr) → Supabase eu-central-1 IP 차단 확인됨 (connection closed)
+          // ※ nsdi.go.kr = 동일 serviceKey(DATA_GO_KR_API_KEY) 사용 가능
+          if (dataGoKrApiKey) {
+            console.log("\n🌍 [1순위] nsdi.go.kr 공시지가 조회 (data.go.kr 1611000 WFS 경로)");
+            const [nRes, nChar] = await Promise.all([
+              fetchNsdiLandInfo(pnu, dataGoKrApiKey),
+              fetchNsdiLandCharacter(pnu, dataGoKrApiKey),
             ]);
 
-            // ★ KEY 오류 최우선 감지
-            if (vRes.keyError) {
-              vworldKeyError = true;
-              console.log("\n🔴 [최우선 진단] VWORLD_API_KEY 오류로 토지 조회 불가");
-              console.log("  → data.go.kr 활용신청 여부와 무관하게 KEY 자체를 먼저 수정해야 함");
-            } else if (vRes.verdict === "success" && vRes.price) {
-              officialPrice = vRes.price;
-              landCategory  = vRes.category;
-              landArea      = vRes.area;
-              useZone       = vRes.useZone;
-              roadAccess    = vRes.roadSide;
-              console.log("✅ [VWorld 1차 성공] 공시지가:", officialPrice);
+            if (nRes.keyError) {
+              landKeyError = true;
+              console.log("\n🔴 [최우선 진단] DATA_GO_KR API KEY 오류 또는 nsdi 서비스 미활용");
+            } else if (nRes.verdict === "connection_error" || nRes.verdict === "network_error") {
+              landConnError = true;
+              console.log(`\n🔌 [연결 실패] nsdi.go.kr 연결 불가 (${nRes.verdict})`);
+              console.log("  → VWorld와 동일하게 Supabase eu-central-1 → 한국 서버 차단 가능성");
+              console.log("  → 토지 API는 한국 내부 서버에서만 접근 가능한 구조일 수 있음");
+            } else if (nRes.verdict === "success" && nRes.price) {
+              officialPrice = nRes.price;
+              landCategory  = nRes.category;
+              landArea      = nRes.area;
+              useZone       = nRes.useZone;
+              roadAccess    = nRes.roadSide;
+              console.log("✅ [nsdi 성공] 공시지가:", officialPrice);
             } else {
-              const diagLabel = vRes.verdict === "no_data" ? "5순위(데이터미존재)"
-                : vRes.verdict === "parse_error" ? "4순위(파싱오류)"
-                : "2순위(endpoint불일치)";
-              console.log(`⚠️ [VWorld 1차 실패] ${diagLabel} 판정=${vRes.verdict} HTTP=${vRes.httpStatus}`);
+              const diagLabel = nRes.verdict === "no_data" ? "5순위(데이터미존재)"
+                : nRes.verdict === "unexpected_error" ? "2순위(endpoint불일치)"
+                : nRes.verdict === "parse_error" ? "4순위(파싱오류)"
+                : "연결실패";
+              console.log(`⚠️ [nsdi 실패] ${diagLabel} | 판정=${nRes.verdict} | HTTP=${nRes.httpStatus}`);
             }
-            if (vChar && !landCategory) { landCategory = vChar.lndcgrCodeNm; landArea = vChar.lndpclAr; useZone = vChar.prposArea1Nm; roadAccess = vChar.roadSideCodeNm; }
-          }
-
-          // ② data.go.kr 2차 확인 (VWorld KEY 오류가 아닌 경우에만)
-          if (!officialPrice && !vworldKeyError && dataGoKrApiKey) {
-            console.log("\n🌍 [2순위] data.go.kr API 확인 시도 (HTTP 500 예상)");
-            const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
-            if (landInfo.price) { officialPrice = landInfo.price; landCategory = landInfo.category; landArea = landInfo.area; useZone = landInfo.useZone; roadAccess = landInfo.roadSide; }
-            if (!landCategory || !landArea) {
-              const charInfo = await fetchLandCharacterDataGoKr(pnu, dataGoKrApiKey);
-              if (charInfo) {
-                if (!landCategory  && charInfo.lndcgrCodeNm)   landCategory = charInfo.lndcgrCodeNm;
-                if (!landArea      && charInfo.lndpclAr)       landArea     = charInfo.lndpclAr;
-                if (!useZone       && charInfo.prposArea1Nm)   useZone      = charInfo.prposArea1Nm;
-                if (!roadAccess    && charInfo.roadSideCodeNm) roadAccess   = charInfo.roadSideCodeNm;
-              }
+            if (nChar && !landCategory) {
+              if (nChar.lndcgrCodeNm)   landCategory = nChar.lndcgrCodeNm;
+              if (nChar.lndpclAr)       landArea     = nChar.lndpclAr;
+              if (nChar.prposArea1Nm)   useZone      = nChar.prposArea1Nm;
+              if (nChar.roadSideCodeNm) roadAccess   = nChar.roadSideCodeNm;
             }
           }
 
@@ -1184,34 +1178,39 @@ serve(async (req) => {
             if (hasBuildingResult) {
               console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공               │");
             }
-            if (vworldKeyError) {
-              console.log("  │ 🔴 1순위: VWORLD_API_KEY 오류 (INCORRECT_KEY) ★ 해결필요│");
-              console.log("  │    → KEY 값 또는 허용 도메인 설정 오류 가능성 높음   │");
+            if (landKeyError) {
+              console.log("  │ 🔴 1순위: API KEY 오류 (nsdi 서비스 미활용 가능성)   │");
+            } else if (landConnError) {
+              console.log("  │ 🔌 1순위: 연결 실패 — Supabase eu-central-1 → 한국 서버 차단 │");
+              console.log("  │    VWorld + nsdi 모두 동일 증상 확인됨                │");
+              console.log("  │    → 한국 외 IP에서 토지 API 접근 불가 구조로 판단    │");
             } else {
-              console.log("  │ ⚪ 1순위: VWORLD_API_KEY 오류 — 해당 없음            │");
+              console.log("  │ 🟡 1순위: nsdi endpoint 경로 불일치                 │");
             }
-            console.log("  │ 🟡 2순위: VWorld endpoint 경로 불일치                │");
-            console.log("  │ 🟡 3순위: stdrYear 누락 또는 형식 오류              │");
-            console.log("  │ 🟡 4순위: 응답 파싱 오류 (XML/JSON 구조 차이)       │");
-            console.log("  │ 🟡 5순위: 실제 토지 데이터 미존재                   │");
-            console.log("  │ ⚪ 6순위: 서비스 승인 문제 (낮음 — 건축물 정상)      │");
+            console.log("  │ 🟡 2순위: nsdi WFS 파라미터 형식 오류               │");
+            console.log("  │ 🟡 3순위: 응답 파싱 오류 (JSON/XML 구조 차이)       │");
+            console.log("  │ 🟡 4순위: 실제 토지 데이터 미존재                   │");
+            console.log("  │ ⚪ 5순위: 서비스 승인 문제 (낮음 — 건축물 정상)      │");
             console.log("  └──────────────────────────────────────────────────────┘");
             console.log(`  → PNU: ${pnu} (${pnu.length}자리)`);
-            if (vworldKeyError) {
-              console.log("  🔑 VWORLD_API_KEY 값 또는 허용 도메인 설정 오류 가능성 높음");
-              console.log("  → 다른 no_data 진단보다 KEY 오류를 먼저 해결해야 합니다");
+            if (landConnError) {
+              console.log("  → nsdi + VWorld 모두 connection_error → 한국 서버 IP 차단으로 판단");
+              console.log("  → 토지 API는 한국 서버에서만 호출 가능할 가능성 높음");
             } else {
-              console.log("  → 토지 endpoint 또는 응답 형식 점검 필요");
-              console.log("  → VWorld API KEY 설정을 확인하세요");
+              console.log("  → nsdi endpoint 또는 파라미터 형식 점검 필요");
             }
           }
 
-          // land_summary에 vworldKeyError 플래그 저장 (UI 배지 표시용)
-          const landDiagnostics = vworldKeyError ? { vworld_key_error: true } : {};
+          // land_summary에 진단 플래그 저장 (UI 배지 표시용)
+          const landDiagnostics: Record<string, unknown> = {};
+          if (landKeyError)  landDiagnostics.land_key_error   = true;
+          if (landConnError) landDiagnostics.land_conn_error  = true;
+          if (!officialPrice && !landKeyError && !landConnError) landDiagnostics.land_no_data = true;
 
           console.log("💰 [공시지가 최종]:", officialPrice);
           console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
-          if (vworldKeyError) console.log("🔴 [KEY 오류] VWORLD_API_KEY 수정 필요");
+          if (landKeyError)  console.log("🔴 [KEY 오류] DATA_GO_KR_API_KEY 또는 nsdi 서비스 활용신청 확인 필요");
+          if (landConnError) console.log("🔌 [연결 실패] nsdi + VWorld 모두 차단 — 한국 서버 IP 접근 불가");
 
           const dongName = propertyAddress.match(/([가-힣]+동|[가-힣]+면|[가-힣]+읍)/)?.[1] || "";
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "") || "0"}-${ji.replace(/^0+/, "") || "0"}`.trim();
