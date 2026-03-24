@@ -1135,6 +1135,7 @@ serve(async (req) => {
           let roadAccess:    string | null = null;
           let landKeyError   = false;
           let landConnError  = false;
+          const landDiagnostics: Record<string, unknown> = {};
 
           // ── land-proxy 우선 호출 (LAND_PROXY_URL 설정 시 국내 프록시 경유) ──
           try {
