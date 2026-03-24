@@ -311,6 +311,52 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               <SectionHeader emoji="🏢" title="건축물 정보" bg="hsl(var(--primary) / 0.05)" />
               {building ? (
                 <div className="px-4 py-1">
+                  {/* 위반건축물 배지 */}
+                  {hasViolationInfo && (
+                    <div
+                      className="flex items-start gap-2 rounded-lg px-3 py-2.5 mb-2 mt-1.5"
+                      style={
+                        isViolation
+                          ? { background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 80%)" }
+                          : { background: "hsl(142 60% 96%)", border: "1.5px solid hsl(142 50% 75%)" }
+                      }
+                    >
+                      <span className="text-base leading-none mt-0.5 flex-shrink-0">
+                        {isViolation ? "⚠️" : "✔"}
+                      </span>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span
+                          className="text-[12px] font-extrabold leading-tight"
+                          style={{ color: isViolation ? "hsl(0 70% 40%)" : "hsl(142 50% 30%)" }}
+                        >
+                          {isViolation ? "위반건축물" : "정상건축물"}
+                        </span>
+                        {isViolation && violation!.items.length > 0 && (
+                          <div className="flex flex-col gap-0.5 mt-0.5">
+                            {violation!.items.map((v, i) => (
+                              <span key={i} className="text-[10px] leading-snug" style={{ color: "hsl(0 60% 35%)" }}>
+                                {v.vlttGbCdNm ? `[${v.vlttGbCdNm}] ` : ""}{v.vlttRnCnts || "위반내용 정보 없음"}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        {!isViolation && (
+                          <span className="text-[10px]" style={{ color: "hsl(142 40% 38%)" }}>
+                            위반건축물 이력 없음
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {!hasViolationInfo && building && (
+                    <div
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 mb-2 mt-1.5"
+                      style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))" }}
+                    >
+                      <span className="text-sm">🏛️</span>
+                      <span className="text-[11px] text-muted-foreground">위반건축물 여부 정보 없음</span>
+                    </div>
+                  )}
                   <Row label="건물명" value={str(building.building_name)} />
                   <Row label="건축물용도" value={str(building.main_purpose) === "조회 결과 없음" ? null : str(building.main_purpose)} />
                   <Row label="연면적" value={str(building.total_area)} />
