@@ -1078,7 +1078,6 @@ function PublicRecordsAccordion({ propertyId, address, lat, lng }: { propertyId:
 }
 
 
-      console.log("🌍 [land_summary]     error:", lRes.error?.message ?? "없음", "| data:", lRes.data === null ? "null (데이터 없음)" : lRes.data);
 
       if (bRes.error || lRes.error) {
         console.error("❌ 조회 오류 - building:", bRes.error?.message, "| land:", lRes.error?.message);
