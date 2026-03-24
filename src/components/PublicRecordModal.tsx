@@ -308,25 +308,49 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   <Row label="지목" value={str(land.land_category)} />
                   <Row label="용도지역" value={str(land.use_zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
-                  {!hasAnyLandData && (
-                    <div
-                      className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                      style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
-                    >
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
-                          토지 endpoint 또는 응답 형식 점검 필요
-                        </span>
-                        <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                          data.go.kr/1611000은 VWorld LINK 방식으로,<br />
-                          직접 REST endpoint가 제공되지 않을 수 있습니다.<br />
-                          <strong>VWorld API KEY</strong> 갱신 또는<br />
-                          <strong>해당 지번 공시지가 미고시</strong> 여부를 확인해주세요.
-                        </span>
+                  {!hasAnyLandData && (() => {
+                    const diag = land._diagnostics && typeof land._diagnostics === "object"
+                      ? (land._diagnostics as Record<string, unknown>)
+                      : null;
+                    const isKeyErr = diag?.vworld_key_error === true;
+                    return isKeyErr ? (
+                      /* ★ 1순위: KEY 오류 배지 — 다른 진단보다 먼저 */
+                      <div
+                        className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
+                        style={{ background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 75%)" }}
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
+                            🔴 VWORLD_API_KEY 오류 (INCORRECT_KEY)
+                          </span>
+                          <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
+                            VWorld API KEY 값 또는 허용 도메인 설정 오류 가능성 높음.<br />
+                            <strong>다른 원인보다 먼저 KEY를 확인해주세요.</strong><br />
+                            → 토지 endpoint 또는 응답 형식 점검 필요<br />
+                            → <strong>VWorld API KEY 설정을 확인하세요</strong>
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      /* 1순위 외 일반 실패 배지 */
+                      <div
+                        className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
+                        style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
+                            토지 endpoint 또는 응답 형식 점검 필요
+                          </span>
+                          <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
+                            VWorld 응답 없음 또는 해당 지번 공시지가 미고시.<br />
+                            <strong>VWorld API KEY 설정을 확인하세요.</strong>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <EmptySection message="토지대장 데이터 없음" />

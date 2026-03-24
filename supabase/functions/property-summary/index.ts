@@ -554,13 +554,15 @@ type EndpointResult = {
 
 // ── VWorld 공시지가 (1차 공식 경로) ──────────────────────────────────────
 // data.go.kr/1611000은 VWorld 데이터를 LINK로 연결. 실제 REST = api.vworld.kr
+// 진단 우선순위: 1.KEY오류 2.endpoint불일치 3.stdrYear 4.파싱오류 5.데이터미존재 6.승인문제
 async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
   price: string | null; category: string | null; area: string | null;
   useZone: string | null; roadSide: string | null;
-  verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error";
+  verdict: "success" | "no_data" | "unexpected_error" | "parse_error" | "network_error" | "key_error";
   httpStatus: number | null;
+  keyError: boolean;  // INCORRECT_KEY 감지 플래그
 }> {
-  const empty = { price: null, category: null, area: null, useZone: null, roadSide: null };
+  const empty = { price: null, category: null, area: null, useZone: null, roadSide: null, keyError: false };
   if (!pnu || !vworldKey) return { ...empty, verdict: "network_error", httpStatus: null };
   const currentYear = new Date().getFullYear();
 
@@ -568,7 +570,7 @@ async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
     const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
     console.log(`\n💰 [VWorld 공시지가 호출] stdrYear=${year}`);
     console.log(`  🌐 URL(마스킹): ${url.replace(vworldKey, "***MASKED***")}`);
-    console.log(`  📅 stdrYear=${year} ✅  pnu 포함=${pnu.length===19?"✅":"❌"}  format=JSON`);
+    console.log(`  📅 stdrYear=${year} ✅  pnu=${pnu} (${pnu.length}자리${pnu.length===19?" ✅":" ❌"})  format=JSON`);
     try {
       const res   = await fetch(url, { signal: AbortSignal.timeout(10000) });
       const httpS = res.status;
@@ -576,14 +578,35 @@ async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
       console.log(`  📡 HTTP: ${httpS}`);
       console.log(`  📄 raw(300자): ${text.substring(0, 300)}`);
       const data  = JSON.parse(text);
-      // INCORRECT_KEY or error
-      if (data?.indvdLandPrices?.resultCode && data.indvdLandPrices.resultCode !== "OK") {
-        console.log(`  ❌ VWorld 오류: ${data.indvdLandPrices.resultCode} / ${data.indvdLandPrices.resultMsg}`);
+
+      // ── 1순위: KEY 오류 감지 ──────────────────────────────────────────
+      const vworldResultCode = data?.indvdLandPrices?.resultCode ?? data?.landCharacters?.resultCode ?? null;
+      const vworldResultMsg  = data?.indvdLandPrices?.resultMsg  ?? data?.landCharacters?.resultMsg  ?? "";
+      if (vworldResultCode && vworldResultCode !== "OK") {
+        const isKeyError = vworldResultCode === "INCORRECT_KEY" ||
+          vworldResultMsg.includes("인증키") || vworldResultMsg.includes("KEY");
+        if (isKeyError) {
+          // ★ 1순위 진단 — 다른 모든 진단보다 먼저 출력
+          console.log(`\n🔴 [1순위 진단] VWORLD_API_KEY 오류 감지!`);
+          console.log(`  ❌ resultCode: ${vworldResultCode}`);
+          console.log(`  ❌ resultMsg : ${vworldResultMsg}`);
+          console.log(`  🔑 VWORLD_API_KEY 값 또는 허용 도메인 설정 오류 가능성 높음`);
+          console.log(`  → VWorld API 콘솔에서 KEY 유효성 및 허용 도메인(api.vworld.kr) 확인 필요`);
+          console.log(`  → 다른 no_data 진단보다 KEY 오류를 먼저 해결해야 합니다`);
+          return { ...empty, verdict: "key_error", httpStatus: httpS, keyError: true };
+        }
+        console.log(`  ❌ [2순위] VWorld endpoint 또는 응답 오류: ${vworldResultCode} / ${vworldResultMsg}`);
         return { ...empty, verdict: "unexpected_error", httpStatus: httpS };
       }
+
+      // ── stdrYear 파라미터 확인 (3순위) ───────────────────────────────
       const fields: any[] = data?.indvdLandPrices?.field ?? [];
+      if (fields.length === 0 && text.includes("stdrYear")) {
+        console.log(`  ⚠️ [3순위] stdrYear=${year} 형식 또는 범위 문제 가능성`);
+      }
+
       if (fields.length > 0) {
-        const f = fields[0];
+        const f     = fields[0];
         const price = Number(f.pblntfPclnd ?? 0);
         if (price > 0) {
           const out = {
@@ -597,11 +620,13 @@ async function fetchVWorldLandPrice(pnu: string, vworldKey: string): Promise<{
           return { ...out, verdict: "success", httpStatus: httpS };
         }
       }
-      console.log(`  ⚠️ VWorld: fields 없음 → no_data`);
+      // ── 5순위: 데이터 미존재 ─────────────────────────────────────────
+      console.log(`  ⚠️ [5순위] VWorld: fields 없음 → 해당 지번 공시지가 미고시 가능성`);
       return { ...empty, verdict: "no_data", httpStatus: httpS };
     } catch (e) {
-      console.error(`  ❌ [VWorld 네트워크 오류]`, String(e));
-      return { ...empty, verdict: "network_error", httpStatus: null };
+      // ── 4순위: 파싱 오류 ─────────────────────────────────────────────
+      console.error(`  ❌ [4순위] VWorld 응답 파싱 오류:`, String(e));
+      return { ...empty, verdict: "parse_error", httpStatus: null };
     }
   }
   return { ...empty, verdict: "no_data", httpStatus: null };
@@ -1128,16 +1153,24 @@ serve(async (req) => {
           let landArea:      string | null = null;
           let useZone:       string | null = null;
           let roadAccess:    string | null = null;
+          let vworldKeyError = false;  // INCORRECT_KEY 감지 플래그
 
           // ① VWorld 1차 시도 (공식 REST endpoint - api.vworld.kr)
           // ※ data.go.kr/1611000은 VWorld LINK 방식 → 직접 REST 미제공 확인됨
+          // ※ 1순위 진단: INCORRECT_KEY → 다른 진단보다 먼저 출력
           if (vworldApiKey) {
             console.log("\n🌍 [1순위] VWorld API 시도 (api.vworld.kr — 공식 제공 경로)");
             const [vRes, vChar] = await Promise.all([
               fetchVWorldLandPrice(pnu, vworldApiKey),
               fetchLandCharacter(pnu, vworldApiKey),
             ]);
-            if (vRes.verdict === "success" && vRes.price) {
+
+            // ★ KEY 오류 최우선 감지
+            if (vRes.keyError) {
+              vworldKeyError = true;
+              console.log("\n🔴 [최우선 진단] VWORLD_API_KEY 오류로 토지 조회 불가");
+              console.log("  → data.go.kr 활용신청 여부와 무관하게 KEY 자체를 먼저 수정해야 함");
+            } else if (vRes.verdict === "success" && vRes.price) {
               officialPrice = vRes.price;
               landCategory  = vRes.category;
               landArea      = vRes.area;
@@ -1145,13 +1178,16 @@ serve(async (req) => {
               roadAccess    = vRes.roadSide;
               console.log("✅ [VWorld 1차 성공] 공시지가:", officialPrice);
             } else {
-              console.log(`⚠️ [VWorld 1차 실패] 판정=${vRes.verdict} HTTP=${vRes.httpStatus}`);
+              const diagLabel = vRes.verdict === "no_data" ? "5순위(데이터미존재)"
+                : vRes.verdict === "parse_error" ? "4순위(파싱오류)"
+                : "2순위(endpoint불일치)";
+              console.log(`⚠️ [VWorld 1차 실패] ${diagLabel} 판정=${vRes.verdict} HTTP=${vRes.httpStatus}`);
             }
             if (vChar && !landCategory) { landCategory = vChar.lndcgrCodeNm; landArea = vChar.lndpclAr; useZone = vChar.prposArea1Nm; roadAccess = vChar.roadSideCodeNm; }
           }
 
-          // ② data.go.kr 2차 확인 (VWorld 실패 시 또는 확인 목적)
-          if (!officialPrice && dataGoKrApiKey) {
+          // ② data.go.kr 2차 확인 (VWorld KEY 오류가 아닌 경우에만)
+          if (!officialPrice && !vworldKeyError && dataGoKrApiKey) {
             console.log("\n🌍 [2순위] data.go.kr API 확인 시도 (HTTP 500 예상)");
             const landInfo = await fetchLandPriceDataGoKr(pnu, dataGoKrApiKey);
             if (landInfo.price) { officialPrice = landInfo.price; landCategory = landInfo.category; landArea = landInfo.area; useZone = landInfo.useZone; roadAccess = landInfo.roadSide; }
@@ -1169,27 +1205,39 @@ serve(async (req) => {
           // ── 토지 전체 실패 최종 진단 ─────────────────────────────────
           if (!officialPrice && !landCategory && !landArea) {
             const hasBuildingResult = !!(buildingData as any)?.main_purpose;
-            console.log("\n⚠️ [토지대장 최종 진단]");
-            console.log("  ┌─────────────────────────────────────────────────┐");
+            console.log("\n⚠️ [토지대장 최종 진단 — 원인 우선순위]");
+            console.log("  ┌──────────────────────────────────────────────────────┐");
             if (hasBuildingResult) {
-              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공          │");
+              console.log("  │ 🏗️ 건축물대장(1613000): 정상 조회 성공               │");
             }
-            console.log("  │ 🌍 VWorld 공시지가: 실패                        │");
-            console.log("  │ 🌍 data.go.kr 1611000: HTTP 500 (endpoint 불일치)│");
-            console.log("  ├─────────────────────────────────────────────────┤");
-            console.log("  │ 원인 우선순위:                                  │");
-            console.log("  │  1순위: VWorld API KEY 오류 (INCORRECT_KEY)     │");
-            console.log("  │  2순위: data.go.kr 토지 endpoint 구조 불일치    │");
-            console.log("  │  3순위: 토지 응답 형식 점검 필요                │");
-            console.log("  │  4순위: 해당 지번 공시지가 미고시               │");
-            console.log("  │  5순위: 서비스 승인 (낮음 - 건축물 정상 확인)   │");
-            console.log("  └─────────────────────────────────────────────────┘");
+            if (vworldKeyError) {
+              console.log("  │ 🔴 1순위: VWORLD_API_KEY 오류 (INCORRECT_KEY) ★ 해결필요│");
+              console.log("  │    → KEY 값 또는 허용 도메인 설정 오류 가능성 높음   │");
+            } else {
+              console.log("  │ ⚪ 1순위: VWORLD_API_KEY 오류 — 해당 없음            │");
+            }
+            console.log("  │ 🟡 2순위: VWorld endpoint 경로 불일치                │");
+            console.log("  │ 🟡 3순위: stdrYear 누락 또는 형식 오류              │");
+            console.log("  │ 🟡 4순위: 응답 파싱 오류 (XML/JSON 구조 차이)       │");
+            console.log("  │ 🟡 5순위: 실제 토지 데이터 미존재                   │");
+            console.log("  │ ⚪ 6순위: 서비스 승인 문제 (낮음 — 건축물 정상)      │");
+            console.log("  └──────────────────────────────────────────────────────┘");
             console.log(`  → PNU: ${pnu} (${pnu.length}자리)`);
-            console.log("  → 토지 endpoint 또는 응답 형식 점검 필요");
+            if (vworldKeyError) {
+              console.log("  🔑 VWORLD_API_KEY 값 또는 허용 도메인 설정 오류 가능성 높음");
+              console.log("  → 다른 no_data 진단보다 KEY 오류를 먼저 해결해야 합니다");
+            } else {
+              console.log("  → 토지 endpoint 또는 응답 형식 점검 필요");
+              console.log("  → VWorld API KEY 설정을 확인하세요");
+            }
           }
+
+          // land_summary에 vworldKeyError 플래그 저장 (UI 배지 표시용)
+          const landDiagnostics = vworldKeyError ? { vworld_key_error: true } : {};
 
           console.log("💰 [공시지가 최종]:", officialPrice);
           console.log("🌱 [토지특성 최종]:", { landCategory, landArea, useZone, roadAccess });
+          if (vworldKeyError) console.log("🔴 [KEY 오류] VWORLD_API_KEY 수정 필요");
 
           const dongName = propertyAddress.match(/([가-힣]+동|[가-힣]+면|[가-힣]+읍)/)?.[1] || "";
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "") || "0"}-${ji.replace(/^0+/, "") || "0"}`.trim();
@@ -1205,13 +1253,13 @@ serve(async (req) => {
                 road_access:    roadAccess    ?? (landData as any).road_access,
               })
               .eq("property_id", pid).select().single();
-            if (updated) landData = updated;
+            if (updated) landData = { ...updated, _diagnostics: landDiagnostics };
           } else {
             const { data: inserted } = await supabase
               .from("land_summary")
               .insert({ property_id: pid, lot_number: lotStr, official_price: officialPrice ?? null, land_category: landCategory ?? null, land_area: landArea ?? null, use_zone: useZone ?? null, road_access: roadAccess ?? null })
               .select().single();
-            if (inserted) landData = inserted;
+            if (inserted) landData = { ...inserted, _diagnostics: landDiagnostics };
           }
           console.log("✅ [토지 정보 저장 완료]");
         } else if (needLand && !pnu) {
