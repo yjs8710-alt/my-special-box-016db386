@@ -1273,6 +1273,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             </div>
           </div>
 
+          {/* ── 건축물대장·토지대장 ── */}
+          <div className="h-2 bg-muted/50 my-2" />
+          <PublicRecordPanel address={property.address} />
+
           {/* ── 추가 액션 버튼 ── */}
           <div className="h-2 bg-muted/50 my-2" />
           <div className="px-4 pb-4 flex flex-col gap-2">
