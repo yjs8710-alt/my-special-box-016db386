@@ -2080,13 +2080,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   return (
     <>
 
-      {/* Building Register Modal */}
-      {buildingRegisterAddr && (
-        <BuildingRegisterModal
-          address={buildingRegisterAddr}
-          onClose={() => setBuildingRegisterAddr(null)}
-        />
-      )}
       {/* Photo Upload Modal */}
       {photoUploadProp && (
         <PhotoUploadModal
