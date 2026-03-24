@@ -207,28 +207,40 @@ async function fetchBuildingRecapTitle(
 }
 
 // ── VWorld 개별공시지가 API ─────────────────────────────────────────────
+// VWorld NED API: GET 방식, key를 쿼리에 포함
 async function fetchIndvdLandPrice(pnu: string, vworldKey: string): Promise<string | null> {
   if (!pnu || !vworldKey) {
     console.log("💰 [공시지가 스킵] PNU 또는 VWORLD_API_KEY 없음");
     return null;
   }
   const currentYear = new Date().getFullYear();
-  // 당해연도 → 직전연도 순으로 시도 (공시지가는 1년 지연 공표)
-  for (const year of [currentYear, currentYear - 1]) {
-    const url = `${VWORLD_LAND_PRICE_URL}?key=${encodeURIComponent(vworldKey)}&pnu=${encodeURIComponent(pnu)}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+  // 공시지가는 1년 지연 공표 → 직전연도 → 그 전 연도 순
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    // NED API는 key 파라미터를 URL에 직접 포함 (인코딩 없이)
+    const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&domain=xhzbskeyzqekyoohnrtq.supabase.co&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
     console.log(`💰 [VWorld 공시지가 호출] PNU:${pnu} 연도:${year}`);
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
       const text = await res.text();
-      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 400));
+      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 500));
       const data = JSON.parse(text);
-      // 응답 구조: indvdLandPrices.field[] (배열 안 객체)
-      const fields: any[] = data?.indvdLandPrices?.field ?? [];
-      if (fields.length > 0) {
-        const price = fields[0]?.pblntfPclnd;
-        if (price) {
+      // 응답 구조 A: indvdLandPrices.field[]
+      const fieldsA: any[] = data?.indvdLandPrices?.field ?? [];
+      // 응답 구조 B: response.result.featureCollection.features[]
+      const featuresB: any[] = data?.response?.result?.featureCollection?.features ?? [];
+
+      if (fieldsA.length > 0) {
+        const price = fieldsA[0]?.pblntfPclnd;
+        if (price && Number(price) > 0) {
           const formatted = Number(price).toLocaleString("ko-KR");
-          console.log(`✅ [공시지가 조회 성공] ${year}년 ${formatted}원/㎡`);
+          console.log(`✅ [공시지가 성공 A] ${year}년 ${formatted}원/㎡`);
+          return `${formatted}원/㎡ (${year}년 기준)`;
+        }
+      } else if (featuresB.length > 0) {
+        const price = featuresB[0]?.properties?.pblntfPclnd;
+        if (price && Number(price) > 0) {
+          const formatted = Number(price).toLocaleString("ko-KR");
+          console.log(`✅ [공시지가 성공 B] ${year}년 ${formatted}원/㎡`);
           return `${formatted}원/㎡ (${year}년 기준)`;
         }
       }
@@ -249,21 +261,28 @@ async function fetchLandCharacter(pnu: string, vworldKey: string): Promise<{
 } | null> {
   if (!pnu || !vworldKey) return null;
   const currentYear = new Date().getFullYear();
-  for (const year of [currentYear, currentYear - 1]) {
-    const url = `${VWORLD_LAND_CHAR_URL}?key=${encodeURIComponent(vworldKey)}&pnu=${encodeURIComponent(pnu)}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&domain=xhzbskeyzqekyoohnrtq.supabase.co&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
     console.log(`🌱 [VWorld 토지특성 호출] PNU:${pnu} 연도:${year}`);
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
       const text = await res.text();
-      console.log(`🌱 [VWorld 토지특성 응답 ${year}]`, text.substring(0, 400));
+      console.log(`🌱 [VWorld 토지특성 응답 ${year}]`, text.substring(0, 500));
       const data = JSON.parse(text);
-      const fields: any[] = data?.landCharacters?.field ?? [];
-      if (fields.length > 0) {
-        const f = fields[0];
+      // 응답 구조 A: landCharacters.field[]
+      const fieldsA: any[] = data?.landCharacters?.field ?? [];
+      // 응답 구조 B: response.result.featureCollection.features[]
+      const featuresB: any[] = data?.response?.result?.featureCollection?.features ?? [];
+
+      const f = fieldsA.length > 0 ? fieldsA[0]
+              : featuresB.length > 0 ? featuresB[0]?.properties
+              : null;
+
+      if (f) {
         return {
-          lndcgrCodeNm:  f.lndcgrCodeNm  || null,
-          lndpclAr:      f.lndpclAr      ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
-          prposArea1Nm:  f.prposArea1Nm  || f.prposArea2Nm || null,
+          lndcgrCodeNm:   f.lndcgrCodeNm   || null,
+          lndpclAr:       f.lndpclAr       ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
+          prposArea1Nm:   f.prposArea1Nm   || f.prposArea2Nm || null,
           roadSideCodeNm: f.roadSideCodeNm || null,
         };
       }
