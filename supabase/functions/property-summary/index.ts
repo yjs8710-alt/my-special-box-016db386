@@ -1228,8 +1228,7 @@ serve(async (req) => {
             }
           }
 
-          // land_summary 진단 플래그 저장
-          const landDiagnostics: Record<string, unknown> = {};
+          // land_summary 진단 플래그 저장 (all_years_no_data는 land-proxy 응답 파싱 시 이미 설정됨)
           if (landKeyError)  landDiagnostics.land_key_error   = true;
           if (landConnError) landDiagnostics.land_conn_error  = true;
           if (!officialPrice && !landKeyError && !landConnError) {
