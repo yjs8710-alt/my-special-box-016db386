@@ -296,9 +296,21 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   <Row label="용도지역" value={str(land.use_zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
                   {!hasAnyLandData && (
-                    <p className="text-[10px] text-muted-foreground/50 pt-1 pb-2 text-center">
-                      국토교통부 미등록 지번이거나 API 조회 실패
-                    </p>
+                    <div
+                      className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
+                      style={{ background: "hsl(45 100% 96%)", border: "1.5px solid hsl(45 80% 75%)" }}
+                    >
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(45 70% 40%)" }} />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-bold" style={{ color: "hsl(45 60% 35%)" }}>
+                          토지대장 조회 결과 없음
+                        </span>
+                        <span className="text-[10px] leading-snug" style={{ color: "hsl(45 50% 40%)" }}>
+                          파라미터 또는 지번 불일치 가능성이 있습니다.<br />
+                          data.go.kr &gt; 1611000 개별공시지가 서비스 활용신청 여부를 확인해주세요.
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
