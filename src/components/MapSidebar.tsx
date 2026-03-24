@@ -2077,7 +2077,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
       {/* Public Record Modal */}
       {publicRecordAddress && (
         <PublicRecordModal
-          address={publicRecordAddress}
+          address={publicRecordAddress.address}
+          propertyId={publicRecordAddress.propertyId}
           onClose={() => setPublicRecordAddress(null)}
         />
       )}
