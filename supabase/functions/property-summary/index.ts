@@ -447,6 +447,40 @@ async function fetchBuildingFloors(s: string, b: string, bun: string, ji: string
   return [];
 }
 
+// ── 위반건축물 조회 ──────────────────────────────────────────────────────
+async function fetchBuildingViolation(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
+  // getBrVlttRnList: 위반건축물 목록 조회
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrVlttRnList", s, b, bun, ji, k, "10");
+  if (total > 0) {
+    console.log("🚨 [위반건축물] 목록 조회 성공:", total, "건");
+    items.forEach((item: any, idx: number) => {
+      console.log(`  🚨 위반건축물 여부: Y`);
+      console.log(`  📄 위반내용 [${idx + 1}]:`, item.vlttRnCnts || item.vlttCn || "(내용 없음)");
+      console.log(`  🗂  위반구분:`, item.vlttGbCdNm || item.vlttKndCdNm || "(구분 없음)");
+      console.log(`  원문:`, JSON.stringify(item));
+    });
+    return { isViolation: true, items, resultCode, resultMsg };
+  }
+
+  // platGbCd 명시 재시도
+  for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
+    const r2 = await fetchBuildingApiWithPlatGb("getBrVlttRnList", s, b, bun, ji, pgb, k);
+    if (r2.total > 0) {
+      console.log(`🚨 [위반건축물] platGbCd=${pgb} 재시도 성공:`, r2.total, "건");
+      return { isViolation: true, items: r2.items, resultCode: r2.resultCode, resultMsg: r2.resultMsg };
+    }
+  }
+
+  // resultCode=00, totalCount=0 → 위반 없음
+  if (resultCode === "00" || resultCode === "0000") {
+    console.log("✅ [위반건축물] 위반 없음 (resultCode=00, totalCount=0)");
+    return { isViolation: false, items: [], resultCode, resultMsg };
+  }
+
+  console.log(`⚠️ [위반건축물] 조회 결과 없음 (${resultCode}/${resultMsg})`);
+  return { isViolation: false, items: [], resultCode, resultMsg };
+}
+
 // ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
