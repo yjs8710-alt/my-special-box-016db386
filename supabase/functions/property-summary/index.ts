@@ -413,8 +413,9 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const dataGoKrApiKey = Deno.env.get("DATA_GO_KR_API_KEY");
+    const vworldApiKey   = Deno.env.get("VWORLD_API_KEY");
 
-    console.log("🔑 [API키 로드]:", { dataGoKr: !!dataGoKrApiKey });
+    console.log("🔑 [API키 로드]:", { dataGoKr: !!dataGoKrApiKey, vworld: !!vworldApiKey });
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
