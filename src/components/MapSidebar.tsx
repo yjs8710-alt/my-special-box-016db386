@@ -1929,13 +1929,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  const getModalInitPos = useCallback(() => {
-    // x: 파란 드래그 라인(사이드바 우측 끝) 정확히 맞춤
-    const x = width;
-    // y: 헤더(56px) + 주거유형 탭바(41px) = 97px → 탭바 바로 아래
-    const y = 97;
-    return { x, y };
-  }, [width]);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터

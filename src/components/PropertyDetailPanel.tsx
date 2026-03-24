@@ -766,10 +766,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
   );
 }
 
-/* ════════════════════════════════════════════════════════
-   공적장부 패널 — Edge Function "property-summary" 전용
-   외부 URL 이동·iframe·embed·modal·webview 일체 사용 금지
-   ════════════════════════════════════════════════════════ */
+/* ─── 공적장부 패널 ─── */
 type PanelStatus = "idle" | "loading" | "ok" | "empty" | "error";
 
 function LandBuildingPanel({ address }: { address: string }) {
