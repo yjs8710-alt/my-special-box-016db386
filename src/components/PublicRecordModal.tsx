@@ -287,6 +287,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
               {/* ① 토지 정보 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
+              {/* 건축물 성공 + 토지 실패 비교 배지 */}
+              {building && hasAnyBuildingData && land && !hasAnyLandData && (
+                <div
+                  className="mx-4 mt-2 mb-1 flex items-start gap-2 rounded-lg px-3 py-2"
+                  style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
+                >
+                  <span className="text-sm flex-shrink-0 mt-0.5">🏗️</span>
+                  <span className="text-[10px] leading-snug" style={{ color: "hsl(221 60% 35%)" }}>
+                    <strong>건축물대장은 정상 조회됨</strong><br />
+                    토지대장만 별도 점검 필요 (endpoint 불일치 가능성 높음)
+                  </span>
+                </div>
+              )}
               {land ? (
                 <div className="px-4 py-1">
                   <Row label="지번주소" value={str(land.lot_number) ?? address} />
