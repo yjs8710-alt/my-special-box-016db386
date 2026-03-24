@@ -4,7 +4,7 @@ import {
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, EyeOff, Eye as EyeIcon,
   AlertTriangle, CheckCircle2, Send, ClipboardList,
 } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
