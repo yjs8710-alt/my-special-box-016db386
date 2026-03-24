@@ -779,18 +779,19 @@ function PropertySummaryPanel({ address }: { address: string }) {
 
   const handleClick = async () => {
     console.log("NEW_PROPERTY_SUMMARY_CLICK");
-
-    if (!address) {
-      setError("주소 없음");
-      setOpen(true);
-      return;
-    }
+    console.log("PROPERTY_SUMMARY_ADDRESS", address);
 
     setOpen(true);
     setLoading(true);
     setError("");
     setBuilding(null);
     setLand(null);
+
+    if (!address) {
+      setLoading(false);
+      setError("주소 정보가 없습니다.");
+      return;
+    }
 
     console.log("CALL_PROPERTY_SUMMARY", address);
 
