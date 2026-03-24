@@ -356,6 +356,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       );
                     }
 
+                    const isAllYearsNoData = diag?.all_years_no_data === true;
                     return (
                       <div
                         className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
@@ -367,7 +368,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                             토지 endpoint / 기준연도 / 응답 형식 점검 필요
                           </span>
                           <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                            nsdi 경로 조회 결과 없음 — endpoint 불일치 또는 해당 지번 미고시 가능성.
+                            {isAllYearsNoData
+                              ? "2025·2024·2026년 모두 재시도하였으나 데이터 없음 — 해당 지번의 토지 데이터가 기준연도에 없을 수 있습니다."
+                              : "nsdi 경로 조회 결과 없음 — endpoint 불일치 또는 해당 지번 미고시 가능성."}
                           </span>
                         </div>
                       </div>
