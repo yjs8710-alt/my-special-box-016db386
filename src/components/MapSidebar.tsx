@@ -1929,7 +1929,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
-  const [publicRecordAddress, setPublicRecordAddress] = useState<string | null>(null);
+  const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
