@@ -488,6 +488,11 @@ serve(async (req) => {
           }
 
           const mappedBuilding = mapBuildingData(bestItem, floorItems);
+          // _raw에 api_status 포함: 클라이언트에서 미승인/데이터없음 구분 가능
+          const rawWithStatus = {
+            ...(mappedBuilding?._raw ?? { floors: [] }),
+            api_status: apiStatus,  // "ok" | "no_data"
+          };
 
           if (isBuildingEmpty && buildingData) {
             const { data: updated } = await supabase
@@ -505,7 +510,7 @@ serve(async (req) => {
                 elevator:      mappedBuilding?.elevator      ?? false,
               })
               .eq("property_id", pid).select().single();
-            if (updated) buildingData = { ...updated, _raw: mappedBuilding?._raw ?? { floors: [] } };
+            if (updated) buildingData = { ...updated, _raw: rawWithStatus };
             console.log("✅ [건축물대장 업데이트 완료]", updated ? "성공" : "실패");
           } else {
             const { data: inserted } = await supabase
@@ -524,7 +529,7 @@ serve(async (req) => {
                 elevator:      mappedBuilding?.elevator      ?? false,
               })
               .select().single();
-            if (inserted) buildingData = { ...inserted, _raw: mappedBuilding?._raw ?? { floors: [] } };
+            if (inserted) buildingData = { ...inserted, _raw: rawWithStatus };
             console.log("✅ [건축물대장 저장 완료]");
           }
         }
