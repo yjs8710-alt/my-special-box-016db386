@@ -239,9 +239,137 @@ async function fetchBuildingTitle(
   return total > 0 ? items[0] : null;
 }
 
-// ── data.go.kr 개별공시지가 API (국토교통부) ─────────────────────────────
-// 서비스: 개별공시지가정보조회 (getIndvdLandPrice)
+// ── data.go.kr 개별공시지가 API (serviceKey 이중인코딩 방지) ──────────────
 async function fetchLandPriceDataGoKr(
+  pnu: string, apiKey: string
+): Promise<{ price: string | null; category: string | null; area: string | null; useZone: string | null; roadSide: string | null }> {
+  const result = { price: null as string | null, category: null as string | null, area: null as string | null, useZone: null as string | null, roadSide: null as string | null };
+  if (!pnu || !apiKey) return result;
+
+  const encodedKey = encodeURIComponent(apiKey);
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const params = new URLSearchParams({ pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json" });
+    const url = `http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice?serviceKey=${encodedKey}&${params}`;
+    console.log(`💰 [개별공시지가 호출 ${year}] PNU:${pnu}`);
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
+      const text = await res.text();
+      console.log(`💰 [개별공시지가 응답 ${year}]`, text.substring(0, 500));
+      const priceMatch = text.match(/<pblntfPclnd>([^<]+)<\/pblntfPclnd>/);
+      const categoryNmMatch = text.match(/<lndcgrCodeNm[^>]*>([^<]+)<\/lndcgrCodeNm>/);
+      const areaMatch = text.match(/<lndpclAr>([^<]+)<\/lndpclAr>/);
+      const useZoneMatch = text.match(/<prposArea1Nm>([^<]+)<\/prposArea1Nm>/);
+      const roadMatch = text.match(/<roadSideCodeNm>([^<]+)<\/roadSideCodeNm>/);
+
+      if (priceMatch) {
+        const price = Number(priceMatch[1]);
+        if (price > 0) {
+          result.price = `${price.toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+          console.log(`✅ [개별공시지가 성공 ${year}] ${result.price}`);
+        }
+      }
+      if (categoryNmMatch) result.category = categoryNmMatch[1];
+      if (areaMatch) result.area = `${Number(areaMatch[1]).toFixed(1)}㎡`;
+      if (useZoneMatch) result.useZone = useZoneMatch[1];
+      if (roadMatch) result.roadSide = roadMatch[1];
+
+      if (result.price) break;
+    } catch (e) {
+      console.error(`❌ [개별공시지가 오류 ${year}]`, String(e));
+    }
+  }
+  return result;
+}
+
+// ── VWorld 개별공시지가 API (폴백용, 한국 IP에서만 동작) ─────────────────
+async function fetchIndvdLandPrice(pnu: string, vworldKey: string): Promise<string | null> {
+  if (!pnu || !vworldKey) return null;
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_PRICE_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    console.log(`💰 [VWorld 공시지가 호출] PNU:${pnu} 연도:${year}`);
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const text = await res.text();
+      console.log(`💰 [VWorld 공시지가 응답 ${year}]`, text.substring(0, 300));
+      const data = JSON.parse(text);
+      const fieldsA: any[] = data?.indvdLandPrices?.field ?? [];
+      if (fieldsA.length > 0) {
+        const price = fieldsA[0]?.pblntfPclnd;
+        if (price && Number(price) > 0) {
+          return `${Number(price).toLocaleString("ko-KR")}원/㎡ (${year}년 기준)`;
+        }
+      }
+    } catch (_) { /* VWorld 한국 IP 차단 시 무시 */ }
+  }
+  return null;
+}
+
+// ── VWorld 토지특성 API (폴백용) ─────────────────────────────────────────
+async function fetchLandCharacter(pnu: string, vworldKey: string): Promise<{
+  lndcgrCodeNm: string | null; lndpclAr: string | null;
+  prposArea1Nm: string | null; roadSideCodeNm: string | null;
+} | null> {
+  if (!pnu || !vworldKey) return null;
+  const currentYear = new Date().getFullYear();
+  for (const year of [currentYear - 1, currentYear - 2]) {
+    const url = `${VWORLD_LAND_CHAR_URL}?key=${vworldKey}&pnu=${pnu}&stdrYear=${year}&format=json&numOfRows=1&pageNo=1`;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const text = await res.text();
+      const data = JSON.parse(text);
+      const fieldsA: any[] = data?.landCharacters?.field ?? [];
+      if (fieldsA.length > 0) {
+        const f = fieldsA[0];
+        return {
+          lndcgrCodeNm:   f.lndcgrCodeNm || null,
+          lndpclAr:       f.lndpclAr ? `${Number(f.lndpclAr).toFixed(1)}㎡` : null,
+          prposArea1Nm:   f.prposArea1Nm || f.prposArea2Nm || null,
+          roadSideCodeNm: f.roadSideCodeNm || null,
+        };
+      }
+    } catch (_) { /* 무시 */ }
+  }
+  return null;
+}
+
+// ── 건축물대장 기본개요 (공통 API 함수 활용) ──────────────────────────────
+async function fetchBuildingBasic(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const { total, items } = await fetchBuildingApi("getBrBasisOulnInfo", sigunguCd, bjdongCd, bun, ji, apiKey);
+  console.log("📊 [기본개요]:", total > 0 ? `${total}건` : "없음");
+  return total > 0 ? items[0] : null;
+}
+
+// ── 층별 개요 ────────────────────────────────────────────────────────────
+async function fetchBuildingFloors(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const { items } = await fetchBuildingApi("getBrFlrOulnInfo", sigunguCd, bjdongCd, bun, ji, apiKey, "20");
+  console.log("📊 [층별개요]:", items.length, "건");
+  return items;
+}
+
+// ── 총괄표제부 (다세대/집합건물 폴백) ────────────────────────────────────
+async function fetchBuildingRecapTitle2(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const { total, items } = await fetchBuildingApi("getBrRecapTitleInfo", sigunguCd, bjdongCd, bun, ji, apiKey);
+  console.log("📊 [총괄표제부]:", total > 0 ? `${total}건 → ${items[0]?.bldNm || "건물명없음"}` : "없음");
+  return total > 0 ? items[0] : null;
+}
+
+// ── 집합건물 전유부 (오피스텔/아파트 폴백) ────────────────────────────────
+async function fetchBuildingExpos(
+  sigunguCd: string, bjdongCd: string, bun: string, ji: string, apiKey: string
+) {
+  const { total, items } = await fetchBuildingApi("getBrExposPubuseAreaInfo", sigunguCd, bjdongCd, bun, ji, apiKey);
+  console.log("📊 [집합건물전유부]:", total > 0 ? `${total}건` : "없음");
+  return total > 0 ? items[0] : null;
+}
+
   pnu: string, apiKey: string
 ): Promise<{ price: string | null; category: string | null; area: string | null; useZone: string | null; roadSide: string | null }> {
   const result = { price: null as string | null, category: null as string | null, area: null as string | null, useZone: null as string | null, roadSide: null as string | null };
