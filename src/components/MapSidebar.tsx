@@ -362,100 +362,192 @@ const MemoNotepad = ({ propId, memoKey, icon, label, initialText }: MemoNotepadP
   );
 };
 
-/* ── BuildingRegisterModal ── */
+/* ══════════════════════════════════════════════════════════
+   공적장부 모달 — Edge Function "property-summary" 전용
+   cloud.eais.go.kr·iframe·embed·외부 URL 이동 일체 금지
+   ══════════════════════════════════════════════════════════ */
+type RegModalStatus = "idle" | "loading" | "ok" | "empty" | "error";
+
 interface BuildingRegisterModalProps {
   address: string;
   onClose: () => void;
-  pos: { x: number; y: number };
-  onPosChange: (pos: { x: number; y: number }) => void;
-  /** 커스텀 URL (정부24, 토지이음 등). 없으면 세움터 주소검색 URL 사용 */
-  customUrl?: string;
-  /** 팝업 제목 */
-  title?: string;
 }
-const BuildingRegisterModal = ({ address, onClose, pos, onPosChange, customUrl, title }: BuildingRegisterModalProps) => {
-  const url = customUrl ?? `https://cloud.eais.go.kr/molit/ru/aapa/RUAAPA01F01.do?srchAddr=${encodeURIComponent(address)}`;
-  const [isDragging, setIsDragging] = useState(false);
-  const draggingModal = useRef(false);
-  const dragOffset = useRef({ x: 0, y: 0 });
 
-  const onHeaderMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    draggingModal.current = true;
-    setIsDragging(true);
-    dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
-    const onMove = (ev: MouseEvent) => {
-      if (!draggingModal.current) return;
-      onPosChange({ x: ev.clientX - dragOffset.current.x, y: ev.clientY - dragOffset.current.y });
+const BuildingRegisterModal = ({ address, onClose }: BuildingRegisterModalProps) => {
+  const [status, setStatus] = useState<RegModalStatus>("idle");
+  const [tab, setTab] = useState<"land" | "building">("land");
+  const [errText, setErrText] = useState("");
+  const [land, setLand] = useState<Record<string, unknown> | null>(null);
+  const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
+
+  const str = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+
+  // 마운트 시 자동 조회
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("NEW_PROPERTY_SUMMARY_CLICK");
+      console.log("CALL_PROPERTY_SUMMARY", address);
+      setStatus("loading");
+      try {
+        const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
+        const apiKey   = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const resp = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: apiKey,
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({ address }),
+        });
+        if (!resp.ok) throw new Error(`서버 오류 (${resp.status})`);
+        const payload = await resp.json();
+        console.log("PROPERTY_SUMMARY_RESPONSE", payload);
+        const b = payload.building_summary ?? null;
+        const l = payload.land_summary ?? null;
+        setBuilding(b);
+        setLand(l);
+        setStatus(b === null && l === null ? "empty" : "ok");
+      } catch (err: unknown) {
+        setErrText(err instanceof Error ? err.message : "알 수 없는 오류");
+        setStatus("error");
+      }
     };
-    const onUp = () => {
-      draggingModal.current = false;
-      setIsDragging(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  };
+    if (address) fetchData();
+  }, [address]);
+
+  const Row = ({ label, value }: { label: string; value?: string | null }) =>
+    value ? (
+      <div className="flex gap-3 py-2 border-b border-border/40 last:border-0">
+        <span className="w-[90px] flex-shrink-0 text-[11px] text-muted-foreground">{label}</span>
+        <span className="text-[11px] font-semibold text-foreground">{value}</span>
+      </div>
+    ) : null;
 
   return (
     <>
-      <div className="fixed inset-0 z-[10050] bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ left: pos.x, top: pos.y, width: "min(900px, 92vw)", height: "min(700px, 88vh)" }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{ width: "min(480px, 94vw)", maxHeight: "85vh" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Draggable Header */}
-        <div
-          className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/5 flex-shrink-0 cursor-grab active:cursor-grabbing select-none"
-          onMouseDown={onHeaderMouseDown}
-        >
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0"
+          style={{ background: "hsl(var(--primary)/0.06)" }}>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: "hsl(var(--primary)/0.12)" }}>
               <FileText className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">{title ?? "건물/토지대장 열람"}</p>
-              <p className="text-[10px] text-muted-foreground truncate max-w-[400px]">{address}</p>
+              <p className="text-sm font-bold text-foreground">건축물대장·토지대장 보기</p>
+              <p className="text-[10px] text-muted-foreground truncate max-w-[300px]">{address}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onMouseDown={(e) => e.stopPropagation()}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-[11px] font-semibold text-primary"
-            >
-              <ExternalLink className="w-3 h-3" />
-              새 탭에서 열기
-            </a>
-            <button
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={onClose}
-              className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          </div>
+          <button onClick={onClose}
+            className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
-        {/* iframe */}
-          {/* iframe - 드래그 중 마우스 이벤트 차단용 오버레이 포함 */}
-          <div className="flex-1 relative min-h-0">
-            {isDragging && <div className="absolute inset-0 z-10" />}
-            <iframe
-              src={url}
-              className="w-full h-full border-0"
-              title="건물/토지대장"
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-            />
-          </div>
-        {/* Fallback notice */}
-        <div className="px-4 py-2 bg-muted/30 border-t border-border flex-shrink-0">
-          <p className="text-[10px] text-muted-foreground text-center">
-            화면이 표시되지 않으면 <a href={url} target="_blank" rel="noopener noreferrer" className="text-primary underline font-semibold">여기를 클릭</a>하여 세움터에서 직접 확인하세요.
-          </p>
+
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+
+          {/* 로딩 */}
+          {status === "loading" && (
+            <div className="flex items-center justify-center gap-2.5 py-16">
+              <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              <p className="text-xs text-muted-foreground">공적장부 조회중...</p>
+            </div>
+          )}
+
+          {/* 오류 */}
+          {status === "error" && (
+            <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
+              <p className="text-xs font-bold text-destructive">공적장부 조회 실패</p>
+              <p className="text-[10px] text-muted-foreground">{errText}</p>
+            </div>
+          )}
+
+          {/* 빈 결과 */}
+          {status === "empty" && (
+            <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
+              <FileText className="w-8 h-8 text-muted-foreground/25 mb-1" />
+              <p className="text-xs font-semibold text-muted-foreground">조회 결과 없음</p>
+              <p className="text-[10px] text-muted-foreground/60">해당 주소의 공적장부 데이터가 없습니다</p>
+            </div>
+          )}
+
+          {/* 데이터 */}
+          {status === "ok" && (
+            <>
+              {/* 탭 */}
+              <div className="flex border-b border-border">
+                <button type="button" onClick={() => setTab("land")}
+                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
+                  style={tab === "land"
+                    ? { background: "hsl(142 55% 35%)", color: "#fff" }
+                    : { background: "transparent", color: "hsl(var(--muted-foreground))" }}>
+                  🌍 토지대장
+                </button>
+                <button type="button" onClick={() => setTab("building")}
+                  className="flex-1 py-2.5 text-xs font-bold transition-colors"
+                  style={tab === "building"
+                    ? { background: "hsl(var(--primary))", color: "#fff" }
+                    : { background: "transparent", color: "hsl(var(--muted-foreground))" }}>
+                  🏢 건축물대장
+                </button>
+              </div>
+
+              {/* 토지대장 */}
+              {tab === "land" && (
+                <div className="px-4 py-3">
+                  {land ? (
+                    <>
+                      <Row label="주소"    value={address} />
+                      <Row label="토지면적" value={str(land.land_area)} />
+                      <Row label="지목"    value={str(land.land_category)} />
+                      <Row label="용도지역" value={str(land.use_zone)} />
+                      <Row label="공시지가" value={str(land.official_price)} />
+                      <Row label="도로조건" value={str(land.road_access)} />
+                      <Row label="지번"    value={str(land.lot_number)} />
+                    </>
+                  ) : (
+                    <p className="text-xs text-center text-muted-foreground py-4">토지대장 데이터 없음</p>
+                  )}
+                </div>
+              )}
+
+              {/* 건축물대장 */}
+              {tab === "building" && (
+                <div className="px-4 py-3">
+                  {building ? (
+                    <>
+                      <Row label="주소"     value={address} />
+                      <Row label="건물명"    value={str(building.building_name)} />
+                      <Row label="건축물용도" value={str(building.main_purpose)} />
+                      <Row label="연면적"    value={str(building.total_area)} />
+                      <Row label="대지면적"  value={str(building.land_area)} />
+                      <Row label="사용승인일" value={str(building.approval_date)} />
+                      <Row label="층수" value={
+                        building.floors_above
+                          ? `지상 ${building.floors_above}층${building.floors_below ? ` / 지하 ${building.floors_below}층` : ""}`
+                          : null
+                      } />
+                      <Row label="주차대수"  value={str(building.parking_count)} />
+                      <Row label="엘리베이터" value={
+                        building.elevator === true ? "있음"
+                          : building.elevator === false ? "없음" : null
+                      } />
+                    </>
+                  ) : (
+                    <p className="text-xs text-center text-muted-foreground py-4">건축물대장 데이터 없음</p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </>
