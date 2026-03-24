@@ -2622,14 +2622,6 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                         )}
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); setModalPos(getModalInitPos()); setBuildingRegisterAddr(prop.address); }}
-                          className="flex flex-col items-center justify-center gap-0.5 py-2 bg-primary/10 hover:bg-primary/20 transition-colors border-r border-primary/20"
-                        >
-                          <FileText className="w-3 h-3 text-primary" />
-                          <span className="text-[9px] font-bold text-primary">건물/토지대장</span>
-                        </button>
-                        <button
-                          type="button"
                           onClick={(e) => { e.stopPropagation(); setPhotoUploadProp(prop); }}
                           className="flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20"
                         >
