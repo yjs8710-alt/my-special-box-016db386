@@ -532,9 +532,9 @@ function parseLandApiResponse(text: string, epName: string) {
 }
 
 // ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
-// 서비스명: 국토교통부_개별공시지가정보 (data.go.kr 1611000 / VWorld 기반)
-// ※ "Unexpected errors" = endpoint 경로가 data.go.kr에 등록되지 않은 것
-// 실제 endpoint 후보를 다양하게 시도
+// ※ "Unexpected errors" = endpoint 경로 자체가 data.go.kr에 없음
+// ※ 건축물대장(1613000/BldRgstHubService)과 다르게 토지 서비스는 경로 구조가 다름
+// 다양한 endpoint를 순차 시도
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
