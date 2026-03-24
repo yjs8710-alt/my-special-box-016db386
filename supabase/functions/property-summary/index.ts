@@ -482,7 +482,11 @@ async function fetchBuildingViolation(s: string, b: string, bun: string, ji: str
 }
 
 // ── data.go.kr 개별공시지가 (1611000/nsdi/IndvdLandPriceService) ────────────
-// 정확한 엔드포인트: /attrList/getIndvdLandPrice (JSON/XML 모두 지원)
+// 승인된 서비스명: 개별공시지가정보서비스 (1611000)
+// 실제 엔드포인트:
+//   - /attrList/getIndvdLandPrice (속성조회)
+//   - /list/getIndvdLandPrice (목록조회)
+// 비교 서비스군: LandUseService/getLandUse, LandCharacterService/getLandCharacter (토지특성)
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
     price: null as string | null, category: null as string | null,
@@ -490,48 +494,66 @@ async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   };
   if (!pnu || !apiKey) return result;
 
-  // PNU 검증
-  console.log(`\n🌍 [토지대장 조회 시작]`);
-  console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
-  if (pnu.length !== 19) {
-    console.log(`  ❌ [진단] PNU 자리수 오류! bun/ji 패딩 또는 bjdongCd 오류 가능성 높음`);
-  }
-
+  const keyMasked = apiKey ? apiKey.substring(0, 8) + "***" : "(없음)";
   const encodedKey = encodeURIComponent(apiKey);
   const currentYear = new Date().getFullYear();
 
-  // 엔드포인트 목록 (정확도 순으로 시도)
+  // PNU 검증 로그
+  console.log(`\n🌍 [토지대장 조회 시작]`);
+  console.log(`  📍 PNU: ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
+  console.log(`  🔑 serviceKey 존재: true (앞 8자: ${keyMasked})`);
+  console.log(`  📌 승인된 서비스: data.go.kr 1611000 (개별공시지가정보서비스)`);
+  console.log(`  📌 승인 상태: 승인/활용 완료 확인됨`);
+  if (pnu.length !== 19) {
+    console.log(`  ❌ [1순위 진단] PNU 자리수 오류 → bun/ji 패딩 또는 bjdongCd 불일치 가능성`);
+  }
+
+  // 엔드포인트 목록
   const LAND_PRICE_ENDPOINTS = [
-    "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice",
-    "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/list/getIndvdLandPrice",
+    { url: "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice", name: "attrList/getIndvdLandPrice" },
+    { url: "http://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/list/getIndvdLandPrice",     name: "list/getIndvdLandPrice"    },
   ];
 
   for (const year of [currentYear - 1, currentYear - 2]) {
     let success = false;
-    for (const baseUrl of LAND_PRICE_ENDPOINTS) {
+    for (const ep of LAND_PRICE_ENDPOINTS) {
       const params = new URLSearchParams({
         pnu, stdrYear: String(year), numOfRows: "1", pageNo: "1", _type: "json"
       });
-      const url = `${baseUrl}?serviceKey=${encodedKey}&${params}`;
+      const url = `${ep.url}?serviceKey=${encodedKey}&${params}`;
       const maskedUrl = url.replace(encodedKey, "***MASKED***");
-      console.log(`💰 [개별공시지가 호출 ${year}] PNU:${pnu} (${pnu.length}자리)`);
-      console.log(`  🌐 URL: ${maskedUrl}`);
+
+      console.log(`\n💰 [개별공시지가 호출]`);
+      console.log(`  📌 엔드포인트명: ${ep.name}`);
+      console.log(`  🌐 전체 URL: ${maskedUrl}`);
+      console.log(`  📦 쿼리스트링: pnu=${pnu} stdrYear=${year} numOfRows=1 pageNo=1 _type=json`);
+      console.log(`  📍 PNU: ${pnu} (${pnu.length}자리)`);
+      console.log(`  📅 조회연도(stdrYear): ${year} ← 연도 파라미터 포함 ✅`);
+      console.log(`  🔑 serviceKey: 존재 (앞 8자: ${keyMasked})`);
+
       try {
         const res  = await fetch(url, { signal: AbortSignal.timeout(12000) });
+        const httpStatus = res.status;
         const text = await res.text();
-        console.log(`💰 [개별공시지가 응답 ${year}]`, text.substring(0, 600));
 
-        // JSON 응답 파싱
+        console.log(`  📡 HTTP 상태코드: ${httpStatus}`);
+        console.log(`  📄 raw 응답 (600자): ${text.substring(0, 600)}`);
+
         let parsed: any = null;
         try { parsed = JSON.parse(text); } catch { /* XML fallback */ }
 
         if (parsed) {
-          // JSON 응답 형식 1: response.body.items.item
-          const items = parsed?.response?.body?.items?.item;
-          const item = items ? (Array.isArray(items) ? items[0] : items) : null;
+          const items      = parsed?.response?.body?.items?.item;
+          const item       = items ? (Array.isArray(items) ? items[0] : items) : null;
           const resultCode = parsed?.response?.header?.resultCode;
+          const resultMsg  = parsed?.response?.header?.resultMsg;
           const totalCount = Number(parsed?.response?.body?.totalCount ?? 0);
-          console.log(`  JSON: resultCode=${resultCode} totalCount=${totalCount}`);
+
+          console.log(`  ✅ [응답 파싱]`);
+          console.log(`    resultCode : ${resultCode}`);
+          console.log(`    resultMsg  : ${resultMsg}`);
+          console.log(`    totalCount : ${totalCount}`);
+          console.log(`    아이템 수  : ${item ? (Array.isArray(items) ? items.length : 1) : 0}`);
 
           if (item) {
             const price = Number(item.pblntfPclnd ?? item.pblntfPc ?? 0);
@@ -541,20 +563,31 @@ async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
               result.area     = item.lndpclAr ? `${Number(item.lndpclAr).toFixed(1)}㎡` : null;
               result.useZone  = item.prposArea1Nm || item.prpsArea1CdNm || null;
               result.roadSide = item.roadSideCodeNm || item.rdnmCdNm || null;
-              console.log(`✅ [개별공시지가 성공 ${year}] ${result.price}`);
+              console.log(`  ✅ [개별공시지가 성공 ${year}] ${result.price}`);
               success = true;
               break;
             }
           }
 
-          // totalCount=0 원인 분석
-          if (totalCount === 0 && resultCode === "00") {
-            console.log(`  ⚠️ [진단] 공시지가 totalCount=0 원인 분석:`);
-            console.log(`    - PNU 자리수: ${pnu.length}자리 ${pnu.length === 19 ? "(정상)" : "(❌오류)"}`);
+          // totalCount=0 분석 (승인 완료 전제)
+          if (totalCount === 0 && (resultCode === "00" || resultCode === "0000")) {
+            console.log(`\n  ⚠️ [totalCount=0 진단] 승인 완료 전제 → 원인 우선순위 분석:`);
+            console.log(`    1순위: 승인된 서비스(1611000)와 호출 endpoint 일치 여부`);
+            console.log(`         → 현재 사용 endpoint: ${ep.name}`);
+            console.log(`         → 승인된 서비스 endpoint: attrList/getIndvdLandPrice 또는 list/getIndvdLandPrice`);
+            console.log(`         → 판단: 일치 ✅`);
+            console.log(`    2순위: 필수 파라미터 누락 또는 형식 불일치`);
+            console.log(`         → pnu(${pnu.length}자리): ${pnu.length === 19 ? "정상 ✅" : "❌ 오류"}`);
             const bunPart = pnu.substring(11, 15);
             const jiPart  = pnu.substring(15, 19);
-            console.log(`    - bun(${bunPart}) ji(${jiPart}) 패딩 확인: ${bunPart.length === 4 && jiPart.length === 4 ? "정상" : "❌오류"}`);
-            console.log(`    - bjdongCd(${pnu.substring(5, 10)}) 오류 가능성: 해당 PNU에 대한 공시지가 미등록 가능성`);
+            console.log(`         → bun(${bunPart}): ${bunPart.length === 4 ? "4자리 ✅" : "❌ 오류"}`);
+            console.log(`         → ji(${jiPart}): ${jiPart.length === 4 ? "4자리 ✅" : "❌ 오류"}`);
+            console.log(`    3순위: 조회연도(stdrYear) 누락`);
+            console.log(`         → stdrYear=${year} 포함됨 ✅`);
+            console.log(`    4순위: PNU는 정상이나 해당 토지 데이터 미존재`);
+            console.log(`         → 해당 지번에 개별공시지가가 고시되지 않았을 가능성`);
+            console.log(`    5순위: 서비스 승인 문제`);
+            console.log(`         → 승인 완료 확인됨 (낮음)`);
           }
         } else {
           // XML 응답 파싱
@@ -571,25 +604,32 @@ async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
               if (areaMatch)  result.area     = `${Number(areaMatch[1]).toFixed(1)}㎡`;
               if (zoneMatch)  result.useZone  = zoneMatch[1];
               if (roadMatch)  result.roadSide = roadMatch[1];
-              console.log(`✅ [개별공시지가(XML) 성공 ${year}] ${result.price}`);
+              console.log(`  ✅ [개별공시지가(XML) 성공 ${year}] ${result.price}`);
               success = true;
               break;
             }
           }
         }
       } catch (e) {
-        console.error(`❌ [개별공시지가 오류 ${year} / ${baseUrl}]`, String(e));
+        console.error(`  ❌ [개별공시지가 오류 ${year} / ${ep.name}]`, String(e));
       }
     }
     if (success) break;
   }
 
-  // 공시지가 조회 실패 시 건축물대장은 있는데 토지대장만 없는 경우 진단
+  // 최종 실패 시 진단 (승인 완료 전제)
   if (!result.price) {
-    console.log(`  ⚠️ [진단] 개별공시지가 조회 실패 → 파라미터 불일치 또는 미등록 가능성 높음`);
-    console.log(`  🏗️ [안내] 건축물대장은 조회되지만 토지대장이 조회되지 않을 경우:`);
-    console.log(`    → 토지대장 파라미터 불일치 가능성 높음 (PNU=${pnu})`);
-    console.log(`    → data.go.kr > 1611000 개별공시지가 서비스 활용신청 여부 확인 필요`);
+    console.log(`\n🚨 [토지대장 최종 진단] 승인 완료 전제`);
+    console.log(`  활용상태는 승인으로 확인되었습니다.`);
+    console.log(`  현재는 승인 문제가 아니라 아래 원인 가능성이 높습니다:`);
+    console.log(`  1순위: 실제 호출 endpoint 불일치 (attrList vs list 경로 차이)`);
+    console.log(`  2순위: 필수 파라미터 누락 또는 형식 불일치 (PNU=${pnu}, ${pnu.length}자리)`);
+    console.log(`  3순위: 조회연도(stdrYear) 범위 문제 (현재 ${currentYear-1}~${currentYear-2} 시도)`);
+    console.log(`  4순위: 해당 지번에 개별공시지가 데이터 자체가 미고시`);
+    console.log(`  5순위: 서비스 승인 문제 (낮음 - 승인 확인됨)`);
+    console.log(`  📌 비교: LandUseService/getLandUse, LandCharacterService/getLandCharacter 는`);
+    console.log(`           1611000/nsdi 하위 토지특성 서비스군으로 IndvdLandPriceService 와`);
+    console.log(`           동일 서비스 그룹이지만 별도 endpoint 임`);
   }
 
   return result;
@@ -993,15 +1033,21 @@ serve(async (req) => {
             if (vChar?.roadSideCodeNm && !roadAccess)   roadAccess   = vChar.roadSideCodeNm;
           }
 
-          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단
+          // 건축물대장 조회 성공 + 토지대장 실패 시 명확한 진단 (승인 완료 전제)
           if (!officialPrice && !landCategory && !landArea) {
-            const hasBuildingResult = !!buildingData?.main_purpose;
+            const hasBuildingResult = !!(buildingData as any)?.main_purpose;
             if (hasBuildingResult) {
-              console.log("\n⚠️ [토지대장 진단]");
-              console.log("  🏗️ 건축물대장은 조회되었지만 토지대장 조회 실패");
-              console.log("  → 토지대장 파라미터 불일치 가능성 높음");
-              console.log(`  → 사용된 PNU: ${pnu}`);
-              console.log(`  → data.go.kr > 1611000 개별공시지가 서비스 활용신청 여부 확인 필요`);
+              console.log("\n⚠️ [토지대장 최종 진단] 건축물대장 조회 성공 / 토지대장 실패");
+              console.log("  🏗️ 건축물대장(1613000)은 조회되었지만 토지대장(1611000) 조회 실패");
+              console.log("  활용상태는 승인으로 확인되었습니다.");
+              console.log("  현재는 승인 문제가 아니라 실제 호출 endpoint,");
+              console.log("  조회연도, 또는 파라미터 형식 불일치 가능성이 높습니다.");
+              console.log(`  → 사용된 PNU: ${pnu} (${pnu.length}자리)`);
+              console.log(`  → 1순위: endpoint 불일치 (attrList/getIndvdLandPrice vs list/getIndvdLandPrice)`);
+              console.log(`  → 2순위: PNU bun/ji 패딩 불일치 (현재 bun=${bun} ji=${ji})`);
+              console.log(`  → 3순위: stdrYear 범위 문제`);
+              console.log(`  → 4순위: 해당 지번 공시지가 미고시`);
+              console.log(`  → 5순위: 서비스 승인 문제 (낮음 - 이미 승인됨)`);
             }
           }
 

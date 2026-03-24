@@ -306,8 +306,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           토지대장 조회 결과 없음
                         </span>
                         <span className="text-[10px] leading-snug" style={{ color: "hsl(45 50% 40%)" }}>
-                          파라미터 또는 지번 불일치 가능성이 있습니다.<br />
-                          data.go.kr &gt; 1611000 개별공시지가 서비스 활용신청 여부를 확인해주세요.
+                          현재 응답은 정상 또는 부분정상으로 보이나,<br />
+                          토지 서비스 승인 상태는 이미 확인되었습니다.<br />
+                          따라서 실제 원인은 <strong>endpoint 불일치</strong>,<br />
+                          <strong>연도 파라미터 누락</strong>, 또는<br />
+                          <strong>토지 속성 조회 조건 불일치</strong> 가능성이 높습니다.
                         </span>
                       </div>
                     </div>
@@ -419,16 +422,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       {buildingApiNoData ? (
                         <>
                           <p className="text-[11px] font-bold text-center" style={{ color: "hsl(38 90% 38%)" }}>
-                            건축물대장 API 승인 대기 또는 조회 결과 없음
+                            건축물대장 조회 결과 없음
                           </p>
                           <div className="rounded-lg p-3 mt-1" style={{ background: "hsl(38 100% 97%)", border: "1px solid hsl(38 80% 85%)" }}>
                             <p className="text-[10px] leading-relaxed" style={{ color: "hsl(38 60% 30%)" }}>
-                              현재 응답은 <strong>resultCode 00 (정상 서비스)</strong> 이지만 <strong>totalCount = 0</strong>입니다.<br />
-                              이는 data.go.kr에서 <strong>건축물대장_HUB서비스<br />(1613000 / BldRgstHubService)</strong> 활용승인이<br />
-                              완료되지 않았거나, 요청 파라미터와 실제 대장 데이터가<br />
-                              일치하지 않을 때 발생할 수 있습니다.<br /><br />
-                              <strong>✅ 확인방법:</strong> data.go.kr 마이페이지 →<br />
-                              활용신청 / 활용현황에서 상태를 확인하세요.
+                              현재 응답은 <strong>resultCode 00 (정상)</strong> 이지만 <strong>totalCount = 0</strong>입니다.<br />
+                              활용상태는 <strong>승인 완료</strong>로 확인되었습니다.<br /><br />
+                              실제 원인은 아래 가능성이 높습니다:<br />
+                              <strong>① endpoint 또는 파라미터 불일치</strong><br />
+                              <strong>② 해당 지번에 건축물 미등록</strong><br />
+                              <strong>③ bun/ji 패딩 형식 불일치</strong>
                             </p>
                           </div>
                         </>
