@@ -447,6 +447,40 @@ async function fetchBuildingFloors(s: string, b: string, bun: string, ji: string
   return [];
 }
 
+// ── 위반건축물 조회 ──────────────────────────────────────────────────────
+async function fetchBuildingViolation(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
+  // getBrVlttRnList: 위반건축물 목록 조회
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrVlttRnList", s, b, bun, ji, k, "10");
+  if (total > 0) {
+    console.log("🚨 [위반건축물] 목록 조회 성공:", total, "건");
+    items.forEach((item: any, idx: number) => {
+      console.log(`  🚨 위반건축물 여부: Y`);
+      console.log(`  📄 위반내용 [${idx + 1}]:`, item.vlttRnCnts || item.vlttCn || "(내용 없음)");
+      console.log(`  🗂  위반구분:`, item.vlttGbCdNm || item.vlttKndCdNm || "(구분 없음)");
+      console.log(`  원문:`, JSON.stringify(item));
+    });
+    return { isViolation: true, items, resultCode, resultMsg };
+  }
+
+  // platGbCd 명시 재시도
+  for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
+    const r2 = await fetchBuildingApiWithPlatGb("getBrVlttRnList", s, b, bun, ji, pgb, k);
+    if (r2.total > 0) {
+      console.log(`🚨 [위반건축물] platGbCd=${pgb} 재시도 성공:`, r2.total, "건");
+      return { isViolation: true, items: r2.items, resultCode: r2.resultCode, resultMsg: r2.resultMsg };
+    }
+  }
+
+  // resultCode=00, totalCount=0 → 위반 없음
+  if (resultCode === "00" || resultCode === "0000") {
+    console.log("✅ [위반건축물] 위반 없음 (resultCode=00, totalCount=0)");
+    return { isViolation: false, items: [], resultCode, resultMsg };
+  }
+
+  console.log(`⚠️ [위반건축물] 조회 결과 없음 (${resultCode}/${resultMsg})`);
+  return { isViolation: false, items: [], resultCode, resultMsg };
+}
+
 // ── data.go.kr 개별공시지가 ──────────────────────────────────────────────
 async function fetchLandPriceDataGoKr(pnu: string, apiKey: string) {
   const result = {
@@ -702,14 +736,15 @@ serve(async (req) => {
       console.log(`  PNU       : ${pnu} (${pnu.length}자리) ${pnu.length === 19 ? "✅" : "❌ 19자리 아님"}`);
 
       if (sigunguCd && bjdongCd) {
-        // ── 3a. 건축물대장 ──
+        // ── 3a. 건축물대장 + 위반건축물 ──
         if (needBuilding) {
-          const [titleItem, recapItem, exposItem, basicItem, floorItems] = await Promise.all([
+          const [titleItem, recapItem, exposItem, basicItem, floorItems, violationResult] = await Promise.all([
             fetchBuildingTitle(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingRecap(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingExpos(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingBasic(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingFloors(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
+            fetchBuildingViolation(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
           ]);
 
           const bestItem   = titleItem || recapItem || exposItem || basicItem;
@@ -718,24 +753,48 @@ serve(async (req) => {
 
           console.log(`\n📊 [최종 선택 API]: ${bestSource}`);
 
+          // ── 위반건축물 최종 요약 로그 ──
+          console.log(`\n🏛️ [위반건축물 판단]`);
+          console.log(`  🚨 위반건축물 여부: ${violationResult.isViolation ? "Y" : "N"}`);
+          if (violationResult.isViolation && violationResult.items.length > 0) {
+            violationResult.items.forEach((v: any, i: number) => {
+              const content = v.vlttRnCnts || v.vlttCn || v.vlttKndCdNm || "(내용 없음)";
+              const kind    = v.vlttGbCdNm || v.vlttKndCdNm || "(구분 없음)";
+              console.log(`  📄 위반내용 [${i + 1}]: ${content}`);
+              console.log(`  🗂  위반구분 [${i + 1}]: ${kind}`);
+            });
+          } else {
+            console.log(`  ✅ 위반 없음`);
+          }
+
           if (!bestItem) {
             console.log("\n🚨 [최종 진단]");
             console.log(`resultCode=00 / 정상 서비스 / totalCount=0`);
             console.log(`API 키 및 활용승인은 정상입니다.`);
-            console.log(`파라미터 조합 확인:`);
-            console.log(`  sigunguCd=${sigunguCd} (출처: ${source})`);
-            console.log(`  bjdongCd=${bjdongCd} (출처: ${source})`);
-            console.log(`  bun=${bun} / ji=${ji}`);
-            console.log(`  platGbCd=${platGbCd}`);
-            console.log(`→ 카카오 b_code 기반 파라미터로도 totalCount=0이면`);
-            console.log(`  해당 번지에 건축물이 없거나, 대장 미등록 건물일 수 있습니다.`);
+            console.log(`파라미터 조합 확인: sigunguCd=${sigunguCd} bjdongCd=${bjdongCd} bun=${bun} / ji=${ji} platGbCd=${platGbCd} (출처: ${source})`);
+            console.log(`→ 해당 번지에 건축물이 없거나, 대장 미등록 건물일 수 있습니다.`);
           }
 
           const mappedBuilding = mapBuildingData(bestItem, floorItems);
+
+          // 위반건축물 정보를 _raw에 포함
+          const violationSummary = violationResult.isViolation
+            ? {
+                isViolation: true,
+                violationYn: "Y",
+                items: violationResult.items.map((v: any) => ({
+                  vlttRnCnts: v.vlttRnCnts || v.vlttCn || null,
+                  vlttGbCdNm: v.vlttGbCdNm || v.vlttKndCdNm || null,
+                  crtnDay:    v.crtnDay || null,
+                })),
+              }
+            : { isViolation: false, violationYn: "N", items: [] };
+
           const rawWithStatus  = {
             ...(mappedBuilding?._raw ?? { floors: [] }),
             api_status: apiStatus,
             params_used: { sigunguCd, bjdongCd, bun, ji, platGbCd, pnu, source },
+            violation: violationSummary,
           };
 
           if (isBuildingEmpty && buildingData) {
