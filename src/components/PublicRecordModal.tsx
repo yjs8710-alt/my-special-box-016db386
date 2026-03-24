@@ -47,7 +47,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [land, setLand] = useState<Record<string, unknown> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
 
-  const str = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+  
 
   /** 값이 있는지 판단 (null / "" / "조회 결과 없음" 제외) */
   const hasVal = (v: unknown) =>
