@@ -1948,8 +1948,20 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     const list = properties.filter(p => checkedIds.has(p.id));
     if (list.length === 0) { alert("인쇄할 매물을 선택해주세요."); return; }
     const today = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
-    const rows = list.map((p, i) =>
-      `<tr>
+
+    // 관리자 여부에 따라 연락처 열 포함 여부 결정
+    const showContacts = isAdmin;
+
+    const rows = list.map((p, i) => {
+      const contactCell = showContacts
+        ? `<td style="font-size:10px;color:#333;line-height:1.6">
+            ${p.contactOwner  ? `<span style="color:#15803d;font-weight:600">건물주</span> ${p.contactOwner}<br/>` : ""}
+            ${p.contactManager ? `<span style="color:#1d4ed8;font-weight:600">관리인</span> ${p.contactManager}<br/>` : ""}
+            ${p.contactTenant  ? `<span style="color:#7c3aed;font-weight:600">세입자</span> ${p.contactTenant}<br/>` : ""}
+            ${(!p.contactOwner && !p.contactManager && !p.contactTenant) ? "-" : ""}
+           </td>`
+        : "";
+      return `<tr>
         <td style="text-align:center;color:#888">${i + 1}</td>
         <td><strong>${p.buildingName ?? p.title}</strong><br/><span style="color:#888;font-size:10px">${p.unitNumber ?? ""}</span></td>
         <td style="color:#555">${p.address}</td>
@@ -1960,8 +1972,18 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         <td style="text-align:center;color:#555">${p.manageFee ?? "-"}</td>
         <td style="text-align:center">${p.availableFrom ?? "-"}</td>
         <td style="text-align:center"><span style="background:#e8f0ff;color:#1a56db;border-radius:4px;padding:2px 6px;font-size:10px">${p.type}</span></td>
-      </tr>`
-    ).join("");
+        ${contactCell}
+      </tr>`;
+    }).join("");
+
+    const contactHeader = showContacts
+      ? `<th style="width:130px">연락처 (관리자용)</th>`
+      : "";
+
+    const adminWatermark = showContacts
+      ? `<p style="font-size:11px;color:#e11d48;font-weight:600;margin-top:4px">🔒 관리자 전용 — 연락처 포함</p>`
+      : "";
+
     const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1979,6 +2001,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     tr:nth-child(even) td { background: #f8faff; }
     tr:hover td { background: #eef3ff; }
     .footer { margin-top: 14px; font-size: 10px; color: #aaa; text-align: right; }
+    .admin-badge { display:inline-block;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:4px;padding:2px 6px;font-size:10px;font-weight:700; }
     @media print {
       body { padding: 10px; }
       .no-print { display: none !important; }
@@ -1991,6 +2014,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
     <div>
       <h1>📋 선택 매물 목록</h1>
       <p style="font-size:12px;color:#555;margin-top:4px">총 <strong style="color:#1a56db">${list.length}건</strong> 선택</p>
+      ${adminWatermark}
     </div>
     <div class="meta">
       출력일: ${today}<br/>
@@ -2010,18 +2034,19 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
         <th style="width:60px">관리비</th>
         <th style="width:80px">입주가능일</th>
         <th style="width:65px">유형</th>
+        ${contactHeader}
       </tr>
     </thead>
     <tbody>${rows}</tbody>
   </table>
-  <div class="footer">※ 본 자료는 참고용이며 실제 계약 조건과 다를 수 있습니다.</div>
+  <div class="footer">※ 본 자료는 참고용이며 실제 계약 조건과 다를 수 있습니다.${showContacts ? " | 🔒 이 문서에는 관리자 전용 연락처 정보가 포함되어 있습니다." : ""}</div>
   <div class="no-print" style="margin-top:20px;text-align:center">
     <button onclick="window.print()" style="padding:10px 28px;background:#1a56db;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-right:8px">🖨️ 인쇄</button>
     <button onclick="window.close()" style="padding:10px 20px;background:#f0f0f0;color:#333;border:none;border-radius:8px;font-size:13px;cursor:pointer">닫기</button>
   </div>
 </body>
 </html>`;
-    const w = window.open("", "_blank", "width=1000,height=700");
+    const w = window.open("", "_blank", "width=1100,height=700");
     w?.document.write(html);
     w?.document.close();
   };
