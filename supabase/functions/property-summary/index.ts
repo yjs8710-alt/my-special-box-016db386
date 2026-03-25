@@ -857,6 +857,24 @@ async function fetchNsdiLandCharacter(pnu: string, apiKey: string): Promise<{
 function mapBuildingData(item: any, floorItems: any[]) {
   if (!item) return null;
 
+  // ── 원본 응답 디버그 로그 ─────────────────────────────────────────────
+  console.log("🏢 [building raw]", JSON.stringify({
+    useAprDay:           item.useAprDay,
+    rideUseElvtCnt:      item.rideUseElvtCnt,
+    emgenUseElvtCnt:     item.emgenUseElvtCnt,
+    elevCnt:             item.elevCnt,
+    emgElevCnt:          item.emgElevCnt,
+    elvCnt:              item.elvCnt,
+    elevYn:              item.elevYn,
+    elvtYn:              item.elvtYn,
+    erthqkAblty:         item.erthqkAblty,
+    erthqkDsgnApplyYn:   item.erthqkDsgnApplyYn,
+    mainPurpsCdNm:       item.mainPurpsCdNm,
+    bldNm:               item.bldNm,
+    grndFlrCnt:          item.grndFlrCnt,
+    ugrndFlrCnt:         item.ugrndFlrCnt,
+  }));
+
   const floorsAbove  = item.grndFlrCnt  ? String(item.grndFlrCnt)                  : null;
   const floorsBelow  = item.ugrndFlrCnt ? String(item.ugrndFlrCnt)                 : null;
   const totalArea    = item.totArea     ? `${Number(item.totArea).toFixed(1)}㎡`    : null;
@@ -868,6 +886,7 @@ function mapBuildingData(item: any, floorItems: any[]) {
   if (item.useAprDay?.length === 8) {
     approvalDate = `${item.useAprDay.slice(0,4)}-${item.useAprDay.slice(4,6)}-${item.useAprDay.slice(6,8)}`;
   }
+  const buildYear = approvalDate ? approvalDate.slice(0, 4) : null;
 
   const parkingCount = (
     Number(item.indrMechUtcnt || 0) + Number(item.oudrMechUtcnt || 0) +
@@ -875,23 +894,32 @@ function mapBuildingData(item: any, floorItems: any[]) {
   );
 
   // ── 엘리베이터 상세 판단 ─────────────────────────────────────────────
-  // 건축물대장 API는 용도에 따라 필드명이 다를 수 있음:
-  //   - 일반건물: elevCnt (일반), emgElevCnt (비상)
-  //   - 아파트/집합건물: rideUseElvtCnt (승용), emgElevCnt (비상)
-  //   - 기타: elvCnt, elevatorCnt 등 변형 필드 가능
-  const elevCnt       = Number(item.elevCnt       || item.elvCnt       || item.rideUseElvtCnt || 0);
-  const emgElevCnt    = Number(item.emgElevCnt    || item.emrgncyElvtCnt || 0);
-  const elevTotal     = elevCnt + emgElevCnt;
+  // 건축물대장 API 필드명:
+  //   - 표제부/총괄표제부 일반건물: elevCnt(승용) + emgElevCnt(비상)
+  //   - 집합건물/아파트: rideUseElvtCnt(승용) + emgenUseElvtCnt(비상) ← 정확한 필드명
+  //   - 구버전: elvCnt, emrgncyElvtCnt 등
+  const elevRide = Number(
+    item.rideUseElvtCnt ?? item.elevCnt ?? item.elvCnt ?? 0
+  );
+  const elevEmg  = Number(
+    item.emgenUseElvtCnt ?? item.emgElevCnt ?? item.emrgncyElvtCnt ?? 0
+  );
+  const elevTotal = elevRide + elevEmg;
 
-  // 집합건물 공용부 총괄표제부의 경우 elevYn 필드가 직접 존재하기도 함
-  const elevYnField   = item.elevYn ?? item.elvtYn ?? null;
-  const elevator      = elevTotal > 0 || elevYnField === "Y";
+  // Y/N 필드 fallback
+  const elevYnField = item.elevYn ?? item.elvtYn ?? null;
+  const elevator    = elevTotal > 0 || elevYnField === "Y";
 
-  const elevatorDetail = elevTotal > 0
-    ? (emgElevCnt > 0 ? `있음 (일반 ${elevCnt}대, 비상 ${emgElevCnt}대)` : `있음 (${elevCnt}대)`)
-    : (elevYnField === "Y" ? "있음" : "없음");
+  let elevatorDetail: string;
+  if (elevTotal > 0) {
+    elevatorDetail = elevEmg > 0
+      ? `있음 (일반 ${elevRide}대, 비상 ${elevEmg}대)`
+      : `있음 (${elevRide}대)`;
+  } else {
+    elevatorDetail = elevator ? "있음" : "없음";
+  }
 
-  console.log(`  🛗 [엘리베이터] elevCnt=${item.elevCnt ?? "-"} rideUseElvtCnt=${item.rideUseElvtCnt ?? "-"} emgElevCnt=${item.emgElevCnt ?? "-"} elevYn=${elevYnField ?? "-"} → ${elevatorDetail}`);
+  console.log(`🏢 [elevator counts] ride=${item.rideUseElvtCnt ?? "-"} emgen=${item.emgenUseElvtCnt ?? "-"} elevCnt=${item.elevCnt ?? "-"} emgElevCnt=${item.emgElevCnt ?? "-"} elevYn=${elevYnField ?? "-"} → ride=${elevRide} emg=${elevEmg} total=${elevTotal} → ${elevatorDetail}`);
 
   // 허가일/착공일
   let permitDate: string | null = null;
@@ -903,7 +931,14 @@ function mapBuildingData(item: any, floorItems: any[]) {
     startDate = `${item.stcnsDay.slice(0,4)}-${item.stcnsDay.slice(4,6)}-${item.stcnsDay.slice(6,8)}`;
   }
 
-  return {
+  // 내진 정보
+  const seismicAblty        = item.erthqkAblty       || null;
+  const seismicDsgnApplyYn  = item.erthqkDsgnApplyYn || null;
+  const seismicDesign = seismicDsgnApplyYn
+    ? (seismicDsgnApplyYn === "Y" ? "적용" : seismicDsgnApplyYn === "N" ? "미적용" : seismicDsgnApplyYn)
+    : null;
+
+  const mapped = {
     building_name:  item.bldNm || null,
     main_purpose:   mainPurpose,
     approval_date:  approvalDate,
@@ -935,23 +970,27 @@ function mapBuildingData(item: any, floorItems: any[]) {
       grndFlrCnt:    floorsAbove,
       ugrndFlrCnt:   floorsBelow,
       indrMechUtcnt: item.indrMechUtcnt ? String(item.indrMechUtcnt) : null,
-      // 엘리베이터 상세
-      elevCnt:       String(elevCnt),
-      emgElevCnt:    String(emgElevCnt),
-      elevYn:        elevator ? "Y" : "N",
+      // 엘리베이터 — ride/emg 분리 저장 (공통 유틸이 재사용)
+      rideUseElvtCnt:    String(elevRide),
+      emgenUseElvtCnt:   String(elevEmg),
+      elevCnt:           String(elevRide),   // 레거시 호환
+      emgElevCnt:        String(elevEmg),    // 레거시 호환
+      elevYn:            elevator ? "Y" : "N",
       elevatorDetail,
-      // 원본 필드도 보존 (디버깅용)
-      rawElevCnt:       item.elevCnt       ?? null,
-      rawRideUseElvtCnt: item.rideUseElvtCnt ?? null,
-      rawEmgElevCnt:    item.emgElevCnt    ?? null,
-      rawElevYn:        elevYnField        ?? null,
+      // 원본 보존 (디버깅)
+      rawRideUseElvtCnt: item.rideUseElvtCnt  ?? null,
+      rawEmgenUseElvtCnt: item.emgenUseElvtCnt ?? null,
+      rawElevCnt:        item.elevCnt          ?? null,
+      rawEmgElevCnt:     item.emgElevCnt       ?? null,
+      rawElevYn:         elevYnField           ?? null,
       // 주소
-      platPlc:       item.platPlc       || null,  // 지번주소(소재지)
-      newPlatPlc:    item.newPlatPlc    || null,  // 도로명주소
+      platPlc:       item.platPlc    || null,
+      newPlatPlc:    item.newPlatPlc || null,
       // 내진
-      erthqkDsgnApplyYn: item.erthqkDsgnApplyYn || null,  // 내진설계 적용 여부 (Y/N)
-      erthqkAblty:       item.erthqkAblty       || null,  // 대내진능력
-      // 용도지역 (건축물대장 표제부에서 제공 시)
+      erthqkDsgnApplyYn: seismicDsgnApplyYn,
+      erthqkAblty:       seismicAblty,
+      seismicDesign,
+      // 기타
       useAprDayBefore: item.useAprDayBefore || null,
       floors: floorItems.map((f) => ({
         flrNo:         f.flrNo,
@@ -961,6 +1000,19 @@ function mapBuildingData(item: any, floorItems: any[]) {
       })),
     },
   };
+
+  console.log("🏢 [building mapped]", JSON.stringify({
+    approval_date: mapped.approval_date,
+    buildYear,
+    elevator:      mapped.elevator,
+    elevatorDetail,
+    elevRide,
+    elevEmg,
+    seismicAblty,
+    seismicDesign,
+  }));
+
+  return mapped;
 }
 
 // ── 메인 핸들러 ─────────────────────────────────────────────────────────
