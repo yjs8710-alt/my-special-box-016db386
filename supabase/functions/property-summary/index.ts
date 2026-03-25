@@ -1196,6 +1196,7 @@ serve(async (req) => {
               console.log(`✅ [elevator 동기화] properties.elevator = ${apiElev} (${mappedBuilding._raw?.elevatorDetail})`);
             }
           }
+        } // end if (needBuilding)
 
         // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 우선 위임) ──────────────
         // 배경: Supabase eu-central-1 → 한국 토지 API(nsdi/VWorld) IP 차단 확인됨
