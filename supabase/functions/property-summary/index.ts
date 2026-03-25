@@ -869,19 +869,29 @@ function mapBuildingData(item: any, floorItems: any[]) {
     approvalDate = `${item.useAprDay.slice(0,4)}-${item.useAprDay.slice(4,6)}-${item.useAprDay.slice(6,8)}`;
   }
 
-  const elevator     = (Number(item.elevCnt || 0) + Number(item.emgElevCnt || 0)) > 0;
   const parkingCount = (
     Number(item.indrMechUtcnt || 0) + Number(item.oudrMechUtcnt || 0) +
     Number(item.indrAutoUtcnt || 0) + Number(item.oudrAutoUtcnt || 0)
   );
 
-  // 엘리베이터 상세: 대수 포함
-  const elevCnt    = Number(item.elevCnt    || 0);
-  const emgElevCnt = Number(item.emgElevCnt || 0);
-  const elevTotal  = elevCnt + emgElevCnt;
+  // ── 엘리베이터 상세 판단 ─────────────────────────────────────────────
+  // 건축물대장 API는 용도에 따라 필드명이 다를 수 있음:
+  //   - 일반건물: elevCnt (일반), emgElevCnt (비상)
+  //   - 아파트/집합건물: rideUseElvtCnt (승용), emgElevCnt (비상)
+  //   - 기타: elvCnt, elevatorCnt 등 변형 필드 가능
+  const elevCnt       = Number(item.elevCnt       || item.elvCnt       || item.rideUseElvtCnt || 0);
+  const emgElevCnt    = Number(item.emgElevCnt    || item.emrgncyElvtCnt || 0);
+  const elevTotal     = elevCnt + emgElevCnt;
+
+  // 집합건물 공용부 총괄표제부의 경우 elevYn 필드가 직접 존재하기도 함
+  const elevYnField   = item.elevYn ?? item.elvtYn ?? null;
+  const elevator      = elevTotal > 0 || elevYnField === "Y";
+
   const elevatorDetail = elevTotal > 0
     ? (emgElevCnt > 0 ? `있음 (일반 ${elevCnt}대, 비상 ${emgElevCnt}대)` : `있음 (${elevCnt}대)`)
-    : "없음";
+    : (elevYnField === "Y" ? "있음" : "없음");
+
+  console.log(`  🛗 [엘리베이터] elevCnt=${item.elevCnt ?? "-"} rideUseElvtCnt=${item.rideUseElvtCnt ?? "-"} emgElevCnt=${item.emgElevCnt ?? "-"} elevYn=${elevYnField ?? "-"} → ${elevatorDetail}`);
 
   // 허가일/착공일
   let permitDate: string | null = null;
