@@ -213,6 +213,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     str(land.official_price) || str(land.use_zone)
   );
 
+  // ── 공통 유틸로 건축물 값 가공 (엘리베이터·내진·건축연도) ──
+  const bMapped = mapBuildingFromDB(building);
+
   return (
     <div
       className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-3 sm:p-4"
