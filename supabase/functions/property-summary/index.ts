@@ -1165,7 +1165,37 @@ serve(async (req) => {
             if (inserted) buildingData = { ...inserted, _raw: rawWithStatus };
             console.log("✅ [건축물대장 저장 완료]");
           }
-        }
+
+          // ── approval_date → properties.build_year 동기화 ──────────────────
+          // 사용승인일 연도를 properties 테이블에도 저장해 매물카드 즉시 표시 가능
+          if (mappedBuilding?.approval_date && pid) {
+            const approvalYear = mappedBuilding.approval_date.substring(0, 4);
+            // 기존 build_year가 없거나 비어있을 때만 업데이트
+            const { data: propRow } = await supabase
+              .from("properties").select("build_year").eq("id", pid).maybeSingle();
+            if (propRow && (!propRow.build_year || propRow.build_year.trim() === "")) {
+              await supabase
+                .from("properties")
+                .update({ build_year: approvalYear })
+                .eq("id", pid);
+              console.log(`✅ [build_year 동기화] properties.build_year = ${approvalYear}`);
+            }
+          }
+
+          // ── elevator → properties.elevator 동기화 ─────────────────────────
+          // 공적장부에서 엘리베이터 정보가 확인된 경우 properties 테이블에도 반영
+          if (mappedBuilding && pid) {
+            const apiElev = mappedBuilding.elevator;
+            const { data: propRow2 } = await supabase
+              .from("properties").select("elevator, build_year").eq("id", pid).maybeSingle();
+            if (propRow2 && propRow2.elevator !== apiElev) {
+              await supabase
+                .from("properties")
+                .update({ elevator: apiElev })
+                .eq("id", pid);
+              console.log(`✅ [elevator 동기화] properties.elevator = ${apiElev} (${mappedBuilding._raw?.elevatorDetail})`);
+            }
+          }
 
         // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 우선 위임) ──────────────
         // 배경: Supabase eu-central-1 → 한국 토지 API(nsdi/VWorld) IP 차단 확인됨
