@@ -484,17 +484,24 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   {raw?.pmsDay && <Row label="허가일" value={str(raw.pmsDay)} />}
                   {raw?.stcnsDay && <Row label="착공일" value={str(raw.stcnsDay)} />}
                   <Row label="사용승인일" value={str(building.approval_date)} />
-                  {raw?.erthqkAblty && <Row label="대내진능력" value={str(raw.erthqkAblty)} />}
-                  {raw?.erthqkDsgnApplyYn != null && (
-                    <Row
-                      label="내진설계 적용"
-                      value={
-                        raw.erthqkDsgnApplyYn === "Y" ? "적용"
-                        : raw.erthqkDsgnApplyYn === "N" ? "미적용"
-                        : str(raw.erthqkDsgnApplyYn)
-                      }
-                    />
-                  )}
+                  <Row
+                    label="내진능력"
+                    value={
+                      raw?.erthqkAblty
+                        ? str(raw.erthqkAblty)
+                        : (str(building.erthqkAblty as unknown) ?? "-")
+                    }
+                  />
+                  <Row
+                    label="내진설계 적용"
+                    value={
+                      raw?.erthqkDsgnApplyYn != null
+                        ? (raw.erthqkDsgnApplyYn === "Y" ? "적용" : raw.erthqkDsgnApplyYn === "N" ? "미적용" : str(raw.erthqkDsgnApplyYn))
+                        : (building.erthqkDsgnApplyYn != null
+                            ? ((building.erthqkDsgnApplyYn as string) === "Y" ? "적용" : (building.erthqkDsgnApplyYn as string) === "N" ? "미적용" : str(building.erthqkDsgnApplyYn as unknown))
+                            : "-")
+                    }
+                  />
                   {!hasAnyBuildingData && (
                     <div className="flex flex-col gap-1.5 pt-2 pb-3 px-1">
                       {buildingApiNoData ? (
