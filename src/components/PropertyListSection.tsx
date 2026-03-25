@@ -113,7 +113,13 @@ const PropertyListSection = () => {
       {/* Property Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((property) => (
-          <PropertyCard key={property.id} {...property} onDelete={() => handleDelete(property.id)} />
+          <PropertyCard
+            key={property.id}
+            {...property}
+            buildYear={(property as any).buildYear}
+            elevator={(property as any).elevator}
+            onDelete={() => handleDelete(property.id)}
+          />
         ))}
       </div>
 

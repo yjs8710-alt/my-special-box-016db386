@@ -875,6 +875,24 @@ function mapBuildingData(item: any, floorItems: any[]) {
     Number(item.indrAutoUtcnt || 0) + Number(item.oudrAutoUtcnt || 0)
   );
 
+  // 엘리베이터 상세: 대수 포함
+  const elevCnt    = Number(item.elevCnt    || 0);
+  const emgElevCnt = Number(item.emgElevCnt || 0);
+  const elevTotal  = elevCnt + emgElevCnt;
+  const elevatorDetail = elevTotal > 0
+    ? (emgElevCnt > 0 ? `있음 (일반 ${elevCnt}대, 비상 ${emgElevCnt}대)` : `있음 (${elevCnt}대)`)
+    : "없음";
+
+  // 허가일/착공일
+  let permitDate: string | null = null;
+  if (item.pmsDay?.length === 8) {
+    permitDate = `${item.pmsDay.slice(0,4)}-${item.pmsDay.slice(4,6)}-${item.pmsDay.slice(6,8)}`;
+  }
+  let startDate: string | null = null;
+  if (item.stcnsDay?.length === 8) {
+    startDate = `${item.stcnsDay.slice(0,4)}-${item.stcnsDay.slice(4,6)}-${item.stcnsDay.slice(6,8)}`;
+  }
+
   return {
     building_name:  item.bldNm || null,
     main_purpose:   mainPurpose,
@@ -887,21 +905,39 @@ function mapBuildingData(item: any, floorItems: any[]) {
     parking_count:  parkingCount > 0 ? String(parkingCount) : null,
     elevator,
     _raw: {
+      // 기본
       hhldCnt:       item.hhldCnt       ? String(item.hhldCnt)                : null,
+      fmlyCnt:       item.fmlyCnt       ? String(item.fmlyCnt)                : null,
       bcRat:         item.bcRat         ? `${item.bcRat}%`                    : null,
       vlRat:         item.vlRat         ? `${item.vlRat}%`                    : null,
+      vlRatEstmTotArea: item.vlRatEstmTotArea ? `${Number(item.vlRatEstmTotArea).toFixed(1)}㎡` : null,
       strctCdNm:     item.strctCdNm     || null,
       roofCdNm:      item.roofCdNm      || null,
       bldNm:         item.bldNm         || null,
       mainPurpsCdNm: item.mainPurpsCdNm || null,
+      etcPurps:      item.etcPurps      || null,
       totArea:       item.totArea       ? `${Number(item.totArea).toFixed(1)}㎡`   : null,
       archArea:      item.archArea      ? `${Number(item.archArea).toFixed(1)}㎡`  : null,
       platArea:      item.platArea      ? `${Number(item.platArea).toFixed(1)}㎡`  : null,
       useAprDay:     approvalDate,
+      pmsDay:        permitDate,
+      stcnsDay:      startDate,
       grndFlrCnt:    floorsAbove,
       ugrndFlrCnt:   floorsBelow,
       indrMechUtcnt: item.indrMechUtcnt ? String(item.indrMechUtcnt) : null,
+      // 엘리베이터 상세
+      elevCnt:       item.elevCnt       ? String(item.elevCnt)    : "0",
+      emgElevCnt:    item.emgElevCnt    ? String(item.emgElevCnt) : "0",
       elevYn:        elevator ? "Y" : "N",
+      elevatorDetail,
+      // 주소
+      platPlc:       item.platPlc       || null,  // 지번주소(소재지)
+      newPlatPlc:    item.newPlatPlc    || null,  // 도로명주소
+      // 내진
+      erthqkDsgnApplyYn: item.erthqkDsgnApplyYn || null,  // 내진설계 적용 여부 (Y/N)
+      erthqkAblty:       item.erthqkAblty       || null,  // 대내진능력
+      // 용도지역 (건축물대장 표제부에서 제공 시)
+      useAprDayBefore: item.useAprDayBefore || null,
       floors: floorItems.map((f) => ({
         flrNo:         f.flrNo,
         flrNoNm:       f.flrNoNm,

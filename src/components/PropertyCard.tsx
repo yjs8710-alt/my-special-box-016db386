@@ -13,14 +13,19 @@ interface PropertyCardProps {
   isNew?: boolean;
   isHot?: boolean;
   views: number;
+  buildYear?: string;
+  elevator?: boolean;
   onDelete?: () => void;
 }
 
 const PropertyCard = ({
   image, title, address, type, area, floor, deposit, monthly,
-  isNew, isHot, views, onDelete
+  isNew, isHot, views, buildYear, elevator, onDelete
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
+
+  // 건축년도에서 숫자 4자리만 추출
+  const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
 
   return (
     <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
@@ -63,6 +68,14 @@ const PropertyCard = ({
             {type}
           </span>
         </div>
+        {/* 건축년도 badge */}
+        {buildYearShort && (
+          <div className="absolute bottom-3 right-3">
+            <span className="bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+              준{buildYearShort}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -84,6 +97,26 @@ const PropertyCard = ({
             <p className="text-sm font-semibold text-foreground">{floor}</p>
           </div>
         </div>
+
+        {/* 건축년도 + 엘리베이터 */}
+        {(buildYearShort || elevator !== undefined) && (
+          <div className="flex items-center gap-2 mb-3">
+            {buildYearShort && (
+              <div className="flex items-center gap-1 bg-muted rounded-full px-2.5 py-1">
+                <span className="text-[10px] text-muted-foreground">준공</span>
+                <span className="text-[11px] font-bold text-foreground">{buildYearShort}년</span>
+              </div>
+            )}
+            {elevator !== undefined && (
+              <div className="flex items-center gap-1 bg-muted rounded-full px-2.5 py-1">
+                <span className="text-[10px] text-muted-foreground">엘리베이터</span>
+                <span className={`text-[11px] font-bold ${elevator ? "text-primary" : "text-muted-foreground"}`}>
+                  {elevator ? "있음" : "없음"}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Price */}
         <div className="border-t border-border pt-3 flex items-end justify-between">
