@@ -159,7 +159,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           if (!hasVal(bSum.floors_above) && hasVal(raw.grndFlrCnt)) bSum.floors_above = raw.grndFlrCnt;
           if (!hasVal(bSum.floors_below) && hasVal(raw.ugrndFlrCnt)) bSum.floors_below = raw.ugrndFlrCnt;
           if (!hasVal(bSum.parking_count) && hasVal(raw.indrMechUtcnt)) bSum.parking_count = raw.indrMechUtcnt;
-          if (bSum.elevator === false && raw.elevYn === "Y") bSum.elevator = true;
+          // 엘리베이터: elevatorDetail 우선, 없으면 elevYn으로 판단
+          if (bSum.elevator === false) {
+            if (raw.elevatorDetail && String(raw.elevatorDetail).startsWith("있음")) bSum.elevator = true;
+            else if (raw.elevYn === "Y") bSum.elevator = true;
+          }
           if (!hasVal(bSum.building_name) && hasVal(raw.bldNm)) bSum.building_name = raw.bldNm;
         }
 
