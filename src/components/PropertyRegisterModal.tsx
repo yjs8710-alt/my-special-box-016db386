@@ -161,6 +161,7 @@ interface FormState {
   isNew: boolean;
   isHot: boolean;
   buildingMemo: string;
+  buildingDong: string; // 집합건물 동(棟)
 }
 
 const INITIAL: FormState = {
@@ -188,6 +189,7 @@ const INITIAL: FormState = {
   expose: true, allowAddressView: false,
   images: [],
   elevator: false, isNew: false, isHot: false, buildingMemo: "",
+  buildingDong: "",
 };
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
@@ -491,6 +493,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.tenantOccupied && form.tenantMonthly && `세입자월세: ${form.tenantMonthly}`,
         form.vacateDate && `퇴거일: ${form.vacateDate}`,
         form.earlyExit && `중도퇴거: 세입자중도퇴거`,
+        isCollectiveBuilding && form.buildingDong && `동(棟): ${form.buildingDong}`,
         ...rentNotes,
         form.direction && `방향: ${form.direction}`,
         form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
@@ -757,29 +760,38 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           <input type="text" placeholder="예) 200평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70">층수</label>
-            <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70">
-              호수
-              {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
-                <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
+        <div className="flex flex-col gap-3">
+          {/* 집합건물 동(棟) 입력 */}
+          {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">집합건물 동(棟) <span className="text-muted-foreground font-normal">(선택)</span></label>
+              <input type="text" placeholder="예) 101동, A동" value={form.buildingDong} onChange={(e) => set("buildingDong", e.target.value)} className={ic(false)} />
+            </div>
+          )}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">층수</label>
+              <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">
+                호수
+                {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+                  <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
+                )}
+              </label>
+              <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+              {form.unitNo && (form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+                <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
               )}
-            </label>
-            <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
-            {form.unitNo && (form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
-              <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
-            )}
-            {form.unitNo && !(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
-              <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70">평수</label>
-            <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+              {form.unitNo && !(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+                <p className="text-[10px] text-primary/70">✨ 이전 매물 정보 자동 불러오기 가능</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-foreground/70">평수</label>
+              <input type="text" placeholder="예) 15평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
+            </div>
           </div>
         </div>
       )}
