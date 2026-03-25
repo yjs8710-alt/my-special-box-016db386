@@ -468,15 +468,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   {raw?.fmlyCnt && Number(raw.fmlyCnt) > 0 && (
                     <Row label="가구수" value={`${raw.fmlyCnt}가구`} />
                   )}
-                  {/* 엘리베이터 — 대수 상세 표시 */}
-                  <Row
-                    label="엘리베이터"
-                    value={
-                      raw?.elevatorDetail
-                        ? str(raw.elevatorDetail)
-                        : (building.elevator === true ? "있음" : building.elevator === false ? "없음" : null)
-                    }
-                  />
+                  {/* 엘리베이터 — 공통 유틸로 정확한 대수 계산 */}
+                  <Row label="엘리베이터" value={bMapped.elevatorDetail} />
                   <Row
                     label="주차"
                     value={
@@ -487,25 +480,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   />
                   {raw?.pmsDay && <Row label="허가일" value={str(raw.pmsDay)} />}
                   {raw?.stcnsDay && <Row label="착공일" value={str(raw.stcnsDay)} />}
-                  <Row label="사용승인일" value={str(building.approval_date)} />
-                  <Row
-                    label="내진능력"
-                    value={
-                      raw?.erthqkAblty
-                        ? str(raw.erthqkAblty)
-                        : (str(building.erthqkAblty as unknown) ?? "-")
-                    }
-                  />
-                  <Row
-                    label="내진설계 적용"
-                    value={
-                      raw?.erthqkDsgnApplyYn != null
-                        ? (raw.erthqkDsgnApplyYn === "Y" ? "적용" : raw.erthqkDsgnApplyYn === "N" ? "미적용" : str(raw.erthqkDsgnApplyYn))
-                        : (building.erthqkDsgnApplyYn != null
-                            ? ((building.erthqkDsgnApplyYn as string) === "Y" ? "적용" : (building.erthqkDsgnApplyYn as string) === "N" ? "미적용" : str(building.erthqkDsgnApplyYn as unknown))
-                            : "-")
-                    }
-                  />
+                  {/* 사용승인일 — 공통 유틸 기반 */}
+                  <Row label="사용승인일" value={bMapped.approvalDate ?? str(building.approval_date)} />
+                  {/* 건축연도 — 사용승인일에서 추출 */}
+                  {bMapped.buildYear && (
+                    <Row label="건축연도" value={`${bMapped.buildYear}년`} />
+                  )}
+                  {/* 내진능력 — 공통 유틸 기반, 항상 표시 */}
+                  <Row label="내진능력" value={bMapped.seismicAblty ?? "-"} />
+                  {/* 내진설계 적용 여부 — 공통 유틸 기반, 항상 표시 */}
+                  <Row label="내진설계 적용" value={bMapped.seismicDesign ?? "-"} />
                   {!hasAnyBuildingData && (
                     <div className="flex flex-col gap-1.5 pt-2 pb-3 px-1">
                       {buildingApiNoData ? (
