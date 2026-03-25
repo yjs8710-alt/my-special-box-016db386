@@ -433,50 +433,63 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       <span className="text-[11px] text-muted-foreground">위반건축물 여부 정보 없음</span>
                     </div>
                   )}
+                  {/* 소재지 / 도로명 — raw 우선, 없으면 address */}
+                  <Row label="소재지" value={str(raw?.platPlc) ?? address} />
+                  {raw?.newPlatPlc && <Row label="도로명" value={str(raw.newPlatPlc)} />}
                   <Row label="건물명" value={str(building.building_name)} />
-                  <Row label="건축물용도" value={str(building.main_purpose) === "조회 결과 없음" ? null : str(building.main_purpose)} />
-                  <Row label="연면적" value={str(building.total_area)} />
+                  <Row label="주용도" value={str(building.main_purpose) === "조회 결과 없음" ? null : str(building.main_purpose)} />
+                  {raw?.etcPurps && <Row label="기타용도" value={str(raw.etcPurps)} />}
+                  <Row label="주구조" value={raw ? str(raw.strctCdNm) : null} />
+                  {raw?.roofCdNm && <Row label="지붕구조" value={str(raw.roofCdNm)} />}
                   <Row label="대지면적" value={str(building.land_area)} />
                   <Row label="건축면적" value={str(building.building_area)} />
-                  <Row label="사용승인일" value={str(building.approval_date)} />
+                  <Row label="연면적" value={str(building.total_area)} />
+                  {raw?.vlRatEstmTotArea && <Row label="용적률산정 연면적" value={str(raw.vlRatEstmTotArea)} />}
+                  {raw?.bcRat && <Row label="건폐율" value={str(raw.bcRat)} />}
+                  {raw?.vlRat && <Row label="용적률" value={str(raw.vlRat)} />}
                   <Row
-                    label="층수"
+                    label="지상층수"
+                    value={building.floors_above ? `${building.floors_above}층` : null}
+                  />
+                  {building.floors_below && String(building.floors_below) !== "0" && (
+                    <Row label="지하층수" value={`${building.floors_below}층`} />
+                  )}
+                  {raw?.hhldCnt && Number(raw.hhldCnt) > 0 && (
+                    <Row label="세대수" value={`${raw.hhldCnt}세대`} />
+                  )}
+                  {raw?.fmlyCnt && Number(raw.fmlyCnt) > 0 && (
+                    <Row label="가구수" value={`${raw.fmlyCnt}가구`} />
+                  )}
+                  {/* 엘리베이터 — 대수 상세 표시 */}
+                  <Row
+                    label="엘리베이터"
                     value={
-                      building.floors_above
-                        ? `지상 ${building.floors_above}층${
-                            building.floors_below && String(building.floors_below) !== "0"
-                              ? ` / 지하 ${building.floors_below}층`
-                              : ""
-                          }`
-                        : null
+                      raw?.elevatorDetail
+                        ? str(raw.elevatorDetail)
+                        : (building.elevator === true ? "있음" : building.elevator === false ? "없음" : null)
                     }
                   />
                   <Row
-                    label="주차대수"
+                    label="주차"
                     value={
                       str(building.parking_count) && str(building.parking_count) !== "0"
                         ? `${building.parking_count}대`
                         : str(building.parking_count)
                     }
                   />
-                  <Row
-                    label="엘리베이터"
-                    value={
-                      building.elevator === true ? "있음"
-                      : building.elevator === false ? "없음"
-                      : null
-                    }
-                  />
-                  {raw && (
-                    <>
-                      {raw.strctCdNm && <Row label="구조" value={str(raw.strctCdNm)} />}
-                      {raw.bcRat     && <Row label="건폐율" value={str(raw.bcRat)} />}
-                      {raw.vlRat     && <Row label="용적률" value={str(raw.vlRat)} />}
-                      {raw.hhldCnt && Number(raw.hhldCnt) > 0 && (
-                        <Row label="세대수" value={`${raw.hhldCnt}세대`} />
-                      )}
-                      {raw.roofCdNm && <Row label="지붕구조" value={str(raw.roofCdNm)} />}
-                    </>
+                  {raw?.pmsDay && <Row label="허가일" value={str(raw.pmsDay)} />}
+                  {raw?.stcnsDay && <Row label="착공일" value={str(raw.stcnsDay)} />}
+                  <Row label="사용승인일" value={str(building.approval_date)} />
+                  {raw?.erthqkAblty && <Row label="대내진능력" value={str(raw.erthqkAblty)} />}
+                  {raw?.erthqkDsgnApplyYn != null && (
+                    <Row
+                      label="내진설계 적용"
+                      value={
+                        raw.erthqkDsgnApplyYn === "Y" ? "적용"
+                        : raw.erthqkDsgnApplyYn === "N" ? "미적용"
+                        : str(raw.erthqkDsgnApplyYn)
+                      }
+                    />
                   )}
                   {!hasAnyBuildingData && (
                     <div className="flex flex-col gap-1.5 pt-2 pb-3 px-1">
