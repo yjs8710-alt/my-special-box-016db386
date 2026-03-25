@@ -936,10 +936,15 @@ function mapBuildingData(item: any, floorItems: any[]) {
       ugrndFlrCnt:   floorsBelow,
       indrMechUtcnt: item.indrMechUtcnt ? String(item.indrMechUtcnt) : null,
       // 엘리베이터 상세
-      elevCnt:       item.elevCnt       ? String(item.elevCnt)    : "0",
-      emgElevCnt:    item.emgElevCnt    ? String(item.emgElevCnt) : "0",
+      elevCnt:       String(elevCnt),
+      emgElevCnt:    String(emgElevCnt),
       elevYn:        elevator ? "Y" : "N",
       elevatorDetail,
+      // 원본 필드도 보존 (디버깅용)
+      rawElevCnt:       item.elevCnt       ?? null,
+      rawRideUseElvtCnt: item.rideUseElvtCnt ?? null,
+      rawEmgElevCnt:    item.emgElevCnt    ?? null,
+      rawElevYn:        elevYnField        ?? null,
       // 주소
       platPlc:       item.platPlc       || null,  // 지번주소(소재지)
       newPlatPlc:    item.newPlatPlc    || null,  // 도로명주소
