@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { mapBuildingFromDB } from "@/lib/buildingUtils";
 
 interface PublicRecordModalProps {
   address: string;
