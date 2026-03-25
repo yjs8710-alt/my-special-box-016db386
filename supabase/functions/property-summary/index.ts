@@ -869,19 +869,29 @@ function mapBuildingData(item: any, floorItems: any[]) {
     approvalDate = `${item.useAprDay.slice(0,4)}-${item.useAprDay.slice(4,6)}-${item.useAprDay.slice(6,8)}`;
   }
 
-  const elevator     = (Number(item.elevCnt || 0) + Number(item.emgElevCnt || 0)) > 0;
   const parkingCount = (
     Number(item.indrMechUtcnt || 0) + Number(item.oudrMechUtcnt || 0) +
     Number(item.indrAutoUtcnt || 0) + Number(item.oudrAutoUtcnt || 0)
   );
 
-  // 엘리베이터 상세: 대수 포함
-  const elevCnt    = Number(item.elevCnt    || 0);
-  const emgElevCnt = Number(item.emgElevCnt || 0);
-  const elevTotal  = elevCnt + emgElevCnt;
+  // ── 엘리베이터 상세 판단 ─────────────────────────────────────────────
+  // 건축물대장 API는 용도에 따라 필드명이 다를 수 있음:
+  //   - 일반건물: elevCnt (일반), emgElevCnt (비상)
+  //   - 아파트/집합건물: rideUseElvtCnt (승용), emgElevCnt (비상)
+  //   - 기타: elvCnt, elevatorCnt 등 변형 필드 가능
+  const elevCnt       = Number(item.elevCnt       || item.elvCnt       || item.rideUseElvtCnt || 0);
+  const emgElevCnt    = Number(item.emgElevCnt    || item.emrgncyElvtCnt || 0);
+  const elevTotal     = elevCnt + emgElevCnt;
+
+  // 집합건물 공용부 총괄표제부의 경우 elevYn 필드가 직접 존재하기도 함
+  const elevYnField   = item.elevYn ?? item.elvtYn ?? null;
+  const elevator      = elevTotal > 0 || elevYnField === "Y";
+
   const elevatorDetail = elevTotal > 0
     ? (emgElevCnt > 0 ? `있음 (일반 ${elevCnt}대, 비상 ${emgElevCnt}대)` : `있음 (${elevCnt}대)`)
-    : "없음";
+    : (elevYnField === "Y" ? "있음" : "없음");
+
+  console.log(`  🛗 [엘리베이터] elevCnt=${item.elevCnt ?? "-"} rideUseElvtCnt=${item.rideUseElvtCnt ?? "-"} emgElevCnt=${item.emgElevCnt ?? "-"} elevYn=${elevYnField ?? "-"} → ${elevatorDetail}`);
 
   // 허가일/착공일
   let permitDate: string | null = null;
@@ -926,10 +936,15 @@ function mapBuildingData(item: any, floorItems: any[]) {
       ugrndFlrCnt:   floorsBelow,
       indrMechUtcnt: item.indrMechUtcnt ? String(item.indrMechUtcnt) : null,
       // 엘리베이터 상세
-      elevCnt:       item.elevCnt       ? String(item.elevCnt)    : "0",
-      emgElevCnt:    item.emgElevCnt    ? String(item.emgElevCnt) : "0",
+      elevCnt:       String(elevCnt),
+      emgElevCnt:    String(emgElevCnt),
       elevYn:        elevator ? "Y" : "N",
       elevatorDetail,
+      // 원본 필드도 보존 (디버깅용)
+      rawElevCnt:       item.elevCnt       ?? null,
+      rawRideUseElvtCnt: item.rideUseElvtCnt ?? null,
+      rawEmgElevCnt:    item.emgElevCnt    ?? null,
+      rawElevYn:        elevYnField        ?? null,
       // 주소
       platPlc:       item.platPlc       || null,  // 지번주소(소재지)
       newPlatPlc:    item.newPlatPlc    || null,  // 도로명주소
@@ -1150,7 +1165,38 @@ serve(async (req) => {
             if (inserted) buildingData = { ...inserted, _raw: rawWithStatus };
             console.log("✅ [건축물대장 저장 완료]");
           }
-        }
+
+          // ── approval_date → properties.build_year 동기화 ──────────────────
+          // 사용승인일 연도를 properties 테이블에도 저장해 매물카드 즉시 표시 가능
+          if (mappedBuilding?.approval_date && pid) {
+            const approvalYear = mappedBuilding.approval_date.substring(0, 4);
+            // 기존 build_year가 없거나 비어있을 때만 업데이트
+            const { data: propRow } = await supabase
+              .from("properties").select("build_year").eq("id", pid).maybeSingle();
+            if (propRow && (!propRow.build_year || propRow.build_year.trim() === "")) {
+              await supabase
+                .from("properties")
+                .update({ build_year: approvalYear })
+                .eq("id", pid);
+              console.log(`✅ [build_year 동기화] properties.build_year = ${approvalYear}`);
+            }
+          }
+
+          // ── elevator → properties.elevator 동기화 ─────────────────────────
+          // 공적장부에서 엘리베이터 정보가 확인된 경우 properties 테이블에도 반영
+          if (mappedBuilding && pid) {
+            const apiElev = mappedBuilding.elevator;
+            const { data: propRow2 } = await supabase
+              .from("properties").select("elevator, build_year").eq("id", pid).maybeSingle();
+            if (propRow2 && propRow2.elevator !== apiElev) {
+              await supabase
+                .from("properties")
+                .update({ elevator: apiElev })
+                .eq("id", pid);
+              console.log(`✅ [elevator 동기화] properties.elevator = ${apiElev} (${mappedBuilding._raw?.elevatorDetail})`);
+            }
+          }
+        } // end if (needBuilding)
 
         // ── 3b. 공시지가 + 토지특성 (land-proxy Edge Function 우선 위임) ──────────────
         // 배경: Supabase eu-central-1 → 한국 토지 API(nsdi/VWorld) IP 차단 확인됨
