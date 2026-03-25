@@ -161,6 +161,7 @@ interface FormState {
   isNew: boolean;
   isHot: boolean;
   buildingMemo: string;
+  buildingDong: string; // 집합건물 동(棟)
 }
 
 const INITIAL: FormState = {
