@@ -765,7 +765,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
       room_password: form.room_password || null,
-      options: Array.isArray(form.options) ? form.options : [],
+      options: (() => {
+        const base = Array.isArray(form.options) ? form.options.filter((o) => !o.startsWith("반려동물_")) : [];
+        return form.pet ? [...base, `반려동물_${form.pet}`] : base;
+      })(),
       images: Array.isArray(form.images) ? form.images : [],
       views: Number(form.views) || 0,
       lat: Number(finalLat) || 0,
