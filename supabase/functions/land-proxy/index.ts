@@ -371,16 +371,21 @@ async function callNsdiCharFallback(pnu: string, apiKey: string): Promise<{
   prposArea1Nm: string | null;
   roadSideCdNm: string | null;
 } | null> {
-  const encodedKey = encodeURIComponent(apiKey);
-  const keyMasked  = apiKey.substring(0, 8) + "***";
-  const params     = new URLSearchParams({ pnu, numOfRows: "1", pageNo: "1", _type: "json" });
-  const url        = `${NSDI_LAND_CHAR_URL}?serviceKey=${encodedKey}&${params}`;
+  const encodedKey  = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
+  // VWorld API 키 encodeURIComponent 적용
+  const vworldRaw   = Deno.env.get("VWORLD_API_KEY")?.trim() ?? "";
+  const vworldEncoded = encodeURIComponent(vworldRaw);
+  const vworldMasked  = vworldRaw.substring(0, 8) + "***";
+  const params      = new URLSearchParams({ pnu, numOfRows: "1", pageNo: "1", _type: "json" });
+  const url         = `${NSDI_LAND_CHAR_URL}?serviceKey=${encodedKey}&${params}`;
 
   console.log(`\n🌐 [nsdi 토지특성] 호출 시작`);
   console.log(`  - endpoint       : nsdi/LandUseService/wfs/getLandUse`);
   console.log(`  - url(masked)    : ${url.replace(encodedKey, "***MASKED***")}`);
   console.log(`  - pnu            : ${pnu}`);
-  console.log(`  - serviceKey(masked) : ${keyMasked}`);
+  console.log(`  - serviceKey(masked)    : ${keyMasked}`);
+  console.log(`  - vworldKey(masked)     : ${vworldMasked || "(미설정)"}`);
 
   try {
     const res    = await fetch(url, { signal: AbortSignal.timeout(10000) });
