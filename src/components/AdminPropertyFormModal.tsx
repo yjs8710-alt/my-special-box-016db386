@@ -487,6 +487,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const landAreaMatch = noteStr.match(/대지[:\s]+([^\n|]+)/);
     if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
 
+    // 반려동물 가능 여부 파싱 (options 배열에서)
+    const opts: string[] = Array.isArray(initial?.options) ? (initial.options as string[]) : [];
+    const petOpt = opts.find((o) => o.startsWith("반려동물_"));
+    if (petOpt) contacts.pet = petOpt.replace("반려동물_", "") as PetType;
+
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
     const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
