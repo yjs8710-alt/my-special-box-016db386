@@ -218,8 +218,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     str(building.total_area) || str(building.approval_date) || str(building.floors_above)
   );
   const hasAnyLandData = land && (
-    str(land.land_category) || str(land.land_area) ||
-    str(land.official_price) || str(land.use_zone)
+    str(land.land_category) || str(land.jimok) ||
+    str(land.land_area)     || str(land.area) ||
+    str(land.official_price) || str(land.price) ||
+    str(land.use_zone)      || str(land.zone)
   );
 
   // ── 공통 유틸로 건축물 값 가공 (엘리베이터·내진·건축연도) ──
