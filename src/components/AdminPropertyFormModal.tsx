@@ -327,6 +327,8 @@ const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
 };
 
 // Extended form state for admin (adds fields not in DBPropertyForm)
+type PetType = "가능" | "불가" | "";
+
 interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   brokerType: typeof BROKER_TYPES[number];
   tradeType: typeof TRADE_TYPES[number];
@@ -348,6 +350,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   buildingArea: string; // 건평
   buildingDong: string; // 집합건물 동(棟)
   landArea: string; // 대지 면적
+  pet: PetType; // 반려동물 가능 여부
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -371,6 +374,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   buildingArea: "",
   buildingDong: "",
   landArea: "",
+  pet: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
