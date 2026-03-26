@@ -933,29 +933,43 @@ serve(async (req) => {
               try { landJson = JSON.parse(landText); } catch { /* 무시 */ }
 
               if (landJson) {
-                if (landJson.key_error)        landKeyError      = true;
-                if (landJson.land_conn_error)  landConnError     = true;
-                if (landJson.all_years_no_data) (landDiagnostics as any).all_years_no_data = true;
+                // ── 새 응답 구조: { land: { area, jimok, zone, price, pnu } } ──
+                const landData = landJson.land ?? null;
+                const verdict  = landJson._verdict ?? landJson.verdict ?? "unknown";
 
-                officialPrice = landJson.official_price ?? null;
-                landCategory  = landJson.land_category  ?? null;
-                landArea      = landJson.land_area       ?? null;
-                useZone       = landJson.use_zone        ?? null;
-                roadAccess    = landJson.road_access     ?? null;
+                if (landJson._key_error        ?? landJson.key_error)        landKeyError  = true;
+                if (landJson._land_conn_error  ?? landJson.land_conn_error)  landConnError = true;
+                if (landJson._all_years_no_data ?? landJson.all_years_no_data)
+                  (landDiagnostics as any).all_years_no_data = true;
 
-                const proxyUsed  = landJson.proxy_used  ?? "unknown";
-                const stdrYrUsed = landJson.stdrYear_used ?? "없음";
-                if (landJson.verdict === "success") {
-                  console.log(`  ✅ [land-proxy 성공] proxy_used=${proxyUsed} | stdrYear=${stdrYrUsed} | 공시지가: ${officialPrice}`);
-                } else if (landJson.all_years_no_data) {
-                  console.log(`  📭 [land-proxy] 3개 연도(2025·2024·2026) 모두 데이터 없음`);
-                  console.log(`  → 해당 지번의 공시지가 정보가 기준연도에 미고시 또는 미존재 가능성`);
-                } else if (landJson.land_conn_error) {
-                  console.log(`  🔌 [land-proxy] 국내 프록시 호출 실패 (연결 차단 또는 프록시 미설정)`);
-                  console.log(`  ⚠️  [land-proxy] fallback nsdi 직접호출은 land-proxy 내부에서 이미 시도됨`);
+                if (landData) {
+                  officialPrice = landData.price        ?? null;
+                  landCategory  = landData.jimok         ?? null;
+                  landArea      = landData.area          ?? null;
+                  useZone       = landData.zone          ?? null;
+                  roadAccess    = null; // 새 구조에서 road_access 미포함
                 } else {
-                  console.log(`  ⚠️  [land-proxy 실패] verdict=${landJson.verdict} | proxy_used=${proxyUsed}`);
+                  // 이전 구조 호환 (프록시 등 이전 포맷)
+                  officialPrice = landJson.official_price ?? null;
+                  landCategory  = landJson.land_category  ?? null;
+                  landArea      = landJson.land_area       ?? null;
+                  useZone       = landJson.use_zone        ?? null;
+                  roadAccess    = landJson.road_access     ?? null;
                 }
+
+                const stdrYrUsed = landJson._stdrYear_used ?? landJson.stdrYear_used ?? "없음";
+                if (verdict === "success") {
+                  console.log(`  ✅ [land-proxy 성공] stdrYear=${stdrYrUsed} | 공시지가: ${officialPrice}`);
+                } else if (landJson._all_years_no_data ?? landJson.all_years_no_data) {
+                  console.log(`  📭 [land-proxy] 3개 연도(2025·2024·2026) 모두 데이터 없음`);
+                } else if (landConnError) {
+                  console.log(`  🔌 [land-proxy] 연결 실패`);
+                } else {
+                  console.log(`  ⚠️  [land-proxy 실패] verdict=${verdict}`);
+                }
+
+                console.log(`\n🌍 토지 응답 — property-summary 수신`);
+                console.log(JSON.stringify({ land: landData, verdict }, null, 2));
               }
             } else {
               console.log(`  🔌 [land-proxy] 국내 프록시 호출 실패 — HTTP ${landRes.status}`);

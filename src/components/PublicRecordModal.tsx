@@ -160,12 +160,21 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           if (!hasVal(bSum.floors_above) && hasVal(raw.grndFlrCnt)) bSum.floors_above = raw.grndFlrCnt;
           if (!hasVal(bSum.floors_below) && hasVal(raw.ugrndFlrCnt)) bSum.floors_below = raw.ugrndFlrCnt;
           if (!hasVal(bSum.parking_count) && hasVal(raw.indrMechUtcnt)) bSum.parking_count = raw.indrMechUtcnt;
-          // 엘리베이터: elevatorDetail 우선, 없으면 elevYn으로 판단
           if (bSum.elevator === false) {
             if (raw.elevatorDetail && String(raw.elevatorDetail).startsWith("있음")) bSum.elevator = true;
             else if (raw.elevYn === "Y") bSum.elevator = true;
           }
           if (!hasVal(bSum.building_name) && hasVal(raw.bldNm)) bSum.building_name = raw.bldNm;
+        }
+
+        // ── land_summary 정규화: 새 { area, jimok, zone, price, pnu } 구조 지원 ──
+        // land-proxy 응답이 새 구조라면 DB 호환 필드명으로 매핑
+        if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
+          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok))        lSum.land_category  = lSum.jimok;
+          if (!hasVal(lSum.official_price) && hasVal(lSum.price))       lSum.official_price = lSum.price;
+          if (!hasVal(lSum.land_area) && hasVal(lSum.area))             lSum.land_area       = lSum.area;
+          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone))              lSum.use_zone        = lSum.zone;
+          console.log("🌍 [land 정규화 완료]:", { land_category: lSum.land_category, official_price: lSum.official_price, land_area: lSum.land_area, use_zone: lSum.use_zone, pnu: lSum.pnu });
         }
 
         setBuilding(bSum);
@@ -209,8 +218,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     str(building.total_area) || str(building.approval_date) || str(building.floors_above)
   );
   const hasAnyLandData = land && (
-    str(land.land_category) || str(land.land_area) ||
-    str(land.official_price) || str(land.use_zone)
+    str(land.land_category) || str(land.jimok) ||
+    str(land.land_area)     || str(land.area) ||
+    str(land.official_price) || str(land.price) ||
+    str(land.use_zone)      || str(land.zone)
   );
 
   // ── 공통 유틸로 건축물 값 가공 (엘리베이터·내진·건축연도) ──
@@ -311,10 +322,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {land ? (
                 <div className="px-4 py-1">
                   <Row label="지번주소" value={str(land.lot_number) ?? address} />
-                  <Row label="공시지가" value={str(land.official_price)} />
-                  <Row label="토지면적" value={str(land.land_area)} />
-                  <Row label="지목" value={str(land.land_category)} />
-                  <Row label="용도지역" value={str(land.use_zone)} />
+                  <Row label="공시지가" value={str(land.official_price) ?? str(land.price)} />
+                  <Row label="토지면적" value={str(land.land_area) ?? str(land.area)} />
+                  <Row label="지목" value={str(land.land_category) ?? str(land.jimok)} />
+                  <Row label="용도지역" value={str(land.use_zone) ?? str(land.zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
                   {!hasAnyLandData && (() => {
                     const diag = land._diagnostics && typeof land._diagnostics === "object"
