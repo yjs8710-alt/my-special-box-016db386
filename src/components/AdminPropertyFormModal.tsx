@@ -327,6 +327,8 @@ const EMPTY: Omit<DBPropertyForm, "id" | "created_at"> = {
 };
 
 // Extended form state for admin (adds fields not in DBPropertyForm)
+type PetType = "가능" | "불가" | "";
+
 interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   brokerType: typeof BROKER_TYPES[number];
   tradeType: typeof TRADE_TYPES[number];
@@ -348,6 +350,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   buildingArea: string; // 건평
   buildingDong: string; // 집합건물 동(棟)
   landArea: string; // 대지 면적
+  pet: PetType; // 반려동물 가능 여부
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -371,6 +374,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   buildingArea: "",
   buildingDong: "",
   landArea: "",
+  pet: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -482,6 +486,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
     const landAreaMatch = noteStr.match(/대지[:\s]+([^\n|]+)/);
     if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
+
+    // 반려동물 가능 여부 파싱 (options 배열에서)
+    const opts: string[] = Array.isArray(initial?.options) ? (initial.options as string[]) : [];
+    const petOpt = opts.find((o) => o.startsWith("반려동물_"));
+    if (petOpt) contacts.pet = petOpt.replace("반려동물_", "") as PetType;
 
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
@@ -756,7 +765,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
       room_password: form.room_password || null,
-      options: Array.isArray(form.options) ? form.options : [],
+      options: (() => {
+        const base = Array.isArray(form.options) ? form.options.filter((o) => !o.startsWith("반려동물_")) : [];
+        return form.pet ? [...base, `반려동물_${form.pet}`] : base;
+      })(),
       images: Array.isArray(form.images) ? form.images : [],
       views: Number(form.views) || 0,
       lat: Number(finalLat) || 0,
@@ -1208,6 +1220,36 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         </span>
                       )}
                     </label>
+                  </div>
+
+                  {/* 반려동물 가능 여부 */}
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-xs font-semibold text-foreground/70">🐾 반려동물</p>
+                    <div className="flex gap-2">
+                      {(["가능", "불가", ""] as PetType[]).map((v) => {
+                        const label = v === "가능" ? "🐾 가능" : v === "불가" ? "🚫 불가" : "미지정";
+                        const isActive = form.pet === v;
+                        return (
+                          <button
+                            key={String(v)}
+                            type="button"
+                            onClick={() => set("pet", v)}
+                            className="flex-1 py-2 rounded-xl text-sm font-bold border-2 transition-all"
+                            style={
+                              isActive
+                                ? v === "가능"
+                                  ? { background: "hsl(142 71% 45%)", color: "#fff", borderColor: "hsl(142 71% 45%)" }
+                                  : v === "불가"
+                                  ? { background: "hsl(0 85% 55%)", color: "#fff", borderColor: "hsl(0 85% 55%)" }
+                                  : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                                : { background: "hsl(var(--background))", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
+                            }
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* 세입자 중도퇴거 체크박스 */}
