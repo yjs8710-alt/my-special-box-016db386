@@ -8,15 +8,8 @@ const corsHeaders = {
 };
 
 const BUILDING_API_BASE = "http://apis.data.go.kr/1613000/BldRgstHubService";
-// 토지 API 후보 경로 (data.go.kr 1611000 서비스)
-// → 모든 경로가 Supabase eu-central-1 IP에서 차단/미지원 확인됨
-// → VWorld (api.vworld.kr): connection closed (IP 차단)
-// → nsdi WFS 경로: HTTP 500 "Unexpected errors"
-// → 정상 동작 경로 확인 필요
-const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/attrList/getIndvdLandPrice";
-const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/attrList/getLandUse";
-const VWORLD_LAND_PRICE_URL = "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr";
-const VWORLD_LAND_CHAR_URL  = "https://api.vworld.kr/ned/data/getLandCharacterAttr";
+// 토지 API는 land-proxy Edge Function을 통해서만 호출 (브라우저/VWorld 직접 호출 금지)
+// → property-summary가 land-proxy를 POST로 호출하는 구조
 
 // ── 카카오 주소 API로 정확한 법정동 코드 + 번지 추출 ────────────────────────
 // 카카오 address.b_code = 10자리 법정동코드 (시군구5 + 읍면동5)
