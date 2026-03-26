@@ -409,14 +409,19 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { pnu, property_id, stdrYear } = body;
+    // address, bun, ji는 로깅/진단 용도로 수신 (pnu가 있으면 pnu 우선)
+    const { pnu, property_id, stdrYear, address, bun, ji } = body;
 
-    console.log(`\n🗺️  [land-proxy] 요청`);
-    console.log(`  - pnu        : ${pnu}`);
+    console.log(`\n🌍 [land-proxy] 토지 조회 요청`);
+    console.log(`  - pnu        : ${pnu ?? "(없음)"}`);
+    console.log(`  - address    : ${address ?? "(없음)"}`);
+    console.log(`  - bun        : ${bun ?? "(없음)"}`);
+    console.log(`  - ji         : ${ji ?? "(없음)"}`);
     console.log(`  - property_id: ${property_id ?? "(없음)"}`);
     console.log(`  - stdrYear   : ${stdrYear ?? "(미전달 — 연도 재시도 모드)"}`);
 
     if (!pnu || pnu.length !== 19) {
+      console.log(`  ❌ pnu 오류: "${pnu}" (${pnu?.length ?? 0}자리)`);
       return new Response(
         JSON.stringify({ error: "pnu가 없거나 19자리가 아닙니다", pnu }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
