@@ -320,10 +320,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {land ? (
                 <div className="px-4 py-1">
                   <Row label="지번주소" value={str(land.lot_number) ?? address} />
-                  <Row label="공시지가" value={str(land.official_price)} />
-                  <Row label="토지면적" value={str(land.land_area)} />
-                  <Row label="지목" value={str(land.land_category)} />
-                  <Row label="용도지역" value={str(land.use_zone)} />
+                  <Row label="공시지가" value={str(land.official_price) ?? str(land.price)} />
+                  <Row label="토지면적" value={str(land.land_area) ?? str(land.area)} />
+                  <Row label="지목" value={str(land.land_category) ?? str(land.jimok)} />
+                  <Row label="용도지역" value={str(land.use_zone) ?? str(land.zone)} />
                   <Row label="도로조건" value={str(land.road_access)} />
                   {!hasAnyLandData && (() => {
                     const diag = land._diagnostics && typeof land._diagnostics === "object"
