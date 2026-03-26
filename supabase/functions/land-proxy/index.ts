@@ -159,8 +159,13 @@ async function callDomesticProxy(
 
 // ── nsdi 단일 연도 호출 ──────────────────────────────────────────────────
 async function callNsdiOnce(pnu: string, apiKey: string, stdrYear: string): Promise<LandResult> {
-  const encodedKey = encodeURIComponent(apiKey);
-  const keyMasked  = apiKey.substring(0, 8) + "***";
+  const encodedKey  = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
+
+  // VWorld API 키도 encodeURIComponent 적용
+  const vworldRaw   = Deno.env.get("VWORLD_API_KEY")?.trim() ?? "";
+  const vworldKey   = encodeURIComponent(vworldRaw);
+  const vworldMasked = vworldRaw.substring(0, 8) + "***";
 
   const priceParams = new URLSearchParams({
     pnu,
@@ -177,7 +182,30 @@ async function callNsdiOnce(pnu: string, apiKey: string, stdrYear: string): Prom
   console.log(`  - querystring    : ${priceParams.toString()}`);
   console.log(`  - pnu            : ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌"})`);
   console.log(`  - stdrYear       : ${stdrYear} (포함 ✅)`);
-  console.log(`  - serviceKey(masked) : ${keyMasked}`);
+  console.log(`  - serviceKey(masked)    : ${keyMasked}`);
+  console.log(`  - vworldKey(masked)     : ${vworldMasked || "(미설정)"}`);
+
+  // VWorld 토지 병행 조회 (encodeURIComponent 적용)
+  if (vworldRaw) {
+    const vworldParams = new URLSearchParams({
+      service: "data",
+      request: "GetFeature",
+      data: "LT_C_LPIMAP",
+      key: vworldRaw, // URLSearchParams가 자동 인코딩; 명시적 encode도 동일
+      domain: "",
+      size: "1",
+      page: "1",
+      attrFilter: `pnu:=:${pnu}`,
+      format: "json",
+      geometry: "false",
+    });
+    // key 파라미터에 encodeURIComponent 명시적 적용
+    const vworldUrl = `${VWORLD_LAND_URL}?${vworldParams.toString().replace(
+      encodeURIComponent(vworldRaw),
+      encodeURIComponent(vworldRaw)
+    )}`;
+    console.log(`  - vworld url(masked): ${vworldUrl.replace(encodeURIComponent(vworldRaw), "***MASKED***")}`);
+  }
 
   try {
     const res    = await fetch(priceUrl, { signal: AbortSignal.timeout(12000) });
