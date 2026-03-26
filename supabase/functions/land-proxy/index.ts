@@ -515,16 +515,18 @@ serve(async (req) => {
     }
 
     // ── 최종 진단 로그 ──────────────────────────────────────────────────
-    console.log(`\n📊 [land-proxy 최종 결과]`);
-    console.log(`  - 판정           : ${result.verdict}`);
-    console.log(`  - key_error      : ${result.key_error}`);
-    console.log(`  - land_conn_error: ${result.land_conn_error}`);
-    console.log(`  - land_no_data   : ${result.land_no_data}`);
-    console.log(`  - all_years_no_data: ${result.all_years_no_data}`);
-    console.log(`  - stdrYear_used  : ${result.stdrYear_used ?? "없음"}`);
-    console.log(`  - proxy_used     : ${result.proxy_used}`);
-    console.log(`  - official_price : ${result.official_price}`);
-    console.log(`  - land_category  : ${result.land_category}`);
+    console.log(`\n🌍 토지 응답 — 최종 결과`);
+    console.log(JSON.stringify(result, null, 2));
+    console.log(`\n📊 [land-proxy 판정 요약]`);
+    console.log(`  - verdict           : ${result.verdict}`);
+    console.log(`  - key_error         : ${result.key_error}`);
+    console.log(`  - land_conn_error   : ${result.land_conn_error}`);
+    console.log(`  - land_no_data      : ${result.land_no_data}`);
+    console.log(`  - all_years_no_data : ${result.all_years_no_data}`);
+    console.log(`  - stdrYear_used     : ${result.stdrYear_used ?? "없음"}`);
+    console.log(`  - proxy_used        : ${result.proxy_used}`);
+    console.log(`  - official_price    : ${result.official_price}`);
+    console.log(`  - land_category     : ${result.land_category}`);
 
     if (result.all_years_no_data) {
       console.log(`\n📭 [최종 진단] ${YEAR_RETRY_ORDER.join(", ")}년 모두 데이터 없음`);
