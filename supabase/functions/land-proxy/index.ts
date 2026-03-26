@@ -33,6 +33,7 @@ const corsHeaders = {
 // ── 엔드포인트 상수 ────────────────────────────────────────────────────────
 const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
 const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/wfs/getLandUse";
+const VWORLD_LAND_URL     = "https://api.vworld.kr/req/data";
 
 // ── 연도 재시도 순서 ────────────────────────────────────────────────────────
 const YEAR_RETRY_ORDER = [2025, 2024, 2026];
@@ -158,8 +159,13 @@ async function callDomesticProxy(
 
 // ── nsdi 단일 연도 호출 ──────────────────────────────────────────────────
 async function callNsdiOnce(pnu: string, apiKey: string, stdrYear: string): Promise<LandResult> {
-  const encodedKey = encodeURIComponent(apiKey);
-  const keyMasked  = apiKey.substring(0, 8) + "***";
+  const encodedKey  = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
+
+  // VWorld API 키도 encodeURIComponent 적용
+  const vworldRaw   = Deno.env.get("VWORLD_API_KEY")?.trim() ?? "";
+  const vworldKey   = encodeURIComponent(vworldRaw);
+  const vworldMasked = vworldRaw.substring(0, 8) + "***";
 
   const priceParams = new URLSearchParams({
     pnu,
@@ -176,7 +182,30 @@ async function callNsdiOnce(pnu: string, apiKey: string, stdrYear: string): Prom
   console.log(`  - querystring    : ${priceParams.toString()}`);
   console.log(`  - pnu            : ${pnu} (${pnu.length}자리${pnu.length === 19 ? " ✅" : " ❌"})`);
   console.log(`  - stdrYear       : ${stdrYear} (포함 ✅)`);
-  console.log(`  - serviceKey(masked) : ${keyMasked}`);
+  console.log(`  - serviceKey(masked)    : ${keyMasked}`);
+  console.log(`  - vworldKey(masked)     : ${vworldMasked || "(미설정)"}`);
+
+  // VWorld 토지 병행 조회 (encodeURIComponent 적용)
+  if (vworldRaw) {
+    const vworldParams = new URLSearchParams({
+      service: "data",
+      request: "GetFeature",
+      data: "LT_C_LPIMAP",
+      key: vworldRaw, // URLSearchParams가 자동 인코딩; 명시적 encode도 동일
+      domain: "",
+      size: "1",
+      page: "1",
+      attrFilter: `pnu:=:${pnu}`,
+      format: "json",
+      geometry: "false",
+    });
+    // key 파라미터에 encodeURIComponent 명시적 적용
+    const vworldUrl = `${VWORLD_LAND_URL}?${vworldParams.toString().replace(
+      encodeURIComponent(vworldRaw),
+      encodeURIComponent(vworldRaw)
+    )}`;
+    console.log(`  - vworld url(masked): ${vworldUrl.replace(encodeURIComponent(vworldRaw), "***MASKED***")}`);
+  }
 
   try {
     const res    = await fetch(priceUrl, { signal: AbortSignal.timeout(12000) });
@@ -342,16 +371,21 @@ async function callNsdiCharFallback(pnu: string, apiKey: string): Promise<{
   prposArea1Nm: string | null;
   roadSideCdNm: string | null;
 } | null> {
-  const encodedKey = encodeURIComponent(apiKey);
-  const keyMasked  = apiKey.substring(0, 8) + "***";
-  const params     = new URLSearchParams({ pnu, numOfRows: "1", pageNo: "1", _type: "json" });
-  const url        = `${NSDI_LAND_CHAR_URL}?serviceKey=${encodedKey}&${params}`;
+  const encodedKey  = encodeURIComponent(apiKey);
+  const keyMasked   = apiKey.substring(0, 8) + "***";
+  // VWorld API 키 encodeURIComponent 적용
+  const vworldRaw   = Deno.env.get("VWORLD_API_KEY")?.trim() ?? "";
+  const vworldEncoded = encodeURIComponent(vworldRaw);
+  const vworldMasked  = vworldRaw.substring(0, 8) + "***";
+  const params      = new URLSearchParams({ pnu, numOfRows: "1", pageNo: "1", _type: "json" });
+  const url         = `${NSDI_LAND_CHAR_URL}?serviceKey=${encodedKey}&${params}`;
 
   console.log(`\n🌐 [nsdi 토지특성] 호출 시작`);
   console.log(`  - endpoint       : nsdi/LandUseService/wfs/getLandUse`);
   console.log(`  - url(masked)    : ${url.replace(encodedKey, "***MASKED***")}`);
   console.log(`  - pnu            : ${pnu}`);
-  console.log(`  - serviceKey(masked) : ${keyMasked}`);
+  console.log(`  - serviceKey(masked)    : ${keyMasked}`);
+  console.log(`  - vworldKey(masked)     : ${vworldMasked || "(미설정)"}`);
 
   try {
     const res    = await fetch(url, { signal: AbortSignal.timeout(10000) });
