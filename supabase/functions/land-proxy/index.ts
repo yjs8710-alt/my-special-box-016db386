@@ -33,6 +33,7 @@ const corsHeaders = {
 // ── 엔드포인트 상수 ────────────────────────────────────────────────────────
 const NSDI_LAND_PRICE_URL = "https://apis.data.go.kr/1611000/nsdi/IndvdLandPriceService/wfs/getIndvdLandPrice";
 const NSDI_LAND_CHAR_URL  = "https://apis.data.go.kr/1611000/nsdi/LandUseService/wfs/getLandUse";
+const VWORLD_LAND_URL     = "https://api.vworld.kr/req/data";
 
 // ── 연도 재시도 순서 ────────────────────────────────────────────────────────
 const YEAR_RETRY_ORDER = [2025, 2024, 2026];
