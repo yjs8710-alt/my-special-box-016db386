@@ -201,15 +201,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
-  // ── 토지 Cloudtype 직접 조회 (모달 열릴 때 자동) ──
+  // ── 토지 Cloudtype 직접 조회 (PNU 기반) ──
   useEffect(() => {
-    if (!address) return;
+    const pnu = typeof land?.pnu === "string" ? land.pnu : "";
+    if (!pnu) return;
+
     const fetchLand = async () => {
-      console.log("토지조회 주소", address);
       setLandLoading(true); setLandError(""); setLandDirect(null);
       try {
-        // 절대 URL — /land-by-address 엔드포인트 사용
-        const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`;
+        const url = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
         console.log("토지조회 URL", url);
         const res = await fetch(url);
         const text = await res.text();
@@ -222,16 +222,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           throw new Error("프록시 서버가 JSON이 아니라 HTML을 반환했습니다. 주소를 확인하세요.");
         }
 
-        if (!res.ok) throw new Error((data?.message as string) || (data?.error as string) || "토지 조회 실패");
-        if (!data?.ok) throw new Error((data?.error as string) || "토지 조회 실패");
+        if (!res.ok) throw new Error((data?.message as string) || "토지 조회 실패");
         setLandDirect(data);
       } catch (e: unknown) {
         console.error("토지조회 에러", e);
         setLandError(e instanceof Error ? e.message : "토지 조회 실패");
       } finally { setLandLoading(false); }
     };
+
     fetchLand();
-  }, [address]);
+  }, [land]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
