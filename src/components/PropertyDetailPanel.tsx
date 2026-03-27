@@ -1015,7 +1015,7 @@ function PropertySummaryPanel({ address }: { address: string }) {
     setLandError("");
     setLandData(null);
     try {
-      const res = await fetch(`${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`);
+      const res = await fetch(`${LAND_PROXY}/land?address=${encodeURIComponent(address)}`);
       const data = await res.json();
       console.log("🌍 토지 응답", data);
       if (!data.ok) throw new Error("토지 조회 실패");
