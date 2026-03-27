@@ -991,7 +991,7 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
 }
 
 /* ─── 공적장부 버튼 + 인라인 토지 조회 결과 ─── */
-function PropertySummaryPanel({ address }: { address: string }) {
+function PropertySummaryPanel({ address, pnu }: { address: string; pnu?: string }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [landOpen, setLandOpen] = useState(false);
   const [landLoading, setLandLoading] = useState(false);
@@ -1002,27 +1002,41 @@ function PropertySummaryPanel({ address }: { address: string }) {
 
   const handleLandClick = async () => {
     console.log("[공적장부] 버튼 클릭, address:", address);
-    if (!address) {
-      console.error("[공적장부] 주소 없음");
-      setLandError("주소 정보가 없습니다.");
+    console.log("[공적장부] pnu:", pnu);
+
+    if (!pnu) {
+      console.error("[공적장부] PNU 없음");
+      setLandError("토지 조회 실패");
       setLandOpen(true);
       return;
     }
+
     if (landOpen && landData) {
       setLandOpen(false);
       return;
     }
+
     setLandOpen(true);
     setLandLoading(true);
     setLandError("");
     setLandData(null);
-    const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`;
+
+    const url = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
     console.log("[공적장부] API URL:", url);
+
     try {
       const res = await fetch(url);
-      const data = await res.json();
-      console.log("🌍 토지 응답", data);
-      if (!res.ok || !data.ok) throw new Error(data?.error || "토지 조회 실패");
+      const text = await res.text();
+      console.log("LAND_RAW_RESPONSE:", text);
+
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("프록시 서버가 JSON이 아니라 HTML을 반환했습니다. 주소를 확인하세요.");
+      }
+
+      if (!res.ok) throw new Error((data?.message as string) || "토지 조회 실패");
       setLandData(data);
     } catch (e: unknown) {
       console.error("❌ 토지 조회 실패:", e);
@@ -1109,6 +1123,9 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   if (!property) return null;
 
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
+  const propertyPnu = typeof (property as unknown as { pnu?: unknown }).pnu === "string"
+    ? String((property as unknown as { pnu?: unknown }).pnu)
+    : undefined;
 
   const allImages = (property.images && property.images.length > 0)
     ? property.images
@@ -1431,7 +1448,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
           {/* ── 건축물대장·토지대장 ── */}
           <div className="h-2 bg-muted/50 my-2" />
-          <PropertySummaryPanel address={property.address} />
+          <PropertySummaryPanel address={property.address} pnu={propertyPnu} />
 
           {/* ── 추가 액션 버튼 ── */}
           <div className="h-2 bg-muted/50 my-2" />
