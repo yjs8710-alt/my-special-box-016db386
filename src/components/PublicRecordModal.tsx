@@ -201,6 +201,28 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
+  // ── 토지 Cloudtype 직접 조회 (모달 열릴 때 자동) ──
+  useEffect(() => {
+    if (!address) return;
+    const fetchLand = async () => {
+      console.log("토지조회 주소", address);
+      setLandLoading(true); setLandError("");
+      try {
+        const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`;
+        console.log("토지조회 URL", url);
+        const res = await fetch(url);
+        const data = await res.json();
+        console.log("토지조회 응답", data);
+        if (!res.ok || !data?.ok) throw new Error(data?.error || "토지 조회 실패");
+        setLandDirect(data);
+      } catch (e: unknown) {
+        console.error("토지조회 에러", e);
+        setLandError(e instanceof Error ? e.message : "토지 조회 실패");
+      } finally { setLandLoading(false); }
+    };
+    fetchLand();
+  }, [address]);
+
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
   const raw = building?._raw && typeof building._raw === "object"
