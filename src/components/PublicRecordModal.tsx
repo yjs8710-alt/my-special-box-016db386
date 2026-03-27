@@ -311,101 +311,53 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           {!loading && !error && (building || land) && (
             <div className="flex flex-col">
 
-              {/* ① 토지 정보 */}
+              {/* ① 토지 정보 — Cloudtype 직접 조회 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
-              {/* 건축물 성공 + 토지 실패 비교 배지 */}
-              {building && hasAnyBuildingData && land && !hasAnyLandData && (
-                <div
-                  className="mx-4 mt-2 mb-1 flex items-start gap-2 rounded-lg px-3 py-2"
-                  style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
-                >
-                  <span className="text-sm flex-shrink-0 mt-0.5">🏗️</span>
-                  <span className="text-[10px] leading-snug" style={{ color: "hsl(221 60% 35%)" }}>
-                    <strong>건축물대장은 정상 조회됨</strong><br />
-                    토지대장만 별도 점검 필요 (endpoint 불일치 가능성 높음)
-                  </span>
+              {!landDirect && !landLoading && !landError && (
+                <div className="px-4 py-3">
+                  <button
+                    className="w-full py-2 rounded-lg text-[12px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                    onClick={async () => {
+                      const addr = address;
+                      console.log("토지조회 주소", addr);
+                      if (!addr) { setLandError("주소 정보 없음"); return; }
+                      setLandLoading(true); setLandError("");
+                      try {
+                        const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(addr)}`;
+                        console.log("토지조회 URL", url);
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        console.log("토지조회 응답", data);
+                        if (!res.ok || !data?.ok) throw new Error(data?.error || "토지 조회 실패");
+                        setLandDirect(data);
+                      } catch (e: unknown) {
+                        console.error("토지조회 에러", e);
+                        setLandError(e instanceof Error ? e.message : "토지 조회 실패");
+                      } finally { setLandLoading(false); }
+                    }}
+                  >
+                    🌍 토지대장 실시간 조회
+                  </button>
                 </div>
               )}
-              {land ? (
-                <div className="px-4 py-1">
-                  <Row label="지번주소" value={str(land.lot_number) ?? address} />
-                  <Row label="공시지가" value={str(land.official_price) ?? str(land.price)} />
-                  <Row label="토지면적" value={str(land.land_area) ?? str(land.area)} />
-                  <Row label="지목" value={str(land.land_category) ?? str(land.jimok)} />
-                  <Row label="용도지역" value={str(land.use_zone) ?? str(land.zone)} />
-                  <Row label="도로조건" value={str(land.road_access)} />
-                  {!hasAnyLandData && (() => {
-                    const diag = land._diagnostics && typeof land._diagnostics === "object"
-                      ? (land._diagnostics as Record<string, unknown>)
-                      : null;
-                    const isKeyErr  = diag?.land_key_error  === true;
-                    const isConnErr = diag?.land_conn_error === true;
-
-                    if (isKeyErr) {
-                      return (
-                        <div
-                          className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                          style={{ background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 75%)" }}
-                        >
-                          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 70% 45%)" }} />
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-bold" style={{ color: "hsl(0 60% 35%)" }}>
-                              🔴 VWorld API KEY 확인 필요 — 값 오류 또는 허용 도메인 불일치
-                            </span>
-                            <span className="text-[10px] leading-snug" style={{ color: "hsl(0 50% 38%)" }}>
-                              키가 등록은 되어 있으나 KEY 값 오류 또는 허용 도메인 불일치 가능성.<br />
-                              → VWorld 포털에서 API KEY 및 허용 IP/도메인 설정을 확인하세요.
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (isConnErr) {
-                      return (
-                        <div
-                          className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                          style={{ background: "hsl(38 100% 97%)", border: "1.5px solid hsl(38 80% 75%)" }}
-                        >
-                          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(38 70% 40%)" }} />
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-bold" style={{ color: "hsl(38 60% 30%)" }}>
-                              🔌 현재 서버 IP 또는 리전 제한으로 토지 API 연결 실패
-                            </span>
-                            <span className="text-[10px] leading-snug" style={{ color: "hsl(38 50% 35%)" }}>
-                              국내 서버 프록시 필요 (eu-central-1 → 한국 토지 API 차단 확인됨).<br />
-                              LAND_PROXY_URL 시크릿에 국내 프록시 URL을 설정하면 즉시 해결됩니다.<br />
-                              <strong>건축물대장은 정상 조회됩니다.</strong>
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    const isAllYearsNoData = diag?.all_years_no_data === true;
-                    return (
-                      <div
-                        className="flex items-start gap-2 rounded-lg px-3 py-2.5 my-2"
-                        style={{ background: "hsl(221 100% 97%)", border: "1.5px solid hsl(221 80% 80%)" }}
-                      >
-                        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "hsl(221 70% 45%)" }} />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[11px] font-bold" style={{ color: "hsl(221 60% 35%)" }}>
-                            토지 endpoint / 기준연도 / 응답 형식 점검 필요
-                          </span>
-                          <span className="text-[10px] leading-snug" style={{ color: "hsl(221 50% 40%)" }}>
-                            {isAllYearsNoData
-                              ? "2025·2024·2026년 모두 재시도하였으나 데이터 없음 — 해당 지번의 토지 데이터가 기준연도에 없을 수 있습니다."
-                              : "nsdi 경로 조회 결과 없음 — endpoint 불일치 또는 해당 지번 미고시 가능성."}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              ) : (
-                <EmptySection message="토지대장 데이터 없음" />
+              {landLoading && (
+                <div className="px-4 py-4 text-center text-[12px] text-muted-foreground font-medium">조회중...</div>
               )}
+              {landError && (
+                <div className="px-4 py-3 text-[12px] text-red-500 font-medium">토지 조회 실패: {landError}</div>
+              )}
+              {landDirect && (() => {
+                const info = landDirect.landInfo as Record<string, unknown> | undefined;
+                return (
+                  <div className="px-4 py-1">
+                    <Row label="지번주소" value={String(landDirect.parcelAddress ?? "-")} />
+                    <Row label="지목" value={String(info?.category ?? "-")} />
+                    <Row label="토지면적" value={info?.area ? `${info.area}㎡` : "-"} />
+                    <Row label="소유구분" value={String(info?.owner ?? "-")} />
+                    <Row label="최종업데이트" value={String(info?.updateDate ?? "-")} />
+                  </div>
+                );
+              })()}
 
               <div className="h-1.5 bg-muted/40 my-1" />
 
