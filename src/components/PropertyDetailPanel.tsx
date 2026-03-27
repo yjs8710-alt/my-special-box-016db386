@@ -1448,7 +1448,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
           {/* ── 건축물대장·토지대장 ── */}
           <div className="h-2 bg-muted/50 my-2" />
-          <PropertySummaryPanel address={property.address} pnu={property.id ? `4311311700100350009` : undefined} />
+          <PropertySummaryPanel address={property.address} pnu={propertyPnu} />
 
           {/* ── 추가 액션 버튼 ── */}
           <div className="h-2 bg-muted/50 my-2" />
