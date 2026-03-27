@@ -1123,6 +1123,9 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   if (!property) return null;
 
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
+  const propertyPnu = typeof (property as unknown as { pnu?: unknown }).pnu === "string"
+    ? String((property as unknown as { pnu?: unknown }).pnu)
+    : undefined;
 
   const allImages = (property.images && property.images.length > 0)
     ? property.images
