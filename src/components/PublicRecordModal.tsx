@@ -49,7 +49,7 @@ function SkeletonRow() {
   );
 }
 
-const LAND_PROXY = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app";
+const LAND_EDGE_FN = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/land-proxy`;
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
@@ -235,9 +235,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
     const fetchLandByPnu = async (pnu: string) => {
       if (!pnu) throw new Error("PNU가 없습니다.");
-      const requestUrl = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
-      console.log("LAND_REQUEST_URL:", requestUrl);
-      const response = await fetch(requestUrl, { method: "GET" });
+      const requestUrl = LAND_EDGE_FN;
+      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      console.log("LAND_REQUEST_URL:", requestUrl, "pnu:", pnu);
+      const response = await fetch(requestUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ pnu }),
+      });
       const rawText = await response.text();
       console.log("LAND_RAW_RESPONSE:", rawText);
       let data: Record<string, unknown>;
@@ -246,7 +255,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       } catch {
         throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
       }
-      if (!response.ok) throw new Error((data.message as string) || "토지 조회 실패");
+      if (!response.ok) throw new Error((data.message as string) || (data.error as string) || "토지 조회 실패");
       return data;
     };
 
@@ -399,14 +408,14 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
               )}
               {landDirect && (() => {
-                const info = landDirect.landInfo as Record<string, unknown> | undefined;
+                const landData = landDirect.land as Record<string, unknown> | undefined;
                 return (
                   <div className="px-4 py-1">
-                    <Row label="지번주소" value={String(landDirect.parcelAddress ?? "-")} />
-                    <Row label="지목" value={String(info?.category ?? "-")} />
-                    <Row label="토지면적" value={info?.area ? `${info.area}㎡` : "-"} />
-                    <Row label="소유구분" value={String(info?.owner ?? "-")} />
-                    <Row label="최종업데이트" value={String(info?.updateDate ?? "-")} />
+                    <Row label="PNU" value={String(landData?.pnu ?? "-")} />
+                    <Row label="지목" value={String(landData?.jimok ?? "-")} />
+                    <Row label="토지면적" value={String(landData?.area ?? "-")} />
+                    <Row label="용도지역" value={String(landData?.zone ?? "-")} />
+                    <Row label="공시지가" value={String(landData?.price ?? "-")} />
                   </div>
                 );
               })()}
