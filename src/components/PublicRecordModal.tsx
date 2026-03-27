@@ -206,14 +206,24 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     if (!address) return;
     const fetchLand = async () => {
       console.log("토지조회 주소", address);
-      setLandLoading(true); setLandError("");
+      setLandLoading(true); setLandError(""); setLandDirect(null);
       try {
+        // 절대 URL — /land-by-address 엔드포인트 사용
         const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`;
         console.log("토지조회 URL", url);
         const res = await fetch(url);
-        const data = await res.json();
-        console.log("토지조회 응답", data);
-        if (!res.ok || !data?.ok) throw new Error(data?.error || "토지 조회 실패");
+        const text = await res.text();
+        console.log("LAND_RAW_RESPONSE:", text);
+
+        let data: Record<string, unknown>;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error("프록시 서버가 JSON이 아니라 HTML을 반환했습니다. 주소를 확인하세요.");
+        }
+
+        if (!res.ok) throw new Error((data?.message as string) || (data?.error as string) || "토지 조회 실패");
+        if (!data?.ok) throw new Error((data?.error as string) || "토지 조회 실패");
         setLandDirect(data);
       } catch (e: unknown) {
         console.error("토지조회 에러", e);
