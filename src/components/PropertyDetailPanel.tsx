@@ -990,21 +990,55 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
   );
 }
 
-/* ─── 공적장부 버튼 (매물카드 하단 진입점) ─── */
+/* ─── 공적장부 버튼 + 인라인 토지 조회 결과 ─── */
 function PropertySummaryPanel({ address }: { address: string }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [landOpen, setLandOpen] = useState(false);
+  const [landLoading, setLandLoading] = useState(false);
+  const [landError, setLandError] = useState("");
+  const [landData, setLandData] = useState<Record<string, unknown> | null>(null);
 
-  const handleClick = () => {
-    console.log("NEW_PROPERTY_SUMMARY_CLICK");
-    console.log("PROPERTY_SUMMARY_ADDRESS", address);
-    setModalOpen(true);
+  const LAND_PROXY = "https://port-0-land-proxy-server-mb5qa2blvamaolr6.sel4.cloudtype.app";
+
+  const handleLandClick = async () => {
+    if (!address) {
+      setLandError("주소 정보가 없습니다.");
+      setLandOpen(true);
+      return;
+    }
+    if (landOpen && landData) {
+      setLandOpen(false);
+      return;
+    }
+    setLandOpen(true);
+    setLandLoading(true);
+    setLandError("");
+    setLandData(null);
+    try {
+      const res = await fetch(`${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`);
+      const data = await res.json();
+      console.log("🌍 토지 응답", data);
+      if (!data.ok) throw new Error("토지 조회 실패");
+      setLandData(data);
+    } catch (e: unknown) {
+      console.error("❌ 토지 조회 실패:", e);
+      setLandError(e instanceof Error ? e.message : "토지 조회 실패");
+    } finally {
+      setLandLoading(false);
+    }
   };
+
+  // 응답에서 토지 정보 추출
+  const landItem = landData?.land as Record<string, unknown> | undefined;
+  const voList = landItem?.ladfrlVOList as Record<string, unknown> | undefined;
+  const voArr = voList?.ladfrlVOList as Array<Record<string, unknown>> | undefined;
+  const vo = voArr?.[0];
 
   return (
     <div className="px-4 pb-3">
       <button
         type="button"
-        onClick={handleClick}
+        onClick={handleLandClick}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl border hover:bg-primary/5 transition-colors"
         style={{ borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.04)" }}
       >
@@ -1013,13 +1047,38 @@ function PropertySummaryPanel({ address }: { address: string }) {
             style={{ background: "hsl(var(--primary) / 0.15)" }}>
             <Layers className="w-3.5 h-3.5 text-primary" />
           </div>
-          <span className="text-xs font-bold text-foreground">건축물·토지대장 열람</span>
+          <span className="text-xs font-bold text-foreground">공적장부</span>
         </div>
         <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full text-white"
           style={{ background: "hsl(var(--primary))" }}>
-          열람
+          {landOpen ? "닫기" : "조회"}
         </span>
       </button>
+
+      {/* 인라인 토지 결과 박스 */}
+      {landOpen && (
+        <div className="mt-2 rounded-xl border px-4 py-3 space-y-1.5"
+          style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 80% 75%)" }}>
+          {landLoading && (
+            <p className="text-xs text-center py-2" style={{ color: "hsl(48 80% 35%)" }}>조회중...</p>
+          )}
+          {!landLoading && landError && (
+            <p className="text-xs text-center py-2" style={{ color: "hsl(var(--destructive))" }}>{landError}</p>
+          )}
+          {!landLoading && !landError && vo && (
+            <>
+              <LandRow label="지번주소" value={String(landData?.parcelAddress ?? "-")} />
+              <LandRow label="지목" value={String(vo.lndcgrCodeNm ?? "-")} />
+              <LandRow label="면적" value={vo.lndpclAr ? `${vo.lndpclAr}㎡` : "-"} />
+              <LandRow label="소유구분" value={String(vo.posesnSeCodeNm ?? "-")} />
+              <LandRow label="최종업데이트" value={String(vo.lastUpdtDt ?? "-")} />
+            </>
+          )}
+          {!landLoading && !landError && !vo && (
+            <p className="text-xs text-center py-2 text-muted-foreground">토지 데이터 없음</p>
+          )}
+        </div>
+      )}
 
       {modalOpen && (
         <PublicRecordModal
@@ -1027,6 +1086,15 @@ function PropertySummaryPanel({ address }: { address: string }) {
           onClose={() => setModalOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+function LandRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] font-semibold w-[72px] flex-shrink-0" style={{ color: "hsl(48 60% 30%)" }}>{label}</span>
+      <span className="text-[11px] font-medium text-foreground">{value}</span>
     </div>
   );
 }
