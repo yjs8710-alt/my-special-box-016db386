@@ -235,9 +235,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
     const fetchLandByPnu = async (pnu: string) => {
       if (!pnu) throw new Error("PNU가 없습니다.");
-      const requestUrl = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
-      console.log("LAND_REQUEST_URL:", requestUrl);
-      const response = await fetch(requestUrl, { method: "GET" });
+      const requestUrl = LAND_EDGE_FN;
+      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      console.log("LAND_REQUEST_URL:", requestUrl, "pnu:", pnu);
+      const response = await fetch(requestUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ pnu }),
+      });
       const rawText = await response.text();
       console.log("LAND_RAW_RESPONSE:", rawText);
       let data: Record<string, unknown>;
@@ -246,7 +255,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       } catch {
         throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
       }
-      if (!response.ok) throw new Error((data.message as string) || "토지 조회 실패");
+      if (!response.ok) throw new Error((data.message as string) || (data.error as string) || "토지 조회 실패");
       return data;
     };
 
