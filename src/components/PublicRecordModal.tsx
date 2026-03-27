@@ -230,15 +230,32 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   useEffect(() => {
     const pnuFromLand = typeof land?.pnu === "string" ? land.pnu : "";
 
-    // land 데이터가 아직 로딩 중이면 대기 (첫 useEffect가 완료될 때까지)
+    // land 데이터가 아직 로딩 중이면 대기
     if (loading) return;
 
-    const fetchLand = async () => {
+    const fetchLandByPnu = async (pnu: string) => {
+      if (!pnu) throw new Error("PNU가 없습니다.");
+      const requestUrl = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
+      console.log("LAND_REQUEST_URL:", requestUrl);
+      const response = await fetch(requestUrl, { method: "GET" });
+      const rawText = await response.text();
+      console.log("LAND_RAW_RESPONSE:", rawText);
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
+      }
+      if (!response.ok) throw new Error((data.message as string) || "토지 조회 실패");
+      return data;
+    };
+
+    const run = async () => {
       setLandLoading(true); setLandError(""); setLandDirect(null);
 
       let pnu = pnuFromLand;
 
-      // PNU가 없으면 주소로 변환 시도
+      // PNU가 없으면 주소→PNU 변환
       if (!pnu && address) {
         pnu = await resolvePnu(address) ?? "";
       }
@@ -252,28 +269,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       console.log("토지조회 PNU:", pnu);
 
       try {
-        const url = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
-        console.log("토지조회 URL", url);
-        const res = await fetch(url);
-        const text = await res.text();
-        console.log("LAND_RAW_RESPONSE:", text);
-
-        let data: Record<string, unknown>;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          throw new Error("프록시 서버가 JSON이 아니라 HTML을 반환했습니다. 주소를 확인하세요.");
-        }
-
-        if (!res.ok) throw new Error((data?.message as string) || "토지 조회 실패");
+        const data = await fetchLandByPnu(pnu);
         setLandDirect(data);
-      } catch (e: unknown) {
-        console.error("토지조회 에러", e);
-        setLandError(e instanceof Error ? e.message : "토지 조회 실패");
+      } catch (error: unknown) {
+        console.error("토지 조회 실패:", error);
+        setLandError(error instanceof Error ? error.message : "토지 조회 실패");
       } finally { setLandLoading(false); }
     };
 
-    fetchLand();
+    run();
   }, [land, loading, address]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
