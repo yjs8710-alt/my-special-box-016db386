@@ -49,12 +49,19 @@ function SkeletonRow() {
   );
 }
 
+const LAND_PROXY = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app";
+
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
   const [land, setLand] = useState<Record<string, unknown> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
+
+  // ── 토지 직접 조회 (Cloudtype) ──
+  const [landLoading, setLandLoading] = useState(false);
+  const [landDirect, setLandDirect] = useState<Record<string, unknown> | null>(null);
+  const [landError, setLandError] = useState("");
 
   /** 값이 있는지 판단 */
   const hasVal = (v: unknown) =>
