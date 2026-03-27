@@ -1001,7 +1001,9 @@ function PropertySummaryPanel({ address }: { address: string }) {
   const LAND_PROXY = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app";
 
   const handleLandClick = async () => {
+    console.log("[공적장부] 버튼 클릭, address:", address);
     if (!address) {
+      console.error("[공적장부] 주소 없음");
       setLandError("주소 정보가 없습니다.");
       setLandOpen(true);
       return;
@@ -1014,11 +1016,13 @@ function PropertySummaryPanel({ address }: { address: string }) {
     setLandLoading(true);
     setLandError("");
     setLandData(null);
+    const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`;
+    console.log("[공적장부] API URL:", url);
     try {
-      const res = await fetch(`${LAND_PROXY}/land-by-address?address=${encodeURIComponent(address)}`);
+      const res = await fetch(url);
       const data = await res.json();
       console.log("🌍 토지 응답", data);
-      if (!data.ok) throw new Error("토지 조회 실패");
+      if (!res.ok || !data.ok) throw new Error(data?.error || "토지 조회 실패");
       setLandData(data);
     } catch (e: unknown) {
       console.error("❌ 토지 조회 실패:", e);
