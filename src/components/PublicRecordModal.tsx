@@ -408,14 +408,14 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
               )}
               {landDirect && (() => {
-                const info = landDirect.landInfo as Record<string, unknown> | undefined;
+                const landData = landDirect.land as Record<string, unknown> | undefined;
                 return (
                   <div className="px-4 py-1">
-                    <Row label="지번주소" value={String(landDirect.parcelAddress ?? "-")} />
-                    <Row label="지목" value={String(info?.category ?? "-")} />
-                    <Row label="토지면적" value={info?.area ? `${info.area}㎡` : "-"} />
-                    <Row label="소유구분" value={String(info?.owner ?? "-")} />
-                    <Row label="최종업데이트" value={String(info?.updateDate ?? "-")} />
+                    <Row label="PNU" value={String(landData?.pnu ?? "-")} />
+                    <Row label="지목" value={String(landData?.jimok ?? "-")} />
+                    <Row label="토지면적" value={String(landData?.area ?? "-")} />
+                    <Row label="용도지역" value={String(landData?.zone ?? "-")} />
+                    <Row label="공시지가" value={String(landData?.price ?? "-")} />
                   </div>
                 );
               })()}
