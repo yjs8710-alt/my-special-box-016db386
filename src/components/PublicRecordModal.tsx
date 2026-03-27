@@ -49,7 +49,7 @@ function SkeletonRow() {
   );
 }
 
-const LAND_PROXY = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app";
+const LAND_EDGE_FN = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/land-proxy`;
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
