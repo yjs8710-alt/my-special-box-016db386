@@ -1033,10 +1033,7 @@ function PropertySummaryPanel({ address }: { address: string }) {
   };
 
   // 응답에서 토지 정보 추출
-  const landItem = landData?.land as Record<string, unknown> | undefined;
-  const voList = landItem?.ladfrlVOList as Record<string, unknown> | undefined;
-  const voArr = voList?.ladfrlVOList as Array<Record<string, unknown>> | undefined;
-  const vo = voArr?.[0];
+  const landInfo = landData?.landInfo as Record<string, unknown> | undefined;
 
   return (
     <div className="px-4 pb-3">
