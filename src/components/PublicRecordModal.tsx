@@ -409,13 +409,26 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
               {landDirect && (() => {
                 const landData = landDirect.land as Record<string, unknown> | undefined;
+                console.log("LAND_PARSED_RESPONSE:", landDirect);
+                console.log("landDirect.land:", landData);
+                console.log("jimok 경로: landDirect.land.jimok =", landData?.jimok);
+                console.log("area 경로: landDirect.land.area =", landData?.area);
+                console.log("zone 경로: landDirect.land.zone =", landData?.zone);
+                console.log("price 경로: landDirect.land.price =", landData?.price);
+                const fmt = (v: unknown) => v === undefined ? "(매핑값 없음)" : v === null ? "(null)" : String(v);
                 return (
                   <div className="px-4 py-1">
-                    <Row label="PNU" value={String(landData?.pnu ?? "-")} />
-                    <Row label="지목" value={String(landData?.jimok ?? "-")} />
-                    <Row label="토지면적" value={String(landData?.area ?? "-")} />
-                    <Row label="용도지역" value={String(landData?.zone ?? "-")} />
-                    <Row label="공시지가" value={String(landData?.price ?? "-")} />
+                    <Row label="PNU" value={fmt(landData?.pnu)} />
+                    <Row label="지목" value={fmt(landData?.jimok)} />
+                    <Row label="토지면적" value={fmt(landData?.area)} />
+                    <Row label="용도지역" value={fmt(landData?.zone)} />
+                    <Row label="공시지가" value={fmt(landData?.price)} />
+                    <div className="mt-3 p-3 rounded border border-border bg-muted/30">
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE</p>
+                      <pre className="text-[9px] text-foreground/70 whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
+                        {JSON.stringify(landDirect, null, 2)}
+                      </pre>
+                    </div>
                   </div>
                 );
               })()}
