@@ -413,23 +413,37 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
               )}
               {landDirect && (() => {
+                const isError = landDirect._error === true;
                 const landData = landDirect.land as Record<string, unknown> | undefined;
                 console.log("LAND_PARSED_RESPONSE:", landDirect);
-                console.log("landDirect.land:", landData);
-                console.log("jimok 경로: landDirect.land.jimok =", landData?.jimok);
-                console.log("area 경로: landDirect.land.area =", landData?.area);
-                console.log("zone 경로: landDirect.land.zone =", landData?.zone);
-                console.log("price 경로: landDirect.land.price =", landData?.price);
                 const fmt = (v: unknown) => v === undefined ? "(매핑값 없음)" : v === null ? "(null)" : String(v);
                 return (
                   <div className="px-4 py-1">
-                    <Row label="PNU" value={fmt(landData?.pnu)} />
-                    <Row label="지목" value={fmt(landData?.jimok)} />
-                    <Row label="토지면적" value={fmt(landData?.area)} />
-                    <Row label="용도지역" value={fmt(landData?.zone)} />
-                    <Row label="공시지가" value={fmt(landData?.price)} />
+                    {!isError && landData && (
+                      <>
+                        <Row label="PNU" value={fmt(landData?.pnu)} />
+                        <Row label="지목" value={fmt(landData?.jimok)} />
+                        <Row label="토지면적" value={fmt(landData?.area)} />
+                        <Row label="용도지역" value={fmt(landData?.zone)} />
+                        <Row label="공시지가" value={fmt(landData?.price)} />
+                      </>
+                    )}
+                    {/* LAND ERROR DETAIL */}
+                    {(isError || landDirect._verdict === "unexpected_error") && (
+                      <div className="mt-2 p-3 rounded border border-border" style={{ background: "hsl(0 100% 97%)", borderColor: "hsl(0 70% 80%)" }}>
+                        <p className="text-[10px] font-bold mb-1" style={{ color: "hsl(0 70% 40%)" }}>LAND ERROR DETAIL</p>
+                        <pre className="text-[9px] whitespace-pre-wrap break-all" style={{ color: "hsl(0 50% 30%)" }}>
+{`verdict : ${fmt(landDirect._verdict)}
+proxy   : ${fmt(landDirect._proxy_used)}
+step    : ${fmt(landDirect._step)}
+message : ${fmt(landDirect._error_message)}
+stack   : ${fmt(landDirect._error_stack)}`}
+                        </pre>
+                      </div>
+                    )}
+                    {/* RAW LAND RESPONSE */}
                     <div className="mt-3 p-3 rounded border border-border bg-muted/30">
-                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE</p>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE (_proxy_used: {fmt(landDirect._proxy_used)})</p>
                       <pre className="text-[9px] text-foreground/70 whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
                         {JSON.stringify(landDirect, null, 2)}
                       </pre>
