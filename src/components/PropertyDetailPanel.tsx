@@ -998,7 +998,7 @@ function PropertySummaryPanel({ address }: { address: string }) {
   const [landError, setLandError] = useState("");
   const [landData, setLandData] = useState<Record<string, unknown> | null>(null);
 
-  const LAND_PROXY = "https://port-0-land-proxy-server-mb5qa2blvamaolr6.sel4.cloudtype.app";
+  const LAND_PROXY = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app";
 
   const handleLandClick = async () => {
     if (!address) {
