@@ -1033,10 +1033,7 @@ function PropertySummaryPanel({ address }: { address: string }) {
   };
 
   // 응답에서 토지 정보 추출
-  const landItem = landData?.land as Record<string, unknown> | undefined;
-  const voList = landItem?.ladfrlVOList as Record<string, unknown> | undefined;
-  const voArr = voList?.ladfrlVOList as Array<Record<string, unknown>> | undefined;
-  const vo = voArr?.[0];
+  const landInfo = landData?.landInfo as Record<string, unknown> | undefined;
 
   return (
     <div className="px-4 pb-3">
@@ -1069,16 +1066,16 @@ function PropertySummaryPanel({ address }: { address: string }) {
           {!landLoading && landError && (
             <p className="text-xs text-center py-2" style={{ color: "hsl(var(--destructive))" }}>{landError}</p>
           )}
-          {!landLoading && !landError && vo && (
+          {!landLoading && !landError && landInfo && (
             <>
               <LandRow label="지번주소" value={String(landData?.parcelAddress ?? "-")} />
-              <LandRow label="지목" value={String(vo.lndcgrCodeNm ?? "-")} />
-              <LandRow label="면적" value={vo.lndpclAr ? `${vo.lndpclAr}㎡` : "-"} />
-              <LandRow label="소유구분" value={String(vo.posesnSeCodeNm ?? "-")} />
-              <LandRow label="최종업데이트" value={String(vo.lastUpdtDt ?? "-")} />
+              <LandRow label="지목" value={String(landInfo.category ?? "-")} />
+              <LandRow label="면적" value={landInfo.area ? `${landInfo.area}㎡` : "-"} />
+              <LandRow label="소유구분" value={String(landInfo.owner ?? "-")} />
+              <LandRow label="최종업데이트" value={String(landInfo.updateDate ?? "-")} />
             </>
           )}
-          {!landLoading && !landError && !vo && (
+          {!landLoading && !landError && !landInfo && (
             <p className="text-xs text-center py-2 text-muted-foreground">토지 데이터 없음</p>
           )}
         </div>
