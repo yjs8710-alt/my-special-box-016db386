@@ -201,13 +201,56 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
-  // ── 토지 Cloudtype 직접 조회 (PNU 기반) ──
+  // ── 주소 → PNU 변환 헬퍼 ──
+  const resolvePnu = async (addr: string): Promise<string | null> => {
+    console.log("🔄 [PNU 변환] 주소로 PNU 조회:", addr);
+    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/address-to-pnu`;
+    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ address: addr }),
+      });
+      const data = await res.json();
+      console.log("🔄 [PNU 변환 응답]", data);
+      if (data?.ok && data?.pnu) return data.pnu as string;
+      return null;
+    } catch (e) {
+      console.error("🔄 [PNU 변환 에러]", e);
+      return null;
+    }
+  };
+
+  // ── 토지 Cloudtype 직접 조회 (PNU 기반, 없으면 주소→PNU 변환) ──
   useEffect(() => {
-    const pnu = typeof land?.pnu === "string" ? land.pnu : "";
-    if (!pnu) return;
+    const pnuFromLand = typeof land?.pnu === "string" ? land.pnu : "";
+
+    // land 데이터가 아직 로딩 중이면 대기 (첫 useEffect가 완료될 때까지)
+    if (loading) return;
 
     const fetchLand = async () => {
       setLandLoading(true); setLandError(""); setLandDirect(null);
+
+      let pnu = pnuFromLand;
+
+      // PNU가 없으면 주소로 변환 시도
+      if (!pnu && address) {
+        pnu = await resolvePnu(address) ?? "";
+      }
+
+      if (!pnu) {
+        setLandError("주소를 먼저 입력하세요");
+        setLandLoading(false);
+        return;
+      }
+
+      console.log("토지조회 PNU:", pnu);
+
       try {
         const url = `${LAND_PROXY}/land?pnu=${encodeURIComponent(pnu)}`;
         console.log("토지조회 URL", url);
@@ -231,7 +274,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     };
 
     fetchLand();
-  }, [land]);
+  }, [land, loading, address]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
