@@ -275,7 +275,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         setLandDirect(data);
       } catch (error: unknown) {
         console.error("토지 조회 실패:", error);
-        setLandError(error instanceof Error ? error.message : "토지 조회 실패");
+        const errMsg = error instanceof Error ? error.message : "토지 조회 실패";
+        const errStack = error instanceof Error ? error.stack : undefined;
+        setLandError(errMsg);
+        // 오류 상세를 landDirect에 저장하여 화면에 표시
+        setLandDirect({
+          _error: true,
+          _error_message: errMsg,
+          _error_stack: errStack ?? null,
+          _proxy_used: "cloudtype",
+          _verdict: "fetch_error",
+          _step: "fetchLandByPnu",
+          _pnu: pnu,
+        });
       } finally { setLandLoading(false); }
     };
 
