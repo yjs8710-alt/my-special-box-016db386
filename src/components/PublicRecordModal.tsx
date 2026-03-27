@@ -49,7 +49,7 @@ function SkeletonRow() {
   );
 }
 
-const LAND_EDGE_FN = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/land-proxy`;
+const CLOUDTYPE_LAND_URL = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app/land";
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
@@ -235,18 +235,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
     const fetchLandByPnu = async (pnu: string) => {
       if (!pnu) throw new Error("PNU가 없습니다.");
-      const requestUrl = LAND_EDGE_FN;
-      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      console.log("LAND_REQUEST_URL:", requestUrl, "pnu:", pnu);
-      const response = await fetch(requestUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: apiKey,
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({ pnu }),
-      });
+      const requestUrl = `${CLOUDTYPE_LAND_URL}?pnu=${encodeURIComponent(pnu)}`;
+      console.log("LAND_REQUEST_URL:", requestUrl);
+      const response = await fetch(requestUrl, { method: "GET" });
       const rawText = await response.text();
       console.log("LAND_RAW_RESPONSE:", rawText);
       let data: Record<string, unknown>;
@@ -256,6 +247,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
       }
       if (!response.ok) throw new Error((data.message as string) || (data.error as string) || "토지 조회 실패");
+      // Cloudtype 프록시 사용 표시
+      data._proxy_used = "cloudtype";
       return data;
     };
 
@@ -282,7 +275,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         setLandDirect(data);
       } catch (error: unknown) {
         console.error("토지 조회 실패:", error);
-        setLandError(error instanceof Error ? error.message : "토지 조회 실패");
+        const errMsg = error instanceof Error ? error.message : "토지 조회 실패";
+        const errStack = error instanceof Error ? error.stack : undefined;
+        setLandError(errMsg);
+        // 오류 상세를 landDirect에 저장하여 화면에 표시
+        setLandDirect({
+          _error: true,
+          _error_message: errMsg,
+          _error_stack: errStack ?? null,
+          _proxy_used: "cloudtype",
+          _verdict: "fetch_error",
+          _step: "fetchLandByPnu",
+          _pnu: pnu,
+        });
       } finally { setLandLoading(false); }
     };
 
@@ -408,23 +413,37 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
               )}
               {landDirect && (() => {
+                const isError = landDirect._error === true;
                 const landData = landDirect.land as Record<string, unknown> | undefined;
                 console.log("LAND_PARSED_RESPONSE:", landDirect);
-                console.log("landDirect.land:", landData);
-                console.log("jimok 경로: landDirect.land.jimok =", landData?.jimok);
-                console.log("area 경로: landDirect.land.area =", landData?.area);
-                console.log("zone 경로: landDirect.land.zone =", landData?.zone);
-                console.log("price 경로: landDirect.land.price =", landData?.price);
                 const fmt = (v: unknown) => v === undefined ? "(매핑값 없음)" : v === null ? "(null)" : String(v);
                 return (
                   <div className="px-4 py-1">
-                    <Row label="PNU" value={fmt(landData?.pnu)} />
-                    <Row label="지목" value={fmt(landData?.jimok)} />
-                    <Row label="토지면적" value={fmt(landData?.area)} />
-                    <Row label="용도지역" value={fmt(landData?.zone)} />
-                    <Row label="공시지가" value={fmt(landData?.price)} />
+                    {!isError && landData && (
+                      <>
+                        <Row label="PNU" value={fmt(landData?.pnu)} />
+                        <Row label="지목" value={fmt(landData?.jimok)} />
+                        <Row label="토지면적" value={fmt(landData?.area)} />
+                        <Row label="용도지역" value={fmt(landData?.zone)} />
+                        <Row label="공시지가" value={fmt(landData?.price)} />
+                      </>
+                    )}
+                    {/* LAND ERROR DETAIL */}
+                    {(isError || landDirect._verdict === "unexpected_error") && (
+                      <div className="mt-2 p-3 rounded border border-border" style={{ background: "hsl(0 100% 97%)", borderColor: "hsl(0 70% 80%)" }}>
+                        <p className="text-[10px] font-bold mb-1" style={{ color: "hsl(0 70% 40%)" }}>LAND ERROR DETAIL</p>
+                        <pre className="text-[9px] whitespace-pre-wrap break-all" style={{ color: "hsl(0 50% 30%)" }}>
+{`verdict : ${fmt(landDirect._verdict)}
+proxy   : ${fmt(landDirect._proxy_used)}
+step    : ${fmt(landDirect._step)}
+message : ${fmt(landDirect._error_message)}
+stack   : ${fmt(landDirect._error_stack)}`}
+                        </pre>
+                      </div>
+                    )}
+                    {/* RAW LAND RESPONSE */}
                     <div className="mt-3 p-3 rounded border border-border bg-muted/30">
-                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE</p>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE (_proxy_used: {fmt(landDirect._proxy_used)})</p>
                       <pre className="text-[9px] text-foreground/70 whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
                         {JSON.stringify(landDirect, null, 2)}
                       </pre>
