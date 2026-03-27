@@ -313,38 +313,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
               {/* ① 토지 정보 — Cloudtype 직접 조회 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
-              {!landDirect && !landLoading && !landError && (
-                <div className="px-4 py-3">
-                  <button
-                    className="w-full py-2 rounded-lg text-[12px] font-bold bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                    onClick={async () => {
-                      const addr = address;
-                      console.log("토지조회 주소", addr);
-                      if (!addr) { setLandError("주소 정보 없음"); return; }
-                      setLandLoading(true); setLandError("");
-                      try {
-                        const url = `${LAND_PROXY}/land-by-address?address=${encodeURIComponent(addr)}`;
-                        console.log("토지조회 URL", url);
-                        const res = await fetch(url);
-                        const data = await res.json();
-                        console.log("토지조회 응답", data);
-                        if (!res.ok || !data?.ok) throw new Error(data?.error || "토지 조회 실패");
-                        setLandDirect(data);
-                      } catch (e: unknown) {
-                        console.error("토지조회 에러", e);
-                        setLandError(e instanceof Error ? e.message : "토지 조회 실패");
-                      } finally { setLandLoading(false); }
-                    }}
-                  >
-                    🌍 토지대장 실시간 조회
-                  </button>
-                </div>
-              )}
               {landLoading && (
                 <div className="px-4 py-4 text-center text-[12px] text-muted-foreground font-medium">조회중...</div>
               )}
               {landError && (
-                <div className="px-4 py-3 text-[12px] text-red-500 font-medium">토지 조회 실패: {landError}</div>
+                <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
               )}
               {landDirect && (() => {
                 const info = landDirect.landInfo as Record<string, unknown> | undefined;
@@ -358,6 +331,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   </div>
                 );
               })()}
+              {!landLoading && !landError && !landDirect && (
+                <EmptySection message="토지 조회 결과 없음" />
+              )}
 
               <div className="h-1.5 bg-muted/40 my-1" />
 
