@@ -1226,8 +1226,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div className="flex flex-col gap-1.5">
                     <p className="text-xs font-semibold text-foreground/70">🐾 반려동물</p>
                     <div className="flex gap-2">
-                      {(["가능", "불가", ""] as PetType[]).map((v) => {
-                        const label = v === "가능" ? "🐾 가능" : v === "불가" ? "🚫 불가" : "미지정";
+                      {(["가능", "불가"] as PetType[]).map((v) => {
+                        const label = v === "가능" ? "🐾 가능" : "🚫 불가";
                         const isActive = form.pet === v;
                         return (
                           <button
