@@ -334,6 +334,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.floors as Array<Record<string, string>>)
     : [];
 
+  // 여러 동(건축물) 정보
+  const allBuildings = raw?.allBuildings && Array.isArray(raw.allBuildings)
+    ? (raw.allBuildings as Array<Record<string, unknown>>)
+    : [];
+
   // api_status === "no_data": API 호출 성공했지만 데이터 없음
   const buildingApiNoData = raw?.api_status === "no_data";
 
@@ -342,7 +347,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     ? (raw.violation as { isViolation: boolean; violationYn: string; items: Array<{ vlttRnCnts?: string; vlttGbCdNm?: string; crtnDay?: string }> })
     : null;
   const isViolation = violation?.isViolation === true;
-  const hasViolationInfo = violation !== null; // API가 결과를 반환했는지 여부
+  const hasViolationInfo = violation !== null;
 
   const hasAnyBuildingData = building && (
     str(building.building_name) || str(building.main_purpose) ||
