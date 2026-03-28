@@ -276,11 +276,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         console.log("LAND_PARSED_FULL:", JSON.stringify(data, null, 2));
 
         // totalCount 체크 — 0이면 결과 없음
-        const totalCount = Number(
-          data?.upstreamData?.response?.totalCount ??
-          data?.response?.totalCount ??
-          0
-        );
+        const d = data as Record<string, unknown>;
+        const upstream = d?.upstreamData as Record<string, unknown> | undefined;
+        const resp = (upstream?.response ?? d?.response) as Record<string, unknown> | undefined;
+        const totalCount = Number(resp?.totalCount ?? 0);
         if (data?.ok && totalCount === 0) {
           setLandDirect(data);
           setLandError("토지대장 조회 결과가 없습니다. (totalCount=0, PNU=" + pnu + ")");
