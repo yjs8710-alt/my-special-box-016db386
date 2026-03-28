@@ -1490,4 +1490,3 @@ function AmountInput({
   );
 }
 
-}
