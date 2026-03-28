@@ -375,22 +375,23 @@ async function fetchBuildingApiWithPlatGb(
 }
 
 // ── 표제부 (platGbCd 없이 먼저, 없으면 0/1로 재시도) ────────────────────
+// 여러 동이 있을 수 있으므로 { primary, allItems } 형태로 반환
 async function fetchBuildingTitle(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
-  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k);
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k, "50");
   if (total > 0) {
-    console.log("📊 [표제부] 성공:", total, "건");
-    return items[0];
+    console.log("📊 [표제부] 성공:", total, "건 (동 수:", items.length, ")");
+    return { primary: items[0], allItems: items };
   }
   // platGbCd 명시 재시도
   for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
-    const r2 = await fetchBuildingApiWithPlatGb("getBrTitleInfo", s, b, bun, ji, pgb, k);
+    const r2 = await fetchBuildingApiWithPlatGb("getBrTitleInfo", s, b, bun, ji, pgb, k, "50");
     if (r2.total > 0) {
       console.log(`📊 [표제부] platGbCd=${pgb} 재시도 성공:`, r2.total, "건");
-      return r2.items[0];
+      return { primary: r2.items[0], allItems: r2.items };
     }
   }
   console.log(`📊 [표제부] 없음 (${resultCode}/${resultMsg})`);
-  return null;
+  return { primary: null, allItems: [] };
 }
 
 // ── 총괄표제부 ───────────────────────────────────────────────────────────
@@ -754,7 +755,7 @@ serve(async (req) => {
       if (sigunguCd && bjdongCd) {
         // ── 3a. 건축물대장 + 위반건축물 ──
         if (needBuilding) {
-          const [titleItem, recapItem, exposItem, basicItem, floorItems, violationResult] = await Promise.all([
+          const [titleResult, recapItem, exposItem, basicItem, floorItems, violationResult] = await Promise.all([
             fetchBuildingTitle(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingRecap(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingExpos(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
@@ -763,6 +764,8 @@ serve(async (req) => {
             fetchBuildingViolation(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
           ]);
 
+          const titleItem = titleResult.primary;
+          const allTitleItems = titleResult.allItems;
           const bestItem   = titleItem || recapItem || exposItem || basicItem;
           const bestSource = titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음";
           const apiStatus  = !bestItem ? "no_data" : "ok";
@@ -811,6 +814,39 @@ serve(async (req) => {
             api_status: apiStatus,
             params_used: { sigunguCd, bjdongCd, bun, ji, platGbCd, pnu, source },
             violation: violationSummary,
+            allBuildings: allTitleItems.map((item: any) => ({
+              dongNm: item.dongNm || item.bldNm || null,
+              regstrGbCdNm: item.regstrGbCdNm || null,
+              regstrKindCdNm: item.regstrKindCdNm || null,
+              mainPurpsCdNm: item.mainPurpsCdNm || null,
+              etcPurps: item.etcPurps || null,
+              strctCdNm: item.strctCdNm || null,
+              roofCdNm: item.roofCdNm || null,
+              platArea: item.platArea ? `${Number(item.platArea).toFixed(2)} ㎡` : null,
+              archArea: item.archArea ? `${Number(item.archArea).toFixed(2)} ㎡` : null,
+              totArea: item.totArea ? `${Number(item.totArea).toFixed(2)} ㎡` : null,
+              vlRatEstmTotArea: item.vlRatEstmTotArea ? `${Number(item.vlRatEstmTotArea).toFixed(2)} ㎡` : null,
+              bcRat: item.bcRat ? `${Number(item.bcRat).toFixed(2)} %` : null,
+              vlRat: item.vlRat ? `${Number(item.vlRat).toFixed(2)} %` : null,
+              hhldCnt: item.hhldCnt ?? null,
+              fmlyCnt: item.fmlyCnt ?? null,
+              grndFlrCnt: item.grndFlrCnt ?? null,
+              ugrndFlrCnt: item.ugrndFlrCnt ?? null,
+              rideUseElvtCnt: item.rideUseElvtCnt ?? item.elevCnt ?? null,
+              emgenUseElvtCnt: item.emgenUseElvtCnt ?? item.emgElevCnt ?? null,
+              indrMechUtcnt: item.indrMechUtcnt ?? null,
+              oudrMechUtcnt: item.oudrMechUtcnt ?? null,
+              indrAutoUtcnt: item.indrAutoUtcnt ?? null,
+              oudrAutoUtcnt: item.oudrAutoUtcnt ?? null,
+              pmsDay: item.pmsDay ? `${item.pmsDay.slice(0,4)}-${item.pmsDay.slice(4,6)}-${item.pmsDay.slice(6,8)}` : null,
+              stcnsDay: item.stcnsDay ? `${item.stcnsDay.slice(0,4)}-${item.stcnsDay.slice(4,6)}-${item.stcnsDay.slice(6,8)}` : null,
+              useAprDay: item.useAprDay ? `${item.useAprDay.slice(0,4)}-${item.useAprDay.slice(4,6)}-${item.useAprDay.slice(6,8)}` : null,
+              platPlc: item.platPlc || null,
+              newPlatPlc: item.newPlatPlc || null,
+              bldNm: item.bldNm || null,
+              erthqkAblty: item.erthqkAblty || null,
+              erthqkDsgnApplyYn: item.erthqkDsgnApplyYn || null,
+            })),
           };
 
           if (isBuildingEmpty && buildingData) {
