@@ -180,16 +180,6 @@ const ApartmentRental = () => {
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
         />
-        {selectedId !== null && (() => {
-          const selected = allProperties.find(p => p.id === selectedId) ?? null;
-          return selected ? (
-            <PropertyDetailPanel
-              property={selected}
-              onClose={() => setSelectedId(null)}
-              sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
-            />
-          ) : null;
-        })()}
       </main>
     </div>
   );
