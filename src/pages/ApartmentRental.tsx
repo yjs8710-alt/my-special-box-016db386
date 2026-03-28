@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
+
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
 
