@@ -1181,17 +1181,6 @@ function Step3({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* 매물 소개 */}
-      <Section label="매물 소개">
-        <textarea
-          placeholder="매물의 특징, 특이사항 등을 적어주세요."
-          value={form.description}
-          onChange={(e) => set("description", e.target.value)}
-          maxLength={300} rows={3}
-          className={ic(false) + " resize-none"}
-        />
-        <p className="text-right text-[11px] text-muted-foreground mt-0.5">{form.description.length} / 300</p>
-      </Section>
 
       {/* 매물 사진 */}
       <Section label="매물 사진">
