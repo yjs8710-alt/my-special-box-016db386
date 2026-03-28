@@ -43,7 +43,7 @@ const ROOM_OPTIONS = [
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
   "옷장","전자키","복층","옥탑","테라스","주차",
 ] as const;
-const FACILITY_OPTIONS = ["수도","유선TV","인터넷","CCTV"] as const;
+
 type PetType = "가능" | "불가" | "";
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
@@ -774,17 +774,19 @@ function Step2({
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
   const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
-  // 상가 임대류 및 토지: 반려동물·옵션·부가시설 숨김
-  const hideResidentialOptions = isLand || isBuildingSale || isCommercial;
-  const showRoomOptions = !hideResidentialOptions;
-  const showFacilities = !isLand && !isBuildingSale;
-  // 토지 임대: 방향도 숨김
-  const showDirection = !isLand && !isBuildingSale;
+  const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
-  const toggleFacility = (f: string) => {
-    const cur = form.facilities;
-    set("facilities", cur.includes(f) ? cur.filter((x) => x !== f) : [...cur, f]);
-  };
+  // 매매 타입 목록 (수정폼과 동일)
+  const SALE_TYPES = ["매매","단독매매","건물매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매"];
+  const isWarehouseSale = SALE_TYPES.includes(form.detailType);
+
+  // 부가 시설 옵션 (아이콘 뱃지로 표시) — 수정폼과 동일
+  const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
+    { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+    { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+    { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+    { key: "CCTV",  label: "CCTV",  icon: "📷", bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  ];
 
   return (
     <div className="flex flex-col gap-5">
@@ -795,25 +797,28 @@ function Step2({
         ))}
       </div>
 
-      {/* 부가 시설 - 토지/건물매매/상가임대류 제외 */}
-      {showFacilities && (
+      {/* 부가 시설 — 매매/상가임대류/토지 제외 */}
+      {!isWarehouseSale && !isCommercial && !isLand && (
         <Section label="부가 시설">
           <div className="flex flex-wrap gap-2">
-            {FACILITY_OPTIONS.map((f) => {
-              const active = form.facilities.includes(f);
-              const icon = f === "수도" ? "💧" : f === "유선TV" ? "📺" : f === "인터넷" ? "🌐" : "📷";
+            {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
+              const isActive = form.options.includes(key);
               return (
                 <button
-                  key={f}
+                  key={key}
                   type="button"
-                  onClick={() => toggleFacility(f)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 ${
-                    active
-                      ? "bg-primary/10 text-primary border-primary"
-                      : "bg-background text-foreground border-border hover:border-primary/40"
-                  }`}
+                  onClick={() => {
+                    const cur = form.options;
+                    set("options", isActive ? cur.filter((o) => o !== key) : [...cur, key]);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all select-none"
+                  style={isActive
+                    ? { background: color, color: "#fff", borderColor: color }
+                    : { background: bg, color, borderColor: border }
+                  }
                 >
-                  <span>{icon}</span>{f}
+                  <span>{icon}</span>
+                  <span>{label}</span>
                 </button>
               );
             })}
@@ -821,11 +826,34 @@ function Step2({
         </Section>
       )}
 
-      {/* 옵션 - 토지/건물매매/상가임대류 제외 */}
-      {showRoomOptions && (
+      {/* 옵션 — 매매/상가임대류/토지 제외 */}
+      {!isWarehouseSale && !isCommercial && !isLand && (
         <Section label="옵션">
-          {/* 풀옵션 체크 버튼 */}
-          <FullOptionToggle options={form.options} set={set} />
+          {/* 풀옵션 버튼 */}
+          <div className="mb-2">
+            <button
+              type="button"
+              onClick={() => {
+                const FULL_OPTIONS = ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"];
+                const current = new Set(form.options);
+                const allSelected = FULL_OPTIONS.every(o => current.has(o));
+                if (allSelected) {
+                  FULL_OPTIONS.forEach(o => current.delete(o));
+                } else {
+                  FULL_OPTIONS.forEach(o => current.add(o));
+                }
+                set("options", Array.from(current));
+              }}
+              className="px-4 py-1.5 rounded-xl text-xs font-extrabold border-2 transition-all"
+              style={
+                ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"].every(o => form.options.includes(o))
+                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                  : { background: "transparent", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }
+              }
+            >
+              ✨ 풀옵션
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {ROOM_OPTIONS.map((opt) => (
               <button key={opt} type="button" onClick={() => toggleOption(opt)}
@@ -833,32 +861,28 @@ function Step2({
                   form.options.includes(opt)
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background text-foreground border-border hover:border-primary/50"
-                }`}>
-                {opt}
-              </button>
+                }`}>{opt}</button>
             ))}
           </div>
         </Section>
       )}
 
-      {/* 비밀번호 - 토지/건물매매/상가임대류 제외 */}
-      {showRoomOptions && (
-        <Section label="비밀번호">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">건물 비번</label>
-              <input type="text" placeholder="건물 공동현관 비번" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">호실 비번</label>
-              <input type="text" placeholder="방 도어락 비번" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
-            </div>
+      {/* 방 비번 / 건물 비번 — 매매/토지 제외 (상가임대류 포함) */}
+      {!isWarehouseSale && !isLand && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">호실 비번</label>
+            <input type="text" placeholder="방 비밀번호" value={form.roomPassword} onChange={(e) => set("roomPassword", e.target.value)} className={ic(false)} />
           </div>
-        </Section>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-foreground/70">건물 비번</label>
+            <input type="text" placeholder="건물 비밀번호" value={form.buildingPassword} onChange={(e) => set("buildingPassword", e.target.value)} className={ic(false)} />
+          </div>
+        </div>
       )}
 
-      {/* 방향 - 토지/건물매매/상가임대류 제외 */}
-      {showDirection && (
+      {/* 방향 — 매매/상가임대류/토지 제외 */}
+      {!isWarehouseSale && !isCommercial && !isLand && (
         <Section label="방향">
           <div className="flex flex-wrap gap-2">
             {DIRECTION_OPTIONS.map((d) => (
@@ -867,27 +891,23 @@ function Step2({
                   form.direction === d
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background text-foreground border-border hover:border-primary/50"
-                }`}>
-                {d}
-              </button>
+                }`}>{d}</button>
             ))}
           </div>
         </Section>
       )}
 
-      {/* 공실 여부 - 토지/매매/건물매매 제외 */}
-      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
-        <Section label="공실 여부">
+      {/* 공실 여부 — 매매 타입이더라도 집합건물이면 표시 */}
+      {(form.tradeType !== "매매" || isCollective) && !isLand && !isBuildingSale && (
+        <Section label="공실여부">
           <div className="flex gap-3">
             {VACANCY_TYPES.map((t) => (
-              <button key={t} type="button" onClick={() => set("vacancy", t)}
+              <button key={t} type="button" onClick={() => set("vacancy", form.vacancy === t ? "공실" : t)}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                   form.vacancy === t
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background text-foreground border-border hover:border-primary/50"
-                }`}>
-                {t}
-              </button>
+                }`}>{t}</button>
             ))}
           </div>
 
@@ -914,52 +934,6 @@ function Step2({
                 </span>
               )}
             </label>
-          </div>
-
-          {/* 세입자 중도퇴거 */}
-          <div className="flex items-center gap-3 mt-2 px-3 py-2.5 rounded-xl border transition-all"
-            style={{
-              background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
-              borderColor: form.earlyExit ? "hsl(0 85% 70%)" : "hsl(var(--border))",
-            }}>
-            <label className="flex items-center gap-2 text-sm cursor-pointer w-full">
-              <input
-                type="checkbox"
-                checked={form.earlyExit}
-                onChange={(e) => set("earlyExit", e.target.checked)}
-                className="w-4 h-4 accent-destructive"
-              />
-              <span className="font-semibold" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
-                세입자 중도퇴거
-              </span>
-              {form.earlyExit && (
-                <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
-                  style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
-                  중도퇴거
-                </span>
-              )}
-            </label>
-          </div>
-
-          {/* 퇴거 예정일 — 항상 표시 */}
-          <div className="flex flex-col gap-1 mt-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              퇴거 예정일
-              <span className="ml-1 text-[10px] font-normal text-muted-foreground/70">(예: 2025.03.15)</span>
-            </label>
-            <input
-              type="text"
-              placeholder="예) 2025.03.15"
-              value={form.vacateDate}
-              onChange={(e) => set("vacateDate", e.target.value)}
-              className="w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground placeholder:text-muted-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
-              style={form.vacateDate ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
-            />
-            {form.vacateDate && (
-              <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
-                🚪 퇴거 예정: {form.vacateDate}
-              </p>
-            )}
           </div>
 
           {/* 반려동물 가능 여부 */}
@@ -991,196 +965,150 @@ function Step2({
               })}
             </div>
           </div>
-        </Section>
-      )}
 
-      {/* 아파트 매매: 세입자 거주 여부 */}
-      {form.detailType === "아파트" && form.tradeType === "매매" && (
-        <Section label="세입자 거주 여부">
-          <div className="flex gap-3 mb-1">
-            <button type="button" onClick={() => set("tenantOccupied", false)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                !form.tenantOccupied ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              공실 (세입자 없음)
-            </button>
-            <button type="button" onClick={() => set("tenantOccupied", true)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
-                form.tenantOccupied ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}>
-              세입자 거주중
-            </button>
+          {/* 세입자 중도퇴거 체크박스 */}
+          <div className="flex items-center gap-3 mt-2 px-3 py-2 rounded-xl border transition-all"
+            style={{
+              background: form.earlyExit ? "hsl(0 85% 97%)" : "hsl(var(--muted)/0.3)",
+              borderColor: form.earlyExit ? "hsl(0 85% 70%)" : "hsl(var(--border))",
+            }}>
+            <label className="flex items-center gap-2 text-sm cursor-pointer w-full" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
+              <input type="checkbox" checked={form.earlyExit}
+                onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
+              <span className={`font-semibold ${form.earlyExit ? "text-[hsl(0_85%_45%)]" : ""}`}>세입자 중도퇴거</span>
+              {form.earlyExit && (
+                <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
+                  style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
+                  중도퇴거
+                </span>
+              )}
+            </label>
           </div>
-          {form.tenantOccupied && (
-            <div className="flex flex-col gap-3 p-3 rounded-xl border border-border bg-muted/20">
-              <p className="text-xs font-semibold text-muted-foreground">세입자 계약 조건</p>
-              <div className="grid grid-cols-2 gap-3">
-                <AmountInput label="전세금 / 보증금" value={form.tenantDeposit} onChange={(v) => set("tenantDeposit", v)} placeholder="예) 20,000" />
-                <AmountInput label="월세 (없으면 0)" value={form.tenantMonthly} onChange={(v) => set("tenantMonthly", v)} placeholder="예) 0" />
-              </div>
-              {/* 퇴거일 날짜 선택 */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-foreground/70">퇴거일</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button type="button" className={cn(
-                      "flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-left",
-                      !form.vacateDate && "text-muted-foreground"
-                    )}>
-                      <CalendarIcon className="w-4 h-4 opacity-50 flex-shrink-0" />
-                      {form.vacateDate ? form.vacateDate : "날짜 선택"}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 z-[10300]" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={form.vacateDate ? new Date(form.vacateDate) : undefined}
-                      onSelect={(d) => set("vacateDate", d ? format(d, "yyyy-MM-dd") : "")}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          )}
-        </Section>
-      )}
 
-      {/* 아파트 외 매매 퇴거일 - 토지/건물매매 제외 */}
-      {form.tradeType === "매매" && form.detailType !== "아파트" && !isLand && !isBuildingSale && (
-        <Section label="퇴거일">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button type="button" className={cn(
-                "flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-xl border outline-none transition-all bg-background text-foreground border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-left",
-                !form.vacateDate && "text-muted-foreground"
-              )}>
-                <CalendarIcon className="w-4 h-4 opacity-50 flex-shrink-0" />
-                {form.vacateDate ? form.vacateDate : "날짜 선택 (없으면 생략)"}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 z-[10300]" align="start">
-              <Calendar
-                mode="single"
-                selected={form.vacateDate ? new Date(form.vacateDate) : undefined}
-                onSelect={(d) => set("vacateDate", d ? format(d, "yyyy-MM-dd") : "")}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
+          {/* 퇴거 예정일 */}
+          <div className="flex flex-col gap-1 mt-1">
+            <label className="text-xs font-semibold text-muted-foreground">
+              퇴거 예정일
+              <span className="ml-1 text-[10px] font-normal text-muted-foreground/70">(예: 2025.03.15)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="예) 2025.03.15"
+              value={form.vacateDate}
+              onChange={(e) => set("vacateDate", e.target.value)}
+              className={ic(false)}
+              style={form.vacateDate ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
+            />
+            {form.vacateDate && (
+              <p className="text-[11px] font-semibold" style={{ color: "hsl(0 85% 45%)" }}>
+                🚪 퇴거 예정: {form.vacateDate}
+              </p>
+            )}
+          </div>
         </Section>
       )}
 
       {/* 금액 입력 */}
       <Section label="금액 입력" error={errors.amount}>
         <p className="text-[11px] text-muted-foreground/70 -mt-1">단위: 만원</p>
-        <div className="grid grid-cols-2 gap-3">
-          {/* 건물매매 선택 시 전용 레이아웃 */}
-          {isBuildingSale ? (
-            <div className="col-span-2 flex flex-col gap-1 p-3 rounded-xl border border-primary/20 bg-primary/5">
-              <p className="text-xs font-bold text-primary mb-1">건물매매 금액</p>
-              <AmountInput label="매매가 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 150,000" />
-            </div>
-          ) : form.tradeType === "매매" ? (
+        {form.tradeType === "매매" || isBuildingSale ? (
+          <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <AmountInput label="매매가액 *" value={form.salePrice} onChange={(v) => set("salePrice", v)} placeholder="예) 15,000" />
             </div>
-          ) : (
-            /* 임대: 월세/반전세/전세 복수 선택 + 각각 금액 입력 */
-            <div className="col-span-2 flex flex-col gap-3">
-              {/* 임대 방식 선택 (복수 가능) */}
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-semibold text-foreground/70">임대 방식 (복수 선택 가능)</p>
-                <div className="flex gap-2">
-                  {(["월세", "반전세", "전세"] as const).map((mode) => {
-                    const active = form.rentModes.includes(mode);
-                    return (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => {
-                          const cur = form.rentModes;
-                          const next = active
-                            ? cur.filter((m) => m !== mode)
-                            : [...cur, mode];
-                          set("rentModes", next.length === 0 ? ["월세"] : next);
-                        }}
-                        className={`flex-1 py-2 rounded-xl text-sm font-bold border-2 transition-all ${
-                          active
-                            ? "bg-primary text-primary-foreground border-primary"
-                            : "bg-background text-foreground border-border hover:border-primary/50"
-                        }`}
-                      >
-                        {mode}
-                      </button>
-                    );
-                  })}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {/* 임대 방식 다중 선택 */}
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[11px] font-bold text-foreground/70">임대 방식 (중복 선택 가능)</p>
+              <div className="flex gap-2">
+                {(["월세", "반전세", "전세"] as const).map((mode) => {
+                  const isOn = form.rentModes.includes(mode);
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        const cur = form.rentModes;
+                        const next = isOn ? cur.filter(m => m !== mode) : [...cur, mode];
+                        set("rentModes", next.length === 0 ? ["월세"] : next);
+                      }}
+                      className="flex-1 py-2 rounded-xl text-xs font-bold border transition-all"
+                      style={isOn
+                        ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                      }
+                    >
+                      {mode}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 월세 금액 */}
+            {(form.rentModes.includes("월세") || form.rentModes.length === 0) && (
+              <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                <p className="text-[11px] font-extrabold text-primary">💰 월세</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
+                  <AmountInput label="월세" value={form.monthlyRent} onChange={(v) => set("monthlyRent", v)} />
                 </div>
               </div>
-
-              {/* 월세 입력 */}
-              {form.rentModes.includes("월세") && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl border border-border bg-muted/20">
-                  <p className="text-xs font-bold text-foreground">💰 월세 금액</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <AmountInput label="보증금" value={form.deposit} onChange={(v) => set("deposit", v)} />
-                    <AmountInput label="월세" value={form.monthlyRent} onChange={(v) => set("monthlyRent", v)} />
-                  </div>
+            )}
+            {/* 반전세 금액 */}
+            {form.rentModes.includes("반전세") && (
+              <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                <p className="text-[11px] font-extrabold text-primary">🏠 반전세</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <AmountInput label="보증금" value={form.halfDeposit} onChange={(v) => set("halfDeposit", v)} />
+                  <AmountInput label="월세" value={form.halfMonthly} onChange={(v) => set("halfMonthly", v)} />
                 </div>
-              )}
-
-              {/* 반전세 입력 */}
-              {form.rentModes.includes("반전세") && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl border border-border bg-muted/20">
-                  <p className="text-xs font-bold text-foreground">🏠 반전세 금액</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <AmountInput label="보증금" value={form.halfDeposit} onChange={(v) => set("halfDeposit", v)} />
-                    <AmountInput label="월세" value={form.halfMonthly} onChange={(v) => set("halfMonthly", v)} />
-                  </div>
-                </div>
-              )}
-
-              {/* 전세 입력 */}
-              {form.rentModes.includes("전세") && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl border border-border bg-muted/20">
-                  <p className="text-xs font-bold text-foreground">🏡 전세 금액</p>
-                  <AmountInput label="전세 보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v)} placeholder="예) 15,000" />
-                </div>
-              )}
-            </div>
-          )}
-          {/* 상가 유형 시 권리금 */}
-          {isCommercial && (
+              </div>
+            )}
+            {/* 전세 금액 */}
+            {form.rentModes.includes("전세") && (
+              <div className="rounded-xl border border-border bg-muted/20 p-3 flex flex-col gap-2">
+                <p className="text-[11px] font-extrabold text-primary">🏡 전세</p>
+                <AmountInput label="보증금" value={form.jeonseDeposit} onChange={(v) => set("jeonseDeposit", v)} />
+              </div>
+            )}
+          </div>
+        )}
+        {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
+        {!isWarehouseSale && (
+          <div className="grid grid-cols-2 gap-3 mt-1">
+            {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.detailType) && (
+              <div className="col-span-2">
+                <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
+              </div>
+            )}
+            <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
+            <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
             <div className="col-span-2">
-              <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
+              <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
             </div>
-          )}
-          {/* 관리비·퇴실청소비 - 매매/토지/건물매매 제외 */}
-          {!isBuildingSale && !isLand && form.tradeType !== "매매" && (
-            <>
-              <AmountInput label="관리비" value={form.managementFee} onChange={(v) => set("managementFee", v)} />
-              <AmountInput label="퇴실 청소비" value={form.exitCleanFee} onChange={(v) => set("exitCleanFee", v)} />
-            </>
-          )}
-          <div className="col-span-2">
+          </div>
+        )}
+        {/* 창고/공장매매: 중개보수만 표시 */}
+        {isWarehouseSale && (
+          <div className="grid grid-cols-1 gap-3 mt-1">
             <AmountInput label="중개보수" value={form.brokerFee} onChange={(v) => set("brokerFee", v)} placeholder="예) 협의" noUnit />
           </div>
-        </div>
+        )}
       </Section>
 
-      {/* LH 전세대출 - 매매/토지/건물매매 제외 */}
-      {!isLand && !isBuildingSale && form.tradeType !== "매매" && (
+      {/* LH 전세대출 — 매매 타입 제외 */}
+      {!isWarehouseSale && form.tradeType !== "매매" && !isLand && (
         <Section label="LH (전세대출)">
-          <div className="flex gap-3">
+          <div className="flex gap-5">
             {LH_TYPES.map((t) => (
               <Radio key={t} checked={form.lhType === t} onClick={() => set("lhType", t)}>{t}</Radio>
             ))}
           </div>
         </Section>
       )}
-
 
       {/* 체크박스 옵션 */}
       <div className="flex gap-6 flex-wrap">
@@ -1214,6 +1142,18 @@ function Step2({
           </div>
         </div>
       </Section>
+
+      {/* 매물 소개 */}
+      <Section label="매물 소개">
+        <textarea
+          placeholder="매물의 특징, 특이사항 등을 적어주세요."
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+          maxLength={300} rows={3}
+          className={ic(false) + " resize-none"}
+        />
+        <p className="text-right text-[11px] text-muted-foreground mt-0.5">{form.description.length} / 300</p>
+      </Section>
     </div>
   );
 }
@@ -1241,17 +1181,6 @@ function Step3({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* 매물 소개 */}
-      <Section label="매물 소개">
-        <textarea
-          placeholder="매물의 특징, 특이사항 등을 적어주세요."
-          value={form.description}
-          onChange={(e) => set("description", e.target.value)}
-          maxLength={300} rows={3}
-          className={ic(false) + " resize-none"}
-        />
-        <p className="text-right text-[11px] text-muted-foreground mt-0.5">{form.description.length} / 300</p>
-      </Section>
 
       {/* 매물 사진 */}
       <Section label="매물 사진">
@@ -1561,47 +1490,3 @@ function AmountInput({
   );
 }
 
-/* ─── FullOptionToggle ─── */
-const FULL_OPTIONS = [
-  "냉장고","세탁기","에어컨","전자레인지","TV","가스레인지","인덕션","침대","책상","옷장","전자키",
-];
-
-function FullOptionToggle({
-  options,
-  set,
-}: {
-  options: string[];
-  set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
-}) {
-  const isFullOption = FULL_OPTIONS.every((o) => options.includes(o));
-
-  const toggleFull = () => {
-    if (isFullOption) {
-      // 풀옵션 해제 → 풀옵션 항목만 제거
-      set("options", options.filter((o) => !FULL_OPTIONS.includes(o)));
-    } else {
-      // 풀옵션 선택 → 기존 옵션 + 풀옵션 합산
-      const merged = Array.from(new Set([...options, ...FULL_OPTIONS]));
-      set("options", merged);
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggleFull}
-      className={`flex items-center gap-2 w-full px-4 py-2.5 rounded-xl border-2 text-sm font-extrabold transition-all mb-2 ${
-        isFullOption
-          ? "bg-primary text-primary-foreground border-primary"
-          : "bg-primary/5 text-primary border-primary/40 hover:border-primary hover:bg-primary/10"
-      }`}
-    >
-      <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-        isFullOption ? "bg-white/30 border-white/50" : "bg-white border-primary/40"
-      }`}>
-        {isFullOption && <span className="text-white text-xs font-black">✓</span>}
-      </span>
-      풀옵션 (냉장고·세탁기·에어컨·전자레인지·TV 등 {FULL_OPTIONS.length}종 일괄 선택)
-    </button>
-  );
-}
