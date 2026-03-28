@@ -1183,7 +1183,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <Section label="공실여부">
                   <div className="flex gap-3">
                     {VACANCY_TYPES.map((t) => (
-                      <button key={t} type="button" onClick={() => set("available_from", t)}
+                      <button key={t} type="button" onClick={() => set("available_from", form.available_from === t ? "" : t)}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all ${
                           form.available_from === t
                             ? "bg-primary text-primary-foreground border-primary"
