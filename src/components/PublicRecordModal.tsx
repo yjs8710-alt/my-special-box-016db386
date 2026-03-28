@@ -268,7 +268,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         return;
       }
 
-      console.log("토지조회 PNU:", pnu);
+      console.log("LAND ADDRESS CHECK =", address);
+      console.log("LAND PNU CHECK =", pnu);
 
       try {
         const data = await fetchLandByPnu(pnu);
