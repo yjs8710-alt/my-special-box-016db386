@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
-import PropertyDetailPanel from "@/components/PropertyDetailPanel";
+
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
 
@@ -180,16 +180,6 @@ const ApartmentRental = () => {
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
         />
-        {selectedId !== null && (() => {
-          const selected = allProperties.find(p => p.id === selectedId) ?? null;
-          return selected ? (
-            <PropertyDetailPanel
-              property={selected}
-              onClose={() => setSelectedId(null)}
-              sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
-            />
-          ) : null;
-        })()}
       </main>
     </div>
   );
