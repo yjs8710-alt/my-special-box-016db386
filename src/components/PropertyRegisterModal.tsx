@@ -1151,36 +1151,6 @@ function Step2({
         </Section>
       )}
 
-      {/* 반려동물 가능 여부 - 주거형 임대 전용 */}
-      {showRoomOptions && (
-        <Section label="반려동물">
-          <div className="flex gap-2">
-            {(["가능", "불가"] as PetType[]).map((v) => {
-              const label = v === "가능" ? "🐾 가능" : "🚫 불가";
-              const isActive = form.pet === v;
-              return (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => set("pet", v)}
-                  className="flex-1 py-2 rounded-xl text-sm font-bold border-2 transition-all"
-                  style={
-                    isActive
-                      ? v === "가능"
-                        ? { background: "hsl(142 71% 45%)", color: "#fff", borderColor: "hsl(142 71% 45%)" }
-                        : v === "불가"
-                        ? { background: "hsl(0 85% 55%)", color: "#fff", borderColor: "hsl(0 85% 55%)" }
-                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                      : { background: "hsl(var(--background))", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
-                  }
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-      )}
 
       {/* 체크박스 옵션 */}
       <div className="flex gap-6 flex-wrap">
