@@ -275,29 +275,40 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         const data = await fetchLandByPnu(pnu);
         console.log("LAND_PARSED_FULL:", JSON.stringify(data, null, 2));
 
-        // totalCount 체크 — 0이면 결과 없음
         const d = data as Record<string, unknown>;
+
+        // 1) 프록시 자체 오류 (ok=false)
+        if (!d?.ok) {
+          setLandDirect(data);
+          setLandError("토지 조회 중 오류가 발생했습니다. (PNU=" + pnu + ")");
+          return;
+        }
+
+        // 2) totalCount 체크
         const upstream = d?.upstreamData as Record<string, unknown> | undefined;
         const resp = (upstream?.response ?? d?.response) as Record<string, unknown> | undefined;
         const totalCount = Number(resp?.totalCount ?? 0);
-        if (data?.ok && totalCount === 0) {
+
+        if (totalCount === 0) {
           setLandDirect(data);
           setLandError("토지대장 조회 결과가 없습니다. (totalCount=0, PNU=" + pnu + ")");
           return;
         }
 
+        // 3) totalCount >= 1 → 정상 데이터
         setLandDirect(data);
       } catch (error: unknown) {
-        console.error("토지 조회 실패:", error);
-        const errMsg = error instanceof Error ? error.message : "토지 조회 실패";
+        // 네트워크/서버 오류만 여기서 처리
+        console.error("토지 조회 네트워크 오류:", error);
+        const errMsg = error instanceof Error ? error.message : "네트워크 오류";
         const errStack = error instanceof Error ? error.stack : undefined;
-        setLandError(errMsg);
+        setLandError("토지 조회 실패 (네트워크/서버 오류): " + errMsg);
         setLandDirect({
           _error: true,
           _error_message: errMsg,
           _error_stack: errStack ?? null,
           _proxy_used: "cloudtype",
-          _verdict: "fetch_error",
+          _verdict: "network_error",
           _step: "fetchLandByPnu",
           _pnu: pnu,
         });
