@@ -54,7 +54,7 @@ function TRow({
   );
 }
 
-/* ── Row 컴포넌트 (기존 토지용) ── */
+/* ── Row 컴포넌트 (토지용) ── */
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
@@ -96,19 +96,12 @@ function SkeletonRow() {
   );
 }
 
-const CLOUDTYPE_LAND_URL = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app/land";
-
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [building, setBuilding] = useState<Record<string, any> | null>(null);
   const [land, setLand] = useState<Record<string, any> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
-
-  // ── 토지 직접 조회 (Cloudtype) ──
-  const [landLoading, setLandLoading] = useState(false);
-  const [landDirect, setLandDirect] = useState<Record<string, any> | null>(null);
-  const [landError, setLandError] = useState("");
 
   /** 값이 있는지 판단 */
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
@@ -131,6 +124,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         // ── Step 1: property_id 없으면 address로 DB에서 조회 ──
         if (!pid && address) {
           console.log("🔎 [property_id 없음] address로 DB 조회:", address);
+
           const { data: propRow, error: propErr } = await supabase
             .from("properties")
             .select("id")
@@ -149,7 +143,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           }
         }
 
-        // ── Step 2: DB에서 building_summary / land_summary 조회 ──
+        // ── Step 2: DB에서 building_summary / land_summary 조회 (property_id 우선) ──
         if (pid) {
           console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
 
@@ -170,7 +164,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
           const bEmpty = !bRes.data || (!bRes.data.main_purpose && !bRes.data.total_area && !bRes.data.approval_date);
 
-          const lEmpty = !lRes.data || !lRes.data.official_price;
+          const lEmpty =
+            !lRes.data ||
+            (!lRes.data.land_category &&
+              !lRes.data.jimok &&
+              !lRes.data.land_area &&
+              !lRes.data.area &&
+              !lRes.data.official_price &&
+              !lRes.data.price &&
+              !lRes.data.use_zone &&
+              !lRes.data.zone);
 
           if (!bEmpty || !lEmpty) {
             setBuilding(bRes.data as Record<string, any> | null);
@@ -296,116 +299,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
-  // ── 주소 → PNU 변환 헬퍼 ──
-  const resolvePnu = async (addr: string): Promise<string | null> => {
-    console.log("🔄 [PNU 변환] 주소로 PNU 조회:", addr);
-
-    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/address-to-pnu`;
-    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: apiKey,
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({ address: addr }),
-      });
-
-      const data = await res.json();
-      console.log("🔄 [PNU 변환 응답]", data);
-
-      if (data?.ok && data?.pnu) {
-        return data.pnu as string;
-      }
-
-      return null;
-    } catch (e) {
-      console.error("🔄 [PNU 변환 에러]", e);
-      return null;
-    }
-  };
-
-  // ── 토지 Cloudtype 직접 조회 ──
-  useEffect(() => {
-    if (loading) return;
-
-    const pnuFromLand = typeof land?.pnu === "string" ? land.pnu : "";
-
-    const fetchLandByPnu = async (pnu: string) => {
-      if (!pnu) {
-        throw new Error("PNU가 없습니다.");
-      }
-
-      const requestUrl = `${CLOUDTYPE_LAND_URL}?pnu=${encodeURIComponent(pnu)}`;
-      console.log("LAND_REQUEST_URL:", requestUrl);
-
-      const response = await fetch(requestUrl, { method: "GET" });
-      const rawText = await response.text();
-      console.log("LAND_RAW_RESPONSE:", rawText);
-
-      let data: Record<string, any>;
-      try {
-        data = JSON.parse(rawText);
-      } catch {
-        throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
-      }
-
-      if (!response.ok) {
-        throw new Error(data.message || data.error || "토지 조회 실패");
-      }
-
-      data._proxy_used = "cloudtype";
-      return data;
-    };
-
-    const run = async () => {
-      setLandLoading(true);
-      setLandError("");
-      setLandDirect(null);
-
-      let pnu = pnuFromLand;
-
-      if (!pnu && address) {
-        pnu = (await resolvePnu(address)) ?? "";
-      }
-
-      if (!pnu) {
-        setLandError("주소를 먼저 입력하세요");
-        setLandLoading(false);
-        return;
-      }
-
-      console.log("LAND ADDRESS CHECK =", address);
-      console.log("LAND PNU CHECK =", pnu);
-
-      try {
-        const data = await fetchLandByPnu(pnu);
-        console.log("LAND_PARSED_FULL:", JSON.stringify(data, null, 2));
-
-        const d = data as Record<string, any>;
-
-        if (!d?.ok) {
-          setLandDirect(null);
-          setLandError("토지 조회 중 오류가 발생했습니다.");
-          return;
-        }
-
-        setLandDirect(data);
-      } catch (error: unknown) {
-        console.error("토지 조회 네트워크 오류:", error);
-        setLandError("토지 조회 중 오류가 발생했습니다.");
-        setLandDirect(null);
-      } finally {
-        setLandLoading(false);
-      }
-    };
-
-    run();
-  }, [land, loading, address]);
-
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
@@ -434,51 +327,31 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const hasViolationInfo = violation !== null;
 
   const hasAnyBuildingData =
-    building &&
-    (str(building.building_name) ||
+    !!building &&
+    !!(
+      str(building.building_name) ||
       str(building.main_purpose) ||
       str(building.total_area) ||
       str(building.approval_date) ||
-      str(building.floors_above));
+      str(building.floors_above)
+    );
 
+  const hasAnyLandData =
+    !!land &&
+    !!(
+      str(land.land_category) ||
+      str(land.jimok) ||
+      str(land.land_area) ||
+      str(land.area) ||
+      str(land.official_price) ||
+      str(land.price) ||
+      str(land.use_zone) ||
+      str(land.zone) ||
+      str(land.pnu)
+    );
+
+  // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
-
-  const formatValue = (v: unknown) => (v === undefined || v === null || v === "" ? "-" : String(v));
-
-  const getLandItem = (source: Record<string, any> | null) => {
-    if (!source) return null;
-
-    // 구조 1: { land: { ... } }
-    if (source.land && typeof source.land === "object") {
-      return source.land;
-    }
-
-    // 구조 2: { response: { body: { items: { item }}}}
-    const resp = source.response ?? source.upstreamData?.response;
-    const item = resp?.body?.items?.item;
-
-    if (Array.isArray(item)) {
-      return item[0] ?? null;
-    }
-
-    if (item && typeof item === "object") {
-      return item;
-    }
-
-    return null;
-  };
-
-  const landItem = getLandItem(landDirect);
-
-  const landPnu = landItem?.pnu ?? landItem?.PNU ?? land?.pnu ?? null;
-
-  const landJimok = landItem?.jimok ?? landItem?.lndcgrCodeNm ?? land?.land_category ?? land?.jimok ?? null;
-
-  const landArea = landItem?.area ?? landItem?.lndpclAr ?? land?.land_area ?? land?.area ?? null;
-
-  const landZone = landItem?.zone ?? landItem?.prposArea1Nm ?? land?.use_zone ?? land?.zone ?? null;
-
-  const landPrice = landItem?.price ?? landItem?.pblntfPclnd ?? land?.official_price ?? land?.price ?? null;
 
   return (
     <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onClose}>
@@ -556,36 +429,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {/* ① 토지 정보 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
 
-              {landLoading && (
-                <div className="px-4 py-4 text-center text-[12px] text-muted-foreground font-medium">조회중...</div>
-              )}
-
-              {!landLoading && landError && (
-                <div className="px-4 py-3 text-[12px] font-medium text-muted-foreground">{landError}</div>
-              )}
-
-              {!landLoading && !landError && (
-                <>
-                  {landItem ? (
-                    <div className="px-4 py-1">
-                      <Row label="PNU" value={formatValue(landPnu)} />
-                      <Row label="지목" value={formatValue(landJimok)} />
-                      <Row label="토지면적" value={formatValue(landArea)} />
-                      <Row label="용도지역" value={formatValue(landZone)} />
-                      <Row label="공시지가" value={formatValue(landPrice)} />
-                    </div>
-                  ) : land ? (
-                    <div className="px-4 py-1">
-                      <Row label="PNU" value={formatValue(land?.pnu)} />
-                      <Row label="지목" value={formatValue(land?.land_category ?? land?.jimok)} />
-                      <Row label="토지면적" value={formatValue(land?.land_area ?? land?.area)} />
-                      <Row label="용도지역" value={formatValue(land?.use_zone ?? land?.zone)} />
-                      <Row label="공시지가" value={formatValue(land?.official_price ?? land?.price)} />
-                    </div>
-                  ) : (
-                    <EmptySection message="토지 조회 결과 없음" />
-                  )}
-                </>
+              {hasAnyLandData ? (
+                <div className="px-4 py-1">
+                  <Row label="PNU" value={str(land?.pnu)} />
+                  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
+                  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
+                  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
+                  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
+                </div>
+              ) : (
+                <EmptySection message="토지 조회 결과 없음" />
               )}
 
               <div className="h-1.5 bg-muted/40 my-1" />
@@ -655,6 +508,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {building && allBuildings.length > 0 ? (
                 allBuildings.map((bldg, idx) => {
                   const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
 
@@ -855,9 +709,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
 
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
-                <p className="text-[9px] text-muted-foreground/40">
-                  출처: 국토교통부 건축물대장 공공데이터 (data.go.kr)
-                </p>
+                <p className="text-[9px] text-muted-foreground/40">출처: 국토교통부 건축물대장·토지대장 공공데이터</p>
                 {fetchedFrom && (
                   <span
                     className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
