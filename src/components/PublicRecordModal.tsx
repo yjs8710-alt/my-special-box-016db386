@@ -279,8 +279,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
         // 1) 프록시 자체 오류 (ok=false)
         if (!d?.ok) {
-          setLandDirect(data);
-          setLandError("토지 조회 중 오류가 발생했습니다. (PNU=" + pnu + ")");
+          setLandDirect(null);
+          setLandError("토지 조회 중 오류가 발생했습니다.");
           return;
         }
 
@@ -290,28 +290,17 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         const totalCount = Number(resp?.totalCount ?? 0);
 
         if (totalCount === 0) {
-          setLandDirect(data);
-          setLandError("토지대장 조회 결과가 없습니다. (totalCount=0, PNU=" + pnu + ")");
+          setLandDirect(null);
+          setLandError("토지대장 조회 결과가 없습니다.");
           return;
         }
 
         // 3) totalCount >= 1 → 정상 데이터
         setLandDirect(data);
       } catch (error: unknown) {
-        // 네트워크/서버 오류만 여기서 처리
         console.error("토지 조회 네트워크 오류:", error);
-        const errMsg = error instanceof Error ? error.message : "네트워크 오류";
-        const errStack = error instanceof Error ? error.stack : undefined;
-        setLandError("토지 조회 실패 (네트워크/서버 오류): " + errMsg);
-        setLandDirect({
-          _error: true,
-          _error_message: errMsg,
-          _error_stack: errStack ?? null,
-          _proxy_used: "cloudtype",
-          _verdict: "network_error",
-          _step: "fetchLandByPnu",
-          _pnu: pnu,
-        });
+        setLandError("토지 조회 중 오류가 발생했습니다.");
+        setLandDirect(null);
       } finally { setLandLoading(false); }
     };
 
@@ -434,46 +423,20 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 <div className="px-4 py-4 text-center text-[12px] text-muted-foreground font-medium">조회중...</div>
               )}
               {landError && (
-                <div className="px-4 py-3 text-[12px] font-medium" style={{ color: "hsl(var(--destructive))" }}>토지 조회 실패: {landError}</div>
+                <div className="px-4 py-3 text-[12px] font-medium text-muted-foreground">{landError}</div>
               )}
               {landDirect && (() => {
-                const isError = landDirect._error === true;
                 const landData = landDirect.land as Record<string, unknown> | undefined;
-                console.log("LAND_PARSED_RESPONSE:", landDirect);
-                const fmt = (v: unknown) => v === undefined ? "(매핑값 없음)" : v === null ? "(null)" : String(v);
-                return (
+                const fmt = (v: unknown) => v === undefined ? "-" : v === null ? "-" : String(v);
+                return landData ? (
                   <div className="px-4 py-1">
-                    {!isError && landData && (
-                      <>
-                        <Row label="PNU" value={fmt(landData?.pnu)} />
-                        <Row label="지목" value={fmt(landData?.jimok)} />
-                        <Row label="토지면적" value={fmt(landData?.area)} />
-                        <Row label="용도지역" value={fmt(landData?.zone)} />
-                        <Row label="공시지가" value={fmt(landData?.price)} />
-                      </>
-                    )}
-                    {/* LAND ERROR DETAIL */}
-                    {(isError || landDirect._verdict === "unexpected_error") && (
-                      <div className="mt-2 p-3 rounded border border-border" style={{ background: "hsl(0 100% 97%)", borderColor: "hsl(0 70% 80%)" }}>
-                        <p className="text-[10px] font-bold mb-1" style={{ color: "hsl(0 70% 40%)" }}>LAND ERROR DETAIL</p>
-                        <pre className="text-[9px] whitespace-pre-wrap break-all" style={{ color: "hsl(0 50% 30%)" }}>
-{`verdict : ${fmt(landDirect._verdict)}
-proxy   : ${fmt(landDirect._proxy_used)}
-step    : ${fmt(landDirect._step)}
-message : ${fmt(landDirect._error_message)}
-stack   : ${fmt(landDirect._error_stack)}`}
-                        </pre>
-                      </div>
-                    )}
-                    {/* RAW LAND RESPONSE */}
-                    <div className="mt-3 p-3 rounded border border-border bg-muted/30">
-                      <p className="text-[10px] font-bold text-muted-foreground mb-1">RAW LAND RESPONSE (_proxy_used: {fmt(landDirect._proxy_used)})</p>
-                      <pre className="text-[9px] text-foreground/70 whitespace-pre-wrap break-all max-h-[200px] overflow-y-auto">
-                        {JSON.stringify(landDirect, null, 2)}
-                      </pre>
-                    </div>
+                    <Row label="PNU" value={fmt(landData?.pnu)} />
+                    <Row label="지목" value={fmt(landData?.jimok)} />
+                    <Row label="토지면적" value={fmt(landData?.area)} />
+                    <Row label="용도지역" value={fmt(landData?.zone)} />
+                    <Row label="공시지가" value={fmt(landData?.price)} />
                   </div>
-                );
+                ) : null;
               })()}
               {!landLoading && !landError && !landDirect && (
                 <EmptySection message="토지 조회 결과 없음" />
