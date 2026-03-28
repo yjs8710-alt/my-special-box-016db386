@@ -1192,8 +1192,8 @@ function Step2({
       {showRoomOptions && (
         <Section label="반려동물">
           <div className="flex gap-2">
-            {(["가능", "불가", ""] as PetType[]).map((v) => {
-              const label = v === "가능" ? "🐾 가능" : v === "불가" ? "🚫 불가" : "미지정";
+            {(["가능", "불가"] as PetType[]).map((v) => {
+              const label = v === "가능" ? "🐾 가능" : "🚫 불가";
               const isActive = form.pet === v;
               return (
                 <button
