@@ -1178,8 +1178,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 공실 여부 — 매매 타입일 때 숨김 */}
-              {form.tradeType !== "매매" && (
+              {/* 공실 여부 — 매매 타입이더라도 집합건물이면 표시 */}
+              {(form.tradeType !== "매매" || form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type)) && (
                 <Section label="공실여부">
                   <div className="flex gap-3">
                     {VACANCY_TYPES.map((t) => (
