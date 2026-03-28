@@ -273,13 +273,26 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
       try {
         const data = await fetchLandByPnu(pnu);
+        console.log("LAND_PARSED_FULL:", JSON.stringify(data, null, 2));
+
+        // totalCount 체크 — 0이면 결과 없음
+        const totalCount = Number(
+          data?.upstreamData?.response?.totalCount ??
+          data?.response?.totalCount ??
+          0
+        );
+        if (data?.ok && totalCount === 0) {
+          setLandDirect(data);
+          setLandError("토지대장 조회 결과가 없습니다. (totalCount=0, PNU=" + pnu + ")");
+          return;
+        }
+
         setLandDirect(data);
       } catch (error: unknown) {
         console.error("토지 조회 실패:", error);
         const errMsg = error instanceof Error ? error.message : "토지 조회 실패";
         const errStack = error instanceof Error ? error.stack : undefined;
         setLandError(errMsg);
-        // 오류 상세를 landDirect에 저장하여 화면에 표시
         setLandDirect({
           _error: true,
           _error_message: errMsg,
