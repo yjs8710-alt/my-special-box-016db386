@@ -279,8 +279,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
         // 1) 프록시 자체 오류 (ok=false)
         if (!d?.ok) {
-          setLandDirect(data);
-          setLandError("토지 조회 중 오류가 발생했습니다. (PNU=" + pnu + ")");
+          setLandDirect(null);
+          setLandError("토지 조회 중 오류가 발생했습니다.");
           return;
         }
 
@@ -290,28 +290,17 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         const totalCount = Number(resp?.totalCount ?? 0);
 
         if (totalCount === 0) {
-          setLandDirect(data);
-          setLandError("토지대장 조회 결과가 없습니다. (totalCount=0, PNU=" + pnu + ")");
+          setLandDirect(null);
+          setLandError("토지대장 조회 결과가 없습니다.");
           return;
         }
 
         // 3) totalCount >= 1 → 정상 데이터
         setLandDirect(data);
       } catch (error: unknown) {
-        // 네트워크/서버 오류만 여기서 처리
         console.error("토지 조회 네트워크 오류:", error);
-        const errMsg = error instanceof Error ? error.message : "네트워크 오류";
-        const errStack = error instanceof Error ? error.stack : undefined;
-        setLandError("토지 조회 실패 (네트워크/서버 오류): " + errMsg);
-        setLandDirect({
-          _error: true,
-          _error_message: errMsg,
-          _error_stack: errStack ?? null,
-          _proxy_used: "cloudtype",
-          _verdict: "network_error",
-          _step: "fetchLandByPnu",
-          _pnu: pnu,
-        });
+        setLandError("토지 조회 중 오류가 발생했습니다.");
+        setLandDirect(null);
       } finally { setLandLoading(false); }
     };
 
