@@ -167,13 +167,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           const lEmpty =
             !lRes.data ||
             (!lRes.data.land_category &&
-              !lRes.data.jimok &&
               !lRes.data.land_area &&
-              !lRes.data.area &&
               !lRes.data.official_price &&
-              !lRes.data.price &&
-              !lRes.data.use_zone &&
-              !lRes.data.zone);
+              !lRes.data.use_zone);
 
           if (!bEmpty || !lEmpty) {
             setBuilding(bRes.data as Record<string, any> | null);
