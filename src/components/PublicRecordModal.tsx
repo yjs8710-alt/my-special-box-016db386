@@ -590,8 +590,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                                 <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">층</th>
                                 <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">호</th>
                                 <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">면적</th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">구분</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">면적</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -600,8 +599,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                                   <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">{ef.flrNoNm || ef.flrNo || "-"}</td>
                                   <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.hoNm || "-"}</td>
                                   <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.mainPurpsCdNm || ef.etcPurps || "-"}</td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.area || "-"}</td>
-                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.exposPubuseGbCdNm || ef.pubuseGbCdNm || "-"}</td>
+                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
                                 </tr>
                               ))}
                             </tbody>
