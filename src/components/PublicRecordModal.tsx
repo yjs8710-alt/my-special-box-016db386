@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { mapBuildingFromDB } from "@/lib/buildingUtils";
@@ -8,23 +8,56 @@ interface PublicRecordModalProps {
   propertyId?: string; // DB UUID (dbId)
   onClose: () => void;
 }
+import React, { forwardRef } from "react";
 
-/* ── 2열 테이블 Row ── */
-function TRow({
-  l1,
-  v1,
-  l2,
-  v2,
-  highlight,
-}: {
+const TRow = forwardRef<HTMLTableRowElement, {
   l1: string;
   v1?: string | null;
   l2?: string;
   v2?: string | null;
   highlight?: boolean;
-}) {
+}>(({ l1, v1, l2, v2, highlight }, ref) => {
   return (
-    <tr className="border-b border-border/40">
+    <tr ref={ref} className="border-b border-border/40">
+      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
+        {l1}
+      </td>
+      <td
+        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 whitespace-nowrap ${
+          highlight ? "text-red-600" : "text-foreground"
+        }`}
+      >
+        {v1 ?? "-"}
+      </td>
+
+      {l2 !== undefined ? (
+        <>
+          <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
+            {l2}
+          </td>
+          <td
+            className={`py-1.5 px-2 text-[11px] font-semibold whitespace-nowrap ${
+              highlight ? "text-red-600" : "text-foreground"
+            }`}
+          >
+            {v2 ?? "-"}
+          </td>
+        </>
+      ) : (
+        <td
+          colSpan={2}
+          className={`py-1.5 px-2 text-[11px] font-semibold ${
+            highlight ? "text-red-600" : "text-foreground"
+          }`}
+        ></td>
+      )}
+    </tr>
+  );
+});
+
+TRow.displayName = "TRow";
+/* ── 2열 테이블 Row ── */
+
       <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
         {l1}
       </td>
