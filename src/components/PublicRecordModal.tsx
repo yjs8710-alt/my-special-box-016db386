@@ -25,7 +25,7 @@ function TRow({
 }) {
   return (
     <tr className="border-b border-border/40">
-      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[70px] whitespace-nowrap border-r border-border/30">
+      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
         {l1}
       </td>
       <td
