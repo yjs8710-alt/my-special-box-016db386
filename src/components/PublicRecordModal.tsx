@@ -273,22 +273,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   }, [address, propertyId]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
-  const hasLandDisplayValue = (obj: Record<string, any> | null) =>
-    !!obj &&
+  const hasAnyLandData =
+    !!land &&
     !!(
-      str(obj.pnu) ||
-      str(obj.land_category) ||
-      str(obj.jimok) ||
-      str(obj.land_area) ||
-      str(obj.area) ||
-      str(obj.official_price) ||
-      str(obj.price) ||
-      str(obj.use_zone) ||
-      str(obj.zone) ||
-      str(obj.lot_number)
+      str(land.land_category) ||
+      str(land.jimok) ||
+      str(land.land_area) ||
+      str(land.area) ||
+      str(land.official_price) ||
+      str(land.price) ||
+      str(land.use_zone) ||
+      str(land.zone) ||
+      str(land.pnu)
     );
-
-  console.log("🌍 LAND FINAL:", land);
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
 
   const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
@@ -324,7 +321,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(building.floors_above)
     );
 
-  const hasAnyLandData = hasLandDisplayValue(land);
   // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
 
@@ -407,16 +403,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {hasAnyLandData ? (
                 <div className="px-4 py-1">
                   <Row label="PNU" value={str(land?.pnu)} />
-                  <Row label="지번" value={str(land?.lot_number)} />
                   <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
                   <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
                   <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
                   <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
                 </div>
               ) : (
-                <div className="px-4 py-4">
-                  <p className="text-[11px] text-muted-foreground">토지 데이터 없음 또는 일부 항목만 조회됨</p>
-                </div>
+                <EmptySection message="토지 조회 결과 없음" />
               )}
 
               <div className="h-1.5 bg-muted/40 my-1" />
