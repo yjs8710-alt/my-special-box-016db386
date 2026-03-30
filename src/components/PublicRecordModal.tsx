@@ -232,18 +232,35 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("🔥 FINAL BUILDING:", bSum);
         }
         // land_summary 정규화
-        if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
-          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) {
-            lSum.land_category = lSum.jimok;
+        // land_summary 정규화
+        if (lSum) {
+          const rawLand = lSum._raw?.land ?? lSum._raw?.rawLand ?? lSum._raw ?? {};
+
+          const rawZone = lSum._raw?.zone ?? lSum._raw?.rawZone ?? {};
+
+          if (!hasVal(lSum.land_category)) {
+            lSum.land_category = rawLand.lndcgrCodeNm ?? rawLand.land_category ?? rawLand.jimok ?? lSum.jimok ?? null;
           }
-          if (!hasVal(lSum.official_price) && hasVal(lSum.price)) {
-            lSum.official_price = lSum.price;
+
+          if (!hasVal(lSum.land_area)) {
+            lSum.land_area = rawLand.lndpclAr ?? rawLand.land_area ?? rawLand.area ?? lSum.area ?? null;
           }
-          if (!hasVal(lSum.land_area) && hasVal(lSum.area)) {
-            lSum.land_area = lSum.area;
+
+          if (!hasVal(lSum.official_price)) {
+            lSum.official_price =
+              rawLand.indvdlzPblntfPc ?? rawLand.official_price ?? rawLand.price ?? lSum.price ?? null;
           }
-          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone)) {
-            lSum.use_zone = lSum.zone;
+
+          if (!hasVal(lSum.use_zone)) {
+            lSum.use_zone = rawZone.prposArea1DstrcNm ?? rawZone.use_zone ?? rawZone.zone ?? lSum.zone ?? null;
+          }
+
+          if (!hasVal(lSum.pnu)) {
+            lSum.pnu = rawLand.pnu ?? rawZone.pnu ?? null;
+          }
+
+          if (!hasVal(lSum.lot_number)) {
+            lSum.lot_number = rawLand.mnnmSlno ?? rawLand.lot_number ?? rawLand.jibun ?? null;
           }
 
           console.log("🌍 [land 정규화 완료]:", {
@@ -251,7 +268,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             official_price: lSum.official_price,
             land_area: lSum.land_area,
             use_zone: lSum.use_zone,
+            lot_number: lSum.lot_number,
             pnu: lSum.pnu,
+            rawLand,
+            rawZone,
           });
         }
 
