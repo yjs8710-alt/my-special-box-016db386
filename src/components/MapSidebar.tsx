@@ -444,7 +444,7 @@ MemoNotepad.displayName = "MemoNotepad";
       )}
     </div>
   );
-};
+});
 
 /* ── ErrorReportModal ── */
 const ERROR_CATEGORIES = ["정보 오류", "사진 오류", "가격 오류", "연락처 오류", "이미 거래완료", "기타"];
