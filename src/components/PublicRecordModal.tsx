@@ -29,7 +29,7 @@ function TRow({
         {l1}
       </td>
       <td
-        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 ${
+        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 whitespace-nowrap ${
           highlight ? "text-red-600" : "text-foreground"
         }`}
       >
