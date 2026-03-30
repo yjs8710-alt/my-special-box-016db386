@@ -8,7 +8,6 @@ interface PublicRecordModalProps {
   propertyId?: string; // DB UUID (dbId)
   onClose: () => void;
 }
-import React, { forwardRef } from "react";
 
 const TRow = forwardRef<HTMLTableRowElement, {
   l1: string;
@@ -57,35 +56,6 @@ const TRow = forwardRef<HTMLTableRowElement, {
 
 TRow.displayName = "TRow";
 /* ── 2열 테이블 Row ── */
-
-      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
-        {l1}
-      </td>
-      <td
-        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 whitespace-nowrap ${
-          highlight ? "text-red-600" : "text-foreground"
-        }`}
-      >
-        {v1 ?? "-"}
-      </td>
-      {l2 !== undefined ? (
-        <>
-          <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
-            {l2}
-          </td>
-          <td className={`py-1.5 px-2 text-[11px] font-semibold whitespace-nowrap ${highlight ? "text-red-600" : "text-foreground"}`}>
-            {v2 ?? "-"}
-          </td>
-        </>
-      ) : (
-        <td
-          colSpan={2}
-          className={`py-1.5 px-2 text-[11px] font-semibold ${highlight ? "text-red-600" : "text-foreground"}`}
-        ></td>
-      )}
-    </tr>
-  );
-}
 
 /* ── Row 컴포넌트 (토지용) ── */
 function Row({ label, value }: { label: string; value?: string | null }) {
