@@ -232,35 +232,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("🔥 FINAL BUILDING:", bSum);
         }
         // land_summary 정규화
-        // land_summary 정규화
-        if (lSum) {
-          const rawLand = lSum._raw?.land ?? lSum._raw?.rawLand ?? lSum._raw ?? {};
-
-          const rawZone = lSum._raw?.zone ?? lSum._raw?.rawZone ?? {};
-
-          if (!hasVal(lSum.land_category)) {
-            lSum.land_category = rawLand.lndcgrCodeNm ?? rawLand.land_category ?? rawLand.jimok ?? lSum.jimok ?? null;
+        if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
+          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) {
+            lSum.land_category = lSum.jimok;
           }
-
-          if (!hasVal(lSum.land_area)) {
-            lSum.land_area = rawLand.lndpclAr ?? rawLand.land_area ?? rawLand.area ?? lSum.area ?? null;
+          if (!hasVal(lSum.official_price) && hasVal(lSum.price)) {
+            lSum.official_price = lSum.price;
           }
-
-          if (!hasVal(lSum.official_price)) {
-            lSum.official_price =
-              rawLand.indvdlzPblntfPc ?? rawLand.official_price ?? rawLand.price ?? lSum.price ?? null;
+          if (!hasVal(lSum.land_area) && hasVal(lSum.area)) {
+            lSum.land_area = lSum.area;
           }
-
-          if (!hasVal(lSum.use_zone)) {
-            lSum.use_zone = rawZone.prposArea1DstrcNm ?? rawZone.use_zone ?? rawZone.zone ?? lSum.zone ?? null;
-          }
-
-          if (!hasVal(lSum.pnu)) {
-            lSum.pnu = rawLand.pnu ?? rawZone.pnu ?? null;
-          }
-
-          if (!hasVal(lSum.lot_number)) {
-            lSum.lot_number = rawLand.mnnmSlno ?? rawLand.lot_number ?? rawLand.jibun ?? null;
+          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone)) {
+            lSum.use_zone = lSum.zone;
           }
 
           console.log("🌍 [land 정규화 완료]:", {
@@ -268,10 +251,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             official_price: lSum.official_price,
             land_area: lSum.land_area,
             use_zone: lSum.use_zone,
-            lot_number: lSum.lot_number,
             pnu: lSum.pnu,
-            rawLand,
-            rawZone,
           });
         }
 
@@ -293,8 +273,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   }, [address, propertyId]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
-  const hasAnyLandData = !!land;
-  const hasAnyBuildingData = !!building;
+  const hasAnyLandData =
+    !!land &&
+    !!(
+      str(land.land_category) ||
+      str(land.jimok) ||
+      str(land.land_area) ||
+      str(land.area) ||
+      str(land.official_price) ||
+      str(land.price) ||
+      str(land.use_zone) ||
+      str(land.zone) ||
+      str(land.pnu)
+    );
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
   if (land && land._raw) {
     const r = land._raw.land ?? land._raw;
@@ -337,6 +328,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const isViolation = violation?.isViolation === true;
   const hasViolationInfo = violation !== null;
+
+  const hasAnyBuildingData =
+    !!building &&
+    !!(
+      str(building.building_name) ||
+      str(building.main_purpose) ||
+      str(building.total_area) ||
+      str(building.approval_date) ||
+      str(building.floors_above)
+    );
 
   // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
@@ -417,7 +418,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {/* ① 토지 정보 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
 
-              {land ? (
+              {hasAnyLandData ? (
                 <div className="px-4 py-1">
                   <Row label="PNU" value={str(land?.pnu)} />
                   <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
@@ -434,47 +435,299 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {/* ② 건축물 정보 */}
               <SectionHeader emoji="🏢" title="건축물대장" bg="hsl(var(--primary) / 0.05)" />
 
-              {building ? (
+              {building && hasViolationInfo && (
+                <div
+                  className="flex items-start gap-2 mx-3 mt-2 mb-1 rounded-lg px-3 py-2.5"
+                  style={
+                    isViolation
+                      ? {
+                          background: "hsl(0 100% 97%)",
+                          border: "1.5px solid hsl(0 80% 80%)",
+                        }
+                      : {
+                          background: "hsl(142 60% 96%)",
+                          border: "1.5px solid hsl(142 50% 75%)",
+                        }
+                  }
+                >
+                  <span className="text-base leading-none mt-0.5 flex-shrink-0">{isViolation ? "⚠️" : "✔"}</span>
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span
+                      className="text-[12px] font-extrabold leading-tight"
+                      style={{
+                        color: isViolation ? "hsl(0 70% 40%)" : "hsl(142 50% 30%)",
+                      }}
+                    >
+                      {isViolation ? "위반건축물" : "정상건축물"}
+                    </span>
+
+                    {isViolation && violation!.items.length > 0 && (
+                      <div className="flex flex-col gap-0.5 mt-0.5">
+                        {violation!.items.map((v, i) => (
+                          <span key={i} className="text-[10px] leading-snug" style={{ color: "hsl(0 60% 35%)" }}>
+                            {v.vlttGbCdNm ? `[${v.vlttGbCdNm}] ` : ""}
+                            {v.vlttRnCnts || "위반내용 정보 없음"}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {!isViolation && (
+                      <span className="text-[10px]" style={{ color: "hsl(142 40% 38%)" }}>
+                        위반건축물 이력 없음
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {building && !hasViolationInfo && (
+                <div
+                  className="flex items-center gap-2 mx-3 mt-2 mb-1 rounded-lg px-3 py-2"
+                  style={{
+                    background: "hsl(var(--muted))",
+                    border: "1px solid hsl(var(--border))",
+                  }}
+                >
+                  <span className="text-sm">🏛️</span>
+                  <span className="text-[11px] text-muted-foreground">위반건축물 여부 정보 없음</span>
+                </div>
+              )}
+
+              {building && allBuildings.length > 0 ? (
+                allBuildings.map((bldg, idx) => {
+                  const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+
+                  const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
+                  const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
+
+                  const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
+                  const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
+                  const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
+
+                  const parkTotal =
+                    Number(bldg.indrMechUtcnt ?? 0) +
+                    Number(bldg.oudrMechUtcnt ?? 0) +
+                    Number(bldg.indrAutoUtcnt ?? 0) +
+                    Number(bldg.oudrAutoUtcnt ?? 0);
+
+                  const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
+
+                  const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
+
+                  const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
+
+                  const seismicDesign = bldg.erthqkDsgnApplyYn
+                    ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
+                      ? "적용"
+                      : String(bldg.erthqkDsgnApplyYn) === "1"
+                        ? "적용"
+                        : String(bldg.erthqkDsgnApplyYn)
+                    : "-";
+
+                  return (
+                    <div key={idx} className="px-3 mt-2">
+                      <div className="flex justify-center mb-2">
+                        <span
+                          className="inline-block text-[11px] font-bold text-white px-4 py-1.5 rounded-full"
+                          style={{ background: "hsl(var(--primary))" }}
+                        >
+                          {dongLabel}
+                          {regKind && (
+                            <span className="block text-[9px] font-normal text-center opacity-80">{regKind}</span>
+                          )}
+                        </span>
+                      </div>
+
+                      <table className="w-full border-collapse border border-border/50 text-[11px]">
+                        <tbody>
+                          <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
+                          {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
+                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
+                          <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
+                          <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
+                          <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
+                          <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
+                          <TRow l1="연면적" v1={s(bldg.totArea)} l2="용적률산정연면적" v2={s(bldg.vlRatEstmTotArea)} />
+                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
+                          <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
+                          <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
+                          <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
+                          <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
+                          <TRow l1="대내진능력" v1={s(bldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
+                        </tbody>
+                      </table>
+
+                      {/* 집합건물 층별 전유/공용 면적 */}
+                      {bldg.exposFloors && Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-[11px] font-bold text-foreground mb-1">
+                            층별 전유/공용 면적 ({bldg.exposFloors.length}건)
+                          </h4>
+                          <table className="w-full border-collapse border border-border/50 text-[10px]">
+                            <thead>
+                              <tr className="bg-muted/40">
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  층
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  호
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  용도
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
+                                  면적
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bldg.exposFloors.map((ef: any, fi: number) => (
+                                <tr key={fi} className="border-b border-border/30 last:border-0">
+                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
+                                    {ef.flrNoNm || ef.flrNo || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.hoNm || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.mainPurpsCdNm || ef.etcPurps || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : building ? (
                 <div className="px-3 mt-2">
                   <table className="w-full border-collapse border border-border/50 text-[11px]">
                     <tbody>
-                      <TRow l1="소재지" v1={address} />
-                      <TRow
-                        l1="건물명"
-                        v1={str(building?.building_name)}
-                        l2="사용승인일"
-                        v2={str(building?.approval_date)}
-                      />
+                      <TRow l1="소재지" v1={str(raw?.platPlc) ?? address} />
+                      {raw?.newPlatPlc && <TRow l1="도로명" v1={str(raw.newPlatPlc)} />}
+                      <TRow l1="건물명" v1={str(building.building_name)} l2="건축물대장구조" v2="-" />
                       <TRow
                         l1="주용도"
-                        v1={str(building?.main_purpose)}
-                        l2="주구조"
-                        v2={raw ? str(raw.strctCdNm) : null}
+                        v1={str(building.main_purpose)}
+                        l2="사용승인일"
+                        v2={bMapped.approvalDate ?? str(building.approval_date)}
                       />
                       <TRow
-                        l1="대지면적"
-                        v1={str(building?.land_area)}
-                        l2="건축면적"
-                        v2={str(building?.building_area)}
+                        l1="주구조"
+                        v1={raw ? str(raw.strctCdNm) : null}
+                        l2="지붕구조"
+                        v2={raw ? str(raw.roofCdNm) : null}
                       />
-                      <TRow l1="연면적" v1={str(building?.total_area)} l2="지상층수" v2={str(building?.floors_above)} />
+                      <TRow l1="대지면적" v1={str(building.land_area)} l2="건축면적" v2={str(building.building_area)} />
                       <TRow
-                        l1="지하층수"
-                        v1={str(building?.floors_below)}
-                        l2="주차"
-                        v2={str(building?.parking_count)}
+                        l1="연면적"
+                        v1={str(building.total_area)}
+                        l2="(용적률산정용)연면적"
+                        v2={raw ? str(raw.vlRatEstmTotArea) : null}
+                      />
+                      <TRow l1="건폐율" v1={raw ? str(raw.bcRat) : null} l2="용적률" v2={raw ? str(raw.vlRat) : null} />
+                      <TRow
+                        l1="세대수"
+                        v1={raw?.hhldCnt ? String(raw.hhldCnt) : "0"}
+                        l2="가구수"
+                        v2={raw?.fmlyCnt ? String(raw.fmlyCnt) : "0"}
+                      />
+                      <TRow
+                        l1="지상층수"
+                        v1={building.floors_above ? `${building.floors_above}` : null}
+                        l2="지하층수"
+                        v2={building.floors_below ? `${building.floors_below}` : "0"}
                       />
                       <TRow
                         l1="엘리베이터"
-                        v1={building?.elevator === true ? "있음" : building?.elevator === false ? "없음" : "-"}
-                        l2="비고"
-                        v2="-"
+                        v1={bMapped.elevatorDetail}
+                        l2="주차"
+                        v2={str(building.parking_count) ? `${building.parking_count}대` : "-"}
+                      />
+                      <TRow
+                        l1="대내진능력"
+                        v1={bMapped.seismicAblty ?? "-"}
+                        l2="내진설계 적용"
+                        v2={bMapped.seismicDesign ?? "-"}
                       />
                     </tbody>
                   </table>
                 </div>
               ) : (
                 <EmptySection message="건축물대장 데이터 없음" />
+              )}
+
+              {!hasAnyBuildingData && building && (
+                <div className="px-4 py-2">
+                  {buildingApiNoData ? (
+                    <div
+                      className="rounded-lg p-3"
+                      style={{
+                        background: "hsl(38 100% 97%)",
+                        border: "1px solid hsl(38 80% 85%)",
+                      }}
+                    >
+                      <p className="text-[10px] leading-relaxed" style={{ color: "hsl(38 60% 30%)" }}>
+                        건축물대장 조회 결과 없음 — 해당 지번에 건축물 미등록
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground/50 text-center">
+                      국토교통부 미등록 지번이거나 API 조회 실패
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {floors.length > 0 && (
+                <>
+                  <div className="px-3 mt-3 mb-1">
+                    <p className="text-[10px] text-muted-foreground italic">
+                      * 참고용 자료이므로 실제 내용과 차이가 있을 수 있습니다.
+                    </p>
+                    <h3 className="text-[13px] font-extrabold text-foreground mt-2 mb-1.5">층별내역</h3>
+                  </div>
+                  <div className="px-3 pb-2">
+                    <table className="w-full border-collapse border border-border/50 text-[11px]">
+                      <thead>
+                        <tr className="bg-muted/40">
+                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
+                            층
+                          </th>
+                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
+                            용도
+                          </th>
+                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
+                            면적
+                          </th>
+                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-border/40">
+                            구분
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {floors.map((f, i) => (
+                          <tr key={i} className="border-b border-border/30 last:border-0">
+                            <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">
+                              {f.flrNoNm || f.flrNo || "-"}
+                            </td>
+                            <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">
+                              {f.mainPurpsCdNm || "-"}
+                            </td>
+                            <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">
+                              {f.area || "-"}
+                            </td>
+                            <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
 
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
