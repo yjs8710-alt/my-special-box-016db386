@@ -273,39 +273,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   }, [address, propertyId]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
-  const hasAnyLandData =
-    !!land &&
-    !!(
-      str(land.land_category) ||
-      str(land.jimok) ||
-      str(land.land_area) ||
-      str(land.area) ||
-      str(land.official_price) ||
-      str(land.price) ||
-      str(land.use_zone) ||
-      str(land.zone) ||
-      str(land.pnu)
-    );
+
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
-  if (land && land._raw) {
-    const r = land._raw.land ?? land._raw;
 
-    land.land_category = r.lndcgrCodeNm ?? land.land_category;
-    land.land_area = r.lndpclAr ?? land.land_area;
-    land.official_price = r.indvdlzPblntfPc ?? land.official_price;
-  }
-  if (building && building._raw) {
-    const r = building._raw;
-
-    building.building_name = r.bldNm ?? building.building_name;
-    building.main_purpose = r.mainPurpsCdNm ?? building.main_purpose;
-    building.total_area = r.totArea ?? building.total_area;
-    building.building_area = r.archArea ?? building.building_area;
-    building.land_area = r.platArea ?? building.land_area;
-    building.approval_date = r.useAprDay ?? building.approval_date;
-    building.floors_above = r.grndFlrCnt ?? building.floors_above;
-    building.floors_below = r.ugrndFlrCnt ?? building.floors_below;
-  }
   const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
 
   const allBuildings =
@@ -339,6 +309,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(building.floors_above)
     );
 
+  const hasAnyLandData = hasLandDisplayValue(land);
   // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
 
@@ -421,13 +392,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {hasAnyLandData ? (
                 <div className="px-4 py-1">
                   <Row label="PNU" value={str(land?.pnu)} />
+                  <Row label="지번" value={str(land?.lot_number)} />
                   <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
                   <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
                   <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
                   <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
                 </div>
               ) : (
-                <EmptySection message="토지 조회 결과 없음" />
+                <div className="px-4 py-4">
+                  <p className="text-[11px] text-muted-foreground">토지 데이터 없음 또는 일부 항목만 조회됨</p>
+                </div>
               )}
 
               <div className="h-1.5 bg-muted/40 my-1" />
