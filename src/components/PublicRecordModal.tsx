@@ -1,16 +1,25 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-type PropertyType = {
+type AnyProperty = {
   id?: string | number | null;
+  property_id?: string | number | null;
   address?: string | null;
+  road_address?: string | null;
+  jibun_address?: string | null;
   pnu?: string | null;
+  [key: string]: any;
 };
 
 type PublicRecordModalProps = {
-  open: boolean;
-  onClose: () => void;
-  property?: PropertyType | null;
+  open?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
+  property?: AnyProperty | null;
+  selectedProperty?: AnyProperty | null;
+  record?: AnyProperty | null;
+  item?: AnyProperty | null;
 };
 
 type LandSummaryType = {
@@ -26,10 +35,25 @@ type LandSummaryType = {
   eum_url?: string | null;
 };
 
-export default function PublicRecordModal({ open, onClose, property }: PublicRecordModalProps) {
+export default function PublicRecordModal(props: PublicRecordModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [landSummary, setLandSummary] = useState<LandSummaryType | null>(null);
+
+  const isOpen = props.open ?? props.isOpen ?? false;
+
+  const handleClose = () => {
+    if (props.onClose) props.onClose();
+    if (props.onOpenChange) props.onOpenChange(false);
+  };
+
+  const property = useMemo<AnyProperty | null>(() => {
+    return props.property ?? props.selectedProperty ?? props.record ?? props.item ?? null;
+  }, [props.property, props.selectedProperty, props.record, props.item]);
+
+  const propertyId = property?.id ?? property?.property_id ?? null;
+  const address = property?.address ?? property?.road_address ?? property?.jibun_address ?? "";
+  const pnu = property?.pnu ?? null;
 
   const fetchLandSummary = async () => {
     try {
@@ -39,9 +63,9 @@ export default function PublicRecordModal({ open, onClose, property }: PublicRec
 
       const { data, error } = await supabase.functions.invoke("bright-processor", {
         body: {
-          propertyId: property?.id ?? null,
-          address: property?.address ?? "",
-          pnu: property?.pnu ?? null,
+          propertyId,
+          address,
+          pnu,
         },
       });
 
@@ -67,14 +91,14 @@ export default function PublicRecordModal({ open, onClose, property }: PublicRec
     }
   };
 
-  if (!open) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold">공적장부</h2>
-          <button onClick={onClose} className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50">
+          <button onClick={handleClose} className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50">
             닫기
           </button>
         </div>
@@ -82,10 +106,10 @@ export default function PublicRecordModal({ open, onClose, property }: PublicRec
         <div className="rounded-xl border bg-gray-50 p-4">
           <div className="mb-2 text-sm font-semibold text-gray-700">매물 정보</div>
           <div className="text-sm text-gray-800">
-            <span className="font-medium">주소:</span> {property?.address || "주소 없음"}
+            <span className="font-medium">주소:</span> {address || "주소 없음"}
           </div>
           <div className="mt-1 text-sm text-gray-800">
-            <span className="font-medium">PNU:</span> {property?.pnu || "없음"}
+            <span className="font-medium">PNU:</span> {pnu || "없음"}
           </div>
         </div>
 
