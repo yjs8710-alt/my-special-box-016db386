@@ -755,7 +755,7 @@ serve(async (req) => {
       if (sigunguCd && bjdongCd) {
         // ── 3a. 건축물대장 + 위반건축물 ──
         if (needBuilding) {
-          const [titleResult, recapItem, exposItem, basicItem, floorItems, violationResult] = await Promise.all([
+          const [titleResult, recapItem, exposResult, basicItem, floorItems, violationResult] = await Promise.all([
             fetchBuildingTitle(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingRecap(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
             fetchBuildingExpos(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
@@ -766,6 +766,8 @@ serve(async (req) => {
 
           const titleItem = titleResult.primary;
           const allTitleItems = titleResult.allItems;
+          const exposItem = exposResult.primary;
+          const allExposItems = exposResult.allItems;
           const bestItem   = titleItem || recapItem || exposItem || basicItem;
           const bestSource = titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음";
           const apiStatus  = !bestItem ? "no_data" : "ok";
