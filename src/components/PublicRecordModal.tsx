@@ -575,18 +575,8 @@ const hasAnyLandData = !!land;
                     </div>
                   );
                 })
-              
-<div className="px-3 mt-2">
-  <table className="w-full border-collapse border text-[11px]">
-    <tbody>
-      <TRow l1="소재지" v1={address} />
-      <TRow l1="건물명" v1={str(building?.building_name)} />
-      <TRow l1="주용도" v1={str(building?.main_purpose)} />
-      <TRow l1="연면적" v1={str(building?.total_area)} />
-      <TRow l1="층수" v1={str(building?.floors_above)} />
-    </tbody>
-  </table>
-</div>
+              ) : null}
+
               
               {floors.length > 0 && (
                 <>
