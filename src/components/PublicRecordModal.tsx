@@ -29,9 +29,7 @@ function TRow({
         {l1}
       </td>
       <td
-        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 ${
-          highlight ? "text-red-600" : "text-foreground"
-        }`}
+        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 ${highlight ? "text-red-600" : "text-foreground"}`}
       >
         {v1 ?? "-"}
       </td>
@@ -54,7 +52,7 @@ function TRow({
   );
 }
 
-/* ── Row 컴포넌트 (토지용) ── */
+/* ── Row 컴포넌트 (기존 토지용) ── */
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
@@ -96,12 +94,24 @@ function SkeletonRow() {
   );
 }
 
+const CLOUDTYPE_LAND_URL = "https://port-0-node-express-mn6x22nsd44b9fb3.sel3.cloudtype.app/land";
+
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [building, setBuilding] = useState<Record<string, any> | null>(null);
-  const [land, setLand] = useState<Record<string, any> | null>(null);
+  const [building, setBuilding] = useState<Record<string, unknown> | null>(null);
+  const [land, setLand] = useState<Record<string, unknown> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
+
+  // ── 토지이용계획 추가 ──
+  const [landUse, setLandUse] = useState<any>(null);
+  const [landUseLoading, setLandUseLoading] = useState(false);
+  const [landUseError, setLandUseError] = useState<string | null>(null);
+
+  // ── 토지 직접 조회 (Cloudtype) ──
+  const [landLoading, setLandLoading] = useState(false);
+  const [landDirect, setLandDirect] = useState<Record<string, unknown> | null>(null);
+  const [landError, setLandError] = useState("");
 
   /** 값이 있는지 판단 */
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
@@ -124,17 +134,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         // ── Step 1: property_id 없으면 address로 DB에서 조회 ──
         if (!pid && address) {
           console.log("🔎 [property_id 없음] address로 DB 조회:", address);
-
           const { data: propRow, error: propErr } = await supabase
             .from("properties")
             .select("id")
             .eq("address", address)
             .maybeSingle();
-
-          if (propErr) {
-            console.warn("⚠️ [properties 조회 오류]", propErr.message);
-          }
-
+          if (propErr) console.warn("⚠️ [properties 조회 오류]", propErr.message);
           if (propRow) {
             pid = propRow.id;
             console.log("📌 address로 조회한 property_id:", pid);
@@ -146,44 +151,28 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         // ── Step 2: DB에서 building_summary / land_summary 조회 (property_id 우선) ──
         if (pid) {
           console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
-
           const [bRes, lRes] = await Promise.all([
             supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
             supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
           ]);
 
-          if (bRes.error) {
-            console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
-          }
-          if (lRes.error) {
-            console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
-          }
+          if (bRes.error) console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
+          if (lRes.error) console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
 
           console.log("📦 [building_summary] DB 조회 결과:", bRes.data ?? "없음");
           console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
 
           const bEmpty = !bRes.data || (!bRes.data.main_purpose && !bRes.data.total_area && !bRes.data.approval_date);
-
-          const lEmpty =
-            !lRes.data ||
-            (!lRes.data.land_category &&
-              !lRes.data.jimok &&
-              !lRes.data.land_area &&
-              !lRes.data.area &&
-              !lRes.data.official_price &&
-              !lRes.data.price &&
-              !lRes.data.use_zone &&
-              !lRes.data.zone);
+          const lEmpty = !lRes.data || !lRes.data.official_price;
 
           if (!bEmpty || !lEmpty) {
-            setBuilding(bRes.data as Record<string, any> | null);
-            setLand(lRes.data as Record<string, any> | null);
+            setBuilding(bRes.data as Record<string, unknown> | null);
+            setLand(lRes.data as Record<string, unknown> | null);
             setFetchedFrom("db");
             console.log("✅ [공적장부] DB 캐시 렌더링 완료");
             setLoading(false);
             return;
           }
-
           console.log("🔄 [DB 데이터 비어있음] API 실시간 조회로 전환...");
         } else {
           console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
@@ -204,13 +193,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           },
           body: JSON.stringify({ address, property_id: pid }),
         });
-
         const data = await res.json();
         console.log("📡 [PROPERTY_SUMMARY_RESPONSE]", data);
 
-        if (!res.ok) {
-          throw new Error(data.error || "공적장부 조회 실패");
-        }
+        if (!res.ok) throw new Error(data.error || "공적장부 조회 실패");
 
         const bSum = data.building_summary ?? null;
         const lSum = data.land_summary ?? null;
@@ -218,61 +204,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         console.log("📦 [building_summary] API 조회 결과:", bSum ?? "없음");
         console.log("🌍 [land_summary] API 조회 결과:", lSum ?? "없음");
 
-        // building_summary _raw 보완
+        // _raw 파싱 → 빈 DB 필드 보완
         if (bSum && bSum._raw && typeof bSum._raw === "object") {
           const raw = bSum._raw as Record<string, unknown>;
-
-          if (!hasVal(bSum.main_purpose) && hasVal(raw.mainPurpsCdNm)) {
-            bSum.main_purpose = raw.mainPurpsCdNm;
-          }
-          if (!hasVal(bSum.total_area) && hasVal(raw.totArea)) {
-            bSum.total_area = raw.totArea;
-          }
-          if (!hasVal(bSum.building_area) && hasVal(raw.archArea)) {
-            bSum.building_area = raw.archArea;
-          }
-          if (!hasVal(bSum.land_area) && hasVal(raw.platArea)) {
-            bSum.land_area = raw.platArea;
-          }
-          if (!hasVal(bSum.approval_date) && hasVal(raw.useAprDay)) {
-            bSum.approval_date = raw.useAprDay;
-          }
-          if (!hasVal(bSum.floors_above) && hasVal(raw.grndFlrCnt)) {
-            bSum.floors_above = raw.grndFlrCnt;
-          }
-          if (!hasVal(bSum.floors_below) && hasVal(raw.ugrndFlrCnt)) {
-            bSum.floors_below = raw.ugrndFlrCnt;
-          }
-          if (!hasVal(bSum.parking_count) && hasVal(raw.indrMechUtcnt)) {
-            bSum.parking_count = raw.indrMechUtcnt;
-          }
+          if (!hasVal(bSum.main_purpose) && hasVal(raw.mainPurpsCdNm)) bSum.main_purpose = raw.mainPurpsCdNm;
+          if (!hasVal(bSum.total_area) && hasVal(raw.totArea)) bSum.total_area = raw.totArea;
+          if (!hasVal(bSum.building_area) && hasVal(raw.archArea)) bSum.building_area = raw.archArea;
+          if (!hasVal(bSum.land_area) && hasVal(raw.platArea)) bSum.land_area = raw.platArea;
+          if (!hasVal(bSum.approval_date) && hasVal(raw.useAprDay)) bSum.approval_date = raw.useAprDay;
+          if (!hasVal(bSum.floors_above) && hasVal(raw.grndFlrCnt)) bSum.floors_above = raw.grndFlrCnt;
+          if (!hasVal(bSum.floors_below) && hasVal(raw.ugrndFlrCnt)) bSum.floors_below = raw.ugrndFlrCnt;
+          if (!hasVal(bSum.parking_count) && hasVal(raw.indrMechUtcnt)) bSum.parking_count = raw.indrMechUtcnt;
           if (bSum.elevator === false) {
-            if (raw.elevatorDetail && String(raw.elevatorDetail).startsWith("있음")) {
-              bSum.elevator = true;
-            } else if (raw.elevYn === "Y") {
-              bSum.elevator = true;
-            }
+            if (raw.elevatorDetail && String(raw.elevatorDetail).startsWith("있음")) bSum.elevator = true;
+            else if (raw.elevYn === "Y") bSum.elevator = true;
           }
-          if (!hasVal(bSum.building_name) && hasVal(raw.bldNm)) {
-            bSum.building_name = raw.bldNm;
-          }
+          if (!hasVal(bSum.building_name) && hasVal(raw.bldNm)) bSum.building_name = raw.bldNm;
         }
 
-        // land_summary 정규화
+        // ── land_summary 정규화
         if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
-          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) {
-            lSum.land_category = lSum.jimok;
-          }
-          if (!hasVal(lSum.official_price) && hasVal(lSum.price)) {
-            lSum.official_price = lSum.price;
-          }
-          if (!hasVal(lSum.land_area) && hasVal(lSum.area)) {
-            lSum.land_area = lSum.area;
-          }
-          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone)) {
-            lSum.use_zone = lSum.zone;
-          }
-
+          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) lSum.land_category = lSum.jimok;
+          if (!hasVal(lSum.official_price) && hasVal(lSum.price)) lSum.official_price = lSum.price;
+          if (!hasVal(lSum.land_area) && hasVal(lSum.area)) lSum.land_area = lSum.area;
+          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone)) lSum.use_zone = lSum.zone;
           console.log("🌍 [land 정규화 완료]:", {
             land_category: lSum.land_category,
             official_price: lSum.official_price,
@@ -299,14 +254,150 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     fetchData();
   }, [address, propertyId]);
 
+  // ── 토지이용계획 조회 ──
+  async function loadLandUse() {
+    try {
+      setLandUseLoading(true);
+      setLandUseError(null);
+
+      const { data, error } = await supabase.functions.invoke("land-use-summary", {
+        body: {
+          propertyId: propertyId,
+          address: address,
+          pnu: (land as any)?.pnu || null,
+        },
+      });
+
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "토지이용계획 조회 실패");
+
+      setLandUse(data.data);
+      console.log("✅ [토지이용계획]", data.data);
+    } catch (err: any) {
+      console.error("❌ [토지이용계획]", err);
+      setLandUseError(err.message || "토지이용계획 조회 실패");
+    } finally {
+      setLandUseLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (address) {
+      loadLandUse();
+    }
+  }, [address]);
+
+  // ── 주소 → PNU 변환 헬퍼 ──
+  const resolvePnu = async (addr: string): Promise<string | null> => {
+    console.log("🔄 [PNU 변환] 주소로 PNU 조회:", addr);
+    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/address-to-pnu`;
+    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ address: addr }),
+      });
+      const data = await res.json();
+      console.log("🔄 [PNU 변환 응답]", data);
+      if (data?.ok && data?.pnu) return data.pnu as string;
+      return null;
+    } catch (e) {
+      console.error("🔄 [PNU 변환 에러]", e);
+      return null;
+    }
+  };
+
+  // ── 토지 Cloudtype 직접 조회 (PNU 기반, 없으면 주소→PNU 변환) ──
+  useEffect(() => {
+    const pnuFromLand = typeof land?.pnu === "string" ? land.pnu : "";
+
+    if (loading) return;
+
+    const fetchLandByPnu = async (pnu: string) => {
+      if (!pnu) throw new Error("PNU가 없습니다.");
+      const requestUrl = `${CLOUDTYPE_LAND_URL}?pnu=${encodeURIComponent(pnu)}`;
+      console.log("LAND_REQUEST_URL:", requestUrl);
+      const response = await fetch(requestUrl, { method: "GET" });
+      const rawText = await response.text();
+      console.log("LAND_RAW_RESPONSE:", rawText);
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error("프록시 서버가 JSON이 아니라 HTML 또는 빈 응답을 반환했습니다.");
+      }
+      if (!response.ok) throw new Error((data.message as string) || (data.error as string) || "토지 조회 실패");
+      data._proxy_used = "cloudtype";
+      return data;
+    };
+
+    const run = async () => {
+      setLandLoading(true);
+      setLandError("");
+      setLandDirect(null);
+
+      let pnu = pnuFromLand;
+
+      if (!pnu && address) {
+        pnu = (await resolvePnu(address)) ?? "";
+      }
+
+      if (!pnu) {
+        setLandError("주소를 먼저 입력하세요");
+        setLandLoading(false);
+        return;
+      }
+
+      console.log("LAND ADDRESS CHECK =", address);
+      console.log("LAND PNU CHECK =", pnu);
+
+      try {
+        const data = await fetchLandByPnu(pnu);
+        console.log("LAND_PARSED_FULL:", JSON.stringify(data, null, 2));
+
+        const d = data as Record<string, unknown>;
+
+        if (!d?.ok) {
+          setLandDirect(null);
+          setLandError("토지 조회 중 오류가 발생했습니다.");
+          return;
+        }
+
+        const upstream = d?.upstreamData as Record<string, unknown> | undefined;
+        const resp = (upstream?.response ?? d?.response) as Record<string, unknown> | undefined;
+        const totalCount = Number(resp?.totalCount ?? 0);
+
+        if (totalCount === 0) {
+          setLandDirect(null);
+          setLandError("토지대장 조회 결과가 없습니다.");
+          return;
+        }
+
+        setLandDirect(data);
+      } catch (error: unknown) {
+        console.error("토지 조회 네트워크 오류:", error);
+        setLandError("토지 조회 중 오류가 발생했습니다.");
+        setLandDirect(null);
+      } finally {
+        setLandLoading(false);
+      }
+    };
+
+    run();
+  }, [land, loading, address]);
+
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
-  const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
-
+  const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, unknown>) : null;
   const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
 
   const allBuildings =
-    raw?.allBuildings && Array.isArray(raw.allBuildings) ? (raw.allBuildings as Array<Record<string, any>>) : [];
+    raw?.allBuildings && Array.isArray(raw.allBuildings) ? (raw.allBuildings as Array<Record<string, unknown>>) : [];
 
   const buildingApiNoData = raw?.api_status === "no_data";
 
@@ -315,42 +406,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       ? (raw.violation as {
           isViolation: boolean;
           violationYn: string;
-          items: Array<{
-            vlttRnCnts?: string;
-            vlttGbCdNm?: string;
-            crtnDay?: string;
-          }>;
+          items: Array<{ vlttRnCnts?: string; vlttGbCdNm?: string; crtnDay?: string }>;
         })
       : null;
-
   const isViolation = violation?.isViolation === true;
   const hasViolationInfo = violation !== null;
 
   const hasAnyBuildingData =
-    !!building &&
-    !!(
-      str(building.building_name) ||
+    building &&
+    (str(building.building_name) ||
       str(building.main_purpose) ||
       str(building.total_area) ||
       str(building.approval_date) ||
-      str(building.floors_above)
-    );
-
+      str(building.floors_above));
   const hasAnyLandData =
-    !!land &&
-    !!(
-      str(land.land_category) ||
+    land &&
+    (str(land.land_category) ||
       str(land.jimok) ||
       str(land.land_area) ||
       str(land.area) ||
       str(land.official_price) ||
       str(land.price) ||
       str(land.use_zone) ||
-      str(land.zone) ||
-      str(land.pnu)
-    );
+      str(land.zone));
 
-  // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
 
   return (
@@ -387,6 +466,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
         {/* ── 콘텐츠 ── */}
         <div className="overflow-y-auto flex-1">
+          {/* 로딩 */}
           {loading && (
             <div className="flex flex-col items-center gap-3 py-10">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -399,6 +479,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             </div>
           )}
 
+          {/* 오류 */}
           {!loading && error && (
             <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
               <div
@@ -412,6 +493,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             </div>
           )}
 
+          {/* 데이터 없음 */}
           {!loading && !error && !building && !land && (
             <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
               <Layers className="w-10 h-10 text-muted-foreground/20" />
@@ -424,26 +506,53 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             </div>
           )}
 
+          {/* ── 정상 데이터 출력 ── */}
           {!loading && !error && (building || land) && (
             <div className="flex flex-col">
-              {/* ① 토지 정보 */}
+              {/* ① 토지 정보 — Cloudtype 직접 조회 */}
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
-
-              {hasAnyLandData ? (
-                <div className="px-4 py-1">
-                  <Row label="PNU" value={str(land?.pnu)} />
-                  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
-                  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
-                  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
-                  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
-                </div>
-              ) : (
-                <EmptySection message="토지 조회 결과 없음" />
+              {landLoading && (
+                <div className="px-4 py-4 text-center text-[12px] text-muted-foreground font-medium">조회중...</div>
               )}
+              {landError && <div className="px-4 py-3 text-[12px] font-medium text-muted-foreground">{landError}</div>}
+              {landDirect &&
+                (() => {
+                  const landData = landDirect.land as Record<string, unknown> | undefined;
+                  const fmt = (v: unknown) => (v === undefined ? "-" : v === null ? "-" : String(v));
+                  return landData ? (
+                    <div className="px-4 py-1">
+                      <Row label="PNU" value={fmt(landData?.pnu)} />
+                      <Row label="지목" value={fmt(landData?.jimok)} />
+                      <Row label="토지면적" value={fmt(landData?.area)} />
+                      <Row label="용도지역" value={fmt(landData?.zone)} />
+                      <Row label="공시지가" value={fmt(landData?.price)} />
+                    </div>
+                  ) : null;
+                })()}
+              {!landLoading && !landError && !landDirect && <EmptySection message="토지 조회 결과 없음" />}
+
+              {/* ①-1 토지이용계획 */}
+              <div className="px-4 py-3 border-t">
+                <h3 className="text-[12px] font-bold mb-2">토지이용계획</h3>
+
+                {landUseLoading && <div className="text-[11px] text-muted-foreground">조회중...</div>}
+
+                {landUseError && <div className="text-[11px] text-red-500">{landUseError}</div>}
+
+                {landUse && !landUseLoading && !landUseError && (
+                  <div className="text-[11px] space-y-1">
+                    <div>용도지역: {landUse.land_use_zone || "-"}</div>
+                    <div>용도지구: {landUse.land_use_district || "-"}</div>
+                    <div>용도구역: {landUse.land_use_area || "-"}</div>
+                    <div>지구단위계획: {landUse.district_unit_plan || "-"}</div>
+                    <div>규제요약: {landUse.regulation_summary || "-"}</div>
+                  </div>
+                )}
+              </div>
 
               <div className="h-1.5 bg-muted/40 my-1" />
 
-              {/* ② 건축물 정보 */}
+              {/* ② 건축물 정보 — 위반여부 항상 상단 표시 */}
               <SectionHeader emoji="🏢" title="건축물대장" bg="hsl(var(--primary) / 0.05)" />
 
               {building && hasViolationInfo && (
@@ -451,27 +560,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   className="flex items-start gap-2 mx-3 mt-2 mb-1 rounded-lg px-3 py-2.5"
                   style={
                     isViolation
-                      ? {
-                          background: "hsl(0 100% 97%)",
-                          border: "1.5px solid hsl(0 80% 80%)",
-                        }
-                      : {
-                          background: "hsl(142 60% 96%)",
-                          border: "1.5px solid hsl(142 50% 75%)",
-                        }
+                      ? { background: "hsl(0 100% 97%)", border: "1.5px solid hsl(0 80% 80%)" }
+                      : { background: "hsl(142 60% 96%)", border: "1.5px solid hsl(142 50% 75%)" }
                   }
                 >
                   <span className="text-base leading-none mt-0.5 flex-shrink-0">{isViolation ? "⚠️" : "✔"}</span>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span
                       className="text-[12px] font-extrabold leading-tight"
-                      style={{
-                        color: isViolation ? "hsl(0 70% 40%)" : "hsl(142 50% 30%)",
-                      }}
+                      style={{ color: isViolation ? "hsl(0 70% 40%)" : "hsl(142 50% 30%)" }}
                     >
                       {isViolation ? "위반건축물" : "정상건축물"}
                     </span>
-
                     {isViolation && violation!.items.length > 0 && (
                       <div className="flex flex-col gap-0.5 mt-0.5">
                         {violation!.items.map((v, i) => (
@@ -482,7 +582,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         ))}
                       </div>
                     )}
-
                     {!isViolation && (
                       <span className="text-[10px]" style={{ color: "hsl(142 40% 38%)" }}>
                         위반건축물 이력 없음
@@ -491,14 +590,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   </div>
                 </div>
               )}
-
               {building && !hasViolationInfo && (
                 <div
                   className="flex items-center gap-2 mx-3 mt-2 mb-1 rounded-lg px-3 py-2"
-                  style={{
-                    background: "hsl(var(--muted))",
-                    border: "1px solid hsl(var(--border))",
-                  }}
+                  style={{ background: "hsl(var(--muted))", border: "1px solid hsl(var(--border))" }}
                 >
                   <span className="text-sm">🏛️</span>
                   <span className="text-[11px] text-muted-foreground">위반건축물 여부 정보 없음</span>
@@ -508,26 +603,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               {building && allBuildings.length > 0 ? (
                 allBuildings.map((bldg, idx) => {
                   const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
-
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
-
                   const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
                   const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
                   const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
-
                   const parkTotal =
                     Number(bldg.indrMechUtcnt ?? 0) +
                     Number(bldg.oudrMechUtcnt ?? 0) +
                     Number(bldg.indrAutoUtcnt ?? 0) +
                     Number(bldg.oudrAutoUtcnt ?? 0);
-
                   const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
-
                   const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
-
                   const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
-
                   const seismicDesign = bldg.erthqkDsgnApplyYn
                     ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
                       ? "적용"
@@ -565,7 +653,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                             l2="(용적률산정용)연면적"
                             v2={s(bldg.vlRatEstmTotArea)}
                           />
-                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
+                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} highlight={false} />
                           <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
                           <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
@@ -644,10 +732,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   {buildingApiNoData ? (
                     <div
                       className="rounded-lg p-3"
-                      style={{
-                        background: "hsl(38 100% 97%)",
-                        border: "1px solid hsl(38 80% 85%)",
-                      }}
+                      style={{ background: "hsl(38 100% 97%)", border: "1px solid hsl(38 80% 85%)" }}
                     >
                       <p className="text-[10px] leading-relaxed" style={{ color: "hsl(38 60% 30%)" }}>
                         건축물대장 조회 결과 없음 — 해당 지번에 건축물 미등록
@@ -661,6 +746,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </div>
               )}
 
+              {/* ③ 층별내역 */}
               {floors.length > 0 && (
                 <>
                   <div className="px-3 mt-3 mb-1">
@@ -708,21 +794,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </>
               )}
 
+              {/* 출처 + 조회 방식 */}
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
-                <p className="text-[9px] text-muted-foreground/40">출처: 국토교통부 건축물대장·토지대장 공공데이터</p>
+                <p className="text-[9px] text-muted-foreground/40">
+                  출처: 국토교통부 건축물대장 공공데이터 (data.go.kr)
+                </p>
                 {fetchedFrom && (
                   <span
                     className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
                     style={
                       fetchedFrom === "db"
-                        ? {
-                            background: "hsl(142 60% 93%)",
-                            color: "hsl(142 50% 35%)",
-                          }
-                        : {
-                            background: "hsl(var(--primary)/0.08)",
-                            color: "hsl(var(--primary))",
-                          }
+                        ? { background: "hsl(142 60% 93%)", color: "hsl(142 50% 35%)" }
+                        : { background: "hsl(var(--primary)/0.08)", color: "hsl(var(--primary))" }
                     }
                   >
                     {fetchedFrom === "db" ? "✓ 캐시" : "✓ 실시간"}
