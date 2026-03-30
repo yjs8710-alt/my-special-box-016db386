@@ -309,7 +309,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(building.floors_above)
     );
 
-  const hasAnyLandData = hasLandDisplayValue(land);
+  const hasAnyLandData = !!land && !!(str(land.land_area) || str(land.land_category) || str(land.use_zone) || str(land.official_price) || str(land.road_access));
   // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
 
