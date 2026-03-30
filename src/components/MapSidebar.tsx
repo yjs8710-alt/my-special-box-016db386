@@ -292,6 +292,7 @@ interface MemoNotepadProps {
   label: string;
   initialText: string;
 }
+
 const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
   ({ propId, memoKey, icon, label, initialText }, ref) => {
     const storageKey = `memo_${propId}_${memoKey}`;
@@ -330,6 +331,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                 setOpen(false);
               }}
             />
+
             <div
               className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[260px]"
               onClick={(e) => e.stopPropagation()}
@@ -345,7 +347,9 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                   <span className="flex items-center gap-1 text-sm leading-none">{icon}</span>
                   <span className="text-[11px] font-bold text-foreground">{label}</span>
                 </div>
+
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     setOpen(false);
@@ -380,7 +384,6 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
 );
 
 MemoNotepad.displayName = "MemoNotepad";
-
   return (
   
     <div className="relative flex items-center">
