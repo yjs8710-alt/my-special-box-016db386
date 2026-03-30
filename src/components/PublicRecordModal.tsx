@@ -550,7 +550,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <tbody>
                           <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
                           {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
-                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="건축물대장구조" v2={s(bldg.regstrGbCdNm)} />
+                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
                           <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
                           <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
                           <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
@@ -558,7 +558,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <TRow
                             l1="연면적"
                             v1={s(bldg.totArea)}
-                            l2="(용적률산정용)연면적"
+                            l2="용적률산정연면적"
                             v2={s(bldg.vlRatEstmTotArea)}
                           />
                           <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
@@ -569,11 +569,42 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <TRow
                             l1="대내진능력"
                             v1={s(bldg.erthqkAblty) ?? "-"}
-                            l2="내진설계 적용 여부"
+                            l2="내진설계적용"
                             v2={seismicDesign}
                           />
                         </tbody>
                       </table>
+
+                      {/* 집합건물 층별 전유/공용 면적 */}
+                      {bldg.exposFloors && Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-[11px] font-bold text-foreground mb-1">
+                            층별 전유/공용 면적 ({bldg.exposFloors.length}건)
+                          </h4>
+                          <table className="w-full border-collapse border border-border/50 text-[10px]">
+                            <thead>
+                              <tr className="bg-muted/40">
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">층</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">호</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">면적</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">구분</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bldg.exposFloors.map((ef: any, fi: number) => (
+                                <tr key={fi} className="border-b border-border/30 last:border-0">
+                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">{ef.flrNoNm || ef.flrNo || "-"}</td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.hoNm || "-"}</td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.mainPurpsCdNm || ef.etcPurps || "-"}</td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.area || "-"}</td>
+                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.exposPubuseGbCdNm || ef.pubuseGbCdNm || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
                   );
                 })
