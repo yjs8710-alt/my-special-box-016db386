@@ -2339,8 +2339,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   className="toolbar-btn flex items-center gap-1 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md"
                   style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
                 >
-                  <img src={link.icon} alt="" className="w-3 h-3 rounded-sm object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  {link.label}
+                  <img src={link.icon} alt="" className="w-3 h-3 rounded-sm object-contain" style={link.label === "다방" ? { filter: "contrast(1.8) saturate(1.5) brightness(0.7)" } : undefined} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <span className="font-extrabold">{link.label}</span>
                 </a>
               ))}
               <span className="flex-1 min-w-[4px]" />
