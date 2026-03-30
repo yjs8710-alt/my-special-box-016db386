@@ -412,16 +412,16 @@ async function fetchBuildingRecap(s: string, b: string, bun: string, ji: string,
   return null;
 }
 
-// ── 집합건물 공용부 ──────────────────────────────────────────────────────
+// ── 집합건물 공용부 (전체 목록) ──────────────────────────────────────────
 async function fetchBuildingExpos(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
-  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k);
-  if (total > 0) { console.log("📊 [집합건물공용부] 성공"); return items[0]; }
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k, "100");
+  if (total > 0) { console.log("📊 [집합건물공용부] 성공:", items.length, "건"); return { primary: items[0], allItems: items }; }
   for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
-    const r2 = await fetchBuildingApiWithPlatGb("getBrExposPubuseAreaInfo", s, b, bun, ji, pgb, k);
-    if (r2.total > 0) { console.log(`📊 [집합건물공용부] platGbCd=${pgb} 재시도 성공`); return r2.items[0]; }
+    const r2 = await fetchBuildingApiWithPlatGb("getBrExposPubuseAreaInfo", s, b, bun, ji, pgb, k, "100");
+    if (r2.total > 0) { console.log(`📊 [집합건물공용부] platGbCd=${pgb} 재시도 성공:`, r2.items.length, "건"); return { primary: r2.items[0], allItems: r2.items }; }
   }
   console.log(`📊 [집합건물공용부] 없음 (${resultCode}/${resultMsg})`);
-  return null;
+  return { primary: null, allItems: [] };
 }
 
 // ── 기본개요 ─────────────────────────────────────────────────────────────
