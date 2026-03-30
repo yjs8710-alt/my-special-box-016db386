@@ -253,7 +253,28 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             bSum.building_name = raw.bldNm;
           }
         }
+        if (bSum && bSum._raw && typeof bSum._raw === "object") {
+          const raw = bSum._raw as Record<string, any>;
 
+          // ✅ raw 값을 우선 사용
+          bSum.main_purpose = raw.mainPurpsCdNm ?? bSum.main_purpose;
+          bSum.total_area = raw.totArea ?? bSum.total_area;
+          bSum.building_area = raw.archArea ?? bSum.building_area;
+          bSum.land_area = raw.platArea ?? bSum.land_area;
+          bSum.approval_date = raw.useAprDay ?? bSum.approval_date;
+          bSum.floors_above = raw.grndFlrCnt ?? bSum.floors_above;
+          bSum.floors_below = raw.ugrndFlrCnt ?? bSum.floors_below;
+          bSum.parking_count = raw.indrMechUtcnt ?? bSum.parking_count;
+          bSum.building_name = raw.bldNm ?? bSum.building_name;
+
+          // 엘리베이터
+          if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+            bSum.elevator = true;
+          }
+
+          console.log("🔥 RAW BUILDING:", raw);
+          console.log("🔥 FINAL BUILDING:", bSum);
+        }
         // land_summary 정규화
         if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
           if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) {
