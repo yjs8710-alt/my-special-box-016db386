@@ -9,13 +9,16 @@ interface PublicRecordModalProps {
   onClose: () => void;
 }
 
-const TRow = forwardRef<HTMLTableRowElement, {
-  l1: string;
-  v1?: string | null;
-  l2?: string;
-  v2?: string | null;
-  highlight?: boolean;
-}>(({ l1, v1, l2, v2, highlight }, ref) => {
+const TRow = forwardRef<
+  HTMLTableRowElement,
+  {
+    l1: string;
+    v1?: string | null;
+    l2?: string;
+    v2?: string | null;
+    highlight?: boolean;
+  }
+>(({ l1, v1, l2, v2, highlight }, ref) => {
   return (
     <tr ref={ref} className="border-b border-border/40">
       <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
@@ -45,9 +48,7 @@ const TRow = forwardRef<HTMLTableRowElement, {
       ) : (
         <td
           colSpan={2}
-          className={`py-1.5 px-2 text-[11px] font-semibold ${
-            highlight ? "text-red-600" : "text-foreground"
-          }`}
+          className={`py-1.5 px-2 text-[11px] font-semibold ${highlight ? "text-red-600" : "text-foreground"}`}
         ></td>
       )}
     </tr>
@@ -55,7 +56,6 @@ const TRow = forwardRef<HTMLTableRowElement, {
 });
 
 TRow.displayName = "TRow";
-/* ── 2열 테이블 Row ── */
 
 /* ── Row 컴포넌트 (토지용) ── */
 function Row({ label, value }: { label: string; value?: string | null }) {
@@ -169,10 +169,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
           const lEmpty =
             !lRes.data ||
-            (!lRes.data.land_category &&
-              !lRes.data.land_area &&
-              !lRes.data.official_price &&
-              !lRes.data.use_zone);
+            (!lRes.data.land_category && !lRes.data.land_area && !lRes.data.official_price && !lRes.data.use_zone);
 
           if (!bEmpty || !lEmpty) {
             setBuilding(bRes.data as Record<string, any> | null);
@@ -558,23 +555,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
                           <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
                           <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
-                          <TRow
-                            l1="연면적"
-                            v1={s(bldg.totArea)}
-                            l2="용적률산정연면적"
-                            v2={s(bldg.vlRatEstmTotArea)}
-                          />
+                          <TRow l1="연면적" v1={s(bldg.totArea)} l2="용적률산정연면적" v2={s(bldg.vlRatEstmTotArea)} />
                           <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
                           <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
                           <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
                           <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
-                          <TRow
-                            l1="대내진능력"
-                            v1={s(bldg.erthqkAblty) ?? "-"}
-                            l2="내진설계적용"
-                            v2={seismicDesign}
-                          />
+                          <TRow l1="대내진능력" v1={s(bldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
                         </tbody>
                       </table>
 
@@ -587,18 +574,32 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <table className="w-full border-collapse border border-border/50 text-[10px]">
                             <thead>
                               <tr className="bg-muted/40">
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">층</th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">호</th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">면적</th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  층
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  호
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  용도
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
+                                  면적
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
                               {bldg.exposFloors.map((ef: any, fi: number) => (
                                 <tr key={fi} className="border-b border-border/30 last:border-0">
-                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">{ef.flrNoNm || ef.flrNo || "-"}</td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.hoNm || "-"}</td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">{ef.mainPurpsCdNm || ef.etcPurps || "-"}</td>
+                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
+                                    {ef.flrNoNm || ef.flrNo || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.hoNm || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.mainPurpsCdNm || ef.etcPurps || "-"}
+                                  </td>
                                   <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
                                 </tr>
                               ))}
