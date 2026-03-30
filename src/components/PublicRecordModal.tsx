@@ -287,7 +287,25 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(land.pnu)
     );
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
+  if (land && land._raw) {
+    const r = land._raw.land ?? land._raw;
 
+    land.land_category = r.lndcgrCodeNm ?? land.land_category;
+    land.land_area = r.lndpclAr ?? land.land_area;
+    land.official_price = r.indvdlzPblntfPc ?? land.official_price;
+  }
+  if (building && building._raw) {
+    const r = building._raw;
+
+    building.building_name = r.bldNm ?? building.building_name;
+    building.main_purpose = r.mainPurpsCdNm ?? building.main_purpose;
+    building.total_area = r.totArea ?? building.total_area;
+    building.building_area = r.archArea ?? building.building_area;
+    building.land_area = r.platArea ?? building.land_area;
+    building.approval_date = r.useAprDay ?? building.approval_date;
+    building.floors_above = r.grndFlrCnt ?? building.floors_above;
+    building.floors_below = r.ugrndFlrCnt ?? building.floors_below;
+  }
   const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
 
   const allBuildings =
