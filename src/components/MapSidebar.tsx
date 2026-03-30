@@ -384,67 +384,6 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
 );
 
 MemoNotepad.displayName = "MemoNotepad";
-  return (
-  
-    <div className="relative flex items-center">
-      <button
-        type="button"
-        title={label}
-        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
-        className="w-[18px] h-[18px] flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
-        style={{ background: "hsl(var(--primary)/0.08)", border: "1px solid hsl(var(--primary)/0.2)" }}
-      >
-        {icon}
-      </button>
-      {open && (
-        <>
-          {/* 배경 클릭 시 닫기 */}
-          <div className="fixed inset-0 z-[8999]" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
-          <div
-            className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[260px]"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              boxShadow: "0 8px 32px rgba(10,45,110,0.22)",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            {/* 메모장 헤더 */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-primary/5 rounded-t-xl">
-              <div className="flex items-center gap-1.5">
-                <span className="flex items-center gap-1 text-sm leading-none">{icon}</span>
-                <span className="text-[11px] font-bold text-foreground">{label}</span>
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); setOpen(false); }}
-                className="w-4 h-4 rounded-full bg-destructive hover:bg-destructive/80 transition-colors flex items-center justify-center"
-              >
-                <X className="w-2.5 h-2.5 text-white" />
-              </button>
-            </div>
-            {/* 메모 입력창 */}
-            <div className="p-2.5">
-              <textarea
-                autoFocus
-                value={text}
-                onChange={(e) => handleChange(e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-                placeholder={`${label}를 입력하세요...`}
-                rows={5}
-                className="w-full text-[11px] text-foreground leading-relaxed resize-none outline-none bg-muted/50 border border-border rounded-lg px-2.5 py-2 placeholder:text-muted-foreground/50 focus:border-primary/40 transition-colors"
-              />
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-[8px] text-primary/60 font-medium">✓ 자동저장</span>
-                <span className="text-[8px] text-muted-foreground">{text.length}자</span>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-
 
 
 /* ── ErrorReportModal ── */
