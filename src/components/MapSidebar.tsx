@@ -2326,9 +2326,9 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
               {[
                 { label: "등기소", url: "http://www.iros.go.kr", bg: "hsl(220 60% 93%)", color: "hsl(220 60% 30%)", border: "hsl(220 50% 70%)", icon: "https://www.iros.go.kr/favicon.ico" },
                 { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)", icon: "/images/gov24-logo.png" },
-                { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)", icon: "https://www.eum.go.kr/favicon.ico" },
+                { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)", icon: "https://www.google.com/s2/favicons?domain=eum.go.kr&sz=32" },
                 { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)", icon: "https://www.zigbang.com/favicon.ico" },
-                { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 93%)", color: "hsl(270 50% 30%)", border: "hsl(270 40% 70%)", icon: "/images/dabang-logo.png" },
+                { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 95%)", color: "hsl(270 60% 20%)", border: "hsl(270 40% 60%)", icon: "/images/dabang-logo.png" },
                 { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)", icon: "https://land.naver.com/favicon.ico" },
               ].map((link) => (
                 <a
@@ -2339,8 +2339,8 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   className="toolbar-btn flex items-center gap-1 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md"
                   style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
                 >
-                  <img src={link.icon} alt="" className="w-3 h-3 rounded-sm object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                  {link.label}
+                  <img src={link.icon} alt="" className="w-3 h-3 rounded-sm object-contain" style={link.label === "다방" ? { filter: "contrast(1.8) saturate(1.5) brightness(0.7)" } : undefined} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <span className="font-extrabold">{link.label}</span>
                 </a>
               ))}
               <span className="flex-1 min-w-[4px]" />
