@@ -273,7 +273,22 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   }, [address, propertyId]);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
+  const hasLandDisplayValue = (obj: Record<string, any> | null) =>
+    !!obj &&
+    !!(
+      str(obj.pnu) ||
+      str(obj.land_category) ||
+      str(obj.jimok) ||
+      str(obj.land_area) ||
+      str(obj.area) ||
+      str(obj.official_price) ||
+      str(obj.price) ||
+      str(obj.use_zone) ||
+      str(obj.zone) ||
+      str(obj.lot_number)
+    );
 
+  console.log("🌍 LAND FINAL:", land);
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
 
   const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
