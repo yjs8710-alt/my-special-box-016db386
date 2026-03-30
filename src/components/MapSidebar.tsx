@@ -2329,7 +2329,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                 { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)", icon: "https://www.google.com/s2/favicons?domain=eum.go.kr&sz=32" },
                 { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)", icon: "https://www.google.com/s2/favicons?domain=zigbang.com&sz=32" },
                 { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 93%)", color: "hsl(270 50% 30%)", border: "hsl(270 40% 70%)", icon: "https://www.google.com/s2/favicons?domain=dabangapp.com&sz=32" },
-                { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)", icon: "https://land.naver.com/favicon.ico" },
+                { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)", icon: "https://www.google.com/s2/favicons?domain=land.naver.com&sz=32" },
               ].map((link) => (
                 <a
                   key={link.label}
