@@ -40,7 +40,7 @@ function TRow({
           <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
             {l2}
           </td>
-          <td className={`py-1.5 px-2 text-[11px] font-semibold ${highlight ? "text-red-600" : "text-foreground"}`}>
+          <td className={`py-1.5 px-2 text-[11px] font-semibold whitespace-nowrap ${highlight ? "text-red-600" : "text-foreground"}`}>
             {v2 ?? "-"}
           </td>
         </>
