@@ -110,7 +110,9 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async () => 
+      let dbBuilding: Record<string, any> | null = null;
+let dbLand: Record<string, any> | null = null;
       console.log("🔍 [공적장부] 조회 시작");
       console.log("🆔 property_id:", propertyId ?? "(없음)");
       console.log("📍 address:", address);
@@ -165,22 +167,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("📦 [building_summary] DB 조회 결과:", bRes.data ?? "없음");
           console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
 
-          const bEmpty = !bRes.data || (!bRes.data.main_purpose && !bRes.data.total_area && !bRes.data.approval_date);
+dbBuilding = (bRes.data as Record<string, any> | null) ?? null;
+dbLand = (lRes.data as Record<string, any> | null) ?? null;
 
-          const lEmpty =
-            !lRes.data ||
-            (!lRes.data.land_category && !lRes.data.land_area && !lRes.data.official_price && !lRes.data.use_zone);
-
-          if (!bEmpty || !lEmpty) {
-            setBuilding(bRes.data as Record<string, any> | null);
-            setLand(lRes.data as Record<string, any> | null);
-            setFetchedFrom("db");
-            console.log("✅ [공적장부] DB 캐시 렌더링 완료");
-            setLoading(false);
-            return;
-          }
-
-          console.log("🔄 [DB 데이터 비어있음] API 실시간 조회로 전환...");
+console.log("🗂️ DB 캐시만 저장하고, API도 계속 호출합니다.");
         } else {
           console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
         }
@@ -208,8 +198,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           throw new Error(data.error || "공적장부 조회 실패");
         }
 
-        const bSum = data.building_summary ?? null;
-        const lSum = data.land_summary ?? null;
+const apiBuilding = data.building_summary ?? null;
+const apiLand = data.land_summary ?? null;
+
+const bSum = apiBuilding ?? dbBuilding;
+const lSum = apiLand ?? dbLand;
 
         console.log("📦 [building_summary] API 조회 결과:", bSum ?? "없음");
         console.log("🌍 [land_summary] API 조회 결과:", lSum ?? "없음");
