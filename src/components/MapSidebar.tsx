@@ -2325,7 +2325,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
             <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
               {[
                 { label: "등기소", url: "http://www.iros.go.kr", bg: "hsl(220 60% 93%)", color: "hsl(220 60% 30%)", border: "hsl(220 50% 70%)", icon: "https://www.iros.go.kr/favicon.ico" },
-                { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)", icon: "https://www.gov.kr/favicon.ico" },
+                { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)", icon: "/images/gov24-logo.png" },
                 { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)", icon: "https://www.eum.go.kr/favicon.ico" },
                 { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)", icon: "https://www.zigbang.com/favicon.ico" },
                 { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 93%)", color: "hsl(270 50% 30%)", border: "hsl(270 40% 70%)", icon: "https://www.dabangapp.com/favicon.ico" },
