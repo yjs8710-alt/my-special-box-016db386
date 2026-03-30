@@ -2339,7 +2339,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                   className="toolbar-btn flex items-center gap-1 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md"
                   style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
                 >
-                  <img src={link.icon} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" style={link.label === "다방" ? { filter: "contrast(1.5) saturate(1.8) brightness(0.85)" } : undefined} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <img src={link.icon} alt="" className="w-3.5 h-3.5 rounded-sm object-contain" style={link.label === "다방" ? { filter: "contrast(3) saturate(3) brightness(0.5)" } : undefined} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   <span className="font-extrabold">{link.label}</span>
                 </a>
               ))}
