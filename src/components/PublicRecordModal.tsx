@@ -232,29 +232,20 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("🔥 FINAL BUILDING:", bSum);
         }
         // land_summary 정규화
-        if (lSum && (hasVal(lSum.jimok) || hasVal(lSum.price) || hasVal(lSum.area))) {
-          if (!hasVal(lSum.land_category) && hasVal(lSum.jimok)) {
-            lSum.land_category = lSum.jimok;
-          }
-          if (!hasVal(lSum.official_price) && hasVal(lSum.price)) {
-            lSum.official_price = lSum.price;
-          }
-          if (!hasVal(lSum.land_area) && hasVal(lSum.area)) {
-            lSum.land_area = lSum.area;
-          }
-          if (!hasVal(lSum.use_zone) && hasVal(lSum.zone)) {
-            lSum.use_zone = lSum.zone;
-          }
+        // 🔥 토지 RAW 강제 매핑 (핵심)
+        if (lSum && lSum._raw && typeof lSum._raw === "object") {
+          const raw = lSum._raw as Record<string, any>;
 
-          console.log("🌍 [land 정규화 완료]:", {
-            land_category: lSum.land_category,
-            official_price: lSum.official_price,
-            land_area: lSum.land_area,
-            use_zone: lSum.use_zone,
-            pnu: lSum.pnu,
-          });
+          lSum.land_category = raw.lndcgrCodeNm ?? lSum.land_category;
+          lSum.land_area = raw.lndpclAr ?? lSum.land_area;
+          lSum.official_price = raw.indvdlzPblntfPc ?? lSum.official_price;
+          lSum.use_zone = raw.prposArea1DstrcNm ?? lSum.use_zone;
+          lSum.pnu = raw.pnu ?? lSum.pnu;
+          lSum.lot_number = raw.mnnmSlno ?? lSum.lot_number;
+
+          console.log("🔥 RAW LAND:", raw);
+          console.log("🔥 FINAL LAND:", lSum);
         }
-
         setBuilding(bSum);
         setLand(lSum);
         setFetchedFrom(apiBuilding || apiLand ? "api" : "db");
@@ -309,7 +300,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(building.floors_above)
     );
 
-  const hasAnyLandData = !!land && !!(str(land.land_area) || str(land.land_category) || str(land.use_zone) || str(land.official_price) || str(land.road_access));
+  const hasAnyLandData =
+    !!land &&
+    !!(
+      str(land.land_area) ||
+      str(land.land_category) ||
+      str(land.use_zone) ||
+      str(land.official_price) ||
+      str(land.road_access)
+    );
   // ── 공통 유틸로 건축물 값 가공
   const bMapped = mapBuildingFromDB(building);
 
