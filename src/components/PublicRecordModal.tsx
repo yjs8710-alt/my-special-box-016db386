@@ -574,7 +574,8 @@ const hasAnyLandData = !!land;
                       )}
                     </div>
                   );
-                })}
+                })
+              ) : null}
 
               
               {floors.length > 0 && (
