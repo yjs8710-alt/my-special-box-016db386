@@ -353,7 +353,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
     <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onClose}>
       <div
         className="w-full bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
-        style={{ maxWidth: "460px", maxHeight: "92vh" }}
+        style={{ maxWidth: "680px", maxHeight: "92vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── 헤더 ── */}
