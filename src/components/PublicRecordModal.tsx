@@ -20,6 +20,8 @@ type Props = {
   selectedProperty?: AnyProperty | null;
   record?: AnyProperty | null;
   item?: AnyProperty | null;
+  address?: string;
+  propertyId?: string;
 };
 
 type LandSummaryType = {
