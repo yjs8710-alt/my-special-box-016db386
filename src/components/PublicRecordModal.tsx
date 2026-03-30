@@ -290,7 +290,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const isViolation = violation?.isViolation === true;
   const hasViolationInfo = violation !== null;
 
-  const hasAnyBuildingData =
+const hasAnyBuildingData = !!building;
     !!building &&
     !!(
       str(building.building_name) ||
@@ -300,7 +300,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(building.floors_above)
     );
 
-  const hasAnyLandData =
+const hasAnyLandData = !!land;
     !!land &&
     !!(
       str(land.land_area) ||
@@ -389,14 +389,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
 
               {hasAnyLandData ? (
-                <div className="px-4 py-1">
-                  <Row label="PNU" value={str(land?.pnu)} />
-                  <Row label="지번" value={str(land?.lot_number)} />
-                  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
-                  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
-                  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
-                  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
-                </div>
+            <div className="px-4 py-1">
+  <Row label="PNU" value={str(land?.pnu)} />
+  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
+  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
+  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
+  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
+</div>
               ) : (
                 <div className="px-4 py-4">
                   <p className="text-[11px] text-muted-foreground">토지 데이터 없음 또는 일부 항목만 조회됨</p>
@@ -576,86 +575,19 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     </div>
                   );
                 })
-              ) : building ? (
-                <div className="px-3 mt-2">
-                  <table className="w-full border-collapse border border-border/50 text-[11px]">
-                    <tbody>
-                      <TRow l1="소재지" v1={str(raw?.platPlc) ?? address} />
-                      {raw?.newPlatPlc && <TRow l1="도로명" v1={str(raw.newPlatPlc)} />}
-                      <TRow l1="건물명" v1={str(building.building_name)} l2="건축물대장구조" v2="-" />
-                      <TRow
-                        l1="주용도"
-                        v1={str(building.main_purpose)}
-                        l2="사용승인일"
-                        v2={bMapped.approvalDate ?? str(building.approval_date)}
-                      />
-                      <TRow
-                        l1="주구조"
-                        v1={raw ? str(raw.strctCdNm) : null}
-                        l2="지붕구조"
-                        v2={raw ? str(raw.roofCdNm) : null}
-                      />
-                      <TRow l1="대지면적" v1={str(building.land_area)} l2="건축면적" v2={str(building.building_area)} />
-                      <TRow
-                        l1="연면적"
-                        v1={str(building.total_area)}
-                        l2="(용적률산정용)연면적"
-                        v2={raw ? str(raw.vlRatEstmTotArea) : null}
-                      />
-                      <TRow l1="건폐율" v1={raw ? str(raw.bcRat) : null} l2="용적률" v2={raw ? str(raw.vlRat) : null} />
-                      <TRow
-                        l1="세대수"
-                        v1={raw?.hhldCnt ? String(raw.hhldCnt) : "0"}
-                        l2="가구수"
-                        v2={raw?.fmlyCnt ? String(raw.fmlyCnt) : "0"}
-                      />
-                      <TRow
-                        l1="지상층수"
-                        v1={building.floors_above ? `${building.floors_above}` : null}
-                        l2="지하층수"
-                        v2={building.floors_below ? `${building.floors_below}` : "0"}
-                      />
-                      <TRow
-                        l1="엘리베이터"
-                        v1={bMapped.elevatorDetail}
-                        l2="주차"
-                        v2={str(building.parking_count) ? `${building.parking_count}대` : "-"}
-                      />
-                      <TRow
-                        l1="대내진능력"
-                        v1={bMapped.seismicAblty ?? "-"}
-                        l2="내진설계 적용"
-                        v2={bMapped.seismicDesign ?? "-"}
-                      />
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <EmptySection message="건축물대장 데이터 없음" />
-              )}
-
-              {!hasAnyBuildingData && building && (
-                <div className="px-4 py-2">
-                  {buildingApiNoData ? (
-                    <div
-                      className="rounded-lg p-3"
-                      style={{
-                        background: "hsl(38 100% 97%)",
-                        border: "1px solid hsl(38 80% 85%)",
-                      }}
-                    >
-                      <p className="text-[10px] leading-relaxed" style={{ color: "hsl(38 60% 30%)" }}>
-                        건축물대장 조회 결과 없음 — 해당 지번에 건축물 미등록
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground/50 text-center">
-                      국토교통부 미등록 지번이거나 API 조회 실패
-                    </p>
-                  )}
-                </div>
-              )}
-
+              
+<div className="px-3 mt-2">
+  <table className="w-full border-collapse border text-[11px]">
+    <tbody>
+      <TRow l1="소재지" v1={address} />
+      <TRow l1="건물명" v1={str(building?.building_name)} />
+      <TRow l1="주용도" v1={str(building?.main_purpose)} />
+      <TRow l1="연면적" v1={str(building?.total_area)} />
+      <TRow l1="층수" v1={str(building?.floors_above)} />
+    </tbody>
+  </table>
+</div>
+              
               {floors.length > 0 && (
                 <>
                   <div className="px-3 mt-3 mb-1">
