@@ -110,4 +110,6 @@ const PublicRecordModal = forwardRef<HTMLDivElement, Props>((props, ref) => {
   );
 });
 
+PublicRecordModal.displayName = "PublicRecordModal";
+
 export default PublicRecordModal;
