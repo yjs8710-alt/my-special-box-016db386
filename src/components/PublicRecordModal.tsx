@@ -370,7 +370,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             </div>
             <div className="min-w-0">
               <h2 className="text-[13px] font-extrabold text-foreground">공적장부 열람</h2>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight truncate max-w-[280px]">{address}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight truncate max-w-[520px]">{address}</p>
             </div>
           </div>
           <button
