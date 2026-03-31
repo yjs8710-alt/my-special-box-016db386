@@ -311,7 +311,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     };
 
     return (
-      <div ref={ref} className="relative flex items-center">
+     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
         <button
           type="button"
           title={label}
@@ -1325,7 +1325,7 @@ interface AddressToggleCardProps {
   regDate: string | undefined;
   chkDate: string | undefined;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, any>(
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean }>(
   ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }, ref) => {
   const [checking, setChecking] = useState(false);
   const isChecked = !!chkDate;
@@ -1388,8 +1388,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, any>(
   const handleOptMouseLeave = () => {
     if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     setShowOptPopup(false);
-  };
-
+  });
+    AddressToggleCard.displayName = "AddressToggleCard";
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
