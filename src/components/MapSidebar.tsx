@@ -41,7 +41,7 @@ function LightboxModal({ units, startUnitIdx = 0, startImgIdx = 0, onClose }: {
   }, [prev, next, onClose]);
 
   return (
-    <div ref={ref} className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
       <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10">
         <X className="w-5 h-5 text-white" />
       </button>
@@ -260,7 +260,7 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
     <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative">
       <button
         type="button"
-        onClick={handisplayNamdleClick}
+       onClick={handleClick}
         title={label}
         className="flex flex-col items-center justify-center w-full h-full rounded transition-colors hover:bg-primary/10 group"
       >
@@ -1325,7 +1325,7 @@ interface AddressToggleCardProps {
   regDate: string | undefined;
   chkDate: string | undefined;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean }>(
+const AddressToggleCard = forwardRef<HTMLDivElement, any>(
   ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }, ref) => {
   const [checking, setChecking] = useState(false);
   const isChecked = !!chkDate;
