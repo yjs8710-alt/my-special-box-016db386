@@ -11,7 +11,7 @@ interface PublicRecordModalProps {
 
 const TRow = forwardRef<
   HTMLTableRowElement,
-  {
+  {ㄹ
     l1: string;
     v1?: string | null;
     l2?: string;
@@ -109,13 +109,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   /** 값이 있는지 판단 */
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      let dbBuilding: Record<string, any> | null = null;
-      let dbLand: Record<string, any> | null = null;
-      console.log("🔍 [공적장부] 조회 시작");
-      console.log("🆔 property_id:", propertyId ?? "(없음)");
-      console.log("📍 address:", address);
+useEffect(() => {
+  setLoading(true);   // 🔥 추가 (중요)
+  setError("");
+  setBuilding(null);
+  setLand(null);
+
+  const fetchData = async () => {
+    ...
+  };
+
+  fetchData();
+}, [address]);
 
       if (!address && !propertyId) {
         setError("주소 정보가 없습니다.");
