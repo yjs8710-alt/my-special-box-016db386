@@ -15,13 +15,14 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "상가", group: "임대", key: "상가" },
   { label: "사무실", group: "임대", key: "사무실" },
   { label: "공장·창고", group: "임대", key: "공장·창고" },
+  { label: "지식산업", group: "임대", key: "지식산업" },
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가매매", group: "매매", key: "상가매매" },
   { label: "건물매매", group: "매매", key: "건물매매" },
 ];
 
 const NON_RESIDENTIAL_DB_TYPES = [
-  "상가", "사무실", "공장·창고", "식당·카페", "병원·학원",
+  "상가", "사무실", "공장·창고", "식당·카페", "병원·학원", "지식산업",
   "상가매매", "건물매매",
   "상가임대", "기타임대",
   "단독매매", "상가주택매매", "상가건물매매",
@@ -58,7 +59,7 @@ const NonResidentialRental = () => {
 
   const nonResidentialTypeLabels = useMemo(() => {
     if (activeTypes.includes("전체")) return ["전체"];
-    if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "상가임대", "기타임대"];
+    if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "지식산업", "상가임대", "기타임대"];
     if (activeTypes.includes("매매-전체")) return ["상가매매", "건물매매"];
     return activeTypes;
   }, [activeTypes]);

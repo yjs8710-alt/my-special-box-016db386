@@ -29,8 +29,8 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS_REG = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","빌라","연립","다세대","주상복합"] },
-  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원"] },
-  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"] },
+  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","지식산업매매"] },
   { group: "토지", types: ["토지"] },
 ];
 // 전체 세부종류 flat 목록 (타입 추론용)
@@ -321,7 +321,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     const e: Record<string, string> = {};
     const isSale = form.detailType === "건물매매" || form.tradeType === "매매";
     const isLand = form.detailType === "토지" || form.buildingType === "토지";
-    const isCommercial = ["상가","사무실","공장·창고"].includes(form.detailType);
+    const isCommercial = ["상가","사무실","공장·창고","지식산업"].includes(form.detailType);
     if (isSale) {
       if (!form.salePrice.trim()) e.amount = "매매가를 입력해주세요";
     } else if (!isLand && !isCommercial) {
@@ -374,7 +374,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     ].filter(Boolean).join("|");
 
     const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
-    const isCommercialLease = ["상가","사무실","공장·창고"].includes(form.detailType);
+    const isCommercialLease = ["상가","사무실","공장·창고","지식산업"].includes(form.detailType);
 
     // 임대 방식별 금액 정리 (월세/반전세/전세 복수 가능)
     const hasWolse = form.rentModes.includes("월세");
@@ -773,7 +773,7 @@ function Step2({
 }) {
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
-  const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원"].includes(form.detailType);
+  const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업"].includes(form.detailType);
   const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
   // 매매 타입 목록 (수정폼과 동일)
@@ -1079,7 +1079,7 @@ function Step2({
         {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
         {!isWarehouseSale && (
           <div className="grid grid-cols-2 gap-3 mt-1">
-            {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.detailType) && (
+            {["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업","상가임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.detailType) && (
               <div className="col-span-2">
                 <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
               </div>

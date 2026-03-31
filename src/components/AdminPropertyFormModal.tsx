@@ -253,8 +253,8 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","빌라","연립","다세대","주상복합"] },
-  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원"] },
-  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"] },
+  { group: "주거형 외 임대·매매", types: ["상가임대","기타임대","단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","지식산업매매"] },
   { group: "토지", types: ["토지"] },
 ];
 
@@ -1036,7 +1036,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </div>
 
               {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
                   {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
@@ -1069,7 +1069,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               )}
 
               {/* 옵션 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="옵션">
                 {/* 풀옵션 버튼 */}
                 <div className="mb-2">
@@ -1126,7 +1126,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               )}
 
               {/* 방향 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="방향">
                 <div className="flex flex-wrap gap-2">
                   {DIRECTION_OPTIONS.map((d) => (
@@ -1328,7 +1328,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
                 {!isWarehouseSale && (
                 <div className="grid grid-cols-2 gap-3 mt-1">
-                  {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.type) && (
+                  {["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업","상가임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.type) && (
                     <div className="col-span-2">
                       <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
                         const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
