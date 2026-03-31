@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { mapBuildingFromDB } from "@/lib/buildingUtils";
@@ -101,7 +101,7 @@ export default function PublicRecordModal({
   const [land, setLand] = useState<Record<string, any> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
 
-  const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
+ 
   const str = (v: unknown) =>
     v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null;
 
