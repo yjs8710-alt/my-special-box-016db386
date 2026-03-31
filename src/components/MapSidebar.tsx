@@ -1,3 +1,4 @@
+import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
 import { MapPin, ChevronRight, ChevronLeft, X, ZoomIn, Phone, KeyRound, FileText, CheckCircle, AlertCircle, Camera, ClipboardList, Send, Heart, Printer, Building2, Pencil, Upload, Trash2, Dog, Droplet, Tv, Cctv, Wifi, Loader2, FileSearch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useCallback, useRef, useEffect } from "react";
@@ -192,35 +193,47 @@ interface ContactEmojiRowProps {
 }
 
 /* 카카오 스타일 SVG 아이콘 */
-const ContactIcon = ({ type, active }: { type: string; active?: boolean }) => {
+import { forwardRef } from "react";
+
+const ContactIcon = forwardRef<
+  SVGSVGElement,
+  { type: string; active?: boolean }
+>(({ type, active }, ref) => {
   const color = active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))";
+
   if (type === "owner") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg ref={ref} width="16" height="16" viewBox="0 0 24 24" fill="none">
       <path d="M3 10.5L12 3L21 10.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V10.5Z" fill={color} />
     </svg>
   );
+
   if (type === "manager") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg ref={ref} width="16" height="16" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="4" fill={color} />
       <path d="M4 20C4 16.686 7.582 14 12 14C16.418 14 20 16.686 20 20" stroke={color} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
+
   if (type === "tenant") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg ref={ref} width="16" height="16" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="7" r="3.5" fill={color} />
       <path d="M5 20C5 16.134 8.134 13 12 13C15.866 13 19 16.134 19 20H5Z" fill={color} />
       <path d="M18 9L20 11L23 7" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+
   if (type === "broker") return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg ref={ref} width="16" height="16" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="4" width="18" height="16" rx="2.5" fill={color} />
       <path d="M9 9H15M9 12H13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M14 16L16 18L20 14" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+
   return null;
-};
+});
+
+ContactIcon.displayName = "ContactIcon";
 
 const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
