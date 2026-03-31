@@ -230,19 +230,20 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         }));
       }
 
-      // 2순위: 이전 매물에서 이미지·비밀번호 자동 로드
-      const { data: propData } = await supabase
+      // 2순위: 이전 매물에서 비밀번호 자동 로드 (이미지는 복사하지 않음)
+      let propQuery = supabase
         .from("properties")
-        .select("images,building_password,room_password")
+        .select("building_password,room_password")
         .eq("dong", form.dong)
-        .eq("unit_number", form.unitNo)
+        .eq("unit_number", form.unitNo);
+      if (form.lotNumber) propQuery = propQuery.eq("lot_number", form.lotNumber);
+      const { data: propData } = await propQuery
         .order("registered_date", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (!propData) return;
       setForm((prev) => ({
         ...prev,
-        images: prev.images.length > 0 ? prev.images : (propData.images ?? []),
         buildingPassword: prev.buildingPassword || propData.building_password || "",
         roomPassword: prev.roomPassword || propData.room_password || "",
       }));
