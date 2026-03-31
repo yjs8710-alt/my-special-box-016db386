@@ -39,6 +39,7 @@ const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
   "식당·카페": { bg: "bg-accent", text: "text-white" },
   "공장·창고": { bg: "bg-green-600", text: "text-white" },
   "병원·학원": { bg: "bg-red-700", text: "text-white" },
+  "지식산업": { bg: "bg-cyan-700", text: "text-white" },
 };
 
 /* ─── 풀스크린 라이트박스 ─── */

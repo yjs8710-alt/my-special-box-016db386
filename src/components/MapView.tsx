@@ -34,6 +34,7 @@ const TYPE_ACCENT: Record<string, string> = {
   "식당·카페": "#fb923c",
   "공장·창고": "#4ade80",
   "병원·학원": "#fb7185",
+  "지식산업": "#22d3ee",
   "아파트": "#60a5fa",
   "원룸": "#38bdf8",
   "빌라": "#38bdf8",
