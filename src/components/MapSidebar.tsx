@@ -41,7 +41,7 @@ function LightboxModal({ units, startUnitIdx = 0, startImgIdx = 0, onClose }: {
   }, [prev, next, onClose]);
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
+  <div ref={ref} className="relative flex items-center">
       <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10">
         <X className="w-5 h-5 text-white" />
       </button>
