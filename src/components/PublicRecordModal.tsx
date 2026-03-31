@@ -109,19 +109,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   /** 값이 있는지 판단 */
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
 
-useEffect(() => {
-  setLoading(true);
-  setError("");
-  setBuilding(null);
-  setLand(null);
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    setBuilding(null);
+    setLand(null);
 
-  const fetchData = async () => {
-    ...
-  };
-
-  fetchData();
-}, [address, propertyId]);
-
+    const fetchData = async () => {
       if (!address && !propertyId) {
         setError("주소 정보가 없습니다.");
         setLoading(false);
@@ -131,10 +125,8 @@ useEffect(() => {
       try {
         let pid = propertyId;
 
-        // ── Step 1: property_id 없으면 address로 DB에서 조회 ──
+        // 1️⃣ property_id 없으면 address로 조회
         if (!pid && address) {
-          console.log("🔎 [property_id 없음] address로 DB 조회:", address);
-
           const { data: propRow, error: propErr } = await supabase
             .from("properties")
             .select("id")
@@ -142,49 +134,31 @@ useEffect(() => {
             .maybeSingle();
 
           if (propErr) {
-            console.warn("⚠️ [properties 조회 오류]", propErr.message);
+            console.warn("⚠️ properties 조회 오류:", propErr.message);
           }
 
           if (propRow) {
             pid = propRow.id;
-            console.log("📌 address로 조회한 property_id:", pid);
-          } else {
-            console.log("⚠️ [properties] address 완전일치 없음:", address);
           }
         }
 
-        // ── Step 2: DB에서 building_summary / land_summary 조회 (property_id 우선) ──
-        if (pid) {
-          console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
+        // 2️⃣ DB 조회
+        let dbBuilding: any = null;
+        let dbLand: any = null;
 
+        if (pid) {
           const [bRes, lRes] = await Promise.all([
             supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
             supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
           ]);
 
-          if (bRes.error) {
-            console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
-          }
-          if (lRes.error) {
-            console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
-          }
-
-          console.log("📦 [building_summary] DB 조회 결과:", bRes.data ?? "없음");
-          console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
-
-          dbBuilding = (bRes.data as Record<string, any> | null) ?? null;
-          dbLand = (lRes.data as Record<string, any> | null) ?? null;
-
-          console.log("🗂️ DB 캐시만 저장하고, API도 계속 호출합니다.");
-        } else {
-          console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
+          dbBuilding = bRes.data ?? null;
+          dbLand = lRes.data ?? null;
         }
 
-        // ── Step 3: Edge Function 호출 (실시간 조회) ──
+        // 3️⃣ Edge Function 호출
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-        console.log("⚡ [Edge Function 호출] address:", address, "| property_id:", pid ?? "(없음)");
 
         const res = await fetch(endpoint, {
           method: "POST",
@@ -197,69 +171,24 @@ useEffect(() => {
         });
 
         const data = await res.json();
-        console.log("📡 [PROPERTY_SUMMARY_RESPONSE]", data);
 
         if (!res.ok) {
           throw new Error(data.error || "공적장부 조회 실패");
         }
 
+        // 4️⃣ API + DB fallback
         const apiBuilding = data.building_summary ?? null;
         const apiLand = data.land_summary ?? null;
 
         const bSum = apiBuilding ?? dbBuilding;
         const lSum = apiLand ?? dbLand;
 
-        console.log("📦 [building_summary] API 조회 결과:", bSum ?? "없음");
-        console.log("🌍 [land_summary] API 조회 결과:", lSum ?? "없음");
-
-        // building_summary _raw 보완
-
-        if (bSum && bSum._raw && typeof bSum._raw === "object") {
-          const raw = bSum._raw as Record<string, any>;
-
-          // ✅ raw 값을 우선 사용
-          bSum.main_purpose = raw.mainPurpsCdNm ?? bSum.main_purpose;
-          bSum.total_area = raw.totArea ?? bSum.total_area;
-          bSum.building_area = raw.archArea ?? bSum.building_area;
-          bSum.land_area = raw.platArea ?? bSum.land_area;
-          bSum.approval_date = raw.useAprDay ?? bSum.approval_date;
-          bSum.floors_above = raw.grndFlrCnt ?? bSum.floors_above;
-          bSum.floors_below = raw.ugrndFlrCnt ?? bSum.floors_below;
-          bSum.parking_count = raw.indrMechUtcnt ?? bSum.parking_count;
-          bSum.building_name = raw.bldNm ?? bSum.building_name;
-
-          // 엘리베이터
-          if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
-            bSum.elevator = true;
-          }
-
-          console.log("🔥 RAW BUILDING:", raw);
-          console.log("🔥 FINAL BUILDING:", bSum);
-        }
-        // land_summary 정규화
-        // 🔥 토지 RAW 강제 매핑 (핵심)
-        if (lSum && lSum._raw && typeof lSum._raw === "object") {
-          const raw = lSum._raw as Record<string, any>;
-
-          lSum.land_category = raw.lndcgrCodeNm ?? lSum.land_category;
-          lSum.land_area = raw.lndpclAr ?? lSum.land_area;
-          lSum.official_price = raw.indvdlzPblntfPc ?? lSum.official_price;
-          lSum.use_zone = raw.prposArea1DstrcNm ?? lSum.use_zone;
-          lSum.pnu = raw.pnu ?? lSum.pnu;
-          lSum.lot_number = raw.mnnmSlno ?? lSum.lot_number;
-
-          console.log("🔥 RAW LAND:", raw);
-          console.log("🔥 FINAL LAND:", lSum);
-        }
         setBuilding(bSum);
         setLand(lSum);
         setFetchedFrom(apiBuilding || apiLand ? "api" : "db");
-        console.log("✅ [공적장부] 렌더링 완료");
-      } catch (e: unknown) {
-        console.error("❌ [공적장부] 조회 실패:", e);
-        const reason = e instanceof Error ? e.message : "조회 중 오류가 발생했습니다.";
-        console.error("❌ 조회 실패 사유:", reason);
-        setError(reason);
+      } catch (e: any) {
+        console.error("❌ 조회 실패:", e);
+        setError(e.message || "조회 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -295,8 +224,8 @@ useEffect(() => {
   const isViolation = violation?.isViolation === true;
   const hasViolationInfo = violation !== null;
 
-const hasAnyBuildingData = !!building;
-    !!building &&
+  const hasAnyBuildingData = !!building;
+  !!building &&
     !!(
       str(building.building_name) ||
       str(building.main_purpose) ||
@@ -305,8 +234,8 @@ const hasAnyBuildingData = !!building;
       str(building.floors_above)
     );
 
-const hasAnyLandData = !!land;
-    !!land &&
+  const hasAnyLandData = !!land;
+  !!land &&
     !!(
       str(land.land_area) ||
       str(land.land_category) ||
@@ -394,13 +323,13 @@ const hasAnyLandData = !!land;
               <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
 
               {hasAnyLandData ? (
-            <div className="px-4 py-1">
-  <Row label="PNU" value={str(land?.pnu)} />
-  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
-  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
-  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
-  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
-</div>
+                <div className="px-4 py-1">
+                  <Row label="PNU" value={str(land?.pnu)} />
+                  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
+                  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
+                  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
+                  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
+                </div>
               ) : (
                 <div className="px-4 py-4">
                   <p className="text-[11px] text-muted-foreground">토지 데이터 없음 또는 일부 항목만 조회됨</p>
@@ -471,118 +400,127 @@ const hasAnyLandData = !!land;
                 </div>
               )}
 
-              {building && allBuildings.length > 0 ? (
-                allBuildings.map((bldg, idx) => {
-                  const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+              {building && allBuildings.length > 0
+                ? allBuildings.map((bldg, idx) => {
+                    const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
 
-                  const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
-                  const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
+                    const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
+                    const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
 
-                  const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
-                  const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
-                  const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
+                    const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
+                    const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
+                    const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
 
-                  const parkTotal =
-                    Number(bldg.indrMechUtcnt ?? 0) +
-                    Number(bldg.oudrMechUtcnt ?? 0) +
-                    Number(bldg.indrAutoUtcnt ?? 0) +
-                    Number(bldg.oudrAutoUtcnt ?? 0);
+                    const parkTotal =
+                      Number(bldg.indrMechUtcnt ?? 0) +
+                      Number(bldg.oudrMechUtcnt ?? 0) +
+                      Number(bldg.indrAutoUtcnt ?? 0) +
+                      Number(bldg.oudrAutoUtcnt ?? 0);
 
-                  const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
+                    const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
 
-                  const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
+                    const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
 
-                  const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
+                    const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
 
-                  const seismicDesign = bldg.erthqkDsgnApplyYn
-                    ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
-                      ? "적용"
-                      : String(bldg.erthqkDsgnApplyYn) === "1"
+                    const seismicDesign = bldg.erthqkDsgnApplyYn
+                      ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
                         ? "적용"
-                        : String(bldg.erthqkDsgnApplyYn)
-                    : "-";
+                        : String(bldg.erthqkDsgnApplyYn) === "1"
+                          ? "적용"
+                          : String(bldg.erthqkDsgnApplyYn)
+                      : "-";
 
-                  return (
-                    <div key={idx} className="px-3 mt-2">
-                      <div className="flex justify-center mb-2">
-                        <span
-                          className="inline-block text-[11px] font-bold text-white px-4 py-1.5 rounded-full"
-                          style={{ background: "hsl(var(--primary))" }}
-                        >
-                          {dongLabel}
-                          {regKind && (
-                            <span className="block text-[9px] font-normal text-center opacity-80">{regKind}</span>
-                          )}
-                        </span>
-                      </div>
-
-                      <table className="w-full border-collapse border border-border/50 text-[11px]">
-                        <tbody>
-                          <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
-                          {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
-                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
-                          <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
-                          <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
-                          <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
-                          <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
-                          <TRow l1="연면적" v1={s(bldg.totArea)} l2="용적률산정연면적" v2={s(bldg.vlRatEstmTotArea)} />
-                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
-                          <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
-                          <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
-                          <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
-                          <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
-                          <TRow l1="대내진능력" v1={s(bldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
-                        </tbody>
-                      </table>
-
-                      {/* 집합건물 층별 전유/공용 면적 */}
-                      {bldg.exposFloors && Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0 && (
-                        <div className="mt-2">
-                          <h4 className="text-[11px] font-bold text-foreground mb-1">
-                            층별 전유/공용 면적 ({bldg.exposFloors.length}건)
-                          </h4>
-                          <table className="w-full border-collapse border border-border/50 text-[10px]">
-                            <thead>
-                              <tr className="bg-muted/40">
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  층
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  호
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  용도
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
-                                  면적
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {bldg.exposFloors.map((ef: any, fi: number) => (
-                                <tr key={fi} className="border-b border-border/30 last:border-0">
-                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
-                                    {ef.flrNoNm || ef.flrNo || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.hoNm || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.mainPurpsCdNm || ef.etcPurps || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                    return (
+                      <div key={idx} className="px-3 mt-2">
+                        <div className="flex justify-center mb-2">
+                          <span
+                            className="inline-block text-[11px] font-bold text-white px-4 py-1.5 rounded-full"
+                            style={{ background: "hsl(var(--primary))" }}
+                          >
+                            {dongLabel}
+                            {regKind && (
+                              <span className="block text-[9px] font-normal text-center opacity-80">{regKind}</span>
+                            )}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  );
-                })
-              ) : null}
 
-              
+                        <table className="w-full border-collapse border border-border/50 text-[11px]">
+                          <tbody>
+                            <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
+                            {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
+                            <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
+                            <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
+                            <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
+                            <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
+                            <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
+                            <TRow
+                              l1="연면적"
+                              v1={s(bldg.totArea)}
+                              l2="용적률산정연면적"
+                              v2={s(bldg.vlRatEstmTotArea)}
+                            />
+                            <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
+                            <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
+                            <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
+                            <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
+                            <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
+                            <TRow
+                              l1="대내진능력"
+                              v1={s(bldg.erthqkAblty) ?? "-"}
+                              l2="내진설계적용"
+                              v2={seismicDesign}
+                            />
+                          </tbody>
+                        </table>
+
+                        {/* 집합건물 층별 전유/공용 면적 */}
+                        {bldg.exposFloors && Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0 && (
+                          <div className="mt-2">
+                            <h4 className="text-[11px] font-bold text-foreground mb-1">
+                              층별 전유/공용 면적 ({bldg.exposFloors.length}건)
+                            </h4>
+                            <table className="w-full border-collapse border border-border/50 text-[10px]">
+                              <thead>
+                                <tr className="bg-muted/40">
+                                  <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                    층
+                                  </th>
+                                  <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                    호
+                                  </th>
+                                  <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                    용도
+                                  </th>
+                                  <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
+                                    면적
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {bldg.exposFloors.map((ef: any, fi: number) => (
+                                  <tr key={fi} className="border-b border-border/30 last:border-0">
+                                    <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
+                                      {ef.flrNoNm || ef.flrNo || "-"}
+                                    </td>
+                                    <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                      {ef.hoNm || "-"}
+                                    </td>
+                                    <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                      {ef.mainPurpsCdNm || ef.etcPurps || "-"}
+                                    </td>
+                                    <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                : null}
+
               {floors.length > 0 && (
                 <>
                   <div className="px-3 mt-3 mb-1">
