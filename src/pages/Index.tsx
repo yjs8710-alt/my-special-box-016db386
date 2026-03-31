@@ -12,7 +12,7 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
-
+  
   const { properties: dbProperties } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
