@@ -9,7 +9,6 @@ interface PublicRecordModalProps {
   onClose: () => void;
 }
 
-import { forwardRef } from "react";
 
 const TRow = forwardRef<
   HTMLTableRowElement,
