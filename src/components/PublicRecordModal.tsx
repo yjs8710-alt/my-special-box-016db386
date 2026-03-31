@@ -107,13 +107,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
 
   /** 값이 있는지 판단 */
-  const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
-
   useEffect(() => {
     setLoading(true);
     setError("");
     setBuilding(null);
     setLand(null);
+    setFetchedFrom(null);
 
     const fetchData = async () => {
       if (!address && !propertyId) {
@@ -124,8 +123,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
       try {
         let pid = propertyId;
+        let dbBuilding: Record<string, any> | null = null;
+        let dbLand: Record<string, any> | null = null;
 
-        // 1️⃣ property_id 없으면 address로 조회
+        // 1) property_id 없으면 address로 properties 조회
         if (!pid && address) {
           const { data: propRow, error: propErr } = await supabase
             .from("properties")
@@ -134,29 +135,33 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
             .maybeSingle();
 
           if (propErr) {
-            console.warn("⚠️ properties 조회 오류:", propErr.message);
+            console.warn("⚠️ [properties 조회 오류]", propErr.message);
           }
 
-          if (propRow) {
+          if (propRow?.id) {
             pid = propRow.id;
           }
         }
 
-        // 2️⃣ DB 조회
-        let dbBuilding: any = null;
-        let dbLand: any = null;
-
+        // 2) DB 캐시 조회
         if (pid) {
           const [bRes, lRes] = await Promise.all([
             supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
             supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
           ]);
 
-          dbBuilding = bRes.data ?? null;
-          dbLand = lRes.data ?? null;
+          if (bRes.error) {
+            console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
+          }
+          if (lRes.error) {
+            console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
+          }
+
+          dbBuilding = (bRes.data as Record<string, any> | null) ?? null;
+          dbLand = (lRes.data as Record<string, any> | null) ?? null;
         }
 
-        // 3️⃣ Edge Function 호출
+        // 3) Edge Function 실시간 조회
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -176,19 +181,47 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           throw new Error(data.error || "공적장부 조회 실패");
         }
 
-        // 4️⃣ API + DB fallback
         const apiBuilding = data.building_summary ?? null;
         const apiLand = data.land_summary ?? null;
 
         const bSum = apiBuilding ?? dbBuilding;
         const lSum = apiLand ?? dbLand;
 
+        // building raw 보정
+        if (bSum && bSum._raw && typeof bSum._raw === "object") {
+          const raw = bSum._raw as Record<string, any>;
+          bSum.main_purpose = raw.mainPurpsCdNm ?? bSum.main_purpose;
+          bSum.total_area = raw.totArea ?? bSum.total_area;
+          bSum.building_area = raw.archArea ?? bSum.building_area;
+          bSum.land_area = raw.platArea ?? bSum.land_area;
+          bSum.approval_date = raw.useAprDay ?? bSum.approval_date;
+          bSum.floors_above = raw.grndFlrCnt ?? bSum.floors_above;
+          bSum.floors_below = raw.ugrndFlrCnt ?? bSum.floors_below;
+          bSum.parking_count = raw.indrMechUtcnt ?? bSum.parking_count;
+          bSum.building_name = raw.bldNm ?? bSum.building_name;
+
+          if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+            bSum.elevator = true;
+          }
+        }
+
+        // land raw 보정
+        if (lSum && lSum._raw && typeof lSum._raw === "object") {
+          const raw = lSum._raw as Record<string, any>;
+          lSum.land_category = raw.lndcgrCodeNm ?? lSum.land_category;
+          lSum.land_area = raw.lndpclAr ?? lSum.land_area;
+          lSum.official_price = raw.indvdlzPblntfPc ?? lSum.official_price;
+          lSum.use_zone = raw.prposArea1DstrcNm ?? lSum.use_zone;
+          lSum.pnu = raw.pnu ?? lSum.pnu;
+          lSum.lot_number = raw.mnnmSlno ?? lSum.lot_number;
+        }
+
         setBuilding(bSum);
         setLand(lSum);
         setFetchedFrom(apiBuilding || apiLand ? "api" : "db");
       } catch (e: any) {
-        console.error("❌ 조회 실패:", e);
-        setError(e.message || "조회 중 오류가 발생했습니다.");
+        console.error("❌ [공적장부] 조회 실패:", e);
+        setError(e?.message || "조회 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
