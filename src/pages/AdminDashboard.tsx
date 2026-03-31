@@ -160,7 +160,7 @@ const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
   },
   {
     group: "상가 임대",
-    types: ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원"],
+    types: ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"],
   },
   {
     group: "주거형 외 임대·매매",
