@@ -9,18 +9,21 @@ interface PublicRecordModalProps {
   onClose: () => void;
 }
 
-const TRow = forwardRef<
-  HTMLTableRowElement,
-  {
-    l1: string;
-    v1?: string | null;
-    l2?: string;
-    v2?: string | null;
-    highlight?: boolean;
-  }
->(({ l1, v1, l2, v2, highlight }, ref) => {
+function TRow({
+  l1,
+  v1,
+  l2,
+  v2,
+  highlight,
+}: {
+  l1: string;
+  v1?: string | null;
+  l2?: string;
+  v2?: string | null;
+  highlight?: boolean;
+}) {
   return (
-    <tr ref={ref} className="border-b border-border/40">
+    <tr className="border-b border-border/40">
       <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
         {l1}
       </td>
@@ -57,7 +60,7 @@ const TRow = forwardRef<
   );
 });
 
-TRow.displayName = "TRow";
+
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
