@@ -1334,7 +1334,9 @@ function PropertySummaryPanel({ address, pnu }: { address: string; pnu?: string 
         </div>
       )}
 
-      {modalOpen && <PublicRecordModal address={address} onClose={() => setModalOpen(false)} />}
+      {modalOpen && (
+        <PublicRecordModal key={address + String(modalOpen)} address={address} onClose={() => setModalOpen(false)} />
+      )}
     </div>
   );
 }
