@@ -1079,7 +1079,7 @@ function Step2({
         {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
         {!isWarehouseSale && (
           <div className="grid grid-cols-2 gap-3 mt-1">
-            {["상가","식당·카페","사무실","공장·창고","병원·학원","상가임대","상가주택매매","상가건물매매","구분상가매매"].includes(form.detailType) && (
+            {["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업","상가임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.detailType) && (
               <div className="col-span-2">
                 <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
               </div>
