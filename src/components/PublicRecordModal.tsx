@@ -11,7 +11,7 @@ interface PublicRecordModalProps {
 
 const TRow = forwardRef<
   HTMLTableRowElement,
-  {ㄹ
+  {
     l1: string;
     v1?: string | null;
     l2?: string;
@@ -110,7 +110,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const hasVal = (v: unknown) => v != null && v !== "" && v !== "조회 결과 없음" && v !== "-";
 
 useEffect(() => {
-  setLoading(true);   // 🔥 추가 (중요)
+  setLoading(true);
   setError("");
   setBuilding(null);
   setLand(null);
@@ -120,7 +120,7 @@ useEffect(() => {
   };
 
   fetchData();
-}, [address]);
+}, [address, propertyId]);
 
       if (!address && !propertyId) {
         setError("주소 정보가 없습니다.");
