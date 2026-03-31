@@ -251,29 +251,30 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     run();
   }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
 
-  // ── 단독건물: 호수 입력 시 이전 매물 이미지·비밀번호만 자동 로드 ──────────
+  // ── 단독건물: 호수 입력 시 이전 매물 비밀번호만 자동 로드 ──────────
   useEffect(() => {
     if (!form.dong || !form.unitNo || isCollectiveBuilding) return;
     const run = async () => {
-      const { data } = await supabase
+      let q = supabase
         .from("properties")
-        .select("images,building_password,room_password")
+        .select("building_password,room_password")
         .eq("dong", form.dong)
         .eq("unit_number", form.unitNo)
-        .eq("status", "active")
+        .eq("status", "active");
+      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
+      const { data } = await q
         .order("registered_date", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (!data) return;
       setForm((prev) => ({
         ...prev,
-        images: prev.images.length > 0 ? prev.images : (data.images ?? []),
         buildingPassword: prev.buildingPassword || data.building_password || "",
         roomPassword: prev.roomPassword || data.room_password || "",
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType, form.detailType]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
