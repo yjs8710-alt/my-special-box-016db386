@@ -311,7 +311,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     };
 
     return (
-     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
+   <div ref={ref} className="relative flex items-center"> 
         <button
           type="button"
           title={label}
