@@ -848,7 +848,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               {/* 매물 종류 */}
               <Section label="매물 종류">
                 <div className="flex gap-5">
-                  {BUILDING_TYPES.map((t) => <Radio key={t} checked={form.buildingType === t} onClick={() => set("buildingType", t)}>{t}</Radio>)}
+                  {BUILDING_TYPES_UI.map((t) => <Radio key={t} checked={form.buildingType === t} onClick={() => set("buildingType", t)}>{t}</Radio>)}
                 </div>
               </Section>
 
