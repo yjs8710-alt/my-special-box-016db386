@@ -414,13 +414,52 @@ async function fetchBuildingRecap(s: string, b: string, bun: string, ji: string,
 
 // ── 집합건물 공용부 (전체 목록) ──────────────────────────────────────────
 async function fetchBuildingExpos(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
-  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrExposPubuseAreaInfo", s, b, bun, ji, k, "100");
-  if (total > 0) { console.log("📊 [집합건물공용부] 성공:", items.length, "건"); return { primary: items[0], allItems: items }; }
-  for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
-    const r2 = await fetchBuildingApiWithPlatGb("getBrExposPubuseAreaInfo", s, b, bun, ji, pgb, k, "100");
-    if (r2.total > 0) { console.log(`📊 [집합건물공용부] platGbCd=${pgb} 재시도 성공:`, r2.items.length, "건"); return { primary: r2.items[0], allItems: r2.items }; }
+  // 대단지 아파트는 500건 이상일 수 있으므로 페이지네이션
+  const fetchAllPages = async (usePlatGb?: string) => {
+    let allItems: any[] = [];
+    let pageNo = 1;
+    const perPage = 500;
+    while (true) {
+      const encodedKey = encodeURIComponent(k);
+      const params: Record<string, string> = { sigunguCd: s, bjdongCd: b, bun, ji, numOfRows: String(perPage), pageNo: String(pageNo), _type: "json" };
+      if (usePlatGb) params.platGbCd = usePlatGb;
+      const url = `${BUILDING_API_BASE}/getBrExposPubuseAreaInfo?serviceKey=${encodedKey}&${new URLSearchParams(params)}`;
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        const text = await res.text();
+        let parsed: any = {};
+        try { parsed = JSON.parse(text); } catch {}
+        const body = parsed?.response?.body ?? {};
+        const totalCount = Number(body?.totalCount ?? 0);
+        const rawItem = body?.items?.item;
+        const items = rawItem ? (Array.isArray(rawItem) ? rawItem : [rawItem]) : [];
+        allItems = allItems.concat(items);
+        console.log(`📊 [집합건물공용부] 페이지 ${pageNo}: ${items.length}건 / 전체 ${totalCount}건`);
+        if (allItems.length >= totalCount || items.length === 0) break;
+        pageNo++;
+      } catch (e) {
+        console.error(`❌ [집합건물공용부 페이지 ${pageNo} 오류]`, String(e));
+        break;
+      }
+    }
+    return allItems;
+  };
+
+  // 먼저 platGbCd 없이 시도
+  let allItems = await fetchAllPages();
+  if (allItems.length > 0) {
+    console.log("📊 [집합건물공용부] 성공:", allItems.length, "건");
+    return { primary: allItems[0], allItems };
   }
-  console.log(`📊 [집합건물공용부] 없음 (${resultCode}/${resultMsg})`);
+  // platGbCd 재시도
+  for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
+    allItems = await fetchAllPages(pgb);
+    if (allItems.length > 0) {
+      console.log(`📊 [집합건물공용부] platGbCd=${pgb} 재시도 성공:`, allItems.length, "건");
+      return { primary: allItems[0], allItems };
+    }
+  }
+  console.log("📊 [집합건물공용부] 없음");
   return { primary: null, allItems: [] };
 }
 

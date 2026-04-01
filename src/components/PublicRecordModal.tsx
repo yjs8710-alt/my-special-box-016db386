@@ -732,37 +732,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               })()}
 
               {(() => {
-                // 선택된 동의 exposFloors로 비주얼 그리드 표시
-                const keyFields2 = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
-                const s2 = (v: unknown) => (v != null && v !== "" ? String(v) : null);
-
-                const isResidentialOrCommercial2 = (b: Record<string, any>) => {
-                  const name = s2(b.dongNm) || s2(b.bldNm) || "";
+                const s3 = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                const isResOrComm = (b: Record<string, any>) => {
+                  const name = s3(b.dongNm) || s3(b.bldNm) || "";
                   if (!name) return true;
                   if (name.includes("상가")) return true;
                   if (/^\d/.test(name)) return true;
                   if (name.includes("아파트") || name.includes("주거")) return true;
                   return false;
                 };
-
-                const sorted2 = allBuildings.length > 0
-                  ? [...allBuildings]
-                      .filter(isResidentialOrCommercial2)
-                      .sort((a, b) => {
-                        const nameA = s2(a.dongNm) || s2(a.bldNm) || "";
-                        const nameB = s2(b.dongNm) || s2(b.bldNm) || "";
-                        return nameA.localeCompare(nameB, "ko");
-                      })
+                const sorted3 = allBuildings.length > 0
+                  ? [...allBuildings].filter(isResOrComm).sort((a, b) => {
+                      const nameA = s3(a.dongNm) || s3(a.bldNm) || "";
+                      const nameB = s3(b.dongNm) || s3(b.bldNm) || "";
+                      return nameA.localeCompare(nameB, "ko");
+                    })
                   : [];
 
-                if (sorted2.length === 0) return null;
-                const safeIdx2 = Math.min(selectedDongIdx, sorted2.length - 1);
-                const selectedBldg = sorted2[safeIdx2];
+                if (sorted3.length === 0) return null;
+                const safeIdx2 = Math.min(selectedDongIdx, sorted3.length - 1);
+                const selectedBldg = sorted3[safeIdx2];
                 const dongExposFloors = Array.isArray(selectedBldg?.exposFloors) ? selectedBldg.exposFloors : [];
-                const dongLabel2 = s2(selectedBldg?.dongNm) || s2(selectedBldg?.bldNm) || undefined;
+                const dongLabel2 = s3(selectedBldg?.dongNm) || s3(selectedBldg?.bldNm) || undefined;
 
                 if (dongExposFloors.length === 0 && floors.length > 0) {
-                  // Fallback: use general floors data
                   return (
                     <>
                       <div className="px-3 mt-3 mb-1">
