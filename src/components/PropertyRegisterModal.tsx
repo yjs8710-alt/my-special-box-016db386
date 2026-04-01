@@ -1220,7 +1220,7 @@ function Step3({
                 <input
                   type="tel" placeholder={placeholder}
                   value={form[key] as string}
-                  onChange={(e) => set(key, e.target.value)}
+                  onChange={(e) => set(key, formatPhone(e.target.value))}
                   className={ic(!!(errors[key])) + " pl-9"}
                 />
               </div>
