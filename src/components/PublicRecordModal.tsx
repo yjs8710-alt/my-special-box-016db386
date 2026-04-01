@@ -129,6 +129,7 @@ const mergeSummary = (
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
+  const [enhancing, setEnhancing] = useState(false);
   const [error, setError] = useState("");
   const [building, setBuilding] = useState<Record<string, any> | null>(null);
   const [land, setLand] = useState<Record<string, any> | null>(null);
@@ -136,8 +137,49 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
+  /** _raw 보강 로직 (building에 적용) */
+  const enrichBuilding = (bSum: Record<string, any>) => {
+    if (bSum._raw && typeof bSum._raw === "object") {
+      const raw = bSum._raw as Record<string, any>;
+      const firstBuilding =
+        Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings[0] : null;
+
+      if (!hasVal(bSum.main_purpose)) bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
+      if (!hasVal(bSum.total_area)) bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
+      if (!hasVal(bSum.building_area)) bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
+      if (!hasVal(bSum.land_area)) bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
+      if (!hasVal(bSum.approval_date)) bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
+      if (!hasVal(bSum.floors_above)) bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
+      if (!hasVal(bSum.floors_below)) bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
+      if (!hasVal(bSum.parking_count)) bSum.parking_count = raw.indrMechUtcnt ?? firstBuilding?.indrMechUtcnt ?? bSum.parking_count;
+      if (!hasVal(bSum.building_name)) bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
+      if (bSum.elevator !== true) {
+        if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+          bSum.elevator = true;
+        }
+      }
+    }
+    return bSum;
+  };
+
+  /** _raw 보강 로직 (land에 적용) */
+  const enrichLand = (lSum: Record<string, any>) => {
+    if (lSum._raw && typeof lSum._raw === "object") {
+      const raw = lSum._raw as Record<string, any>;
+      lSum.land_category = raw.lndcgrCodeNm ?? lSum.land_category;
+      lSum.land_area = raw.lndpclAr ?? lSum.land_area;
+      lSum.official_price = raw.indvdlzPblntfPc ?? lSum.official_price;
+      lSum.use_zone = raw.prposArea1DstrcNm ?? lSum.use_zone;
+      lSum.pnu = raw.pnu ?? lSum.pnu;
+      lSum.lot_number = raw.mnnmSlno ?? lSum.lot_number;
+    }
+    return lSum;
+  };
+
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
+    setEnhancing(false);
     setError("");
     setBuilding(null);
     setLand(null);
@@ -152,58 +194,51 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
       try {
         let pid = propertyId;
-        let dbBuilding: Record<string, any> | null = null;
-        let dbLand: Record<string, any> | null = null;
 
         if (!pid && address) {
-          console.log("🔎 [property_id 없음] address로 DB 조회:", address);
-
-          const { data: propRow, error: propErr } = await supabase
+          const { data: propRow } = await supabase
             .from("properties")
             .select("id")
             .eq("address", address)
             .maybeSingle();
-
-          if (propErr) {
-            console.warn("⚠️ [properties 조회 오류]", propErr.message);
-          }
-
-          if (propRow?.id) {
-            pid = propRow.id;
-            console.log("📌 address로 조회한 property_id:", pid);
-          } else {
-            console.log("⚠️ [properties] address 완전일치 없음:", address);
-          }
+          if (propRow?.id) pid = propRow.id;
         }
 
-        if (pid) {
-          console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
+        // ── Phase 1: DB 즉시 표시 ────────────────────────────────────
+        let dbBuilding: Record<string, any> | null = null;
+        let dbLand: Record<string, any> | null = null;
+        let hasDBData = false;
 
+        if (pid) {
           const [bRes, lRes] = await Promise.all([
             supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
             supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
           ]);
 
-          if (bRes.error) {
-            console.warn("⚠️ [building_summary 조회 오류]", bRes.error.message);
-          }
-          if (lRes.error) {
-            console.warn("⚠️ [land_summary 조회 오류]", lRes.error.message);
-          }
-
-          console.log("📦 [building_summary] DB 조회 결과:", bRes.data ?? "없음");
-          console.log("🌍 [land_summary] DB 조회 결과:", lRes.data ?? "없음");
-
           dbBuilding = (bRes.data as Record<string, any> | null) ?? null;
           dbLand = (lRes.data as Record<string, any> | null) ?? null;
-        } else {
-          console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
+
+          const bHasData = dbBuilding && (dbBuilding.main_purpose || dbBuilding.total_area || dbBuilding.approval_date);
+          const lHasData = dbLand && (dbLand.land_area || dbLand.land_category || dbLand.official_price);
+          hasDBData = !!(bHasData || lHasData);
+
+          if (hasDBData && !cancelled) {
+            // DB 데이터를 먼저 즉시 표시 (간소화 뷰)
+            setBuilding(dbBuilding);
+            setLand(dbLand);
+            setFetchedFrom("db");
+            setLoading(false);
+            console.log("⚡ [Phase 1] DB 캐시 즉시 표시");
+          }
         }
+
+        // ── Phase 2: Edge Function으로 _raw 보강 ────────────────────
+        if (hasDBData) setEnhancing(true);
 
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-        console.log("⚡ [Edge Function 호출] address:", address, "| property_id:", pid ?? "(없음)");
+        console.log("⚡ [Phase 2] Edge Function 호출:", address);
 
         const res = await fetch(endpoint, {
           method: "POST",
@@ -215,11 +250,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           body: JSON.stringify({ address, property_id: pid }),
         });
 
+        if (cancelled) return;
+
         const data = await res.json();
-        console.log("📡 [PROPERTY_SUMMARY_RESPONSE]", data);
 
         if (!res.ok) {
-          throw new Error(data.error || "공적장부 조회 실패");
+          if (!hasDBData) throw new Error(data.error || "공적장부 조회 실패");
+          console.warn("⚠️ Edge Function 실패, DB 캐시 유지");
+          setEnhancing(false);
+          return;
         }
 
         const apiBuilding = (data.building_summary as Record<string, any> | null) ?? null;
@@ -228,78 +267,29 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         const bSum = mergeSummary(dbBuilding, apiBuilding);
         const lSum = mergeSummary(dbLand, apiLand);
 
-        console.log("📦 [building_summary] 최종 병합 결과:", bSum ?? "없음");
-        console.log("🌍 [land_summary] 최종 병합 결과:", lSum ?? "없음");
+        if (bSum) enrichBuilding(bSum);
+        if (lSum) enrichLand(lSum);
 
-        if (bSum && bSum._raw && typeof bSum._raw === "object") {
-          const raw = bSum._raw as Record<string, any>;
-          const firstBuilding =
-            Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings[0] : null;
-
-          if (!hasVal(bSum.main_purpose)) {
-            bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
-          }
-          if (!hasVal(bSum.total_area)) {
-            bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
-          }
-          if (!hasVal(bSum.building_area)) {
-            bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
-          }
-          if (!hasVal(bSum.land_area)) {
-            bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
-          }
-          if (!hasVal(bSum.approval_date)) {
-            bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
-          }
-          if (!hasVal(bSum.floors_above)) {
-            bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
-          }
-          if (!hasVal(bSum.floors_below)) {
-            bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
-          }
-          if (!hasVal(bSum.parking_count)) {
-            bSum.parking_count = raw.indrMechUtcnt ?? firstBuilding?.indrMechUtcnt ?? bSum.parking_count;
-          }
-          if (!hasVal(bSum.building_name)) {
-            bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
-          }
-          if (bSum.elevator !== true) {
-            if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
-              bSum.elevator = true;
-            }
-          }
-
-          console.log("🔥 RAW BUILDING:", raw);
-          console.log("🔥 FINAL BUILDING:", bSum);
+        if (!cancelled) {
+          setBuilding(bSum);
+          setLand(lSum);
+          setFetchedFrom(apiBuilding?._raw ? "api" : "db");
+          setEnhancing(false);
+          if (!hasDBData) setLoading(false);
+          console.log("✅ [Phase 2] 최종 병합 완료");
         }
-
-        if (lSum && lSum._raw && typeof lSum._raw === "object") {
-          const raw = lSum._raw as Record<string, any>;
-
-          lSum.land_category = raw.lndcgrCodeNm ?? lSum.land_category;
-          lSum.land_area = raw.lndpclAr ?? lSum.land_area;
-          lSum.official_price = raw.indvdlzPblntfPc ?? lSum.official_price;
-          lSum.use_zone = raw.prposArea1DstrcNm ?? lSum.use_zone;
-          lSum.pnu = raw.pnu ?? lSum.pnu;
-          lSum.lot_number = raw.mnnmSlno ?? lSum.lot_number;
-
-          console.log("🔥 RAW LAND:", raw);
-          console.log("🔥 FINAL LAND:", lSum);
-        }
-
-        setBuilding(bSum);
-        setLand(lSum);
-        setFetchedFrom(apiBuilding || apiLand ? "api" : "db");
-        console.log("✅ [공적장부] 렌더링 완료");
       } catch (e: any) {
-        console.error("❌ [공적장부] 조회 실패:", e);
-        setError(e?.message || "조회 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
+        if (!cancelled) {
+          console.error("❌ [공적장부] 조회 실패:", e);
+          setError(e?.message || "조회 중 오류가 발생했습니다.");
+          setLoading(false);
+          setEnhancing(false);
+        }
       }
     };
 
     fetchData();
+    return () => { cancelled = true; };
   }, [address, propertyId]);
 
   const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
@@ -704,7 +694,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           }
                     }
                   >
-                    {fetchedFrom === "db" ? "✓ 캐시" : "✓ 실시간"}
+                    {enhancing ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        상세 로딩
+                      </span>
+                    ) : fetchedFrom === "db" ? "✓ 캐시" : "✓ 실시간"}
                   </span>
                 )}
               </div>
