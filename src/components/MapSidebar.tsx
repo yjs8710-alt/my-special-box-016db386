@@ -3463,12 +3463,22 @@ const MapSidebar = ({
                   return (
                     <div key={prop.id} className="flex flex-col">
                       <button
-                        onClick={() => (selectedId === prop.id ? onDeselect?.() : onSelect(prop.id))}
-                        className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
-                          selectedId === prop.id
-                            ? "ring-2 ring-primary shadow-lg"
-                            : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
-                        }`}
+                        <div
+  role="button"
+  tabIndex={0}
+  onClick={() => selectedId === prop.id ? onDeselect?.() : onSelect(prop.id)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+    }
+  }}
+  className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
+    selectedId === prop.id
+      ? "ring-2 ring-primary shadow-lg"
+      : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
+  }`}
+>
                       >
                         {/* Row: 3줄 레이아웃 */}
                         <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
@@ -3636,7 +3646,7 @@ const MapSidebar = ({
                               >
                                 {prop.memo ? "수정" : "수정불가"}
                               </span>
-                            </button>
+                            </div>
                           )}
                           {/* 건축/토지 열람 버튼 */}
                           <button
