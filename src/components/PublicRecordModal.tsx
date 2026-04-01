@@ -9,7 +9,6 @@ interface PublicRecordModalProps {
   onClose: () => void;
 }
 
-
 function TRow({
   l1,
   v1,
@@ -57,16 +56,13 @@ function TRow({
   );
 }
 
-
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
       <span className="w-[90px] flex-shrink-0 text-[11px] text-muted-foreground font-medium leading-tight pt-0.5">
         {label}
       </span>
-      <span className="text-[11px] font-semibold text-foreground leading-tight flex-1">
-        {value ?? "-"}
-      </span>
+      <span className="text-[11px] font-semibold text-foreground leading-tight flex-1">{value ?? "-"}</span>
     </div>
   );
 }
@@ -89,20 +85,14 @@ function SkeletonRow() {
   );
 }
 
-export default function PublicRecordModal({
-  address,
-  propertyId,
-  onClose,
-}: PublicRecordModalProps) {
+export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [building, setBuilding] = useState<Record<string, any> | null>(null);
   const [land, setLand] = useState<Record<string, any> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
 
- 
-  const str = (v: unknown) =>
-    v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null;
+  const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
   useEffect(() => {
     setLoading(true);
@@ -193,61 +183,63 @@ export default function PublicRecordModal({
           throw new Error(data.error || "공적장부 조회 실패");
         }
 
-const apiBuilding = data.building_summary ?? null;
-const apiLand = data.land_summary ?? null;
+        const apiBuilding = (data.building_summary as Record<string, any> | null) ?? null;
+        const apiLand = (data.land_summary as Record<string, any> | null) ?? null;
 
-// ✅ API가 일부만 와도 DB의 상세 _raw를 유지
-const bSum = mergeSummary(dbBuilding, apiBuilding);
-const lSum = mergeSummary(dbLand, apiLand);
+        // ✅ API 일부 응답 + DB 상세 _raw 병합
+        const bSum = mergeSummary(dbBuilding, apiBuilding);
+        const lSum = mergeSummary(dbLand, apiLand);
 
-        console.log("📦 [building_summary] 최종 조회 결과:", bSum ?? "없음");
-        console.log("🌍 [land_summary] 최종 조회 결과:", lSum ?? "없음");
+        console.log("📦 [building_summary] 최종 병합 결과:", bSum ?? "없음");
+        console.log("🌍 [land_summary] 최종 병합 결과:", lSum ?? "없음");
 
         // building raw 보정
-      if (bSum && bSum._raw && typeof bSum._raw === "object") {
-  const raw = bSum._raw as Record<string, any>;
-  const firstBuilding =
-    Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0
-      ? raw.allBuildings[0]
-      : null;
+        if (bSum && bSum._raw && typeof bSum._raw === "object") {
+          const raw = bSum._raw as Record<string, any>;
+          const firstBuilding =
+            Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings[0] : null;
 
-  if (!hasVal(bSum.main_purpose)) {
-    bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
-  }
-  if (!hasVal(bSum.total_area)) {
-    bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
-  }
-  if (!hasVal(bSum.building_area)) {
-    bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
-  }
-  if (!hasVal(bSum.land_area)) {
-    bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
-  }
-  if (!hasVal(bSum.approval_date)) {
-    bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
-  }
-  if (!hasVal(bSum.floors_above)) {
-    bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
-  }
-  if (!hasVal(bSum.floors_below)) {
-    bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
-  }
-  if (!hasVal(bSum.parking_count)) {
-    bSum.parking_count =
-      raw.indrMechUtcnt ??
-      firstBuilding?.indrMechUtcnt ??
-      bSum.parking_count;
-  }
-  if (!hasVal(bSum.building_name)) {
-    bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
-  }
+          if (!hasVal(bSum.main_purpose)) {
+            bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
+          }
 
-  if (bSum.elevator !== true) {
-    if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
-      bSum.elevator = true;
-    }
-  }
-}  
+          if (!hasVal(bSum.total_area)) {
+            bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
+          }
+
+          if (!hasVal(bSum.building_area)) {
+            bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
+          }
+
+          if (!hasVal(bSum.land_area)) {
+            bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
+          }
+
+          if (!hasVal(bSum.approval_date)) {
+            bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
+          }
+
+          if (!hasVal(bSum.floors_above)) {
+            bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
+          }
+
+          if (!hasVal(bSum.floors_below)) {
+            bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
+          }
+
+          if (!hasVal(bSum.parking_count)) {
+            bSum.parking_count = raw.indrMechUtcnt ?? firstBuilding?.indrMechUtcnt ?? bSum.parking_count;
+          }
+
+          if (!hasVal(bSum.building_name)) {
+            bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
+          }
+
+          if (bSum.elevator !== true) {
+            if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+              bSum.elevator = true;
+            }
+          }
 
           console.log("🔥 RAW BUILDING:", raw);
           console.log("🔥 FINAL BUILDING:", bSum);
@@ -283,19 +275,12 @@ const lSum = mergeSummary(dbLand, apiLand);
     fetchData();
   }, [address, propertyId]);
 
-  const raw = building?._raw && typeof building._raw === "object"
-    ? (building._raw as Record<string, any>)
-    : null;
+  const raw = building?._raw && typeof building._raw === "object" ? (building._raw as Record<string, any>) : null;
 
-  const floors =
-    raw?.floors && Array.isArray(raw.floors)
-      ? (raw.floors as Array<Record<string, string>>)
-      : [];
+  const floors = raw?.floors && Array.isArray(raw.floors) ? (raw.floors as Array<Record<string, string>>) : [];
 
   const allBuildings =
-    raw?.allBuildings && Array.isArray(raw.allBuildings)
-      ? (raw.allBuildings as Array<Record<string, any>>)
-      : [];
+    raw?.allBuildings && Array.isArray(raw.allBuildings) ? (raw.allBuildings as Array<Record<string, any>>) : [];
 
   const violation =
     raw?.violation && typeof raw.violation === "object"
@@ -356,9 +341,7 @@ const lSum = mergeSummary(dbLand, apiLand);
             </div>
             <div className="min-w-0">
               <h2 className="text-[13px] font-extrabold text-foreground">공적장부 열람</h2>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight truncate max-w-[520px]">
-                {address}
-              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight truncate max-w-[520px]">{address}</p>
             </div>
           </div>
           <button
@@ -511,8 +494,8 @@ const lSum = mergeSummary(dbLand, apiLand);
                     ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
                       ? "적용"
                       : String(bldg.erthqkDsgnApplyYn) === "1"
-                      ? "적용"
-                      : String(bldg.erthqkDsgnApplyYn)
+                        ? "적용"
+                        : String(bldg.erthqkDsgnApplyYn)
                     : "-";
 
                   return (
@@ -597,10 +580,30 @@ const lSum = mergeSummary(dbLand, apiLand);
                   <table className="w-full border-collapse border border-border/50 text-[11px]">
                     <tbody>
                       <TRow l1="건물명" v1={building?.building_name as string} />
-                      <TRow l1="주용도" v1={building?.main_purpose as string} l2="사용승인일" v2={bMapped.approvalDate} />
-                      <TRow l1="연면적" v1={building?.total_area as string} l2="대지면적" v2={building?.land_area as string} />
-                      <TRow l1="건축면적" v1={building?.building_area as string} l2="층수" v2={`지상 ${building?.floors_above ?? "-"}층 / 지하 ${building?.floors_below ?? "-"}층`} />
-                      <TRow l1="주차대수" v1={building?.parking_count as string} l2="엘리베이터" v2={bMapped.elevatorDetail} />
+                      <TRow
+                        l1="주용도"
+                        v1={building?.main_purpose as string}
+                        l2="사용승인일"
+                        v2={bMapped.approvalDate}
+                      />
+                      <TRow
+                        l1="연면적"
+                        v1={building?.total_area as string}
+                        l2="대지면적"
+                        v2={building?.land_area as string}
+                      />
+                      <TRow
+                        l1="건축면적"
+                        v1={building?.building_area as string}
+                        l2="층수"
+                        v2={`지상 ${building?.floors_above ?? "-"}층 / 지하 ${building?.floors_below ?? "-"}층`}
+                      />
+                      <TRow
+                        l1="주차대수"
+                        v1={building?.parking_count as string}
+                        l2="엘리베이터"
+                        v2={bMapped.elevatorDetail}
+                      />
                     </tbody>
                   </table>
                 </div>
@@ -658,9 +661,7 @@ const lSum = mergeSummary(dbLand, apiLand);
               )}
 
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
-                <p className="text-[9px] text-muted-foreground/40">
-                  출처: 국토교통부 건축물대장·토지대장 공공데이터
-                </p>
+                <p className="text-[9px] text-muted-foreground/40">출처: 국토교통부 건축물대장·토지대장 공공데이터</p>
                 {fetchedFrom && (
                   <span
                     className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
