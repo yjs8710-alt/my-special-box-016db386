@@ -602,18 +602,33 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
 
               {(() => {
-                const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
+              const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
                 const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
                 const fieldCount = (bldg: Record<string, any>) =>
                   keyFields.filter((f) => s(bldg[f])).length;
 
-                // 동 이름 오름차순 정렬
+                // 상가동 + 주거동(숫자로 시작하는 동)만 필터
+                const isResidentialOrCommercial = (b: Record<string, any>) => {
+                  const name = s(b.dongNm) || s(b.bldNm) || "";
+                  if (!name) return true; // 이름 없으면 포함
+                  // 상가동 포함
+                  if (name.includes("상가")) return true;
+                  // 숫자로 시작하는 동 (101동, 102동 등) = 주거동
+                  if (/^\d/.test(name)) return true;
+                  // 주거 관련 키워드
+                  if (name.includes("아파트") || name.includes("주거")) return true;
+                  return false;
+                };
+
+                // 동 이름 오름차순 정렬 + 필터
                 const sorted = allBuildings.length > 0
-                  ? [...allBuildings].sort((a, b) => {
-                      const nameA = s(a.dongNm) || s(a.bldNm) || "";
-                      const nameB = s(b.dongNm) || s(b.bldNm) || "";
-                      return nameA.localeCompare(nameB, "ko");
-                    })
+                  ? [...allBuildings]
+                      .filter(isResidentialOrCommercial)
+                      .sort((a, b) => {
+                        const nameA = s(a.dongNm) || s(a.bldNm) || "";
+                        const nameB = s(b.dongNm) || s(b.bldNm) || "";
+                        return nameA.localeCompare(nameB, "ko");
+                      })
                   : [];
 
                 // allBuildings 없으면 요약 표제부
