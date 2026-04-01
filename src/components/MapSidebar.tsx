@@ -27,6 +27,35 @@ import {
   Loader2,
   FileSearch,
 } from "lucide-react";
+import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import {
+  MapPin,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  ZoomIn,
+  Phone,
+  KeyRound,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Camera,
+  ClipboardList,
+  Send,
+  Heart,
+  Printer,
+  Building2,
+  Pencil,
+  Upload,
+  Trash2,
+  Dog,
+  Droplet,
+  Tv,
+  Cctv,
+  Wifi,
+  Loader2,
+  FileSearch,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
