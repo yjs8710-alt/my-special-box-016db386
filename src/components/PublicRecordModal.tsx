@@ -490,6 +490,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 allBuildings.map((bldg, idx) => {
                   const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
 
+                  // 집합건물: 총괄표제부(첫 항목)의 빈 필드를 다른 동 데이터로 보충
+                  const fallbackField = (field: string) => {
+                    if (s(bldg[field])) return s(bldg[field]);
+                    for (const other of allBuildings) {
+                      if (other !== bldg && s(other[field])) return s(other[field]);
+                    }
+                    return null;
+                  };
+
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
 
@@ -533,18 +542,18 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <tbody>
                           <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
                           {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
-                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
-                          <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
-                          <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
-                          <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
-                          <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
-                          <TRow l1="연면적" v1={s(bldg.totArea)} l2="용적률산정연면적" v2={s(bldg.vlRatEstmTotArea)} />
-                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
-                          <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
-                          <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
+                          <TRow l1="건물명" v1={fallbackField("bldNm")} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
+                          <TRow l1="용도지역" v1={fallbackField("mainPurpsCdNm")} l2="사용승인일" v2={fallbackField("useAprDay")} />
+                          <TRow l1="주용도" v1={fallbackField("mainPurpsCdNm")} l2="기타용도" v2={fallbackField("etcPurps")} />
+                          <TRow l1="주구조" v1={fallbackField("strctCdNm")} l2="지붕구조" v2={fallbackField("roofCdNm")} />
+                          <TRow l1="대지면적" v1={fallbackField("platArea")} l2="건축면적" v2={fallbackField("archArea")} />
+                          <TRow l1="연면적" v1={fallbackField("totArea")} l2="용적률산정연면적" v2={fallbackField("vlRatEstmTotArea")} />
+                          <TRow l1="건폐율" v1={fallbackField("bcRat")} l2="용적률" v2={fallbackField("vlRat")} />
+                          <TRow l1="세대수" v1={fallbackField("hhldCnt") ?? "0"} l2="가구수" v2={fallbackField("fmlyCnt") ?? "0"} />
+                          <TRow l1="지상층수" v1={fallbackField("grndFlrCnt")} l2="지하층수" v2={fallbackField("ugrndFlrCnt") ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
-                          <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
-                          <TRow l1="대내진능력" v1={s(bldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
+                          <TRow l1="허가일" v1={fallbackField("pmsDay")} l2="착공일" v2={fallbackField("stcnsDay")} />
+                          <TRow l1="대내진능력" v1={fallbackField("erthqkAblty") ?? "-"} l2="내진설계적용" v2={seismicDesign} />
                         </tbody>
                       </table>
 
