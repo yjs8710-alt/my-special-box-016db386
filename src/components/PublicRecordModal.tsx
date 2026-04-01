@@ -711,7 +711,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         </tr>
                       </thead>
                       <tbody>
-                        {floors.map((f, i) => (
+                        {[...floors]
+                          .sort((a, b) => {
+                            const numA = parseInt(String(a.flrNo ?? a.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                            const numB = parseInt(String(b.flrNo ?? b.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                            return numA - numB;
+                          })
+                          .map((f, i) => (
                           <tr key={i} className="border-b border-border/30 last:border-0">
                             <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">
                               {f.flrNoNm || f.flrNo || "-"}
