@@ -145,13 +145,16 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
                         className="text-center cursor-pointer border border-border/20 transition-all hover:ring-2 hover:ring-primary/50 hover:z-10 relative"
                         style={{
                           background: bg,
-                          minWidth: 44,
-                          padding: "3px 2px",
+                          minWidth: 52,
+                          padding: "2px 1px",
                         }}
                         onMouseEnter={(e) => handleMouseEnter(e, unit)}
                         onMouseLeave={() => setHoveredUnit(null)}
                       >
-                        <span className="text-[10px] font-bold text-foreground/80">{hoLabel}</span>
+                        <span className="block text-[10px] font-bold text-foreground/80 leading-tight">{hoLabel}</span>
+                        {unit.area && (
+                          <span className="block text-[7px] text-foreground/50 leading-tight">{parseFloat(String(unit.area).replace(/[^0-9.]/g, "")).toFixed(1)}㎡</span>
+                        )}
                       </td>
                     );
                   })}
