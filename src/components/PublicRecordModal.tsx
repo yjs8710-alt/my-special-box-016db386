@@ -400,6 +400,41 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const topBMapped = mapBuildingFromDB(topBuilding);
 
+  const renderBuildingSummaryTable = (
+    source: Record<string, any> | null,
+    mapped: ReturnType<typeof mapBuildingFromDB>
+  ) => (
+    <table className="w-full border-collapse border border-border/50 text-[11px]">
+      <tbody>
+        <TRow l1="건물명" v1={str(source?.building_name)} />
+        <TRow
+          l1="주용도"
+          v1={str(source?.main_purpose)}
+          l2="사용승인일"
+          v2={mapped.approvalDate ?? str(source?.approval_date)}
+        />
+        <TRow
+          l1="연면적"
+          v1={str(source?.total_area)}
+          l2="대지면적"
+          v2={str(source?.land_area)}
+        />
+        <TRow
+          l1="건축면적"
+          v1={str(source?.building_area)}
+          l2="층수"
+          v2={`지상 ${str(source?.floors_above) ?? "-"}층 / 지하 ${str(source?.floors_below) ?? "-"}층`}
+        />
+        <TRow
+          l1="주차대수"
+          v1={str(source?.parking_count)}
+          l2="엘리베이터"
+          v2={mapped.elevatorDetail}
+        />
+      </tbody>
+    </table>
+  );
+
   return (
     <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onClose}>
       <div
