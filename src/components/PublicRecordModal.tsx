@@ -134,6 +134,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [building, setBuilding] = useState<Record<string, any> | null>(null);
   const [land, setLand] = useState<Record<string, any> | null>(null);
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
+  const [selectedDongIdx, setSelectedDongIdx] = useState(0);
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
