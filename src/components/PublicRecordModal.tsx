@@ -84,6 +84,47 @@ function SkeletonRow() {
     </div>
   );
 }
+const hasVal = (v: unknown) => v !== null && v !== undefined && v !== "" && v !== "-" && v !== "조회 결과 없음";
+
+const mergeSummary = (
+  dbData: Record<string, any> | null,
+  apiData: Record<string, any> | null,
+): Record<string, any> | null => {
+  if (!dbData && !apiData) return null;
+  if (!dbData) return apiData;
+  if (!apiData) return dbData;
+
+  const dbRaw = dbData._raw && typeof dbData._raw === "object" ? (dbData._raw as Record<string, any>) : {};
+
+  const apiRaw = apiData._raw && typeof apiData._raw === "object" ? (apiData._raw as Record<string, any>) : {};
+
+  const mergedRaw: Record<string, any> = {
+    ...dbRaw,
+    ...apiRaw,
+  };
+
+  if (!Array.isArray(mergedRaw.floors) || mergedRaw.floors.length === 0) {
+    mergedRaw.floors = Array.isArray(dbRaw.floors) ? dbRaw.floors : [];
+  }
+
+  if (!Array.isArray(mergedRaw.allBuildings) || mergedRaw.allBuildings.length === 0) {
+    mergedRaw.allBuildings = Array.isArray(dbRaw.allBuildings) ? dbRaw.allBuildings : [];
+  }
+
+  if (!Array.isArray(mergedRaw.exposFloors) || mergedRaw.exposFloors.length === 0) {
+    mergedRaw.exposFloors = Array.isArray(dbRaw.exposFloors) ? dbRaw.exposFloors : [];
+  }
+
+  if (!mergedRaw.violation && dbRaw.violation) {
+    mergedRaw.violation = dbRaw.violation;
+  }
+
+  return {
+    ...dbData,
+    ...apiData,
+    _raw: mergedRaw,
+  };
+};
 
 export default function PublicRecordModal({ address, propertyId, onClose }: PublicRecordModalProps) {
   const [loading, setLoading] = useState(true);
