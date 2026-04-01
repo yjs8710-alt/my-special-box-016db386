@@ -193,32 +193,61 @@ export default function PublicRecordModal({
           throw new Error(data.error || "공적장부 조회 실패");
         }
 
-        const apiBuilding = data.building_summary ?? null;
-        const apiLand = data.land_summary ?? null;
+const apiBuilding = data.building_summary ?? null;
+const apiLand = data.land_summary ?? null;
 
-        const bSum = apiBuilding ?? dbBuilding;
-        const lSum = apiLand ?? dbLand;
+// ✅ API가 일부만 와도 DB의 상세 _raw를 유지
+const bSum = mergeSummary(dbBuilding, apiBuilding);
+const lSum = mergeSummary(dbLand, apiLand);
 
         console.log("📦 [building_summary] 최종 조회 결과:", bSum ?? "없음");
         console.log("🌍 [land_summary] 최종 조회 결과:", lSum ?? "없음");
 
         // building raw 보정
-        if (bSum && bSum._raw && typeof bSum._raw === "object") {
-          const raw = bSum._raw as Record<string, any>;
+      if (bSum && bSum._raw && typeof bSum._raw === "object") {
+  const raw = bSum._raw as Record<string, any>;
+  const firstBuilding =
+    Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0
+      ? raw.allBuildings[0]
+      : null;
 
-          bSum.main_purpose = raw.mainPurpsCdNm ?? bSum.main_purpose;
-          bSum.total_area = raw.totArea ?? bSum.total_area;
-          bSum.building_area = raw.archArea ?? bSum.building_area;
-          bSum.land_area = raw.platArea ?? bSum.land_area;
-          bSum.approval_date = raw.useAprDay ?? bSum.approval_date;
-          bSum.floors_above = raw.grndFlrCnt ?? bSum.floors_above;
-          bSum.floors_below = raw.ugrndFlrCnt ?? bSum.floors_below;
-          bSum.parking_count = raw.indrMechUtcnt ?? bSum.parking_count;
-          bSum.building_name = raw.bldNm ?? bSum.building_name;
+  if (!hasVal(bSum.main_purpose)) {
+    bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
+  }
+  if (!hasVal(bSum.total_area)) {
+    bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
+  }
+  if (!hasVal(bSum.building_area)) {
+    bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
+  }
+  if (!hasVal(bSum.land_area)) {
+    bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
+  }
+  if (!hasVal(bSum.approval_date)) {
+    bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
+  }
+  if (!hasVal(bSum.floors_above)) {
+    bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
+  }
+  if (!hasVal(bSum.floors_below)) {
+    bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
+  }
+  if (!hasVal(bSum.parking_count)) {
+    bSum.parking_count =
+      raw.indrMechUtcnt ??
+      firstBuilding?.indrMechUtcnt ??
+      bSum.parking_count;
+  }
+  if (!hasVal(bSum.building_name)) {
+    bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
+  }
 
-          if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
-            bSum.elevator = true;
-          }
+  if (bSum.elevator !== true) {
+    if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+      bSum.elevator = true;
+    }
+  }
+}  
 
           console.log("🔥 RAW BUILDING:", raw);
           console.log("🔥 FINAL BUILDING:", bSum);
