@@ -38,10 +38,10 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
   const [hoveredUnit, setHoveredUnit] = useState<ExposFloor | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  // Only show 전유 units (not 공용)
+  // Show units with hoNm (exclude explicitly 공용 only)
   const units = useMemo(() => {
     return exposFloors.filter(
-      (e) => e.hoNm && (e.exposPubuseGbCdNm === "전유" || e.pubuseGbCdNm === "전유" || (!e.exposPubuseGbCdNm && !e.pubuseGbCdNm))
+      (e) => e.hoNm && e.exposPubuseGbCdNm !== "공용" && e.pubuseGbCdNm !== "공용"
     );
   }, [exposFloors]);
 
