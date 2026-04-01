@@ -1845,7 +1845,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       setShowOptPopup(false);
     };
 
-    AddressToggleCard.displayName = "AddressToggleCard";
+    
 
     // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
     const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
@@ -3466,7 +3466,16 @@ const MapSidebar = ({
                         <div
   role="button"
   tabIndex={0}
+ <div
+  role="button"
+  tabIndex={0}
   onClick={() => selectedId === prop.id ? onDeselect?.() : onSelect(prop.id)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+    }
+  }}
   onKeyDown={(e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -3545,7 +3554,7 @@ const MapSidebar = ({
                                   />
                                 </svg>
                               )}
-                            </button>
+                            </div>
                             {/* 순번 + 등록일 — 하단 좌측 오버레이 */}
                             <div
                               className="absolute bottom-0 left-0 right-0 flex items-center gap-0.5 px-1 py-0.5"
