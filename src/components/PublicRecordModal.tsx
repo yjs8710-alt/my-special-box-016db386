@@ -137,24 +137,40 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
 
-  /** _raw 보강 로직 (building에 적용) */
+  /** _raw 보강 로직 (building에 적용) - 모든 동에서 가장 상세한 값을 탐색 */
   const enrichBuilding = (bSum: Record<string, any>) => {
     if (bSum._raw && typeof bSum._raw === "object") {
       const raw = bSum._raw as Record<string, any>;
-      const firstBuilding =
-        Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings[0] : null;
+      const buildings: Record<string, any>[] =
+        Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings : [];
 
-      if (!hasVal(bSum.main_purpose)) bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
-      if (!hasVal(bSum.total_area)) bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
-      if (!hasVal(bSum.building_area)) bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
-      if (!hasVal(bSum.land_area)) bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
-      if (!hasVal(bSum.approval_date)) bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
-      if (!hasVal(bSum.floors_above)) bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
-      if (!hasVal(bSum.floors_below)) bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
-      if (!hasVal(bSum.parking_count)) bSum.parking_count = raw.indrMechUtcnt ?? firstBuilding?.indrMechUtcnt ?? bSum.parking_count;
-      if (!hasVal(bSum.building_name)) bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
+      // 모든 동에서 첫 번째 유효값을 찾는 헬퍼
+      const findVal = (...fields: string[]) => {
+        // raw 자체에서 먼저 탐색
+        for (const f of fields) {
+          if (hasVal(raw[f])) return raw[f];
+        }
+        // allBuildings에서 탐색
+        for (const bldg of buildings) {
+          for (const f of fields) {
+            if (hasVal(bldg[f])) return bldg[f];
+          }
+        }
+        return null;
+      };
+
+      if (!hasVal(bSum.main_purpose)) bSum.main_purpose = findVal("mainPurpsCdNm", "etcPurps") ?? bSum.main_purpose;
+      if (!hasVal(bSum.total_area)) bSum.total_area = findVal("totArea") ?? bSum.total_area;
+      if (!hasVal(bSum.building_area)) bSum.building_area = findVal("archArea") ?? bSum.building_area;
+      if (!hasVal(bSum.land_area)) bSum.land_area = findVal("platArea") ?? bSum.land_area;
+      if (!hasVal(bSum.approval_date)) bSum.approval_date = findVal("useAprDay") ?? bSum.approval_date;
+      if (!hasVal(bSum.floors_above)) bSum.floors_above = findVal("grndFlrCnt") ?? bSum.floors_above;
+      if (!hasVal(bSum.floors_below)) bSum.floors_below = findVal("ugrndFlrCnt") ?? bSum.floors_below;
+      if (!hasVal(bSum.parking_count)) bSum.parking_count = findVal("indrMechUtcnt") ?? bSum.parking_count;
+      if (!hasVal(bSum.building_name)) bSum.building_name = findVal("bldNm", "dongNm") ?? bSum.building_name;
       if (bSum.elevator !== true) {
-        if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
+        if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음") ||
+            buildings.some((b) => Number(b.rideUseElvtCnt ?? 0) + Number(b.emgenUseElvtCnt ?? 0) > 0)) {
           bSum.elevator = true;
         }
       }
