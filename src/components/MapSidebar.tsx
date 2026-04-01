@@ -3138,7 +3138,7 @@ const MapSidebar = ({
               </div>
             </div>
             {/* 외부링크 + 선택인쇄 바 */}
-            <div className="flex items-center gap-1 px-3 py-1.5 overflow-x-auto scrollbar-none flex-nowrap">
+            <div className="flex items-center gap-1 px-3 py-1.5 flex-wrap">
               {[
                 {
                   label: "등기소",
