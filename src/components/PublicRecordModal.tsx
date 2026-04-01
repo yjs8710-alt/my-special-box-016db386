@@ -606,9 +606,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 const fieldCount = (bldg: Record<string, any>) =>
                   keyFields.filter((f) => s(bldg[f])).length;
 
-                // 상세 필드 많은 순으로 정렬
+                // 동 이름 오름차순 정렬
                 const sorted = allBuildings.length > 0
-                  ? [...allBuildings].sort((a, b) => fieldCount(b) - fieldCount(a))
+                  ? [...allBuildings].sort((a, b) => {
+                      const nameA = s(a.dongNm) || s(a.bldNm) || "";
+                      const nameB = s(b.dongNm) || s(b.bldNm) || "";
+                      return nameA.localeCompare(nameB, "ko");
+                    })
                   : [];
 
                 // allBuildings 없으면 요약 표제부
@@ -630,8 +634,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
                 const safeIdx = Math.min(selectedDongIdx, sorted.length - 1);
                 const bldg = sorted[safeIdx];
-                const dongLabel = (b: Record<string, any>, i: number) =>
-                  s(b.dongNm) || s(b.bldNm) || `건축물 ${i + 1}`;
+                const dongLabel = (b: Record<string, any>) =>
+                  s(b.dongNm) || s(b.bldNm) || "건축물";
 
                 const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
                 const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
@@ -679,7 +683,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                                     }
                               }
                             >
-                              {dongLabel(b, i)}
+                              {dongLabel(b)}
                             </button>
                           ))}
                         </div>
