@@ -38,12 +38,15 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
   const [hoveredUnit, setHoveredUnit] = useState<ExposFloor | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  // Show units with hoNm (exclude explicitly 공용 only)
-  const units = useMemo(() => {
+  // Private units (전유부) with hoNm
+  const privateUnits = useMemo(() => {
     return exposFloors.filter(
       (e) => e.hoNm && e.exposPubuseGbCdNm !== "공용" && e.pubuseGbCdNm !== "공용"
     );
   }, [exposFloors]);
+
+  // All entries for building the complete floor list (no gaps)
+  const allEntries = useMemo(() => exposFloors, [exposFloors]);
 
   // Group by area size for color coding
   const areaGroups = useMemo(() => {
