@@ -317,7 +317,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     };
 
     return (
-   <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
+      <div ref={ref} className="relative inline-flex">
         <button
           type="button"
           title={label}
@@ -1394,8 +1394,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   const handleOptMouseLeave = () => {
     if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     setShowOptPopup(false);
-  });
-    AddressToggleCard.displayName = "AddressToggleCard";
+  };
+
+  AddressToggleCard.displayName = "AddressToggleCard";
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
@@ -1875,7 +1876,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     </div>
   );
-};
+});
 
 /* ── LandlordPhoneRow ── */
 const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
