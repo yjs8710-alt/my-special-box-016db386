@@ -16,19 +16,16 @@ interface FloorGridProps {
   dongName?: string;
 }
 
-// Parse floor number for sorting
 function parseFloorNum(f: ExposFloor): number {
   const raw = f.flrNo ?? f.flrNoNm ?? "0";
   const n = parseInt(String(raw).replace(/[^0-9-]/g, "")) || 0;
   return n;
 }
 
-// Parse ho (unit) number
 function parseHoNum(ho: string): number {
   return parseInt(ho.replace(/[^0-9]/g, "")) || 0;
 }
 
-// Normalize area string to number for grouping
 function areaToNum(area?: string | null): number {
   if (!area) return 0;
   return parseFloat(area.replace(/[^0-9.]/g, "")) || 0;
@@ -38,29 +35,29 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
   const [hoveredUnit, setHoveredUnit] = useState<ExposFloor | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
 
-  // Show units with hoNm (exclude explicitly 공용 only)
-  const units = useMemo(() => {
+  // Private units (전유부) with hoNm
+  const privateUnits = useMemo(() => {
     return exposFloors.filter(
       (e) => e.hoNm && e.exposPubuseGbCdNm !== "공용" && e.pubuseGbCdNm !== "공용"
     );
   }, [exposFloors]);
 
-  // Group by area size for color coding
+  // Group by area size for color coding (private units only)
   const areaGroups = useMemo(() => {
     const map = new Map<string, { count: number; color: string }>();
-    units.forEach((u) => {
+    privateUnits.forEach((u) => {
       const areaKey = u.area ?? "기타";
       if (!map.has(areaKey)) map.set(areaKey, { count: 0, color: "" });
       map.get(areaKey)!.count++;
     });
 
     const colors = [
-      "hsl(0 70% 85%)",    // pink/red
-      "hsl(210 60% 85%)",  // blue
-      "hsl(142 50% 85%)",  // green
-      "hsl(45 80% 85%)",   // yellow
-      "hsl(280 50% 85%)",  // purple
-      "hsl(20 70% 85%)",   // orange
+      "hsl(0 70% 85%)",
+      "hsl(210 60% 85%)",
+      "hsl(142 50% 85%)",
+      "hsl(45 80% 85%)",
+      "hsl(280 50% 85%)",
+      "hsl(20 70% 85%)",
     ];
     let ci = 0;
     map.forEach((val) => {
@@ -68,31 +65,32 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
       ci++;
     });
     return map;
-  }, [units]);
+  }, [privateUnits]);
 
-  // Build grid: group by floor, then collect units per floor
+  // Build grid: use ALL entries to build complete floor list (no gaps)
   const gridData = useMemo(() => {
-    // Get all unique floors sorted descending (top floor first)
     const floorMap = new Map<number, ExposFloor[]>();
-    units.forEach((u) => {
+    // Register ALL floors (including 공용-only floors) so no floor is skipped
+    exposFloors.forEach((u) => {
+      const fNum = parseFloorNum(u);
+      if (!floorMap.has(fNum)) floorMap.set(fNum, []);
+    });
+    // Add private units to their floors
+    privateUnits.forEach((u) => {
       const fNum = parseFloorNum(u);
       if (!floorMap.has(fNum)) floorMap.set(fNum, []);
       floorMap.get(fNum)!.push(u);
     });
 
-    // Sort units within each floor by ho number
     floorMap.forEach((arr) => arr.sort((a, b) => parseHoNum(a.hoNm!) - parseHoNum(b.hoNm!)));
 
-    // Get max columns
     const maxCols = Math.max(...Array.from(floorMap.values()).map((arr) => arr.length), 1);
-
-    // Sort floors descending
     const floors = Array.from(floorMap.keys()).sort((a, b) => b - a);
 
     return { floorMap, floors, maxCols };
-  }, [units]);
+  }, [exposFloors, privateUnits]);
 
-  if (units.length === 0) return null;
+  if (privateUnits.length === 0 && exposFloors.length === 0) return null;
 
   const { floorMap, floors, maxCols } = gridData;
 
@@ -109,19 +107,21 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
       </h3>
 
       {/* Area legend */}
-      <div className="flex flex-wrap gap-2 mb-2">
-        {Array.from(areaGroups.entries())
-          .sort((a, b) => areaToNum(a[0]) - areaToNum(b[0]))
-          .map(([area, info]) => (
-          <span
-            key={area}
-            className="text-[10px] font-bold px-2 py-0.5 rounded border border-border/50"
-            style={{ background: info.color }}
-          >
-            {area} <span className="text-muted-foreground font-normal">({info.count})</span>
-          </span>
-        ))}
-      </div>
+      {areaGroups.size > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {Array.from(areaGroups.entries())
+            .sort((a, b) => areaToNum(a[0]) - areaToNum(b[0]))
+            .map(([area, info]) => (
+            <span
+              key={area}
+              className="text-[10px] font-bold px-2 py-0.5 rounded border border-border/50"
+              style={{ background: info.color }}
+            >
+              {area} <span className="text-muted-foreground font-normal">({info.count})</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Grid */}
       <div className="overflow-x-auto border border-border/50 rounded-lg">
@@ -130,40 +130,52 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
             {floors.map((fNum) => {
               const rowUnits = floorMap.get(fNum) || [];
               const floorLabel = fNum < 0 ? `B${Math.abs(fNum)}` : `${fNum}F`;
+              const isEmptyFloor = rowUnits.length === 0;
               return (
                 <tr key={fNum}>
                   <td className="py-0.5 px-1.5 text-[10px] font-bold text-muted-foreground text-right whitespace-nowrap border-r border-border/30 bg-muted/20" style={{ width: 36 }}>
                     {floorLabel}
                   </td>
-                  {rowUnits.map((unit, ci) => {
-                    const areaKey = unit.area ?? "기타";
-                    const bg = areaGroups.get(areaKey)?.color ?? "hsl(var(--muted))";
-                    const hoLabel = unit.hoNm?.replace(/호$/, "") ?? "";
-                    return (
-                      <td
-                        key={ci}
-                        className="text-center cursor-pointer border border-border/20 transition-all hover:ring-2 hover:ring-primary/50 hover:z-10 relative"
-                        style={{
-                          background: bg,
-                          minWidth: 52,
-                          padding: "2px 1px",
-                        }}
-                        onMouseEnter={(e) => handleMouseEnter(e, unit)}
-                        onMouseLeave={() => setHoveredUnit(null)}
-                      >
-                        <span className="block text-[10px] font-bold text-foreground/80 leading-tight">{hoLabel}</span>
-                        {unit.area && (
-                          <span className="block text-[7px] text-foreground/50 leading-tight">{parseFloat(String(unit.area).replace(/[^0-9.]/g, "")).toFixed(1)}㎡</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                  {/* Fill empty cells */}
-                  {Array.from({ length: maxCols - rowUnits.length }).map((_, i) => (
-                    <td key={`e-${i}`} className="border border-border/10" style={{ minWidth: 44, padding: "3px 2px" }}>
-                      <span className="text-[10px] text-transparent">·</span>
+                  {isEmptyFloor ? (
+                    <td
+                      colSpan={maxCols}
+                      className="text-center text-[9px] text-muted-foreground/50 italic border border-border/10 bg-muted/10"
+                      style={{ padding: "2px 4px" }}
+                    >
+                      공용
                     </td>
-                  ))}
+                  ) : (
+                    <>
+                      {rowUnits.map((unit, ci) => {
+                        const areaKey = unit.area ?? "기타";
+                        const bg = areaGroups.get(areaKey)?.color ?? "hsl(var(--muted))";
+                        const hoLabel = unit.hoNm?.replace(/호$/, "") ?? "";
+                        return (
+                          <td
+                            key={ci}
+                            className="text-center cursor-pointer border border-border/20 transition-all hover:ring-2 hover:ring-primary/50 hover:z-10 relative"
+                            style={{
+                              background: bg,
+                              minWidth: 52,
+                              padding: "2px 1px",
+                            }}
+                            onMouseEnter={(e) => handleMouseEnter(e, unit)}
+                            onMouseLeave={() => setHoveredUnit(null)}
+                          >
+                            <span className="block text-[10px] font-bold text-foreground/80 leading-tight">{hoLabel}</span>
+                            {unit.area && (
+                              <span className="block text-[7px] text-foreground/50 leading-tight">{parseFloat(String(unit.area).replace(/[^0-9.]/g, "")).toFixed(1)}㎡</span>
+                            )}
+                          </td>
+                        );
+                      })}
+                      {Array.from({ length: maxCols - rowUnits.length }).map((_, i) => (
+                        <td key={`e-${i}`} className="border border-border/10" style={{ minWidth: 44, padding: "3px 2px" }}>
+                          <span className="text-[10px] text-transparent">·</span>
+                        </td>
+                      ))}
+                    </>
+                  )}
                 </tr>
               );
             })}
