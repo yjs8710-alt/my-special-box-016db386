@@ -583,24 +583,48 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </div>
               )}
 
-              {hasAnyBuildingData && (
-                <div className="px-3 mt-2">
-                  <div className="flex justify-center mb-2">
-                    <span
-                      className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
-                      style={{ background: "hsl(var(--primary))" }}
-                    >
-                      표제부
-                    </span>
-                  </div>
-                  {renderBuildingSummaryTable(topBuilding, topBMapped)}
-                </div>
-              )}
+              {(() => {
+                // 집합건물: 상세 필드가 많은 순서로 정렬, 공란 많은 항목은 숨김
+                const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
+                const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                const fieldCount = (bldg: Record<string, any>) =>
+                  keyFields.filter((f) => s(bldg[f])).length;
 
-              {building && allBuildings.length > 0 ? (
-                allBuildings.map((bldg, idx) => {
-                  const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                const sorted = allBuildings.length > 0
+                  ? [...allBuildings].sort((a, b) => fieldCount(b) - fieldCount(a))
+                  : [];
 
+                // 가장 상세한 항목의 필드 수 기준, 절반 미만이면 숨김
+                const maxFields = sorted.length > 0 ? fieldCount(sorted[0]) : 0;
+                const threshold = Math.max(Math.floor(maxFields / 2), 2);
+                const visible = sorted.filter((bldg) => fieldCount(bldg) >= threshold);
+
+                // allBuildings가 없고 상단 요약만 있는 경우
+                if (visible.length === 0 && hasAnyBuildingData) {
+                  return (
+                    <div className="px-3 mt-2">
+                      <div className="flex justify-center mb-2">
+                        <span
+                          className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
+                          style={{ background: "hsl(var(--primary))" }}
+                        >
+                          표제부
+                        </span>
+                      </div>
+                      {renderBuildingSummaryTable(topBuilding, topBMapped)}
+                    </div>
+                  );
+                }
+
+                if (visible.length === 0 && !hasAnyBuildingData) {
+                  return (
+                    <div className="px-4 py-4">
+                      <p className="text-[11px] text-muted-foreground">건축물 데이터 없음 또는 일부 항목만 조회됨</p>
+                    </div>
+                  );
+                }
+
+                return visible.map((bldg, idx) => {
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
 
@@ -613,7 +637,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     Number(bldg.oudrMechUtcnt ?? 0) +
                     Number(bldg.indrAutoUtcnt ?? 0) +
                     Number(bldg.oudrAutoUtcnt ?? 0);
-
                   const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
                   const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
                   const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
@@ -660,12 +683,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       </table>
                     </div>
                   );
-                })
-              ) : !hasAnyBuildingData ? (
-                <div className="px-4 py-4">
-                  <p className="text-[11px] text-muted-foreground">건축물 데이터 없음 또는 일부 항목만 조회됨</p>
-                </div>
-              ) : null}
+                });
+              })()}
 
               {floors.length > 0 && (
                 <>
