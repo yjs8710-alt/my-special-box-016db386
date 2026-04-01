@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { mapBuildingFromDB } from "@/lib/buildingUtils";
+import FloorGrid from "@/components/FloorGrid";
 
 interface PublicRecordModalProps {
   address: string;
@@ -601,18 +602,33 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
 
               {(() => {
-                const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
+              const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
                 const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
                 const fieldCount = (bldg: Record<string, any>) =>
                   keyFields.filter((f) => s(bldg[f])).length;
 
-                // 동 이름 오름차순 정렬
+                // 상가동 + 주거동(숫자로 시작하는 동)만 필터
+                const isResidentialOrCommercial = (b: Record<string, any>) => {
+                  const name = s(b.dongNm) || s(b.bldNm) || "";
+                  if (!name) return true; // 이름 없으면 포함
+                  // 상가동 포함
+                  if (name.includes("상가")) return true;
+                  // 숫자로 시작하는 동 (101동, 102동 등) = 주거동
+                  if (/^\d/.test(name)) return true;
+                  // 주거 관련 키워드
+                  if (name.includes("아파트") || name.includes("주거")) return true;
+                  return false;
+                };
+
+                // 동 이름 오름차순 정렬 + 필터
                 const sorted = allBuildings.length > 0
-                  ? [...allBuildings].sort((a, b) => {
-                      const nameA = s(a.dongNm) || s(a.bldNm) || "";
-                      const nameB = s(b.dongNm) || s(b.bldNm) || "";
-                      return nameA.localeCompare(nameB, "ko");
-                    })
+                  ? [...allBuildings]
+                      .filter(isResidentialOrCommercial)
+                      .sort((a, b) => {
+                        const nameA = s(a.dongNm) || s(a.bldNm) || "";
+                        const nameB = s(b.dongNm) || s(b.bldNm) || "";
+                        return nameA.localeCompare(nameB, "ko");
+                      })
                   : [];
 
                 // allBuildings 없으면 요약 표제부
@@ -715,60 +731,84 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 );
               })()}
 
-              {floors.length > 0 && (
-                <>
-                  <div className="px-3 mt-3 mb-1">
-                    <p className="text-[10px] text-muted-foreground italic">
-                      * 참고용 자료이므로 실제 내용과 차이가 있을 수 있습니다.
-                    </p>
-                    <h3 className="text-[13px] font-extrabold text-foreground mt-2 mb-1.5">층별내역</h3>
-                  </div>
-                  <div className="px-3 pb-2">
-                    <table className="w-full border-collapse border border-border/50 text-[11px]">
-                      <thead>
-                        <tr className="bg-muted/40">
-                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
-                            층
-                          </th>
-                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
-                            용도
-                          </th>
-                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">
-                            면적
-                          </th>
-                          <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-border/40">
-                            구분
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[...floors]
-                          .sort((a, b) => {
-                            const numA = parseInt(String(a.flrNo ?? a.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
-                            const numB = parseInt(String(b.flrNo ?? b.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
-                            return numA - numB;
-                          })
-                          .map((f, i) => (
-                          <tr key={i} className="border-b border-border/30 last:border-0">
-                            <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">
-                              {f.flrNoNm || f.flrNo || "-"}
-                            </td>
-                            <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">
-                              {f.mainPurpsCdNm || "-"}
-                            </td>
-                            <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">
-                              {f.area || "-"}
-                            </td>
-                            <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
+              {(() => {
+                // 선택된 동의 exposFloors로 비주얼 그리드 표시
+                const keyFields2 = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
+                const s2 = (v: unknown) => (v != null && v !== "" ? String(v) : null);
 
+                const isResidentialOrCommercial2 = (b: Record<string, any>) => {
+                  const name = s2(b.dongNm) || s2(b.bldNm) || "";
+                  if (!name) return true;
+                  if (name.includes("상가")) return true;
+                  if (/^\d/.test(name)) return true;
+                  if (name.includes("아파트") || name.includes("주거")) return true;
+                  return false;
+                };
 
+                const sorted2 = allBuildings.length > 0
+                  ? [...allBuildings]
+                      .filter(isResidentialOrCommercial2)
+                      .sort((a, b) => {
+                        const nameA = s2(a.dongNm) || s2(a.bldNm) || "";
+                        const nameB = s2(b.dongNm) || s2(b.bldNm) || "";
+                        return nameA.localeCompare(nameB, "ko");
+                      })
+                  : [];
+
+                if (sorted2.length === 0) return null;
+                const safeIdx2 = Math.min(selectedDongIdx, sorted2.length - 1);
+                const selectedBldg = sorted2[safeIdx2];
+                const dongExposFloors = Array.isArray(selectedBldg?.exposFloors) ? selectedBldg.exposFloors : [];
+                const dongLabel2 = s2(selectedBldg?.dongNm) || s2(selectedBldg?.bldNm) || undefined;
+
+                if (dongExposFloors.length === 0 && floors.length > 0) {
+                  // Fallback: use general floors data
+                  return (
+                    <>
+                      <div className="px-3 mt-3 mb-1">
+                        <p className="text-[10px] text-muted-foreground italic">
+                          * 참고용 자료이므로 실제 내용과 차이가 있을 수 있습니다.
+                        </p>
+                        <h3 className="text-[13px] font-extrabold text-foreground mt-2 mb-1.5">층별내역</h3>
+                      </div>
+                      <div className="px-3 pb-2">
+                        <table className="w-full border-collapse border border-border/50 text-[11px]">
+                          <thead>
+                            <tr className="bg-muted/40">
+                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">층</th>
+                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
+                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">면적</th>
+                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-border/40">구분</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[...floors]
+                              .sort((a, b) => {
+                                const numA = parseInt(String(a.flrNo ?? a.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                                const numB = parseInt(String(b.flrNo ?? b.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                                return numA - numB;
+                              })
+                              .map((f, i) => (
+                              <tr key={i} className="border-b border-border/30 last:border-0">
+                                <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">{f.flrNoNm || f.flrNo || "-"}</td>
+                                <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.mainPurpsCdNm || "-"}</td>
+                                <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.area || "-"}</td>
+                                <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  );
+                }
+
+                if (dongExposFloors.length > 0) {
+                  return <FloorGrid exposFloors={dongExposFloors} dongName={dongLabel2} />;
+                }
+
+                return null;
+              })()}
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
                 <p className="text-[9px] text-muted-foreground/40">출처: 국토교통부 건축물대장·토지대장 공공데이터</p>
                 {fetchedFrom && (
