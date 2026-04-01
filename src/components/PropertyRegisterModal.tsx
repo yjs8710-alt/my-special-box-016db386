@@ -403,7 +403,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       title: isBuildingSale
         ? `${form.dong} ${form.detailType} (${form.buildingSaleType})`
         : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
-      building_name: form.buildingName || null,
+      building_name: form.buildingName || form.detailType || null,
       address,
       dong: form.dong,
       lot_number: form.lotNumber,
