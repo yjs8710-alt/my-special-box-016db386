@@ -594,10 +594,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   ? [...allBuildings].sort((a, b) => fieldCount(b) - fieldCount(a))
                   : [];
 
-                // 가장 상세한 항목의 필드 수 기준, 절반 미만이면 숨김
-                const maxFields = sorted.length > 0 ? fieldCount(sorted[0]) : 0;
-                const threshold = Math.max(Math.floor(maxFields / 2), 2);
-                const visible = sorted.filter((bldg) => fieldCount(bldg) >= threshold);
+                // 가장 상세한 표제부 1개만 표시
+                const visible = sorted.length > 0 ? [sorted[0]] : [];
 
                 // allBuildings가 없고 상단 요약만 있는 경우
                 if (visible.length === 0 && hasAnyBuildingData) {
