@@ -247,7 +247,7 @@ const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
 const VACANCY_TYPES = ["공실","세입자 거주중"] as const;
 const BROKER_TYPES = ["일반중개","공동중개"] as const;
 const TRADE_TYPES = ["임대","매매"] as const;
-const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
+const BUILDING_TYPES = ["단독건물","집합건물"] as const;
 
 // 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
 const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
