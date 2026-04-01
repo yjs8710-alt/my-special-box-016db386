@@ -721,10 +721,11 @@ serve(async (req) => {
     let landData     = lRes.data as Record<string, unknown> | null;
 
     const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
-    const needBuilding    = !buildingData || !!isBuildingEmpty;
-    const needLand        = !landData || !landData.official_price;
+    const needBuildingSave = !buildingData || !!isBuildingEmpty; // DB 저장 필요 여부
+    const needBuilding     = true; // _raw 상세 데이터를 위해 항상 API 호출
+    const needLand         = !landData || !landData.official_price;
 
-    console.log("📦 [building_summary]:", buildingData ? (isBuildingEmpty ? "빈껍데기" : "유효") : "없음");
+    console.log("📦 [building_summary]:", buildingData ? (isBuildingEmpty ? "빈껍데기" : "유효") : "없음", "| needBuildingSave:", needBuildingSave);
     console.log("🌍 [land_summary]:", landData ? "있음" : "없음", "| 공시지가:", landData?.official_price || "없음");
 
     // ── 3. API 조회 ──────────────────────────────────────────────────
@@ -912,11 +913,9 @@ serve(async (req) => {
             console.log("✅ [건축물대장 저장 완료]");
           }
 
-          // ── approval_date → properties.build_year 동기화 ──────────────────
-          // 사용승인일 연도를 properties 테이블에도 저장해 매물카드 즉시 표시 가능
-          if (mappedBuilding?.approval_date && pid) {
+          // ── approval_date / elevator 동기화 (신규 저장 시에만) ──────
+          if (needBuildingSave && mappedBuilding?.approval_date && pid) {
             const approvalYear = mappedBuilding.approval_date.substring(0, 4);
-            // 기존 build_year가 없거나 비어있을 때만 업데이트
             const { data: propRow } = await supabase
               .from("properties").select("build_year").eq("id", pid).maybeSingle();
             if (propRow && (!propRow.build_year || propRow.build_year.trim() === "")) {
@@ -928,9 +927,7 @@ serve(async (req) => {
             }
           }
 
-          // ── elevator → properties.elevator 동기화 ─────────────────────────
-          // 공적장부에서 엘리베이터 정보가 확인된 경우 properties 테이블에도 반영
-          if (mappedBuilding && pid) {
+          if (needBuildingSave && mappedBuilding && pid) {
             const apiElev = mappedBuilding.elevator;
             const { data: propRow2 } = await supabase
               .from("properties").select("elevator, build_year").eq("id", pid).maybeSingle();
