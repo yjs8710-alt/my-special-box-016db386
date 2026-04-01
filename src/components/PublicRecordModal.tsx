@@ -490,6 +490,15 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 allBuildings.map((bldg, idx) => {
                   const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
 
+                  // 집합건물: 총괄표제부(첫 항목)의 빈 필드를 다른 동 데이터로 보충
+                  const fallbackField = (field: string) => {
+                    if (s(bldg[field])) return s(bldg[field]);
+                    for (const other of allBuildings) {
+                      if (other !== bldg && s(other[field])) return s(other[field]);
+                    }
+                    return null;
+                  };
+
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
 
