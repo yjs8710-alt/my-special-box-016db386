@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, formatPhone } from "@/lib/utils";
 import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -1220,7 +1220,7 @@ function Step3({
                 <input
                   type="tel" placeholder={placeholder}
                   value={form[key] as string}
-                  onChange={(e) => set(key, e.target.value)}
+                  onChange={(e) => set(key, formatPhone(e.target.value))}
                   className={ic(!!(errors[key])) + " pl-9"}
                 />
               </div>
