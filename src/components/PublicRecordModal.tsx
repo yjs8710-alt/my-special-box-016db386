@@ -583,18 +583,23 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </div>
               )}
 
+              {hasAnyBuildingData && (
+                <div className="px-3 mt-2">
+                  <div className="flex justify-center mb-2">
+                    <span
+                      className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
+                      style={{ background: "hsl(var(--primary))" }}
+                    >
+                      표제부
+                    </span>
+                  </div>
+                  {renderBuildingSummaryTable(topBuilding, topBMapped)}
+                </div>
+              )}
+
               {building && allBuildings.length > 0 ? (
                 allBuildings.map((bldg, idx) => {
                   const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
-
-                  // 집합건물: 총괄표제부(첫 항목)의 빈 필드를 다른 동 데이터로 보충
-                  const fallbackField = (field: string) => {
-                    if (s(bldg[field])) return s(bldg[field]);
-                    for (const other of allBuildings) {
-                      if (other !== bldg && s(other[field])) return s(other[field]);
-                    }
-                    return null;
-                  };
 
                   const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
                   const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
@@ -622,10 +627,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     : "-";
 
                   return (
-                    <div key={idx} className="px-3 mt-2">
+                    <div key={idx} className="px-3 mt-3">
                       <div className="flex justify-center mb-2">
                         <span
-                          className="inline-block text-[11px] font-bold text-white px-4 py-1.5 rounded-full"
+                          className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
                           style={{ background: "hsl(var(--primary))" }}
                         >
                           {dongLabel}
@@ -639,102 +644,28 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <tbody>
                           <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
                           {s(bldg.newPlatPlc) && <TRow l1="도로명" v1={s(bldg.newPlatPlc)} />}
-                          <TRow l1="건물명" v1={fallbackField("bldNm")} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
-                          <TRow l1="용도지역" v1={fallbackField("mainPurpsCdNm")} l2="사용승인일" v2={fallbackField("useAprDay")} />
-                          <TRow l1="주용도" v1={fallbackField("mainPurpsCdNm")} l2="기타용도" v2={fallbackField("etcPurps")} />
-                          <TRow l1="주구조" v1={fallbackField("strctCdNm")} l2="지붕구조" v2={fallbackField("roofCdNm")} />
-                          <TRow l1="대지면적" v1={fallbackField("platArea")} l2="건축면적" v2={fallbackField("archArea")} />
-                          <TRow l1="연면적" v1={fallbackField("totArea")} l2="용적률산정연면적" v2={fallbackField("vlRatEstmTotArea")} />
-                          <TRow l1="건폐율" v1={fallbackField("bcRat")} l2="용적률" v2={fallbackField("vlRat")} />
-                          <TRow l1="세대수" v1={fallbackField("hhldCnt") ?? "0"} l2="가구수" v2={fallbackField("fmlyCnt") ?? "0"} />
-                          <TRow l1="지상층수" v1={fallbackField("grndFlrCnt")} l2="지하층수" v2={fallbackField("ugrndFlrCnt") ?? "0"} />
+                          <TRow l1="건물명" v1={s(bldg.bldNm)} l2="대장구분" v2={s(bldg.regstrGbCdNm)} />
+                          <TRow l1="용도지역" v1={s(bldg.mainPurpsCdNm)} l2="사용승인일" v2={s(bldg.useAprDay)} />
+                          <TRow l1="주용도" v1={s(bldg.mainPurpsCdNm)} l2="기타용도" v2={s(bldg.etcPurps)} />
+                          <TRow l1="주구조" v1={s(bldg.strctCdNm)} l2="지붕구조" v2={s(bldg.roofCdNm)} />
+                          <TRow l1="대지면적" v1={s(bldg.platArea)} l2="건축면적" v2={s(bldg.archArea)} />
+                          <TRow l1="연면적" v1={s(bldg.totArea)} l2="용적률산정연면적" v2={s(bldg.vlRatEstmTotArea)} />
+                          <TRow l1="건폐율" v1={s(bldg.bcRat)} l2="용적률" v2={s(bldg.vlRat)} />
+                          <TRow l1="세대수" v1={s(bldg.hhldCnt) ?? "0"} l2="가구수" v2={s(bldg.fmlyCnt) ?? "0"} />
+                          <TRow l1="지상층수" v1={s(bldg.grndFlrCnt)} l2="지하층수" v2={s(bldg.ugrndFlrCnt) ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
-                          <TRow l1="허가일" v1={fallbackField("pmsDay")} l2="착공일" v2={fallbackField("stcnsDay")} />
-                          <TRow l1="대내진능력" v1={fallbackField("erthqkAblty") ?? "-"} l2="내진설계적용" v2={seismicDesign} />
+                          <TRow l1="허가일" v1={s(bldg.pmsDay)} l2="착공일" v2={s(bldg.stcnsDay)} />
+                          <TRow l1="대내진능력" v1={s(bldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
                         </tbody>
                       </table>
-
-                      {bldg.exposFloors && Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0 && (
-                        <div className="mt-2">
-                          <h4 className="text-[11px] font-bold text-foreground mb-1">
-                            층별 전유/공용 면적 ({bldg.exposFloors.length}건)
-                          </h4>
-                          <table className="w-full border-collapse border border-border/50 text-[10px]">
-                            <thead>
-                              <tr className="bg-muted/40">
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  층
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  호
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  용도
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
-                                  면적
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {bldg.exposFloors.map((ef: any, fi: number) => (
-                                <tr key={fi} className="border-b border-border/30 last:border-0">
-                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
-                                    {ef.flrNoNm || ef.flrNo || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.hoNm || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.mainPurpsCdNm || ef.etcPurps || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
                     </div>
                   );
                 })
-              ) : hasAnyBuildingData ? (
-                <div className="px-3 mt-2">
-                  <table className="w-full border-collapse border border-border/50 text-[11px]">
-                    <tbody>
-                      <TRow l1="건물명" v1={building?.building_name as string} />
-                      <TRow
-                        l1="주용도"
-                        v1={building?.main_purpose as string}
-                        l2="사용승인일"
-                        v2={bMapped.approvalDate}
-                      />
-                      <TRow
-                        l1="연면적"
-                        v1={building?.total_area as string}
-                        l2="대지면적"
-                        v2={building?.land_area as string}
-                      />
-                      <TRow
-                        l1="건축면적"
-                        v1={building?.building_area as string}
-                        l2="층수"
-                        v2={`지상 ${building?.floors_above ?? "-"}층 / 지하 ${building?.floors_below ?? "-"}층`}
-                      />
-                      <TRow
-                        l1="주차대수"
-                        v1={building?.parking_count as string}
-                        l2="엘리베이터"
-                        v2={bMapped.elevatorDetail}
-                      />
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
+              ) : !hasAnyBuildingData ? (
                 <div className="px-4 py-4">
                   <p className="text-[11px] text-muted-foreground">건축물 데이터 없음 또는 일부 항목만 조회됨</p>
                 </div>
-              )}
+              ) : null}
 
               {floors.length > 0 && (
                 <>
@@ -781,6 +712,65 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     </table>
                   </div>
                 </>
+              )}
+
+              {buildingExposeSections.length > 0 && (
+                <div className="px-3 mt-3 pb-2">
+                  <h3 className="text-[13px] font-extrabold text-foreground mb-1.5">층별 전유/공용면적</h3>
+                  <div className="space-y-3">
+                    {buildingExposeSections.map((bldg, idx) => {
+                      const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                      const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
+
+                      return (
+                        <div key={`expos-${idx}`}>
+                          <div className="flex justify-center mb-2">
+                            <span
+                              className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
+                              style={{ background: "hsl(var(--primary))" }}
+                            >
+                              {dongLabel}
+                            </span>
+                          </div>
+                          <table className="w-full border-collapse border border-border/50 text-[10px]">
+                            <thead>
+                              <tr className="bg-muted/40">
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  층
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  호
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
+                                  용도
+                                </th>
+                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
+                                  면적
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {bldg.exposFloors.map((ef: any, fi: number) => (
+                                <tr key={fi} className="border-b border-border/30 last:border-0">
+                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
+                                    {ef.flrNoNm || ef.flrNo || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.hoNm || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
+                                    {ef.mainPurpsCdNm || ef.etcPurps || ef.pubuseGbCdNm || ef.exposPubuseGbCdNm || "-"}
+                                  </td>
+                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
 
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
