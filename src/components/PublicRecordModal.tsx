@@ -299,6 +299,68 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const allBuildings =
     raw?.allBuildings && Array.isArray(raw.allBuildings) ? (raw.allBuildings as Array<Record<string, any>>) : [];
 
+  const firstBuildingValue = (...fields: string[]) => {
+    for (const bldg of allBuildings) {
+      for (const field of fields) {
+        const value = str(bldg?.[field]);
+        if (value) return value;
+      }
+    }
+    return null;
+  };
+
+  const headerSource =
+    allBuildings.find(
+      (bldg) =>
+        str(bldg?.bldNm) ||
+        str(bldg?.mainPurpsCdNm) ||
+        str(bldg?.etcPurps) ||
+        str(bldg?.platArea) ||
+        str(bldg?.archArea) ||
+        str(bldg?.totArea) ||
+        str(bldg?.useAprDay)
+    ) ?? null;
+
+  const topBuildingRaw =
+    raw || headerSource
+      ? {
+          ...(raw ?? {}),
+          ...(headerSource ?? {}),
+        }
+      : null;
+
+  const headerParkingTotal = allBuildings.reduce((maxTotal, bldg) => {
+    const total =
+      Number(bldg.indrMechUtcnt ?? 0) +
+      Number(bldg.oudrMechUtcnt ?? 0) +
+      Number(bldg.indrAutoUtcnt ?? 0) +
+      Number(bldg.oudrAutoUtcnt ?? 0);
+    return total > maxTotal ? total : maxTotal;
+  }, 0);
+
+  const topBuilding =
+    building || headerSource
+      ? {
+          ...(building ?? {}),
+          _raw: topBuildingRaw,
+          building_name: str(building?.building_name) ?? firstBuildingValue("bldNm", "dongNm") ?? "",
+          main_purpose: str(building?.main_purpose) ?? firstBuildingValue("mainPurpsCdNm", "etcPurps") ?? "",
+          land_area: str(building?.land_area) ?? firstBuildingValue("platArea") ?? "",
+          building_area: str(building?.building_area) ?? firstBuildingValue("archArea") ?? "",
+          total_area: str(building?.total_area) ?? firstBuildingValue("totArea") ?? "",
+          approval_date: str(building?.approval_date) ?? firstBuildingValue("useAprDay") ?? "",
+          floors_above: str(building?.floors_above) ?? firstBuildingValue("grndFlrCnt") ?? "",
+          floors_below: str(building?.floors_below) ?? firstBuildingValue("ugrndFlrCnt") ?? "",
+          parking_count:
+            str(building?.parking_count) ??
+            (headerParkingTotal > 0 ? `${headerParkingTotal} 대` : ""),
+        }
+      : null;
+
+  const buildingExposeSections = allBuildings.filter(
+    (bldg) => Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0
+  );
+
   const violation =
     raw?.violation && typeof raw.violation === "object"
       ? (raw.violation as {
@@ -316,13 +378,13 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const hasViolationInfo = violation !== null;
 
   const hasAnyBuildingData =
-    !!building &&
+    !!topBuilding &&
     !!(
-      str(building.building_name) ||
-      str(building.main_purpose) ||
-      str(building.total_area) ||
-      str(building.approval_date) ||
-      str(building.floors_above)
+      str(topBuilding.building_name) ||
+      str(topBuilding.main_purpose) ||
+      str(topBuilding.total_area) ||
+      str(topBuilding.approval_date) ||
+      str(topBuilding.floors_above)
     );
 
   const hasAnyLandData =
@@ -336,7 +398,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       str(land.pnu)
     );
 
-  const bMapped = mapBuildingFromDB(building);
+  const topBMapped = mapBuildingFromDB(topBuilding);
 
   return (
     <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-3 sm:p-4" onClick={onClose}>
