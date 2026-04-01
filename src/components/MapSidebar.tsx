@@ -3210,10 +3210,25 @@ const MapSidebar = ({
               ))}
               <span className="flex-1 min-w-[4px]" />
               <button
-                onClick={() => {
+                onClick={async () => {
                   const addr = window.prompt("건축물대장을 조회할 주소를 입력하세요\n예) 개신동 41-5, 분평동 1261");
-                  if (addr && addr.trim()) {
-                    setPublicRecordAddress({ address: addr.trim() });
+                  if (!addr?.trim()) return;
+                  const query = addr.trim();
+                  try {
+                    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode`;
+                    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+                    const res = await fetch(endpoint, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", apikey: apiKey, Authorization: `Bearer ${apiKey}` },
+                      body: JSON.stringify({ address: query }),
+                    });
+                    const data = await res.json();
+                    const normalized = data?.jibunAddress || data?.roadAddress || query;
+                    console.log("[건축물조회] 입력:", query, "→ 정규화:", normalized);
+                    setPublicRecordAddress({ address: normalized });
+                  } catch (e) {
+                    console.warn("[건축물조회] geocode 실패, 원본 사용:", e);
+                    setPublicRecordAddress({ address: query });
                   }
                 }}
                 className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
