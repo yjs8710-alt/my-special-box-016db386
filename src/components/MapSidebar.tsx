@@ -3210,6 +3210,23 @@ const MapSidebar = ({
               ))}
               <span className="flex-1 min-w-[4px]" />
               <button
+                onClick={() => {
+                  const addr = window.prompt("건축물대장을 조회할 주소를 입력하세요\n예) 개신동 41-5, 분평동 1261");
+                  if (addr && addr.trim()) {
+                    setPublicRecordAddress({ address: addr.trim() });
+                  }
+                }}
+                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
+                style={{
+                  background: "hsl(30 80% 93%)",
+                  color: "hsl(30 70% 25%)",
+                  border: "1px solid hsl(30 60% 70%)",
+                }}
+              >
+                <Building2 className="w-3 h-3" />
+                건축물조회
+              </button>
+              <button
                 onClick={handleSelectPrint}
                 className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
                 style={{
