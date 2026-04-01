@@ -317,7 +317,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     };
 
     return (
-      <>
+   <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
         <button
           type="button"
           title={label}
@@ -330,7 +330,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
 
         {open && (
           <>
-            <div className="fixed inset-0 z-[8999] bg-black/40" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
+            <div className="fixed inset-0 z-[8999]" onClick={(e) => { e.stopPropagation(); setOpen(false); }} />
 
             <div
               className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[260px]"
@@ -370,7 +370,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
             </div>
           </>
         )}
-      </>
+      </div>
     );
   }
 );
@@ -1394,7 +1394,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   const handleOptMouseLeave = () => {
     if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     setShowOptPopup(false);
-  };
+  });
+    AddressToggleCard.displayName = "AddressToggleCard";
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
@@ -1874,8 +1875,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     </div>
   );
-});
-AddressToggleCard.displayName = "AddressToggleCard";
+};
 
 /* ── LandlordPhoneRow ── */
 const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
