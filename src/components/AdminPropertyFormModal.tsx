@@ -853,7 +853,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
               {/* 세부 종류 (유형) */}
               <Section label="세부 종류 (유형) *">
-                {PROPERTY_TYPE_GROUPS.map(({ group, types }) => (
+                {PROPERTY_TYPE_GROUPS.filter(({ group }) => !(["단독건물","집합건물"].includes(form.buildingType) && group === "토지")).map(({ group, types }) => (
                   <div key={group} className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
                     <div className="flex flex-wrap gap-1.5">
