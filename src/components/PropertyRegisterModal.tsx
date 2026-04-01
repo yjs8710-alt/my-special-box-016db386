@@ -638,7 +638,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
       {/* 세부 종류 - 매물종류 토지 선택 시 숨김 */}
       {form.buildingType !== "토지" && (
         <Section label="세부 종류" error={errors.detailType}>
-          {PROPERTY_TYPE_GROUPS_REG.map(({ group, types }) => (
+          {PROPERTY_TYPE_GROUPS_REG.filter(({ group }) => !(["단독건물","집합건물"].includes(form.buildingType) && group === "토지")).map(({ group, types }) => (
             <div key={group} className="flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
               <div className="flex flex-wrap gap-1.5">
