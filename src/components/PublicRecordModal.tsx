@@ -737,64 +737,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </>
               )}
 
-              {buildingExposeSections.length > 0 && (
-                <div className="px-3 mt-3 pb-2">
-                  <h3 className="text-[13px] font-extrabold text-foreground mb-1.5">층별 전유/공용면적</h3>
-                  <div className="space-y-3">
-                    {buildingExposeSections.map((bldg, idx) => {
-                      const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
-                      const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
-
-                      return (
-                        <div key={`expos-${idx}`}>
-                          <div className="flex justify-center mb-2">
-                            <span
-                              className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
-                              style={{ background: "hsl(var(--primary))" }}
-                            >
-                              {dongLabel}
-                            </span>
-                          </div>
-                          <table className="w-full border-collapse border border-border/50 text-[10px]">
-                            <thead>
-                              <tr className="bg-muted/40">
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  층
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  호
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-r border-border/40">
-                                  용도
-                                </th>
-                                <th className="py-1 px-1.5 text-left font-bold text-muted-foreground border-b border-border/40">
-                                  면적
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {bldg.exposFloors.map((ef: any, fi: number) => (
-                                <tr key={fi} className="border-b border-border/30 last:border-0">
-                                  <td className="py-1 px-1.5 font-semibold text-foreground border-r border-border/30">
-                                    {ef.flrNoNm || ef.flrNo || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.hoNm || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground border-r border-border/30">
-                                    {ef.mainPurpsCdNm || ef.etcPurps || ef.pubuseGbCdNm || ef.exposPubuseGbCdNm || "-"}
-                                  </td>
-                                  <td className="py-1 px-1.5 text-muted-foreground">{ef.area || "-"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               <div className="px-4 py-3 mt-1 flex items-center justify-between">
                 <p className="text-[9px] text-muted-foreground/40">출처: 국토교통부 건축물대장·토지대장 공공데이터</p>
