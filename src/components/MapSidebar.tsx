@@ -246,55 +246,121 @@ const ContactEmojiRow = ({ propId, type, number }: ContactEmojiRowProps) => {
     tenant: "hsl(142 71% 45%)",
     broker: "hsl(25 95% 53%)",
   };
+const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(
+  ({ propId, type, number }, ref) => {
+    const label =
+      type === "owner"
+        ? "소유주"
+        : type === "tenant"
+        ? "세입자"
+        : type === "broker"
+        ? "부동산"
+        : "관리인";
 
-  if (!number) {
+    const [revealed, setRevealed] = useState(
+      () => !!number && hasRevealedToday(propId, type)
+    );
+    const [showPopup, setShowPopup] = useState(false);
+
+    const typeColor: Record<string, string> = {
+      owner: "hsl(var(--primary))",
+      manager: "hsl(217 91% 60%)",
+      tenant: "hsl(142 71% 45%)",
+      broker: "hsl(25 95% 53%)",
+    };
+
+    if (!number) {
+      return (
+        <div
+          ref={ref}
+          className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none"
+        >
+          <ContactIcon type={type} />
+          <span className="text-[6px] text-muted-foreground mt-0.5 leading-none">
+            {label}
+          </span>
+        </div>
+      );
+    }
+
+    const handleClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!revealed) {
+        markRevealed(propId, type);
+        setRevealed(true);
+      }
+      setShowPopup((v) => !v);
+    };
+
     return (
-      <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none">
-        <ContactIcon type={type} />
-        <span className="text-[6px] text-muted-foreground mt-0.5 leading-none">{label}</span>
+      <div
+        ref={ref}
+        className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative"
+      >
+        <button
+          type="button"
+          onClick={handleClick}
+          title={label}
+          className="flex flex-col items-center justify-center w-full h-full rounded transition-colors hover:bg-primary/10 group"
+        >
+          <span
+            className="flex items-center justify-center w-5 h-5 rounded-full transition-all group-hover:scale-110"
+            style={{ background: `${typeColor[type]}18` }}
+          >
+            <ContactIcon type={type} active />
+          </span>
+          <span
+            className="text-[6px] mt-0.5 leading-none font-semibold"
+            style={{ color: typeColor[type] }}
+          >
+            {label}
+          </span>
+        </button>
+
+        {showPopup && (
+          <div
+            className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex items-center gap-2 whitespace-nowrap"
+            style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span
+              className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+              style={{ background: `${typeColor[type]}20` }}
+            >
+              <ContactIcon type={type} active />
+            </span>
+
+            <span
+              className="text-[9px] font-bold"
+              style={{ color: typeColor[type] }}
+            >
+              {label}
+            </span>
+
+            <a
+              href={`tel:${number}`}
+              className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
+            >
+              {number}
+            </a>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPopup(false);
+              }}
+              className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
+            >
+              <X className="w-2.5 h-2.5 text-muted-foreground" />
+            </button>
+          </div>
+        )}
       </div>
     );
   }
+);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!revealed) { markRevealed(propId, type); setRevealed(true); }
-    setShowPopup(v => !v);
-  };
-
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative">
-      <button
-        type="button"
-       onClick={handleClick}
-        title={label}
-        className="flex flex-col items-center justify-center w-full h-full rounded transition-colors hover:bg-primary/10 group"
-      >
-        <span className="flex items-center justify-center w-5 h-5 rounded-full transition-all group-hover:scale-110"
-          style={{ background: `${typeColor[type]}18` }}>
-          <ContactIcon type={type} active />
-        </span>
-        <span className="text-[6px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>{label}</span>
-      </button>
-      {showPopup && (
-        <div
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex items-center gap-2 whitespace-nowrap"
-          style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <span className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0" style={{ background: `${typeColor[type]}20` }}>
-            <ContactIcon type={type} active />
-          </span>
-          <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>{label}</span>
-          <a href={`tel:${number}`} className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight">{number}</a>
-          <button onClick={(e) => { e.stopPropagation(); setShowPopup(false); }} className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors">
-            <X className="w-2.5 h-2.5 text-muted-foreground" />
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
+ContactEmojiRow.displayName = "ContactEmojiRow";  
 
 /* ── MemoPopup ── (건물메모 / 방메모 이모티콘 클릭 팝업) */
 /* ── MemoNotepad ── 클릭 시 메모장(편집 가능) 팝업 */
