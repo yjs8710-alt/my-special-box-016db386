@@ -1491,7 +1491,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     setShowOptPopup(false);
   };
 
-  AddressToggleCard.displayName = "AddressToggleCard";
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
@@ -1972,7 +1971,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     </div>
   );
 });
-
 AddressToggleCard.displayName = "AddressToggleCard";
 
 /* ── LandlordPhoneRow ── */
@@ -2643,9 +2641,17 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
 
                   return (
                     <div key={prop.id} className="flex flex-col">
-                    <button
+                    <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => selectedId === prop.id ? onDeselect?.() : onSelect(prop.id)}
-                      className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white ${
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+                        }
+                      }}
+                      className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
                         selectedId === prop.id
                           ? "ring-2 ring-primary shadow-lg"
                           : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
@@ -2750,7 +2756,7 @@ const MapSidebar = ({ properties, selectedId, onSelect, onDeselect, topOffset = 
                         />
                       </div>
 
-                    </button>
+                    </div>
 
                     {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
                     {selectedId === prop.id && (
