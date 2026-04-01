@@ -84,6 +84,7 @@ function SkeletonRow() {
     </div>
   );
 }
+
 const hasVal = (v: unknown) => v !== null && v !== undefined && v !== "" && v !== "-" && v !== "조회 결과 없음";
 
 const mergeSummary = (
@@ -154,7 +155,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         let dbBuilding: Record<string, any> | null = null;
         let dbLand: Record<string, any> | null = null;
 
-        // 1) property_id가 없으면 address로 properties 조회
         if (!pid && address) {
           console.log("🔎 [property_id 없음] address로 DB 조회:", address);
 
@@ -176,7 +176,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           }
         }
 
-        // 2) DB 캐시 조회
         if (pid) {
           console.log("📦 [DB 조회] building_summary + land_summary (property_id:", pid, ")");
 
@@ -201,7 +200,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("⚠️ [property_id 없음] address만으로 Edge Function 호출");
         }
 
-        // 3) Edge Function 실시간 조회
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
@@ -227,14 +225,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         const apiBuilding = (data.building_summary as Record<string, any> | null) ?? null;
         const apiLand = (data.land_summary as Record<string, any> | null) ?? null;
 
-        // ✅ API 일부 응답 + DB 상세 _raw 병합
         const bSum = mergeSummary(dbBuilding, apiBuilding);
         const lSum = mergeSummary(dbLand, apiLand);
 
         console.log("📦 [building_summary] 최종 병합 결과:", bSum ?? "없음");
         console.log("🌍 [land_summary] 최종 병합 결과:", lSum ?? "없음");
 
-        // building raw 보정
         if (bSum && bSum._raw && typeof bSum._raw === "object") {
           const raw = bSum._raw as Record<string, any>;
           const firstBuilding =
@@ -243,39 +239,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           if (!hasVal(bSum.main_purpose)) {
             bSum.main_purpose = raw.mainPurpsCdNm ?? firstBuilding?.mainPurpsCdNm ?? bSum.main_purpose;
           }
-
           if (!hasVal(bSum.total_area)) {
             bSum.total_area = raw.totArea ?? firstBuilding?.totArea ?? bSum.total_area;
           }
-
           if (!hasVal(bSum.building_area)) {
             bSum.building_area = raw.archArea ?? firstBuilding?.archArea ?? bSum.building_area;
           }
-
           if (!hasVal(bSum.land_area)) {
             bSum.land_area = raw.platArea ?? firstBuilding?.platArea ?? bSum.land_area;
           }
-
           if (!hasVal(bSum.approval_date)) {
             bSum.approval_date = raw.useAprDay ?? firstBuilding?.useAprDay ?? bSum.approval_date;
           }
-
           if (!hasVal(bSum.floors_above)) {
             bSum.floors_above = raw.grndFlrCnt ?? firstBuilding?.grndFlrCnt ?? bSum.floors_above;
           }
-
           if (!hasVal(bSum.floors_below)) {
             bSum.floors_below = raw.ugrndFlrCnt ?? firstBuilding?.ugrndFlrCnt ?? bSum.floors_below;
           }
-
           if (!hasVal(bSum.parking_count)) {
             bSum.parking_count = raw.indrMechUtcnt ?? firstBuilding?.indrMechUtcnt ?? bSum.parking_count;
           }
-
           if (!hasVal(bSum.building_name)) {
             bSum.building_name = raw.bldNm ?? firstBuilding?.bldNm ?? bSum.building_name;
           }
-
           if (bSum.elevator !== true) {
             if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음")) {
               bSum.elevator = true;
@@ -286,7 +273,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           console.log("🔥 FINAL BUILDING:", bSum);
         }
 
-        // land raw 보정
         if (lSum && lSum._raw && typeof lSum._raw === "object") {
           const raw = lSum._raw as Record<string, any>;
 
