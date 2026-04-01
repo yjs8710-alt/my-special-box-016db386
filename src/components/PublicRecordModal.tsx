@@ -112,20 +112,20 @@ const getBuildingLabel = (bldg: Record<string, any>) => toDisplayText(bldg?.dong
 const getBuildingDetailScore = (bldg: Record<string, any>) =>
   buildingDetailKeyFields.filter((field) => toDisplayText(bldg?.[field])).length;
 
-const isResidentialOrCommercialBuilding = (bldg: Record<string, any>) => {
-  const name = getBuildingLabel(bldg);
-  if (!name) return false;
-  if (name.includes("상가")) return true;
-  if (/^\d/.test(name)) return true;
-  if (name.includes("아파트") || name.includes("주거")) return true;
-  return false;
+/** 의미 있는 데이터가 있는 건물인지 (빈 레코드 제외) */
+const hasMeaningfulData = (bldg: Record<string, any>) => {
+  const label = getBuildingLabel(bldg);
+  const score = getBuildingDetailScore(bldg);
+  const hasExpos = Array.isArray(bldg.exposFloors) && bldg.exposFloors.length > 0;
+  return (!!label && score > 0) || hasExpos;
 };
 
 const sortBuildingsByLabel = (buildings: Array<Record<string, any>>) =>
   [...buildings].sort((a, b) => getBuildingLabel(a).localeCompare(getBuildingLabel(b), "ko"));
 
+/** 모든 동을 반환 (빈 레코드만 제외) */
 const getDetailedBuildingCandidates = (buildings: Array<Record<string, any>>) => {
-  const filtered = sortBuildingsByLabel(buildings.filter(isResidentialOrCommercialBuilding));
+  const filtered = sortBuildingsByLabel(buildings.filter(hasMeaningfulData));
   if (filtered.length > 0) return filtered;
 
   const fallback = [...buildings]
