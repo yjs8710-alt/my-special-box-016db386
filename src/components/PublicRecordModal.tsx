@@ -694,7 +694,12 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           }
                     }
                   >
-                    {fetchedFrom === "db" ? "✓ 캐시" : "✓ 실시간"}
+                    {enhancing ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        상세 로딩
+                      </span>
+                    ) : fetchedFrom === "db" ? "✓ 캐시" : "✓ 실시간"}
                   </span>
                 )}
               </div>
