@@ -1394,8 +1394,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   const handleOptMouseLeave = () => {
     if (optHoverTimer.current) clearTimeout(optHoverTimer.current);
     setShowOptPopup(false);
-  });
-    AddressToggleCard.displayName = "AddressToggleCard";
+  };
+
+  AddressToggleCard.displayName = "AddressToggleCard";
 
   // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
   const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
