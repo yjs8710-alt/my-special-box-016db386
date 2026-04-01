@@ -851,20 +851,56 @@ serve(async (req) => {
               }
             : { isViolation: false, violationYn: "N", items: [] };
 
+          // dongNm 정규화 헬퍼 (공백/빈문자열 → null)
+          const normDong = (v: any) => v && String(v).trim() ? String(v).trim() : null;
+
+          // 총괄표제부 매핑
+          const recapMapped = recapItem ? {
+            bldNm: recapItem.bldNm || null,
+            mainPurpsCdNm: recapItem.mainPurpsCdNm || null,
+            etcPurps: recapItem.etcPurps || null,
+            strctCdNm: recapItem.strctCdNm || null,
+            roofCdNm: recapItem.roofCdNm || null,
+            platArea: recapItem.platArea ? `${Number(recapItem.platArea).toFixed(2)} ㎡` : null,
+            archArea: recapItem.archArea ? `${Number(recapItem.archArea).toFixed(2)} ㎡` : null,
+            totArea: recapItem.totArea ? `${Number(recapItem.totArea).toFixed(2)} ㎡` : null,
+            vlRatEstmTotArea: recapItem.vlRatEstmTotArea ? `${Number(recapItem.vlRatEstmTotArea).toFixed(2)} ㎡` : null,
+            bcRat: recapItem.bcRat ? `${Number(recapItem.bcRat).toFixed(2)} %` : null,
+            vlRat: recapItem.vlRat ? `${Number(recapItem.vlRat).toFixed(2)} %` : null,
+            hhldCnt: recapItem.hhldCnt ?? null,
+            fmlyCnt: recapItem.fmlyCnt ?? null,
+            grndFlrCnt: recapItem.grndFlrCnt ?? null,
+            ugrndFlrCnt: recapItem.ugrndFlrCnt ?? null,
+            rideUseElvtCnt: recapItem.rideUseElvtCnt ?? recapItem.elevCnt ?? null,
+            emgenUseElvtCnt: recapItem.emgenUseElvtCnt ?? recapItem.emgElevCnt ?? null,
+            indrMechUtcnt: recapItem.indrMechUtcnt ?? null,
+            oudrMechUtcnt: recapItem.oudrMechUtcnt ?? null,
+            indrAutoUtcnt: recapItem.indrAutoUtcnt ?? null,
+            oudrAutoUtcnt: recapItem.oudrAutoUtcnt ?? null,
+            pmsDay: recapItem.pmsDay?.length === 8 ? `${recapItem.pmsDay.slice(0,4)}-${recapItem.pmsDay.slice(4,6)}-${recapItem.pmsDay.slice(6,8)}` : null,
+            stcnsDay: recapItem.stcnsDay?.length === 8 ? `${recapItem.stcnsDay.slice(0,4)}-${recapItem.stcnsDay.slice(4,6)}-${recapItem.stcnsDay.slice(6,8)}` : null,
+            useAprDay: recapItem.useAprDay?.length === 8 ? `${recapItem.useAprDay.slice(0,4)}-${recapItem.useAprDay.slice(4,6)}-${recapItem.useAprDay.slice(6,8)}` : null,
+            platPlc: recapItem.platPlc || null,
+            newPlatPlc: recapItem.newPlatPlc || null,
+            dongCnt: recapItem.dongCnt ?? null,
+          } : null;
+
           const rawWithStatus  = {
             ...(mappedBuilding?._raw ?? { floors: [] }),
             api_status: apiStatus,
             params_used: { sigunguCd, bjdongCd, bun, ji, platGbCd, pnu, source },
             violation: violationSummary,
+            recap: recapMapped,
             allBuildings: allTitleItems.map((item: any) => {
+              const titleDong = normDong(item.dongNm);
               // 집합건물 전유/공용부 면적에서 해당 동의 층별 정보 추출
               const dongFloors = allExposItems.filter((e: any) => {
-                // dongNm이 같거나, 동 정보가 없는 경우 포함
-                return (!item.dongNm && !e.dongNm) || (item.dongNm && e.dongNm === item.dongNm);
+                const exposDong = normDong(e.dongNm);
+                return (!titleDong && !exposDong) || (titleDong && exposDong === titleDong);
               });
               
               return {
-                dongNm: item.dongNm || item.bldNm || null,
+                dongNm: titleDong || (item.bldNm ? String(item.bldNm).trim() : null) || null,
                 regstrGbCdNm: item.regstrGbCdNm || null,
                 regstrKindCdNm: item.regstrKindCdNm || null,
                 mainPurpsCdNm: item.mainPurpsCdNm || null,
@@ -892,7 +928,7 @@ serve(async (req) => {
                 useAprDay: item.useAprDay ? `${item.useAprDay.slice(0,4)}-${item.useAprDay.slice(4,6)}-${item.useAprDay.slice(6,8)}` : null,
                 platPlc: item.platPlc || null,
                 newPlatPlc: item.newPlatPlc || null,
-                bldNm: item.bldNm || null,
+                bldNm: item.bldNm ? String(item.bldNm).trim() : null,
                 erthqkAblty: item.erthqkAblty || null,
                 erthqkDsgnApplyYn: item.erthqkDsgnApplyYn || null,
                 // 집합건물 층별 전유/공용 면적 정보
@@ -900,11 +936,11 @@ serve(async (req) => {
                   flrNo: e.flrNo ?? null,
                   flrNoNm: e.flrNoNm ?? null,
                   area: e.area ? `${Number(e.area).toFixed(1)}㎡` : null,
-                  pubuseGbCdNm: e.pubuseGbCdNm ?? null, // 전유/공용 구분
+                  pubuseGbCdNm: e.pubuseGbCdNm ?? null,
                   mainPurpsCdNm: e.mainPurpsCdNm ?? null,
                   etcPurps: e.etcPurps ?? null,
                   exposPubuseGbCdNm: e.exposPubuseGbCdNm ?? null,
-                  hoNm: e.hoNm ?? null, // 호수
+                  hoNm: e.hoNm ?? null,
                 })),
               };
             }),
