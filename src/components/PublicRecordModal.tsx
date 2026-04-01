@@ -765,10 +765,14 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               })()}
 
               {(() => {
-                const s3 = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                const s3 = (v: unknown) => {
+                  if (v == null || v === "") return null;
+                  const trimmed = String(v).trim();
+                  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
+                };
                 const isResOrComm = (b: Record<string, any>) => {
                   const name = s3(b.dongNm) || s3(b.bldNm) || "";
-                  if (!name) return true;
+                  if (!name) return false;
                   if (name.includes("상가")) return true;
                   if (/^\d/.test(name)) return true;
                   if (name.includes("아파트") || name.includes("주거")) return true;
