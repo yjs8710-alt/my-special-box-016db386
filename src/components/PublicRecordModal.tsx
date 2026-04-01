@@ -683,7 +683,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                                     }
                               }
                             >
-                              {dongLabel(b, i)}
+                              {dongLabel(b)}
                             </button>
                           ))}
                         </div>
