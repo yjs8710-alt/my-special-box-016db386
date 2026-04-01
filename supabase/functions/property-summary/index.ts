@@ -721,7 +721,9 @@ serve(async (req) => {
     let landData     = lRes.data as Record<string, unknown> | null;
 
     const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
-    const needBuilding    = !buildingData || !!isBuildingEmpty;
+    // _raw (allBuildings, floors 등)는 DB에 저장되지 않으므로
+    // 상세 화면을 위해 항상 API를 호출해야 함
+    const needBuilding    = true;
     const needLand        = !landData || !landData.official_price;
 
     console.log("📦 [building_summary]:", buildingData ? (isBuildingEmpty ? "빈껍데기" : "유효") : "없음");
@@ -870,7 +872,11 @@ serve(async (req) => {
             }),
           };
 
-          if (isBuildingEmpty && buildingData) {
+          if (buildingData && !isBuildingEmpty) {
+            // DB에 유효한 데이터가 이미 있으면 _raw만 붙여서 반환 (DB 업데이트 불필요)
+            buildingData = { ...buildingData, _raw: rawWithStatus };
+            console.log("✅ [건축물대장] DB 캐시 + _raw 병합");
+          } else if (isBuildingEmpty && buildingData) {
             const { data: updated } = await supabase
               .from("building_summary")
               .update({
