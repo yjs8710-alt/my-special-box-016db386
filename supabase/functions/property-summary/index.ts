@@ -377,14 +377,14 @@ async function fetchBuildingApiWithPlatGb(
 // ── 표제부 (platGbCd 없이 먼저, 없으면 0/1로 재시도) ────────────────────
 // 여러 동이 있을 수 있으므로 { primary, allItems } 형태로 반환
 async function fetchBuildingTitle(s: string, b: string, bun: string, ji: string, platGbCd: string, k: string) {
-  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k, "50");
+  const { total, items, resultCode, resultMsg } = await fetchBuildingApi("getBrTitleInfo", s, b, bun, ji, k, "100");
   if (total > 0) {
     console.log("📊 [표제부] 성공:", total, "건 (동 수:", items.length, ")");
     return { primary: items[0], allItems: items };
   }
   // platGbCd 명시 재시도
   for (const pgb of [platGbCd, platGbCd === "0" ? "1" : "0"]) {
-    const r2 = await fetchBuildingApiWithPlatGb("getBrTitleInfo", s, b, bun, ji, pgb, k, "50");
+    const r2 = await fetchBuildingApiWithPlatGb("getBrTitleInfo", s, b, bun, ji, pgb, k, "100");
     if (r2.total > 0) {
       console.log(`📊 [표제부] platGbCd=${pgb} 재시도 성공:`, r2.total, "건");
       return { primary: r2.items[0], allItems: r2.items };
