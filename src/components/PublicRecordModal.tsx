@@ -601,37 +601,26 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
 
               {(() => {
-                // 집합건물: 상세 필드가 많은 순서로 정렬, 공란 많은 항목은 숨김
                 const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
                 const s = (v: unknown) => (v != null && v !== "" ? String(v) : null);
                 const fieldCount = (bldg: Record<string, any>) =>
                   keyFields.filter((f) => s(bldg[f])).length;
 
+                // 상세 필드 많은 순으로 정렬
                 const sorted = allBuildings.length > 0
                   ? [...allBuildings].sort((a, b) => fieldCount(b) - fieldCount(a))
                   : [];
 
-                // 가장 상세한 표제부 1개만 표시
-                const visible = sorted.length > 0 ? [sorted[0]] : [];
-
-                // allBuildings가 없고 상단 요약만 있는 경우
-                if (visible.length === 0 && hasAnyBuildingData) {
+                // allBuildings 없으면 요약 표제부
+                if (sorted.length === 0 && hasAnyBuildingData) {
                   return (
                     <div className="px-3 mt-2">
-                      <div className="flex justify-center mb-2">
-                        <span
-                          className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
-                          style={{ background: "hsl(var(--primary))" }}
-                        >
-                          표제부
-                        </span>
-                      </div>
                       {renderBuildingSummaryTable(topBuilding, topBMapped)}
                     </div>
                   );
                 }
 
-                if (visible.length === 0 && !hasAnyBuildingData) {
+                if (sorted.length === 0 && !hasAnyBuildingData) {
                   return (
                     <div className="px-4 py-4">
                       <p className="text-[11px] text-muted-foreground">건축물 데이터 없음 또는 일부 항목만 조회됨</p>
@@ -639,45 +628,66 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   );
                 }
 
-                return visible.map((bldg, idx) => {
-                  const dongLabel = s(bldg.dongNm) || s(bldg.bldNm) || `건축물 ${idx + 1}`;
-                  const regKind = s(bldg.regstrKindCdNm) || s(bldg.regstrGbCdNm) || "";
+                const safeIdx = Math.min(selectedDongIdx, sorted.length - 1);
+                const bldg = sorted[safeIdx];
+                const dongLabel = (b: Record<string, any>, i: number) =>
+                  s(b.dongNm) || s(b.bldNm) || `건축물 ${i + 1}`;
 
-                  const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
-                  const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
-                  const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
+                const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
+                const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
+                const elevDetail = elevRide + elevEmg > 0 ? `승용 ${elevRide} 대 / 비상용 ${elevEmg} 대` : "없음";
 
-                  const parkTotal =
-                    Number(bldg.indrMechUtcnt ?? 0) +
-                    Number(bldg.oudrMechUtcnt ?? 0) +
-                    Number(bldg.indrAutoUtcnt ?? 0) +
-                    Number(bldg.oudrAutoUtcnt ?? 0);
-                  const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
-                  const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
-                  const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
+                const parkTotal =
+                  Number(bldg.indrMechUtcnt ?? 0) +
+                  Number(bldg.oudrMechUtcnt ?? 0) +
+                  Number(bldg.indrAutoUtcnt ?? 0) +
+                  Number(bldg.oudrAutoUtcnt ?? 0);
+                const parkMech = Number(bldg.indrMechUtcnt ?? 0) + Number(bldg.oudrMechUtcnt ?? 0);
+                const parkAuto = Number(bldg.indrAutoUtcnt ?? 0) + Number(bldg.oudrAutoUtcnt ?? 0);
+                const parkDetail = parkTotal > 0 ? `기계식 ${parkMech} 대 / 자주식 ${parkAuto} 대` : "-";
 
-                  const seismicDesign = bldg.erthqkDsgnApplyYn
-                    ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
+                const seismicDesign = bldg.erthqkDsgnApplyYn
+                  ? String(bldg.erthqkDsgnApplyYn).trim().toUpperCase() === "Y"
+                    ? "적용"
+                    : String(bldg.erthqkDsgnApplyYn) === "1"
                       ? "적용"
-                      : String(bldg.erthqkDsgnApplyYn) === "1"
-                        ? "적용"
-                        : String(bldg.erthqkDsgnApplyYn)
-                    : "-";
+                      : String(bldg.erthqkDsgnApplyYn)
+                  : "-";
 
-                  return (
-                    <div key={idx} className="px-3 mt-3">
-                      <div className="flex justify-center mb-2">
-                        <span
-                          className="inline-block text-[11px] font-bold text-primary-foreground px-4 py-1.5 rounded-full"
-                          style={{ background: "hsl(var(--primary))" }}
-                        >
-                          {dongLabel}
-                          {regKind && (
-                            <span className="block text-[9px] font-normal text-center opacity-80">{regKind}</span>
-                          )}
-                        </span>
+                return (
+                  <>
+                    {/* 동 선택 탭 */}
+                    {sorted.length > 1 && (
+                      <div className="px-3 mt-2 mb-1">
+                        <div className="flex flex-wrap gap-1.5">
+                          {sorted.map((b, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setSelectedDongIdx(i)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-full border transition-colors"
+                              style={
+                                i === safeIdx
+                                  ? {
+                                      background: "hsl(var(--primary))",
+                                      color: "hsl(var(--primary-foreground))",
+                                      borderColor: "hsl(var(--primary))",
+                                    }
+                                  : {
+                                      background: "hsl(var(--muted))",
+                                      color: "hsl(var(--muted-foreground))",
+                                      borderColor: "hsl(var(--border))",
+                                    }
+                              }
+                            >
+                              {dongLabel(b, i)}
+                            </button>
+                          ))}
+                        </div>
                       </div>
+                    )}
 
+                    {/* 선택된 동 표제부 */}
+                    <div className="px-3 mt-2">
                       <table className="w-full border-collapse border border-border/50 text-[11px]">
                         <tbody>
                           <TRow l1="소재지" v1={s(bldg.platPlc) ?? address} />
@@ -697,8 +707,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         </tbody>
                       </table>
                     </div>
-                  );
-                });
+                  </>
+                );
               })()}
 
               {floors.length > 0 && (
