@@ -88,6 +88,53 @@ function SkeletonRow() {
 
 const hasVal = (v: unknown) => v !== null && v !== undefined && v !== "" && v !== "-" && v !== "조회 결과 없음";
 
+const buildingDetailKeyFields = [
+  "mainPurpsCdNm",
+  "strctCdNm",
+  "archArea",
+  "totArea",
+  "useAprDay",
+  "grndFlrCnt",
+  "bcRat",
+  "vlRat",
+  "platPlc",
+  "newPlatPlc",
+];
+
+const toDisplayText = (v: unknown) => {
+  if (v == null || v === "") return null;
+  const trimmed = String(v).trim();
+  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
+};
+
+const getBuildingLabel = (bldg: Record<string, any>) => toDisplayText(bldg?.dongNm) || toDisplayText(bldg?.bldNm) || "";
+
+const getBuildingDetailScore = (bldg: Record<string, any>) =>
+  buildingDetailKeyFields.filter((field) => toDisplayText(bldg?.[field])).length;
+
+const isResidentialOrCommercialBuilding = (bldg: Record<string, any>) => {
+  const name = getBuildingLabel(bldg);
+  if (!name) return false;
+  if (name.includes("상가")) return true;
+  if (/^\d/.test(name)) return true;
+  if (name.includes("아파트") || name.includes("주거")) return true;
+  return false;
+};
+
+const sortBuildingsByLabel = (buildings: Array<Record<string, any>>) =>
+  [...buildings].sort((a, b) => getBuildingLabel(a).localeCompare(getBuildingLabel(b), "ko"));
+
+const getDetailedBuildingCandidates = (buildings: Array<Record<string, any>>) => {
+  const filtered = sortBuildingsByLabel(buildings.filter(isResidentialOrCommercialBuilding));
+  if (filtered.length > 0) return filtered;
+
+  const fallback = [...buildings]
+    .filter((bldg) => getBuildingDetailScore(bldg) > 0)
+    .sort((a, b) => getBuildingDetailScore(b) - getBuildingDetailScore(a));
+
+  return fallback.length > 0 ? [fallback[0]] : [];
+};
+
 const mergeSummary = (
   dbData: Record<string, any> | null,
   apiData: Record<string, any> | null,
@@ -316,6 +363,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   const allBuildings =
     raw?.allBuildings && Array.isArray(raw.allBuildings) ? (raw.allBuildings as Array<Record<string, any>>) : [];
+
+  const detailedBuildings = getDetailedBuildingCandidates(allBuildings);
 
   const firstBuildingValue = (...fields: string[]) => {
     for (const bldg of allBuildings) {
@@ -631,38 +680,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               )}
 
               {(() => {
-              const keyFields = ["mainPurpsCdNm", "strctCdNm", "archArea", "totArea", "useAprDay", "grndFlrCnt", "bcRat", "vlRat"];
-                const s = (v: unknown) => {
-                  if (v == null || v === "") return null;
-                  const trimmed = String(v).trim();
-                  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
-                };
-                const fieldCount = (bldg: Record<string, any>) =>
-                  keyFields.filter((f) => s(bldg[f])).length;
-
-                // 상가동 + 주거동(숫자로 시작하는 동)만 필터
-                const isResidentialOrCommercial = (b: Record<string, any>) => {
-                  const name = s(b.dongNm) || s(b.bldNm) || "";
-                  if (!name) return false; // 이름 없으면(공백 포함) 제외
-                  // 상가동 포함
-                  if (name.includes("상가")) return true;
-                  // 숫자로 시작하는 동 (101동, 102동, 415동 등) = 주거동
-                  if (/^\d/.test(name)) return true;
-                  // 주거 관련 키워드
-                  if (name.includes("아파트") || name.includes("주거")) return true;
-                  return false;
-                };
-
-                // 동 이름 오름차순 정렬 + 필터
-                const sorted = allBuildings.length > 0
-                  ? [...allBuildings]
-                      .filter(isResidentialOrCommercial)
-                      .sort((a, b) => {
-                        const nameA = s(a.dongNm) || s(a.bldNm) || "";
-                        const nameB = s(b.dongNm) || s(b.bldNm) || "";
-                        return nameA.localeCompare(nameB, "ko");
-                      })
-                  : [];
+                const s = toDisplayText;
+                const sorted = detailedBuildings;
 
                 // allBuildings 없으면 요약 표제부
                 if (sorted.length === 0 && hasAnyBuildingData) {
@@ -683,8 +702,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
                 const safeIdx = Math.min(selectedDongIdx, sorted.length - 1);
                 const bldg = sorted[safeIdx];
-                const dongLabel = (b: Record<string, any>) =>
-                  s(b.dongNm) || s(b.bldNm) || "건축물";
+                const dongLabel = (b: Record<string, any>) => getBuildingLabel(b) || "건축물";
 
                 const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
                 const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
@@ -765,32 +783,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               })()}
 
               {(() => {
-                const s3 = (v: unknown) => {
-                  if (v == null || v === "") return null;
-                  const trimmed = String(v).trim();
-                  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
-                };
-                const isResOrComm = (b: Record<string, any>) => {
-                  const name = s3(b.dongNm) || s3(b.bldNm) || "";
-                  if (!name) return false;
-                  if (name.includes("상가")) return true;
-                  if (/^\d/.test(name)) return true;
-                  if (name.includes("아파트") || name.includes("주거")) return true;
-                  return false;
-                };
-                const sorted3 = allBuildings.length > 0
-                  ? [...allBuildings].filter(isResOrComm).sort((a, b) => {
-                      const nameA = s3(a.dongNm) || s3(a.bldNm) || "";
-                      const nameB = s3(b.dongNm) || s3(b.bldNm) || "";
-                      return nameA.localeCompare(nameB, "ko");
-                    })
-                  : [];
-
-                if (sorted3.length === 0) return null;
-                const safeIdx2 = Math.min(selectedDongIdx, sorted3.length - 1);
-                const selectedBldg = sorted3[safeIdx2];
+                const selectedBuildings = detailedBuildings;
+                const safeIdx2 = Math.min(selectedDongIdx, Math.max(selectedBuildings.length - 1, 0));
+                const selectedBldg = selectedBuildings[safeIdx2];
                 const dongExposFloors = Array.isArray(selectedBldg?.exposFloors) ? selectedBldg.exposFloors : [];
-                const dongLabel2 = s3(selectedBldg?.dongNm) || s3(selectedBldg?.bldNm) || undefined;
+                const dongLabel2 = getBuildingLabel(selectedBldg ?? {}) || undefined;
 
                 if (dongExposFloors.length === 0 && floors.length > 0) {
                   return (
