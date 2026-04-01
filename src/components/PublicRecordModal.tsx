@@ -732,12 +732,28 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               })()}
 
               {(() => {
-                // 위에서 계산한 sorted와 동일한 리스트 사용
-                if (sorted.length === 0) return null;
-                const safeIdx2 = Math.min(selectedDongIdx, sorted.length - 1);
-                const selectedBldg = sorted[safeIdx2];
+                const s3 = (v: unknown) => (v != null && v !== "" ? String(v) : null);
+                const isResOrComm = (b: Record<string, any>) => {
+                  const name = s3(b.dongNm) || s3(b.bldNm) || "";
+                  if (!name) return true;
+                  if (name.includes("상가")) return true;
+                  if (/^\d/.test(name)) return true;
+                  if (name.includes("아파트") || name.includes("주거")) return true;
+                  return false;
+                };
+                const sorted3 = allBuildings.length > 0
+                  ? [...allBuildings].filter(isResOrComm).sort((a, b) => {
+                      const nameA = s3(a.dongNm) || s3(a.bldNm) || "";
+                      const nameB = s3(b.dongNm) || s3(b.bldNm) || "";
+                      return nameA.localeCompare(nameB, "ko");
+                    })
+                  : [];
+
+                if (sorted3.length === 0) return null;
+                const safeIdx2 = Math.min(selectedDongIdx, sorted3.length - 1);
+                const selectedBldg = sorted3[safeIdx2];
                 const dongExposFloors = Array.isArray(selectedBldg?.exposFloors) ? selectedBldg.exposFloors : [];
-                const dongLabel2 = s(selectedBldg?.dongNm) || s(selectedBldg?.bldNm) || undefined;
+                const dongLabel2 = s3(selectedBldg?.dongNm) || s3(selectedBldg?.bldNm) || undefined;
 
                 if (dongExposFloors.length === 0 && floors.length > 0) {
                   return (
