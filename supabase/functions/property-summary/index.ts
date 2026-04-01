@@ -721,10 +721,11 @@ serve(async (req) => {
     let landData     = lRes.data as Record<string, unknown> | null;
 
     const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
-    const needBuilding    = !buildingData || !!isBuildingEmpty;
-    const needLand        = !landData || !landData.official_price;
+    const needBuildingSave = !buildingData || !!isBuildingEmpty; // DB 저장 필요 여부
+    const needBuilding     = true; // _raw 상세 데이터를 위해 항상 API 호출
+    const needLand         = !landData || !landData.official_price;
 
-    console.log("📦 [building_summary]:", buildingData ? (isBuildingEmpty ? "빈껍데기" : "유효") : "없음");
+    console.log("📦 [building_summary]:", buildingData ? (isBuildingEmpty ? "빈껍데기" : "유효") : "없음", "| needBuildingSave:", needBuildingSave);
     console.log("🌍 [land_summary]:", landData ? "있음" : "없음", "| 공시지가:", landData?.official_price || "없음");
 
     // ── 3. API 조회 ──────────────────────────────────────────────────
