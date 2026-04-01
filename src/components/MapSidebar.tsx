@@ -1874,7 +1874,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     </div>
   );
-};
+});
+AddressToggleCard.displayName = "AddressToggleCard";
 
 /* ── LandlordPhoneRow ── */
 const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
