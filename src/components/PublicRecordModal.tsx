@@ -567,11 +567,11 @@ export default function PublicRecordModal({
                 <div className="px-3 mt-2">
                   <table className="w-full border-collapse border border-border/50 text-[11px]">
                     <tbody>
-                      <TRow l1="건물명" v1={bMapped.buildingName} />
-                      <TRow l1="주용도" v1={bMapped.mainPurpose} l2="사용승인일" v2={bMapped.approvalDate} />
-                      <TRow l1="연면적" v1={bMapped.totalArea} l2="대지면적" v2={bMapped.landArea} />
-                      <TRow l1="건축면적" v1={bMapped.buildingArea} l2="층수" v2={bMapped.floorText} />
-                      <TRow l1="주차대수" v1={bMapped.parkingCount} l2="엘리베이터" v2={bMapped.elevatorText} />
+                      <TRow l1="건물명" v1={building?.building_name as string} />
+                      <TRow l1="주용도" v1={building?.main_purpose as string} l2="사용승인일" v2={bMapped.approvalDate} />
+                      <TRow l1="연면적" v1={building?.total_area as string} l2="대지면적" v2={building?.land_area as string} />
+                      <TRow l1="건축면적" v1={building?.building_area as string} l2="층수" v2={`지상 ${building?.floors_above ?? "-"}층 / 지하 ${building?.floors_below ?? "-"}층`} />
+                      <TRow l1="주차대수" v1={building?.parking_count as string} l2="엘리베이터" v2={bMapped.elevatorDetail} />
                     </tbody>
                   </table>
                 </div>
