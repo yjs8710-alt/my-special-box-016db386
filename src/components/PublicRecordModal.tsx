@@ -253,6 +253,22 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
   useEffect(() => {
     let cancelled = false;
+    const cacheKey = getCacheKey(address, propertyId);
+
+    // ── 캐시 히트: API 호출 없이 즉시 표시 ──
+    const cached = recordCache.get(cacheKey);
+    if (cached) {
+      console.log("⚡ [캐시 히트] 즉시 표시:", cacheKey);
+      setBuilding(cached.building);
+      setLand(cached.land);
+      setFetchedFrom(cached.fetchedFrom);
+      setLoading(false);
+      setEnhancing(false);
+      setError("");
+      return;
+    }
+
+    // ── 캐시 미스: 기존 fetch 로직 ──
     setLoading(true);
     setEnhancing(false);
     setError("");
@@ -333,6 +349,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           if (!hasDBData) throw new Error(data.error || "공적장부 조회 실패");
           console.warn("⚠️ Edge Function 실패, DB 캐시 유지");
           setEnhancing(false);
+          // DB 데이터만이라도 캐시
+          recordCache.set(cacheKey, { building: dbBuilding, land: dbLand, fetchedFrom: "db" });
           return;
         }
 
@@ -346,12 +364,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         if (lSum) enrichLand(lSum);
 
         if (!cancelled) {
+          const finalFetchedFrom = apiBuilding?._raw ? "api" as const : "db" as const;
           setBuilding(bSum);
           setLand(lSum);
-          setFetchedFrom(apiBuilding?._raw ? "api" : "db");
+          setFetchedFrom(finalFetchedFrom);
           setEnhancing(false);
           if (!hasDBData) setLoading(false);
-          console.log("✅ [Phase 2] 최종 병합 완료");
+          console.log("✅ [Phase 2] 최종 병합 완료 → 캐시 저장");
+
+          // 캐시에 저장
+          recordCache.set(cacheKey, { building: bSum, land: lSum, fetchedFrom: finalFetchedFrom });
         }
       } catch (e: any) {
         if (!cancelled) {
