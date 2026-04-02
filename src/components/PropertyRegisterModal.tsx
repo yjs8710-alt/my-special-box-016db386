@@ -1171,24 +1171,22 @@ function Step3({
   onImageRemove: (url: string) => void;
   onImageSetMain: (url: string) => void;
 }) {
+  const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "소유주 연락처", placeholder: "예) 010-1234-5678" },
     { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
     { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
     { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
   ];
-  // 입주가능/담당중개사는 표시하지 않음
 
   return (
     <div className="flex flex-col gap-5">
 
       {/* 매물 사진 */}
       <Section label="매물 사진">
-        {/* 캐러셀 미리보기 */}
         {form.images.length > 0 && (
           <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} />
         )}
-        {/* 업로드 버튼 */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -1208,7 +1206,45 @@ function Step3({
       {/* 연락처 */}
       <Section label="연락처">
         <div className="flex flex-col gap-3">
-          {contacts.map(({ key, label, placeholder, required }) => (
+          {/* 소유주 연락처 1 + 추가 버튼 */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
+              {!showOwner2 && (
+                <button type="button" onClick={() => setShowOwner2(true)}
+                  className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                  <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                  추가
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input type="tel" placeholder="예) 010-1234-5678"
+                value={form.contactOwner as string}
+                onChange={(e) => set("contactOwner", formatPhone(e.target.value))}
+                className={ic(!!(errors.contactOwner)) + " pl-9"} />
+            </div>
+          </div>
+          {/* 소유주 연락처 2 */}
+          {showOwner2 && (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-foreground/70">소유주 연락처 2</label>
+                <button type="button" onClick={() => { setShowOwner2(false); set("contactOwner2", ""); }}
+                  className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder="예) 010-5678-1234"
+                  value={form.contactOwner2 as string}
+                  onChange={(e) => set("contactOwner2", formatPhone(e.target.value))}
+                  className={ic(false) + " pl-9"} />
+              </div>
+            </div>
+          )}
+          {/* 나머지 연락처 */}
+          {contacts.filter(c => c.key !== "contactOwner").map(({ key, label, placeholder, required }) => (
             <div key={key} className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">
                 {label} {required && <span className="text-destructive">*</span>}
