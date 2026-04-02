@@ -233,67 +233,87 @@ const MyPage = () => {
 
           {/* ─── 내 정보 ─── */}
           <TabsContent value="info" className="space-y-4">
-            {/* 개인정보 */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  회원정보
-                </CardTitle>
+                <CardTitle className="text-sm font-bold">회원/사업자 정보</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">이메일</Label>
-                  <Input value={email} disabled className="mt-1 bg-muted/50 text-sm" />
+              <CardContent className="p-0">
+                {/* 2-column definition list */}
+                <div className="border-t" style={{ borderColor: "hsl(var(--border))" }}>
+                  {([
+                    [
+                      { label: "이름", value: profile?.name ?? "", editable: true, field: "name" as const },
+                      { label: "휴대폰 번호", value: phone, editable: true, field: "phone" as const },
+                    ],
+                    [
+                      { label: "대표번호", value: profile?.phone ?? "", editable: false },
+                      { label: "이메일", value: email, editable: false },
+                    ],
+                    [
+                      { label: "사업자등록번호", value: businessNumber, editable: true, field: "businessNumber" as const },
+                      { label: "중개사무소등록번호", value: licenseNumber, editable: true, field: "licenseNumber" as const },
+                    ],
+                    [
+                      { label: "상호명", value: agencyName, editable: true, field: "agencyName" as const },
+                      { label: "주소(신청용)", value: agencyAddress, editable: true, field: "agencyAddress" as const },
+                    ],
+                    [
+                      { label: "회원유형", value: profile?.member_type ?? "", editable: false },
+                      null,
+                    ],
+                  ] as const).map((row, ri) => (
+                    <div
+                      key={ri}
+                      className="grid grid-cols-1 md:grid-cols-2 border-b last:border-b-0"
+                      style={{ borderColor: "hsl(var(--border))" }}
+                    >
+                      {row.map((cell, ci) =>
+                        cell ? (
+                          <div
+                            key={ci}
+                            className={`px-5 py-3 ${ci === 0 && row[1] ? "md:border-r" : ""}`}
+                            style={{ borderColor: "hsl(var(--border))" }}
+                          >
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">{cell.label}</p>
+                            {cell.editable && cell.field ? (
+                              <Input
+                                value={
+                                  cell.field === "name" ? name
+                                    : cell.field === "phone" ? phone
+                                    : cell.field === "businessNumber" ? businessNumber
+                                    : cell.field === "licenseNumber" ? licenseNumber
+                                    : cell.field === "agencyName" ? agencyName
+                                    : agencyAddress
+                                }
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  if (cell.field === "name") setName(v);
+                                  else if (cell.field === "phone") setPhone(v);
+                                  else if (cell.field === "businessNumber") setBusinessNumber(v);
+                                  else if (cell.field === "licenseNumber") setLicenseNumber(v);
+                                  else if (cell.field === "agencyName") setAgencyName(v);
+                                  else setAgencyAddress(v);
+                                }}
+                                className="h-8 text-sm"
+                              />
+                            ) : (
+                              <p className="text-sm text-foreground">{cell.value || "—"}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div key={ci} className="hidden md:block" />
+                        )
+                      )}
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">이름</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">연락처</Label>
-                  <Input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">회원유형</Label>
-                  <Input value={profile?.member_type ?? ""} disabled className="mt-1 bg-muted/50 text-sm" />
-                </div>
-                <div className="flex justify-end pt-1">
+
+                <div className="flex justify-end gap-2 p-4">
                   <Button size="sm" onClick={handleSavePersonal} disabled={saving} className="text-xs gap-1">
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     개인정보 저장
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 회사정보 */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-muted-foreground" />
-                  회사정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">상호명</Label>
-                  <Input value={agencyName} onChange={(e) => setAgencyName(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">사업자등록번호</Label>
-                  <Input value={businessNumber} onChange={(e) => setBusinessNumber(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">중개등록번호</Label>
-                  <Input value={licenseNumber} onChange={(e) => setLicenseNumber(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">사무소 주소</Label>
-                  <Input value={agencyAddress} onChange={(e) => setAgencyAddress(e.target.value)} className="mt-1 text-sm" />
-                </div>
-                <div className="flex justify-end pt-1">
-                  <Button size="sm" onClick={handleSaveCompany} disabled={saving} className="text-xs gap-1">
+                  <Button size="sm" onClick={handleSaveCompany} disabled={saving} className="text-xs gap-1" variant="outline">
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                     회사정보 저장
                   </Button>
