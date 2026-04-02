@@ -124,8 +124,8 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
       )}
 
       {/* Grid */}
-      <div className="overflow-x-auto border border-border/50 rounded-lg">
-        <table className="border-collapse" style={{ minWidth: `${maxCols * 48 + 36}px` }}>
+      <div className="overflow-x-auto border border-border/50 rounded-lg" style={{ maxHeight: 320, overflowY: "auto" }}>
+        <table className="border-collapse w-full" style={{ minWidth: `${maxCols * 38 + 30}px` }}>
           <tbody>
             {floors.map((fNum) => {
               const rowUnits = floorMap.get(fNum) || [];
@@ -133,14 +133,14 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
               const isEmptyFloor = rowUnits.length === 0;
               return (
                 <tr key={fNum}>
-                  <td className="py-0.5 px-1.5 text-[10px] font-bold text-muted-foreground text-right whitespace-nowrap border-r border-border/30 bg-muted/20" style={{ width: 36 }}>
+                  <td className="py-0 px-1 text-[9px] font-bold text-muted-foreground text-right whitespace-nowrap border-r border-border/30 bg-muted/20" style={{ width: 28, lineHeight: "16px" }}>
                     {floorLabel}
                   </td>
                   {isEmptyFloor ? (
                     <td
                       colSpan={maxCols}
-                      className="text-center text-[9px] text-muted-foreground/50 italic border border-border/10 bg-muted/10"
-                      style={{ padding: "2px 4px" }}
+                      className="text-center text-[8px] text-muted-foreground/50 italic border border-border/10 bg-muted/10"
+                      style={{ padding: "1px 2px", lineHeight: "14px" }}
                     >
                       공용
                     </td>
@@ -153,25 +153,26 @@ export default function FloorGrid({ exposFloors, dongName }: FloorGridProps) {
                         return (
                           <td
                             key={ci}
-                            className="text-center cursor-pointer border border-border/20 transition-all hover:ring-2 hover:ring-primary/50 hover:z-10 relative"
+                            className="text-center cursor-pointer border border-border/20 transition-all hover:ring-1 hover:ring-primary/50 hover:z-10 relative"
                             style={{
                               background: bg,
-                              minWidth: 52,
-                              padding: "2px 1px",
+                              minWidth: 36,
+                              padding: "0px 1px",
+                              lineHeight: "12px",
                             }}
                             onMouseEnter={(e) => handleMouseEnter(e, unit)}
                             onMouseLeave={() => setHoveredUnit(null)}
                           >
-                            <span className="block text-[10px] font-bold text-foreground/80 leading-tight">{hoLabel}</span>
+                            <span className="block text-[8px] font-bold text-foreground/80 leading-none pt-[1px]">{hoLabel}</span>
                             {unit.area && (
-                              <span className="block text-[7px] text-foreground/50 leading-tight">{parseFloat(String(unit.area).replace(/[^0-9.]/g, "")).toFixed(1)}㎡</span>
+                              <span className="block text-[6px] text-foreground/50 leading-none pb-[1px]">{parseFloat(String(unit.area).replace(/[^0-9.]/g, "")).toFixed(1)}㎡</span>
                             )}
                           </td>
                         );
                       })}
                       {Array.from({ length: maxCols - rowUnits.length }).map((_, i) => (
-                        <td key={`e-${i}`} className="border border-border/10" style={{ minWidth: 44, padding: "3px 2px" }}>
-                          <span className="text-[10px] text-transparent">·</span>
+                        <td key={`e-${i}`} className="border border-border/10" style={{ minWidth: 36, padding: "1px" }}>
+                          <span className="text-[8px] text-transparent">·</span>
                         </td>
                       ))}
                     </>
