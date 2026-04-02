@@ -110,8 +110,10 @@ interface FormState {
   description: string;
   contactBroker: string;
   contactOwner: string;
+  contactOwner2: string;
   contactTenant: string;
   contactManager: string;
+  roadAddress: string;
   tenantOccupied: boolean;      // 아파트매매: 세입자 거주여부
   tenantDeposit: string;        // 아파트매매: 세입자 전세/보증금
   tenantMonthly: string;        // 아파트매매: 세입자 월세
@@ -146,7 +148,8 @@ const INITIAL: FormState = {
   lhType: "관계없음", exitCleanFee: "", brokerFee: "",
   myMemo: "",
   description: "",
-  contactBroker: "", contactOwner: "", contactTenant: "", contactManager: "",
+  contactBroker: "", contactOwner: "", contactOwner2: "", contactTenant: "", contactManager: "",
+  roadAddress: "",
   tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
   earlyExit: false,
   expose: true, allowAddressView: false,
@@ -370,6 +373,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
     const contactParts = [
       form.contactOwner && `건물주:${form.contactOwner}`,
+      form.contactOwner2 && `건물주2:${form.contactOwner2}`,
       form.contactBroker && `부동산:${form.contactBroker}`,
       form.contactTenant && `세입자:${form.contactTenant}`,
       form.contactManager && `관리인:${form.contactManager}`,
@@ -447,6 +451,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       registered_by: user?.userId ?? null,
       note: [
         form.contactOwner && `건물주: ${form.contactOwner}`,
+        form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
         form.contactBroker && `부동산: ${form.contactBroker}`,
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
@@ -464,6 +469,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
         form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
         form.brokerFee && `중개보수: ${form.brokerFee}`,
+        form.roadAddress && `도로명: ${form.roadAddress}`,
       ].filter(Boolean).join("\n") || null,
       vacate_date: form.vacateDate || null,
     };
@@ -607,8 +613,29 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
 /* ─── Step 1 ─── */
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+  const [addressVerified, setAddressVerified] = useState<null | "success" | "fail">(null);
+  const [verifying, setVerifying] = useState(false);
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
+
+  const handleAddressVerify = async () => {
+    const addr = form.roadAddress || ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    if (!addr.trim()) return;
+    setVerifying(true);
+    setAddressVerified(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", { body: { address: addr } });
+      if (!error && data?.success) {
+        setAddressVerified("success");
+      } else {
+        setAddressVerified("fail");
+      }
+    } catch {
+      setAddressVerified("fail");
+    } finally {
+      setVerifying(false);
+    }
+  };
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
 
   return (
@@ -682,7 +709,27 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
+        {/* 도로명주소 입력 */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type="text" placeholder="도로명주소 입력 (예: 충북 청주시 흥덕구 대농로 17)" value={form.roadAddress} onChange={(e) => set("roadAddress", e.target.value)} className={ic(false) + " pl-9"} />
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">도로명</span>
+        </div>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+        {/* 주소확인 버튼 */}
+        <button type="button" onClick={handleAddressVerify} disabled={verifying || (!form.lotNumber && !form.roadAddress)}
+          className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
+          style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
+          {verifying ? "확인 중..." : "📍 주소확인"}
+        </button>
+        {addressVerified === "success" && (
+          <p className="text-[11px] text-green-600 font-semibold">✅ 주소가 확인되었습니다</p>
+        )}
+        {addressVerified === "fail" && (
+          <p className="text-[11px] text-destructive font-semibold">❌ 주소를 찾을 수 없습니다. 다시 확인해주세요</p>
+        )}
       </Section>
 
       {/* 건물이름 - 토지/건물매매/단독매매/창고/공장매매/다가구매매 등 매매 제외 */}
@@ -1158,24 +1205,22 @@ function Step3({
   onImageRemove: (url: string) => void;
   onImageSetMain: (url: string) => void;
 }) {
+  const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
     { key: "contactOwner", label: "소유주 연락처", placeholder: "예) 010-1234-5678" },
     { key: "contactBroker", label: "부동산 연락처", placeholder: "예) 043-123-4567" },
     { key: "contactTenant", label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
     { key: "contactManager", label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
   ];
-  // 입주가능/담당중개사는 표시하지 않음
 
   return (
     <div className="flex flex-col gap-5">
 
       {/* 매물 사진 */}
       <Section label="매물 사진">
-        {/* 캐러셀 미리보기 */}
         {form.images.length > 0 && (
           <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} />
         )}
-        {/* 업로드 버튼 */}
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -1195,7 +1240,45 @@ function Step3({
       {/* 연락처 */}
       <Section label="연락처">
         <div className="flex flex-col gap-3">
-          {contacts.map(({ key, label, placeholder, required }) => (
+          {/* 소유주 연락처 1 + 추가 버튼 */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
+              {!showOwner2 && (
+                <button type="button" onClick={() => setShowOwner2(true)}
+                  className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                  <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                  추가
+                </button>
+              )}
+            </div>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input type="tel" placeholder="예) 010-1234-5678"
+                value={form.contactOwner as string}
+                onChange={(e) => set("contactOwner", formatPhone(e.target.value))}
+                className={ic(!!(errors.contactOwner)) + " pl-9"} />
+            </div>
+          </div>
+          {/* 소유주 연락처 2 */}
+          {showOwner2 && (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-foreground/70">소유주 연락처 2</label>
+                <button type="button" onClick={() => { setShowOwner2(false); set("contactOwner2", ""); }}
+                  className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder="예) 010-5678-1234"
+                  value={form.contactOwner2 as string}
+                  onChange={(e) => set("contactOwner2", formatPhone(e.target.value))}
+                  className={ic(false) + " pl-9"} />
+              </div>
+            </div>
+          )}
+          {/* 나머지 연락처 */}
+          {contacts.filter(c => c.key !== "contactOwner").map(({ key, label, placeholder, required }) => (
             <div key={key} className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">
                 {label} {required && <span className="text-destructive">*</span>}

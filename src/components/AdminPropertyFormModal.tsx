@@ -300,9 +300,11 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   exitCleanFee: string;
   brokerFee: string;
   contactOwner: string;
+  contactOwner2: string;
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
+  roadAddress: string;
   // 다중 임대 방식
   rentModes: string[]; // ["월세", "반전세", "전세"]
   halfDeposit: string;
@@ -325,9 +327,11 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   exitCleanFee: "",
   brokerFee: "",
   contactOwner: "",
+  contactOwner2: "",
   contactTenant: "",
   contactManager: "",
   contactBroker: "",
+  roadAddress: "",
   rentModes: [],
   halfDeposit: "",
   halfMonthly: "",
@@ -426,11 +430,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     const noteStr = init.note ?? init.agent_name ?? "";
     const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
+    const owner2Match = noteStr.match(/건물주2[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
     if (ownerMatch) contacts.contactOwner = ownerMatch[1].trim();
+    if (owner2Match) contacts.contactOwner2 = owner2Match[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+    const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
+    if (roadMatch) contacts.roadAddress = roadMatch[1].trim();
 
     // 방향, LH, 청소비, 중개보수, 중도퇴거 파싱
     const dirMatch = noteStr.match(/방향[:\s]+([^\n|]+)/);
@@ -484,6 +492,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const [geocoding, setGeocoding] = useState(false);
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
+  const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 창고/공장매매 포함 모든 매매 타입: 층수·호수·평수·관리비·청소비·권리금 제외, 대지·건평 표시
@@ -694,6 +703,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
+      form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
       ...rentNotes,
@@ -705,6 +715,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
       form.landArea && `대지: ${form.landArea}`,
+      form.roadAddress && `도로명: ${form.roadAddress}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
@@ -910,7 +921,26 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
                   <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능</p>
+                {/* 도로명주소 */}
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input type="text" placeholder="도로명주소 입력 (예: 충북 청주시 흥덕구 대농로 17)" value={form.roadAddress}
+                      onChange={(e) => set("roadAddress", e.target.value)}
+                      className={ic + " pl-9"} />
+                  </div>
+                  <span className="self-center text-[10px] text-muted-foreground whitespace-nowrap">도로명</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+                {/* 주소확인 버튼 */}
+                <button type="button" onClick={() => {
+                  const addr = form.roadAddress || form.address;
+                  if (addr) geocodeAddress(addr);
+                }} disabled={geocoding || (!form.lot_number && !form.roadAddress)}
+                  className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
+                  style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
+                  {geocoding ? "확인 중..." : "📍 주소확인"}
+                </button>
                 {form.address && (
                   <div className="flex flex-col gap-1">
                     <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
@@ -1397,17 +1427,53 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
                 )}
                 <div className="flex flex-col gap-3">
+                  {/* 소유주 연락처 1 + 추가 버튼 */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
+                      {!showOwner2 && (
+                        <button type="button" onClick={() => setShowOwner2(true)}
+                          className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                          추가
+                        </button>
+                      )}
+                    </div>
+                    <ContactField
+                      fieldKey="contactOwner"
+                      label=""
+                      placeholder="예) 010-1234-5678"
+                      value={form.contactOwner}
+                      onChange={(v) => set("contactOwner", v)}
+                    />
+                  </div>
+                  {/* 소유주 연락처 2 */}
+                  {showOwner2 && (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-foreground/70">소유주 연락처 2</label>
+                        <button type="button" onClick={() => { setShowOwner2(false); set("contactOwner2", ""); }}
+                          className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+                      </div>
+                      <ContactField
+                        fieldKey="contactOwner2"
+                        label=""
+                        placeholder="예) 010-5678-1234"
+                        value={form.contactOwner2}
+                        onChange={(v) => set("contactOwner2", v)}
+                      />
+                    </div>
+                  )}
+                  {/* 나머지 연락처 */}
                   {([
-                    { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678", required: false },
-                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432", required: false },
-                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666", required: false },
-                  ] as { key: "contactOwner"|"contactTenant"|"contactManager"; label: string; placeholder: string; required: boolean }[]).map(({ key, label, placeholder, required }) => (
+                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
+                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
+                  ] as { key: "contactTenant"|"contactManager"; label: string; placeholder: string }[]).map(({ key, label, placeholder }) => (
                     <ContactField
                       key={key}
                       fieldKey={key}
                       label={label}
                       placeholder={placeholder}
-                      required={required}
                       value={form[key] as string}
                       onChange={(v) => set(key, v)}
                     />
