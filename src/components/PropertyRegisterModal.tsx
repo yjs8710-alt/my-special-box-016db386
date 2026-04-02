@@ -775,7 +775,7 @@ function Step2({
 }) {
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
-  const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업"].includes(form.detailType);
+  const isCommercial = ["상가","사무실","공장·창고","지식산업"].includes(form.detailType);
   const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
   // 매매 타입 목록 (수정폼과 동일)

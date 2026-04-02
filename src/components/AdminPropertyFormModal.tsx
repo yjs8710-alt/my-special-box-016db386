@@ -1024,7 +1024,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </div>
 
               {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
                   {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
