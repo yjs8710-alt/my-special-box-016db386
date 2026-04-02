@@ -784,6 +784,7 @@ function Step2({
 
   // 부가 시설 옵션 (아이콘 뱃지로 표시) — 수정폼과 동일
   const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
+    { key: "엘리베이터", label: "엘리베이터", icon: "🛗", bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
     { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
     { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
     { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
