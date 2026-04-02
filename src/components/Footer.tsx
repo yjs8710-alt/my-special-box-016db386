@@ -1,17 +1,14 @@
 import { Phone, Mail } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 
 const Footer = () => {
   return (
     <footer className="bg-foreground text-white">
-      {/* Footer Bottom */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">집</span>
-              </div>
-              <span className="text-xl font-bold text-white">집다</span>
+              <img src={logoImg} alt="집다 로고" className="h-10 w-auto object-contain brightness-0 invert" />
             </div>
             <p className="text-sm text-white/50 max-w-sm leading-relaxed">
               중개사만을 위한 청주 공실 전문 플랫폼. 검증된 실매물 정보로 빠르고 정확한 중개 서비스를 제공하세요.
