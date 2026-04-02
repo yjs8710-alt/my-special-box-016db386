@@ -557,7 +557,7 @@ const MyProperties = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [agentName, setAgentName] = useState("");
   // 관리자 전용: user_id → {name, email} 맵
-  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; email?: string }>>({});
+  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; agency_name?: string }>>({});
 
   // 프로필 및 매물 로드
   useEffect(() => {
