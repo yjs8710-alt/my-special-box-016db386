@@ -430,11 +430,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     const noteStr = init.note ?? init.agent_name ?? "";
     const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
+    const owner2Match = noteStr.match(/건물주2[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
     if (ownerMatch) contacts.contactOwner = ownerMatch[1].trim();
+    if (owner2Match) contacts.contactOwner2 = owner2Match[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+    const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
+    if (roadMatch) contacts.roadAddress = roadMatch[1].trim();
 
     // 방향, LH, 청소비, 중개보수, 중도퇴거 파싱
     const dirMatch = noteStr.match(/방향[:\s]+([^\n|]+)/);
