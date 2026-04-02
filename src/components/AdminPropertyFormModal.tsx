@@ -1422,8 +1422,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
-                      {!form.contactOwner2 && (
-                        <button type="button" onClick={() => set("contactOwner2", "")}
+                      {!showOwner2 && (
+                        <button type="button" onClick={() => setShowOwner2(true)}
                           className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
                           <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
                           추가
@@ -1439,11 +1439,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     />
                   </div>
                   {/* 소유주 연락처 2 */}
-                  {(form.contactOwner2 !== undefined && form.contactOwner2 !== null) && form.contactOwner2 !== "" ? (
+                  {showOwner2 && (
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <label className="text-xs font-semibold text-foreground/70">소유주 연락처 2</label>
-                        <button type="button" onClick={() => set("contactOwner2", "")}
+                        <button type="button" onClick={() => { setShowOwner2(false); set("contactOwner2", ""); }}
                           className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
                       </div>
                       <ContactField
@@ -1454,7 +1454,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         onChange={(v) => set("contactOwner2", v)}
                       />
                     </div>
-                  ) : null}
+                  )}
                   {/* 나머지 연락처 */}
                   {([
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
