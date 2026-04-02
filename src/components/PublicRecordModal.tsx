@@ -1,8 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { mapBuildingFromDB } from "@/lib/buildingUtils";
 import FloorGrid from "@/components/FloorGrid";
+
+/* ── 모듈 레벨 캐시: 동일 주소 재조회 시 API 호출 방지 ── */
+interface CachedRecord {
+  building: Record<string, any> | null;
+  land: Record<string, any> | null;
+  fetchedFrom: "db" | "api" | null;
+}
+const recordCache = new Map<string, CachedRecord>();
+const getCacheKey = (address: string, propertyId?: string) =>
+  `${propertyId ?? ""}::${address}`;
 
 interface PublicRecordModalProps {
   address: string;
