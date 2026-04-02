@@ -524,14 +524,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
   }, []);
 
-  // 도로명주소 입력 시 자동 geocode (디바운스)
-  useEffect(() => {
-    if (!form.roadAddress || form.roadAddress.trim().length < 5) return;
-    const timer = setTimeout(() => {
-      geocodeAddress(form.roadAddress);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [form.roadAddress, geocodeAddress]);
 
   // 청주 연락처 자동 불러오기
   // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
@@ -919,32 +911,22 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <AdminSelect value={dong} onChange={(v) => { setDong(v); updateAddress(sigungu, v, form.lot_number); }} placeholder="동/읍/면 선택" options={dongList} disabled={!sigungu} />
                 </div>
 
-                {/* 번지 */}
+                {/* 번지 또는 도로명주소 */}
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="text" placeholder="번지 입력 (예: 123-4)" value={form.lot_number}
+                    <input type="text" placeholder="번지 또는 도로명주소 입력 (예: 123-4 또는 대농로 17)" value={form.lot_number}
                       onChange={(e) => { set("lot_number", e.target.value); updateAddress(sigungu, dong, e.target.value); }}
                       className={ic + " pl-9"} />
                   </div>
-                  <span className="self-center text-xs text-muted-foreground whitespace-nowrap">번지</span>
                 </div>
-                {/* 도로명주소 */}
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input type="text" placeholder="도로명주소 입력 (예: 충북 청주시 흥덕구 대농로 17)" value={form.roadAddress}
-                      onChange={(e) => set("roadAddress", e.target.value)}
-                      className={ic + " pl-9"} />
-                  </div>
-                  <span className="self-center text-[10px] text-muted-foreground whitespace-nowrap">도로명</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+                <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 또는 도로명주소 입력 가능</p>
                 {/* 주소확인 버튼 */}
                 <button type="button" onClick={() => {
-                  const addr = form.roadAddress || form.address;
+                  const isRoad = form.lot_number?.match(/[가-힣].*(로|길)\s/);
+                  const addr = isRoad ? form.lot_number : form.address;
                   if (addr) geocodeAddress(addr);
-                }} disabled={geocoding || (!form.lot_number && !form.roadAddress)}
+                }} disabled={geocoding || !form.lot_number}
                   className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
                   style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
                   {geocoding ? "확인 중..." : "📍 주소확인"}

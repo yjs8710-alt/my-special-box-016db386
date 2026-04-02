@@ -618,33 +618,10 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
-  // 도로명주소 입력 시 자동 geocode (디바운스)
-  useEffect(() => {
-    if (!form.roadAddress || form.roadAddress.trim().length < 5) {
-      setAddressVerified(null);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setVerifying(true);
-      setAddressVerified(null);
-      try {
-        const { data, error } = await supabase.functions.invoke("geocode", { body: { address: form.roadAddress } });
-        if (!error && data?.success) {
-          setAddressVerified("success");
-        } else {
-          setAddressVerified("fail");
-        }
-      } catch {
-        setAddressVerified("fail");
-      } finally {
-        setVerifying(false);
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [form.roadAddress]);
-
   const handleAddressVerify = async () => {
-    const addr = form.roadAddress || ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    const addr = form.lotNumber?.match(/[가-힣].*(로|길)\s/)
+      ? form.lotNumber
+      : ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
     if (!addr.trim()) return;
     setVerifying(true);
     setAddressVerified(null);
@@ -730,21 +707,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input type="text" placeholder="번지 입력 (예: 123-4)" value={form.lotNumber} onChange={(e) => set("lotNumber", e.target.value)} className={ic(false) + " pl-9"} />
+            <input type="text" placeholder="번지 또는 도로명주소 입력 (예: 123-4 또는 대농로 17)" value={form.lotNumber} onChange={(e) => set("lotNumber", e.target.value)} className={ic(false) + " pl-9"} />
           </div>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        {/* 도로명주소 입력 */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input type="text" placeholder="도로명주소 입력 (예: 충북 청주시 흥덕구 대농로 17)" value={form.roadAddress} onChange={(e) => set("roadAddress", e.target.value)} className={ic(false) + " pl-9"} />
-          </div>
-          <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">도로명</span>
-        </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 또는 도로명주소 입력 가능</p>
         {/* 주소확인 버튼 */}
-        <button type="button" onClick={handleAddressVerify} disabled={verifying || (!form.lotNumber && !form.roadAddress)}
+        <button type="button" onClick={handleAddressVerify} disabled={verifying || !form.lotNumber}
           className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
           style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
           {verifying ? "확인 중..." : "📍 주소확인"}
