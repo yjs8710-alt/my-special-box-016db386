@@ -300,9 +300,11 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   exitCleanFee: string;
   brokerFee: string;
   contactOwner: string;
+  contactOwner2: string;
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
+  roadAddress: string;
   // 다중 임대 방식
   rentModes: string[]; // ["월세", "반전세", "전세"]
   halfDeposit: string;
