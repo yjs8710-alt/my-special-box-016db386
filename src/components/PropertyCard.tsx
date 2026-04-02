@@ -34,7 +34,15 @@ const PropertyCard = ({
         <img
           src={image}
           alt={title}
+          loading="eager"
+          decoding="async"
+          referrerPolicy="no-referrer"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          style={{ imageRendering: "auto" }}
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (!img.src.endsWith("/placeholder.svg")) img.src = "/placeholder.svg";
+          }}
         />
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-1.5">
