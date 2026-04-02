@@ -399,7 +399,7 @@ const PropertyRow = ({
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
   isAdmin?: boolean;
-  registrantInfo?: { name: string; email?: string } | null;
+  registrantInfo?: { name: string; agency_name?: string } | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
 
