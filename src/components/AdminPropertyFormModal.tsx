@@ -932,6 +932,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <span className="self-center text-[10px] text-muted-foreground whitespace-nowrap">도로명</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+                {/* 주소확인 버튼 */}
+                <button type="button" onClick={() => {
+                  const addr = form.roadAddress || form.address;
+                  if (addr) geocodeAddress(addr);
+                }} disabled={geocoding || (!form.lot_number && !form.roadAddress)}
+                  className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
+                  style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
+                  {geocoding ? "확인 중..." : "📍 주소확인"}
+                </button>
                 {form.address && (
                   <div className="flex flex-col gap-1">
                     <p className="text-xs text-primary font-medium bg-primary/8 px-3 py-1.5 rounded-lg">📍 {form.address}</p>
