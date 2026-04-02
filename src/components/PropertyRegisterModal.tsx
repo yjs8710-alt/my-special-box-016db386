@@ -613,8 +613,30 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
 /* ─── Step 1 ─── */
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
+  const [addressVerified, setAddressVerified] = useState<null | "success" | "fail">(null);
+  const [verifying, setVerifying] = useState(false);
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
+  const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
+
+  const handleAddressVerify = async () => {
+    const addr = form.roadAddress || ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    if (!addr.trim()) return;
+    setVerifying(true);
+    setAddressVerified(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode", { body: { address: addr } });
+      if (!error && data?.success) {
+        setAddressVerified("success");
+      } else {
+        setAddressVerified("fail");
+      }
+    } catch {
+      setAddressVerified("fail");
+    } finally {
+      setVerifying(false);
+    }
+  };
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
 
   return (
