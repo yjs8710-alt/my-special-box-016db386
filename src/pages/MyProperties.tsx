@@ -582,12 +582,12 @@ const MyProperties = () => {
         setAgentName("관리자");
         const [{ data: props }, { data: profiles }] = await Promise.all([
           supabase.from("properties").select("*").order("registered_date", { ascending: false }),
-          supabase.from("agent_profiles").select("user_id, name, phone"),
+          supabase.from("agent_profiles").select("user_id, name, agency_name"),
         ]);
         if (props) setProperties(props as DBProperty[]);
         if (profiles) {
-          const map: Record<string, { name: string; email?: string }> = {};
-          profiles.forEach(p => { map[p.user_id] = { name: p.name }; });
+          const map: Record<string, { name: string; agency_name?: string }> = {};
+          profiles.forEach(p => { map[p.user_id] = { name: p.name, agency_name: p.agency_name }; });
           setRegistrantMap(map);
         }
         setLoading(false);
