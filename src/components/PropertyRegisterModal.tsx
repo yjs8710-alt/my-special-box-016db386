@@ -717,7 +717,19 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           </div>
           <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">도로명</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능</p>
+        {/* 주소확인 버튼 */}
+        <button type="button" onClick={handleAddressVerify} disabled={verifying || (!form.lotNumber && !form.roadAddress)}
+          className="w-full py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40"
+          style={{ borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.05)" }}>
+          {verifying ? "확인 중..." : "📍 주소확인"}
+        </button>
+        {addressVerified === "success" && (
+          <p className="text-[11px] text-green-600 font-semibold">✅ 주소가 확인되었습니다</p>
+        )}
+        {addressVerified === "fail" && (
+          <p className="text-[11px] text-destructive font-semibold">❌ 주소를 찾을 수 없습니다. 다시 확인해주세요</p>
+        )}
       </Section>
 
       {/* 건물이름 - 토지/건물매매/단독매매/창고/공장매매/다가구매매 등 매매 제외 */}
