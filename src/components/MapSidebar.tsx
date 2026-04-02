@@ -3303,17 +3303,18 @@ const MapSidebar = ({
                               className="w-[96px] flex-shrink-0 overflow-hidden relative"
                               style={{ minHeight: "96px" }}
                             >
-                              {item.images && item.images.length > 0 ? (
+                              {item.images && item.images.length > 0 && item.images[0] ? (
                                 <img
                                   src={item.images[0]}
                                   alt={item.label}
                                   loading="eager"
                                   decoding="async"
+                                  referrerPolicy="no-referrer"
                                   className="w-full h-full object-cover cursor-zoom-in"
-                                  style={{
-                                    imageRendering: "auto",
-                                    transform: "translateZ(0)",
-                                    willChange: "transform",
+                                  style={{ imageRendering: "auto" }}
+                                  onError={(e) => {
+                                    const img = e.currentTarget;
+                                    img.style.display = "none";
                                   }}
                                   onClick={(e) => {
                                     e.stopPropagation();
