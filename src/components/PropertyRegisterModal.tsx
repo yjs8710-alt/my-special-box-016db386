@@ -618,31 +618,6 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
-  // 도로명주소 입력 시 자동 geocode (디바운스)
-  useEffect(() => {
-    if (!form.roadAddress || form.roadAddress.trim().length < 5) {
-      setAddressVerified(null);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setVerifying(true);
-      setAddressVerified(null);
-      try {
-        const { data, error } = await supabase.functions.invoke("geocode", { body: { address: form.roadAddress } });
-        if (!error && data?.success) {
-          setAddressVerified("success");
-        } else {
-          setAddressVerified("fail");
-        }
-      } catch {
-        setAddressVerified("fail");
-      } finally {
-        setVerifying(false);
-      }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [form.roadAddress]);
-
   const handleAddressVerify = async () => {
     const addr = form.lotNumber?.match(/[가-힣].*(로|길)\s/)
       ? form.lotNumber
