@@ -667,11 +667,21 @@ const MyProperties = () => {
     ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
     : [];
 
+  // 부동산(사무소)별 탭 목록 (관리자 전용)
+  const agencyList = isAdminView
+    ? ["전체", ...Array.from(new Set(
+        Object.values(registrantMap).map(r => r.agency_name).filter(Boolean)
+      )).sort()]
+    : [];
+
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
-    return matchStatus && matchSearch && matchAgent;
+    const matchAgency = !isAdminView || agencyTab === "전체" || (
+      p.registered_by && registrantMap[p.registered_by]?.agency_name === agencyTab
+    );
+    return matchStatus && matchSearch && matchAgent && matchAgency;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
