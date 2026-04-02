@@ -644,7 +644,9 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
   }, [form.roadAddress]);
 
   const handleAddressVerify = async () => {
-    const addr = form.roadAddress || ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    const addr = form.lotNumber?.match(/[가-힣].*(로|길)\s/)
+      ? form.lotNumber
+      : ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
     if (!addr.trim()) return;
     setVerifying(true);
     setAddressVerified(null);
