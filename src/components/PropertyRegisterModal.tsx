@@ -29,7 +29,7 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS_REG = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","빌라","연립","다세대","주상복합"] },
-  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업","기타임대"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","지식산업","기타임대"] },
   { group: "매매", types: ["단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","지식산업매매"] },
   { group: "토지", types: ["토지"] },
 ];
@@ -438,9 +438,9 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       views: 0,
       lat,
       lng,
-      is_new: form.isNew,
-      is_hot: form.isHot,
-      elevator: form.elevator,
+      is_new: false,
+      is_hot: false,
+      elevator: form.options.includes("엘리베이터"),
       status: "active" as const,
       registered_date: new Date().toISOString().split("T")[0],
       agent_name: myAgentName || contactParts,
@@ -775,7 +775,7 @@ function Step2({
 }) {
   const isLand = form.detailType === "토지" || form.buildingType === "토지";
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
-  const isCommercial = ["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업"].includes(form.detailType);
+  const isCommercial = ["상가","사무실","공장·창고","지식산업"].includes(form.detailType);
   const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
   // 매매 타입 목록 (수정폼과 동일)
@@ -784,6 +784,7 @@ function Step2({
 
   // 부가 시설 옵션 (아이콘 뱃지로 표시) — 수정폼과 동일
   const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
+    { key: "엘리베이터", label: "엘리베이터", icon: "🛗", bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
     { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
     { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
     { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
@@ -1112,22 +1113,6 @@ function Step2({
         </Section>
       )}
 
-      {/* 체크박스 옵션 */}
-      <div className="flex gap-6 flex-wrap">
-        {[
-          { key: "elevator" as const, label: "엘리베이터" },
-          { key: "isNew" as const, label: "신규 매물" },
-          { key: "isHot" as const, label: "인기 매물" },
-        ].map(({ key, label }) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input type="checkbox"
-              checked={form[key] as boolean}
-              onChange={(e) => set(key, e.target.checked)}
-              className="w-4 h-4 accent-primary" />
-            {label}
-          </label>
-        ))}
-      </div>
 
       {/* 메모 */}
       <Section label="메모">

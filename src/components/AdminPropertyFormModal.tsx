@@ -237,6 +237,7 @@ const ROOM_OPTIONS = [
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
+  { key: "엘리베이터", label: "엘리베이터", icon: "🛗", bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
   { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
   { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
   { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
@@ -253,7 +254,7 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형 임대", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","빌라","연립","다세대","주상복합"] },
-  { group: "상가 임대", types: ["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업","기타임대"] },
+  { group: "상가 임대", types: ["상가","사무실","공장·창고","지식산업","기타임대"] },
   { group: "매매", types: ["단독매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","지식산업매매"] },
   { group: "토지", types: ["토지"] },
 ];
@@ -270,10 +271,8 @@ const ROOM_TYPE_MAP: Record<string, string[]> = {
   "고시원":   ["고시원","고시텔"],
   "주인세대": ["주인세대","단독주택"],
   "상가":     ["1층상가","2층상가","지하상가","코너상가","대형상가"],
-  "식당·카페":["카페","식당","패스트푸드","베이커리","분식"],
   "사무실":   ["소형사무실","중형사무실","대형사무실","오피스","코워킹"],
   "공장·창고":["소형창고","대형창고","공장","물류센터"],
-  "병원·학원":["병원","의원","학원","어린이집"],
 };
 
 type LhType = typeof LH_TYPES[number];
@@ -468,10 +467,17 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     return contacts;
   };
 
-  const [form, setForm] = useState<AdminFormExtended>({
-    ...EMPTY_EXTENDED,
-    ...(initial ?? {}),
-    ...parseContactsFromInitial(initial),
+  const [form, setForm] = useState<AdminFormExtended>(() => {
+    const merged = {
+      ...EMPTY_EXTENDED,
+      ...(initial ?? {}),
+      ...parseContactsFromInitial(initial),
+    };
+    // elevator boolean → 부가시설 옵션으로 매핑
+    if (initial?.elevator && !merged.options.includes("엘리베이터")) {
+      merged.options = [...merged.options, "엘리베이터"];
+    }
+    return merged;
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -717,7 +723,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       monthly: finalMonthly ?? "",
       manage_fee: form.manage_fee ?? "",
       parking: form.parking ?? "",
-      elevator: form.elevator ?? false,
+      elevator: form.options.includes("엘리베이터"),
       available_from: form.available_from ?? "",
       total_floors: form.total_floors ?? "",
       build_year: form.build_year ?? "",
@@ -736,8 +742,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       views: Number(form.views) || 0,
       lat: Number(finalLat) || 0,
       lng: Number(finalLng) || 0,
-      is_new: form.is_new ?? false,
-      is_hot: form.is_hot ?? false,
+      is_new: false,
+      is_hot: false,
       status: form.status ?? "active",
       registered_date: form.registered_date || new Date().toISOString().slice(0, 10),
       checked_date: form.checked_date || null,
@@ -1009,18 +1015,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
-                    <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
-                    <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
-                  </div>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
@@ -1036,7 +1031,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </div>
 
               {/* 부가 시설 (수도·유선TV·인터넷·CCTV) — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="부가 시설">
                 <div className="flex flex-wrap gap-2">
                   {EXTRA_FACILITY_OPTIONS.map(({ key, label, icon, bg, color, border }) => {
@@ -1069,7 +1064,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               )}
 
               {/* 옵션 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="옵션">
                 {/* 풀옵션 버튼 */}
                 <div className="mb-2">
@@ -1126,7 +1121,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               )}
 
               {/* 방향 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="방향">
                 <div className="flex flex-wrap gap-2">
                   {DIRECTION_OPTIONS.map((d) => (
@@ -1328,7 +1323,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 {/* 관리비 + 청소비 + 중개보수 — 창고/공장매매 제외 */}
                 {!isWarehouseSale && (
                 <div className="grid grid-cols-2 gap-3 mt-1">
-                  {["상가","식당·카페","사무실","공장·창고","병원·학원","지식산업","기타임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.type) && (
+                  {["상가","사무실","공장·창고","지식산업","기타임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.type) && (
                     <div className="col-span-2">
                       <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
                         const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
@@ -1362,16 +1357,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               </Section>
               )}
 
-              {/* 체크박스 옵션 */}
-              <div className="flex gap-6 flex-wrap">
-                {[{ key: "elevator" as const, label: "엘리베이터" }, { key: "is_new" as const, label: "신규 매물" }, { key: "is_hot" as const, label: "인기 매물" }].map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                    <input type="checkbox" checked={form[key] as boolean}
-                      onChange={(e) => set(key, e.target.checked)} className="w-4 h-4 accent-primary" />
-                    {label}
-                  </label>
-                ))}
-              </div>
 
 
               {/* 메모 */}
