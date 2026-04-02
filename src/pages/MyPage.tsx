@@ -109,28 +109,14 @@ const MyPage = () => {
     })();
   }, [profile]);
 
-  const handleSavePersonal = async () => {
-    if (!profile) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from("agent_profiles")
-      .update({ name, phone })
-      .eq("id", profile.id);
-    setSaving(false);
-    if (error) {
-      toast({ title: "저장 실패", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "개인정보가 저장되었습니다." });
-      setProfile({ ...profile, name, phone });
-    }
-  };
-
-  const handleSaveCompany = async () => {
+  const handleSaveAll = async () => {
     if (!profile) return;
     setSaving(true);
     const { error } = await supabase
       .from("agent_profiles")
       .update({
+        name,
+        phone,
         agency_name: agencyName,
         agency_address: agencyAddress,
         license_number: licenseNumber,
@@ -141,8 +127,15 @@ const MyPage = () => {
     if (error) {
       toast({ title: "저장 실패", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "회사정보가 저장되었습니다." });
-      setProfile({ ...profile, agency_name: agencyName, agency_address: agencyAddress, license_number: licenseNumber, business_number: businessNumber });
+      toast({ title: "정보가 저장되었습니다." });
+      setProfile({
+        ...profile,
+        name, phone,
+        agency_name: agencyName,
+        agency_address: agencyAddress,
+        license_number: licenseNumber,
+        business_number: businessNumber,
+      });
     }
   };
 
@@ -308,14 +301,10 @@ const MyPage = () => {
                   ))}
                 </div>
 
-                <div className="flex justify-end gap-2 p-4">
-                  <Button size="sm" onClick={handleSavePersonal} disabled={saving} className="text-xs gap-1">
+                <div className="flex justify-end p-4">
+                  <Button size="sm" onClick={handleSaveAll} disabled={saving} className="text-xs gap-1">
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    개인정보 저장
-                  </Button>
-                  <Button size="sm" onClick={handleSaveCompany} disabled={saving} className="text-xs gap-1" variant="outline">
-                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    회사정보 저장
+                    저장
                   </Button>
                 </div>
               </CardContent>

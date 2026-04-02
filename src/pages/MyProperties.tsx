@@ -399,7 +399,7 @@ const PropertyRow = ({
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
   isAdmin?: boolean;
-  registrantInfo?: { name: string; email?: string } | null;
+  registrantInfo?: { name: string; agency_name?: string } | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -551,12 +551,13 @@ const MyProperties = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
   const [agentTab, setAgentTab] = useState<string>("전체");
+  const [agencyTab, setAgencyTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const [agentName, setAgentName] = useState("");
   // 관리자 전용: user_id → {name, email} 맵
-  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; email?: string }>>({});
+  const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; agency_name?: string }>>({});
 
   // 프로필 및 매물 로드
   useEffect(() => {
@@ -581,12 +582,12 @@ const MyProperties = () => {
         setAgentName("관리자");
         const [{ data: props }, { data: profiles }] = await Promise.all([
           supabase.from("properties").select("*").order("registered_date", { ascending: false }),
-          supabase.from("agent_profiles").select("user_id, name, phone"),
+          supabase.from("agent_profiles").select("user_id, name, agency_name"),
         ]);
         if (props) setProperties(props as DBProperty[]);
         if (profiles) {
-          const map: Record<string, { name: string; email?: string }> = {};
-          profiles.forEach(p => { map[p.user_id] = { name: p.name }; });
+          const map: Record<string, { name: string; agency_name?: string }> = {};
+          profiles.forEach(p => { map[p.user_id] = { name: p.name, agency_name: p.agency_name }; });
           setRegistrantMap(map);
         }
         setLoading(false);
@@ -666,11 +667,21 @@ const MyProperties = () => {
     ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
     : [];
 
+  // 부동산(사무소)별 탭 목록 (관리자 전용)
+  const agencyList = isAdminView
+    ? ["전체", ...Array.from(new Set(
+        Object.values(registrantMap).map(r => r.agency_name).filter(Boolean)
+      )).sort()]
+    : [];
+
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
-    return matchStatus && matchSearch && matchAgent;
+    const matchAgency = !isAdminView || agencyTab === "전체" || (
+      p.registered_by && registrantMap[p.registered_by]?.agency_name === agencyTab
+    );
+    return matchStatus && matchSearch && matchAgent && matchAgency;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
@@ -727,6 +738,7 @@ const MyProperties = () => {
         {/* 관리자 전용: 등록자별 탭 필터 */}
         {isAdminView && agentList.length > 1 && (
           <div className="mb-4 -mx-1 px-1 overflow-x-auto">
+            <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
             <div className="flex gap-1.5 min-w-max pb-1">
               {agentList.map(agent => {
                 const count = agent === "전체"
