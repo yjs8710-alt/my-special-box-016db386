@@ -687,7 +687,15 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           </div>
           <span className="text-xs text-muted-foreground whitespace-nowrap">번지</span>
         </div>
-        <p className="text-[11px] text-muted-foreground/60 -mt-1">도로명주소 불가 / 번지주소만 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
+        {/* 도로명주소 입력 */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input type="text" placeholder="도로명주소 입력 (예: 충북 청주시 흥덕구 대농로 17)" value={form.roadAddress} onChange={(e) => set("roadAddress", e.target.value)} className={ic(false) + " pl-9"} />
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 whitespace-nowrap">도로명</span>
+        </div>
+        <p className="text-[11px] text-muted-foreground/60 -mt-1">번지주소 기본 · 도로명주소도 입력 가능 · 번지 입력 시 등록된 연락처가 자동으로 불러와집니다 ✨</p>
       </Section>
 
       {/* 건물이름 - 토지/건물매매/단독매매/창고/공장매매/다가구매매 등 매매 제외 */}
