@@ -492,6 +492,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
   const [geocoding, setGeocoding] = useState(false);
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
+  const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 창고/공장매매 포함 모든 매매 타입: 층수·호수·평수·관리비·청소비·권리금 제외, 대지·건평 표시
