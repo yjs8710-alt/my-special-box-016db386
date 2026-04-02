@@ -467,10 +467,17 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     return contacts;
   };
 
-  const [form, setForm] = useState<AdminFormExtended>({
-    ...EMPTY_EXTENDED,
-    ...(initial ?? {}),
-    ...parseContactsFromInitial(initial),
+  const [form, setForm] = useState<AdminFormExtended>(() => {
+    const merged = {
+      ...EMPTY_EXTENDED,
+      ...(initial ?? {}),
+      ...parseContactsFromInitial(initial),
+    };
+    // elevator boolean → 부가시설 옵션으로 매핑
+    if (initial?.elevator && !merged.options.includes("엘리베이터")) {
+      merged.options = [...merged.options, "엘리베이터"];
+    }
+    return merged;
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
