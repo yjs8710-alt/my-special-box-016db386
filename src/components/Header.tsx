@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Users, ShieldCheck, ChevronDown, Building, ClipboardList, User } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building, ClipboardList, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -54,10 +53,30 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
 
             {/* 로고 */}
             <div
-              className="flex items-center gap-1.5 cursor-pointer mr-3 select-none flex-shrink-0"
+              className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
               onClick={() => navigate("/")}
             >
-              <img src={logoImg} alt="집다 로고" className="h-8 w-auto object-contain" />
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: "hsl(var(--accent))" }}
+              >
+                <Home className="w-4 h-4 text-white" />
+              </div>
+              <span
+                className="text-[15px] font-extrabold tracking-tight text-white hidden sm:block"
+                style={{ letterSpacing: "-0.02em" }}
+              >
+                집다
+              </span>
+              <span
+                className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
+                style={{
+                  background: "hsl(var(--header-border))",
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
+                공인중개사 전용
+              </span>
             </div>
 
 
