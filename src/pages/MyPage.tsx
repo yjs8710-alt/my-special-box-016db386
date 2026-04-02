@@ -301,14 +301,10 @@ const MyPage = () => {
                   ))}
                 </div>
 
-                <div className="flex justify-end gap-2 p-4">
-                  <Button size="sm" onClick={handleSavePersonal} disabled={saving} className="text-xs gap-1">
+                <div className="flex justify-end p-4">
+                  <Button size="sm" onClick={handleSaveAll} disabled={saving} className="text-xs gap-1">
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    개인정보 저장
-                  </Button>
-                  <Button size="sm" onClick={handleSaveCompany} disabled={saving} className="text-xs gap-1" variant="outline">
-                    {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                    회사정보 저장
+                    저장
                   </Button>
                 </div>
               </CardContent>
