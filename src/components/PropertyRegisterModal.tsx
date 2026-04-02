@@ -1113,22 +1113,6 @@ function Step2({
         </Section>
       )}
 
-      {/* 체크박스 옵션 */}
-      <div className="flex gap-6 flex-wrap">
-        {[
-          { key: "elevator" as const, label: "엘리베이터" },
-          { key: "isNew" as const, label: "신규 매물" },
-          { key: "isHot" as const, label: "인기 매물" },
-        ].map(({ key, label }) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-            <input type="checkbox"
-              checked={form[key] as boolean}
-              onChange={(e) => set(key, e.target.checked)}
-              className="w-4 h-4 accent-primary" />
-            {label}
-          </label>
-        ))}
-      </div>
 
       {/* 메모 */}
       <Section label="메모">

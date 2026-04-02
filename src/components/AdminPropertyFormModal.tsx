@@ -1010,18 +1010,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">전체 층수</label>
-                    <input type="text" placeholder="예) 5층" value={form.total_floors} onChange={(e) => set("total_floors", e.target.value)} className={ic} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">건축연도</label>
-                    <input type="text" placeholder="예) 2010" value={form.build_year} onChange={(e) => set("build_year", e.target.value)} className={ic} />
-                  </div>
-                </div>
-              )}
+              ) : null}
             </div>
           )}
 
