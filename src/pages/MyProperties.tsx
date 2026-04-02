@@ -738,6 +738,7 @@ const MyProperties = () => {
         {/* 관리자 전용: 등록자별 탭 필터 */}
         {isAdminView && agentList.length > 1 && (
           <div className="mb-4 -mx-1 px-1 overflow-x-auto">
+            <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
             <div className="flex gap-1.5 min-w-max pb-1">
               {agentList.map(agent => {
                 const count = agent === "전체"
