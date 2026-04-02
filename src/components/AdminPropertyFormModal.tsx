@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
@@ -507,7 +507,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // Edge Function을 통해 주소 → 좌표 자동 조회 (네이버 API 직접 호출 제거)
   const geocodeAddress = useCallback(async (fullAddress: string) => {
     if (!fullAddress.trim()) return;
     setGeocoding(true);
@@ -524,6 +523,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       setGeocoding(false);
     }
   }, []);
+
+  // 도로명주소 입력 시 자동 geocode (디바운스)
+  useEffect(() => {
+    if (!form.roadAddress || form.roadAddress.trim().length < 5) return;
+    const timer = setTimeout(() => {
+      geocodeAddress(form.roadAddress);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [form.roadAddress, geocodeAddress]);
 
   // 청주 연락처 자동 불러오기
   // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
