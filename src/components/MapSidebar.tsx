@@ -3518,19 +3518,25 @@ const MapSidebar = ({
                             className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
                             style={{ minHeight: "96px" }}
                           >
-                            {prop.image ? (
+                            {prop.image && prop.image.length > 0 ? (
                               <img
                                 src={prop.image}
                                 alt={prop.title}
                                 loading="eager"
                                 decoding="async"
+                                referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                 style={{
                                   imageRendering: "auto",
                                   WebkitBackfaceVisibility: "hidden",
-                                  transform: "translateZ(0) scale(1.001)",
                                   backfaceVisibility: "hidden",
-                                  willChange: "transform",
+                                }}
+                                onError={(e) => {
+                                  const img = e.currentTarget;
+                                  img.style.display = "none";
+                                  if (img.parentElement) {
+                                    img.parentElement.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center gap-0.5" style="background:hsl(var(--muted))"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg><span class="text-[8px] font-medium" style="color:hsl(var(--muted-foreground))">사진없음</span></div>`;
+                                  }
                                 }}
                               />
                             ) : (
