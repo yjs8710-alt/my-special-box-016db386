@@ -1057,7 +1057,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               )}
 
               {/* 옵션 — 매매/상가임대류/토지 제외 */}
-              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","식당·카페","병원·학원","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
+              {!SALE_TYPES.includes(form.type) && !["상가","사무실","공장·창고","지식산업"].includes(form.type) && form.buildingType !== "토지" && (
               <Section label="옵션">
                 {/* 풀옵션 버튼 */}
                 <div className="mb-2">
