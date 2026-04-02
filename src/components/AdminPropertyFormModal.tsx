@@ -1417,17 +1417,53 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   </div>
                 )}
                 <div className="flex flex-col gap-3">
+                  {/* 소유주 연락처 1 + 추가 버튼 */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
+                      {!form.contactOwner2 && (
+                        <button type="button" onClick={() => set("contactOwner2", "")}
+                          className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                          추가
+                        </button>
+                      )}
+                    </div>
+                    <ContactField
+                      fieldKey="contactOwner"
+                      label=""
+                      placeholder="예) 010-1234-5678"
+                      value={form.contactOwner}
+                      onChange={(v) => set("contactOwner", v)}
+                    />
+                  </div>
+                  {/* 소유주 연락처 2 */}
+                  {(form.contactOwner2 !== undefined && form.contactOwner2 !== null) && form.contactOwner2 !== "" ? (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-foreground/70">소유주 연락처 2</label>
+                        <button type="button" onClick={() => set("contactOwner2", "")}
+                          className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+                      </div>
+                      <ContactField
+                        fieldKey="contactOwner2"
+                        label=""
+                        placeholder="예) 010-5678-1234"
+                        value={form.contactOwner2}
+                        onChange={(v) => set("contactOwner2", v)}
+                      />
+                    </div>
+                  ) : null}
+                  {/* 나머지 연락처 */}
                   {([
-                    { key: "contactOwner" as const, label: "소유주 연락처", placeholder: "예) 010-1234-5678", required: false },
-                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432", required: false },
-                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666", required: false },
-                  ] as { key: "contactOwner"|"contactTenant"|"contactManager"; label: string; placeholder: string; required: boolean }[]).map(({ key, label, placeholder, required }) => (
+                    { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
+                    { key: "contactManager" as const, label: "관리인 연락처", placeholder: "예) 010-5555-6666" },
+                  ] as { key: "contactTenant"|"contactManager"; label: string; placeholder: string }[]).map(({ key, label, placeholder }) => (
                     <ContactField
                       key={key}
                       fieldKey={key}
                       label={label}
                       placeholder={placeholder}
-                      required={required}
                       value={form[key] as string}
                       onChange={(v) => set(key, v)}
                     />
