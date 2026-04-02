@@ -228,12 +228,20 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               </Button>
             )}
             {isAuthorized && (
-              <button
-                className="w-full text-sm text-white/50 font-medium py-2 mt-1"
-                onClick={handleLogout}
-              >
-                로그아웃
-              </button>
+              <>
+                <button
+                  onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
+                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                >
+                  마이페이지
+                </button>
+                <button
+                  className="w-full text-sm text-white/50 font-medium py-2 mt-1"
+                  onClick={handleLogout}
+                >
+                  로그아웃
+                </button>
+              </>
             )}
           </div>
         </div>
