@@ -110,8 +110,10 @@ interface FormState {
   description: string;
   contactBroker: string;
   contactOwner: string;
+  contactOwner2: string;
   contactTenant: string;
   contactManager: string;
+  roadAddress: string;
   tenantOccupied: boolean;      // 아파트매매: 세입자 거주여부
   tenantDeposit: string;        // 아파트매매: 세입자 전세/보증금
   tenantMonthly: string;        // 아파트매매: 세입자 월세
