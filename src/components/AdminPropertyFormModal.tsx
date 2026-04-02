@@ -716,7 +716,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       monthly: finalMonthly ?? "",
       manage_fee: form.manage_fee ?? "",
       parking: form.parking ?? "",
-      elevator: form.elevator ?? false,
+      elevator: form.options.includes("엘리베이터"),
       available_from: form.available_from ?? "",
       total_floors: form.total_floors ?? "",
       build_year: form.build_year ?? "",
