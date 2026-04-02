@@ -373,6 +373,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
     const contactParts = [
       form.contactOwner && `건물주:${form.contactOwner}`,
+      form.contactOwner2 && `건물주2:${form.contactOwner2}`,
       form.contactBroker && `부동산:${form.contactBroker}`,
       form.contactTenant && `세입자:${form.contactTenant}`,
       form.contactManager && `관리인:${form.contactManager}`,
