@@ -702,6 +702,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
+      form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
       ...rentNotes,
@@ -713,6 +714,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
       form.landArea && `대지: ${form.landArea}`,
+      form.roadAddress && `도로명: ${form.roadAddress}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
