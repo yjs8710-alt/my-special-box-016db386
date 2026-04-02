@@ -109,28 +109,14 @@ const MyPage = () => {
     })();
   }, [profile]);
 
-  const handleSavePersonal = async () => {
-    if (!profile) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from("agent_profiles")
-      .update({ name, phone })
-      .eq("id", profile.id);
-    setSaving(false);
-    if (error) {
-      toast({ title: "저장 실패", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "개인정보가 저장되었습니다." });
-      setProfile({ ...profile, name, phone });
-    }
-  };
-
-  const handleSaveCompany = async () => {
+  const handleSaveAll = async () => {
     if (!profile) return;
     setSaving(true);
     const { error } = await supabase
       .from("agent_profiles")
       .update({
+        name,
+        phone,
         agency_name: agencyName,
         agency_address: agencyAddress,
         license_number: licenseNumber,
@@ -141,8 +127,15 @@ const MyPage = () => {
     if (error) {
       toast({ title: "저장 실패", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "회사정보가 저장되었습니다." });
-      setProfile({ ...profile, agency_name: agencyName, agency_address: agencyAddress, license_number: licenseNumber, business_number: businessNumber });
+      toast({ title: "정보가 저장되었습니다." });
+      setProfile({
+        ...profile,
+        name, phone,
+        agency_name: agencyName,
+        agency_address: agencyAddress,
+        license_number: licenseNumber,
+        business_number: businessNumber,
+      });
     }
   };
 
