@@ -18,6 +18,7 @@ import CommercialRental from "./pages/CommercialRental";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import MyProperties from "./pages/MyProperties";
+import MyPage from "./pages/MyPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
           <Route path="/commercial" element={<ProtectedRoute><CommercialRental /></ProtectedRoute>} />
           <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
+          <Route path="/my-page" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
 
           {/* 관리자 */}
           <Route path="/admin/login" element={<AdminLogin />} />

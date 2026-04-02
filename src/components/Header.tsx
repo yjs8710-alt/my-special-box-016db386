@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building, ClipboardList } from "lucide-react";
+import { Menu, X, Bell, LogOut, Home, Users, ShieldCheck, ChevronDown, Building, ClipboardList, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -121,9 +121,10 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
 
               {isAuthorized ? (
                 <>
-                  <div
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+                   <button
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                     style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    onClick={() => navigate("/my-page")}
                   >
                     <div
                       className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white flex-shrink-0"
@@ -132,8 +133,8 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                       {user?.memberType?.[0] ?? "U"}
                     </div>
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <ChevronDown className="w-3 h-3 text-white/40" />
-                  </div>
+                    <User className="w-3 h-3 text-white/40" />
+                  </button>
 
                   {user?.isAdmin && (
                     <button
@@ -227,12 +228,20 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               </Button>
             )}
             {isAuthorized && (
-              <button
-                className="w-full text-sm text-white/50 font-medium py-2 mt-1"
-                onClick={handleLogout}
-              >
-                로그아웃
-              </button>
+              <>
+                <button
+                  onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
+                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                >
+                  마이페이지
+                </button>
+                <button
+                  className="w-full text-sm text-white/50 font-medium py-2 mt-1"
+                  onClick={handleLogout}
+                >
+                  로그아웃
+                </button>
+              </>
             )}
           </div>
         </div>
