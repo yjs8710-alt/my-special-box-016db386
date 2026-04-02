@@ -507,15 +507,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const sigunguList = CHEONGJU_SIGUNGU_ADMIN;
   const dongList = DONG_MAP[sigungu] ?? [];
 
-  // 도로명주소 입력 시 자동 geocode (디바운스)
-  useEffect(() => {
-    if (!form.roadAddress || form.roadAddress.trim().length < 5) return;
-    const timer = setTimeout(() => {
-      geocodeAddress(form.roadAddress);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [form.roadAddress, geocodeAddress]);
-
   const geocodeAddress = useCallback(async (fullAddress: string) => {
     if (!fullAddress.trim()) return;
     setGeocoding(true);
