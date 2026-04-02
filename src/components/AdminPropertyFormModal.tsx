@@ -524,6 +524,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
   }, []);
 
+  // 도로명주소 입력 시 자동 geocode (디바운스)
+  useEffect(() => {
+    if (!form.roadAddress || form.roadAddress.trim().length < 5) return;
+    const timer = setTimeout(() => {
+      geocodeAddress(form.roadAddress);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [form.roadAddress, geocodeAddress]);
+
   // 청주 연락처 자동 불러오기
   // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
   const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string, unitVal?: string, isCollective?: boolean) => {
