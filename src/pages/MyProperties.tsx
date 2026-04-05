@@ -484,8 +484,9 @@ const PropertyRow = ({
           </button>
           <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
             className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-            style={{ color: "hsl(var(--destructive))" }}>
-            <Trash2 className="w-3.5 h-3.5" />
+            style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
+            title={isAdmin ? "삭제" : "종료"}>
+            {isAdmin ? <Trash2 className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
           </button>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
