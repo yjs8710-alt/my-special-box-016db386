@@ -142,10 +142,18 @@ const hasMeaningfulData = (bldg: Record<string, any>) => {
 const sortBuildingsByLabel = (buildings: Array<Record<string, any>>) =>
   [...buildings].sort((a, b) => getBuildingLabel(a).localeCompare(getBuildingLabel(b), "ko"));
 
-/** 모든 동을 반환 (빈 레코드만 제외) */
+/** 모든 동을 반환 (빈 레코드만 제외, 의미 없는 "건축물" 레이블 탭 제거) */
 const getDetailedBuildingCandidates = (buildings: Array<Record<string, any>>) => {
   const filtered = sortBuildingsByLabel(buildings.filter(hasMeaningfulData));
-  if (filtered.length > 0) return filtered;
+  if (filtered.length > 0) {
+    // 구체적인 동/건물명이 있는 탭이 1개 이상이면, 라벨이 빈 문자열이거나 "건축물"인 제네릭 탭 제거
+    const named = filtered.filter((b) => {
+      const lbl = getBuildingLabel(b);
+      return lbl && lbl !== "건축물";
+    });
+    if (named.length > 0) return named;
+    return filtered;
+  }
 
   const fallback = [...buildings]
     .filter((bldg) => getBuildingDetailScore(bldg) > 0)
