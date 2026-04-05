@@ -250,7 +250,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       if (!hasVal(bSum.approval_date)) bSum.approval_date = findVal("useAprDay") ?? bSum.approval_date;
       if (!hasVal(bSum.floors_above)) bSum.floors_above = findVal("grndFlrCnt") ?? bSum.floors_above;
       if (!hasVal(bSum.floors_below)) bSum.floors_below = findVal("ugrndFlrCnt") ?? bSum.floors_below;
-      if (!hasVal(bSum.parking_count)) bSum.parking_count = findVal("indrMechUtcnt") ?? bSum.parking_count;
+      if (!hasVal(bSum.parking_count)) {
+        // 주차대수: recap/allBuildings에서 총합 계산
+        const parkingSources = recap ? [recap, ...buildings] : buildings;
+        const parkingTotal = parkingSources.reduce((max, src) => {
+          const t = Number(src.indrMechUtcnt ?? 0) + Number(src.oudrMechUtcnt ?? 0) +
+                    Number(src.indrAutoUtcnt ?? 0) + Number(src.oudrAutoUtcnt ?? 0);
+          return t > max ? t : max;
+        }, 0);
+        if (parkingTotal > 0) bSum.parking_count = `${parkingTotal} 대`;
+      }
       if (!hasVal(bSum.building_name)) bSum.building_name = findVal("bldNm", "dongNm") ?? bSum.building_name;
       if (bSum.elevator !== true) {
         if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음") ||
