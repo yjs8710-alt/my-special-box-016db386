@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
@@ -766,9 +767,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       if (initial?.id) {
         const { error } = await supabase.from("properties").update(payload).eq("id", initial.id);
         if (error) { alert("수정 오류: " + error.message); return; }
+        // 수정 후 건축물·토지대장 백그라운드 캐싱
+        prefetchPropertySummary(payload.address, initial.id).catch(() => {});
       } else {
-        const { error } = await supabase.from("properties").insert(payload);
+        const { data: insertedRow, error } = await supabase.from("properties").insert(payload).select("id").single();
         if (error) { alert("등록 오류: " + error.message); return; }
+        // 신규 등록 후 건축물·토지대장 백그라운드 캐싱
+        if (insertedRow?.id) {
+          prefetchPropertySummary(payload.address, insertedRow.id).catch(() => {});
+        }
       }
 
       // 청주 연락처 동기화

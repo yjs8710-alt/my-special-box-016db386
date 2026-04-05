@@ -7,6 +7,7 @@ import { cn, formatPhone } from "@/lib/utils";
 import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
@@ -474,7 +475,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       vacate_date: form.vacateDate || null,
     };
 
-    const { error } = await supabase.from("properties").insert(payload);
+    const { data: insertedRow, error } = await supabase.from("properties").insert(payload).select("id").single();
     setSaving(false);
 
     if (!error && form.dong) {
@@ -509,6 +510,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     if (error) {
       setSaveError("저장 중 오류가 발생했습니다: " + error.message);
       return;
+    }
+
+    // ── 건축물대장·토지대장 백그라운드 자동 조회 (캐싱) ──
+    if (insertedRow?.id) {
+      const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+      prefetchPropertySummary(address, insertedRow.id).catch(() => {});
     }
 
     setSubmitted(true);
