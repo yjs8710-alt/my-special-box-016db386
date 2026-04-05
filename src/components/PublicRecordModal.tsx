@@ -96,7 +96,11 @@ function SkeletonRow() {
   );
 }
 
-const hasVal = (v: unknown) => v !== null && v !== undefined && v !== "" && v !== "-" && v !== "조회 결과 없음";
+const hasVal = (v: unknown) => {
+  if (v == null || v === "") return false;
+  const s = String(v).trim();
+  return s !== "" && s !== "-" && s !== "--" && s !== "조회 결과 없음";
+};
 
 const buildingDetailKeyFields = [
   "mainPurpsCdNm",
@@ -114,7 +118,7 @@ const buildingDetailKeyFields = [
 const toDisplayText = (v: unknown) => {
   if (v == null || v === "") return null;
   const trimmed = String(v).trim();
-  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
+  return trimmed === "" || trimmed === "-" || trimmed === "--" || trimmed === "조회 결과 없음" ? null : trimmed;
 };
 
 const getBuildingLabel = (bldg: Record<string, any>) => toDisplayText(bldg?.dongNm) || toDisplayText(bldg?.bldNm) || "";
@@ -194,18 +198,29 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
   const [selectedDongIdx, setSelectedDongIdx] = useState(0);
 
-  const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
+  const str = (v: unknown) => {
+    if (v == null || v === "") return null;
+    const s = String(v).trim();
+    return s === "" || s === "-" || s === "--" || s === "조회 결과 없음" ? null : s;
+  };
 
-  /** _raw 보강 로직 (building에 적용) - 모든 동에서 가장 상세한 값을 탐색 */
+  /** _raw 보강 로직 (building에 적용) - 모든 동/recap/exposFloors에서 가장 상세한 값을 탐색 */
   const enrichBuilding = (bSum: Record<string, any>) => {
     if (bSum._raw && typeof bSum._raw === "object") {
       const raw = bSum._raw as Record<string, any>;
       const buildings: Record<string, any>[] =
         Array.isArray(raw.allBuildings) && raw.allBuildings.length > 0 ? raw.allBuildings : [];
+      const recap = raw.recap && typeof raw.recap === "object" ? (raw.recap as Record<string, any>) : null;
 
-      // 모든 동에서 첫 번째 유효값을 찾는 헬퍼
+      // 모든 동/recap에서 첫 번째 유효값을 찾는 헬퍼
       const findVal = (...fields: string[]) => {
-        // raw 자체에서 먼저 탐색
+        // recap에서 먼저 탐색 (총괄표제부가 가장 정확)
+        if (recap) {
+          for (const f of fields) {
+            if (hasVal(recap[f])) return recap[f];
+          }
+        }
+        // raw 자체에서 탐색
         for (const f of fields) {
           if (hasVal(raw[f])) return raw[f];
         }
@@ -213,6 +228,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         for (const bldg of buildings) {
           for (const f of fields) {
             if (hasVal(bldg[f])) return bldg[f];
+          }
+        }
+        // exposFloors에서 mainPurpsCdNm 등 탐색 (집합건물 fallback)
+        for (const bldg of buildings) {
+          if (Array.isArray(bldg.exposFloors)) {
+            for (const ef of bldg.exposFloors) {
+              for (const f of fields) {
+                if (hasVal(ef[f])) return ef[f];
+              }
+            }
           }
         }
         return null;
@@ -225,7 +250,16 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
       if (!hasVal(bSum.approval_date)) bSum.approval_date = findVal("useAprDay") ?? bSum.approval_date;
       if (!hasVal(bSum.floors_above)) bSum.floors_above = findVal("grndFlrCnt") ?? bSum.floors_above;
       if (!hasVal(bSum.floors_below)) bSum.floors_below = findVal("ugrndFlrCnt") ?? bSum.floors_below;
-      if (!hasVal(bSum.parking_count)) bSum.parking_count = findVal("indrMechUtcnt") ?? bSum.parking_count;
+      if (!hasVal(bSum.parking_count)) {
+        // 주차대수: recap/allBuildings에서 총합 계산
+        const parkingSources = recap ? [recap, ...buildings] : buildings;
+        const parkingTotal = parkingSources.reduce((max, src) => {
+          const t = Number(src.indrMechUtcnt ?? 0) + Number(src.oudrMechUtcnt ?? 0) +
+                    Number(src.indrAutoUtcnt ?? 0) + Number(src.oudrAutoUtcnt ?? 0);
+          return t > max ? t : max;
+        }, 0);
+        if (parkingTotal > 0) bSum.parking_count = `${parkingTotal} 대`;
+      }
       if (!hasVal(bSum.building_name)) bSum.building_name = findVal("bldNm", "dongNm") ?? bSum.building_name;
       if (bSum.elevator !== true) {
         if (raw.elevYn === "Y" || String(raw.elevatorDetail ?? "").includes("있음") ||

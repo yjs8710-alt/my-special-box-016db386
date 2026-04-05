@@ -49,10 +49,11 @@ export function mapBuildingRaw(raw: Record<string, unknown> | null | undefined):
   // ── 1. 사용승인일 ─────────────────────────────────────────────────
   let approvalDate: string | null = null;
   const raw_useAprDay = raw.useAprDay ?? raw.useAprDayBefore ?? null;
-  if (typeof raw_useAprDay === "string" && raw_useAprDay.length === 8) {
-    approvalDate = `${raw_useAprDay.slice(0,4)}-${raw_useAprDay.slice(4,6)}-${raw_useAprDay.slice(6,8)}`;
-  } else if (typeof raw_useAprDay === "string" && raw_useAprDay.includes("-")) {
-    approvalDate = raw_useAprDay; // 이미 YYYY-MM-DD
+  if (typeof raw_useAprDay === "string" && raw_useAprDay.trim().length === 8 && /^\d{8}$/.test(raw_useAprDay.trim())) {
+    const d = raw_useAprDay.trim();
+    approvalDate = `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
+  } else if (typeof raw_useAprDay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw_useAprDay.trim())) {
+    approvalDate = raw_useAprDay.trim(); // 이미 YYYY-MM-DD
   }
 
   // building_summary.approval_date가 이미 있으면 우선
