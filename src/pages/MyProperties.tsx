@@ -48,7 +48,7 @@ type DBProperty = {
   lng: number;
   is_new: boolean;
   is_hot: boolean;
-  status: "active" | "hidden";
+  status: "active" | "hidden" | "ended";
   registered_date: string;
   checked_date?: string;
   agent_name: string;
