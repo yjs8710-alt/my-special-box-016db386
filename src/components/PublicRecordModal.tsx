@@ -96,7 +96,11 @@ function SkeletonRow() {
   );
 }
 
-const hasVal = (v: unknown) => v !== null && v !== undefined && v !== "" && v !== "-" && v !== "조회 결과 없음";
+const hasVal = (v: unknown) => {
+  if (v == null || v === "") return false;
+  const s = String(v).trim();
+  return s !== "" && s !== "-" && s !== "--" && s !== "조회 결과 없음";
+};
 
 const buildingDetailKeyFields = [
   "mainPurpsCdNm",
@@ -114,7 +118,7 @@ const buildingDetailKeyFields = [
 const toDisplayText = (v: unknown) => {
   if (v == null || v === "") return null;
   const trimmed = String(v).trim();
-  return trimmed === "" || trimmed === "조회 결과 없음" || trimmed === "--" ? null : trimmed;
+  return trimmed === "" || trimmed === "-" || trimmed === "--" || trimmed === "조회 결과 없음" ? null : trimmed;
 };
 
 const getBuildingLabel = (bldg: Record<string, any>) => toDisplayText(bldg?.dongNm) || toDisplayText(bldg?.bldNm) || "";
@@ -194,7 +198,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   const [fetchedFrom, setFetchedFrom] = useState<"db" | "api" | null>(null);
   const [selectedDongIdx, setSelectedDongIdx] = useState(0);
 
-  const str = (v: unknown) => (v != null && v !== "" && v !== "조회 결과 없음" ? String(v) : null);
+  const str = (v: unknown) => {
+    if (v == null || v === "") return null;
+    const s = String(v).trim();
+    return s === "" || s === "-" || s === "--" || s === "조회 결과 없음" ? null : s;
+  };
 
   /** _raw 보강 로직 (building에 적용) - 모든 동에서 가장 상세한 값을 탐색 */
   const enrichBuilding = (bSum: Record<string, any>) => {
