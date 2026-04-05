@@ -775,8 +775,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 const safeIdx = Math.min(selectedDongIdx, sorted.length - 1);
                 const bldg = sorted[safeIdx];
                 const fallbackName = s(topBuilding?.building_name) ?? s(raw?.bldNm) ?? recapName ?? "건축물";
-                const displayBldg = {
+                const displayBldg: Record<string, any> = {
                   ...bldg,
+                  platPlc: s(bldg?.platPlc) ?? s(raw?.platPlc) ?? null,
+                  newPlatPlc: s(bldg?.newPlatPlc) ?? s(raw?.newPlatPlc) ?? null,
+                  regstrGbCdNm: s(bldg?.regstrGbCdNm) ?? null,
                   bldNm: s(bldg?.bldNm) ?? fallbackName,
                   mainPurpsCdNm: s(bldg?.mainPurpsCdNm) ?? s(topBuilding?.main_purpose) ?? s(raw?.mainPurpsCdNm) ?? null,
                   etcPurps: s(bldg?.etcPurps) ?? s(raw?.etcPurps) ?? null,
@@ -857,20 +860,20 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                     <div className="px-3 mt-2">
                       <table className="w-full border-collapse border border-border/50 text-[11px]">
                         <tbody>
-                          <TRow l1="소재지" v1={s(displayBldg.platPlc) ?? address} />
-                          {s(displayBldg.newPlatPlc) && <TRow l1="도로명" v1={s(displayBldg.newPlatPlc)} />}
-                          <TRow l1="건물명" v1={s(displayBldg.bldNm)} l2="대장구분" v2={s(displayBldg.regstrGbCdNm)} />
-                          <TRow l1="용도지역" v1={s(displayBldg.mainPurpsCdNm)} l2="사용승인일" v2={s(displayBldg.useAprDay)} />
-                          <TRow l1="주용도" v1={s(displayBldg.mainPurpsCdNm)} l2="기타용도" v2={s(displayBldg.etcPurps)} />
-                          <TRow l1="주구조" v1={s(displayBldg.strctCdNm)} l2="지붕구조" v2={s(displayBldg.roofCdNm)} />
-                          <TRow l1="대지면적" v1={s(displayBldg.platArea)} l2="건축면적" v2={s(displayBldg.archArea)} />
-                          <TRow l1="연면적" v1={s(displayBldg.totArea)} l2="용적률산정연면적" v2={s(displayBldg.vlRatEstmTotArea)} />
-                          <TRow l1="건폐율" v1={s(displayBldg.bcRat)} l2="용적률" v2={s(displayBldg.vlRat)} />
-                          <TRow l1="세대수" v1={s(displayBldg.hhldCnt) ?? "0"} l2="가구수" v2={s(displayBldg.fmlyCnt) ?? "0"} />
-                          <TRow l1="지상층수" v1={s(displayBldg.grndFlrCnt)} l2="지하층수" v2={s(displayBldg.ugrndFlrCnt) ?? "0"} />
+                          <TRow l1="소재지" v1={displayBldg.platPlc ?? address} />
+                          {displayBldg.newPlatPlc && <TRow l1="도로명" v1={displayBldg.newPlatPlc} />}
+                          <TRow l1="건물명" v1={displayBldg.bldNm} l2="대장구분" v2={displayBldg.regstrGbCdNm} />
+                          <TRow l1="용도지역" v1={displayBldg.mainPurpsCdNm} l2="사용승인일" v2={displayBldg.useAprDay} />
+                          <TRow l1="주용도" v1={displayBldg.mainPurpsCdNm} l2="기타용도" v2={displayBldg.etcPurps} />
+                          <TRow l1="주구조" v1={displayBldg.strctCdNm} l2="지붕구조" v2={displayBldg.roofCdNm} />
+                          <TRow l1="대지면적" v1={displayBldg.platArea} l2="건축면적" v2={displayBldg.archArea} />
+                          <TRow l1="연면적" v1={displayBldg.totArea} l2="용적률산정연면적" v2={displayBldg.vlRatEstmTotArea} />
+                          <TRow l1="건폐율" v1={displayBldg.bcRat} l2="용적률" v2={displayBldg.vlRat} />
+                          <TRow l1="세대수" v1={displayBldg.hhldCnt ?? "0"} l2="가구수" v2={displayBldg.fmlyCnt ?? "0"} />
+                          <TRow l1="지상층수" v1={displayBldg.grndFlrCnt} l2="지하층수" v2={displayBldg.ugrndFlrCnt ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
-                          <TRow l1="허가일" v1={s(displayBldg.pmsDay)} l2="착공일" v2={s(displayBldg.stcnsDay)} />
-                          <TRow l1="대내진능력" v1={s(displayBldg.erthqkAblty) ?? "-"} l2="내진설계적용" v2={seismicDesign} />
+                          <TRow l1="허가일" v1={displayBldg.pmsDay} l2="착공일" v2={displayBldg.stcnsDay} />
+                          <TRow l1="대내진능력" v1={displayBldg.erthqkAblty ?? "-"} l2="내진설계적용" v2={seismicDesign} />
                         </tbody>
                       </table>
                     </div>
@@ -879,11 +882,17 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               })()}
 
               {(() => {
+                const s = toDisplayText;
                 const selectedBuildings = detailedBuildings;
                 const safeIdx2 = Math.min(selectedDongIdx, Math.max(selectedBuildings.length - 1, 0));
                 const selectedBldg = selectedBuildings[safeIdx2];
                 const dongExposFloors = Array.isArray(selectedBldg?.exposFloors) ? selectedBldg.exposFloors : [];
-                const dongLabel2 = getBuildingLabel(selectedBldg ?? {}) || s(topBuilding?.building_name) || s(raw?.bldNm) || undefined;
+                const dongLabel2 =
+                  getBuildingLabel(selectedBldg ?? {}) ||
+                  s(topBuilding?.building_name) ||
+                  s(raw?.bldNm) ||
+                  getRecapBuildingName(raw) ||
+                  undefined;
 
                 if (dongExposFloors.length === 0 && floors.length > 0) {
                   return (
