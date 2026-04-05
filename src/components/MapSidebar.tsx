@@ -1287,8 +1287,9 @@ interface LeaseProposalModalProps {
   prop: MapProperty;
   allProperties: MapProperty[];
   onClose: () => void;
+  isAdmin?: boolean;
 }
-const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModalProps) => {
+const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProposalModalProps) => {
   const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
   const handlePrint = () => window.print();
 
@@ -1451,7 +1452,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">임대제안서</p>
-              <p className="text-[10px] text-muted-foreground">직접 수정 후 저장할 수 있습니다</p>
+              <p className="text-[10px] text-muted-foreground">{isAdmin ? "직접 수정 후 저장할 수 있습니다" : "열람 전용"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1461,19 +1462,15 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             >
               🖨️ 인쇄
             </button>
-            <button
-              onClick={handleSave}
-              className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
-              style={{ background: "hsl(var(--primary))", color: "#fff" }}
-            >
-              {saved ? "✓ 저장됨" : "💾 저장"}
-            </button>
-            <button
-              onClick={handleDelete}
-              className="px-2.5 py-1.5 text-[11px] font-bold bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors"
-            >
-              🗑️ 초기화
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleSave}
+                className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                style={{ background: "hsl(var(--primary))", color: "#fff" }}
+              >
+                {saved ? "✓ 저장됨" : "💾 저장"}
+              </button>
+            )}
             <button
               onClick={onClose}
               className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center"
@@ -1488,7 +1485,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
           {/* 타이틀 */}
           <div className="bg-primary rounded-xl px-6 py-4 text-center">
             <p className="text-base font-extrabold tracking-widest text-primary-foreground">임 대 제 안 서</p>
-            <p className="text-[10px] text-primary-foreground/60 mt-0.5">Lease Proposal · {todayStr}</p>
+            <p className="text-[10px] text-primary-foreground/60 mt-0.5">{todayStr}</p>
           </div>
 
           {/* ① 건물 현황 - 편집 가능 */}
@@ -1511,6 +1508,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           value={value}
                           onChange={(e) => updateBuildingRow(i, e.target.value)}
                           className={ic}
+                          readOnly={!isAdmin}
                         />
                       </td>
                     </tr>
@@ -1528,6 +1526,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                 <p className="text-[12px] font-extrabold text-foreground">호수별 임대 현황</p>
                 <span className="text-[10px] text-muted-foreground">총 {units.length}개 호실</span>
               </div>
+              {isAdmin && (
               <button
                 onClick={addUnit}
                 className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
@@ -1535,6 +1534,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
               >
                 + 호실 추가
               </button>
+              )}
             </div>
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
@@ -1558,6 +1558,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "unitNumber", e.target.value)}
                           className={ic}
                           placeholder="호수"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1566,6 +1567,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "type", e.target.value)}
                           className={ic}
                           placeholder="유형"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1574,6 +1576,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "floor", e.target.value)}
                           className={ic}
                           placeholder="층"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1582,6 +1585,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "area", e.target.value)}
                           className={ic}
                           placeholder="면적"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1590,6 +1594,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "deposit", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="보증금"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1598,15 +1603,18 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateUnit(i, "monthly", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="월세"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1 text-center">
+                        {isAdmin && (
                         <button
                           onClick={() => removeUnit(i)}
                           className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -1623,6 +1631,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                         placeholder="합계 직접 입력"
                         className={ic + " text-right font-extrabold"}
                         style={{ borderColor: "hsl(var(--primary)/0.5)" }}
+                        readOnly={!isAdmin}
                       />
                     </td>
                     <td colSpan={2} />
@@ -1639,6 +1648,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                 <div className="w-1 h-4 rounded-full" style={{ background: "hsl(0 85% 55%)" }} />
                 <p className="text-[12px] font-extrabold text-foreground">근저당 내역</p>
               </div>
+              {isAdmin && (
               <button
                 onClick={addMortgage}
                 className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
@@ -1646,6 +1656,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
               >
                 + 내역 추가
               </button>
+              )}
             </div>
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
@@ -1665,6 +1676,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateMortgage(i, "creditor", e.target.value)}
                           className={ic}
                           placeholder="채권자명"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1673,15 +1685,18 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                           onChange={(e) => updateMortgage(i, "amount", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="금액"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1 text-center">
+                        {isAdmin && (
                         <button
                           onClick={() => removeMortgage(i)}
                           className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -1696,6 +1711,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
                         placeholder="합계 직접 입력"
                         className={ic + " text-right font-extrabold"}
                         style={{ borderColor: "hsl(0 85% 65%)" }}
+                        readOnly={!isAdmin}
                       />
                     </td>
                     <td />
@@ -1705,22 +1721,24 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             </div>
           </div>
 
-          {/* ④ 특이사항 - 편집 가능 */}
+          {/* ④ 특이사항 */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
-              <p className="text-[12px] font-extrabold text-foreground">특이사항 / 안내사항</p>
+              <p className="text-[12px] font-extrabold text-foreground">특이사항</p>
             </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={4}
-              placeholder="특이사항, 안내사항 등을 입력하세요"
+              placeholder="특이사항 등을 입력하세요"
               className="w-full px-3 py-2 text-[11px] rounded-xl border border-border bg-muted/20 text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary resize-none transition-colors"
+              readOnly={!isAdmin}
             />
           </div>
 
-          {/* 하단 저장/초기화 버튼 */}
+          {/* 하단 저장 버튼 - 관리자만 */}
+          {isAdmin && (
           <div className="flex gap-3 pt-1">
             <button
               onClick={handleSave}
@@ -1729,13 +1747,8 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             >
               💾 {saved ? "저장 완료!" : "저장하기"}
             </button>
-            <button
-              onClick={handleDelete}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-            >
-              🗑️ 초기화
-            </button>
           </div>
+          )}
         </div>
       </div>
     </>
@@ -2970,6 +2983,7 @@ const MapSidebar = ({
           prop={leaseProposalProp}
           allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
+          isAdmin={isAdmin}
         />
       )}
       {/* Error Report Modal */}
@@ -3745,8 +3759,7 @@ const MapSidebar = ({
                             <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
                             <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
                           </button>
-                          {/* 임대제안서 - 관리자만 */}
-                          {isAdmin && (
+                          {/* 임대제안서 */}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -3758,7 +3771,6 @@ const MapSidebar = ({
                             <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
                             <span className="text-[8px] font-bold text-purple-700 leading-none">임대제안서</span>
                           </button>
-                          )}
                           {/* 거래완료 */}
                           <button
                             type="button"
