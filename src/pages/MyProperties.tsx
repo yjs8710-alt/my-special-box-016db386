@@ -435,6 +435,12 @@ const PropertyRow = ({
                 숨김
               </span>
             )}
+            {prop.status === "ended" && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "hsl(0 0% 85%)", color: "hsl(0 0% 40%)" }}>
+                종료
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -550,7 +556,7 @@ const MyProperties = () => {
   const [properties, setProperties] = useState<DBProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden" | "ended">("all");
   const [agentTab, setAgentTab] = useState<string>("전체");
   const [agencyTab, setAgencyTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
