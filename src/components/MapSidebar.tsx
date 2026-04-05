@@ -1711,6 +1711,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                         placeholder="합계 직접 입력"
                         className={ic + " text-right font-extrabold"}
                         style={{ borderColor: "hsl(0 85% 65%)" }}
+                        readOnly={!isAdmin}
                       />
                     </td>
                     <td />
@@ -1720,22 +1721,24 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
             </div>
           </div>
 
-          {/* ④ 특이사항 - 편집 가능 */}
+          {/* ④ 특이사항 */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-4 bg-muted-foreground/40 rounded-full" />
-              <p className="text-[12px] font-extrabold text-foreground">특이사항 / 안내사항</p>
+              <p className="text-[12px] font-extrabold text-foreground">특이사항</p>
             </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={4}
-              placeholder="특이사항, 안내사항 등을 입력하세요"
+              placeholder="특이사항 등을 입력하세요"
               className="w-full px-3 py-2 text-[11px] rounded-xl border border-border bg-muted/20 text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary resize-none transition-colors"
+              readOnly={!isAdmin}
             />
           </div>
 
-          {/* 하단 저장/초기화 버튼 */}
+          {/* 하단 저장 버튼 - 관리자만 */}
+          {isAdmin && (
           <div className="flex gap-3 pt-1">
             <button
               onClick={handleSave}
@@ -1744,10 +1747,8 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
             >
               💾 {saved ? "저장 완료!" : "저장하기"}
             </button>
-            <button
-              onClick={handleDelete}
-              className="px-5 py-2.5 rounded-xl text-sm font-bold border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-            >
+          </div>
+          )
               🗑️ 초기화
             </button>
           </div>
