@@ -759,8 +759,14 @@ serve(async (req) => {
     let buildingData = bRes.data as Record<string, unknown> | null;
     let landData     = lRes.data as Record<string, unknown> | null;
 
-    const isBuildingEmpty = buildingData && !buildingData.main_purpose && !buildingData.total_area && !buildingData.approval_date;
-    const needBuildingSave = !buildingData || !!isBuildingEmpty; // DB 저장 필요 여부
+    // 공백/무의미한 값도 빈 데이터로 취급
+    const trimOrNull = (v: unknown) => v && String(v).trim() ? String(v).trim() : null;
+    const isBuildingEmpty = buildingData && !trimOrNull(buildingData.main_purpose) && !trimOrNull(buildingData.total_area) && !trimOrNull(buildingData.approval_date);
+    // total_area가 너무 작으면 (경비실 등 소규모 건물 캐시) 재조회 필요
+    const isBuildingPoor = buildingData && !isBuildingEmpty &&
+      buildingData.total_area && Number(String(buildingData.total_area).replace(/[^0-9.]/g, "")) < 20 &&
+      !trimOrNull(buildingData.approval_date) && !trimOrNull(buildingData.floors_above);
+    const needBuildingSave = !buildingData || !!isBuildingEmpty || !!isBuildingPoor;
     const needBuilding     = true; // _raw 상세 데이터를 위해 항상 API 호출
     const needLand         = !landData || !landData.official_price;
 
@@ -804,15 +810,49 @@ serve(async (req) => {
             fetchBuildingViolation(sigunguCd, bjdongCd, bun, ji, platGbCd, dataGoKrApiKey),
           ]);
 
-          const titleItem = titleResult.primary;
           const allTitleItems = titleResult.allItems;
           const exposItem = exposResult.primary;
           const allExposItems = exposResult.allItems;
-          const bestItem   = titleItem || recapItem || exposItem || basicItem;
-          const bestSource = titleItem ? "표제부" : recapItem ? "총괄표제부" : exposItem ? "집합건물공용부" : basicItem ? "기본개요" : "없음";
+
+          // ── bestItem 선택: 가장 상세한 표제부 아이템 우선 ──
+          // 아파트 등 집합건물에서 첫 번째 아이템이 관리동/경비실 등 소규모인 경우 방지
+          const scoreTitleItem = (item: any) => {
+            let s = 0;
+            if (item.bldNm && String(item.bldNm).trim()) s += 3;
+            if (item.mainPurpsCdNm && String(item.mainPurpsCdNm).trim()) s += 2;
+            if (item.totArea && Number(item.totArea) > 50) s += 2;
+            if (item.useAprDay && String(item.useAprDay).trim().length >= 8) s += 1;
+            if (item.grndFlrCnt && Number(item.grndFlrCnt) > 1) s += 1;
+            if (item.rideUseElvtCnt && Number(item.rideUseElvtCnt) > 0) s += 1;
+            return s;
+          };
+
+          let titleItem = titleResult.primary;
+          if (allTitleItems.length > 1) {
+            // 가장 상세한 표제부 아이템 선택
+            titleItem = allTitleItems.reduce((best: any, item: any) =>
+              scoreTitleItem(item) > scoreTitleItem(best) ? item : best,
+              allTitleItems[0]
+            );
+            console.log(`📊 [표제부 최적 선택] ${allTitleItems.length}건 중 bldNm="${titleItem?.bldNm}" totArea=${titleItem?.totArea} score=${scoreTitleItem(titleItem)}`);
+          }
+
+          // recap(총괄표제부)이 있고 titleItem보다 상세하면 recap 우선
+          const bestItem = (() => {
+            if (titleItem && recapItem) {
+              // recap이 건물명이 있고 titleItem에 없으면 recap 우선
+              const titleHasName = titleItem.bldNm && String(titleItem.bldNm).trim();
+              const recapHasName = recapItem.bldNm && String(recapItem.bldNm).trim();
+              if (!titleHasName && recapHasName) return recapItem;
+              // titleItem의 면적이 너무 작으면 (경비실 등) recap 우선
+              if (Number(titleItem.totArea ?? 0) < 50 && Number(recapItem.totArea ?? 0) > 50) return recapItem;
+            }
+            return titleItem || recapItem || exposItem || basicItem;
+          })();
+          const bestSource = bestItem === recapItem ? "총괄표제부" : bestItem === titleItem ? "표제부" : bestItem === exposItem ? "집합건물공용부" : bestItem === basicItem ? "기본개요" : "없음";
           const apiStatus  = !bestItem ? "no_data" : "ok";
 
-          console.log(`\n📊 [최종 선택 API]: ${bestSource}`);
+          console.log(`\n📊 [최종 선택 API]: ${bestSource} (bldNm="${bestItem?.bldNm}" totArea=${bestItem?.totArea})`);
 
           // ── 위반건축물 최종 요약 로그 ──
           console.log(`\n🏛️ [위반건축물 판단]`);
