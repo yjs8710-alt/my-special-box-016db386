@@ -773,7 +773,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
                 const safeIdx = Math.min(selectedDongIdx, sorted.length - 1);
                 const bldg = sorted[safeIdx];
-                const dongLabel = (b: Record<string, any>) => getBuildingLabel(b) || "건축물";
+                const recapName = getRecapBuildingName(raw);
+                const dongLabel = (b: Record<string, any>) => getBuildingLabel(b) || recapName || "건축물";
 
                 const elevRide = Number(bldg.rideUseElvtCnt ?? 0);
                 const elevEmg = Number(bldg.emgenUseElvtCnt ?? 0);
