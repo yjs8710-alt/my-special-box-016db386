@@ -702,7 +702,7 @@ const MyProperties = () => {
       <Header onRegisterChange={setShowRegister} />
       {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
       {editTarget && <EditModal initial={editTarget} onClose={() => setEditTarget(null)} onSave={handleEdit} />}
-      {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />}
+      {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} isAdmin={isAdminView} />}
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
         {/* 헤더 */}
