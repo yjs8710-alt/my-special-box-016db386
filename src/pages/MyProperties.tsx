@@ -361,25 +361,25 @@ const EditModal = ({
 };
 
 // ─── Delete Confirm Modal ─────────────────────────────────────────────────────
-const DeleteConfirmModal = ({ title, onConfirm, onCancel }: { title: string; onConfirm: () => void; onCancel: () => void }) => (
+const DeleteConfirmModal = ({ title, onConfirm, onCancel, isAdmin }: { title: string; onConfirm: () => void; onCancel: () => void; isAdmin?: boolean }) => (
   <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
     <div className="w-full max-w-sm rounded-2xl shadow-2xl p-6 flex flex-col gap-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "hsl(var(--destructive) / 0.12)" }}>
-          <Trash2 className="w-5 h-5" style={{ color: "hsl(var(--destructive))" }} />
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: isAdmin ? "hsl(var(--destructive) / 0.12)" : "hsl(var(--warning) / 0.12)" }}>
+          {isAdmin ? <Trash2 className="w-5 h-5" style={{ color: "hsl(var(--destructive))" }} /> : <EyeOff className="w-5 h-5" style={{ color: "hsl(var(--warning, 40 90% 50%))" }} />}
         </div>
         <div>
-          <p className="text-sm font-bold text-foreground">매물 삭제</p>
-          <p className="text-xs text-muted-foreground mt-0.5">이 작업은 되돌릴 수 없습니다.</p>
+          <p className="text-sm font-bold text-foreground">{isAdmin ? "매물 삭제" : "매물 종료"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{isAdmin ? "이 작업은 되돌릴 수 없습니다." : "종료된 매물은 목록에서 숨겨집니다."}</p>
         </div>
       </div>
       <p className="text-sm text-foreground">
-        <span className="font-semibold">"{title}"</span> 매물을 삭제하시겠습니까?
+        <span className="font-semibold">"{title}"</span> 매물을 {isAdmin ? "삭제" : "종료"}하시겠습니까?
       </p>
       <div className="flex gap-3">
         <button onClick={onCancel} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border text-muted-foreground hover:bg-muted/40 transition-colors">취소</button>
         <button onClick={onConfirm} className="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
-          style={{ background: "hsl(var(--destructive))", color: "white" }}>삭제</button>
+          style={{ background: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--primary))", color: "white" }}>{isAdmin ? "삭제" : "종료"}</button>
       </div>
     </div>
   </div>
