@@ -512,6 +512,12 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       return;
     }
 
+    // ── 건축물대장·토지대장 백그라운드 자동 조회 (캐싱) ──
+    if (insertedRow?.id) {
+      const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+      prefetchPropertySummary(address, insertedRow.id).catch(() => {});
+    }
+
     setSubmitted(true);
   };
 
