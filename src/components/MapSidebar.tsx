@@ -1748,10 +1748,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               💾 {saved ? "저장 완료!" : "저장하기"}
             </button>
           </div>
-          )
-              🗑️ 초기화
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </>
