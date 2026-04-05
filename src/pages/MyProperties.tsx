@@ -795,14 +795,14 @@ const MyProperties = () => {
             <Input className="pl-9 h-9 text-sm" placeholder="제목, 주소, 유형 검색" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-1.5">
-            {(["all", "active", "hidden"] as const).map(s => (
+            {(["all", "active", "hidden", "ended"] as const).map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
                 style={statusFilter === s
                   ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                 }>
-                {s === "all" ? "전체" : s === "active" ? "노출" : "숨김"}
+                {s === "all" ? "전체" : s === "active" ? "노출" : s === "hidden" ? "숨김" : "종료"}
               </button>
             ))}
           </div>
