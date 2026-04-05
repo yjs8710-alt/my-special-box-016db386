@@ -1558,6 +1558,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "unitNumber", e.target.value)}
                           className={ic}
                           placeholder="호수"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1566,6 +1567,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "type", e.target.value)}
                           className={ic}
                           placeholder="유형"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1574,6 +1576,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "floor", e.target.value)}
                           className={ic}
                           placeholder="층"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1582,6 +1585,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "area", e.target.value)}
                           className={ic}
                           placeholder="면적"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1590,6 +1594,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "deposit", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="보증금"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1598,15 +1603,18 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateUnit(i, "monthly", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="월세"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1 text-center">
+                        {isAdmin && (
                         <button
                           onClick={() => removeUnit(i)}
                           className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
+                        )}
                       </td>
                     </tr>
                   ))}
