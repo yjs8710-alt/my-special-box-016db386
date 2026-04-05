@@ -28,7 +28,7 @@ const HeroSection = () => {
           <p className="text-white/60 text-xs font-medium">지역을 선택하면 지도 매물화면으로 이동합니다</p>
           <button
             onClick={() => navigate("/residential")}
-            className="px-8 py-3 rounded-xl border-2 border-white/60 text-white text-lg font-extrabold hover:bg-white hover:text-primary transition-all duration-200 backdrop-blur-sm hover:shadow-lg"
+            className="px-8 py-3 rounded-xl border-2 border-white/60 text-white text-lg font-extrabold hover:bg-white hover:text-[#1E5EFF] transition-all duration-200 backdrop-blur-sm hover:shadow-lg"
           >
             청주
           </button>

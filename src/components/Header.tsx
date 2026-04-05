@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminEditBar from "@/components/AdminEditBar";
 import { useAuth } from "@/hooks/useAuth";
+import logoJipda from "@/assets/logo-jipda.png";
 
 const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential", icon: Building },
@@ -42,7 +43,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
+    <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "linear-gradient(135deg, #1E5EFF, #00A3FF)" }}>
       {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
 
@@ -56,23 +57,16 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
               onClick={() => navigate("/")}
             >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: "hsl(var(--accent))" }}
-              >
-                <Home className="w-4 h-4 text-white" />
-              </div>
-              <span
-                className="text-[15px] font-extrabold tracking-tight text-white hidden sm:block"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                집다
-              </span>
+              <img
+                src={logoJipda}
+                alt="집다 로고"
+                className="h-9 object-contain drop-shadow-sm"
+              />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
-                  background: "hsl(var(--header-border))",
-                  color: "rgba(255,255,255,0.55)",
+                  background: "rgba(255,255,255,0.15)",
+                  color: "rgba(255,255,255,0.7)",
                 }}
               >
                 공인중개사 전용
@@ -200,7 +194,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
       {/* 모바일 메뉴 */}
       {menuOpen && (
         <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3"
-          style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
+          style={{ background: "linear-gradient(135deg, #1E5EFF, #00A3FF)", borderColor: "rgba(255,255,255,0.2)" }}>
           {NAV_ITEMS.map((item) => (
             <button
               key={item.label}
