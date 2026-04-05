@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminEditBar from "@/components/AdminEditBar";
 import { useAuth } from "@/hooks/useAuth";
+import logoImg from "@/assets/logo-jipda.png";
 
 const NAV_ITEMS = [
   { label: "주거형 임대", path: "/residential", icon: Building },
@@ -56,18 +57,11 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
               onClick={() => navigate("/")}
             >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: "hsl(var(--accent))" }}
-              >
-                <Home className="w-4 h-4 text-white" />
-              </div>
-              <span
-                className="text-[15px] font-extrabold tracking-tight text-white hidden sm:block"
-                style={{ letterSpacing: "-0.02em" }}
-              >
-                집다
-              </span>
+              <img
+                src={logoImg}
+                alt="집다 로고"
+                className="h-8 w-auto flex-shrink-0 object-contain brightness-0 invert"
+              />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
