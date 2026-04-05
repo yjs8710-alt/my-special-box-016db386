@@ -1323,7 +1323,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
         if (bs) {
           setBuildingInfoRows([
             ["소재지", base.address],
-            ["건물명", bs.building_name || base.buildingName || base.title],
+            ["건물명", base.buildingName || bs.building_name || base.title],
             ["주용도", bs.main_purpose || ""],
             ["사용승인일", bs.approval_date || ""],
             ["연면적", bs.total_area ? `${bs.total_area}㎡` : ""],
