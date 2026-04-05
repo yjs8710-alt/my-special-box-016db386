@@ -986,11 +986,11 @@ serve(async (req) => {
             }),
           };
 
-          if (buildingData && !isBuildingEmpty) {
+          if (buildingData && !isBuildingEmpty && !isBuildingPoor) {
             // DB에 유효한 데이터가 이미 있으면 _raw만 붙여서 반환 (DB 업데이트 불필요)
             buildingData = { ...buildingData, _raw: rawWithStatus };
             console.log("✅ [건축물대장] DB 캐시 + _raw 병합");
-          } else if (isBuildingEmpty && buildingData) {
+          } else if ((isBuildingEmpty || isBuildingPoor) && buildingData) {
             const { data: updated } = await supabase
               .from("building_summary")
               .update({
