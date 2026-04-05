@@ -647,9 +647,18 @@ const MyProperties = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
-    if (error) { alert("삭제 오류: " + error.message); return; }
-    setProperties(prev => prev.filter(p => p.id !== deleteTarget.id));
+    const isAdminUser = agentName === "관리자";
+    if (isAdminUser) {
+      // 관리자: 실제 삭제
+      const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
+      if (error) { alert("삭제 오류: " + error.message); return; }
+      setProperties(prev => prev.filter(p => p.id !== deleteTarget.id));
+    } else {
+      // 일반회원: 종료 (status → ended)
+      const { error } = await supabase.from("properties").update({ status: "ended" }).eq("id", deleteTarget.id);
+      if (error) { alert("종료 오류: " + error.message); return; }
+      setProperties(prev => prev.map(p => p.id === deleteTarget.id ? { ...p, status: "ended" as const } : p));
+    }
     setDeleteTarget(null);
   };
 
