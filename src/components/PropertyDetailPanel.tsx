@@ -714,9 +714,8 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
               </div>
 
               {/* 테이블 헤더 */}
-              <div className="grid grid-cols-[50px_68px_1fr_1fr_32px] gap-1 mb-1 px-1">
+              <div className="grid grid-cols-[50px_1fr_1fr_32px] gap-1 mb-1 px-1">
                 <span className="text-[10px] font-bold text-muted-foreground text-center">호실</span>
-                <span className="text-[10px] font-bold text-muted-foreground text-center">상태</span>
                 <span className="text-[10px] font-bold text-muted-foreground text-center">보증금(만원)</span>
                 <span className="text-[10px] font-bold text-muted-foreground text-center">월세(만원)</span>
                 <span className="text-[10px] font-bold text-muted-foreground text-center">삭제</span>
@@ -726,7 +725,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
                 {rooms.map((row, i) => (
                   <div
                     key={i}
-                    className="grid grid-cols-[50px_68px_1fr_1fr_32px] gap-1 items-center rounded-lg px-1 py-1.5"
+                    className="grid grid-cols-[50px_1fr_1fr_32px] gap-1 items-center rounded-lg px-1 py-1.5"
                     style={{ background: i % 2 === 0 ? "hsl(var(--muted)/0.4)" : "transparent" }}
                   >
                     <input
@@ -736,15 +735,6 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
                       onChange={(e) => setRoom(i, "unit", e.target.value)}
                       className={icUnit}
                     />
-                    <select
-                      value={row.status}
-                      onChange={(e) => setRoom(i, "status", e.target.value)}
-                      className="px-1 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground outline-none focus:border-primary w-full"
-                    >
-                      <option value="임대중">임대중</option>
-                      <option value="공실">공실</option>
-                      <option value="자가">자가</option>
-                    </select>
                     <input
                       type="text"
                       placeholder="500"
