@@ -3758,8 +3758,7 @@ const MapSidebar = ({
                             <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
                             <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
                           </button>
-                          {/* 임대제안서 - 관리자만 */}
-                          {isAdmin && (
+                          {/* 임대제안서 */}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -3771,7 +3770,6 @@ const MapSidebar = ({
                             <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
                             <span className="text-[8px] font-bold text-purple-700 leading-none">임대제안서</span>
                           </button>
-                          )}
                           {/* 거래완료 */}
                           <button
                             type="button"
