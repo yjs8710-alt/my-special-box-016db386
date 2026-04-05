@@ -16,13 +16,13 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 28% 11%;
 
-    /* ── 프라이머리 — 딥 네이비 ── */
-    --primary: 220 90% 20%;
+    /* ── 프라이머리 — 브랜드 블루 ── */
+    --primary: 224 100% 56%;
     --primary-foreground: 0 0% 100%;
 
     /* ── 세컨더리 ── */
     --secondary: 216 28% 93%;
-    --secondary-foreground: 220 90% 20%;
+    --secondary-foreground: 224 100% 56%;
 
     /* ── Muted ── */
     --muted: 216 16% 93%;
@@ -38,30 +38,32 @@
 
     --border: 218 16% 87%;
     --input: 218 16% 87%;
-    --ring: 220 90% 20%;
+    --ring: 224 100% 56%;
 
     --radius: 0.5rem;
 
-    /* ── 헤더 ── */
-    --header-bg: 220 92% 16%;
-    --header-border: 220 72% 23%;
+    /* ── 헤더 (그라데이션은 inline style로 적용) ── */
+    --header-bg: 224 100% 56%;
+    --header-border: 197 100% 51%;
+    --header-gradient-from: #1E5EFF;
+    --header-gradient-to: #00A3FF;
 
     /* ── 사이드바 ── */
-    --sidebar-background: 220 90% 20%;
+    --sidebar-background: 224 100% 56%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 22 100% 52%;
+    --sidebar-primary: 224 100% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 68% 28%;
+    --sidebar-accent: 224 80% 45%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 68% 26%;
-    --sidebar-ring: 22 100% 52%;
+    --sidebar-border: 224 80% 48%;
+    --sidebar-ring: 224 100% 56%;
 
     /* ── 기타 ── */
-    --hero-overlay: 220 90% 10%;
+    --hero-overlay: 224 90% 14%;
     --badge-new: 152 58% 38%;
     --badge-hot: 0 82% 52%;
-    --card-shadow: 0 1px 12px 0 hsl(220 90% 20% / 0.07);
-    --card-shadow-hover: 0 6px 28px 0 hsl(220 90% 20% / 0.16);
+    --card-shadow: 0 1px 12px 0 hsl(224 100% 56% / 0.07);
+    --card-shadow-hover: 0 6px 28px 0 hsl(224 100% 56% / 0.16);
 
     /* ── SaaS 전용 토큰 ── */
     --surface: 220 20% 98%;
