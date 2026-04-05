@@ -1631,6 +1631,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                         placeholder="합계 직접 입력"
                         className={ic + " text-right font-extrabold"}
                         style={{ borderColor: "hsl(var(--primary)/0.5)" }}
+                        readOnly={!isAdmin}
                       />
                     </td>
                     <td colSpan={2} />
@@ -1647,6 +1648,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                 <div className="w-1 h-4 rounded-full" style={{ background: "hsl(0 85% 55%)" }} />
                 <p className="text-[12px] font-extrabold text-foreground">근저당 내역</p>
               </div>
+              {isAdmin && (
               <button
                 onClick={addMortgage}
                 className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
@@ -1654,6 +1656,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               >
                 + 내역 추가
               </button>
+              )}
             </div>
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
@@ -1673,6 +1676,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateMortgage(i, "creditor", e.target.value)}
                           className={ic}
                           placeholder="채권자명"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1">
@@ -1681,15 +1685,18 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           onChange={(e) => updateMortgage(i, "amount", e.target.value)}
                           className={ic + " text-right"}
                           placeholder="금액"
+                          readOnly={!isAdmin}
                         />
                       </td>
                       <td className="px-1 py-1 text-center">
+                        {isAdmin && (
                         <button
                           onClick={() => removeMortgage(i)}
                           className="w-5 h-5 rounded-full bg-destructive/10 hover:bg-destructive flex items-center justify-center text-destructive hover:text-white transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
+                        )}
                       </td>
                     </tr>
                   ))}
