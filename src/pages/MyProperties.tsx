@@ -479,20 +479,20 @@ const PropertyRow = ({
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1">
           <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-            className="p-1.5 rounded-lg transition-colors hover:bg-muted/60"
+            className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
             title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
             style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
-            {prop.status === "active" ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {prop.status === "active" ? "노출" : "숨김"}
           </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
-            className="p-1.5 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground">
-            <Pencil className="w-3.5 h-3.5" />
+            className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
+            수정
           </button>
           <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
-            className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+            className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
             style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
             title={isAdmin ? "삭제" : "종료"}>
-            {isAdmin ? <Trash2 className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {isAdmin ? "삭제" : "종료"}
           </button>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
