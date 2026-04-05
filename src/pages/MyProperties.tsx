@@ -48,7 +48,7 @@ type DBProperty = {
   lng: number;
   is_new: boolean;
   is_hot: boolean;
-  status: "active" | "hidden";
+  status: "active" | "hidden" | "ended";
   registered_date: string;
   checked_date?: string;
   agent_name: string;
@@ -361,25 +361,25 @@ const EditModal = ({
 };
 
 // ─── Delete Confirm Modal ─────────────────────────────────────────────────────
-const DeleteConfirmModal = ({ title, onConfirm, onCancel }: { title: string; onConfirm: () => void; onCancel: () => void }) => (
+const DeleteConfirmModal = ({ title, onConfirm, onCancel, isAdmin }: { title: string; onConfirm: () => void; onCancel: () => void; isAdmin?: boolean }) => (
   <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
     <div className="w-full max-w-sm rounded-2xl shadow-2xl p-6 flex flex-col gap-4" style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "hsl(var(--destructive) / 0.12)" }}>
-          <Trash2 className="w-5 h-5" style={{ color: "hsl(var(--destructive))" }} />
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: isAdmin ? "hsl(var(--destructive) / 0.12)" : "hsl(var(--warning) / 0.12)" }}>
+          {isAdmin ? <Trash2 className="w-5 h-5" style={{ color: "hsl(var(--destructive))" }} /> : <EyeOff className="w-5 h-5" style={{ color: "hsl(var(--warning, 40 90% 50%))" }} />}
         </div>
         <div>
-          <p className="text-sm font-bold text-foreground">매물 삭제</p>
-          <p className="text-xs text-muted-foreground mt-0.5">이 작업은 되돌릴 수 없습니다.</p>
+          <p className="text-sm font-bold text-foreground">{isAdmin ? "매물 삭제" : "매물 종료"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{isAdmin ? "이 작업은 되돌릴 수 없습니다." : "종료된 매물은 목록에서 숨겨집니다."}</p>
         </div>
       </div>
       <p className="text-sm text-foreground">
-        <span className="font-semibold">"{title}"</span> 매물을 삭제하시겠습니까?
+        <span className="font-semibold">"{title}"</span> 매물을 {isAdmin ? "삭제" : "종료"}하시겠습니까?
       </p>
       <div className="flex gap-3">
         <button onClick={onCancel} className="flex-1 py-2 text-sm font-medium rounded-lg border border-border text-muted-foreground hover:bg-muted/40 transition-colors">취소</button>
         <button onClick={onConfirm} className="flex-1 py-2 text-sm font-bold rounded-lg transition-colors"
-          style={{ background: "hsl(var(--destructive))", color: "white" }}>삭제</button>
+          style={{ background: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--primary))", color: "white" }}>{isAdmin ? "삭제" : "종료"}</button>
       </div>
     </div>
   </div>
@@ -435,6 +435,12 @@ const PropertyRow = ({
                 숨김
               </span>
             )}
+            {prop.status === "ended" && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "hsl(0 0% 85%)", color: "hsl(0 0% 40%)" }}>
+                종료
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
@@ -484,8 +490,9 @@ const PropertyRow = ({
           </button>
           <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
             className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-            style={{ color: "hsl(var(--destructive))" }}>
-            <Trash2 className="w-3.5 h-3.5" />
+            style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
+            title={isAdmin ? "삭제" : "종료"}>
+            {isAdmin ? <Trash2 className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
           </button>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
@@ -549,7 +556,7 @@ const MyProperties = () => {
   const [properties, setProperties] = useState<DBProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden" | "ended">("all");
   const [agentTab, setAgentTab] = useState<string>("전체");
   const [agencyTab, setAgencyTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
@@ -647,9 +654,18 @@ const MyProperties = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
-    if (error) { alert("삭제 오류: " + error.message); return; }
-    setProperties(prev => prev.filter(p => p.id !== deleteTarget.id));
+    const isAdminUser = agentName === "관리자";
+    if (isAdminUser) {
+      // 관리자: 실제 삭제
+      const { error } = await supabase.from("properties").delete().eq("id", deleteTarget.id);
+      if (error) { alert("삭제 오류: " + error.message); return; }
+      setProperties(prev => prev.filter(p => p.id !== deleteTarget.id));
+    } else {
+      // 일반회원: 종료 (status → ended)
+      const { error } = await supabase.from("properties").update({ status: "ended" }).eq("id", deleteTarget.id);
+      if (error) { alert("종료 오류: " + error.message); return; }
+      setProperties(prev => prev.map(p => p.id === deleteTarget.id ? { ...p, status: "ended" as const } : p));
+    }
     setDeleteTarget(null);
   };
 
@@ -692,7 +708,7 @@ const MyProperties = () => {
       <Header onRegisterChange={setShowRegister} />
       {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
       {editTarget && <EditModal initial={editTarget} onClose={() => setEditTarget(null)} onSave={handleEdit} />}
-      {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />}
+      {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} isAdmin={isAdminView} />}
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
         {/* 헤더 */}
@@ -779,14 +795,14 @@ const MyProperties = () => {
             <Input className="pl-9 h-9 text-sm" placeholder="제목, 주소, 유형 검색" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-1.5">
-            {(["all", "active", "hidden"] as const).map(s => (
+            {(["all", "active", "hidden", "ended"] as const).map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
                 style={statusFilter === s
                   ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                 }>
-                {s === "all" ? "전체" : s === "active" ? "노출" : "숨김"}
+                {s === "all" ? "전체" : s === "active" ? "노출" : s === "hidden" ? "숨김" : "종료"}
               </button>
             ))}
           </div>
