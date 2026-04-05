@@ -1287,8 +1287,9 @@ interface LeaseProposalModalProps {
   prop: MapProperty;
   allProperties: MapProperty[];
   onClose: () => void;
+  isAdmin?: boolean;
 }
-const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModalProps) => {
+const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProposalModalProps) => {
   const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
   const handlePrint = () => window.print();
 
@@ -1451,7 +1452,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             </div>
             <div>
               <p className="text-sm font-bold text-foreground">임대제안서</p>
-              <p className="text-[10px] text-muted-foreground">직접 수정 후 저장할 수 있습니다</p>
+              <p className="text-[10px] text-muted-foreground">{isAdmin ? "직접 수정 후 저장할 수 있습니다" : "열람 전용"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1461,19 +1462,15 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
             >
               🖨️ 인쇄
             </button>
-            <button
-              onClick={handleSave}
-              className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
-              style={{ background: "hsl(var(--primary))", color: "#fff" }}
-            >
-              {saved ? "✓ 저장됨" : "💾 저장"}
-            </button>
-            <button
-              onClick={handleDelete}
-              className="px-2.5 py-1.5 text-[11px] font-bold bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-lg transition-colors"
-            >
-              🗑️ 초기화
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleSave}
+                className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                style={{ background: "hsl(var(--primary))", color: "#fff" }}
+              >
+                {saved ? "✓ 저장됨" : "💾 저장"}
+              </button>
+            )}
             <button
               onClick={onClose}
               className="w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center"
@@ -1488,7 +1485,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
           {/* 타이틀 */}
           <div className="bg-primary rounded-xl px-6 py-4 text-center">
             <p className="text-base font-extrabold tracking-widest text-primary-foreground">임 대 제 안 서</p>
-            <p className="text-[10px] text-primary-foreground/60 mt-0.5">Lease Proposal · {todayStr}</p>
+            <p className="text-[10px] text-primary-foreground/60 mt-0.5">{todayStr}</p>
           </div>
 
           {/* ① 건물 현황 - 편집 가능 */}
