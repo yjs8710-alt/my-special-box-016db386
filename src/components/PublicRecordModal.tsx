@@ -123,6 +123,11 @@ const toDisplayText = (v: unknown) => {
 
 const getBuildingLabel = (bldg: Record<string, any>) => toDisplayText(bldg?.dongNm) || toDisplayText(bldg?.bldNm) || "";
 
+/** recap(총괄표제부)에서 건물명 추출 */
+const getRecapBuildingName = (raw: Record<string, any> | null) => {
+  if (!raw?.recap || typeof raw.recap !== "object") return null;
+  return toDisplayText((raw.recap as Record<string, any>).bldNm) || null;
+};
 const getBuildingDetailScore = (bldg: Record<string, any>) =>
   buildingDetailKeyFields.filter((field) => toDisplayText(bldg?.[field])).length;
 
