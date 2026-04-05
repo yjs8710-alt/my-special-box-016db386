@@ -721,34 +721,6 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                 </div>
               )}
 
-              {/* 총괄표제부 */}
-              {raw?.recap && (
-                <div className="px-3 mt-2">
-                  <h3 className="text-[12px] font-extrabold text-foreground mb-1.5 flex items-center gap-1.5">
-                    <span className="text-sm">📋</span> 총괄표제부
-                  </h3>
-                  <table className="w-full border-collapse border border-border/50 text-[11px]">
-                    <tbody>
-                      <TRow l1="건물명" v1={str(raw.recap.bldNm)} l2="동수" v2={str(raw.recap.dongCnt)} />
-                      <TRow l1="주용도" v1={str(raw.recap.mainPurpsCdNm)} l2="기타용도" v2={str(raw.recap.etcPurps)} />
-                      <TRow l1="대지면적" v1={str(raw.recap.platArea)} l2="건축면적" v2={str(raw.recap.archArea)} />
-                      <TRow l1="연면적" v1={str(raw.recap.totArea)} l2="용적률산정연면적" v2={str(raw.recap.vlRatEstmTotArea)} />
-                      <TRow l1="건폐율" v1={str(raw.recap.bcRat)} l2="용적률" v2={str(raw.recap.vlRat)} />
-                      <TRow l1="세대수" v1={str(raw.recap.hhldCnt) ?? "0"} l2="가구수" v2={str(raw.recap.fmlyCnt) ?? "0"} />
-                      <TRow l1="지상층수" v1={str(raw.recap.grndFlrCnt)} l2="지하층수" v2={str(raw.recap.ugrndFlrCnt) ?? "0"} />
-                      <TRow l1="사용승인일" v1={str(raw.recap.useAprDay)} l2="허가일" v2={str(raw.recap.pmsDay)} />
-                      {(() => {
-                        const rElev = Number(raw.recap.rideUseElvtCnt ?? 0);
-                        const eElev = Number(raw.recap.emgenUseElvtCnt ?? 0);
-                        const elevStr = rElev + eElev > 0 ? `승용 ${rElev} 대 / 비상용 ${eElev} 대` : "없음";
-                        const rPark = Number(raw.recap.indrMechUtcnt ?? 0) + Number(raw.recap.oudrMechUtcnt ?? 0) +
-                                      Number(raw.recap.indrAutoUtcnt ?? 0) + Number(raw.recap.oudrAutoUtcnt ?? 0);
-                        return <TRow l1="엘리베이터" v1={elevStr} l2="주차" v2={rPark > 0 ? `${rPark} 대` : "-"} />;
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
-              )}
 
               {(() => {
                 const s = toDisplayText;
