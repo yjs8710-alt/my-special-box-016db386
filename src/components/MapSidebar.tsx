@@ -1526,6 +1526,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                 <p className="text-[12px] font-extrabold text-foreground">호수별 임대 현황</p>
                 <span className="text-[10px] text-muted-foreground">총 {units.length}개 호실</span>
               </div>
+              {isAdmin && (
               <button
                 onClick={addUnit}
                 className="text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
@@ -1533,6 +1534,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               >
                 + 호실 추가
               </button>
+              )}
             </div>
             <div className="border border-border rounded-xl overflow-hidden">
               <table className="w-full text-[11px]">
