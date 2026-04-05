@@ -1309,6 +1309,39 @@ const LeaseProposalModal = ({ prop, allProperties, onClose }: LeaseProposalModal
     ["관리비", base.manageFee ?? ""],
   ]);
 
+  // ── 건축물대장 데이터 자동 로드 ──
+  useEffect(() => {
+    const loadBuildingSummary = async () => {
+      if (!prop.dbId) return;
+      try {
+        const { data: bs } = await supabase
+          .from("building_summary")
+          .select("*")
+          .eq("property_id", prop.dbId)
+          .maybeSingle();
+        if (bs) {
+          setBuildingInfoRows([
+            ["소재지", base.address],
+            ["건물명", bs.building_name || base.buildingName || base.title],
+            ["주용도", bs.main_purpose || ""],
+            ["사용승인일", bs.approval_date || ""],
+            ["연면적", bs.total_area ? `${bs.total_area}㎡` : ""],
+            ["건축면적", bs.building_area ? `${bs.building_area}㎡` : ""],
+            ["대지면적", bs.land_area ? `${bs.land_area}㎡` : ""],
+            ["지상층수", bs.floors_above || base.totalFloors || ""],
+            ["지하층수", bs.floors_below || ""],
+            ["주차대수", bs.parking_count || base.parking || ""],
+            ["엘리베이터", bs.elevator ? "있음" : "없음"],
+            ["관리비", base.manageFee ?? ""],
+          ]);
+        }
+      } catch (e) {
+        console.warn("건축물대장 로드 실패:", e);
+      }
+    };
+    loadBuildingSummary();
+  }, [prop.dbId]);
+
   const [units, setUnits] = useState<UnitRow[]>(() =>
     sameBuilding.map((p, i) => ({
       id: String(p.id),
