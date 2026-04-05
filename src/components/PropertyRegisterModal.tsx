@@ -641,12 +641,13 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
     // 기존 등록된 건물명 자동 가져오기
     if (!form.buildingName && form.dong && form.lotNumber) {
       try {
-        const fullAddr = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
         const { data: existing } = await supabase
           .from("properties")
           .select("building_name")
-          .eq("address", fullAddr)
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lotNumber)
           .not("building_name", "is", null)
+          .order("registered_date", { ascending: false })
           .limit(1)
           .maybeSingle();
         if (existing?.building_name) {
