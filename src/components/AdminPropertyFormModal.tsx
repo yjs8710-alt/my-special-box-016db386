@@ -574,12 +574,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (d && lot) fetchBuildingInfoFromDB(d, lot);
   };
 
-  // 기존 매물에서 총층수·건축년도 자동 조회
+  // 기존 매물에서 총층수·건축년도·건물명 자동 조회
   const fetchBuildingInfoFromDB = useCallback(async (dongVal: string, lotVal: string) => {
     if (!dongVal || !lotVal) return;
     const { data } = await supabase
       .from("properties")
-      .select("total_floors,build_year")
+      .select("total_floors,build_year,building_name")
       .eq("dong", dongVal)
       .eq("lot_number", lotVal)
       .not("total_floors", "eq", "")
@@ -589,8 +589,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (data) {
       setForm((f) => ({
         ...f,
-        total_floors: f.total_floors || data.total_floors || f.total_floors,
-        build_year:   f.build_year   || data.build_year   || f.build_year,
+        total_floors:  f.total_floors  || data.total_floors  || f.total_floors,
+        build_year:    f.build_year    || data.build_year    || f.build_year,
+        building_name: f.building_name || data.building_name || f.building_name,
       }));
     }
   }, []);
