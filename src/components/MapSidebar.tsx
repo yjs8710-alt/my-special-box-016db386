@@ -2983,6 +2983,7 @@ const MapSidebar = ({
           prop={leaseProposalProp}
           allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
+          isAdmin={isAdmin}
         />
       )}
       {/* Error Report Modal */}
