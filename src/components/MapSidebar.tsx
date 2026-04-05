@@ -1508,6 +1508,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                           value={value}
                           onChange={(e) => updateBuildingRow(i, e.target.value)}
                           className={ic}
+                          readOnly={!isAdmin}
                         />
                       </td>
                     </tr>
