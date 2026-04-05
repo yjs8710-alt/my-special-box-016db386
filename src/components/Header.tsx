@@ -43,7 +43,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
-      <AdminEditBar />
+      {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
 
       {/* 상단 바 */}
