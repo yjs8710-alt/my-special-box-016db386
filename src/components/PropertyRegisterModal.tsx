@@ -637,6 +637,23 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
     } finally {
       setVerifying(false);
     }
+
+    // 기존 등록된 건물명 자동 가져오기
+    if (!form.buildingName && form.dong && form.lotNumber) {
+      try {
+        const fullAddr = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+        const { data: existing } = await supabase
+          .from("properties")
+          .select("building_name")
+          .eq("address", fullAddr)
+          .not("building_name", "is", null)
+          .limit(1)
+          .maybeSingle();
+        if (existing?.building_name) {
+          set("buildingName", existing.building_name);
+        }
+      } catch {}
+    }
   };
   const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
 
