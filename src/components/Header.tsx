@@ -53,18 +53,13 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
 
             {/* 로고 */}
             <div
-              className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
+              className="flex items-center gap-1.5 cursor-pointer mr-4 select-none flex-shrink-0"
               onClick={() => navigate("/")}
             >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: "hsl(var(--accent))" }}
-              >
-                <Home className="w-4 h-4 text-white" />
-              </div>
+              <Home className="w-7 h-7 text-white/80 flex-shrink-0" strokeWidth={1.5} />
               <span
-                className="text-[15px] font-extrabold tracking-tight text-white hidden sm:block"
-                style={{ letterSpacing: "-0.02em" }}
+                className="text-[18px] font-extrabold tracking-tight text-white hidden sm:block"
+                style={{ letterSpacing: "-0.03em" }}
               >
                 집다
               </span>
@@ -75,7 +70,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                   color: "rgba(255,255,255,0.55)",
                 }}
               >
-                공인중개사 전용
+                공인중개사·전용
               </span>
             </div>
 
