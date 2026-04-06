@@ -6,34 +6,25 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative w-full h-[calc(100vh-80px)] flex items-center justify-center">
-      <img
-        src={heroBg}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+    <section className="relative min-h-[520px] flex flex-col items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroBg})` }} />
+      <div className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 flex flex-col items-center text-center gap-6">
-        <img
-          src={logoImg}
-          alt="집다 로고"
-          className="w-44 md:w-56 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.6)]"
-        />
-        <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight">
-          집다
-        </h1>
-        <p className="text-white/80 text-lg md:text-xl">
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16">
+        <img src={logoImg} alt="집다 로고" className="h-28 sm:h-36 md:h-44 object-contain mb-6 drop-shadow-2xl" />
+
+        <p className="text-lg sm:text-xl md:text-2xl text-white font-medium tracking-wide mb-10 drop-shadow-lg">
           공인중개사 전용 부동산 플랫폼
         </p>
+
         <button
           onClick={() => navigate("/residential")}
-          className="mt-4 px-8 py-4 rounded-xl bg-[#1e3a8a] text-white text-lg font-semibold hover:bg-[#1e40af] transition"
+          className="px-12 py-3.5 rounded-xl border-2 border-white/60 text-white text-xl font-extrabold hover:bg-white hover:text-primary transition-all duration-200 backdrop-blur-sm hover:shadow-lg drop-shadow-lg"
         >
           청주
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 
