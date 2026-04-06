@@ -14,7 +14,7 @@ const HeroSection = () => {
         <img
           src={logoImg}
           alt="집다 로고"
-          className="w-40 md:w-56 lg:w-72 h-auto object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+          className="w-56 md:w-72 lg:w-96 h-auto object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
         />
 
         <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-medium tracking-wide drop-shadow-lg">
