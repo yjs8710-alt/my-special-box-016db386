@@ -8,7 +8,10 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-[520px] flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroBg})` }} />
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,_rgba(15,23,42,0.7)_0%,_rgba(15,23,42,0.3)_50%,_transparent_80%)]" />
+      </div>
 
       <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16">
         <img src={logoImg} alt="집다 로고" className="h-28 sm:h-36 md:h-44 object-contain mb-6 drop-shadow-2xl" />
