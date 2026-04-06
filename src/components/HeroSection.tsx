@@ -1,5 +1,5 @@
 import heroBg from "@/assets/hero-bg.jpg";
-import logoImg from "@/assets/logo-clean.png";
+import logoImg from "@/assets/logo.png";
 
 const HeroSection = () => {
   return (
@@ -8,11 +8,21 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/20" />
 
       <div className="relative z-10 flex items-center justify-center px-4">
-        <img
-          src={logoImg}
-          alt="집다 로고"
-          className="h-32 sm:h-40 md:h-52 object-contain drop-shadow-2xl"
-          
+        <div
+          className="h-32 sm:h-40 md:h-52 w-auto aspect-[3/2]"
+          style={{
+            backgroundImage: `url(${heroBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            WebkitMaskImage: `url(${logoImg})`,
+            maskImage: `url(${logoImg})`,
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            maskPosition: "center",
+          }}
         />
       </div>
     </section>
