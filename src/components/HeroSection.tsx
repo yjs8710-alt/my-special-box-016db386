@@ -1,5 +1,5 @@
 import heroBg from "@/assets/hero-bg.jpg";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo-clean.png";
 
 const HeroSection = () => {
   return (
@@ -12,7 +12,7 @@ const HeroSection = () => {
           src={logoImg}
           alt="집다 로고"
           className="h-32 sm:h-40 md:h-52 object-contain drop-shadow-2xl"
-          style={{ mixBlendMode: "screen" }}
+          
         />
       </div>
     </section>
