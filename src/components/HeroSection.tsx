@@ -1,7 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
-import logoImg from "@/assets/logo.png";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -16,7 +15,6 @@ const HeroSection = () => {
           <span className="inline-block bg-accent/20 text-accent text-xs font-bold px-3 py-1 rounded-full mb-4 border border-accent/30">
             중개사 전용 플랫폼
           </span>
-          <img src={logoImg} alt="집다 로고" className="h-14 sm:h-16 md:h-20 object-contain mx-auto mb-3" />
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 leading-tight">
             집을 찾다, <span className="text-accent">집다</span>
           </h1>
