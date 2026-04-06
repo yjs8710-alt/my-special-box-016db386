@@ -11,7 +11,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-black/30" />
 
       <div className="relative z-10 flex flex-col items-center justify-center px-4 py-16">
-        <img src={logoImg} alt="집다 로고" className="h-28 sm:h-36 md:h-44 object-contain mb-6 drop-shadow-2xl" />
+        <img src={logoImg} alt="집다 로고" className="h-28 sm:h-36 md:h-44 object-contain mb-6 drop-shadow-2xl" style={{ mixBlendMode: "screen" }} />
 
         <p className="text-lg sm:text-xl md:text-2xl text-white font-medium tracking-wide mb-10 drop-shadow-lg">
           공인중개사 전용 부동산 플랫폼
