@@ -57,7 +57,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
               onClick={() => navigate("/")}
             >
-              <img src={logoImg} alt="집다 로고" className="h-9 object-contain" />
+              <img src={logoImg} alt="집다 로고" className="h-11 object-contain" />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
