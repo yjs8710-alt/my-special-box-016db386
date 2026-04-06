@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo-transparent.png";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -10,20 +10,20 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroBg})` }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-6 px-4 py-16">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-5 px-4 py-16">
         <img
           src={logoImg}
           alt="집다 로고"
-          className="w-[220px] md:w-[320px] lg:w-[420px] xl:w-[520px] h-auto object-contain"
+          className="w-44 md:w-52 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        <p className="text-white font-semibold text-xl md:text-2xl drop-shadow-lg">
+        <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-medium tracking-wide drop-shadow-lg">
           공인중개사 전용 부동산 플랫폼
         </p>
 
         <button
           onClick={() => navigate("/residential")}
-          className="px-8 py-4 rounded-xl border border-white/30 bg-[#0d2d68]/70 text-white font-bold text-xl hover:bg-white hover:text-primary transition-all duration-200"
+          className="mt-2 px-12 py-3 rounded-xl border-2 border-white/50 text-white text-xl font-bold hover:bg-white hover:text-primary transition-all duration-200 backdrop-blur-sm drop-shadow-lg"
         >
           청주
         </button>
