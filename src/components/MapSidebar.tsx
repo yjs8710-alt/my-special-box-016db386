@@ -3114,7 +3114,7 @@ const MapSidebar = ({
         />
       )}
       {/* Error Report Modal */}
-      {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} onDealComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
+      {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} />}
       {/* Deal Complete Modal */}
       {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} onComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
       {/* Admin Property Edit Modal */}
