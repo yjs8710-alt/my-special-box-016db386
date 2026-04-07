@@ -3826,7 +3826,7 @@ const MapSidebar = ({
                                         }))
                                       : [
                                           {
-                                            label: prop.title,
+                                            label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
                                             images:
                                               prop.images && prop.images.length > 0
                                                 ? prop.images
