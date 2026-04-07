@@ -1836,6 +1836,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     const handleCheckToggle = async (e: React.MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault();
       if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
