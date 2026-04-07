@@ -37,6 +37,7 @@ import PublicRecordModal from "@/components/PublicRecordModal";
 interface LightboxUnit {
   label: string; // 예) "101호", "A동" 또는 단일 매물명
   images: string[];
+  isReference?: boolean; // 참고용 사진 여부
 }
 function LightboxModal({
   units,
