@@ -877,6 +877,8 @@ const DealCompleteModal = ({ prop, onClose, onComplete }: DealCompleteModalProps
       });
       if (error) throw error;
       setDone(true);
+      const pid = prop.dbId || String(prop.id);
+      onComplete?.(pid);
     } catch (e) {
       console.error("거래완료 저장 실패:", e);
       alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
