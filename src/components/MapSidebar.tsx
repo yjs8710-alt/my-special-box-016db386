@@ -3694,7 +3694,7 @@ const MapSidebar = ({
                   const roomPw = prop.roomPassword;
                   const regDate = prop.registeredDate;
                   const chkDate = prop.checkedDate;
-
+                  const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
                     <div key={prop.id} className="flex flex-col">
                       <div
