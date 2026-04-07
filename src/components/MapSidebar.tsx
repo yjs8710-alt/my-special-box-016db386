@@ -3901,6 +3901,7 @@ const MapSidebar = ({
                             chkDate={chkDate}
                             isAdmin={isAdmin}
                             isDealCompleted={isDealCompleted}
+                            listScrollRef={listScrollRef}
                           />
                         </div>
                       </div>
