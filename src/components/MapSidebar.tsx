@@ -2792,6 +2792,66 @@ const MapSidebar = ({
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
+  // 종료된 매물에서 참고용 사진 가져오기
+  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; address: string }>>(new Map());
+  useEffect(() => {
+    let cancelled = false;
+    const fetchInactiveRefs = async () => {
+      // 현재 사진 없는 매물의 주소 목록
+      const noImageAddrs = properties
+        .filter((p) => !p.image || p.image.length === 0)
+        .map((p) => p.address)
+        .filter((a, i, arr) => arr.indexOf(a) === i);
+      if (noImageAddrs.length === 0) return;
+
+      const { data } = await supabase
+        .from("properties")
+        .select("address, unit_number, images")
+        .in("address", noImageAddrs)
+        .neq("status", "active")
+        .not("images", "eq", "{}");
+
+      if (!cancelled && data) {
+        const map = new Map<string, { image: string; images: string[]; unitNumber: string; address: string }>();
+        for (const row of data) {
+          const imgs = row.images as string[];
+          if (imgs && imgs.length > 0 && imgs[0] && !map.has(row.address)) {
+            map.set(row.address, {
+              image: imgs[0],
+              images: imgs,
+              unitNumber: row.unit_number || "?",
+              address: row.address,
+            });
+          }
+        }
+        setInactiveRefMap(map);
+      }
+    };
+    fetchInactiveRefs();
+    return () => { cancelled = true; };
+  }, [properties]);
+
+  // 참고용 사진 찾기 헬퍼: 동일주소 active 매물 → inactive 매물 순
+  const findRefImage = useCallback((prop: MapProperty, pool: MapProperty[]) => {
+    // 1) 동일 주소 active 매물에서 찾기
+    const sibling = pool.find(
+      (p) => p.id !== prop.id && p.address === prop.address && p.image && p.image.length > 0
+    );
+    if (sibling) return {
+      image: sibling.image,
+      images: sibling.images && sibling.images.length > 0 ? sibling.images : [sibling.image],
+      unitNumber: sibling.unitNumber || "?",
+    };
+    // 2) inactive 매물에서 찾기
+    const inactive = inactiveRefMap.get(prop.address);
+    if (inactive) return {
+      image: inactive.image,
+      images: inactive.images,
+      unitNumber: inactive.unitNumber,
+    };
+    return null;
+  }, [inactiveRefMap]);
+
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
   // 둘 다 없으면 전체 표시
