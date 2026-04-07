@@ -114,7 +114,7 @@ function LightboxModal({
 
       {/* 사진 카운터 — 탭 없을 때 중앙, 탭 있을 때 우측 상단 */}
       <div
-        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${(units.length > 1 || units.some((u) => u.isReference)) ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
         onClick={(e) => e.stopPropagation()}
       >
         {imgIdx + 1} / {currentImages.length}
@@ -122,7 +122,7 @@ function LightboxModal({
 
       <div
         className="relative w-full h-full overflow-hidden"
-        style={{ paddingTop: units.length > 1 ? "56px" : "0" }}
+        style={{ paddingTop: (units.length > 1 || units.some((u) => u.isReference)) ? "56px" : "0" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 슬라이드 트랙 */}
