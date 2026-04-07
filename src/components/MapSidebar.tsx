@@ -1829,8 +1829,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, isDealCompleted }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; listScrollRef?: React.RefObject<HTMLDivElement> }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, isDealCompleted, listScrollRef }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -1840,10 +1840,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
+      // 스크롤 위치 보존
+      const scrollEl = listScrollRef.current;
+      const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
       // 체크 시 확인일·등록일 모두 0(초기화)
       await supabase.from("properties").update({ checked_date: null, registered_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
       setChecking(false);
+      // 리렌더 후 스크롤 위치 복원 (realtime refetch 대기)
+      const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
+      requestAnimationFrame(restore);
+      setTimeout(restore, 100);
+      setTimeout(restore, 300);
+      setTimeout(restore, 600);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showOptPopup, setShowOptPopup] = useState(false);
@@ -2841,6 +2850,7 @@ const MapSidebar = ({
     };
     loadDealCompleted();
   }, []);
+  const listScrollRef = useRef<HTMLDivElement>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
@@ -3422,7 +3432,7 @@ const MapSidebar = ({
           </div>
 
           {/* List */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
+          <div ref={listScrollRef} className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
             {/* 소유주 번호 검색 결과: 매물 카드와 동일한 레이아웃으로 표시 */}
             {landlordSearched ? (
               landlordLoading ? (
@@ -3893,6 +3903,7 @@ const MapSidebar = ({
                             chkDate={chkDate}
                             isAdmin={isAdmin}
                             isDealCompleted={isDealCompleted}
+                            listScrollRef={listScrollRef}
                           />
                         </div>
                       </div>
