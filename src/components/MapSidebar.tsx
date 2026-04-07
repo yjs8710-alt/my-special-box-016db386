@@ -85,8 +85,8 @@ function LightboxModal({
         <X className="w-5 h-5 text-white" />
       </button>
 
-      {/* 호실 탭 — 2개 이상일 때만 표시 */}
-      {units.length > 1 && (
+      {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
+      {(units.length > 1 || units.some((u) => u.isReference)) && (
         <div
           className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
           onClick={(e) => e.stopPropagation()}
