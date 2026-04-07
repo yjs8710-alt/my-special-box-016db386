@@ -421,8 +421,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
       building_name: form.buildingName || null,
       address,
-      dong: form.dong,
-      lot_number: form.lotNumber,
+      dong: finalDong,
+      lot_number: finalLotNumber,
       district: districtVal,
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
