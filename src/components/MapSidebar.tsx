@@ -3480,6 +3480,7 @@ const MapSidebar = ({
                                           const units: LightboxUnit[] = allWithImages.map((r) => ({
                                             label: r.unitNumber ? `${r.unitNumber}호` : r.label,
                                             images: r.images!,
+                                            isReference: r.id !== item.id,
                                           }));
                                           if (isRef && units.length === 0) {
                                             units.push({ label: `${refUnit}호`, images: refImages, isReference: true });
