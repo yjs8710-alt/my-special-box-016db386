@@ -105,7 +105,7 @@ function LightboxModal({
                     : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
                 }
               >
-                {isRef ? `${u.label}(다른방)` : `${u.label}`}
+                {isRef ? `${u.label}(다른방)` : `${u.label}(현재방)`}
               </button>
             );
           })}
