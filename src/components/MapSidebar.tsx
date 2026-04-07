@@ -3819,11 +3819,17 @@ const MapSidebar = ({
                                   );
                                   const units: LightboxUnit[] =
                                     sameAddr.length > 1
-                                      ? sameAddr.map((p) => ({
-                                          label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
-                                          images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
-                                          isReference: p.id !== prop.id,
-                                        }))
+                                      ? (() => {
+                                          // 현재방을 첫 번째로, 나머지는 뒤에 배치
+                                          const current = sameAddr.find((p) => p.id === prop.id);
+                                          const others = sameAddr.filter((p) => p.id !== prop.id);
+                                          const sorted = current ? [current, ...others] : sameAddr;
+                                          return sorted.map((p) => ({
+                                            label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
+                                            images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                            isReference: p.id !== prop.id,
+                                          }));
+                                        })()
                                       : [
                                           {
                                             label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
@@ -3835,8 +3841,7 @@ const MapSidebar = ({
                                                   : [],
                                           },
                                         ];
-                                  const unitIdx = sameAddr.length > 1 ? sameAddr.findIndex((p) => p.id === prop.id) : 0;
-                                  setLightbox({ units, unitIdx: Math.max(0, unitIdx) });
+                                  setLightbox({ units, unitIdx: 0 });
                                 }}
                                 className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                               >
