@@ -2188,7 +2188,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             // 매매 여부 판별: note에 매매가 포함되거나 monthly가 비어있고 deposit이 있는 경우
             const isSaleProp = note.includes("매매가:") || (!prop.monthly && !!prop.deposit);
             return (
-              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap">
+              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
                 {isSaleProp ? (
                   <>
                     <span className="text-[11px] font-bold" style={{ color: "hsl(0 85% 55%)" }}>
