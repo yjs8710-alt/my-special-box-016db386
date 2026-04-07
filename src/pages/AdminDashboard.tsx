@@ -2545,8 +2545,10 @@ const AdminDashboard = () => {
                 <div className="flex flex-col gap-3">
                   {filteredReports.map((r) => {
                     const tm = REPORT_TYPE_META[r.report_type];
-                    const sm = REPORT_STATUS_META[r.status];
+                    const sm = REPORT_STATUS_META[r.status as keyof typeof REPORT_STATUS_META] ?? { label: r.status, color: "hsl(var(--muted-foreground))", bg: "hsl(var(--muted))" };
                     const isExpanded = expandedReport === r.id;
+                    // 신청자 정보 조회
+                    const submitter = r.submitted_by ? members.find(m => m.user_id === r.submitted_by) : null;
                     return (
                       <div key={r.id} className="bg-card border border-border rounded-xl overflow-hidden">
                         {/* 헤더 행 */}
@@ -2564,6 +2566,20 @@ const AdminDashboard = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate">{r.property_title}</p>
                             <p className="text-xs text-muted-foreground truncate">{r.property_address}</p>
+                            {/* 신청자 표시 */}
+                            {submitter && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                👤 <span className="font-semibold" style={{ color: "hsl(var(--primary))" }}>{submitter.name}</span>
+                                <span className="ml-1">({submitter.agency_name})</span>
+                                {submitter.phone && <span className="ml-1">· {formatPhone(submitter.phone)}</span>}
+                              </p>
+                            )}
+                            {!submitter && r.submitted_by && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">👤 비회원 제보</p>
+                            )}
+                            {!r.submitted_by && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">👤 익명 제보</p>
+                            )}
                           </div>
 
                           {/* 상태 배지 */}
