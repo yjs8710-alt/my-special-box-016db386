@@ -647,6 +647,14 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
       const { data, error } = await supabase.functions.invoke("geocode", { body: { address: addr } });
       if (!error && data?.success) {
         setAddressVerified("success");
+        // 도로명 입력 시 지번으로 자동 변환
+        if (data.jibunAddress) {
+          const jibunMatch = (data.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
+          if (jibunMatch) {
+            set("dong", jibunMatch[1]);
+            set("lotNumber", jibunMatch[2]);
+          }
+        }
       } else {
         setAddressVerified("fail");
       }
