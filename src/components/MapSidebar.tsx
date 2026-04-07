@@ -2826,6 +2826,20 @@ const MapSidebar = ({
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
+
+  // 기존 거래완료 제보 불러오기 (새로고침 시에도 빨간줄 유지)
+  useEffect(() => {
+    const loadDealCompleted = async () => {
+      const { data } = await supabase
+        .from("property_reports")
+        .select("property_id")
+        .eq("report_type", "deal_complete");
+      if (data && data.length > 0) {
+        setDealCompletedIds(new Set(data.map((r) => r.property_id)));
+      }
+    };
+    loadDealCompleted();
+  }, []);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
