@@ -91,20 +91,24 @@ function LightboxModal({
           className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          {units.map((u, i) => (
-            <button
-              key={i}
-              onClick={() => handleUnitChange(i)}
-              className="px-3 py-1 rounded-full text-xs font-bold transition-all"
-              style={
-                i === unitIdx
-                  ? { background: "hsl(var(--primary))", color: "#fff" }
-                  : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
-              }
-            >
-              {u.label}
-            </button>
-          ))}
+          {units.map((u, i) => {
+            const isCurrent = i === unitIdx;
+            const isRef = u.isReference;
+            return (
+              <button
+                key={i}
+                onClick={() => handleUnitChange(i)}
+                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                style={
+                  isCurrent
+                    ? { background: "hsl(var(--primary))", color: "#fff" }
+                    : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
+                }
+              >
+                {isRef ? `[다른방] ${u.label}` : units.length > 1 && !isRef ? `[현재방] ${u.label}` : u.label}
+              </button>
+            );
+          })}
         </div>
       )}
 
