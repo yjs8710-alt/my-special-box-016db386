@@ -152,7 +152,7 @@ function LightboxModal({
             style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
+            <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--primary))" }}>
               다른 매물 사진입니다. 참고용입니다.
             </span>
           </div>
