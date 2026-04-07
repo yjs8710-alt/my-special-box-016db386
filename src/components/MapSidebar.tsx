@@ -501,7 +501,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
         className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 opacity-25 select-none"
       >
         <ContactIcon type={type} />
-        <span className="text-[6px] text-muted-foreground mt-0.5 leading-none">{label}</span>
+        <span className="text-[8px] text-muted-foreground mt-0.5 leading-none">{label}</span>
       </div>
     );
   }
@@ -532,7 +532,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
         >
           <ContactIcon type={type} active />
         </span>
-        <span className="text-[6px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>
+        <span className="text-[8px] mt-0.5 leading-none font-semibold" style={{ color: typeColor[type] }}>
           {label}
         </span>
       </button>
