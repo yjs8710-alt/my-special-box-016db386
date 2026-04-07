@@ -12,6 +12,8 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     const m = noteStr.match(new RegExp(`${key}[:\\s]+([0-9\\-]+)`));
     return m ? m[1].trim() : undefined;
   };
+  const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
+  const roadAddress = roadMatch ? roadMatch[1].trim() : undefined;
 
   return {
     id: 100000 + idx,
@@ -57,6 +59,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     totalFloors: String(row.total_floors ?? ""),
     buildYear: String(row.build_year ?? ""),
     memo: String(row.id ?? ""),
+    roadAddress,
   };
 }
 
