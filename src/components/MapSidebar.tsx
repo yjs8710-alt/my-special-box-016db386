@@ -1840,10 +1840,17 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
+      // 스크롤 위치 보존
+      const scrollEl = listScrollRef.current;
+      const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
       // 체크 시 확인일·등록일 모두 0(초기화)
       await supabase.from("properties").update({ checked_date: null, registered_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
       setChecking(false);
+      // 리렌더 후 스크롤 위치 복원
+      requestAnimationFrame(() => {
+        if (scrollEl) scrollEl.scrollTop = savedScroll;
+      });
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showOptPopup, setShowOptPopup] = useState(false);
