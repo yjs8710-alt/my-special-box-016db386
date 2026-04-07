@@ -156,7 +156,7 @@ function LightboxModal({
               다른 매물 사진입니다. 참고용입니다.
             </span>
           </div>
-        )
+        )}
         {currentImages.length > 1 && (
           <>
             <button
