@@ -709,7 +709,7 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
       }
 
       const propertyId = prop.dbId || String(prop.id);
-      const insertData: Record<string, unknown> = {
+      const baseData = {
         property_id: propertyId,
         property_title: prop.title || prop.address,
         property_address: prop.address,
@@ -718,16 +718,12 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
         proposer_name: proposerName,
         proposer_company: proposerCompany,
         proposer_phone: proposerPhone,
+        error_content: reportType === "error_report" ? (text.trim() || null) : null,
+        deal_date: reportType === "deal_complete" ? dealDate : null,
+        deal_memo: reportType === "deal_complete" ? (text.trim() || null) : null,
       };
 
-      if (reportType === "error_report") {
-        insertData.error_content = text.trim() || null;
-      } else {
-        insertData.deal_date = dealDate;
-        insertData.deal_memo = text.trim() || null;
-      }
-
-      const { error } = await supabase.from("property_reports").insert(insertData);
+      const { error } = await supabase.from("property_reports").insert(baseData);
       if (error) throw error;
       setSent(true);
       if (reportType === "deal_complete") {
