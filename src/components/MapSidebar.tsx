@@ -2841,6 +2841,7 @@ const MapSidebar = ({
     };
     loadDealCompleted();
   }, []);
+  const listScrollRef = useRef<HTMLDivElement>(null);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
