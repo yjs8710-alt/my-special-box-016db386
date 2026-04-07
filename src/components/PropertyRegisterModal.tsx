@@ -351,8 +351,10 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSaving(true);
     setSaveError("");
 
-    const address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
+    let address = ["충북", form.sigungu, form.dong, form.lotNumber].filter(Boolean).join(" ");
     const districtVal = form.sigungu ? form.sigungu.replace("청주시 ", "") : null;
+    let finalDong = form.dong;
+    let finalLotNumber = form.lotNumber;
 
     // ── Geocoding: 주소 → 좌표 ─────────────────────────────────
     let lat = 0;
@@ -365,6 +367,15 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       if (!geoErr && geoData?.success) {
         lat = geoData.lat;
         lng = geoData.lng;
+        // 도로명 입력 시 지번 주소로 자동 변환
+        if (geoData.jibunAddress) {
+          const jibunMatch = (geoData.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
+          if (jibunMatch) {
+            finalDong = jibunMatch[1];
+            finalLotNumber = jibunMatch[2];
+            address = ["충북", form.sigungu, finalDong, finalLotNumber].filter(Boolean).join(" ");
+          }
+        }
       } else {
         console.warn("[geocode] 좌표 변환 실패:", geoErr?.message ?? geoData?.error);
       }
@@ -410,8 +421,8 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         : `${form.dong} ${form.detailType}${form.floor ? ` ${form.floor}` : ""}`,
       building_name: form.buildingName || null,
       address,
-      dong: form.dong,
-      lot_number: form.lotNumber,
+      dong: finalDong,
+      lot_number: finalLotNumber,
       district: districtVal,
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
@@ -636,6 +647,14 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
       const { data, error } = await supabase.functions.invoke("geocode", { body: { address: addr } });
       if (!error && data?.success) {
         setAddressVerified("success");
+        // 도로명 입력 시 지번으로 자동 변환
+        if (data.jibunAddress) {
+          const jibunMatch = (data.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
+          if (jibunMatch) {
+            set("dong", jibunMatch[1]);
+            set("lotNumber", jibunMatch[2]);
+          }
+        }
       } else {
         setAddressVerified("fail");
       }
