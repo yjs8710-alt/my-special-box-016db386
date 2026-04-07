@@ -1358,11 +1358,8 @@ const AdminDashboard = () => {
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
     const newStatus = prop.status === "active" ? "hidden" : "active";
-    const updatePayload: Record<string, unknown> = { status: newStatus };
     // 재등록(active 복구) 시 확인일 초기화 + 거래완료 제보 반려 처리
     if (newStatus === "active") {
-      updatePayload.checked_date = null;
-      // 해당 매물의 미반려 거래완료 제보를 모두 반려 처리 → 취소선 제거
       await supabase
         .from("property_reports")
         .update({ status: "rejected" })
@@ -1370,7 +1367,13 @@ const AdminDashboard = () => {
         .eq("report_type", "deal_complete")
         .neq("status", "rejected");
     }
-    const { error } = await supabase.from("properties").update(updatePayload).eq("id", prop.id);
+    const { error } = await supabase
+      .from("properties")
+      .update(newStatus === "active"
+        ? { status: newStatus, checked_date: null }
+        : { status: newStatus }
+      )
+      .eq("id", prop.id);
     if (!error) setDbProperties((prev) => prev.map((p) => p.id === prop.id ? { ...p, status: newStatus, checked_date: newStatus === "active" ? undefined : p.checked_date } : p));
     else alert("상태 변경 오류: " + error.message);
     setTogglingId(null);
