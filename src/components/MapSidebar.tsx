@@ -1945,17 +1945,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
           {prop.buildYear && (
             <span
-              className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap"
+              className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap rounded"
               style={{
-                background: "#fff",
-                color: "#111",
-                border: "1.5px solid #111",
-                borderRadius: "2px",
+                background: "hsl(var(--primary) / 0.12)",
+                color: "hsl(var(--primary))",
+                border: "1px solid hsl(var(--primary) / 0.3)",
                 letterSpacing: "-0.02em",
                 lineHeight: 1.2,
               }}
             >
-              준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
+              🏗 {prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
             </span>
           )}
           <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
