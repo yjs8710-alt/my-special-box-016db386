@@ -1954,7 +1954,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 lineHeight: 1.2,
               }}
             >
-              🏗 {prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
+              준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
             </span>
           )}
           <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
