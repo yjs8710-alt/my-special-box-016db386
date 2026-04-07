@@ -2585,10 +2585,17 @@ const AdminDashboard = () => {
                                 {submitter.phone && <span className="ml-1">· {formatPhone(submitter.phone)}</span>}
                               </p>
                             )}
-                            {!submitter && r.submitted_by && (
+                            {!submitter && r.proposer_name && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                👤 <span className="font-semibold" style={{ color: "hsl(var(--primary))" }}>{r.proposer_name}</span>
+                                {r.proposer_company && <span className="ml-1">({r.proposer_company})</span>}
+                                {r.proposer_phone && <span className="ml-1">· {formatPhone(r.proposer_phone)}</span>}
+                              </p>
+                            )}
+                            {!submitter && !r.proposer_name && r.submitted_by && (
                               <p className="text-[10px] text-muted-foreground mt-0.5">👤 비회원 제보</p>
                             )}
-                            {!r.submitted_by && (
+                            {!r.submitted_by && !r.proposer_name && (
                               <p className="text-[10px] text-muted-foreground mt-0.5">👤 익명 제보</p>
                             )}
                           </div>
