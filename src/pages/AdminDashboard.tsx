@@ -115,6 +115,7 @@ type PropertyReport = {
   proposal_period?: string;
   proposal_content?: string;
   admin_memo?: string;
+  submitted_by?: string | null;
   created_at: string;
 };
 
