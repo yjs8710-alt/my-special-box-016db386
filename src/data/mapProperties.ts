@@ -41,6 +41,7 @@ export interface MapProperty {
   availableFrom: string;
   totalFloors: string;
   buildYear: string;
+  roadAddress?: string;
 }
 
 export const MAP_PROPERTIES: MapProperty[] = [];
