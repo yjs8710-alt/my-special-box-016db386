@@ -2818,6 +2818,7 @@ const MapSidebar = ({
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
+  const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
