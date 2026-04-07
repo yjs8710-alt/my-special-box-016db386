@@ -3100,7 +3100,7 @@ const MapSidebar = ({
       {/* Error Report Modal */}
       {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} />}
       {/* Deal Complete Modal */}
-      {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} />}
+      {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} onComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
       {/* Admin Property Edit Modal */}
       {adminEditProp &&
         (() => {
