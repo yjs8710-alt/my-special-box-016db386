@@ -1840,8 +1840,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
       setChecking(true);
-      // 체크 시 확인일을 0(null)으로 초기화
-      await supabase.from("properties").update({ checked_date: null }).eq("id", prop.memo);
+      // 체크 시 확인일·등록일 모두 0(초기화)
+      await supabase.from("properties").update({ checked_date: null, registered_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
       setChecking(false);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
