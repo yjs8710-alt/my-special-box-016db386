@@ -1213,21 +1213,58 @@ const AdminDashboard = () => {
   }, []);
 
   // ─── 신고/제안 불러오기 ──────────────────────────────────────────────────
-  const fetchReports = useCallback(async () => {
-    setReportsLoading(true);
-    const { data, error } = await supabase.from("property_reports").select("*").order("created_at", { ascending: false });
+  const fetchReports = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (!silent) setReportsLoading(true);
+    const { data, error } = await supabase
+      .from("property_reports")
+      .select("*")
+      .order("created_at", { ascending: false });
     if (!error && data) setReports(data as PropertyReport[]);
-    setReportsLoading(false);
+    if (!silent) setReportsLoading(false);
   }, []);
 
-  useEffect(() => { fetchMembers(); fetchProperties(); fetchContacts(); fetchReports(); }, [fetchMembers, fetchProperties, fetchContacts, fetchReports]);
+  useEffect(() => {
+    void fetchMembers();
+    void fetchProperties();
+    void fetchContacts();
+    void fetchReports();
+  }, [fetchMembers, fetchProperties, fetchContacts, fetchReports]);
+
+  useEffect(() => {
+    if (tab !== "reports") return;
+
+    void fetchReports({ silent: true });
+
+    const intervalId = window.setInterval(() => {
+      void fetchReports({ silent: true });
+    }, 5000);
+
+    const handleFocus = () => {
+      void fetchReports({ silent: true });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void fetchReports({ silent: true });
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [tab, fetchReports]);
 
   // Realtime 구독: 매물 변경 즉시 반영
   useEffect(() => {
     const channel = supabase
       .channel("admin-properties-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, () => {
-        fetchProperties();
+        void fetchProperties();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -2510,7 +2547,7 @@ const AdminDashboard = () => {
                       총 {reports.length}건 · 미처리 {pendingCount}건
                     </p>
                   </div>
-                  <button onClick={fetchReports} disabled={reportsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  <button onClick={() => void fetchReports()} disabled={reportsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${reportsLoading ? "animate-spin" : ""}`} />
                   </button>
                 </div>
