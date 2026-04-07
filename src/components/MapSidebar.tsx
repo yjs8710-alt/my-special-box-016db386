@@ -2810,7 +2810,7 @@ const MapSidebar = ({
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
   // 종료된 매물에서 참고용 사진 가져오기
-  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; address: string }>>(new Map());
+  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>>(new Map());
   useEffect(() => {
     let cancelled = false;
     const fetchInactiveRefs = async () => {
@@ -2823,13 +2823,13 @@ const MapSidebar = ({
 
       const { data } = await supabase
         .from("properties")
-        .select("address, unit_number, images")
+        .select("address, unit_number, images, room_type")
         .in("address", noImageAddrs)
         .neq("status", "active")
         .not("images", "eq", "{}");
 
       if (!cancelled && data) {
-        const map = new Map<string, { image: string; images: string[]; unitNumber: string; address: string }>();
+        const map = new Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>();
         for (const row of data) {
           const imgs = row.images as string[];
           if (imgs && imgs.length > 0 && imgs[0] && !map.has(row.address)) {
@@ -2837,6 +2837,7 @@ const MapSidebar = ({
               image: imgs[0],
               images: imgs,
               unitNumber: row.unit_number || "?",
+              roomType: (row as any).room_type || "",
               address: row.address,
             });
           }
