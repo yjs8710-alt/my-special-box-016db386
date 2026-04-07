@@ -17,6 +17,7 @@ interface PropertyCardProps {
   elevator?: boolean;
   onDelete?: () => void;
   referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
+  referenceUnit?: string;  // 참고용 사진의 호수
 }
 
 const PropertyCard = ({
