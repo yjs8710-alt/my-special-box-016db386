@@ -3259,7 +3259,7 @@ const MapSidebar = ({
               <span className="flex-1 min-w-[4px]" />
               <button
                 onClick={async () => {
-                  const addr = window.prompt("건축물대장을 조회할 주소를 입력하세요\n예) 개신동 41-5, 분평동 1261");
+                  const addr = window.prompt("건축물대장을 조회할 주소를 입력하세요\n예) 개신동 41-5, 분평동 1261\n예) 사직대로 160, 충북대로 1");
                   if (!addr?.trim()) return;
                   const query = addr.trim();
                   try {
