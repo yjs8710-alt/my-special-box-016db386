@@ -3469,7 +3469,7 @@ const MapSidebar = ({
                                           className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                           style={{ background: "hsl(var(--accent))", color: "white" }}
                                         >
-                                          참고용({refUnit}호)
+                                          참고용
                                         </span>
                                       )}
                                     </>
@@ -3709,7 +3709,7 @@ const MapSidebar = ({
                                         className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                         style={{ background: "hsl(var(--accent))", color: "white" }}
                                       >
-                                        참고용({ref.unitNumber}호)
+                                        참고용
                                       </span>
                                     )}
                                   </>
