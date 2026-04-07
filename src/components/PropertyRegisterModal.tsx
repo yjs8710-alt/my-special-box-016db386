@@ -356,9 +356,10 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     let finalDong = form.dong;
     let finalLotNumber = form.lotNumber;
 
-    // ── Geocoding: 주소 → 좌표 ─────────────────────────────────
+    // ── Geocoding: 주소 → 좌표 + 도로명 ─────────────────────────────────
     let lat = 0;
     let lng = 0;
+    let finalRoadAddress = form.roadAddress || "";
     try {
       const geoAddress = ["충북 청주시", form.sigungu.replace("청주시 ", ""), form.dong, form.lotNumber].filter(Boolean).join(" ");
       const { data: geoData, error: geoErr } = await supabase.functions.invoke("geocode", {
@@ -367,6 +368,10 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       if (!geoErr && geoData?.success) {
         lat = geoData.lat;
         lng = geoData.lng;
+        // 도로명주소 저장
+        if (geoData.roadAddress && !finalRoadAddress) {
+          finalRoadAddress = geoData.roadAddress as string;
+        }
         // 도로명 입력 시 지번 주소로 자동 변환
         if (geoData.jibunAddress) {
           const jibunMatch = (geoData.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
