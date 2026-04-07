@@ -2833,9 +2833,12 @@ const MapSidebar = ({
       const { data } = await supabase
         .from("property_reports")
         .select("property_id")
-        .eq("report_type", "deal_complete");
+        .eq("report_type", "deal_complete")
+        .neq("status", "rejected");
       if (data && data.length > 0) {
         setDealCompletedIds(new Set(data.map((r) => r.property_id)));
+      } else {
+        setDealCompletedIds(new Set());
       }
     };
     loadDealCompleted();
