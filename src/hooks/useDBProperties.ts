@@ -59,6 +59,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     totalFloors: String(row.total_floors ?? ""),
     buildYear: String(row.build_year ?? ""),
     memo: String(row.id ?? ""),
+    roadAddress,
   };
 }
 
