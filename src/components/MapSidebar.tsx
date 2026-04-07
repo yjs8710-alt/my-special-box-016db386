@@ -105,7 +105,7 @@ function LightboxModal({
                     : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
                 }
               >
-                {isRef ? `${u.label}(다른방)` : `${u.label}`}
+                {isRef ? `${u.label}(다른방)` : `${u.label}(현재방)`}
               </button>
             );
           })}
@@ -3480,6 +3480,7 @@ const MapSidebar = ({
                                           const units: LightboxUnit[] = allWithImages.map((r) => ({
                                             label: r.unitNumber ? `${r.unitNumber}호` : r.label,
                                             images: r.images!,
+                                            isReference: r.id !== item.id,
                                           }));
                                           if (isRef && units.length === 0) {
                                             units.push({ label: `${refUnit}호`, images: refImages, isReference: true });
@@ -3818,6 +3819,7 @@ const MapSidebar = ({
                                       ? sameAddr.map((p) => ({
                                           label: p.unitNumber ? `${p.unitNumber}호` : p.title || p.address,
                                           images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                          isReference: p.id !== prop.id,
                                         }))
                                       : [
                                           {
