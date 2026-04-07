@@ -672,20 +672,19 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
 MemoNotepad.displayName = "MemoNotepad";
 
 /* ── ErrorReportModal ── */
-const ERROR_CATEGORIES = ["정보 오류", "사진 오류", "가격 오류", "연락처 오류", "이미 거래완료", "기타"];
-
 interface ErrorReportModalProps {
   prop: MapProperty;
   onClose: () => void;
+  onDealComplete?: (pid: string) => void;
 }
-const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
-  const [category, setCategory] = useState(ERROR_CATEGORIES[0]);
+const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalProps) => {
+  const [reportType, setReportType] = useState<"error_report" | "deal_complete">("error_report");
   const [text, setText] = useState("");
+  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSend = async () => {
-    if (!text.trim()) return;
     setSaving(true);
     try {
       const {
@@ -710,21 +709,32 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
       }
 
       const propertyId = prop.dbId || String(prop.id);
-      const { error } = await supabase.from("property_reports").insert({
+      const insertData: Record<string, unknown> = {
         property_id: propertyId,
         property_title: prop.title || prop.address,
         property_address: prop.address,
-        report_type: "error_report",
-        error_content: `[${category}] ${text.trim()}`,
+        report_type: reportType,
         submitted_by: userId,
         proposer_name: proposerName,
         proposer_company: proposerCompany,
         proposer_phone: proposerPhone,
-      });
+      };
+
+      if (reportType === "error_report") {
+        insertData.error_content = text.trim() || null;
+      } else {
+        insertData.deal_date = dealDate;
+        insertData.deal_memo = text.trim() || null;
+      }
+
+      const { error } = await supabase.from("property_reports").insert(insertData);
       if (error) throw error;
       setSent(true);
+      if (reportType === "deal_complete") {
+        onDealComplete?.(propertyId);
+      }
     } catch (e) {
-      console.error("오류제보 저장 실패:", e);
+      console.error("제보 저장 실패:", e);
       alert("제보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setSaving(false);
@@ -735,24 +745,26 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
     <>
       <div className="fixed inset-0 z-[10050] bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-white rounded-2xl shadow-2xl flex flex-col"
-        style={{ width: "min(460px, 92vw)", maxHeight: "88vh" }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10051] bg-card rounded-2xl shadow-2xl flex flex-col"
+        style={{ width: "min(420px, 92vw)", maxHeight: "88vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b border-border rounded-t-2xl flex-shrink-0"
-          style={{ background: "hsl(var(--destructive)/0.06)" }}
+          style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2)/0.06)" : "hsl(var(--destructive)/0.06)" }}
         >
           <div className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "hsl(var(--destructive)/0.12)" }}
+              style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2)/0.12)" : "hsl(var(--destructive)/0.12)" }}
             >
-              <AlertCircle className="w-4 h-4 text-destructive" />
+              {reportType === "deal_complete"
+                ? <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+                : <AlertCircle className="w-4 h-4 text-destructive" />}
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">오류 제보</p>
+              <p className="text-sm font-bold text-foreground">매물 제보</p>
               <p className="text-[10px] text-muted-foreground truncate max-w-[280px]">
                 {prop.buildingName ?? prop.title} {prop.unitNumber ?? ""}
               </p>
@@ -767,10 +779,9 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
         </div>
 
         {sent ? (
-          /* 전송 완료 */
           <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
-            <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-green-500" />
+            <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--chart-2)/0.1)" }}>
+              <CheckCircle className="w-7 h-7" style={{ color: "hsl(var(--chart-2))" }} />
             </div>
             <p className="text-sm font-bold text-foreground">제보가 접수되었습니다</p>
             <p className="text-[11px] text-muted-foreground leading-relaxed">관리자가 검토 후 처리할 예정입니다.</p>
@@ -792,71 +803,66 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
               </p>
             </div>
 
-            {/* 오류 유형 선택 */}
+            {/* 제보 유형 선택: 오류제보 / 거래완료 */}
             <div>
-              <p className="text-[11px] font-semibold text-foreground mb-2">오류 유형 선택</p>
-              <div className="flex flex-wrap gap-1.5">
-                {ERROR_CATEGORIES.map((cat) => (
+              <p className="text-[11px] font-semibold text-foreground mb-2">제보 유형</p>
+              <div className="flex gap-2">
+                {([
+                  { key: "error_report" as const, label: "⚠️ 오류제보", color: "hsl(var(--destructive))" },
+                  { key: "deal_complete" as const, label: "✅ 거래완료", color: "hsl(var(--chart-2))" },
+                ]).map((t) => (
                   <button
-                    key={cat}
-                    onClick={() => setCategory(cat)}
-                    className="px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all"
+                    key={t.key}
+                    onClick={() => setReportType(t.key)}
+                    className="flex-1 px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all"
                     style={
-                      category === cat
-                        ? {
-                            background: "hsl(var(--destructive))",
-                            color: "#fff",
-                            borderColor: "hsl(var(--destructive))",
-                          }
-                        : {
-                            background: "transparent",
-                            color: "hsl(var(--muted-foreground))",
-                            borderColor: "hsl(var(--border))",
-                          }
+                      reportType === t.key
+                        ? { background: t.color, color: "#fff", borderColor: t.color }
+                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                     }
                   >
-                    {cat}
+                    {t.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* 메모장 */}
-            <div>
-              <p className="text-[11px] font-semibold text-foreground mb-1.5">오류 내용 작성</p>
-              <div
-                className="rounded-xl border border-border overflow-hidden"
-                style={{ background: "hsl(var(--muted)/0.3)" }}
-              >
-                {/* 메모장 줄 배경 */}
-                <div className="relative">
-                  <textarea
-                    autoFocus
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder={`어떤 오류가 있는지 자세히 작성해 주세요.\n예) 월세가 실제와 다릅니다. 실제 월세는 400만원입니다.`}
-                    rows={7}
-                    className="w-full text-[12px] text-foreground leading-7 resize-none outline-none px-3 pt-2 pb-2 placeholder:text-muted-foreground/40"
-                    style={{
-                      background:
-                        "repeating-linear-gradient(transparent, transparent 27px, hsl(var(--border)) 27px, hsl(var(--border)) 28px)",
-                      backgroundPositionY: "2px",
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between items-center px-3 py-1.5 border-t border-border bg-muted/20">
-                  <span className="text-[9px] text-primary/60 font-medium">✓ 작성 후 관리자에게 전송됩니다</span>
-                  <span className="text-[9px] text-muted-foreground">{text.length}자</span>
-                </div>
+            {/* 거래완료 선택 시 거래일 */}
+            {reportType === "deal_complete" && (
+              <div>
+                <p className="text-[11px] font-semibold text-foreground mb-1.5">거래일</p>
+                <input
+                  type="date"
+                  value={dealDate}
+                  onChange={(e) => setDealDate(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-foreground outline-none"
+                />
               </div>
+            )}
+
+            {/* 내용 (선택사항) */}
+            <div>
+              <p className="text-[11px] font-semibold text-foreground mb-1.5">
+                내용 <span className="text-muted-foreground font-normal">(선택)</span>
+              </p>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="추가 내용이 있으면 작성해 주세요."
+                rows={4}
+                className="w-full text-[12px] text-foreground leading-7 resize-none outline-none px-3 pt-2 pb-2 rounded-xl border border-border placeholder:text-muted-foreground/40"
+                style={{
+                  background: "hsl(var(--muted)/0.3)",
+                }}
+              />
             </div>
 
             {/* 전송 버튼 */}
             <button
               onClick={handleSend}
-              disabled={!text.trim() || saving}
+              disabled={saving}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: "hsl(var(--destructive))", color: "#fff" }}
+              style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff" }}
             >
               <Send className="w-4 h-4" />
               {saving ? "제출 중..." : "제보하기"}
