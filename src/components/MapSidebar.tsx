@@ -2810,7 +2810,7 @@ const MapSidebar = ({
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
   // 종료된 매물에서 참고용 사진 가져오기
-  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; address: string }>>(new Map());
+  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>>(new Map());
   useEffect(() => {
     let cancelled = false;
     const fetchInactiveRefs = async () => {
@@ -2823,13 +2823,13 @@ const MapSidebar = ({
 
       const { data } = await supabase
         .from("properties")
-        .select("address, unit_number, images")
+        .select("address, unit_number, images, room_type")
         .in("address", noImageAddrs)
         .neq("status", "active")
         .not("images", "eq", "{}");
 
       if (!cancelled && data) {
-        const map = new Map<string, { image: string; images: string[]; unitNumber: string; address: string }>();
+        const map = new Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>();
         for (const row of data) {
           const imgs = row.images as string[];
           if (imgs && imgs.length > 0 && imgs[0] && !map.has(row.address)) {
@@ -2837,6 +2837,7 @@ const MapSidebar = ({
               image: imgs[0],
               images: imgs,
               unitNumber: row.unit_number || "?",
+              roomType: (row as any).room_type || "",
               address: row.address,
             });
           }
@@ -2858,6 +2859,7 @@ const MapSidebar = ({
       image: sibling.image,
       images: sibling.images && sibling.images.length > 0 ? sibling.images : [sibling.image],
       unitNumber: sibling.unitNumber || "?",
+      roomType: sibling.roomType || "",
     };
     // 2) inactive 매물에서 찾기
     const inactive = inactiveRefMap.get(prop.address);
@@ -2865,6 +2867,7 @@ const MapSidebar = ({
       image: inactive.image,
       images: inactive.images,
       unitNumber: inactive.unitNumber,
+      roomType: inactive.roomType || "",
     };
     return null;
   }, [inactiveRefMap]);
@@ -3807,7 +3810,7 @@ const MapSidebar = ({
                                   e.stopPropagation();
                                   if (!hasOwnImages && ref) {
                                     // 참고용 사진 lightbox
-                                    setLightbox({ units: [{ label: `${ref.unitNumber}호`, images: ref.images, isReference: true }], unitIdx: 0 });
+                                    setLightbox({ units: [{ label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`, images: ref.images, isReference: true }], unitIdx: 0 });
                                     return;
                                   }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
@@ -3817,13 +3820,13 @@ const MapSidebar = ({
                                   const units: LightboxUnit[] =
                                     sameAddr.length > 1
                                       ? sameAddr.map((p) => ({
-                                          label: p.unitNumber ? `${p.unitNumber}호` : p.title || p.address,
+                                          label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                           images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                           isReference: p.id !== prop.id,
                                         }))
                                       : [
                                           {
-                                            label: prop.title,
+                                            label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
                                             images:
                                               prop.images && prop.images.length > 0
                                                 ? prop.images
