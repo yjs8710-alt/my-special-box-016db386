@@ -2672,15 +2672,29 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               color: "hsl(0 85% 40%)",
               border: "hsl(0 85% 70%)",
             });
-          // 퇴거 예정일
-          if (prop.vacateDate)
-            chips.push({
-              label: `퇴거 ${prop.vacateDate}`,
-              value: "",
-              bg: "hsl(0 85% 93%)",
-              color: "hsl(0 85% 35%)",
-              border: "hsl(0 85% 65%)",
-            });
+          // 퇴거 예정일 — 지났으면 공실 표시
+          if (prop.vacateDate) {
+            const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+            const vacateTime = new Date(vacateStr).getTime();
+            const isPast = !isNaN(vacateTime) && vacateTime < Date.now();
+            if (isPast) {
+              chips.push({
+                label: "공실",
+                value: "",
+                bg: "hsl(142 50% 90%)",
+                color: "hsl(142 60% 30%)",
+                border: "hsl(142 50% 65%)",
+              });
+            } else {
+              chips.push({
+                label: `퇴거 ${prop.vacateDate}`,
+                value: "",
+                bg: "hsl(0 85% 93%)",
+                color: "hsl(0 85% 35%)",
+                border: "hsl(0 85% 65%)",
+              });
+            }
+          }
 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
