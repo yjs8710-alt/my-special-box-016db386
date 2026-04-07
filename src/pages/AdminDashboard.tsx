@@ -2547,7 +2547,7 @@ const AdminDashboard = () => {
                       총 {reports.length}건 · 미처리 {pendingCount}건
                     </p>
                   </div>
-                  <button onClick={fetchReports} disabled={reportsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
+                  <button onClick={() => void fetchReports()} disabled={reportsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${reportsLoading ? "animate-spin" : ""}`} />
                   </button>
                 </div>
