@@ -764,9 +764,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const payload = {
       title: form.title || "",
       building_name: form.building_name || null,
-      address: form.address || "",
-      dong: form.dong ?? "",
-      lot_number: form.lot_number ?? "",
+      address: finalAddress || "",
+      dong: finalDong ?? "",
+      lot_number: finalLotNumber ?? "",
       district: form.district || null,
       type: form.type || "",
       room_type: form.room_type || null,
