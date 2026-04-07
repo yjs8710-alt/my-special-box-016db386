@@ -679,18 +679,36 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
-    // 좌표가 없으면 저장 전 Edge Function으로 geocode 호출
+    // 좌표가 없거나 도로명 주소인 경우 geocode 호출하여 좌표 + 지번 변환
     let finalLat = form.lat;
     let finalLng = form.lng;
-    if (!finalLat || !finalLng) {
+    let finalAddress = form.address;
+    let finalDong = form.dong;
+    let finalLotNumber = form.lot_number;
+    const isRoadAddr = form.lot_number?.match(/[가-힣].*(로|길)\s/);
+    if (!finalLat || !finalLng || isRoadAddr) {
       try {
+        const geoQuery = isRoadAddr ? form.lot_number : form.address;
         const { data } = await supabase.functions.invoke("geocode", {
-          body: { address: form.address },
+          body: { address: geoQuery },
         });
         if (data?.success) {
           finalLat = data.lat;
           finalLng = data.lng;
-          setForm((f) => ({ ...f, lat: finalLat, lng: finalLng }));
+          // 도로명→지번 변환
+          if (data.jibunAddress) {
+            const jibunMatch = (data.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
+            if (jibunMatch) {
+              finalDong = jibunMatch[1];
+              finalLotNumber = jibunMatch[2];
+              const sg = form.district ? `청주시 ${form.district}` : "";
+              finalAddress = ["충북", sg, finalDong, finalLotNumber].filter(Boolean).join(" ");
+            }
+          }
+          // 도로명주소 보존 (note에 저장됨)
+          if (isRoadAddr && data.roadAddress && !form.roadAddress) {
+            setForm((f) => ({ ...f, roadAddress: data.roadAddress }));
+          }
         }
       } catch {
         // 좌표 없이 저장 계속

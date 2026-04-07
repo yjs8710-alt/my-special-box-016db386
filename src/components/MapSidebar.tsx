@@ -1967,6 +1967,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           >
             로드뷰
           </a>
+          {/* 도로명 버튼 (hover 시 도로명주소 표시) */}
+          {prop.roadAddress && (
+            <span
+              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border cursor-default whitespace-nowrap relative group/road"
+              style={{ color: "hsl(var(--accent-foreground))", borderColor: "hsl(var(--border))", background: "hsl(var(--muted))" }}
+              title={prop.roadAddress}
+            >
+              도로명
+              <span className="absolute left-0 bottom-full mb-1 hidden group-hover/road:block bg-foreground text-background text-[10px] font-medium px-2 py-1 rounded shadow-lg whitespace-nowrap z-50">
+                {prop.roadAddress}
+              </span>
+            </span>
+          )}
           <span className="flex-1" />
           <MemoNotepad
             propId={prop.id}
