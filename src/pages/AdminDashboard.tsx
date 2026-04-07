@@ -2458,6 +2458,7 @@ const AdminDashboard = () => {
               pending:  { label: "미처리", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)" },
               reviewed: { label: "검토중", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)" },
               resolved: { label: "처리완료", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)" },
+              rejected: { label: "반려", color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)" },
             };
 
             const filteredReports = reports.filter((r) => {
