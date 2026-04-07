@@ -13,7 +13,14 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     return m ? m[1].trim() : undefined;
   };
   const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
-  const roadAddress = roadMatch ? roadMatch[1].trim() : undefined;
+  // note에 도로명이 없으면 lot_number에서 도로명 감지 (한글+로/길 패턴)
+  const lotStr = String(row.lot_number ?? "");
+  const isRoadLot = /[가-힣].*(로|길)/.test(lotStr);
+  const roadAddress = roadMatch
+    ? roadMatch[1].trim()
+    : isRoadLot
+      ? lotStr
+      : undefined;
 
   return {
     id: 100000 + idx,
