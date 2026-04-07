@@ -1836,11 +1836,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     const handleCheckToggle = async (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
       setChecking(true);
-      const newDate = isChecked ? null : new Date().toISOString().slice(0, 10);
-      await supabase.from("properties").update({ checked_date: newDate }).eq("id", prop.memo);
+      // 체크 시 확인일을 0(null)으로 초기화
+      await supabase.from("properties").update({ checked_date: null }).eq("id", prop.memo);
       setChecking(false);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
