@@ -128,14 +128,21 @@ const MyPage = () => {
       toast({ title: "저장 실패", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "정보가 저장되었습니다." });
-      setProfile({
-        ...profile,
-        name, phone,
-        agency_name: agencyName,
-        agency_address: agencyAddress,
-        license_number: licenseNumber,
-        business_number: businessNumber,
-      });
+      // DB에서 최신 데이터 다시 불러오기
+      const { data: refreshed } = await supabase
+        .from("agent_profiles")
+        .select("*")
+        .eq("id", profile.id)
+        .maybeSingle();
+      if (refreshed) {
+        setProfile(refreshed);
+        setName(refreshed.name);
+        setPhone(refreshed.phone);
+        setAgencyName(refreshed.agency_name);
+        setAgencyAddress(refreshed.agency_address);
+        setLicenseNumber(refreshed.license_number);
+        setBusinessNumber(refreshed.business_number);
+      }
     }
   };
 
