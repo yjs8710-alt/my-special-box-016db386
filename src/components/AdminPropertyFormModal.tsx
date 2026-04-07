@@ -517,24 +517,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       });
       if (!error && data?.success) {
         const updates: Partial<typeof form> = { lat: data.lat, lng: data.lng };
+        // 도로명주소 자동 저장
+        if (data.roadAddress && !form.roadAddress) {
+          updates.roadAddress = data.roadAddress as string;
+        }
         // 도로명으로 검색했을 때 지번 주소로 자동 변환
         if (data.jibunAddress) {
           const jibun = data.jibunAddress as string;
-          // jibunAddress 예: "충북 청주시 서원구 사창동 123-4"
-          // dong과 lot_number 추출
           const jibunMatch = jibun.match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
           if (jibunMatch) {
             const jibunDong = jibunMatch[1];
             const jibunLot = jibunMatch[2];
             updates.dong = jibunDong;
             updates.lot_number = jibunLot;
-            // address를 지번 기반으로 재구성
             setForm((f) => {
               const sg = f.district ? `청주시 ${f.district}` : "";
               const newAddress = ["충북", sg, jibunDong, jibunLot].filter(Boolean).join(" ");
               return { ...f, ...updates, address: newAddress };
             });
-            // dong state도 업데이트
             setDong(jibunDong);
             return;
           }
