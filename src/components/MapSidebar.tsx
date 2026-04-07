@@ -3482,7 +3482,7 @@ const MapSidebar = ({
                                             images: r.images!,
                                           }));
                                           if (isRef && units.length === 0) {
-                                            units.push({ label: `${refUnit}호 (참고용)`, images: refImages });
+                                            units.push({ label: `${refUnit}호`, images: refImages, isReference: true });
                                           }
                                           if (units.length === 0) return;
                                           const currentIdx = isRef ? units.length - 1 : allWithImages.findIndex((r) => r.id === item.id);
@@ -3806,7 +3806,7 @@ const MapSidebar = ({
                                   e.stopPropagation();
                                   if (!hasOwnImages && ref) {
                                     // 참고용 사진 lightbox
-                                    setLightbox({ units: [{ label: `${ref.unitNumber}호 (참고용)`, images: ref.images }], unitIdx: 0 });
+                                    setLightbox({ units: [{ label: `${ref.unitNumber}호`, images: ref.images, isReference: true }], unitIdx: 0 });
                                     return;
                                   }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
