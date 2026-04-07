@@ -2530,7 +2530,7 @@ const AdminDashboard = () => {
               if (status === "rejected") {
                 const report = reports.find((r) => r.id === id);
                 if (report && report.report_type === "deal_complete" && report.property_id) {
-                  await supabase.from("properties").update({ status: "active" }).eq("id", report.property_id);
+                  await supabase.from("properties").update({ status: "active", checked_date: null }).eq("id", report.property_id);
                 }
               }
               setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
