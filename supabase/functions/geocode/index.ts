@@ -76,6 +76,17 @@ Deno.serve(async (req) => {
       if (!candidates.includes(shorter)) candidates.push(shorter);
     }
 
+    // 도로명 주소 폴백: "XX로 123" 또는 "XX길 123" 패턴에 "청주시" 붙이기
+    const roadMatch = address.match(/([가-힣0-9]+(?:로|길)\s*[\d-]+(?:번길\s*[\d-]+)?)/);
+    if (roadMatch) {
+      const roadOnly = roadMatch[1];
+      if (!candidates.includes(roadOnly)) candidates.push(roadOnly);
+      const withCity = "청주시 " + roadOnly;
+      if (!candidates.includes(withCity)) candidates.push(withCity);
+      const withFull = "충북 청주시 " + roadOnly;
+      if (!candidates.includes(withFull)) candidates.push(withFull);
+    }
+
     console.log("[geocode] Fallback candidates:", candidates);
 
     let first = null;
