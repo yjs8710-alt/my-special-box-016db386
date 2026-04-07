@@ -75,7 +75,7 @@ type DBProperty = {
   lng: number;
   is_new: boolean;
   is_hot: boolean;
-  status: "active" | "hidden";
+  status: "active" | "hidden" | "ended";
   registered_date: string;
   checked_date?: string;
   agent_name: string;
@@ -2593,6 +2593,65 @@ const AdminDashboard = () => {
                               )}
                               {r.report_type === "deal_complete" && (
                                 <>
+                                  {/* 매물 상세 정보 + 연락처 */}
+                                  {(() => {
+                                    const matchedProp = dbProperties.find(p => p.id === r.property_id);
+                                    return matchedProp ? (
+                                      <div className="md:col-span-2 rounded-xl border border-border p-3 space-y-2" style={{ background: "hsl(var(--muted) / 0.3)" }}>
+                                        <p className="text-[10px] font-bold text-muted-foreground mb-1">📋 매물 정보</p>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-xs">
+                                          <div><span className="text-muted-foreground">유형: </span><span className="font-semibold text-foreground">{matchedProp.type}</span></div>
+                                          <div><span className="text-muted-foreground">보증금: </span><span className="font-semibold text-foreground">{matchedProp.deposit}</span></div>
+                                          <div><span className="text-muted-foreground">월세: </span><span className="font-semibold text-foreground">{matchedProp.monthly}</span></div>
+                                          <div><span className="text-muted-foreground">면적: </span><span className="font-semibold text-foreground">{matchedProp.area}</span></div>
+                                          <div><span className="text-muted-foreground">층: </span><span className="font-semibold text-foreground">{matchedProp.floor}</span></div>
+                                          {matchedProp.unit_number && <div><span className="text-muted-foreground">호수: </span><span className="font-semibold text-foreground">{matchedProp.unit_number}</span></div>}
+                                          <div><span className="text-muted-foreground">담당: </span><span className="font-semibold text-foreground">{matchedProp.agent_name || "—"}</span></div>
+                                          <div><span className="text-muted-foreground">상태: </span><span className="font-semibold" style={{ color: matchedProp.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>{matchedProp.status === "active" ? "노출중" : matchedProp.status === "hidden" ? "숨김" : "종료"}</span></div>
+                                        </div>
+                                        {/* 연락처 (note 필드 파싱) */}
+                                        {matchedProp.note && (
+                                          <div className="flex flex-wrap gap-2 mt-1">
+                                            {matchedProp.note.split(/[\n|]/).filter(Boolean).map((line, i) => {
+                                              const phoneMatch = line.match(/([0-9\-]+)/);
+                                              return (
+                                                <a key={i} href={phoneMatch ? `tel:${phoneMatch[1]}` : undefined}
+                                                  className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg border border-border hover:bg-muted/60 transition-colors"
+                                                  style={{ color: "hsl(var(--primary))" }}>
+                                                  <Phone className="w-3 h-3" />
+                                                  {line.trim()}
+                                                </a>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+                                        {/* 종료 버튼 */}
+                                        {matchedProp.status !== "ended" && (
+                                          <button
+                                            onClick={async () => {
+                                              if (!window.confirm(`"${matchedProp.title}" 매물을 종료 처리하시겠습니까?`)) return;
+                                              const { error } = await supabase.from("properties").update({ status: "ended" }).eq("id", matchedProp.id);
+                                              if (error) { alert("종료 처리 실패: " + error.message); return; }
+                                              setDbProperties(prev => prev.map(p => p.id === matchedProp.id ? { ...p, status: "ended" as const } : p));
+                                              updateReportStatus(r.id, "resolved");
+                                              alert("매물이 종료 처리되었습니다.");
+                                            }}
+                                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white mt-1 transition-colors hover:opacity-90"
+                                            style={{ background: "hsl(var(--destructive))" }}>
+                                            <XCircle className="w-3.5 h-3.5" />
+                                            매물 종료 처리
+                                          </button>
+                                        )}
+                                        {matchedProp.status === "ended" && (
+                                          <p className="text-xs font-bold mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>✅ 이미 종료된 매물입니다</p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="md:col-span-2 rounded-xl bg-muted/40 border border-border p-3">
+                                        <p className="text-xs text-muted-foreground">매물 정보를 찾을 수 없습니다 (ID: {r.property_id})</p>
+                                      </div>
+                                    );
+                                  })()}
                                   {r.deal_date && (
                                     <div className="rounded-xl bg-muted/40 border border-border p-3">
                                       <p className="text-[10px] font-bold text-muted-foreground mb-0.5">거래 완료일</p>
