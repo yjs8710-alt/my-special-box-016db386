@@ -17,11 +17,12 @@ interface PropertyCardProps {
   elevator?: boolean;
   onDelete?: () => void;
   referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
+  referenceUnit?: string;  // 참고용 사진의 호수
 }
 
 const PropertyCard = ({
   image, title, address, type, area, floor, deposit, monthly,
-  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage
+  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage, referenceUnit
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
 
@@ -56,7 +57,7 @@ const PropertyCard = ({
                 className="absolute bottom-3 right-3 z-10 text-[10px] font-bold px-2 py-0.5 rounded-full"
                 style={{ background: "hsl(var(--accent))", color: "white" }}
               >
-                참고용
+                참고용{referenceUnit ? `(${referenceUnit}호)` : ""}
               </span>
             )}
           </>
