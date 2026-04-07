@@ -2116,9 +2116,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <span
               className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
-                background: "hsl(var(--primary)/0.1)",
-                color: "hsl(var(--primary))",
-                border: "1.5px solid hsl(var(--primary)/0.35)",
+                background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)",
+                color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))",
+                border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`,
+                textDecoration: isDealCompleted ? "line-through" : "none",
+                textDecorationColor: isDealCompleted ? "hsl(0 80% 50%)" : undefined,
+                textDecorationThickness: isDealCompleted ? "2px" : undefined,
               }}
             >
               {prop.type && <span>{prop.type}</span>}
