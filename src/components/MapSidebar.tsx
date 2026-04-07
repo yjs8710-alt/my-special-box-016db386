@@ -3457,11 +3457,19 @@ const MapSidebar = ({
                                         }}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          if (isRef) {
-                                            setLightbox({ units: [{ label: `${refUnit}호 (참고용)`, images: refImages }], unitIdx: 0 });
-                                          } else {
-                                            setLightbox({ units: [{ label: item.label, images: item.images! }], unitIdx: 0 });
+                                          const allWithImages = (landlordResults ?? []).filter(
+                                            (r) => r.sublabel === item.sublabel && r.images && r.images.length > 0 && r.images[0]
+                                          );
+                                          const units: LightboxUnit[] = allWithImages.map((r) => ({
+                                            label: r.unitNumber ? `${r.unitNumber}호` : r.label,
+                                            images: r.images!,
+                                          }));
+                                          if (isRef && units.length === 0) {
+                                            units.push({ label: `${refUnit}호 (참고용)`, images: refImages });
                                           }
+                                          if (units.length === 0) return;
+                                          const currentIdx = isRef ? units.length - 1 : allWithImages.findIndex((r) => r.id === item.id);
+                                          setLightbox({ units, unitIdx: Math.max(0, currentIdx) });
                                         }}
                                       />
                                       {isRef && (
@@ -3469,7 +3477,7 @@ const MapSidebar = ({
                                           className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                           style={{ background: "hsl(var(--accent))", color: "white" }}
                                         >
-                                          참고용({refUnit}호)
+                                          참고용
                                         </span>
                                       )}
                                     </>
@@ -3709,7 +3717,7 @@ const MapSidebar = ({
                                         className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                         style={{ background: "hsl(var(--accent))", color: "white" }}
                                       >
-                                        참고용({ref.unitNumber}호)
+                                        참고용
                                       </span>
                                     )}
                                   </>
