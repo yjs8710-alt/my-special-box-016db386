@@ -2859,6 +2859,7 @@ const MapSidebar = ({
       image: sibling.image,
       images: sibling.images && sibling.images.length > 0 ? sibling.images : [sibling.image],
       unitNumber: sibling.unitNumber || "?",
+      roomType: sibling.roomType || "",
     };
     // 2) inactive 매물에서 찾기
     const inactive = inactiveRefMap.get(prop.address);
@@ -2866,6 +2867,7 @@ const MapSidebar = ({
       image: inactive.image,
       images: inactive.images,
       unitNumber: inactive.unitNumber,
+      roomType: inactive.roomType || "",
     };
     return null;
   }, [inactiveRefMap]);
