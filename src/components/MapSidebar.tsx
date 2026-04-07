@@ -1024,7 +1024,7 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
     if (idx === 0) return;
     const next = [savedPhotos[idx], ...savedPhotos.filter((_, i) => i !== idx)];
     if (isDBProperty) {
-      await supabase.from("properties").update({ images: next }).eq("id", dbId);
+      await supabase.rpc("update_property_images", { _property_id: dbId, _images: next });
     } else {
       localStorage.setItem(storageKey, JSON.stringify(next));
     }
@@ -1040,7 +1040,7 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
       const filePath = url.replace(bucketBase + "/", "");
       await supabase.storage.from("property-images").remove([filePath]);
       const next = savedPhotos.filter((_, i) => i !== idx);
-      await supabase.from("properties").update({ images: next }).eq("id", dbId);
+      await supabase.rpc("update_property_images", { _property_id: dbId, _images: next });
       setSavedPhotos(next);
       onImagesUpdated?.(next);
     } else {
@@ -1070,7 +1070,7 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
         }
       }
       const merged = [...savedPhotos, ...newUrls];
-      const { error: updateErr } = await supabase.from("properties").update({ images: merged }).eq("id", dbId);
+      const { error: updateErr } = await supabase.rpc("update_property_images", { _property_id: dbId, _images: merged });
       if (!updateErr) {
         setSavedPhotos(merged);
         onImagesUpdated?.(merged);
