@@ -486,7 +486,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         form.lhType && form.lhType !== "관계없음" && `LH: ${form.lhType}`,
         form.exitCleanFee && `청소비: ${form.exitCleanFee}`,
         form.brokerFee && `중개보수: ${form.brokerFee}`,
-        form.roadAddress && `도로명: ${form.roadAddress}`,
+        (finalRoadAddress || form.roadAddress) && `도로명: ${finalRoadAddress || form.roadAddress}`,
       ].filter(Boolean).join("\n") || null,
       vacate_date: form.vacateDate || null,
     };
