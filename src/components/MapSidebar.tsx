@@ -3825,15 +3825,6 @@ const MapSidebar = ({
                                 </svg>
                               )}
                             </button>
-                            {/* 순번 — 하단 좌측 오버레이 */}
-                            <div
-                              className="absolute bottom-0 left-0 flex items-center gap-0.5 px-1 py-0.5"
-                              style={{ background: "rgba(0,0,0,0.52)", borderTopRightRadius: 4 }}
-                            >
-                              <span className="text-[9px] font-extrabold text-white leading-none flex-shrink-0">
-                                {idx}.
-                              </span>
-                            </div>
                             {(() => {
                               const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               const ref = !hasOwnImages ? findRefImage(prop, displayProperties) : null;
