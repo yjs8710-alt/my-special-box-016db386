@@ -2470,7 +2470,11 @@ const AdminDashboard = () => {
 
             const updateReportStatus = async (id: string, status: "pending" | "reviewed" | "resolved" | "rejected") => {
               const { error } = await supabase.from("property_reports").update({ status }).eq("id", id);
-              if (!error) setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
+              if (error) {
+                alert("처리 상태 변경 오류: " + error.message);
+                return;
+              }
+              setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
             };
 
             const saveReportMemo = async (id: string) => {
