@@ -3810,7 +3810,7 @@ const MapSidebar = ({
                                   e.stopPropagation();
                                   if (!hasOwnImages && ref) {
                                     // 참고용 사진 lightbox
-                                    setLightbox({ units: [{ label: `${ref.unitNumber}호`, images: ref.images, isReference: true }], unitIdx: 0 });
+                                    setLightbox({ units: [{ label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`, images: ref.images, isReference: true }], unitIdx: 0 });
                                     return;
                                   }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
