@@ -1970,8 +1970,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* 도로명 버튼 (hover 시 도로명주소 표시) */}
           {prop.roadAddress && (
             <span
-              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border cursor-default whitespace-nowrap relative group/road"
-              style={{ color: "hsl(var(--accent-foreground))", borderColor: "hsl(var(--border))", background: "hsl(var(--muted))" }}
+              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap relative group/road cursor-default"
+              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
               title={prop.roadAddress}
             >
               도로명

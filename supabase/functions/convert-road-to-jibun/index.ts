@@ -34,19 +34,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find properties with road addresses in lot_number
+    // Find ALL active properties that don't have 도로명 in their note
     const listRes = await fetch(
-      `${supabaseUrl}/rest/v1/properties?status=eq.active&lot_number=not.like.*-*&lot_number=like.*%EB%A1%9C*&select=id,address,dong,lot_number,note&limit=100`,
-      {
-        headers: {
-          apikey: serviceRoleKey,
-          Authorization: `Bearer ${serviceRoleKey}`,
-        },
-      }
-    );
-    // Also get properties with "길" in lot_number
-    const listRes2 = await fetch(
-      `${supabaseUrl}/rest/v1/properties?status=eq.active&lot_number=like.*%EA%B8%B8*&select=id,address,dong,lot_number,note&limit=100`,
+      `${supabaseUrl}/rest/v1/properties?status=eq.active&select=id,address,dong,lot_number,note,lat,lng&limit=500&order=created_at.desc`,
       {
         headers: {
           apikey: serviceRoleKey,
@@ -55,69 +45,83 @@ Deno.serve(async (req) => {
       }
     );
 
-    const props1 = listRes.ok ? await listRes.json() : [];
-    const props2 = listRes2.ok ? await listRes2.json() : [];
-    
-    // Deduplicate
-    const seen = new Set<string>();
-    const allProps = [...props1, ...props2].filter((p: { id: string; lot_number: string }) => {
-      if (seen.has(p.id)) return false;
-      seen.add(p.id);
-      // Only process if lot_number contains Korean road patterns
-      return /[가-힣].*(로|길)/.test(p.lot_number);
-    });
+    const allProps: {
+      id: string;
+      address: string;
+      dong: string;
+      lot_number: string;
+      note: string | null;
+      lat: number;
+      lng: number;
+    }[] = listRes.ok ? await listRes.json() : [];
 
-    console.log(`[convert] Found ${allProps.length} properties with road addresses`);
+    // Filter: only properties WITHOUT 도로명 in note, limit to 50 per run
+    const needsRoad = allProps
+      .filter((p) => !p.note || !/도로명[:\s]/.test(p.note))
+      .slice(0, 50);
 
-    const results: { id: string; oldAddress: string; newAddress: string; status: string }[] = [];
+    console.log(
+      `[convert] Total active: ${allProps.length}, needing road address: ${needsRoad.length}`
+    );
 
-    for (const prop of allProps) {
+    const results: {
+      id: string;
+      address: string;
+      roadAddress: string;
+      status: string;
+    }[] = [];
+
+    for (const prop of needsRoad) {
       try {
-        // Geocode the road address
-        const searchQuery = prop.address || `청주시 ${prop.dong} ${prop.lot_number}`;
+        // Use address for geocoding
+        const searchQuery = prop.address;
         const result = await searchKakao(searchQuery, kakaoApiKey);
-        
+
         if (!result) {
-          // Try with just lot_number
-          const result2 = await searchKakao(prop.lot_number, kakaoApiKey);
+          // Try with dong + lot_number
+          const fallback = `청주시 ${prop.dong} ${prop.lot_number}`;
+          const result2 = await searchKakao(fallback, kakaoApiKey);
           if (!result2) {
-            results.push({ id: prop.id, oldAddress: prop.address, newAddress: "", status: "not_found" });
+            results.push({
+              id: prop.id,
+              address: prop.address,
+              roadAddress: "",
+              status: "not_found",
+            });
             continue;
           }
           Object.assign(result, result2);
         }
 
-        const jibunAddress = result?.address?.address_name ?? "";
-        const roadAddress = result?.road_address?.address_name ?? prop.lot_number;
-        const lat = parseFloat(result.y);
-        const lng = parseFloat(result.x);
+        const roadAddress = result?.road_address?.address_name ?? "";
 
-        if (!jibunAddress) {
-          results.push({ id: prop.id, oldAddress: prop.address, newAddress: "", status: "no_jibun" });
+        if (!roadAddress) {
+          results.push({
+            id: prop.id,
+            address: prop.address,
+            roadAddress: "",
+            status: "no_road",
+          });
           continue;
         }
 
-        // Extract dong and lot from jibun address
-        const jibunMatch = jibunAddress.match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
-        if (!jibunMatch) {
-          results.push({ id: prop.id, oldAddress: prop.address, newAddress: jibunAddress, status: "parse_fail" });
-          continue;
-        }
-
-        const newDong = jibunMatch[1];
-        const newLot = jibunMatch[2];
-        
-        // Reconstruct address parts from original
-        const districtMatch = prop.address.match(/(청주시\s+[가-힣]+구)/);
-        const district = districtMatch ? districtMatch[1] : "";
-        const newAddress = ["충북", district, newDong, newLot].filter(Boolean).join(" ");
-
-        // Preserve road address in note
+        // Append 도로명 to note
         const noteStr = prop.note ?? "";
-        const hasRoadInNote = /도로명[:\s]/.test(noteStr);
-        const newNote = hasRoadInNote ? noteStr : [noteStr, `도로명: ${roadAddress}`].filter(Boolean).join("\n");
+        const newNote = [noteStr, `도로명: ${roadAddress}`]
+          .filter(Boolean)
+          .join("\n");
 
-        // Update the property
+        // Also update lat/lng if missing
+        const updates: Record<string, unknown> = { note: newNote };
+        if (!prop.lat || !prop.lng) {
+          const lat = parseFloat(result.y);
+          const lng = parseFloat(result.x);
+          if (lat && lng) {
+            updates.lat = lat;
+            updates.lng = lng;
+          }
+        }
+
         const updateRes = await fetch(
           `${supabaseUrl}/rest/v1/properties?id=eq.${prop.id}`,
           {
@@ -128,36 +132,34 @@ Deno.serve(async (req) => {
               "Content-Type": "application/json",
               Prefer: "return=minimal",
             },
-            body: JSON.stringify({
-              address: newAddress,
-              dong: newDong,
-              lot_number: newLot,
-              lat: lat || undefined,
-              lng: lng || undefined,
-              note: newNote,
-            }),
+            body: JSON.stringify(updates),
           }
         );
 
         results.push({
           id: prop.id,
-          oldAddress: prop.address,
-          newAddress,
-          status: updateRes.ok ? "converted" : "update_fail",
+          address: prop.address,
+          roadAddress,
+          status: updateRes.ok ? "added" : "update_fail",
         });
 
-        // Rate limit - wait 200ms between geocode calls
+        // Rate limit
         await new Promise((r) => setTimeout(r, 200));
       } catch (e) {
-        results.push({ id: prop.id, oldAddress: prop.address, newAddress: "", status: `error: ${e}` });
+        results.push({
+          id: prop.id,
+          address: prop.address,
+          roadAddress: "",
+          status: `error: ${e}`,
+        });
       }
     }
 
-    const converted = results.filter((r) => r.status === "converted").length;
-    console.log(`[convert] Done: ${converted}/${allProps.length} converted`);
+    const added = results.filter((r) => r.status === "added").length;
+    console.log(`[convert] Done: ${added}/${needsRoad.length} road addresses added`);
 
     return new Response(
-      JSON.stringify({ total: allProps.length, converted, results }),
+      JSON.stringify({ total: needsRoad.length, added, results }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

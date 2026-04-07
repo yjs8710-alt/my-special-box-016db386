@@ -517,24 +517,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       });
       if (!error && data?.success) {
         const updates: Partial<typeof form> = { lat: data.lat, lng: data.lng };
+        // 도로명주소 자동 저장
+        if (data.roadAddress && !form.roadAddress) {
+          updates.roadAddress = data.roadAddress as string;
+        }
         // 도로명으로 검색했을 때 지번 주소로 자동 변환
         if (data.jibunAddress) {
           const jibun = data.jibunAddress as string;
-          // jibunAddress 예: "충북 청주시 서원구 사창동 123-4"
-          // dong과 lot_number 추출
           const jibunMatch = jibun.match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
           if (jibunMatch) {
             const jibunDong = jibunMatch[1];
             const jibunLot = jibunMatch[2];
             updates.dong = jibunDong;
             updates.lot_number = jibunLot;
-            // address를 지번 기반으로 재구성
             setForm((f) => {
               const sg = f.district ? `청주시 ${f.district}` : "";
               const newAddress = ["충북", sg, jibunDong, jibunLot].filter(Boolean).join(" ");
               return { ...f, ...updates, address: newAddress };
             });
-            // dong state도 업데이트
             setDong(jibunDong);
             return;
           }
@@ -679,24 +679,27 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
     setSaving(true);
 
-    // 좌표가 없거나 도로명 주소인 경우 geocode 호출하여 좌표 + 지번 변환
+    // 좌표가 없거나 도로명 주소이거나 도로명정보가 없는 경우 geocode 호출
     let finalLat = form.lat;
     let finalLng = form.lng;
     let finalAddress = form.address;
     let finalDong = form.dong;
     let finalLotNumber = form.lot_number;
+    let finalRoadAddress = form.roadAddress;
     const isRoadAddr = form.lot_number?.match(/[가-힣].*(로|길)\s/);
-    if (!finalLat || !finalLng || isRoadAddr) {
+    if (!finalLat || !finalLng || isRoadAddr || !finalRoadAddress) {
       try {
         const geoQuery = isRoadAddr ? form.lot_number : form.address;
         const { data } = await supabase.functions.invoke("geocode", {
           body: { address: geoQuery },
         });
         if (data?.success) {
-          finalLat = data.lat;
-          finalLng = data.lng;
+          if (!finalLat || !finalLng) {
+            finalLat = data.lat;
+            finalLng = data.lng;
+          }
           // 도로명→지번 변환
-          if (data.jibunAddress) {
+          if (isRoadAddr && data.jibunAddress) {
             const jibunMatch = (data.jibunAddress as string).match(/([가-힣]+[동리읍면])\s+([\d-]+)$/);
             if (jibunMatch) {
               finalDong = jibunMatch[1];
@@ -705,9 +708,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               finalAddress = ["충북", sg, finalDong, finalLotNumber].filter(Boolean).join(" ");
             }
           }
-          // 도로명주소 보존 (note에 저장됨)
-          if (isRoadAddr && data.roadAddress && !form.roadAddress) {
-            setForm((f) => ({ ...f, roadAddress: data.roadAddress }));
+          // 도로명주소 저장
+          if (data.roadAddress && !finalRoadAddress) {
+            finalRoadAddress = data.roadAddress as string;
           }
         }
       } catch {
@@ -758,7 +761,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
       form.landArea && `대지: ${form.landArea}`,
-      form.roadAddress && `도로명: ${form.roadAddress}`,
+      finalRoadAddress && `도로명: ${finalRoadAddress}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
