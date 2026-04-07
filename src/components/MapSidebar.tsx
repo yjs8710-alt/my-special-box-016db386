@@ -1836,11 +1836,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     const handleCheckToggle = async (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
       setChecking(true);
-      const newDate = isChecked ? null : new Date().toISOString().slice(0, 10);
-      await supabase.from("properties").update({ checked_date: newDate }).eq("id", prop.memo);
+      // 체크 시 확인일을 0(null)으로 초기화
+      await supabase.from("properties").update({ checked_date: null }).eq("id", prop.memo);
       setChecking(false);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
@@ -2041,12 +2042,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       : `등록 후 ${daysFromReg}일 경과 — 클릭하여 확인 완료 표시`
                   }
                   onClick={handleCheckToggle}
-                  disabled={checking}
-                  className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all hover:scale-105 select-none"
+                  disabled={checking || !isAdmin}
+                  className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all select-none"
                   style={{
                     background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
                     border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
                     opacity: checking ? 0.5 : 1,
+                    cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
                   {isChecked ? (
