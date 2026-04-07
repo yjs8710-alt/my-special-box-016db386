@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
 
     // Find ALL active properties that don't have 도로명 in their note
     const listRes = await fetch(
-      `${supabaseUrl}/rest/v1/properties?status=eq.active&select=id,address,dong,lot_number,note,lat,lng&limit=500`,
+      `${supabaseUrl}/rest/v1/properties?status=eq.active&select=id,address,dong,lot_number,note,lat,lng&limit=500&order=created_at.desc`,
       {
         headers: {
           apikey: serviceRoleKey,
