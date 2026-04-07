@@ -3818,6 +3818,7 @@ const MapSidebar = ({
                                       ? sameAddr.map((p) => ({
                                           label: p.unitNumber ? `${p.unitNumber}호` : p.title || p.address,
                                           images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                          isReference: p.id !== prop.id,
                                         }))
                                       : [
                                           {
