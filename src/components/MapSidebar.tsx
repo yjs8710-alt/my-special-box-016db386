@@ -675,12 +675,9 @@ MemoNotepad.displayName = "MemoNotepad";
 interface ErrorReportModalProps {
   prop: MapProperty;
   onClose: () => void;
-  onDealComplete?: (pid: string) => void;
 }
-const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalProps) => {
-  const [reportType, setReportType] = useState<"error_report" | "deal_complete">("error_report");
+const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
   const [text, setText] = useState("");
-  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -709,26 +706,19 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
       }
 
       const propertyId = prop.dbId || String(prop.id);
-      const baseData = {
+      const { error } = await supabase.from("property_reports").insert({
         property_id: propertyId,
         property_title: prop.title || prop.address,
         property_address: prop.address,
-        report_type: reportType,
+        report_type: "error_report",
         submitted_by: userId,
         proposer_name: proposerName,
         proposer_company: proposerCompany,
         proposer_phone: proposerPhone,
-        error_content: reportType === "error_report" ? (text.trim() || null) : null,
-        deal_date: reportType === "deal_complete" ? dealDate : null,
-        deal_memo: reportType === "deal_complete" ? (text.trim() || null) : null,
-      };
-
-      const { error } = await supabase.from("property_reports").insert(baseData);
+        error_content: text.trim() || null,
+      });
       if (error) throw error;
       setSent(true);
-      if (reportType === "deal_complete") {
-        onDealComplete?.(propertyId);
-      }
     } catch (e) {
       console.error("제보 저장 실패:", e);
       alert("제보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -748,19 +738,17 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
         {/* 헤더 */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b border-border rounded-t-2xl flex-shrink-0"
-          style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2)/0.06)" : "hsl(var(--destructive)/0.06)" }}
+          style={{ background: "hsl(var(--destructive)/0.06)" }}
         >
           <div className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2)/0.12)" : "hsl(var(--destructive)/0.12)" }}
+              style={{ background: "hsl(var(--destructive)/0.12)" }}
             >
-              {reportType === "deal_complete"
-                ? <CheckCircle className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
-                : <AlertCircle className="w-4 h-4 text-destructive" />}
+              <AlertCircle className="w-4 h-4 text-destructive" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">매물 제보</p>
+              <p className="text-sm font-bold text-foreground">오류 제보</p>
               <p className="text-[10px] text-muted-foreground truncate max-w-[280px]">
                 {prop.buildingName ?? prop.title} {prop.unitNumber ?? ""}
               </p>
@@ -799,57 +787,18 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
               </p>
             </div>
 
-            {/* 제보 유형 선택: 오류제보 / 거래완료 */}
-            <div>
-              <p className="text-[11px] font-semibold text-foreground mb-2">제보 유형</p>
-              <div className="flex gap-2">
-                {([
-                  { key: "error_report" as const, label: "⚠️ 오류제보", color: "hsl(var(--destructive))" },
-                  { key: "deal_complete" as const, label: "✅ 거래완료", color: "hsl(var(--chart-2))" },
-                ]).map((t) => (
-                  <button
-                    key={t.key}
-                    onClick={() => setReportType(t.key)}
-                    className="flex-1 px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all"
-                    style={
-                      reportType === t.key
-                        ? { background: t.color, color: "#fff", borderColor: t.color }
-                        : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                    }
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 거래완료 선택 시 거래일 */}
-            {reportType === "deal_complete" && (
-              <div>
-                <p className="text-[11px] font-semibold text-foreground mb-1.5">거래일</p>
-                <input
-                  type="date"
-                  value={dealDate}
-                  onChange={(e) => setDealDate(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-foreground outline-none"
-                />
-              </div>
-            )}
-
             {/* 내용 (선택사항) */}
             <div>
               <p className="text-[11px] font-semibold text-foreground mb-1.5">
-                내용 <span className="text-muted-foreground font-normal">(선택)</span>
+                오류 내용 <span className="text-muted-foreground font-normal">(선택)</span>
               </p>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="추가 내용이 있으면 작성해 주세요."
+                placeholder="어떤 오류가 있는지 작성해 주세요."
                 rows={4}
                 className="w-full text-[12px] text-foreground leading-7 resize-none outline-none px-3 pt-2 pb-2 rounded-xl border border-border placeholder:text-muted-foreground/40"
-                style={{
-                  background: "hsl(var(--muted)/0.3)",
-                }}
+                style={{ background: "hsl(var(--muted)/0.3)" }}
               />
             </div>
 
@@ -858,7 +807,7 @@ const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalPro
               onClick={handleSend}
               disabled={saving}
               className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: reportType === "deal_complete" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff" }}
+              style={{ background: "hsl(var(--destructive))", color: "#fff" }}
             >
               <Send className="w-4 h-4" />
               {saving ? "제출 중..." : "제보하기"}
@@ -3165,7 +3114,7 @@ const MapSidebar = ({
         />
       )}
       {/* Error Report Modal */}
-      {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} onDealComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
+      {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} />}
       {/* Deal Complete Modal */}
       {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} onComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
       {/* Admin Property Edit Modal */}
