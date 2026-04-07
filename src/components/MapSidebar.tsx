@@ -3346,43 +3346,71 @@ const MapSidebar = ({
                         >
                           {/* Row: 동일 3컬럼 레이아웃 */}
                           <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
-                            {/* ①썸네일 */}
+                            {/* ①썸네일 + 참고용 사진 */}
                             <div
                               className="w-[96px] flex-shrink-0 overflow-hidden relative"
                               style={{ minHeight: "96px" }}
                             >
-                              {item.images && item.images.length > 0 && item.images[0] ? (
-                                <img
-                                  src={item.images[0]}
-                                  alt={item.label}
-                                  loading="eager"
-                                  decoding="async"
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover cursor-zoom-in"
-                                  style={{ imageRendering: "auto" }}
-                                  onError={(e) => {
-                                    const img = e.currentTarget;
-                                    img.style.display = "none";
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setLightbox({ units: [{ label: item.label, images: item.images! }], unitIdx: 0 });
-                                  }}
-                                />
-                              ) : (
-                                <div
-                                  className="w-full h-full flex flex-col items-center justify-center gap-0.5"
-                                  style={{ background: "hsl(var(--muted))" }}
-                                >
-                                  <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
-                                  <span
-                                    className="text-[8px] font-medium"
-                                    style={{ color: "hsl(var(--muted-foreground))" }}
+                              {(() => {
+                                const hasOwn = item.images && item.images.length > 0 && item.images[0];
+                                let refImg: string | null = null;
+                                if (!hasOwn && (landlordResults ?? []).length > 1) {
+                                  const sibling = (landlordResults ?? []).find(
+                                    (r) => r.id !== item.id && r.sublabel === item.sublabel && r.images && r.images.length > 0 && r.images[0]
+                                  );
+                                  if (sibling) refImg = sibling.images![0];
+                                }
+                                const showImg = hasOwn ? item.images![0] : refImg;
+                                const isRef = !hasOwn && !!refImg;
+
+                                if (showImg) {
+                                  return (
+                                    <>
+                                      <img
+                                        src={showImg}
+                                        alt={item.label}
+                                        loading="eager"
+                                        decoding="async"
+                                        referrerPolicy="no-referrer"
+                                        className={`w-full h-full object-cover cursor-zoom-in ${isRef ? "opacity-70" : ""}`}
+                                        style={{ imageRendering: "auto" }}
+                                        onError={(e) => {
+                                          const img = e.currentTarget;
+                                          img.style.display = "none";
+                                        }}
+                                        onClick={(e) => {
+                                          if (!isRef) {
+                                            e.stopPropagation();
+                                            setLightbox({ units: [{ label: item.label, images: item.images! }], unitIdx: 0 });
+                                          }
+                                        }}
+                                      />
+                                      {isRef && (
+                                        <span
+                                          className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded"
+                                          style={{ background: "hsl(var(--accent))", color: "white" }}
+                                        >
+                                          참고용
+                                        </span>
+                                      )}
+                                    </>
+                                  );
+                                }
+                                return (
+                                  <div
+                                    className="w-full h-full flex flex-col items-center justify-center gap-0.5"
+                                    style={{ background: "hsl(var(--muted))" }}
                                   >
-                                    사진없음
-                                  </span>
-                                </div>
-                              )}
+                                    <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
+                                    <span
+                                      className="text-[8px] font-medium"
+                                      style={{ color: "hsl(var(--muted-foreground))" }}
+                                    >
+                                      사진없음
+                                    </span>
+                                  </div>
+                                );
+                              })()}
                               {/* 순번 + 상태 배지 오버레이 */}
                               <div
                                 className="absolute bottom-0 left-0 right-0 flex items-center gap-0.5 px-1 py-0.5"
@@ -3562,47 +3590,73 @@ const MapSidebar = ({
                       >
                         {/* Row: 3줄 레이아웃 */}
                         <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
-                          {/* ①썸네일 96px — 고화질 렌더링 */}
+                          {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}
                           <div
                             className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
                             style={{ minHeight: "96px" }}
                           >
-                            {prop.image && prop.image.length > 0 ? (
-                              <img
-                                src={prop.image}
-                                alt={prop.title}
-                                loading="eager"
-                                decoding="async"
-                                referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                style={{
-                                  imageRendering: "auto",
-                                  WebkitBackfaceVisibility: "hidden",
-                                  backfaceVisibility: "hidden",
-                                }}
-                                onError={(e) => {
-                                  const img = e.currentTarget;
-                                  img.style.display = "none";
-                                  if (img.parentElement) {
-                                    img.parentElement.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center gap-0.5" style="background:hsl(var(--muted))"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg><span class="text-[8px] font-medium" style="color:hsl(var(--muted-foreground))">사진없음</span></div>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              /* 이미지 없는 DB 매물 placeholder */
-                              <div
-                                className="w-full h-full flex flex-col items-center justify-center gap-0.5"
-                                style={{ background: "hsl(var(--muted))" }}
-                              >
-                                <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
-                                <span
-                                  className="text-[8px] font-medium"
-                                  style={{ color: "hsl(var(--muted-foreground))" }}
+                            {(() => {
+                              const hasOwnImage = prop.image && prop.image.length > 0;
+                              // 사진 없으면 동일 주소 다른 매물에서 참고용 사진 찾기
+                              let refImage: string | null = null;
+                              if (!hasOwnImage && displayProperties.length > 1) {
+                                const sibling = displayProperties.find(
+                                  (p) => p.id !== prop.id && p.address === prop.address && p.image && p.image.length > 0
+                                );
+                                if (sibling) refImage = sibling.image;
+                              }
+                              const showImage = hasOwnImage ? prop.image : refImage;
+                              const isRef = !hasOwnImage && !!refImage;
+
+                              if (showImage) {
+                                return (
+                                  <>
+                                    <img
+                                      src={showImage}
+                                      alt={prop.title}
+                                      loading="eager"
+                                      decoding="async"
+                                      referrerPolicy="no-referrer"
+                                      className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
+                                      style={{
+                                        imageRendering: "auto",
+                                        WebkitBackfaceVisibility: "hidden",
+                                        backfaceVisibility: "hidden",
+                                      }}
+                                      onError={(e) => {
+                                        const img = e.currentTarget;
+                                        img.style.display = "none";
+                                        if (img.parentElement) {
+                                          img.parentElement.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center gap-0.5" style="background:hsl(var(--muted))"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg><span class="text-[8px] font-medium" style="color:hsl(var(--muted-foreground))">사진없음</span></div>`;
+                                        }
+                                      }}
+                                    />
+                                    {isRef && (
+                                      <span
+                                        className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded"
+                                        style={{ background: "hsl(var(--accent))", color: "white" }}
+                                      >
+                                        참고용
+                                      </span>
+                                    )}
+                                  </>
+                                );
+                              }
+                              return (
+                                <div
+                                  className="w-full h-full flex flex-col items-center justify-center gap-0.5"
+                                  style={{ background: "hsl(var(--muted))" }}
                                 >
-                                  사진없음
-                                </span>
-                              </div>
-                            )}
+                                  <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
+                                  <span
+                                    className="text-[8px] font-medium"
+                                    style={{ color: "hsl(var(--muted-foreground))" }}
+                                  >
+                                    사진없음
+                                  </span>
+                                </div>
+                              );
+                            })()}
                             <button
                               type="button"
                               onClick={(e) => {

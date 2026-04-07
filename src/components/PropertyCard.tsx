@@ -16,34 +16,55 @@ interface PropertyCardProps {
   buildYear?: string;
   elevator?: boolean;
   onDelete?: () => void;
+  referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
 }
 
 const PropertyCard = ({
   image, title, address, type, area, floor, deposit, monthly,
-  isNew, isHot, views, buildYear, elevator, onDelete
+  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
 
+  const hasOwnImage = image && image.length > 0;
+  const displayImage = hasOwnImage ? image : referenceImage || "";
+  const isRef = !hasOwnImage && !!referenceImage;
+
   return (
     <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
-        <img
-          src={image}
-          alt={title}
-          loading="eager"
-          decoding="async"
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          style={{ imageRendering: "auto" }}
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (!img.src.endsWith("/placeholder.svg")) img.src = "/placeholder.svg";
-          }}
-        />
+        {displayImage ? (
+          <>
+            <img
+              src={displayImage}
+              alt={title}
+              loading="eager"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
+              style={{ imageRendering: "auto" }}
+              onError={(e) => {
+                const img = e.currentTarget;
+                if (!img.src.endsWith("/placeholder.svg")) img.src = "/placeholder.svg";
+              }}
+            />
+            {isRef && (
+              <span
+                className="absolute bottom-3 right-3 z-10 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ background: "hsl(var(--accent))", color: "white" }}
+              >
+                참고용
+              </span>
+            )}
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <span className="text-xs text-muted-foreground">사진없음</span>
+          </div>
+        )}
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-1.5">
           {isNew && (
