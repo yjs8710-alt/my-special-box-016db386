@@ -761,7 +761,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
       form.landArea && `대지: ${form.landArea}`,
-      form.roadAddress && `도로명: ${form.roadAddress}`,
+      finalRoadAddress && `도로명: ${finalRoadAddress}`,
     ].filter(Boolean).join("\n");
 
     const payload = {
