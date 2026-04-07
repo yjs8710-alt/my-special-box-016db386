@@ -1310,9 +1310,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </label>
                     <input
                       type="text"
-                      placeholder="예) 2025.03.15"
+                      placeholder="예) 2025-03-15"
                       value={form.vacate_date ?? ""}
-                      onChange={(e) => set("vacate_date", e.target.value)}
+                      maxLength={10}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "").slice(0, 8);
+                        let formatted = raw;
+                        if (raw.length > 4) formatted = raw.slice(0, 4) + "-" + raw.slice(4);
+                        if (raw.length > 6) formatted = raw.slice(0, 4) + "-" + raw.slice(4, 6) + "-" + raw.slice(6);
+                        set("vacate_date", formatted);
+                      }}
                       className={ic}
                       style={form.vacate_date ? { borderColor: "hsl(0 85% 60%)", background: "hsl(0 85% 98%)" } : {}}
                     />
