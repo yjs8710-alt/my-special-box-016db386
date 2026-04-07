@@ -1833,9 +1833,10 @@ interface AddressToggleCardProps {
   roomPw: string | undefined;
   regDate: string | undefined;
   chkDate: string | undefined;
+  isDealCompleted?: boolean;
 }
 const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }, ref) => {
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, isDealCompleted }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
