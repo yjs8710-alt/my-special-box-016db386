@@ -37,6 +37,7 @@ import PublicRecordModal from "@/components/PublicRecordModal";
 interface LightboxUnit {
   label: string; // 예) "101호", "A동" 또는 단일 매물명
   images: string[];
+  isReference?: boolean; // 참고용 사진 여부
 }
 function LightboxModal({
   units,
@@ -90,20 +91,24 @@ function LightboxModal({
           className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          {units.map((u, i) => (
-            <button
-              key={i}
-              onClick={() => handleUnitChange(i)}
-              className="px-3 py-1 rounded-full text-xs font-bold transition-all"
-              style={
-                i === unitIdx
-                  ? { background: "hsl(var(--primary))", color: "#fff" }
-                  : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
-              }
-            >
-              {u.label}
-            </button>
-          ))}
+          {units.map((u, i) => {
+            const isCurrent = i === unitIdx;
+            const isRef = u.isReference;
+            return (
+              <button
+                key={i}
+                onClick={() => handleUnitChange(i)}
+                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                style={
+                  isCurrent
+                    ? { background: "hsl(var(--primary))", color: "#fff" }
+                    : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
+                }
+              >
+                {isRef ? `[다른방] ${u.label}` : units.length > 1 && !isRef ? `[현재방] ${u.label}` : u.label}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -140,6 +145,18 @@ function LightboxModal({
             </div>
           ))}
         </div>
+        {/* 참고용 안내 메시지 */}
+        {units[unitIdx]?.isReference && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 text-center z-10"
+            style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
+              다른 매물 사진입니다. 참고용입니다.
+            </span>
+          </div>
+        )}
         {currentImages.length > 1 && (
           <>
             <button
@@ -3465,7 +3482,7 @@ const MapSidebar = ({
                                             images: r.images!,
                                           }));
                                           if (isRef && units.length === 0) {
-                                            units.push({ label: `${refUnit}호 (참고용)`, images: refImages });
+                                            units.push({ label: `${refUnit}호`, images: refImages, isReference: true });
                                           }
                                           if (units.length === 0) return;
                                           const currentIdx = isRef ? units.length - 1 : allWithImages.findIndex((r) => r.id === item.id);
@@ -3789,7 +3806,7 @@ const MapSidebar = ({
                                   e.stopPropagation();
                                   if (!hasOwnImages && ref) {
                                     // 참고용 사진 lightbox
-                                    setLightbox({ units: [{ label: `${ref.unitNumber}호 (참고용)`, images: ref.images }], unitIdx: 0 });
+                                    setLightbox({ units: [{ label: `${ref.unitNumber}호`, images: ref.images, isReference: true }], unitIdx: 0 });
                                     return;
                                   }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
