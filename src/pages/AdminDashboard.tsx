@@ -2525,6 +2525,7 @@ const AdminDashboard = () => {
                       { key: "pending", label: "미처리" },
                       { key: "reviewed", label: "검토중" },
                       { key: "resolved", label: "처리완료" },
+                      { key: "rejected", label: "반려" },
                     ] as const).map((f) => (
                       <button key={f.key} onClick={() => setReportStatusFilter(f.key)}
                         className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
