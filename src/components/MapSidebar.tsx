@@ -145,6 +145,18 @@ function LightboxModal({
             </div>
           ))}
         </div>
+        {/* 참고용 안내 메시지 */}
+        {units[unitIdx]?.isReference && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 text-center z-10"
+            style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
+              다른 매물 사진입니다. 참고용입니다.
+            </span>
+          </div>
+        )
         {currentImages.length > 1 && (
           <>
             <button
