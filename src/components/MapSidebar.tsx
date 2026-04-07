@@ -2145,7 +2145,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             if (hasMulti) {
               return (
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
                   {wolseMatch && (
                     <span
                       className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
