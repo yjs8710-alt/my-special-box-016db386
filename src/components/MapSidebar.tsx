@@ -3356,7 +3356,7 @@ const MapSidebar = ({
                                 let refImg: string | null = null;
                                 if (!hasOwn && (landlordResults ?? []).length > 1) {
                                   const sibling = (landlordResults ?? []).find(
-                                    (r) => r.id !== item.id && r.address === item.address && r.images && r.images.length > 0 && r.images[0]
+                                    (r) => r.id !== item.id && r.sublabel === item.sublabel && r.images && r.images.length > 0 && r.images[0]
                                   );
                                   if (sibling) refImg = sibling.images![0];
                                 }
