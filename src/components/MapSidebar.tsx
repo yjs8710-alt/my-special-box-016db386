@@ -675,12 +675,9 @@ MemoNotepad.displayName = "MemoNotepad";
 interface ErrorReportModalProps {
   prop: MapProperty;
   onClose: () => void;
-  onDealComplete?: (pid: string) => void;
 }
-const ErrorReportModal = ({ prop, onClose, onDealComplete }: ErrorReportModalProps) => {
-  const [reportType, setReportType] = useState<"error_report" | "deal_complete">("error_report");
+const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
   const [text, setText] = useState("");
-  const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
 
