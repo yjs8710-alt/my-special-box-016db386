@@ -3771,11 +3771,19 @@ const MapSidebar = ({
                                 <span className="text-[8px] text-white/80 leading-none truncate">{regDate}</span>
                               )}
                             </div>
-                            {(prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [])
-                              .length > 0 && (
+                            {(() => {
+                              const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              const ref = !hasOwnImages ? findRefImage(prop, displayProperties) : null;
+                              if (!hasOwnImages && !ref) return null;
+                              return (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (!hasOwnImages && ref) {
+                                    // 참고용 사진 lightbox
+                                    setLightbox({ units: [{ label: `${ref.unitNumber}호 (참고용)`, images: ref.images }], unitIdx: 0 });
+                                    return;
+                                  }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
                                   const sameAddr = properties.filter(
                                     (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
@@ -3804,7 +3812,8 @@ const MapSidebar = ({
                               >
                                 <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
                               </button>
-                            )}
+                              );
+                            })()}
                           </div>
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
