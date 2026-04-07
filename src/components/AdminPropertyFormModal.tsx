@@ -1607,6 +1607,25 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 try {
                   const { error } = await supabase.from("properties").update({ status: "closed" }).eq("id", initial.id!);
                   if (error) { alert("오류: " + error.message); return; }
+                  // 신고/제안에 거래완료 기록 남기기
+                  const { data: { user } } = await supabase.auth.getUser();
+                  let pName: string | null = null, pCompany: string | null = null, pPhone: string | null = null;
+                  if (user) {
+                    const { data: profile } = await supabase.from("agent_profiles").select("name, agency_name, phone").eq("user_id", user.id).maybeSingle();
+                    if (profile) { pName = profile.name; pCompany = profile.agency_name; pPhone = profile.phone; }
+                  }
+                  await supabase.from("property_reports").insert({
+                    property_id: initial.id!,
+                    property_title: initial.title || form.title || "",
+                    property_address: initial.address || form.address || "",
+                    report_type: "deal_complete",
+                    status: "resolved",
+                    submitted_by: user?.id || null,
+                    proposer_name: pName,
+                    proposer_company: pCompany,
+                    proposer_phone: pPhone,
+                    deal_memo: "관리자 직접 종료",
+                  });
                   onSaved?.();
                   onClose();
                 } finally {
