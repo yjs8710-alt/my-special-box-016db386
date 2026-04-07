@@ -55,10 +55,10 @@ Deno.serve(async (req) => {
       lng: number;
     }[] = listRes.ok ? await listRes.json() : [];
 
-    // Filter: only properties WITHOUT 도로명 in note
-    const needsRoad = allProps.filter(
-      (p) => !p.note || !/도로명[:\s]/.test(p.note)
-    );
+    // Filter: only properties WITHOUT 도로명 in note, limit to 50 per run
+    const needsRoad = allProps
+      .filter((p) => !p.note || !/도로명[:\s]/.test(p.note))
+      .slice(0, 50);
 
     console.log(
       `[convert] Total active: ${allProps.length}, needing road address: ${needsRoad.length}`
