@@ -3508,12 +3508,11 @@ const MapSidebar = ({
                                         }}
                                       />
                                       {isRef && (
-                                        <span
-                                          className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
-                                          style={{ background: "hsl(var(--accent))", color: "white" }}
-                                        >
-                                          참고용
-                                        </span>
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                                          <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
+                                            참고용<br/>다른 호실 사진
+                                          </span>
+                                        </div>
                                       )}
                                     </>
                                   );
@@ -3748,12 +3747,11 @@ const MapSidebar = ({
                                       }}
                                     />
                                     {isRef && (
-                                      <span
-                                        className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
-                                        style={{ background: "hsl(var(--accent))", color: "white" }}
-                                      >
-                                        참고용
-                                      </span>
+                                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                                        <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
+                                          참고용<br/>다른 호실 사진
+                                        </span>
+                                      </div>
                                     )}
                                   </>
                                 );

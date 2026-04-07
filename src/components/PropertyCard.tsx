@@ -53,12 +53,11 @@ const PropertyCard = ({
               }}
             />
             {isRef && (
-              <span
-                className="absolute bottom-3 right-3 z-10 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ background: "hsl(var(--accent))", color: "white" }}
-              >
-                참고용
-              </span>
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <span className="text-[11px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
+                  참고용 다른 호실 사진
+                </span>
+              </div>
             )}
           </>
         ) : (
