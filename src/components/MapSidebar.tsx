@@ -3817,7 +3817,7 @@ const MapSidebar = ({
                                   const units: LightboxUnit[] =
                                     sameAddr.length > 1
                                       ? sameAddr.map((p) => ({
-                                          label: p.unitNumber ? `${p.unitNumber}호` : p.title || p.address,
+                                          label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                           images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                           isReference: p.id !== prop.id,
                                         }))
