@@ -851,8 +851,9 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
 interface DealCompleteModalProps {
   prop: MapProperty;
   onClose: () => void;
+  onComplete?: (propId: string) => void;
 }
-const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
+const DealCompleteModal = ({ prop, onClose, onComplete }: DealCompleteModalProps) => {
   const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
   const [memo, setMemo] = useState("");
   const [saving, setSaving] = useState(false);
