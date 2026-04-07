@@ -595,6 +595,23 @@ const MyProperties = () => {
         if (profiles) {
           const map: Record<string, { name: string; agency_name?: string }> = {};
           profiles.forEach(p => { map[p.user_id] = { name: p.name, agency_name: p.agency_name }; });
+
+          // registered_by가 없는 매물도 agent_name으로 프로필 매칭
+          if (props) {
+            const nameToProfile = new Map<string, { name: string; agency_name?: string }>();
+            profiles.forEach(p => { nameToProfile.set(p.name, { name: p.name, agency_name: p.agency_name }); });
+            props.forEach(p => {
+              const row = p as DBProperty;
+              if (!row.registered_by && row.agent_name) {
+                const matched = nameToProfile.get(row.agent_name);
+                if (matched) {
+                  // agent_name을 키로 사용하여 fallback 매핑
+                  map[`agent_name:${row.agent_name}`] = matched;
+                }
+              }
+            });
+          }
+
           setRegistrantMap(map);
         }
         setLoading(false);
