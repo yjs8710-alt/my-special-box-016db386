@@ -865,6 +865,25 @@ const DealCompleteModal = ({ prop, onClose, onComplete }: DealCompleteModalProps
       const {
         data: { session },
       } = await supabase.auth.getSession();
+      const userId = session?.user?.id ?? null;
+
+      // 제보자 프로필 조회
+      let proposerName: string | null = null;
+      let proposerCompany: string | null = null;
+      let proposerPhone: string | null = null;
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("agent_profiles")
+          .select("name, agency_name, phone")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (profile) {
+          proposerName = profile.name;
+          proposerCompany = profile.agency_name;
+          proposerPhone = profile.phone;
+        }
+      }
+
       const propertyId = prop.dbId || String(prop.id);
       const { error } = await supabase.from("property_reports").insert({
         property_id: propertyId,
@@ -873,7 +892,10 @@ const DealCompleteModal = ({ prop, onClose, onComplete }: DealCompleteModalProps
         report_type: "deal_complete",
         deal_date: dealDate,
         deal_memo: memo.trim() || null,
-        submitted_by: session?.user?.id ?? null,
+        submitted_by: userId,
+        proposer_name: proposerName,
+        proposer_company: proposerCompany,
+        proposer_phone: proposerPhone,
       });
       if (error) throw error;
       setDone(true);
