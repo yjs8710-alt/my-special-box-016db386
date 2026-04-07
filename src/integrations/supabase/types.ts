@@ -494,6 +494,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_property_images: {
+        Args: { _images: string[]; _property_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
