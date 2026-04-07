@@ -22,7 +22,7 @@ interface PropertyCardProps {
 
 const PropertyCard = ({
   image, title, address, type, area, floor, deposit, monthly,
-  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage
+  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage, referenceUnit
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
 
