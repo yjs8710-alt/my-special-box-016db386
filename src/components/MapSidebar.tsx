@@ -3886,6 +3886,7 @@ const MapSidebar = ({
                             regDate={regDate}
                             chkDate={chkDate}
                             isAdmin={isAdmin}
+                            isDealCompleted={isDealCompleted}
                           />
                         </div>
                       </div>
