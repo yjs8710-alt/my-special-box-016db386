@@ -2869,7 +2869,7 @@ const MapSidebar = ({
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
 
-  // 기존 거래완료 제보 불러오기 (새로고침 시에도 빨간줄 유지)
+  // 기존 거래완료 제보 불러오기 — 매물이 active인 경우에만 취소선 표시
   useEffect(() => {
     const loadDealCompleted = async () => {
       const { data } = await supabase
@@ -2878,6 +2878,8 @@ const MapSidebar = ({
         .eq("report_type", "deal_complete")
         .neq("status", "rejected");
       if (data && data.length > 0) {
+        // active 상태인 매물 중 거래완료 제보가 있는 것만 표시
+        // → 재등록(active 복구) 시 관련 제보도 rejected 처리해야 취소선이 사라짐
         setDealCompletedIds(new Set(data.map((r) => r.property_id)));
       } else {
         setDealCompletedIds(new Set());

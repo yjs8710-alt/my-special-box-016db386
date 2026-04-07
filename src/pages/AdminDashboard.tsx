@@ -1358,8 +1358,23 @@ const AdminDashboard = () => {
   const togglePropertyStatus = async (prop: DBProperty) => {
     setTogglingId(prop.id);
     const newStatus = prop.status === "active" ? "hidden" : "active";
-    const { error } = await supabase.from("properties").update({ status: newStatus }).eq("id", prop.id);
-    if (!error) setDbProperties((prev) => prev.map((p) => p.id === prop.id ? { ...p, status: newStatus } : p));
+    // 재등록(active 복구) 시 확인일 초기화 + 거래완료 제보 반려 처리
+    if (newStatus === "active") {
+      await supabase
+        .from("property_reports")
+        .update({ status: "rejected" })
+        .eq("property_id", prop.id)
+        .eq("report_type", "deal_complete")
+        .neq("status", "rejected");
+    }
+    const { error } = await supabase
+      .from("properties")
+      .update(newStatus === "active"
+        ? { status: newStatus, checked_date: null }
+        : { status: newStatus }
+      )
+      .eq("id", prop.id);
+    if (!error) setDbProperties((prev) => prev.map((p) => p.id === prop.id ? { ...p, status: newStatus, checked_date: newStatus === "active" ? undefined : p.checked_date } : p));
     else alert("상태 변경 오류: " + error.message);
     setTogglingId(null);
   };
@@ -2515,7 +2530,7 @@ const AdminDashboard = () => {
               if (status === "rejected") {
                 const report = reports.find((r) => r.id === id);
                 if (report && report.report_type === "deal_complete" && report.property_id) {
-                  await supabase.from("properties").update({ status: "active" }).eq("id", report.property_id);
+                  await supabase.from("properties").update({ status: "active", checked_date: null }).eq("id", report.property_id);
                 }
               }
               setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
