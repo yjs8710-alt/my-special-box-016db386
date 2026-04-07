@@ -3414,11 +3414,28 @@ const MapSidebar = ({
                               {(() => {
                                 const hasOwn = item.images && item.images.length > 0 && item.images[0];
                                 let refImg: string | null = null;
-                                if (!hasOwn && (landlordResults ?? []).length > 1) {
+                                let refImages: string[] = [];
+                                let refUnit = "";
+                                if (!hasOwn) {
+                                  // 동일 sublabel 다른 결과에서 찾기
                                   const sibling = (landlordResults ?? []).find(
                                     (r) => r.id !== item.id && r.sublabel === item.sublabel && r.images && r.images.length > 0 && r.images[0]
                                   );
-                                  if (sibling) refImg = sibling.images![0];
+                                  if (sibling) {
+                                    refImg = sibling.images![0];
+                                    refImages = sibling.images!;
+                                    refUnit = sibling.unitNumber || "?";
+                                  }
+                                  // inactive 매물에서도 찾기
+                                  if (!refImg) {
+                                    const addr = item.sublabel || "";
+                                    const inactive = inactiveRefMap.get(addr);
+                                    if (inactive) {
+                                      refImg = inactive.image;
+                                      refImages = inactive.images;
+                                      refUnit = inactive.unitNumber;
+                                    }
+                                  }
                                 }
                                 const showImg = hasOwn ? item.images![0] : refImg;
                                 const isRef = !hasOwn && !!refImg;
@@ -3439,18 +3456,20 @@ const MapSidebar = ({
                                           img.style.display = "none";
                                         }}
                                         onClick={(e) => {
-                                          if (!isRef) {
-                                            e.stopPropagation();
+                                          e.stopPropagation();
+                                          if (isRef) {
+                                            setLightbox({ units: [{ label: `${refUnit}호 (참고용)`, images: refImages }], unitIdx: 0 });
+                                          } else {
                                             setLightbox({ units: [{ label: item.label, images: item.images! }], unitIdx: 0 });
                                           }
                                         }}
                                       />
                                       {isRef && (
                                         <span
-                                          className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded"
+                                          className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                           style={{ background: "hsl(var(--accent))", color: "white" }}
                                         >
-                                          참고용
+                                          참고용({refUnit}호)
                                         </span>
                                       )}
                                     </>
@@ -3657,16 +3676,10 @@ const MapSidebar = ({
                           >
                             {(() => {
                               const hasOwnImage = prop.image && prop.image.length > 0;
-                              // 사진 없으면 동일 주소 다른 매물에서 참고용 사진 찾기
-                              let refImage: string | null = null;
-                              if (!hasOwnImage && displayProperties.length > 1) {
-                                const sibling = displayProperties.find(
-                                  (p) => p.id !== prop.id && p.address === prop.address && p.image && p.image.length > 0
-                                );
-                                if (sibling) refImage = sibling.image;
-                              }
-                              const showImage = hasOwnImage ? prop.image : refImage;
-                              const isRef = !hasOwnImage && !!refImage;
+                              // 사진 없으면 동일 주소 active 매물 → inactive 매물에서 참고용 사진 찾기
+                              const ref = !hasOwnImage ? findRefImage(prop, displayProperties) : null;
+                              const showImage = hasOwnImage ? prop.image : ref?.image || null;
+                              const isRef = !hasOwnImage && !!ref;
 
                               if (showImage) {
                                 return (
@@ -3693,10 +3706,10 @@ const MapSidebar = ({
                                     />
                                     {isRef && (
                                       <span
-                                        className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded"
+                                        className="absolute top-1 right-1 z-10 text-[7px] font-bold px-1 py-0.5 rounded leading-tight"
                                         style={{ background: "hsl(var(--accent))", color: "white" }}
                                       >
-                                        참고용
+                                        참고용({ref.unitNumber}호)
                                       </span>
                                     )}
                                   </>
