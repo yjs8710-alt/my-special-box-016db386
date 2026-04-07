@@ -2474,6 +2474,13 @@ const AdminDashboard = () => {
                 alert("처리 상태 변경 오류: " + error.message);
                 return;
               }
+              // 거래완료 제보를 반려 처리 시 → 매물 상태를 active로 복구
+              if (status === "rejected") {
+                const report = reports.find((r) => r.id === id);
+                if (report && report.report_type === "deal_complete" && report.property_id) {
+                  await supabase.from("properties").update({ status: "active" }).eq("id", report.property_id);
+                }
+              }
               setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
             };
 
