@@ -851,8 +851,9 @@ const ErrorReportModal = ({ prop, onClose }: ErrorReportModalProps) => {
 interface DealCompleteModalProps {
   prop: MapProperty;
   onClose: () => void;
+  onComplete?: (propId: string) => void;
 }
-const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
+const DealCompleteModal = ({ prop, onClose, onComplete }: DealCompleteModalProps) => {
   const [dealDate, setDealDate] = useState(new Date().toISOString().slice(0, 10));
   const [memo, setMemo] = useState("");
   const [saving, setSaving] = useState(false);
@@ -876,6 +877,8 @@ const DealCompleteModal = ({ prop, onClose }: DealCompleteModalProps) => {
       });
       if (error) throw error;
       setDone(true);
+      const pid = prop.dbId || String(prop.id);
+      onComplete?.(pid);
     } catch (e) {
       console.error("거래완료 저장 실패:", e);
       alert("처리 중 오류가 발생했습니다. 다시 시도해주세요.");
@@ -1830,9 +1833,10 @@ interface AddressToggleCardProps {
   roomPw: string | undefined;
   regDate: string | undefined;
   chkDate: string | undefined;
+  isDealCompleted?: boolean;
 }
 const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin }, ref) => {
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, isDealCompleted }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -2112,9 +2116,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <span
               className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
-                background: "hsl(var(--primary)/0.1)",
-                color: "hsl(var(--primary))",
-                border: "1.5px solid hsl(var(--primary)/0.35)",
+                background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)",
+                color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))",
+                border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`,
+                textDecoration: isDealCompleted ? "line-through" : "none",
+                textDecorationColor: isDealCompleted ? "hsl(0 80% 50%)" : undefined,
+                textDecorationThickness: isDealCompleted ? "2px" : undefined,
               }}
             >
               {prop.type && <span>{prop.type}</span>}
@@ -2138,7 +2145,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             if (hasMulti) {
               return (
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
                   {wolseMatch && (
                     <span
                       className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
@@ -2181,7 +2188,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             // 매매 여부 판별: note에 매매가 포함되거나 monthly가 비어있고 deposit이 있는 경우
             const isSaleProp = note.includes("매매가:") || (!prop.monthly && !!prop.deposit);
             return (
-              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap">
+              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
                 {isSaleProp ? (
                   <>
                     <span className="text-[11px] font-bold" style={{ color: "hsl(0 85% 55%)" }}>
@@ -2818,6 +2825,21 @@ const MapSidebar = ({
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
+  const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
+
+  // 기존 거래완료 제보 불러오기 (새로고침 시에도 빨간줄 유지)
+  useEffect(() => {
+    const loadDealCompleted = async () => {
+      const { data } = await supabase
+        .from("property_reports")
+        .select("property_id")
+        .eq("report_type", "deal_complete");
+      if (data && data.length > 0) {
+        setDealCompletedIds(new Set(data.map((r) => r.property_id)));
+      }
+    };
+    loadDealCompleted();
+  }, []);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
@@ -3096,7 +3118,7 @@ const MapSidebar = ({
       {/* Error Report Modal */}
       {errorReportProp && <ErrorReportModal prop={errorReportProp} onClose={() => setErrorReportProp(null)} />}
       {/* Deal Complete Modal */}
-      {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} />}
+      {dealCompleteProp && <DealCompleteModal prop={dealCompleteProp} onClose={() => setDealCompleteProp(null)} onComplete={(pid) => setDealCompletedIds(prev => new Set(prev).add(pid))} />}
       {/* Admin Property Edit Modal */}
       {adminEditProp &&
         (() => {
@@ -3690,7 +3712,7 @@ const MapSidebar = ({
                   const roomPw = prop.roomPassword;
                   const regDate = prop.registeredDate;
                   const chkDate = prop.checkedDate;
-
+                  const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
                     <div key={prop.id} className="flex flex-col">
                       <div
@@ -3881,6 +3903,7 @@ const MapSidebar = ({
                             regDate={regDate}
                             chkDate={chkDate}
                             isAdmin={isAdmin}
+                            isDealCompleted={isDealCompleted}
                           />
                         </div>
                       </div>
