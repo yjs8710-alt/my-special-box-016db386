@@ -100,8 +100,9 @@ export function useDBProperties(typeFilter?: string[]) {
     fetch();
 
     // Realtime 구독: 매물 변경 시 자동 갱신
+    const channelName = `db-properties-realtime-${typeFilter ? typeFilter.join(",") : "all"}-${Date.now()}`;
     const channel = supabase
-      .channel("db-properties-realtime")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "properties" },

@@ -765,8 +765,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
     try {
       if (initial?.id) {
-        const { error } = await supabase.from("properties").update(payload).eq("id", initial.id);
+        const { data: updated, error } = await supabase.from("properties").update(payload).eq("id", initial.id).select("id");
         if (error) { alert("수정 오류: " + error.message); return; }
+        if (!updated || updated.length === 0) { alert("수정 권한이 없거나 해당 매물을 찾을 수 없습니다."); return; }
         // 수정 후 건축물·토지대장 백그라운드 캐싱
         prefetchPropertySummary(payload.address, initial.id).catch(() => {});
       } else {
