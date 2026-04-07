@@ -103,7 +103,7 @@ type PropertyReport = {
   property_title: string;
   property_address: string;
   report_type: "error_report" | "deal_complete" | "rental_proposal";
-  status: "pending" | "reviewed" | "resolved";
+  status: "pending" | "reviewed" | "resolved" | "rejected";
   error_content?: string;
   deal_date?: string;
   deal_memo?: string;
@@ -1137,7 +1137,7 @@ const AdminDashboard = () => {
   const [reports, setReports] = useState<PropertyReport[]>([]);
   const [reportsLoading, setReportsLoading] = useState(false);
   const [reportFilter, setReportFilter] = useState<"all" | "error_report" | "deal_complete" | "rental_proposal">("all");
-  const [reportStatusFilter, setReportStatusFilter] = useState<"all" | "pending" | "reviewed" | "resolved">("all");
+  const [reportStatusFilter, setReportStatusFilter] = useState<"all" | "pending" | "reviewed" | "resolved" | "rejected">("all");
   const [expandedReport, setExpandedReport] = useState<string | null>(null);
   const [reportMemoInputs, setReportMemoInputs] = useState<Record<string, string>>({});
 
@@ -2467,7 +2467,7 @@ const AdminDashboard = () => {
               return true;
             });
 
-            const updateReportStatus = async (id: string, status: "pending" | "reviewed" | "resolved") => {
+            const updateReportStatus = async (id: string, status: "pending" | "reviewed" | "resolved" | "rejected") => {
               const { error } = await supabase.from("property_reports").update({ status }).eq("id", id);
               if (!error) setReports((prev) => prev.map((r) => r.id === id ? { ...r, status } : r));
             };
@@ -2694,7 +2694,7 @@ const AdminDashboard = () => {
                             {/* 상태 변경 */}
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-xs font-semibold text-muted-foreground">처리 상태:</span>
-                              {(["pending", "reviewed", "resolved"] as const).map((s) => (
+                              {(["pending", "reviewed", "resolved", "rejected"] as const).map((s) => (
                                 <button key={s} onClick={() => updateReportStatus(r.id, s)}
                                   className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
                                   style={r.status === s
