@@ -17,7 +17,7 @@ const HeroSection = () => {
           className="w-72 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-medium tracking-wide drop-shadow-lg">
+        <p className="text-2xl sm:text-3xl md:text-4xl text-white/90 font-medium tracking-wide drop-shadow-lg">
           공인중개사 전용 부동산 플랫폼
         </p>
 
