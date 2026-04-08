@@ -63,10 +63,13 @@ function getPinSize(zoomLevel: number): number {
  */
 function createPinHtml(_property: MapProperty, isSelected: boolean, zoomLevel: number) {
   const size = getPinSize(zoomLevel);
+  const imgH = Math.round(size * 1.2);
   const scale = isSelected ? 1.3 : 1;
   const shadow = isSelected
     ? `drop-shadow(0 0 8px rgba(120,80,255,0.6)) drop-shadow(0 3px 8px rgba(0,0,0,0.4))`
     : `drop-shadow(0 2px 5px rgba(0,0,0,0.35))`;
+
+  const pinUrl = `${window.location.origin}/images/map-pin.png`;
 
   return `
     <div style="
@@ -77,8 +80,10 @@ function createPinHtml(_property: MapProperty, isSelected: boolean, zoomLevel: n
       transform-origin:bottom center;
       cursor:pointer;
       filter:${shadow};
+      width:${size}px;
+      height:${imgH}px;
     ">
-      <img src="/images/map-pin.png" width="${size}" height="${Math.round(size * 1.2)}"
+      <img src="${pinUrl}" width="${size}" height="${imgH}"
         style="display:block;object-fit:contain;" />
     </div>
   `;
