@@ -61,83 +61,25 @@ function getPinSize(zoomLevel: number): number {
  * 개선된 집 모양 핀 — 원형 배경 + 집 아이콘
  * 가격 라벨 완전 제거
  */
-function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number) {
-  const color = TYPE_COLORS[property.type] ?? "#0369a1";
-  const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
-  const mainColor = isSelected ? accent : color;
+function createPinHtml(_property: MapProperty, isSelected: boolean, zoomLevel: number) {
   const size = getPinSize(zoomLevel);
-
-  // 원형 배경 지름 = 핀 크기, 아이콘은 55%
-  const circleDiam = size;
-  const iconSize = Math.round(size * 0.58);
-
-  const ringColor = isSelected ? "white" : "rgba(255,255,255,0.7)";
-  const ringWidth = isSelected ? 2.5 : 1.5;
+  const scale = isSelected ? 1.3 : 1;
   const shadow = isSelected
-    ? `drop-shadow(0 0 6px ${accent}cc) drop-shadow(0 3px 8px rgba(0,0,0,0.45))`
-    : `drop-shadow(0 2px 5px rgba(0,0,0,0.38))`;
-  const scale = isSelected ? 1.25 : 1;
-
-  // 꼬리(말풍선 삼각형) 높이 = size * 0.22
-  const tailH = Math.round(size * 0.22);
-  const tailW = Math.round(size * 0.3);
-
-  // 집 모양 SVG 아이콘 (지붕+몸체+창문+문)
-  const houseIcon = `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none"
-      xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
-      <!-- 지붕 -->
-      <path d="M2 11L12 2L22 11" fill="none" stroke="white" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- 몸체 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="white" opacity="0.25"/>
-      <!-- 몸체 테두리 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="none" stroke="white"
-        stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- 문 -->
-      <rect x="10" y="16" width="4" height="6" rx="0.5" fill="white" opacity="0.75"/>
-      <!-- 창문 좌 -->
-      <rect x="5.5" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-      <!-- 창문 우 -->
-      <rect x="15" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-    </svg>
-  `;
+    ? `drop-shadow(0 0 8px rgba(120,80,255,0.6)) drop-shadow(0 3px 8px rgba(0,0,0,0.4))`
+    : `drop-shadow(0 2px 5px rgba(0,0,0,0.35))`;
 
   return `
     <div style="
       display:flex;
-      flex-direction:column;
       align-items:center;
-      gap:0;
+      justify-content:center;
       transform:scale(${scale});
       transform-origin:bottom center;
       cursor:pointer;
       filter:${shadow};
     ">
-      <!-- 원형 배경 -->
-      <div style="
-        width:${circleDiam}px;
-        height:${circleDiam}px;
-        border-radius:50%;
-        background:${mainColor};
-        border:${ringWidth}px solid ${ringColor};
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        flex-shrink:0;
-      ">
-        ${houseIcon}
-      </div>
-      <!-- 말풍선 꼬리 삼각형 -->
-      <div style="
-        width:0;
-        height:0;
-        border-left:${Math.round(tailW/2)}px solid transparent;
-        border-right:${Math.round(tailW/2)}px solid transparent;
-        border-top:${tailH}px solid ${mainColor};
-        margin-top:-1px;
-        flex-shrink:0;
-      "></div>
+      <img src="/images/map-pin.png" width="${size}" height="${Math.round(size * 1.2)}"
+        style="display:block;object-fit:contain;" />
     </div>
   `;
 }
