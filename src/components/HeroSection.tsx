@@ -10,14 +10,14 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroBg})` }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-5 px-4 py-16">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-1 px-4 py-16">
         <img
           src={logoImg}
           alt="집다 로고"
           className="w-72 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-medium tracking-wide drop-shadow-lg">
+        <p className="text-2xl sm:text-3xl md:text-4xl text-white/90 font-medium tracking-wide drop-shadow-lg">
           공인중개사 전용 부동산 플랫폼
         </p>
 
