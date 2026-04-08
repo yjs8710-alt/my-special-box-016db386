@@ -10,7 +10,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${heroBg})` }} />
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-5 px-4 py-16">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center gap-1 px-4 py-16">
         <img
           src={logoImg}
           alt="집다 로고"
