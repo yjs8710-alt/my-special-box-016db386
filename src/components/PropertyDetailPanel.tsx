@@ -11,7 +11,7 @@ import {
   Layers,
   BadgeCheck,
   Share2,
-  ArrowUpRight,
+  ArrowUpDown,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -1622,7 +1622,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 },
                 { icon: <Car className="w-3.5 h-3.5" />, label: "주차", value: property.parking },
                 {
-                  icon: <ArrowUpRight className="w-3.5 h-3.5" />,
+                  icon: <ArrowUpDown className="w-3.5 h-3.5" />,
                   label: "엘리베이터",
                   value: property.elevator ? "있음" : "없음",
                 },

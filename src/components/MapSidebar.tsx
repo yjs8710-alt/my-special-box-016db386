@@ -2617,15 +2617,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" strokeWidth="2" />
-                    <path
-                      d="M9 10l3-3 3 3M9 14l3 3 3-3"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m7 15 5 5 5-5" />
+                    <path d="m7 9 5-5 5 5" />
                   </svg>
                 </span>,
               );
