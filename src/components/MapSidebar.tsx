@@ -438,6 +438,7 @@ interface ContactEmojiRowProps {
   propId: number;
   type: "owner" | "manager" | "tenant" | "broker";
   number: string | null;
+  number2?: string | null; // 소유주 2번째 연락처
 }
 
 /* 카카오 스타일 SVG 아이콘 */
@@ -483,7 +484,7 @@ const ContactIcon = forwardRef<SVGSVGElement, { type: string; active?: boolean }
 
 ContactIcon.displayName = "ContactIcon";
 
-const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number }, ref) => {
+const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number, number2 }, ref) => {
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
@@ -541,37 +542,63 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
       {showPopup && (
         <div
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex items-center gap-2 whitespace-nowrap"
+          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
           style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <span
-            className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
-            style={{ background: `${typeColor[type]}20` }}
-          >
-            <ContactIcon type={type} active />
-          </span>
+          {/* 첫 번째 연락처 */}
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+              style={{ background: `${typeColor[type]}20` }}
+            >
+              <ContactIcon type={type} active />
+            </span>
+            <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
+              {label}
+            </span>
+            <a
+              href={`tel:${number}`}
+              className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
+            >
+              {number}
+            </a>
+            {!number2 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPopup(false); }}
+                className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
+              >
+                <X className="w-2.5 h-2.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
 
-          <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
-            {label}
-          </span>
-
-          <a
-            href={`tel:${number}`}
-            className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
-          >
-            {number}
-          </a>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPopup(false);
-            }}
-            className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
-          >
-            <X className="w-2.5 h-2.5 text-muted-foreground" />
-          </button>
+          {/* 두 번째 연락처 (소유주2) */}
+          {number2 && (
+            <div className="flex items-center gap-2">
+              <span
+                className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+                style={{ background: `${typeColor[type]}20` }}
+              >
+                <ContactIcon type={type} active />
+              </span>
+              <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
+                {label}2
+              </span>
+              <a
+                href={`tel:${number2}`}
+                className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
+              >
+                {number2}
+              </a>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPopup(false); }}
+                className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
+              >
+                <X className="w-2.5 h-2.5 text-muted-foreground" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -3383,10 +3410,14 @@ const MapSidebar = ({
           // 또는 note: "건물주: 010-xxx\n부동산: 043-xxx\n..."
           const rawContact = adminEditProp.agentName ?? adminEditProp.note ?? "";
           const parseC = (key: string) => {
-            const m = rawContact.match(new RegExp(`${key}[:\\s]+([0-9][0-9\\-]+)`));
+            const pattern = key === "건물주"
+              ? /건물주(?!2)[:\s]+([0-9][0-9\-]+)/
+              : new RegExp(`${key}[:\\s]+([0-9][0-9\\-]+)`);
+            const m = rawContact.match(pattern);
             return m ? m[1].trim() : "";
           };
           const parsedOwner = adminEditProp.contactOwner || parseC("건물주");
+          const parsedOwner2 = adminEditProp.contactOwner2 || parseC("건물주2");
           const parsedBroker = adminEditProp.contact || parseC("부동산");
           const parsedTenant = parseC("세입자");
           const parsedManager = adminEditProp.contactManager || parseC("관리인");
@@ -3442,6 +3473,7 @@ const MapSidebar = ({
                       agent_name: parsedBroker,
                       // 아래는 AdminFormExtended 확장 필드로 초기화됨
                       ...(parsedOwner ? { contactOwner: parsedOwner } : {}),
+                      ...(parsedOwner2 ? { contactOwner2: parsedOwner2 } : {}),
                       ...(parsedTenant ? { contactTenant: parsedTenant } : {}),
                       ...(parsedManager ? { contactManager: parsedManager } : {}),
                     }
@@ -4131,7 +4163,7 @@ const MapSidebar = ({
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
                           <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
-                            <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
+                            <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} number2={prop.contactOwner2 ?? null} />
                             <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
                             <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
                           </div>
