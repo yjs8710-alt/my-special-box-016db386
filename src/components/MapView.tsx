@@ -121,7 +121,6 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       clearOverlays();
-      console.log("[MapView] renderOverlays called, props count:", props.length, "zoom:", zoom);
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         const isSelected = prop.id === selId;
@@ -141,7 +140,6 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
 
         overlaysRef.current.set(prop.id, overlay);
       });
-      console.log("[MapView] overlays created:", overlaysRef.current.size);
     },
     [clearOverlays]
   );
