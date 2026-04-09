@@ -1941,8 +1941,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const scrollEl = listScrollRef.current;
       const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
-      // 체크 시 확인일·등록일 모두 0(초기화)
-      await supabase.from("properties").update({ checked_date: null, registered_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
+      // 체크 시 확인일만 오늘로 설정 (등록일은 변경하지 않음)
+      await supabase.from("properties").update({ checked_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
       setChecking(false);
       // 리렌더 후 스크롤 위치 복원 (realtime refetch 대기)
       const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
@@ -2282,21 +2282,23 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             userId={userId}
             isAdmin={isAdmin}
           />
-          {/* 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 (모든 회원에게 표시, 수정은 관리자만) */}
+          {/* 확인 체크박스 — 확인일 기준 경과일(D+N) 자동 표시 (모든 회원에게 표시, 수정은 관리자만) */}
           {
             prop.memo &&
             (() => {
-              // 확인일(chkDate) 기준 경과일 (확인 체크용)
+              // 확인일(chkDate) 기준 경과일
               const daysSince = chkDate ? Math.floor((Date.now() - new Date(chkDate).getTime()) / 86400000) : null;
-              // 등록일(regDate) 기준 경과일 — 오늘 등록=0, 내일=1, ...
+              // 등록일(regDate) 기준 경과일
               const daysFromReg = regDate ? Math.floor((Date.now() - new Date(regDate).getTime()) / 86400000) : null;
+              // 경과일: 확인일 있으면 확인일 기준, 없으면 등록일 기준
+              const displayDays = daysSince ?? daysFromReg;
               return (
                 <button
                   type="button"
                   title={
                     isChecked
-                      ? `확인: ${chkDate} (확인 후 ${daysSince}일) | 등록 후 ${daysFromReg}일 — 클릭 시 초기화`
-                      : `등록 후 ${daysFromReg}일 경과 — 클릭하여 확인 완료 표시`
+                      ? `확인: ${chkDate} (확인 후 ${daysSince}일) | 등록: ${regDate}`
+                      : `등록: ${regDate} (${daysFromReg}일 경과) — 클릭하여 확인 완료 표시`
                   }
                   onClick={handleCheckToggle}
                   disabled={checking || !isAdmin}
@@ -2331,17 +2333,17 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       />
                     </svg>
                   )}
-                  {/* 등록일 기준 경과일 (D+N) */}
+                  {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
                     className="text-[10px] font-black whitespace-nowrap tabular-nums"
                     style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}
                   >
-                    {daysFromReg !== null ? daysFromReg : isChecked ? daysSince : "?"}
+                    {displayDays !== null ? displayDays : "?"}
                   </span>
                 </button>
               );
             })()}
-          {/* 등록일 */}
+          {/* 등록일 (최초 등록일자) */}
           {regDate && (
             <span
               className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums"
