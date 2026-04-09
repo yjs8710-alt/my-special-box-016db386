@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
-import buildingMemoIcon from "@/assets/icon_building_memo_clean.png";
 import {
   MapPin,
   ChevronRight,
@@ -2169,7 +2168,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <MemoNotepad
             propId={prop.id}
             memoKey="building"
-            icon={<img src={buildingMemoIcon} alt="건물메모" className="w-4 h-4" />}
+            icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
           />
