@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import buildingMemoIcon from "@/assets/icon_building_memo_clean.png";
 import {
   MapPin,
   ChevronRight,
