@@ -1913,7 +1913,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         return;
       }
 
-      const popup = window.open("", "kakao-roadview-window", "width=1280,height=900");
+      const popup = window.open("", "kakao-roadview-window", "width=" + screen.width + ",height=" + screen.height + ",left=0,top=0");
       if (!popup) {
         alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.");
         return;
@@ -1934,34 +1934,93 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <title>${prop.buildingName ?? prop.title ?? "로드뷰"}</title>
   <style>
     :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; height: 100%; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
-    body { display: grid; grid-template-rows: auto 1fr; }
-    header { padding: 14px 18px; background: #ffffff; border-bottom: 1px solid #e2e8f0; }
-    h1 { margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; }
-    p { margin: 6px 0 0; font-size: 12px; color: #475569; }
-    main { position: relative; min-height: 0; }
-    #roadview { width: 100%; height: 100%; background: #dbe4ee; }
-    #status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.94); color: #0f172a; text-align: center; padding: 24px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+    .toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #1e293b; color: #fff; z-index: 10; flex-shrink: 0; }
+    .toolbar h1 { font-size: 14px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toolbar .addr { font-size: 11px; color: #94a3b8; margin-left: 8px; }
+    .toolbar button { padding: 6px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+    .btn-rv { background: #3b82f6; color: #fff; }
+    .btn-rv.active { background: #2563eb; box-shadow: 0 0 0 2px #60a5fa; }
+    .btn-map { background: #475569; color: #fff; }
+    .btn-map.active { background: #059669; box-shadow: 0 0 0 2px #34d399; }
+    .btn-close { background: #ef4444; color: #fff; }
+    .btn-close:hover { background: #dc2626; }
+    .content { flex: 1; display: flex; position: relative; min-height: 0; }
+    .panel { flex: 1; min-width: 0; min-height: 0; position: relative; }
+    .panel.hidden { display: none; }
+    #roadview, #map { width: 100%; height: 100%; }
+    #status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(15,23,42,0.92); color: #fff; text-align: center; padding: 24px; z-index: 5; }
     #status strong { font-size: 16px; }
-    #status span { font-size: 13px; color: #475569; }
+    #status span { font-size: 13px; color: #94a3b8; }
+    .divider { width: 4px; background: #334155; cursor: col-resize; flex-shrink: 0; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}</h1>
-    <p>${prop.address}</p>
-  </header>
-  <main>
-    <div id="roadview"></div>
-    <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
-  </main>
+  <div class="toolbar">
+    <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}<span class="addr">${prop.address}</span></h1>
+    <button class="btn-rv active" id="btnRv" onclick="toggleView('rv')">로드뷰</button>
+    <button class="btn-map" id="btnMap" onclick="toggleView('map')">지도</button>
+    <button class="btn-close" onclick="window.close()">닫기</button>
+  </div>
+  <div class="content">
+    <div class="panel" id="rvPanel">
+      <div id="roadview"></div>
+      <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
+    </div>
+    <div class="panel hidden" id="mapPanel">
+      <div id="map"></div>
+    </div>
+  </div>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false"></script>
   <script>
     const data = ${payload};
     const radii = [30, 50, 100, 200, 400, 800, 1500];
     const statusEl = document.getElementById("status");
     const roadviewEl = document.getElementById("roadview");
+    const mapEl = document.getElementById("map");
+    const rvPanel = document.getElementById("rvPanel");
+    const mapPanel = document.getElementById("mapPanel");
+    const btnRv = document.getElementById("btnRv");
+    const btnMap = document.getElementById("btnMap");
+    let mapInstance = null;
+    let currentView = "rv"; // "rv" | "map" | "both"
+
+    function toggleView(mode) {
+      if (mode === "rv") {
+        if (currentView === "rv") return;
+        if (currentView === "map") { currentView = "rv"; }
+        else { currentView = "rv"; }
+      } else if (mode === "map") {
+        if (currentView === "map") { currentView = "rv"; }
+        else if (currentView === "rv") { currentView = "both"; }
+        else { currentView = "rv"; }
+      }
+
+      rvPanel.classList.toggle("hidden", currentView === "map");
+      mapPanel.classList.toggle("hidden", currentView === "rv");
+      btnRv.classList.toggle("active", currentView === "rv" || currentView === "both");
+      btnMap.classList.toggle("active", currentView === "map" || currentView === "both");
+
+      setTimeout(() => {
+        if (currentView !== "map") try { roadview.relayout(); } catch(e) {}
+        if (currentView !== "rv") {
+          if (!mapInstance) initMap();
+          else try { mapInstance.relayout(); } catch(e) {}
+        }
+      }, 100);
+    }
+
+    let roadview;
+    function initMap() {
+      const pos = new kakao.maps.LatLng(data.lat, data.lng);
+      mapInstance = new kakao.maps.Map(mapEl, { center: pos, level: 3 });
+      new kakao.maps.Marker({ position: pos, map: mapInstance });
+      mapInstance.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+      mapInstance.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
+    }
+
     const setStatus = (title, desc) => {
       statusEl.innerHTML = "<strong>" + title + "</strong><span>" + desc + "</span>";
       statusEl.style.display = "flex";
@@ -1970,7 +2029,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     kakao.maps.load(() => {
       try {
         const position = new kakao.maps.LatLng(data.lat, data.lng);
-        const roadview = new kakao.maps.Roadview(roadviewEl);
+        roadview = new kakao.maps.Roadview(roadviewEl);
         const roadviewClient = new kakao.maps.RoadviewClient();
 
         const searchNearest = (index = 0) => {
