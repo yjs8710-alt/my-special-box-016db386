@@ -367,40 +367,13 @@ const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => 
       </svg>
     ),
     애완동물가능: (
-      <svg width={s} height={s} viewBox="0 0 64 64" fill="currentColor">
-        <ellipse cx="32" cy="44" rx="18" ry="11" />
-        <circle cx="32" cy="26" r="12" />
-        <ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)" />
-        <ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)" />
-        <ellipse cx="25" cy="28" rx="2.5" ry="1.8" fill="white" />
-        <ellipse cx="39" cy="28" rx="2.5" ry="1.8" fill="white" />
-        <circle cx="25.5" cy="28" r="1.2" fill="#333" />
-        <circle cx="39.5" cy="28" r="1.2" fill="#333" />
-        <ellipse cx="32" cy="33" rx="3.5" ry="2" />
-        <rect x="22" y="53" width="6" height="9" rx="3" />
-        <rect x="36" y="53" width="6" height="9" rx="3" />
-      </svg>
+      <img src={boneIconSrc} alt="반려동물" width={s} height={s} style={{ objectFit: "contain" }} />
     ),
     반려동물_가능: (
-      <svg width={s} height={s} viewBox="0 0 64 64" fill="currentColor">
-        <ellipse cx="32" cy="44" rx="18" ry="11" />
-        <circle cx="32" cy="26" r="12" />
-        <ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)" />
-        <ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)" />
-        <ellipse cx="25" cy="28" rx="2.5" ry="1.8" fill="white" />
-        <ellipse cx="39" cy="28" rx="2.5" ry="1.8" fill="white" />
-        <circle cx="25.5" cy="28" r="1.2" fill="#333" />
-        <circle cx="39.5" cy="28" r="1.2" fill="#333" />
-        <ellipse cx="32" cy="33" rx="3.5" ry="2" />
-        <rect x="22" y="53" width="6" height="9" rx="3" />
-        <rect x="36" y="53" width="6" height="9" rx="3" />
-      </svg>
+      <img src={boneIconSrc} alt="반려동물" width={s} height={s} style={{ objectFit: "contain" }} />
     ),
     애완동물불가: (
-      <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-        <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
+      <img src={boneIconSrc} alt="반려동물불가" width={s} height={s} style={{ objectFit: "contain", opacity: 0.5 }} />
     ),
   };
   return icons[name] ?? <span className="text-[10px] leading-none">{name.slice(0, 1)}</span>;
