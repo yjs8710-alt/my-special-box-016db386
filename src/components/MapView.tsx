@@ -32,20 +32,18 @@ function createPinHtml(isSelected: boolean, zoomLevel: number): string {
   const shadow = isSelected
     ? "drop-shadow(0 0 10px rgba(59,130,246,0.7)) drop-shadow(0 4px 12px rgba(0,0,0,0.4))"
     : "drop-shadow(0 3px 6px rgba(0,0,0,0.35))";
-  const transition = "transition:transform 0.15s ease,filter 0.15s ease;";
 
   return `<div style="
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
+    width:${size}px;
+    height:${size}px;
     cursor:pointer;
     filter:${shadow};
-    ${transition}
+    transition:filter 0.15s ease;
   "><img
     src="${PIN_IMAGE_URL}"
     width="${size}"
     height="${size}"
-    style="display:block;object-fit:contain;pointer-events:none;"
+    style="display:block;width:${size}px;height:${size}px;object-fit:contain;pointer-events:none;"
     draggable="false"
     alt=""
   /></div>`;
