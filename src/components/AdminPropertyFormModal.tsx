@@ -244,8 +244,8 @@ const ElevatorSvgIcon = () => (
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
   { key: "엘리베이터", label: "엘리베이터", icon: <ElevatorSvgIcon />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
   { key: "수도",   label: "수도",   icon: <span>💧</span>, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-  { key: "유선TV", label: "유선TV", icon: <span>📺</span>, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-  { key: "인터넷", label: "인터넷", icon: <span>🌐</span>, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+  { key: "유선TV", label: "유선TV", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+  { key: "인터넷", label: "인터넷", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
   { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
@@ -1006,16 +1006,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 )}
               </Section>
 
-              {/* 건물이름 / 매물명 */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
-                  <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">매물명 *</label>
-                  <input type="text" placeholder="예) 흥덕구 원룸" value={form.title} onChange={(e) => set("title", e.target.value)} className={ic} />
-                </div>
+              {/* 건물이름 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
+                <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
               </div>
 
               {/* 층수 / 호수 / 평수 — 창고/공장매매 제외 */}
