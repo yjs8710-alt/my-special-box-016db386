@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import ReactDOM from "react-dom";
 import {
   MapPin,
   ChevronRight,
@@ -489,6 +490,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   const typeColor: Record<string, string> = {
     owner: "hsl(var(--primary))",
