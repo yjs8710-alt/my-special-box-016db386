@@ -50,7 +50,15 @@ const PropertyCard = ({
               style={{ imageRendering: "auto" }}
               onError={(e) => {
                 const img = e.currentTarget;
-                if (!img.src.endsWith("/placeholder.svg")) img.src = "/placeholder.svg";
+                // 로드 실패 시 로고 플레이스홀더로 교체
+                const parent = img.parentElement;
+                if (parent) {
+                  const fallback = document.createElement("div");
+                  fallback.className = "w-full h-full flex items-center justify-center bg-muted absolute inset-0";
+                  fallback.innerHTML = `<img src="${logoTransparent}" alt="집다 로고" class="w-20 h-auto opacity-40" />`;
+                  parent.appendChild(fallback);
+                  img.style.display = "none";
+                }
               }}
             />
             {isRef && (
