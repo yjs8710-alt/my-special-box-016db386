@@ -117,7 +117,8 @@ export function usePropertyFilter(
       // 거래 유형 (월세/전세/단기임대/임대/매매)
       if (filters.dealType.length > 0) {
         const isMaemae = (p.type ?? "").includes("매매") || (p.note ?? "").includes("매매가:");
-        const isJeonse = !isMaemae && (!p.monthly || p.monthly === "-" || p.monthly === "전세");
+        const monthlyVal = (p.monthly ?? "").trim();
+        const isJeonse = !isMaemae && (!monthlyVal || monthlyVal === "-" || monthlyVal === "0" || monthlyVal === "전세");
         const isWolse = !isMaemae && p.monthly && p.monthly !== "-" && p.monthly !== "전세";
         const match = filters.dealType.some((dt) => {
           if (dt === "매매") return isMaemae;
