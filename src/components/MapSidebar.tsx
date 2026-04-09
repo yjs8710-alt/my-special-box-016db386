@@ -3839,7 +3839,7 @@ const MapSidebar = ({
                                 }
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-muted">
-                                    <img src={logoTransparent} alt="집다 로고" className="w-12 h-auto opacity-40 select-none" />
+                                    <img src={logoTransparent} alt="집다 로고" className="w-24 h-auto opacity-40 select-none" />
                                   </div>
     
                                 );
@@ -4064,7 +4064,7 @@ const MapSidebar = ({
                                         const logo = document.createElement("img");
                                         logo.src = logoTransparent;
                                         logo.alt = "집다 로고";
-                                        logo.className = "w-12 h-auto opacity-40 select-none";
+                                        logo.className = "w-24 h-auto opacity-40 select-none";
 
                                         fallback.appendChild(logo);
                                         parent.prepend(fallback);
@@ -4082,7 +4082,7 @@ const MapSidebar = ({
                               }
                               return (
                                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                                  <img src={logoTransparent} alt="집다 로고" className="w-12 h-auto opacity-40 select-none" />
+                                  <img src={logoTransparent} alt="집다 로고" className="w-24 h-auto opacity-40 select-none" />
                                 </div>
     
                               );
