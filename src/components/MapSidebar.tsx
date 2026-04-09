@@ -542,37 +542,63 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
       {showPopup && (
         <div
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex items-center gap-2 whitespace-nowrap"
+          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
           style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <span
-            className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
-            style={{ background: `${typeColor[type]}20` }}
-          >
-            <ContactIcon type={type} active />
-          </span>
+          {/* 첫 번째 연락처 */}
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+              style={{ background: `${typeColor[type]}20` }}
+            >
+              <ContactIcon type={type} active />
+            </span>
+            <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
+              {label}
+            </span>
+            <a
+              href={`tel:${number}`}
+              className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
+            >
+              {number}
+            </a>
+            {!number2 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPopup(false); }}
+                className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
+              >
+                <X className="w-2.5 h-2.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
 
-          <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
-            {label}
-          </span>
-
-          <a
-            href={`tel:${number}`}
-            className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
-          >
-            {number}
-          </a>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPopup(false);
-            }}
-            className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
-          >
-            <X className="w-2.5 h-2.5 text-muted-foreground" />
-          </button>
+          {/* 두 번째 연락처 (소유주2) */}
+          {number2 && (
+            <div className="flex items-center gap-2">
+              <span
+                className="flex items-center justify-center w-5 h-5 rounded-full flex-shrink-0"
+                style={{ background: `${typeColor[type]}20` }}
+              >
+                <ContactIcon type={type} active />
+              </span>
+              <span className="text-[9px] font-bold" style={{ color: typeColor[type] }}>
+                {label}2
+              </span>
+              <a
+                href={`tel:${number2}`}
+                className="text-[12px] font-extrabold text-foreground hover:text-primary transition-colors tracking-tight"
+              >
+                {number2}
+              </a>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPopup(false); }}
+                className="ml-0.5 w-4 h-4 rounded-full bg-muted flex items-center justify-center hover:bg-border transition-colors"
+              >
+                <X className="w-2.5 h-2.5 text-muted-foreground" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
