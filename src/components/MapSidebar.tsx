@@ -29,6 +29,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon.png";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -3837,18 +3838,10 @@ const MapSidebar = ({
                                   );
                                 }
                                 return (
-                                  <div
-                                    className="w-full h-full flex flex-col items-center justify-center gap-0.5"
-                                    style={{ background: "hsl(var(--muted))" }}
-                                  >
-                                    <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
-                                    <span
-                                      className="text-[8px] font-medium"
-                                      style={{ color: "hsl(var(--muted-foreground))" }}
-                                    >
-                                      사진없음
-                                    </span>
+                                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                                    <img src={logoTransparent} alt="집다 로고" className="w-12 h-auto opacity-40 select-none" />
                                   </div>
+    
                                 );
                               })()}
                               {/* 순번 + 상태 배지 오버레이 */}
@@ -4059,10 +4052,21 @@ const MapSidebar = ({
                                       }}
                                       onError={(e) => {
                                         const img = e.currentTarget;
+                                        img.onerror = null;
                                         img.style.display = "none";
-                                        if (img.parentElement) {
-                                          img.parentElement.innerHTML = `<div class="w-full h-full flex flex-col items-center justify-center gap-0.5" style="background:hsl(var(--muted))"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg><span class="text-[8px] font-medium" style="color:hsl(var(--muted-foreground))">사진없음</span></div>`;
-                                        }
+                                        const parent = img.parentElement;
+                                        if (!parent || parent.querySelector('[data-thumb-fallback="logo"]')) return;
+                                        const fallback = document.createElement("div");
+                                        fallback.setAttribute("data-thumb-fallback", "logo");
+                                        fallback.className = "absolute inset-0 flex items-center justify-center bg-muted pointer-events-none";
+                                        const logo = document.createElement("img");
+                                        logo.src = logoTransparent;
+                                        logo.alt = "집다 로고";
+                                        logo.className = "w-12 h-auto opacity-40 select-none";
+                                        fallback.appendChild(logo);
+                                        parent.prepend(fallback);
+                                      }}
+    
                                       }}
                                     />
                                     {isRef && (
@@ -4076,18 +4080,10 @@ const MapSidebar = ({
                                 );
                               }
                               return (
-                                <div
-                                  className="w-full h-full flex flex-col items-center justify-center gap-0.5"
-                                  style={{ background: "hsl(var(--muted))" }}
-                                >
-                                  <Building2 className="w-5 h-5" style={{ color: "hsl(var(--muted-foreground))" }} />
-                                  <span
-                                    className="text-[8px] font-medium"
-                                    style={{ color: "hsl(var(--muted-foreground))" }}
-                                  >
-                                    사진없음
-                                  </span>
+                                <div className="w-full h-full flex items-center justify-center bg-muted">
+                                  <img src={logoTransparent} alt="집다 로고" className="w-12 h-auto opacity-40 select-none" />
                                 </div>
+    
                               );
                             })()}
                             <button
