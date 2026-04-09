@@ -3065,6 +3065,7 @@ const MapSidebar = ({
   landlordSearched,
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
+  const { user: authUser } = useAuth();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
