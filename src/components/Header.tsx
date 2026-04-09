@@ -77,13 +77,14 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                 <button
                   key={item.label}
                   onClick={() => navigate(item.path)}
-                  className="text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+                  className="flex items-center gap-1 text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                   style={
                     isActive(item.path)
                       ? { background: "rgba(255,255,255,0.12)", color: "white" }
                       : { color: "rgba(255,255,255,0.65)" }
                   }
                 >
+                  {item.label === "주거형 임대" && <img src={iconHouse} alt="" className="w-4 h-4" />}
                   {item.label}
                 </button>
               ))}
