@@ -9,7 +9,11 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
   // 형식: "건물주: 010-xxxx\n관리인: 010-yyyy" 또는 "건물주:010-xxxx|관리인:010-yyyy"
   const noteStr = String(row.note ?? row.agent_name ?? "");
   const parseContact = (key: string) => {
-    const m = noteStr.match(new RegExp(`${key}[:\\s]+([0-9\\-]+)`));
+    // "건물주"를 찾을 때 "건물주2"에 매칭되지 않도록 word boundary 처리
+    const pattern = key === "건물주"
+      ? /건물주(?!2)[:\s]+([0-9\-]+)/
+      : new RegExp(`${key}[:\\s]+([0-9\\-]+)`);
+    const m = noteStr.match(pattern);
     return m ? m[1].trim() : undefined;
   };
   const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
