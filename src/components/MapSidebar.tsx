@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import ReactDOM from "react-dom";
 import {
   MapPin,
   ChevronRight,
@@ -489,6 +490,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   const typeColor: Record<string, string> = {
     owner: "hsl(var(--primary))",
@@ -515,6 +518,10 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
       markRevealed(propId, type);
       setRevealed(true);
     }
+    if (!showPopup && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPopupPos({ top: rect.top + rect.height / 2, left: rect.right + 4 });
+    }
     setShowPopup((v) => !v);
   };
 
@@ -524,6 +531,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
       className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative"
     >
       <button
+        ref={btnRef}
         type="button"
         onClick={handleClick}
         title={label}
@@ -540,10 +548,10 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
         </span>
       </button>
 
-      {showPopup && (
+      {showPopup && ReactDOM.createPortal(
         <div
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
-          style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
+          className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
+          style={{ top: popupPos.top, left: popupPos.left, transform: "translateY(-50%)", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* 첫 번째 연락처 */}
@@ -599,7 +607,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
               </button>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -2749,9 +2758,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               CCTV: {
                 icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />,
                 title: "CCTV",
-                bg: "#f8fafc",
-                color: "#475569",
-                border: "#cbd5e1",
+                bg: "#fef2f2",
+                color: "#dc2626",
+                border: "#fca5a5",
               },
             };
 
