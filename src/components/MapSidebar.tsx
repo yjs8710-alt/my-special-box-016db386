@@ -438,6 +438,7 @@ interface ContactEmojiRowProps {
   propId: number;
   type: "owner" | "manager" | "tenant" | "broker";
   number: string | null;
+  number2?: string | null; // 소유주 2번째 연락처
 }
 
 /* 카카오 스타일 SVG 아이콘 */
