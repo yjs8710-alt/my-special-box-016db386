@@ -2632,20 +2632,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             // 옵션 배열 기반 아이콘 맵
             const fatDogIcon = (
-              <svg width="15" height="15" viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="32" cy="44" rx="18" ry="11" />
-                <circle cx="32" cy="26" r="12" />
-                <ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)" />
-                <ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)" />
-                <ellipse cx="24" cy="28" rx="3" ry="2" fill="white" />
-                <ellipse cx="40" cy="28" rx="3" ry="2" fill="white" />
-                <circle cx="25" cy="28" r="1.5" fill="#333" />
-                <circle cx="41" cy="28" r="1.5" fill="#333" />
-                <ellipse cx="32" cy="33" rx="4" ry="2.5" />
-                <path d="M26 37 Q32 41 38 37" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                <rect x="22" y="53" width="6" height="9" rx="3" />
-                <rect x="36" y="53" width="6" height="9" rx="3" />
-              </svg>
+              <img src={boneIconSrc} alt="반려동물" width={16} height={16} className="inline-block" style={{ objectFit: "contain" }} />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
