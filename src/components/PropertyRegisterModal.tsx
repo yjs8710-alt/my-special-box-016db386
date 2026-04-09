@@ -8,6 +8,7 @@ import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLe
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
+import cctvIcon from "@/assets/cctv_icon.png";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
@@ -871,13 +872,16 @@ function Step2({
   const SALE_TYPES = ["매매","단독매매","건물매매","다가구매매","다중매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매"];
   const isWarehouseSale = SALE_TYPES.includes(form.detailType);
 
+  const ElevatorSvgIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,3 5,11 19,11" /><polygon points="12,21 5,13 19,13" /></svg>
+  );
   // 부가 시설 옵션 (아이콘 뱃지로 표시) — 수정폼과 동일
-  const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
-    { key: "엘리베이터", label: "엘리베이터", icon: "🛗", bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
-    { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-    { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-    { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-    { key: "CCTV",  label: "CCTV",  icon: "📷", bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
+    { key: "엘리베이터", label: "엘리베이터", icon: <ElevatorSvgIcon />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
+    { key: "수도",   label: "수도",   icon: <span>💧</span>, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+    { key: "유선TV", label: "유선TV", icon: <span>📺</span>, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+    { key: "인터넷", label: "인터넷", icon: <span>🌐</span>, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+    { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
   ];
 
   return (
