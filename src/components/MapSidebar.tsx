@@ -1905,6 +1905,112 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       setShowOptPopup(false);
     };
 
+    const handleRoadviewOpen = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+
+      if (!prop.lat || !prop.lng) {
+        window.open(`https://map.kakao.com/?q=${encodeURIComponent(prop.address)}`, "_blank");
+        return;
+      }
+
+      const popup = window.open("", "kakao-roadview-window", "width=1280,height=900");
+      if (!popup) {
+        alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.");
+        return;
+      }
+
+      const payload = JSON.stringify({
+        title: prop.buildingName ?? prop.title ?? "로드뷰",
+        address: prop.address,
+        lat: prop.lat,
+        lng: prop.lng,
+      }).replace(/</g, "\\u003c");
+
+      const html = `<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${prop.buildingName ?? prop.title ?? "로드뷰"}</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+    body { display: grid; grid-template-rows: auto 1fr; }
+    header { padding: 14px 18px; background: #ffffff; border-bottom: 1px solid #e2e8f0; }
+    h1 { margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; }
+    p { margin: 6px 0 0; font-size: 12px; color: #475569; }
+    main { position: relative; min-height: 0; }
+    #roadview { width: 100%; height: 100%; background: #dbe4ee; }
+    #status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.94); color: #0f172a; text-align: center; padding: 24px; }
+    #status strong { font-size: 16px; }
+    #status span { font-size: 13px; color: #475569; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}</h1>
+    <p>${prop.address}</p>
+  </header>
+  <main>
+    <div id="roadview"></div>
+    <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
+  </main>
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false"></script>
+  <script>
+    const data = ${payload};
+    const radii = [30, 50, 100, 200, 400, 800, 1500];
+    const statusEl = document.getElementById("status");
+    const roadviewEl = document.getElementById("roadview");
+    const setStatus = (title, desc) => {
+      statusEl.innerHTML = "<strong>" + title + "</strong><span>" + desc + "</span>";
+      statusEl.style.display = "flex";
+    };
+
+    kakao.maps.load(() => {
+      try {
+        const position = new kakao.maps.LatLng(data.lat, data.lng);
+        const roadview = new kakao.maps.Roadview(roadviewEl);
+        const roadviewClient = new kakao.maps.RoadviewClient();
+
+        const searchNearest = (index = 0) => {
+          const radius = radii[index];
+          setStatus("가장 가까운 로드뷰를 찾는 중입니다.", radius + "m 반경까지 탐색 중");
+
+          roadviewClient.getNearestPanoId(position, radius, function (panoId) {
+            if (panoId) {
+              roadview.setPanoId(panoId, position);
+              statusEl.style.display = "none";
+              setTimeout(function () {
+                try { roadview.relayout(); } catch (e) {}
+              }, 120);
+              return;
+            }
+
+            if (index < radii.length - 1) {
+              searchNearest(index + 1);
+              return;
+            }
+
+            setStatus("주변에서 로드뷰를 찾지 못했습니다.", "좌표 주변 도로까지 자동 탐색했지만 표시 가능한 로드뷰가 없습니다.");
+          });
+        };
+
+        searchNearest();
+      } catch (error) {
+        setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.");
+      }
+    });
+  </script>
+</body>
+</html>`;
+
+      popup.document.open();
+      popup.document.write(html);
+      popup.document.close();
+      popup.focus();
+    };
+
     // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
     const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
     const rawArea = pyeong ? pyeong[1] + "평" : prop.area ? prop.area.split(" ")[0] : "";
@@ -1978,20 +2084,14 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {showFullAddr ? prop.address : shortAddress(prop.address)}
           </button>
           {/* 로드뷰 버튼 */}
-          <a
-            href={
-              prop.lat && prop.lng
-                ? `https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`
-                : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}`
-            }
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+          <button
+            type="button"
+            onClick={handleRoadviewOpen}
             className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
             style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
           >
             로드뷰
-          </a>
+          </button>
           {/* 도로명 버튼 (hover 시 도로명주소 표시) */}
           {prop.roadAddress && (
             <span
