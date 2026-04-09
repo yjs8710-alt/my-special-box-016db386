@@ -579,25 +579,77 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
 ContactEmojiRow.displayName = "ContactEmojiRow";
 
-/* ── MemoPopup ── (건물메모 / 방메모 이모티콘 클릭 팝업) */
-/* ── MemoNotepad ── 클릭 시 메모장(편집 가능) 팝업 */
+/* ── MemoNotepad ── DB 기반 사용자별 메모 (같은 사무소+관리자 열람 가능) */
 interface MemoNotepadProps {
-  propId: number;
+  propertyDbId: string | undefined; // DB UUID
+  propId: number; // fallback for localStorage (non-DB properties)
   memoKey: string; // "building" | "room"
   icon: React.ReactNode;
   label: string;
-  initialText: string;
+  initialText: string; // 기존 property 테이블의 메모 (관리자용)
+  userId?: string;
+  isAdmin?: boolean;
 }
 const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
-  ({ propId, memoKey, icon, label, initialText }, ref) => {
-    const storageKey = `memo_${propId}_${memoKey}`;
+  ({ propertyDbId, propId, memoKey, icon, label, initialText, userId, isAdmin }, ref) => {
     const [open, setOpen] = useState(false);
-    const [text, setText] = useState(() => localStorage.getItem(storageKey) ?? initialText);
+    const [myText, setMyText] = useState("");
+    const [otherMemos, setOtherMemos] = useState<Array<{ user_id: string; content: string; name?: string }>>([]);
+    const [loaded, setLoaded] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // DB에서 메모 로드
+    useEffect(() => {
+      if (!open || !propertyDbId || !userId) return;
+      setLoaded(false);
+      (async () => {
+        const { data } = await supabase
+          .from("property_user_memos")
+          .select("user_id, content")
+          .eq("property_id", propertyDbId)
+          .eq("memo_type", memoKey);
+
+        if (data) {
+          const mine = data.find((m) => m.user_id === userId);
+          setMyText(mine?.content ?? "");
+          const others = data.filter((m) => m.user_id !== userId && m.content.trim());
+          // 작성자 이름 가져오기
+          if (others.length > 0) {
+            const userIds = others.map((m) => m.user_id);
+            const { data: profiles } = await supabase
+              .from("agent_profiles")
+              .select("user_id, name")
+              .in("user_id", userIds);
+            const nameMap = new Map(profiles?.map((p) => [p.user_id, p.name]) ?? []);
+            setOtherMemos(others.map((m) => ({ ...m, name: nameMap.get(m.user_id) ?? "알 수 없음" })));
+          } else {
+            setOtherMemos([]);
+          }
+        }
+        setLoaded(true);
+      })();
+    }, [open, propertyDbId, userId, memoKey]);
+
+    // 자동 저장 (디바운스 1초)
     const handleChange = (v: string) => {
-      setText(v);
-      localStorage.setItem(storageKey, v);
+      setMyText(v);
+      if (!propertyDbId || !userId) return;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(async () => {
+        setSaving(true);
+        await supabase.from("property_user_memos").upsert(
+          { property_id: propertyDbId, user_id: userId, memo_type: memoKey, content: v },
+          { onConflict: "property_id,user_id,memo_type" }
+        );
+        setSaving(false);
+      }, 1000);
     };
+
+    // 비 DB 매물은 localStorage 폴백
+    const isDbProp = !!propertyDbId;
+    const storageKey = `memo_${propId}_${memoKey}`;
+    const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
     return (
       <div ref={ref} className="relative inline-flex">
@@ -625,7 +677,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
             />
 
             <div
-              className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[260px]"
+              className="fixed z-[9000] bg-white border border-border rounded-xl shadow-2xl w-[300px]"
               onClick={(e) => e.stopPropagation()}
               style={{
                 boxShadow: "0 8px 32px rgba(10,45,110,0.22)",
@@ -638,6 +690,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                 <div className="flex items-center gap-1.5">
                   <span className="flex items-center gap-1 text-sm leading-none">{icon}</span>
                   <span className="text-[11px] font-bold text-foreground">{label}</span>
+                  {saving && <span className="text-[9px] text-muted-foreground ml-1">저장 중...</span>}
                 </div>
 
                 <button
@@ -651,16 +704,58 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                 </button>
               </div>
 
-              <div className="p-2.5">
-                <textarea
-                  autoFocus
-                  value={text}
-                  onChange={(e) => handleChange(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  placeholder={`${label}를 입력하세요...`}
-                  rows={5}
-                  className="w-full text-[11px] resize-none outline-none bg-muted/50 border border-border rounded-lg px-2.5 py-2"
-                />
+              <div className="p-2.5 space-y-2">
+                {/* 내 메모 */}
+                <div>
+                  <p className="text-[10px] font-bold text-primary mb-1">내 메모</p>
+                  {isDbProp ? (
+                    <textarea
+                      autoFocus
+                      value={loaded ? myText : "불러오는 중..."}
+                      onChange={(e) => handleChange(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder={`${label}를 입력하세요...`}
+                      rows={4}
+                      disabled={!loaded}
+                      className="w-full text-[11px] resize-none outline-none bg-muted/50 border border-border rounded-lg px-2.5 py-2"
+                    />
+                  ) : (
+                    <textarea
+                      autoFocus
+                      value={fallbackText}
+                      onChange={(e) => {
+                        localStorage.setItem(storageKey, e.target.value);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder={`${label}를 입력하세요...`}
+                      rows={4}
+                      className="w-full text-[11px] resize-none outline-none bg-muted/50 border border-border rounded-lg px-2.5 py-2"
+                    />
+                  )}
+                </div>
+
+                {/* 관리자 원본 메모 (properties 테이블) */}
+                {initialText && (
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground mb-1">관리자 메모</p>
+                    <div className="text-[11px] text-foreground bg-muted/30 border border-border rounded-lg px-2.5 py-2 whitespace-pre-wrap">
+                      {initialText}
+                    </div>
+                  </div>
+                )}
+
+                {/* 같은 사무소 다른 회원 메모 */}
+                {otherMemos.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground mb-1">사무소 메모</p>
+                    {otherMemos.map((m, i) => (
+                      <div key={i} className="text-[11px] text-foreground bg-blue-50 border border-blue-100 rounded-lg px-2.5 py-2 mb-1 whitespace-pre-wrap">
+                        <span className="text-[10px] font-bold text-blue-600">{m.name}</span>
+                        <p className="mt-0.5">{m.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </>
