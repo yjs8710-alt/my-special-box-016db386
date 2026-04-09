@@ -1981,7 +1981,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <a
             href={
               prop.lat && prop.lng
-                ? `https://map.kakao.com/?map_type=TYPE_MAP&urlLevel=3&rv=on&rvLat=${prop.lat}&rvLng=${prop.lng}`
+                ? `https://map.kakao.com/link/roadview/${prop.lat},${prop.lng}`
                 : `https://map.kakao.com/?q=${encodeURIComponent(prop.address)}`
             }
             target="_blank"
