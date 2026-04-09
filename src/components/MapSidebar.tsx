@@ -607,7 +607,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
               </button>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
