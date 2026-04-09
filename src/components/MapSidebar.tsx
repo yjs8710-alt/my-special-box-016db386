@@ -32,7 +32,6 @@ import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
-import buildingMemoIcon from "@/assets/building-memo-icon.png";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
@@ -2169,7 +2168,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <MemoNotepad
             propId={prop.id}
             memoKey="building"
-            icon={<img src={buildingMemoIcon} alt="건물메모" className="w-3.5 h-3.5" />}
+            icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
           />
