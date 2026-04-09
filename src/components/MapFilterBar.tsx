@@ -473,7 +473,8 @@ const MapFilterBar = ({
             className="flex items-center bg-white overflow-hidden rounded-xl"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
-              width: 380,
+              minWidth: 380,
+              width: "fit-content",
               flexShrink: 0,
               border: `2px solid ${searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--primary))"}`,
               transition: "border-color 0.2s",
@@ -558,14 +559,16 @@ const MapFilterBar = ({
                     </span>
                   )}
                 </button>
-                <button
-                  onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
-                  className="flex items-center gap-1 px-2 h-10 transition-colors hover:text-destructive"
-                  style={{ borderLeft: "1px solid hsl(var(--border))", color: activeFilterCount > 0 ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}
-                >
-                  <X className="w-3 h-3" />
-                  <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
-                </button>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
+                    className="flex items-center gap-1 px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80"
+                    style={{ borderLeft: "1px solid hsl(var(--border))" }}
+                  >
+                    <X className="w-3 h-3" />
+                    <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
+                  </button>
+                )}
                 <button
                   onClick={() => onSearchClick?.()}
                   className="flex items-center justify-center h-10 px-4 text-xs font-bold"
