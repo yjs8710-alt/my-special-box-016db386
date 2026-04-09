@@ -1006,16 +1006,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 )}
               </Section>
 
-              {/* 건물이름 / 매물명 */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
-                  <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground">매물명 *</label>
-                  <input type="text" placeholder="예) 흥덕구 원룸" value={form.title} onChange={(e) => set("title", e.target.value)} className={ic} />
-                </div>
+              {/* 건물이름 */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">건물이름</label>
+                <input type="text" placeholder="건물명 (선택)" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} className={ic} />
               </div>
 
               {/* 층수 / 호수 / 평수 — 창고/공장매매 제외 */}
