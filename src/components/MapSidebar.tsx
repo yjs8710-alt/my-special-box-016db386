@@ -4150,6 +4150,7 @@ const MapSidebar = ({
                             regDate={regDate}
                             chkDate={chkDate}
                             isAdmin={isAdmin}
+                            userId={authUser?.userId}
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
                           />
