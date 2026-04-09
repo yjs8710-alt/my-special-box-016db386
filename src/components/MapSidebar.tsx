@@ -1941,8 +1941,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const scrollEl = listScrollRef.current;
       const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
-      // 체크 시 확인일을 null로 초기화 → 오름차순 정렬에서 아래로 이동
-      await supabase.from("properties").update({ checked_date: null }).eq("id", prop.memo);
+      // 토글: 확인일이 있으면 null로 초기화, 없으면 오늘로 설정
+      const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
+      await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
       // 리렌더 후 스크롤 위치 복원 (realtime refetch 대기)
       const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
