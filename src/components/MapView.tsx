@@ -123,6 +123,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       clearOverlays();
+      console.log("[MapView] renderOverlays called, props count:", props.length, "zoom:", zoom);
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         const isSelected = prop.id === selId;
@@ -136,12 +137,13 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
           content,
           map,
-          yAnchor: 1, // 이미지 하단 중앙이 좌표에 맞도록
+          yAnchor: 1,
           zIndex: isSelected ? 1000 : 0,
         });
 
         overlaysRef.current.set(prop.id, overlay);
       });
+      console.log("[MapView] overlays created:", overlaysRef.current.size);
     },
     [clearOverlays]
   );
