@@ -237,12 +237,15 @@ const ROOM_OPTIONS = [
   "옷장","전자키","복층","옥탑","테라스","주차",
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
-const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: string; bg: string; color: string; border: string }[] = [
-  { key: "엘리베이터", label: "엘리베이터", icon: "🛗", bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
-  { key: "수도",   label: "수도",   icon: "💧", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-  { key: "유선TV", label: "유선TV", icon: "📺", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-  { key: "인터넷", label: "인터넷", icon: "🌐", bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: "📷", bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+const ElevatorSvgIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12,3 5,11 19,11" /><polygon points="12,21 5,13 19,13" /></svg>
+);
+const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
+  { key: "엘리베이터", label: "엘리베이터", icon: <ElevatorSvgIcon />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
+  { key: "수도",   label: "수도",   icon: <span>💧</span>, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+  { key: "유선TV", label: "유선TV", icon: <span>📺</span>, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+  { key: "인터넷", label: "인터넷", icon: <span>🌐</span>, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
