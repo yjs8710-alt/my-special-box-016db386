@@ -548,10 +548,10 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
         </span>
       </button>
 
-      {showPopup && (
+      {showPopup && ReactDOM.createPortal(
         <div
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-1 z-[9000] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
-          style={{ boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
+          className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
+          style={{ top: popupPos.top, left: popupPos.left, transform: "translateY(-50%)", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* 첫 번째 연락처 */}
