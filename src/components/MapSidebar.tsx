@@ -3410,10 +3410,14 @@ const MapSidebar = ({
           // 또는 note: "건물주: 010-xxx\n부동산: 043-xxx\n..."
           const rawContact = adminEditProp.agentName ?? adminEditProp.note ?? "";
           const parseC = (key: string) => {
-            const m = rawContact.match(new RegExp(`${key}[:\\s]+([0-9][0-9\\-]+)`));
+            const pattern = key === "건물주"
+              ? /건물주(?!2)[:\s]+([0-9][0-9\-]+)/
+              : new RegExp(`${key}[:\\s]+([0-9][0-9\\-]+)`);
+            const m = rawContact.match(pattern);
             return m ? m[1].trim() : "";
           };
           const parsedOwner = adminEditProp.contactOwner || parseC("건물주");
+          const parsedOwner2 = adminEditProp.contactOwner2 || parseC("건물주2");
           const parsedBroker = adminEditProp.contact || parseC("부동산");
           const parsedTenant = parseC("세입자");
           const parsedManager = adminEditProp.contactManager || parseC("관리인");
