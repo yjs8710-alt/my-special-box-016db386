@@ -192,10 +192,11 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   // 집합건물 여부 판단: 건물유형이 집합건물이거나 세부유형이 아파트/오피스텔/빌라/연립 등
   const isCollectiveBuilding = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
-  // ── 주소(동+번지) 변경 시 전화번호 자동 로드 (단독건물: 동+번지 기준) ──────
+  // ── 주소(동+번지) 변경 시 전화번호 + 건물비밀번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
     if (!form.dong || isCollectiveBuilding) return;
     const run = async () => {
+      // 연락처 자동 로드
       let q = supabase
         .from("cheongju_contacts")
         .select("contact_owner,contact_manager,contact_broker,phone")
@@ -203,13 +204,33 @@ export default function PropertyRegisterModal({ onClose }: Props) {
         .is("unit_number", null);
       if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
       const { data } = await q.maybeSingle();
-      if (!data) return;
-      setForm((prev) => ({
-        ...prev,
-        contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
-        contactManager: prev.contactManager || data.contact_manager || "",
-        contactBroker: prev.contactBroker || data.contact_broker || "",
-      }));
+      if (data) {
+        setForm((prev) => ({
+          ...prev,
+          contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
+          contactManager: prev.contactManager || data.contact_manager || "",
+          contactBroker: prev.contactBroker || data.contact_broker || "",
+        }));
+      }
+
+      // 건물 비밀번호 자동 로드 (기존 매물에서)
+      if (form.lotNumber) {
+        let pq = supabase
+          .from("properties")
+          .select("building_password")
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lotNumber)
+          .not("building_password", "is", null)
+          .order("registered_date", { ascending: false })
+          .limit(1);
+        const { data: propData } = await pq.maybeSingle();
+        if (propData?.building_password) {
+          setForm((prev) => ({
+            ...prev,
+            buildingPassword: prev.buildingPassword || propData.building_password || "",
+          }));
+        }
+      }
     };
     run();
   }, [form.dong, form.lotNumber, form.buildingType, form.detailType]);

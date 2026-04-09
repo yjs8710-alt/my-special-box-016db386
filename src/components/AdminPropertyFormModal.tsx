@@ -607,7 +607,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (!dongVal || !lotVal) return;
     const { data } = await supabase
       .from("properties")
-      .select("total_floors,build_year,building_name")
+      .select("total_floors,build_year,building_name,building_password")
       .eq("dong", dongVal)
       .eq("lot_number", lotVal)
       .not("total_floors", "eq", "")
@@ -617,9 +617,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (data) {
       setForm((f) => ({
         ...f,
-        total_floors:  f.total_floors  || data.total_floors  || f.total_floors,
-        build_year:    f.build_year    || data.build_year    || f.build_year,
-        building_name: f.building_name || data.building_name || f.building_name,
+        total_floors:      f.total_floors      || data.total_floors      || f.total_floors,
+        build_year:        f.build_year        || data.build_year        || f.build_year,
+        building_name:     f.building_name     || data.building_name     || f.building_name,
+        building_password: f.building_password || data.building_password || f.building_password,
       }));
     }
   }, []);
