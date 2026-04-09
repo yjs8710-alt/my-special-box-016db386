@@ -63,7 +63,7 @@ const PropertyCard = ({
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
-            <span className="text-xs text-muted-foreground">사진없음</span>
+            <img src={logoTransparent} alt="집다 로고" className="w-20 h-auto opacity-40" />
           </div>
         )}
         {/* Badges */}
