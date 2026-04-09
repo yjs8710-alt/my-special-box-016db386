@@ -4158,7 +4158,7 @@ const MapSidebar = ({
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
                           <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
-                            <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} />
+                            <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} number2={prop.contactOwner2 ?? null} />
                             <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
                             <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
                           </div>
