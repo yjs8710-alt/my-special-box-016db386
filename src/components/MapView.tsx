@@ -13,25 +13,26 @@ const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
 const PIN_IMAGE_URL = "/images/map-pin.png";
 
 /* ── 커스텀 핀 이미지 크기 설정 ── */
-const PIN_BASE_SIZE = 80;   // 기본 크기 (px)
-const PIN_MIN_SIZE = 40;    // 최소 크기 (px)
-const PIN_SELECTED_SIZE = 100; // 선택 시 크기 (px)
 
-/** 줌 레벨(1~14) → 핀 크기(px) 매핑 — 확대(레벨↓)=작게, 축소(레벨↑)=크게 */
-function getPinSize(zoomLevel: number, isSelected: boolean): number {
-  if (isSelected) return PIN_SELECTED_SIZE;
-  // level 1(최대 확대) ~ level 14(최대 축소)
-  // level 5를 기준(80px), 레벨이 올라갈수록 커지고, 내려갈수록 작아짐
-  const size = Math.round(PIN_BASE_SIZE + (zoomLevel - 5) * 4);
-  return Math.max(PIN_MIN_SIZE, Math.min(120, size));
+/** 줌 레벨 → 핀 크기(px) — 확대(레벨↓)=크게, 축소(레벨↑)=작게 (이전 로직 동일) */
+function getPinSize(zoomLevel: number): number {
+  if (zoomLevel <= 2) return 52;
+  if (zoomLevel <= 3) return 46;
+  if (zoomLevel <= 4) return 40;
+  if (zoomLevel <= 5) return 34;
+  if (zoomLevel <= 6) return 28;
+  if (zoomLevel <= 7) return 22;
+  if (zoomLevel <= 8) return 17;
+  return 13;
 }
 
 /** 커스텀 이미지 핀 HTML 생성 함수 */
 function createPinHtml(isSelected: boolean, zoomLevel: number): string {
-  const size = getPinSize(zoomLevel, isSelected);
+  const baseSize = getPinSize(zoomLevel);
+  const size = isSelected ? Math.round(baseSize * 1.35) : baseSize;
   const shadow = isSelected
-    ? "drop-shadow(0 0 10px rgba(59,130,246,0.7)) drop-shadow(0 4px 12px rgba(0,0,0,0.4))"
-    : "drop-shadow(0 3px 6px rgba(0,0,0,0.35))";
+    ? "drop-shadow(0 0 8px rgba(59,130,246,0.7)) drop-shadow(0 3px 8px rgba(0,0,0,0.45))"
+    : "drop-shadow(0 2px 5px rgba(0,0,0,0.38))";
 
   return `<div style="
     width:${size}px;
@@ -43,7 +44,7 @@ function createPinHtml(isSelected: boolean, zoomLevel: number): string {
     src="${PIN_IMAGE_URL}"
     width="${size}"
     height="${size}"
-    style="display:block;width:${size}px;height:${size}px;object-fit:contain;pointer-events:none;"
+    style="display:block;width:${size}px;height:${size}px;object-fit:contain;pointer-events:none;background:none;"
     draggable="false"
     alt=""
   /></div>`;
