@@ -495,7 +495,7 @@ const MapFilterBar = ({
                 : <Search className="w-3.5 h-3.5" />
               }
               <span className="text-[10px] font-bold hidden sm:block">
-                {searchMode === "landlord" ? "소유주" : "검색"}
+                {searchMode === "landlord" ? "소유주" : "소유주검색"}
               </span>
             </button>
 
@@ -558,6 +558,16 @@ const MapFilterBar = ({
                     </span>
                   )}
                 </button>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => onFiltersChange({ ...DEFAULT_FILTERS })}
+                    className="flex items-center gap-1 px-2 h-10 transition-colors text-destructive hover:text-destructive/80"
+                    style={{ borderLeft: "1px solid hsl(var(--border))" }}
+                  >
+                    <X className="w-3 h-3" />
+                    <span className="text-[10px] font-bold">해제</span>
+                  </button>
+                )}
                 <button
                   onClick={() => onSearchClick?.()}
                   className="flex items-center justify-center h-10 px-4 text-xs font-bold"
