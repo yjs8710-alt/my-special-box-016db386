@@ -29,6 +29,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import boneIconSrc from "@/assets/bone_icon.png";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
