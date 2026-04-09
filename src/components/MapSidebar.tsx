@@ -2262,18 +2262,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           )}
           <span className="flex-1" />
           <MemoNotepad
+            propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
             icon={<ClipboardList className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
+            userId={userId}
+            isAdmin={isAdmin}
           />
           <MemoNotepad
+            propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
             icon={<PenLine className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="방메모"
             initialText={roomMemo ?? ""}
+            userId={userId}
+            isAdmin={isAdmin}
           />
           {/* 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 (모든 회원에게 표시, 수정은 관리자만) */}
           {
