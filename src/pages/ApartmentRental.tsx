@@ -39,7 +39,11 @@ const ApartmentRental = () => {
   const toggleDealType = (t: string) => setActiveDealTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
 
   const aptTypeFilter = activeTypes.length === 0 ? ["전체"] : activeTypes;
-  const filtered = usePropertyFilter(allProperties, filters, aptTypeFilter, query, propertyId);
+  const mergedFilters = useMemo(() => ({
+    ...filters,
+    dealType: activeDealTypes.length > 0 ? activeDealTypes : filters.dealType,
+  }), [filters, activeDealTypes]);
+  const filtered = usePropertyFilter(allProperties, mergedFilters, aptTypeFilter, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
 
   const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; }, []);
