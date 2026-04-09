@@ -1941,8 +1941,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const scrollEl = listScrollRef.current;
       const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
-      // 체크 시 확인일·등록일 모두 0(초기화)
-      await supabase.from("properties").update({ checked_date: null, registered_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
+      // 체크 시 확인일만 오늘로 설정 (등록일은 변경하지 않음)
+      await supabase.from("properties").update({ checked_date: new Date().toISOString().slice(0, 10) }).eq("id", prop.memo);
       setChecking(false);
       // 리렌더 후 스크롤 위치 복원 (realtime refetch 대기)
       const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
