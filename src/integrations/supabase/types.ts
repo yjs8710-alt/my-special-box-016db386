@@ -410,6 +410,36 @@ export type Database = {
         }
         Relationships: []
       }
+      property_user_memos: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          memo_type: string
+          property_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          memo_type: string
+          property_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          memo_type?: string
+          property_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       public_record_summary: {
         Row: {
           building_approval_date: string | null
