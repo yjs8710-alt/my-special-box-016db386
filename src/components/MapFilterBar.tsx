@@ -558,16 +558,14 @@ const MapFilterBar = ({
                     </span>
                   )}
                 </button>
-                {activeFilterCount > 0 && (
-                  <button
-                    onClick={() => onFiltersChange({ ...DEFAULT_FILTERS })}
-                    className="flex items-center gap-1 px-2 h-10 transition-colors text-destructive hover:text-destructive/80"
-                    style={{ borderLeft: "1px solid hsl(var(--border))" }}
-                  >
-                    <X className="w-3 h-3" />
-                    <span className="text-[10px] font-bold">해제</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
+                  className="flex items-center gap-1 px-2 h-10 transition-colors hover:text-destructive"
+                  style={{ borderLeft: "1px solid hsl(var(--border))", color: activeFilterCount > 0 ? "hsl(var(--destructive))" : "hsl(var(--muted-foreground))" }}
+                >
+                  <X className="w-3 h-3" />
+                  <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
+                </button>
                 <button
                   onClick={() => onSearchClick?.()}
                   className="flex items-center justify-center h-10 px-4 text-xs font-bold"
