@@ -32,6 +32,7 @@ export interface MapProperty {
   images?: string[];       // 여러장 사진
   contact: string;
   contactOwner?: string;
+  contactOwner2?: string;
   contactManager?: string;
   contactTenant?: string;
   agentName: string;

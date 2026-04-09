@@ -56,6 +56,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     checkedDate: row.checked_date ? String(row.checked_date) : undefined,
     contact: parseContact("부동산") ?? "",
     contactOwner: parseContact("건물주"),
+    contactOwner2: parseContact("건물주2"),
     contactManager: parseContact("관리인"),
     contactTenant: parseContact("세입자"),
     agentName: String(row.agent_name ?? ""),
