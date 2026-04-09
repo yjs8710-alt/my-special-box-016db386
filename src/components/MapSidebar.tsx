@@ -23,11 +23,11 @@ import {
   Dog,
   Droplet,
   Tv,
-  Cctv,
   Wifi,
   Loader2,
   FileSearch,
 } from "lucide-react";
+import cctvIcon from "@/assets/cctv_icon.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -2717,7 +2717,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#d8b4fe",
               },
               CCTV: {
-                icon: <Cctv size={14} strokeWidth={2} />,
+                icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />,
                 title: "CCTV",
                 bg: "#f8fafc",
                 color: "#475569",
