@@ -1,4 +1,5 @@
 import { MapPin, Eye, Heart, X } from "lucide-react";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { useState } from "react";
 
 interface PropertyCardProps {
