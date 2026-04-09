@@ -518,6 +518,10 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
       markRevealed(propId, type);
       setRevealed(true);
     }
+    if (!showPopup && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setPopupPos({ top: rect.top + rect.height / 2, left: rect.right + 4 });
+    }
     setShowPopup((v) => !v);
   };
 
