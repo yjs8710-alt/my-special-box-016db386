@@ -2168,7 +2168,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <MemoNotepad
             propId={prop.id}
             memoKey="building"
-            icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5} />}
+            icon={<img src={buildingMemoIcon} alt="건물메모" className="w-4 h-4" />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
           />
