@@ -17,6 +17,7 @@ import {
   Printer,
   Building2,
   Pencil,
+  PenLine,
   Upload,
   Trash2,
   Dog,
@@ -2168,29 +2169,14 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <MemoNotepad
             propId={prop.id}
             memoKey="building"
-            icon={<Building2 className="w-3 h-3 text-primary" strokeWidth={2.5} />}
+            icon={<ClipboardList className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
           />
           <MemoNotepad
             propId={prop.id}
             memoKey="room"
-            icon={
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14" />
-                <path d="M2 20h20" />
-                <path d="M14 12v.01" />
-              </svg>
-            }
+            icon={<PenLine className="w-3 h-3 text-primary" strokeWidth={2.5} />}
             label="방메모"
             initialText={roomMemo ?? ""}
           />
