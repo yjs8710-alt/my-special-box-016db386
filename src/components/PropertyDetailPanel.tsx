@@ -1622,7 +1622,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 },
                 { icon: <Car className="w-3.5 h-3.5" />, label: "주차", value: property.parking },
                 {
-                  icon: <ArrowUpDown className="w-3.5 h-3.5" />,
+                  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><polygon points="12,3 5,11 19,11" /><polygon points="12,21 5,13 19,13" /></svg>,
                   label: "엘리베이터",
                   value: property.elevator ? "있음" : "없음",
                 },
