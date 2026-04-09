@@ -2180,8 +2180,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             label="방메모"
             initialText={roomMemo ?? ""}
           />
-          {/* 관리자 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 */}
-          {isAdmin &&
+          {/* 확인 체크박스 — 등록일 기준 경과일(D+N) 자동 표시 (모든 회원에게 표시, 수정은 관리자만) */}
+          {
             prop.memo &&
             (() => {
               // 확인일(chkDate) 기준 경과일 (확인 체크용)
