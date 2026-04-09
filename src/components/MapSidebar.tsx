@@ -3473,6 +3473,7 @@ const MapSidebar = ({
                       agent_name: parsedBroker,
                       // 아래는 AdminFormExtended 확장 필드로 초기화됨
                       ...(parsedOwner ? { contactOwner: parsedOwner } : {}),
+                      ...(parsedOwner2 ? { contactOwner2: parsedOwner2 } : {}),
                       ...(parsedTenant ? { contactTenant: parsedTenant } : {}),
                       ...(parsedManager ? { contactManager: parsedManager } : {}),
                     }
