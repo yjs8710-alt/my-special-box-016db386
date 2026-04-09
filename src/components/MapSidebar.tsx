@@ -531,6 +531,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
       className="flex-1 flex flex-col items-center justify-center border-b border-border/20 last:border-b-0 relative"
     >
       <button
+        ref={btnRef}
         type="button"
         onClick={handleClick}
         title={label}
