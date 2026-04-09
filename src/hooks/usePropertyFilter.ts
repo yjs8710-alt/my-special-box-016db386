@@ -116,14 +116,15 @@ export function usePropertyFilter(
 
       // 거래 유형 (월세/전세/단기임대/임대/매매)
       if (filters.dealType.length > 0) {
-        const isJeonse = !p.monthly || p.monthly === "-" || p.monthly === "전세";
-        const isWolse = p.monthly && p.monthly !== "-" && p.monthly !== "전세";
+        const isMaemae = (p.type ?? "").includes("매매") || (p.note ?? "").includes("매매가:");
+        const isJeonse = !isMaemae && (!p.monthly || p.monthly === "-" || p.monthly === "전세");
+        const isWolse = !isMaemae && p.monthly && p.monthly !== "-" && p.monthly !== "전세";
         const match = filters.dealType.some((dt) => {
+          if (dt === "매매") return isMaemae;
           if (dt === "월세") return isWolse;
           if (dt === "전세") return isJeonse;
           if (dt === "단기임대") return (p.availableFrom ?? "").includes("단기");
-          if (dt === "임대") return true; // 상가임대 페이지: 임대=전체 포함
-          if (dt === "매매") return false; // 상가임대에서 매매는 별도
+          if (dt === "임대") return !isMaemae;
           return true;
         });
         if (!match) return false;
