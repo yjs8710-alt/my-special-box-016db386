@@ -17,6 +17,7 @@ import {
   Printer,
   Building2,
   Pencil,
+  PenLine,
   Upload,
   Trash2,
   Dog,
