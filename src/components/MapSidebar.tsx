@@ -2671,10 +2671,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="12,3 5,11 19,11" />
-                    <polygon points="12,21 5,13 19,13" />
-                  </svg>
+                  <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" />
                 </span>,
               );
 
@@ -2733,31 +2730,14 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#fca5a5",
               },
               수도: {
-                icon: <Droplet size={14} strokeWidth={2} />,
+                icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" />,
                 title: "수도",
                 bg: "#eff6ff",
                 color: "#1d4ed8",
                 border: "#93c5fd",
               },
               인터넷: {
-                icon: (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M5 12.55a11 11 0 0 1 14.08 0"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path d="M1.42 9a16 16 0 0 1 21.16 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path
-                      d="M8.53 16.11a6 6 0 0 1 6.95 0"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="12" cy="20" r="1.5" fill="currentColor" />
-                  </svg>
-                ),
+                icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" />,
                 title: "인터넷",
                 bg: "#f0fdf4",
                 color: "#15803d",
