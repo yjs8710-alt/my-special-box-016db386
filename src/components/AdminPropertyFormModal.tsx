@@ -247,7 +247,7 @@ const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNod
   { key: "수도",   label: "수도",   icon: <span>💧</span>, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
   { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5" />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
   { key: "인터넷", label: "인터넷", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-3.5 h-3.5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  { key: "CCTV",  label: "CCTV",  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
