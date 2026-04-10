@@ -2678,7 +2678,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             // 옵션 배열 기반 아이콘 맵
             const petImgIcon = (
-              <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" />
+              <img src={petIcon} alt="반려동물" className="w-10 h-10 object-contain" />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
