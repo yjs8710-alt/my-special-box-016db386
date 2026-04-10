@@ -12,9 +12,9 @@ const HeroSection = () => {
 
       <div className="relative z-10 flex flex-col items-center justify-center text-center gap-1 px-4 py-16">
         <img
-          src={logoImg}
+          src={heroLogo}
           alt="집다 로고"
-          className="w-72 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)] brightness-0 invert"
+          className="w-72 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
 
