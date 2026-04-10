@@ -2642,7 +2642,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               )}
             </>
           )}
-          <span className="flex-shrink min-w-0" style={{ flexGrow: 1, flexBasis: 0 }} />
+          <span className="w-1" />
           {/* ⑨ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV/CCTV) — 아이콘만 표시 */}
           {(() => {
             type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
