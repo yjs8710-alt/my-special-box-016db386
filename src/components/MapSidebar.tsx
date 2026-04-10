@@ -27,8 +27,15 @@ import {
   Wifi,
   Loader2,
   FileSearch,
-  Shield,
 } from "lucide-react";
+import cctvIcon from "@/assets/cctv_icon.png";
+import tvIcon from "@/assets/tv_icon.png";
+import waterIcon from "@/assets/water_icon.png";
+import elevatorIcon from "@/assets/elevator_icon.png";
+import internetIcon from "@/assets/internet_icon.png";
+import petIcon from "@/assets/pet_icon.png";
+import checkDateIcon from "@/assets/check_date_icon.png";
+import memoIcon from "@/assets/memo_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
@@ -2307,7 +2314,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<PenLine className="w-4 h-4" />}
+            icon={<img src={memoIcon} alt="건물메모" className="w-5 h-5 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -2317,7 +2324,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<PenLine className="w-4 h-4" />}
+            icon={<img src={memoIcon} alt="방메모" className="w-5 h-5 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
@@ -2351,7 +2358,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
-                  <CheckCircle className="w-4 h-4" style={{ opacity: isChecked ? 1 : 0.4 }} />
+                  <img src={checkDateIcon} alt="확인일" className="w-3 h-3 object-contain" style={{ opacity: isChecked ? 1 : 0.4, imageRendering: "-webkit-optimize-contrast" as any }} />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
                     className="text-[10px] font-black whitespace-nowrap tabular-nums"
@@ -2645,13 +2652,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
                 >
-                  <Building2 className="w-5 h-5" />
+                  <img src={elevatorIcon} alt="엘리베이터" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
                 </span>,
               );
 
             // 옵션 배열 기반 아이콘 맵
             const petImgIcon = (
-              <Dog className="w-5 h-5" />
+              <img src={petIcon} alt="반려동물" className="w-10 h-10 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
@@ -2691,28 +2698,28 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#fca5a5",
               },
               수도: {
-                icon: <Droplet className="w-5 h-5" />,
+                icon: <img src={waterIcon} alt="수도" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "수도",
                 bg: "#eff6ff",
                 color: "#1d4ed8",
                 border: "#93c5fd",
               },
               인터넷: {
-                icon: <Wifi className="w-5 h-5" />,
+                icon: <img src={internetIcon} alt="인터넷" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "인터넷",
                 bg: "#f0fdf4",
                 color: "#15803d",
                 border: "#86efac",
               },
               유선TV: {
-                icon: <Tv className="w-5 h-5" />,
+                icon: <img src={tvIcon} alt="유선TV" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "유선TV",
                 bg: "#faf5ff",
                 color: "#7e22ce",
                 border: "#d8b4fe",
               },
               CCTV: {
-                icon: <Shield className="w-5 h-5" />,
+                icon: <img src={cctvIcon} alt="CCTV" className="w-8 h-8" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "CCTV",
                 bg: "#fef2f2",
                 color: "#dc2626",
