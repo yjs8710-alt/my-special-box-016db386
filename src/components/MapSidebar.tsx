@@ -2357,7 +2357,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
-                  <img src={checkDateIcon} alt="확인일" className="w-4 h-4 object-contain" style={{ opacity: isChecked ? 1 : 0.4 }} />
+                  <img src={checkDateIcon} alt="확인일" className="w-8 h-8 object-contain" style={{ opacity: isChecked ? 1 : 0.4, imageRendering: "-webkit-optimize-contrast" as any }} />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
                     className="text-[10px] font-black whitespace-nowrap tabular-nums"
@@ -2651,13 +2651,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
                 >
-                  <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" />
+                  <img src={elevatorIcon} alt="엘리베이터" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
                 </span>,
               );
 
             // 옵션 배열 기반 아이콘 맵
             const petImgIcon = (
-              <img src={petIcon} alt="반려동물" className="w-10 h-10 object-contain" />
+              <img src={petIcon} alt="반려동물" className="w-10 h-10 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
@@ -2697,28 +2697,28 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#fca5a5",
               },
               수도: {
-                icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" />,
+                icon: <img src={waterIcon} alt="수도" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "수도",
                 bg: "#eff6ff",
                 color: "#1d4ed8",
                 border: "#93c5fd",
               },
               인터넷: {
-                icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" />,
+                icon: <img src={internetIcon} alt="인터넷" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "인터넷",
                 bg: "#f0fdf4",
                 color: "#15803d",
                 border: "#86efac",
               },
               유선TV: {
-                icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" />,
+                icon: <img src={tvIcon} alt="유선TV" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "유선TV",
                 bg: "#faf5ff",
                 color: "#7e22ce",
                 border: "#d8b4fe",
               },
               CCTV: {
-                icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" />,
+                icon: <img src={cctvIcon} alt="CCTV" className="w-8 h-8" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />,
                 title: "CCTV",
                 bg: "#fef2f2",
                 color: "#dc2626",
