@@ -34,6 +34,7 @@ import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
+import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
@@ -2356,29 +2357,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
-                  {isChecked ? (
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path
-                        d="M1.5 5L4 7.5L8.5 2.5"
-                        stroke="hsl(142 60% 35%)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  ) : (
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <rect
-                        x="1"
-                        y="1"
-                        width="8"
-                        height="8"
-                        rx="1.5"
-                        stroke="hsl(var(--muted-foreground))"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  )}
+                  <img src={checkDateIcon} alt="확인일" className="w-4 h-4 object-contain" style={{ opacity: isChecked ? 1 : 0.4 }} />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
                     className="text-[10px] font-black whitespace-nowrap tabular-nums"
