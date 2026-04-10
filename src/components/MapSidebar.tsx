@@ -2394,7 +2394,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         </div>
 
         {/* 2줄: [세부유형 (층) 호수] | 보증금/월세 관리비 몇평 | 옵션 | 비번 */}
-        <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
+        <div className="flex items-center gap-1 flex-wrap min-h-[22px]">
           {/* 남향 뱃지 */}
           {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
             <span
@@ -2751,7 +2751,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#86efac",
               },
               유선TV: {
-                icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5" />,
+                icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
                 title: "유선TV",
                 bg: "#faf5ff",
                 color: "#7e22ce",
