@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
+import tvIcon from "@/assets/tv_icon.png";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
