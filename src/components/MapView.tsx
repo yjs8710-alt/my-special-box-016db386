@@ -82,24 +82,24 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   const tailH = Math.round(size * 0.22);
   const tailW = Math.round(size * 0.3);
 
-  // 집 모양 SVG 아이콘 (지붕+몸체+창문+문)
+  // 집다 로고 집 모양 SVG 아이콘 (지붕+굴뚝+곡선몸체+4칸창문) — 흰색
   const houseIcon = `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none"
+    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 32 32" fill="none"
       xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
       <!-- 지붕 -->
-      <path d="M2 11L12 2L22 11" fill="none" stroke="white" stroke-width="2"
+      <path d="M3 15L15 5L25 13" fill="none" stroke="white" stroke-width="2.8"
         stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- 몸체 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="white" opacity="0.25"/>
-      <!-- 몸체 테두리 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="none" stroke="white"
-        stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- 문 -->
-      <rect x="10" y="16" width="4" height="6" rx="0.5" fill="white" opacity="0.75"/>
-      <!-- 창문 좌 -->
-      <rect x="5.5" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-      <!-- 창문 우 -->
-      <rect x="15" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
+      <!-- 굴뚝 -->
+      <rect x="22" y="7" width="3.5" height="6" rx="0.5" fill="white" opacity="0.9"/>
+      <!-- 곡선 몸체 (C자 형태) -->
+      <path d="M5 15L5 24C5 27 7.5 29 11 29L20 29C24 29 27 27 27 23L27 15"
+        fill="none" stroke="white" stroke-width="2.4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 4칸 창문 -->
+      <rect x="12" y="16" width="3.2" height="3.2" rx="0.5" fill="white" opacity="0.85"/>
+      <rect x="16.5" y="16" width="3.2" height="3.2" rx="0.5" fill="white" opacity="0.85"/>
+      <rect x="12" y="20.5" width="3.2" height="3.2" rx="0.5" fill="white" opacity="0.85"/>
+      <rect x="16.5" y="20.5" width="3.2" height="3.2" rx="0.5" fill="white" opacity="0.85"/>
     </svg>
   `;
 
