@@ -4,7 +4,7 @@ import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
 import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
-import elevatorIcon from "@/assets/elevator_icon.png";
+import elevatorIcon from "@/assets/elevator_icon.svg";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 
