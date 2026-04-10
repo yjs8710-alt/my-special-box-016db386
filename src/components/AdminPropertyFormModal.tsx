@@ -1,12 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
-import cctvIcon from "@/assets/cctv_icon.png";
-import tvIcon from "@/assets/tv_icon.png";
-import waterIcon from "@/assets/water_icon.png";
-import elevatorIcon from "@/assets/elevator_icon.png";
-import internetIcon from "@/assets/internet_icon.png";
-import petIcon from "@/assets/pet_icon.png";
+import { Building2, Droplet, Tv, Wifi, Shield, Dog } from "lucide-react";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
