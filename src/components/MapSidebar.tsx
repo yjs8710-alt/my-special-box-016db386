@@ -2751,7 +2751,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#86efac",
               },
               유선TV: {
-                icon: <img src={tvIcon} alt="유선TV" className="w-3.5 h-3.5" />,
+                icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5" />,
                 title: "유선TV",
                 bg: "#faf5ff",
                 color: "#7e22ce",
