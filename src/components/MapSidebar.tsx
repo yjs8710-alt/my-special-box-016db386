@@ -2768,7 +2768,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#d8b4fe",
               },
               CCTV: {
-                icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5" />,
+                icon: <img src={cctvIcon} alt="CCTV" icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" />, />,
                 title: "CCTV",
                 bg: "#fef2f2",
                 color: "#dc2626",
