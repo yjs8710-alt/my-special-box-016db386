@@ -4,11 +4,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn, formatPhone } from "@/lib/utils";
-import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
-import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
-import { Building2, Droplet, Tv, Wifi, Shield, Dog } from "lucide-react";
+import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight, Droplet, Tv, Wifi, Shield, Dog } from "lucide-react";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
