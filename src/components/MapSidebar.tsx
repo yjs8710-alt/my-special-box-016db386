@@ -27,6 +27,7 @@ import {
   Wifi,
   Loader2,
   FileSearch,
+  Shield,
 } from "lucide-react";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
