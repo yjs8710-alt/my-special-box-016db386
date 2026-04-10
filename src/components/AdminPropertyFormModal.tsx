@@ -3,6 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
 import tvIcon from "@/assets/tv_icon.png";
+import waterIcon from "@/assets/water_icon.png";
+import elevatorIcon from "@/assets/elevator_icon.png";
+import internetIcon from "@/assets/internet_icon.png";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
