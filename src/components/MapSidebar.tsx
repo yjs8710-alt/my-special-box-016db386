@@ -415,6 +415,7 @@ const OPTION_ICONS: Record<string, string> = {
   건조기: "건조기",
   스타일러: "스타일러",
   TV: "TV",
+  유선TV: "유선TV",
   에어컨: "에어컨",
   가스레인지: "가스레인지",
   인덕션: "인덕션",
@@ -423,8 +424,10 @@ const OPTION_ICONS: Record<string, string> = {
   책상: "책상",
   옷장: "옷장",
   전자키: "전자키",
+  수도: "수도",
   인터넷: "인터넷",
   주차: "주차",
+  CCTV: "CCTV",
   애완동물가능: "애완동물가능",
   애완동물불가: "애완동물불가",
   반려동물_가능: "반려동물_가능",
@@ -2648,9 +2651,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
             const badges: JSX.Element[] = [];
             const opts = prop.options ?? [];
+            const normalizedOpts = new Set(
+              opts.map((opt) => String(opt).replace(/\s+/g, "").toLowerCase())
+            );
+            const hasOption = (...candidates: string[]) =>
+              candidates.some((candidate) =>
+                normalizedOpts.has(candidate.replace(/\s+/g, "").toLowerCase())
+              );
 
             // 엘리베이터 (boolean 필드)
-            if (prop.elevator)
+            if (prop.elevator || hasOption("엘리베이터"))
               badges.push(
                 <span
                   key="elevator"
@@ -2751,7 +2761,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#86efac",
               },
               유선TV: {
-                icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" />,
                 title: "유선TV",
                 bg: "#faf5ff",
                 color: "#7e22ce",
@@ -2767,9 +2777,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             };
 
             // 반려동물 불가는 금지선 오버레이
-            const isPetDenied = opts.includes("반려동물불가") || opts.includes("애완동물불가");
-            const isPetAllowed =
-              opts.includes("반려동물가능") || opts.includes("애완동물가능") || opts.includes("반려동물_가능");
+            const isPetDenied = hasOption("반려동물불가", "애완동물불가");
+            const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
 
             const dogIcon = fatDogIcon;
 
@@ -2802,23 +2811,21 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               );
             }
 
-            const EXTRA_KEYS = ["수도", "인터넷", "유선TV", "CCTV"];
-            opts
-              .filter((o) => EXTRA_KEYS.includes(o))
-              .forEach((opt) => {
-                const d = ICON_MAP[opt];
-                if (!d) return;
-                badges.push(
-                  <span
-                    key={opt}
-                    title={d.title}
-                    className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                    style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}
-                  >
-                    {d.icon}
-                  </span>,
-                );
-              });
+            (["수도", "인터넷", "유선TV", "CCTV"] as const).forEach((opt) => {
+              if (!hasOption(opt)) return;
+              const d = ICON_MAP[opt];
+              if (!d) return;
+              badges.push(
+                <span
+                  key={opt}
+                  title={d.title}
+                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+                  style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}
+                >
+                  {d.icon}
+                </span>,
+              );
+            });
 
             return badges;
           })()}
