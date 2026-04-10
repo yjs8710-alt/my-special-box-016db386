@@ -2652,7 +2652,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
                 >
-                  <img src={elevatorIcon} alt="엘리베이터" className="w-6 h-6 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
+                  <img src={elevatorIcon} alt="엘리베이터" className="w-12 h-12 object-contain" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
                 </span>,
               );
 

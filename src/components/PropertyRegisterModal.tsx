@@ -901,7 +901,7 @@ function Step2({
   const imgStyle = { imageRendering: "-webkit-optimize-contrast" as any };
   // 부가 시설 옵션 (아이콘 뱃지로 표시) — 수정폼과 동일
   const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
-    { key: "엘리베이터", label: "엘리베이터", icon: <img src={elevatorIcon} alt="엘리베이터" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
+    { key: "엘리베이터", label: "엘리베이터", icon: <img src={elevatorIcon} alt="엘리베이터" className="w-12 h-12 object-contain" style={imgStyle} />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
     { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
     { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
     { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
