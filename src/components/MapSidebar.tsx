@@ -33,6 +33,7 @@ import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
+import petIcon from "@/assets/pet_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
@@ -2676,54 +2677,41 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               );
 
             // 옵션 배열 기반 아이콘 맵
-            const fatDogIcon = (
-              <svg width="15" height="15" viewBox="0 0 64 64" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="32" cy="44" rx="18" ry="11" />
-                <circle cx="32" cy="26" r="12" />
-                <ellipse cx="20" cy="14" rx="6" ry="8" transform="rotate(-15 20 14)" />
-                <ellipse cx="44" cy="14" rx="6" ry="8" transform="rotate(15 44 14)" />
-                <ellipse cx="24" cy="28" rx="3" ry="2" fill="white" />
-                <ellipse cx="40" cy="28" rx="3" ry="2" fill="white" />
-                <circle cx="25" cy="28" r="1.5" fill="#333" />
-                <circle cx="41" cy="28" r="1.5" fill="#333" />
-                <ellipse cx="32" cy="33" rx="4" ry="2.5" />
-                <path d="M26 37 Q32 41 38 37" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                <rect x="22" y="53" width="6" height="9" rx="3" />
-                <rect x="36" y="53" width="6" height="9" rx="3" />
-              </svg>
+            const petImgIcon = (
+              <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
               반려동물가능: {
-                icon: fatDogIcon,
+                icon: petImgIcon,
                 title: "반려동물 가능",
                 bg: "#fff7ed",
                 color: "#c2410c",
                 border: "#fdba74",
               },
               애완동물가능: {
-                icon: fatDogIcon,
+                icon: petImgIcon,
                 title: "반려동물 가능",
                 bg: "#fff7ed",
                 color: "#c2410c",
                 border: "#fdba74",
               },
               반려동물_가능: {
-                icon: fatDogIcon,
+                icon: petImgIcon,
                 title: "반려동물 가능",
                 bg: "#fff7ed",
                 color: "#c2410c",
                 border: "#fdba74",
               },
               반려동물불가: {
-                icon: fatDogIcon,
+                icon: petImgIcon,
                 title: "반려동물 불가",
                 bg: "#fef2f2",
                 color: "#b91c1c",
                 border: "#fca5a5",
               },
               애완동물불가: {
-                icon: fatDogIcon,
+                icon: petImgIcon,
                 title: "반려동물 불가",
                 bg: "#fef2f2",
                 color: "#b91c1c",
@@ -2763,7 +2751,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const isPetDenied = hasOption("반려동물불가", "애완동물불가");
             const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
 
-            const dogIcon = fatDogIcon;
+            const dogIcon = petImgIcon;
 
             if (isPetDenied) {
               badges.push(
