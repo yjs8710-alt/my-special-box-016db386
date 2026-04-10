@@ -1056,10 +1056,10 @@ function Step2({
 
           {/* 반려동물 가능 여부 */}
           <div className="flex flex-col gap-1.5">
-            <p className="text-xs font-semibold text-foreground/70">🐾 반려동물</p>
+            <p className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={petIcon} alt="반려동물" className="w-4 h-4 inline" /> 반려동물</p>
             <div className="flex gap-2">
               {(["가능", "불가"] as PetType[]).map((v) => {
-                const label = v === "가능" ? "🐾 가능" : "🚫 불가";
+                const label = v === "가능" ? "가능" : "불가";
                 const isActive = form.pet === v;
                 return (
                   <button
