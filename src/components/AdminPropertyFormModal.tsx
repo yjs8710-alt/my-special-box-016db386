@@ -238,13 +238,12 @@ const ROOM_OPTIONS = [
   "옷장","전자키","복층","옥탑","테라스","주차",
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
-const imgStyle = { imageRendering: "-webkit-optimize-contrast" as any };
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
-  { key: "엘리베이터", label: "엘리베이터", icon: <img src={elevatorIcon} alt="엘리베이터" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
-  { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-  { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-  { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-6 h-6 object-contain" style={imgStyle} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-8 h-8" style={imgStyle} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  { key: "엘리베이터", label: "엘리베이터", icon: <Building2 className="w-5 h-5" />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
+  { key: "수도",   label: "수도",   icon: <Droplet className="w-5 h-5" />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+  { key: "유선TV", label: "유선TV", icon: <Tv className="w-5 h-5" />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+  { key: "인터넷", label: "인터넷", icon: <Wifi className="w-5 h-5" />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+  { key: "CCTV",  label: "CCTV",  icon: <Shield className="w-5 h-5" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
@@ -1252,7 +1251,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
                   {/* 반려동물 가능 여부 */}
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={petIcon} alt="반려동물" className="w-4 h-4 inline" /> 반려동물</p>
+                    <p className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><Dog className="w-4 h-4 inline" /> 반려동물</p>
                     <div className="flex gap-2">
                       {(["가능", "불가"] as PetType[]).map((v) => {
                         const label = v === "가능" ? "가능" : "불가";
