@@ -29,6 +29,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon.png";
+import tvIcon from "@/assets/tv_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
