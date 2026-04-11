@@ -2787,6 +2787,45 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           if (!hasChips && !hasDesc) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
+              {/* 비번 */}
+              {(buildingPw || roomPw) && (
+                <>
+                  <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.4)" }} />
+                  {buildingPw && (
+                    <div className="relative group/bpw flex-shrink-0">
+                      <span
+                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)" }}
+                      >
+                        건 {buildingPw}
+                      </span>
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/bpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                        <div className="text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg" style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}>
+                          🏢 건물 공동현관 비밀번호
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {roomPw && (
+                    <div className="relative group/rpw flex-shrink-0">
+                      <span
+                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)" }}
+                      >
+                        방 {roomPw}
+                      </span>
+                      <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/rpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
+                        <div className="text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg" style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}>
+                          🚪 방(호실) 도어락 비밀번호
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0" style={{ borderLeft: "4px solid transparent", borderRight: "4px solid transparent", borderTop: "4px solid hsl(var(--foreground))" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {chips.length > 0 && <span className="flex-shrink-0 w-px h-3.5 bg-border" />}
+                </>
+              )}
               {chips.map((chip, i) => (
                 <span
                   key={i}
