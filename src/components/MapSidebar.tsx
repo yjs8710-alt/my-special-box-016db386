@@ -2568,6 +2568,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </>
             );
           })()}
+          <span className="flex-1" />
           {/* 아이콘 배지 (컴팩트, 인라인 — 옵션 앞) */}
           {(() => {
             const badges: JSX.Element[] = [];
