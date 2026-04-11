@@ -2588,7 +2588,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <span key="pet-deny" title="반려동물 불가" className={`${iconCls} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
                   {petImg}
                   <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg>
                   </span>
                 </span>,
               );
