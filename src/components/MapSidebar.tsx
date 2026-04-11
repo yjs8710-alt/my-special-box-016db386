@@ -2400,7 +2400,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* ① 유형 + 층 + 동 + 호수를 하나의 네모칸에 */}
           {(prop.type || floorShort || prop.unitNumber) && (
             <span
-              className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+               className="flex-shrink-0 flex items-center gap-0.5 text-[13px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
                 background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)",
                 color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))",
@@ -2408,15 +2408,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 textDecoration: isDealCompleted ? "line-through" : "none",
                 textDecorationColor: isDealCompleted ? "hsl(0 80% 50%)" : undefined,
                 textDecorationThickness: isDealCompleted ? "2px" : undefined,
+                lineHeight: 1.4,
               }}
             >
               {prop.type && <span>{prop.type}</span>}
-              {floorShort && <span className="opacity-80">({floorShort})</span>}
+              {floorShort && <span className="opacity-80" style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 600 }}>({floorShort})</span>}
               {(() => {
                 const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
                 return m ? <span className="opacity-80">{m[1].trim()}</span> : null;
               })()}
-              {prop.unitNumber && <span>{prop.unitNumber}</span>}
+              {prop.unitNumber && <span style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 600 }}>{prop.unitNumber}</span>}
             </span>
           )}
           {/* 구분선 */}
