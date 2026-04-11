@@ -565,14 +565,16 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     setSubmitted(true);
   };
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const goNext = () => {
-    if (step === 1 && validateStep1()) setStep(2);
-    else if (step === 2 && validateStep2()) setStep(3);
+    if (step === 1 && validateStep1()) { setStep(2); scrollRef.current?.scrollTo(0, 0); }
+    else if (step === 2 && validateStep2()) { setStep(3); scrollRef.current?.scrollTo(0, 0); }
     else if (step === 3 && validateStep3()) handleSubmit();
   };
 
   const goPrev = () => {
-    if (step > 1) setStep((s) => (s - 1) as 1 | 2 | 3);
+    if (step > 1) { setStep((s) => (s - 1) as 1 | 2 | 3); scrollRef.current?.scrollTo(0, 0); }
   };
 
   return (
@@ -612,7 +614,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
         {/* Body */}
         {submitted ? <SuccessView onClose={onClose} /> : (
-          <div className="overflow-y-auto flex-1 px-6 py-4">
+          <div ref={scrollRef} className="overflow-y-auto flex-1 px-6 py-4">
             {step === 1 && <Step1 form={form} set={set} errors={errors} />}
             {step === 2 && <Step2 form={form} set={set} toggleOption={toggleOption} errors={errors} />}
             {step === 3 && (
