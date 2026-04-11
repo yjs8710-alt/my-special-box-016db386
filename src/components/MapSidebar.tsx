@@ -2635,7 +2635,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           )}
         </div>
 
-        {/* 3줄: 공실 → 시설 아이콘 → 옵션배지 → 기타 칩 → 특이사항 */}
+        {/* 3줄: 상태칩 + 아이콘 — 2줄에 못 들어가면 자동 줄바꿈 */}
         <div className="flex items-center gap-1 min-h-[17px] flex-wrap">
           {/* 공실/세입자/퇴거 상태 칩 먼저 */}
           {(() => {
