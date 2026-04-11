@@ -7,6 +7,7 @@ import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
+import memoIcon from "@/assets/memo_icon_new.png";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
@@ -1444,12 +1445,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               <Section label="메모">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">건물 메모</label>
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
                     <textarea rows={2} value={form.building_memo ?? ""} onChange={(e) => set("building_memo", e.target.value)}
                       className={ic + " resize-none"} placeholder="건물 관련 메모" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground">방 메모 (내 메모)</label>
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모 (내 메모)</label>
                     <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
                       className={ic + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
                   </div>
