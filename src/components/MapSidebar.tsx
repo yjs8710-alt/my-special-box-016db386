@@ -2313,7 +2313,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<ClipboardList className="w-3 h-3 text-primary" strokeWidth={2.5} />}
+            icon={<img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -2323,7 +2323,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<PenLine className="w-3 h-3 text-primary" strokeWidth={2.5} />}
+            icon={<img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
