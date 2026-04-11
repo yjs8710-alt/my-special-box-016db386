@@ -2643,7 +2643,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                         border: "1.5px solid hsl(var(--border))",
                       }}
                     >
-                      {`옵션(${prop.options!.length}) ▾`}
+                      {`옵션 ▾`}
                     </span>
                   )}
                   {/* 호버 팝업 — fixed로 overflow:hidden 탈출, 화면 경계 감지 */}
