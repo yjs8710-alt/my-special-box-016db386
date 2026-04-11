@@ -2678,7 +2678,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             // 옵션 배열 기반 아이콘 맵
             const petImgIcon = (
-              <img src={petIcon} alt="반려동물" className="w-7 h-7 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
+              <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
@@ -2757,7 +2757,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <span
                   key="pet-deny"
                   title="반려동물 불가"
-                  className="flex-shrink-0 relative flex items-center justify-center w-8 h-8 rounded select-none"
+                  className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}
                 >
                   {dogIcon}
@@ -2773,7 +2773,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <span
                   key="pet-ok"
                   title="반려동물 가능"
-                  className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded select-none"
+                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
                   style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}
                 >
                   {dogIcon}
