@@ -2633,227 +2633,58 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               )}
             </>
           )}
-          <span className="w-1" />
-          {/* ⑨ 특수 아이콘 옵션 (반려동물/엘리베이터/수도/인터넷/유선TV/CCTV) — 아이콘만 표시 */}
-          {(() => {
-            type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
-            const badges: JSX.Element[] = [];
-            const opts = prop.options ?? [];
-            const normalizedOpts = new Set(
-              opts.map((opt) => String(opt).replace(/\s+/g, "").toLowerCase())
-            );
-            const hasOption = (...candidates: string[]) =>
-              candidates.some((candidate) =>
-                normalizedOpts.has(candidate.replace(/\s+/g, "").toLowerCase())
-              );
-
-            // 엘리베이터 (boolean 필드)
-            if (prop.elevator || hasOption("엘리베이터"))
-              badges.push(
-                <span
-                  key="elevator"
-                  title="엘리베이터"
-                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                  style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}
-                >
-                  <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
-                </span>,
-              );
-
-            // 옵션 배열 기반 아이콘 맵
-            const petImgIcon = (
-              <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
-            );
-
-            const ICON_MAP: Record<string, IconBadge> = {
-              반려동물가능: {
-                icon: petImgIcon,
-                title: "반려동물 가능",
-                bg: "#fff7ed",
-                color: "#c2410c",
-                border: "#fdba74",
-              },
-              애완동물가능: {
-                icon: petImgIcon,
-                title: "반려동물 가능",
-                bg: "#fff7ed",
-                color: "#c2410c",
-                border: "#fdba74",
-              },
-              반려동물_가능: {
-                icon: petImgIcon,
-                title: "반려동물 가능",
-                bg: "#fff7ed",
-                color: "#c2410c",
-                border: "#fdba74",
-              },
-              반려동물불가: {
-                icon: petImgIcon,
-                title: "반려동물 불가",
-                bg: "#fef2f2",
-                color: "#b91c1c",
-                border: "#fca5a5",
-              },
-              애완동물불가: {
-                icon: petImgIcon,
-                title: "반려동물 불가",
-                bg: "#fef2f2",
-                color: "#b91c1c",
-                border: "#fca5a5",
-              },
-              수도: {
-                icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
-                title: "수도",
-                bg: "#eff6ff",
-                color: "#1d4ed8",
-                border: "#93c5fd",
-              },
-              인터넷: {
-                icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
-                title: "인터넷",
-                bg: "#f0fdf4",
-                color: "#15803d",
-                border: "#86efac",
-              },
-              유선TV: {
-                icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
-                title: "유선TV",
-                bg: "#faf5ff",
-                color: "#7e22ce",
-                border: "#d8b4fe",
-              },
-              CCTV: {
-                icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
-                title: "CCTV",
-                bg: "#fef2f2",
-                color: "#dc2626",
-                border: "#fca5a5",
-              },
-            };
-
-            const isPetDenied = hasOption("반려동물불가", "애완동물불가");
-            const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
-
-            const dogIcon = petImgIcon;
-
-            if (isPetDenied) {
-              badges.push(
-                <span
-                  key="pet-deny"
-                  title="반려동물 불가"
-                  className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                  style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}
-                >
-                  {dogIcon}
-                  <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="20" height="20" viewBox="0 0 14 14">
-                      <line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                </span>,
-              );
-            } else if (isPetAllowed) {
-              badges.push(
-                <span
-                  key="pet-ok"
-                  title="반려동물 가능"
-                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                  style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}
-                >
-                  {dogIcon}
-                </span>,
-              );
-            }
-
-            (["수도", "인터넷", "유선TV", "CCTV"] as const).forEach((opt) => {
-              if (!hasOption(opt)) return;
-              const d = ICON_MAP[opt];
-              if (!d) return;
-              badges.push(
-                <span
-                  key={opt}
-                  title={d.title}
-                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
-                  style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}
-                >
-                  {d.icon}
-                </span>,
-              );
-            });
-
-            return badges;
-          })()}
-          {/* ⑦-b 옵션 텍스트 배지 — 호버 시 상세 목록 팝업 */}
-          {prop.options &&
-            prop.options.length > 0 &&
-            (() => {
-              const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
-              const isFull = prop.options!.includes("풀옵션") || FULL_OPT.every((o) => prop.options!.includes(o));
-              return (
-                <div
-                  ref={optBadgeRef}
-                  className="relative flex-shrink-0"
-                  onMouseEnter={handleOptMouseEnter}
-                  onMouseLeave={handleOptMouseLeave}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {isFull ? (
-                    <span
-                      className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
-                      style={{
-                        background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))",
-                        color: "hsl(28 80% 35%)",
-                        border: "1.5px solid hsl(38 80% 70%)",
-                      }}
-                    >
-                      풀옵션
-                    </span>
-                  ) : (
-                    <span
-                      className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none"
-                      style={{
-                        background: "hsl(var(--muted))",
-                        color: "hsl(var(--foreground)/0.65)",
-                        border: "1.5px solid hsl(var(--border))",
-                      }}
-                    >
-                      {`옵션(${prop.options!.length}) ▾`}
-                    </span>
-                  )}
-                  {/* 호버 팝업 — fixed로 overflow:hidden 탈출, 화면 경계 감지 */}
-                  {showOptPopup && (
-                    <div
-                      className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5"
-                      style={{
-                        ...optPopupStyle,
-                        minWidth: "160px",
-                        maxWidth: "220px",
-                        boxShadow: "0 4px 20px hsl(var(--primary)/0.15)",
-                      }}
-                      onMouseEnter={() => setShowOptPopup(true)}
-                      onMouseLeave={handleOptMouseLeave}
-                    >
-                      <p
-                        className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border"
-                        style={{ color: "hsl(var(--primary))" }}
-                      >
-                        {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
-                      </p>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {prop.options!.map((opt) => (
-                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">
-                            · {opt}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
         </div>
 
-        {/* 3줄: 방향·공실·LH·청소비·중개보수 + 특이사항 */}
+        {/* 3줄: 공실 → 시설 아이콘 → 옵션배지 → 기타 칩 → 특이사항 */}
+        <div className="flex items-center gap-1 min-h-[17px] flex-wrap">
+          {/* 공실/세입자/퇴거 상태 칩 먼저 */}
+          {(() => {
+            const isSalePropCard = prop.type?.includes("매매");
+            const vacancy = !isSalePropCard && prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null;
+            const statusChips: { label: string; bg: string; color: string; border: string }[] = [];
+            if (vacancy) statusChips.push({ label: vacancy === "공실" ? "공실" : "세입자", bg: vacancy === "공실" ? "hsl(142 70% 93%)" : "hsl(38 95% 92%)", color: vacancy === "공실" ? "hsl(142 60% 30%)" : "hsl(25 90% 40%)", border: vacancy === "공실" ? "hsl(142 60% 70%)" : "hsl(38 80% 65%)" });
+            if (prop.vacateDate) {
+              const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+              const vacateTime = new Date(vacateStr).getTime();
+              const isPast = !isNaN(vacateTime) && vacateTime < Date.now();
+              if (isPast) statusChips.push({ label: "공실", bg: "hsl(142 50% 90%)", color: "hsl(142 60% 30%)", border: "hsl(142 50% 65%)" });
+              else statusChips.push({ label: `퇴거 ${prop.vacateDate}`, bg: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "hsl(0 85% 65%)" });
+            }
+            return statusChips.map((chip, i) => (<span key={`st-${i}`} className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}>{chip.label}</span>));
+          })()}
+          {/* 시설 아이콘들 */}
+          {(() => {
+            type IconBadge = { icon: JSX.Element; title: string; bg: string; border: string };
+            const badges: JSX.Element[] = [];
+            const opts = prop.options ?? [];
+            const normalizedOpts = new Set(opts.map((opt) => String(opt).replace(/\s+/g, "").toLowerCase()));
+            const hasOption = (...candidates: string[]) => candidates.some((c) => normalizedOpts.has(c.replace(/\s+/g, "").toLowerCase()));
+            if (prop.elevator || hasOption("엘리베이터")) badges.push(<span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#e0f2fe", border: "1.5px solid #7dd3fc" }}><img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /></span>);
+            const petImgIcon = <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />;
+            const isPetDenied = hasOption("반려동물불가", "애완동물불가");
+            const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
+            if (isPetDenied) badges.push(<span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#fef2f2", border: "1.5px solid #fca5a5" }}>{petImgIcon}<span className="absolute inset-0 flex items-center justify-center pointer-events-none"><svg width="20" height="20" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" /></svg></span></span>);
+            else if (isPetAllowed) badges.push(<span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#fff7ed", border: "1.5px solid #fdba74" }}>{petImgIcon}</span>);
+            const ICON_MAP: Record<string, IconBadge> = {
+              수도: { icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "수도", bg: "#eff6ff", border: "#93c5fd" },
+              인터넷: { icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "인터넷", bg: "#f0fdf4", border: "#86efac" },
+              유선TV: { icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "유선TV", bg: "#faf5ff", border: "#d8b4fe" },
+              CCTV: { icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "CCTV", bg: "#fef2f2", border: "#fca5a5" },
+            };
+            (["수도", "인터넷", "유선TV", "CCTV"] as const).forEach((opt) => { if (!hasOption(opt)) return; const d = ICON_MAP[opt]; if (!d) return; badges.push(<span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: d.bg, border: `1.5px solid ${d.border}` }}>{d.icon}</span>); });
+            return badges;
+          })()}
+          {/* 옵션 텍스트 배지 */}
+          {prop.options && prop.options.length > 0 && (() => {
+            const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
+            const isFull = prop.options!.includes("풀옵션") || FULL_OPT.every((o) => prop.options!.includes(o));
+            return (
+              <div ref={optBadgeRef} className="relative flex-shrink-0" onMouseEnter={handleOptMouseEnter} onMouseLeave={handleOptMouseLeave} onClick={(e) => e.stopPropagation()}>
+                {isFull ? (<span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>풀옵션</span>) : (<span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap cursor-default select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>{`옵션(${prop.options!.length}) ▾`}</span>)}
+                {showOptPopup && (<div className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5" style={{ ...optPopupStyle, minWidth: "160px", maxWidth: "220px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }} onMouseEnter={() => setShowOptPopup(true)} onMouseLeave={handleOptMouseLeave}><p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>{isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}</p><div className="grid grid-cols-2 gap-x-3 gap-y-1">{prop.options!.map((opt) => (<span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>))}</div></div>)}
+              </div>
+            );
+          })()}
         {(() => {
           const note = prop.note ?? "";
           const dirMatch = note.match(/방향[:\s]+([^\n|]+)/);
