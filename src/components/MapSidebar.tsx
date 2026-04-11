@@ -2575,8 +2575,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const opts = prop.options ?? [];
             const normalizedOpts = new Set(opts.map((opt) => String(opt).replace(/\s+/g, "").toLowerCase()));
             const hasOption = (...candidates: string[]) => candidates.some((c) => normalizedOpts.has(c.replace(/\s+/g, "").toLowerCase()));
-            const iconCls = "flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none";
-            const imgCls = "w-3.5 h-3.5 object-contain";
+            const iconCls = "flex-shrink-0 flex items-center justify-center w-6 h-6 rounded select-none";
+            const imgCls = "w-4 h-4 object-contain";
             const imgStyle = { imageRendering: '-webkit-optimize-contrast' as any };
 
             if (prop.elevator || hasOption("엘리베이터"))
