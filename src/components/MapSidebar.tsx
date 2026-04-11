@@ -35,6 +35,7 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -2312,7 +2313,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<ClipboardList className="w-3.5 h-3.5 text-primary" strokeWidth={2.2} />}
+            icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -2322,7 +2323,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<PenLine className="w-3.5 h-3.5 text-primary" strokeWidth={2.2} />}
+            icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
@@ -2739,7 +2740,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 border: "#d8b4fe",
               },
               CCTV: {
-                icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
+                icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />,
                 title: "CCTV",
                 bg: "#fef2f2",
                 color: "#dc2626",
