@@ -2361,8 +2361,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   <img 
                       src={checkDateIcon} 
                       alt="확인" 
-                      className="w-3 h-3 object-contain" 
-                      style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.4 }} 
+                      className="w-5 h-5 object-contain" 
+                      style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.6 }} 
                     />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
