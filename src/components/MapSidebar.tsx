@@ -2433,37 +2433,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             if (hasMulti) {
               return (
                 <div className="flex items-center gap-1 flex-shrink-0" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
-                  {wolseMatch && (
+                   {wolseMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "hsl(var(--foreground))" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "hsl(var(--foreground))", fontFamily: '"Montserrat", sans-serif' }}
                     >
-                      <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
+                      <span style={{ fontFamily: 'inherit', color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
                       <span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
                     </span>
                   )}
                   {halfMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "#1d4ed8" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "#1d4ed8", fontFamily: '"Montserrat", sans-serif' }}
                     >
                       반{halfMatch[1]}/{halfMatch[2]}
                     </span>
                   )}
                   {jeonseMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "#15803d" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "#15803d", fontFamily: '"Montserrat", sans-serif' }}
                     >
                       전{jeonseMatch[1]}
                     </span>
                   )}
                   {areaShort && (
                     <>
-                      <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>
+                      <span className="text-[12px]" style={{ color: "hsl(var(--border))" }}>
                         ·
                       </span>
-                      <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>
+                      <span className="text-[12px] font-semibold" style={{ color: "hsl(25 90% 40%)", fontFamily: '"Montserrat", sans-serif' }}>
                         {areaShort}
                       </span>
                     </>
