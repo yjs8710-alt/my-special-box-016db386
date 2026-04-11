@@ -4006,11 +4006,12 @@ const MapSidebar = ({
                                       loading="eager"
                                       decoding="async"
                                       referrerPolicy="no-referrer"
-                                      className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
+                                      className={`w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
                                       style={{
-                                        imageRendering: "auto",
+                                        imageRendering: "-webkit-optimize-contrast" as any,
                                         WebkitBackfaceVisibility: "hidden",
                                         backfaceVisibility: "hidden",
+                                        filter: "contrast(1.02) saturate(1.05)",
                                       }}
                                       onError={(e) => {
                                         const img = e.currentTarget;
