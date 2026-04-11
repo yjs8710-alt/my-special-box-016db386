@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
+import remodelingIcon from "@/assets/remodeling-icon.png";
 import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
@@ -250,6 +251,7 @@ const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNod
   { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
   { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
   { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  { key: "리모델링", label: "리모델링", icon: <img src={remodelingIcon} alt="리모델링" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;

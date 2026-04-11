@@ -29,6 +29,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon.png";
+import remodelingIcon from "@/assets/remodeling-icon.png";
 import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
@@ -2601,6 +2602,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               ["인터넷", { src: internetIcon, alt: "인터넷", bg: "#f0fdf4", border: "#86efac" }],
               ["유선TV", { src: tvIcon, alt: "유선TV", bg: "#faf5ff", border: "#d8b4fe" }],
               ["CCTV", { src: cctvIcon, alt: "CCTV", bg: "#fef2f2", border: "#fca5a5" }],
+              ["리모델링", { src: remodelingIcon, alt: "리모델링", bg: "#fff7ed", border: "#fdba74" }],
             ];
             entries.forEach(([opt, d]) => {
               if (!hasOption(opt)) return;
