@@ -2784,7 +2784,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
-          if (!hasChips && !hasDesc) return null;
+          if (!hasChips && !hasDesc && !buildingPw && !roomPw) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
               {/* 비번 */}
