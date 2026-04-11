@@ -498,6 +498,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+  const bodyScrollRef = useRef<HTMLDivElement>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
   const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
@@ -902,7 +903,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 px-6 py-4">
+        <div ref={bodyScrollRef} className="overflow-y-auto flex-1 px-6 py-4">
 
           {/* ── STEP 1 ── */}
           {formStep === 1 && (
@@ -1644,14 +1645,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
             </button>
           )}
           {formStep > 1 && (
-            <button type="button" onClick={() => setFormStep((s) => (s - 1) as 1 | 2 | 3)}
+            <button type="button" onClick={() => { setFormStep((s) => (s - 1) as 1 | 2 | 3); bodyScrollRef.current?.scrollTo(0, 0); }}
               className="px-4 py-2 rounded-full text-xs font-semibold border border-border text-foreground hover:bg-muted/50">
               이전
             </button>
           )}
           <div className="flex-1" />
           {formStep < 3 ? (
-            <button type="button" onClick={() => setFormStep((s) => (s + 1) as 2 | 3)}
+            <button type="button" onClick={() => { setFormStep((s) => (s + 1) as 2 | 3); bodyScrollRef.current?.scrollTo(0, 0); }}
               className="px-6 py-2 rounded-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90">
               다음
             </button>
