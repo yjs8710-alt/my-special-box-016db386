@@ -706,7 +706,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
             e.stopPropagation();
             setOpen((v) => !v);
           }}
-          className="w-[18px] h-[18px] flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
+          className="w-5 h-5 flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
           style={{ background: "hsl(var(--primary)/0.08)", border: "1px solid hsl(var(--primary)/0.2)" }}
         >
           {icon}
@@ -2312,7 +2312,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+            icon={<ClipboardList className="w-3.5 h-3.5 text-primary" strokeWidth={2.2} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -2322,7 +2322,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+            icon={<PenLine className="w-3.5 h-3.5 text-primary" strokeWidth={2.2} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
@@ -2678,7 +2678,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
             // 옵션 배열 기반 아이콘 맵
             const petImgIcon = (
-              <img src={petIcon} alt="반려동물" className="w-12 h-12 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
+              <img src={petIcon} alt="반려동물" className="w-7 h-7 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
             );
 
             const ICON_MAP: Record<string, IconBadge> = {
@@ -2747,7 +2747,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               },
             };
 
-            // 반려동물 불가는 금지선 오버레이
             const isPetDenied = hasOption("반려동물불가", "애완동물불가");
             const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
 
@@ -2758,12 +2757,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <span
                   key="pet-deny"
                   title="반려동물 불가"
-                  className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+                  className="flex-shrink-0 relative flex items-center justify-center w-8 h-8 rounded select-none"
                   style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}
                 >
                   {dogIcon}
                   <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="18" height="18" viewBox="0 0 14 14">
+                    <svg width="20" height="20" viewBox="0 0 14 14">
                       <line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" />
                     </svg>
                   </span>
@@ -2774,7 +2773,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <span
                   key="pet-ok"
                   title="반려동물 가능"
-                  className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none"
+                  className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded select-none"
                   style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}
                 >
                   {dogIcon}
