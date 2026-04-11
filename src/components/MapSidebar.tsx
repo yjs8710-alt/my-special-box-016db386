@@ -2358,26 +2358,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
-{isChecked ? (
-                    <img 
+                  <img 
                       src={checkDateIcon} 
                       alt="확인" 
                       className="w-3 h-3 object-contain" 
-                      style={{ imageRendering: '-webkit-optimize-contrast' as any }} 
+                      style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.4 }} 
                     />
-                  ) : (
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <rect
-                        x="1"
-                        y="1"
-                        width="8"
-                        height="8"
-                        rx="1.5"
-                        stroke="hsl(var(--muted-foreground))"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  )}
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
                     className="text-[10px] font-black whitespace-nowrap tabular-nums"
