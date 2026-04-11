@@ -3987,7 +3987,7 @@ const MapSidebar = ({
                         <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
                           {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}
                           <div
-                            className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
+                            className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb rounded-l-md"
                             style={{ minHeight: "96px" }}
                           >
                             {(() => {
