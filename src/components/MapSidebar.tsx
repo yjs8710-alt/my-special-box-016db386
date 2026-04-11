@@ -2583,7 +2583,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               badges.push(<span key="elevator" title="엘리베이터" className={iconCls} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="엘리베이터" className={imgCls} style={imgStyle} /></span>);
 
             const petImg = <img src={petIcon} alt="반려동물" className={imgCls} style={imgStyle} />;
-            if (hasOption("반려동물불가", "애완동물불가")) {
+            if (hasOption("반려동물불가", "애완동물불가", "반려동물_불가")) {
               badges.push(
                 <span key="pet-deny" title="반려동물 불가" className={`${iconCls} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
                   {petImg}
