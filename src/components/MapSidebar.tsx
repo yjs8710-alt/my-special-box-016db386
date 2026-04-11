@@ -2783,10 +2783,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           if (!hasChips && !hasDesc && !buildingPw && !roomPw) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
-              {/* 비번 */}
+              {/* 비번 - 오른쪽 정렬 */}
+              <span className="flex-1" />
               {(buildingPw || roomPw) && (
                 <>
-                  <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.4)" }} />
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
                       <span
