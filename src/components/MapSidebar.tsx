@@ -2571,7 +2571,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {(buildingPw || roomPw) && (
             <>
               <span className="flex-shrink-0 w-px h-3.5 bg-border" />
-              <KeyRound className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(var(--foreground)/0.4)" }} />
               {buildingPw && (
                 <div className="relative group/bpw flex-shrink-0">
                   <span
@@ -2582,7 +2581,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       border: "1.5px solid hsl(220 25% 80%)",
                     }}
                   >
-                    건 {buildingPw}
+                    건{buildingPw}
                   </span>
                   <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/bpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
                     <div
@@ -2612,7 +2611,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       border: "1.5px solid hsl(var(--accent)/0.4)",
                     }}
                   >
-                    방 {roomPw}
+                    방{roomPw}
                   </span>
                   <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 z-[9999] opacity-0 group-hover/rpw:opacity-100 transition-opacity duration-150 whitespace-nowrap">
                     <div
