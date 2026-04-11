@@ -2255,7 +2255,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       });
 
     return (
-      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-[6px]">
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
         <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
           {prop.buildYear && (
@@ -2272,7 +2272,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
             </span>
           )}
-          <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
+          <p className="text-[16px] font-bold text-foreground truncate leading-[1.4] flex-shrink min-w-0">
             {prop.buildingName ?? prop.title}
           </p>
           <button
@@ -2281,7 +2281,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               e.stopPropagation();
               setShowFullAddr((v) => !v);
             }}
-            className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
+            className="text-[14px] font-bold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
             style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
             title="클릭하면 전체 주소 표시"
           >
