@@ -2366,7 +2366,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
-                    className="text-[10px] font-black whitespace-nowrap tabular-nums"
+                    className="text-[11px] font-medium whitespace-nowrap tabular-nums"
                     style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}
                   >
                     {displayDays !== null ? displayDays : "?"}
@@ -2377,8 +2377,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* 등록일 (최초 등록일자) */}
           {regDate && (
             <span
-              className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums"
-              style={{ color: "#111" }}
+              className="flex-shrink-0 text-[12px] font-normal whitespace-nowrap tabular-nums"
+              style={{ color: "hsl(var(--muted-foreground))", fontFamily: '"Montserrat", sans-serif', lineHeight: 1.4 }}
             >
               {regDate.slice(2).replace(/-/g, ".")}
             </span>
