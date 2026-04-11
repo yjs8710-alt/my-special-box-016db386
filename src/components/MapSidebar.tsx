@@ -2783,8 +2783,38 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           if (!hasChips && !hasDesc && !buildingPw && !roomPw) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
-              {/* 비번 - 오른쪽 정렬 */}
+              {/* 왼쪽: 칩들과 특이사항 */}
+              {chips.map((chip, i) => (
+                <span
+                  key={i}
+                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}
+                >
+                  {chip.label}
+                </span>
+              ))}
+              {hasDesc && (
+                <>
+                  {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
+                  <span
+                    className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
+                    style={{ color: "hsl(var(--muted-foreground))" }}
+                  >
+                    특이
+                  </span>
+                  <span
+                    className="text-[11px] font-extrabold leading-tight truncate"
+                    style={{ color: "hsl(var(--foreground))" }}
+                  >
+                    {prop.description!.length > 40 ? prop.description!.slice(0, 40) + "…" : prop.description}
+                  </span>
+                </>
+              )}
+
+              {/* 우측 정렬을 위한 스페이서 */}
               <span className="flex-1" />
+
+              {/* 오른쪽: 비밀번호 */}
               {(buildingPw || roomPw) && (
                 <>
                   {buildingPw && (
@@ -2819,33 +2849,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </div>
                     </div>
                   )}
-                  {chips.length > 0 && <span className="flex-shrink-0 w-px h-3.5 bg-border" />}
-                </>
-              )}
-              {chips.map((chip, i) => (
-                <span
-                  key={i}
-                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
-                  style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}
-                >
-                  {chip.label}
-                </span>
-              ))}
-              {hasDesc && (
-                <>
-                  {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
-                  <span
-                    className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
-                    style={{ color: "hsl(var(--muted-foreground))" }}
-                  >
-                    특이
-                  </span>
-                  <span
-                    className="text-[11px] font-extrabold leading-tight truncate"
-                    style={{ color: "hsl(var(--foreground))" }}
-                  >
-                    {prop.description!.length > 40 ? prop.description!.slice(0, 40) + "…" : prop.description}
-                  </span>
                 </>
               )}
             </div>
