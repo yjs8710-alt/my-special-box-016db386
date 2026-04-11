@@ -299,6 +299,19 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     }
   }, [selectedId, properties, suppressPan]);
 
+  // 컨테이너 크기 변경 시 지도 relayout 호출
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      if (mapRef.current && window.kakao?.maps) {
+        mapRef.current.relayout();
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return <div ref={containerRef} className="w-full h-full" />;
 };
 
