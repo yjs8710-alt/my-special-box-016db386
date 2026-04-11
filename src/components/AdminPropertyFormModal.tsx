@@ -245,11 +245,11 @@ const ROOM_OPTIONS = [
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
-  { key: "엘리베이터", label: "엘리베이터", icon: <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
-  { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
-  { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5" />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
-  { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  { key: "엘리베이터", label: "엘리베이터", icon: <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#e0f2fe", color: "#0369a1", border: "#7dd3fc" },
+  { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
+  { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
+  { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
+  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
