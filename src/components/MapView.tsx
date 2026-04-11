@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
+import pinHouseImg from "@/assets/pin_house.png";
 
 declare global {
   interface Window {
@@ -82,25 +83,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   const tailH = Math.round(size * 0.22);
   const tailW = Math.round(size * 0.3);
 
-  // 집 모양 SVG 아이콘 (지붕+몸체+창문+문)
+  // 집 모양 이미지 아이콘
   const houseIcon = `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none"
-      xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
-      <!-- 지붕 -->
-      <path d="M2 11L12 2L22 11" fill="none" stroke="white" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- 몸체 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="white" opacity="0.25"/>
-      <!-- 몸체 테두리 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="none" stroke="white"
-        stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- 문 -->
-      <rect x="10" y="16" width="4" height="6" rx="0.5" fill="white" opacity="0.75"/>
-      <!-- 창문 좌 -->
-      <rect x="5.5" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-      <!-- 창문 우 -->
-      <rect x="15" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-    </svg>
+    <img src="${pinHouseImg}" width="${iconSize}" height="${iconSize}" 
+      style="display:block;flex-shrink:0;object-fit:contain;" />
   `;
 
   return `
