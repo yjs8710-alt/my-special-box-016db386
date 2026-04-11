@@ -2788,7 +2788,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {chips.map((chip, i) => (
                 <span
                   key={i}
-                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  className="flex-shrink-0 text-[12px] font-normal px-1.5 py-0.5 rounded whitespace-nowrap"
                   style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}
                 >
                   {chip.label}
@@ -2798,13 +2798,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <>
                   {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
                   <span
-                    className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
+                    className="flex-shrink-0 text-[12px] font-normal whitespace-nowrap"
                     style={{ color: "hsl(var(--muted-foreground))" }}
                   >
                     특이
                   </span>
                   <span
-                    className="text-[11px] font-extrabold leading-tight truncate"
+                    className="text-[12px] font-normal leading-tight truncate"
                     style={{ color: "hsl(var(--foreground))" }}
                   >
                     {prop.description!.length > 40 ? prop.description!.slice(0, 40) + "…" : prop.description}
@@ -2821,7 +2821,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        className="text-[12px] font-normal font-montserrat whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
                         style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)" }}
                       >
                         건 {buildingPw}
@@ -2837,7 +2837,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {roomPw && (
                     <div className="relative group/rpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        className="text-[12px] font-normal font-montserrat whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
                         style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)" }}
                       >
                         방 {roomPw}
