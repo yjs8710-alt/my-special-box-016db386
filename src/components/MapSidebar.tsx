@@ -35,6 +35,7 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
@@ -2357,16 +2358,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     cursor: isAdmin ? "pointer" : "default",
                   }}
                 >
-                  {isChecked ? (
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                      <path
-                        d="M1.5 5L4 7.5L8.5 2.5"
-                        stroke="hsl(142 60% 35%)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+{isChecked ? (
+                    <img 
+                      src={checkDateIcon} 
+                      alt="확인" 
+                      className="w-3 h-3 object-contain" 
+                      style={{ imageRendering: '-webkit-optimize-contrast' as any }} 
+                    />
                   ) : (
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                       <rect
