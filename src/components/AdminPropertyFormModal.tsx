@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
+import remodelingIcon from "@/assets/remodeling-icon.png";
 import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
