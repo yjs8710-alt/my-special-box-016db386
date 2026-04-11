@@ -2704,9 +2704,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </div>
               );
             })()}
-          {/* 아이콘 배지 (넘치면 다음 줄로 wrap) */}
+          {/* 아이콘 배지 (컴팩트, 인라인) */}
           {(() => {
-            type IconBadge = { icon: JSX.Element; title: string; bg: string; color: string; border: string };
             const badges: JSX.Element[] = [];
             const opts = prop.options ?? [];
             const normalizedOpts = new Set(
@@ -2716,45 +2715,36 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               candidates.some((candidate) =>
                 normalizedOpts.has(candidate.replace(/\s+/g, "").toLowerCase())
               );
+            const iconCls = "flex-shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded select-none";
+            const imgCls = "w-3.5 h-3.5 object-contain";
+            const imgStyle = { imageRendering: '-webkit-optimize-contrast' as any };
 
             if (prop.elevator || hasOption("엘리베이터"))
-              badges.push(
-                <span key="elevator" title="엘리베이터" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#e0f2fe", color: "#0369a1", border: "1.5px solid #7dd3fc" }}>
-                  <img src={elevatorIcon} alt="엘리베이터" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />
-                </span>,
-              );
+              badges.push(<span key="elevator" title="엘리베이터" className={iconCls} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="엘리베이터" className={imgCls} style={imgStyle} /></span>);
 
-            const petImgIcon = <img src={petIcon} alt="반려동물" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />;
-            const isPetDenied = hasOption("반려동물불가", "애완동물불가");
-            const isPetAllowed = hasOption("반려동물가능", "애완동물가능", "반려동물_가능");
-
-            if (isPetDenied) {
+            const petImg = <img src={petIcon} alt="반려동물" className={imgCls} style={imgStyle} />;
+            if (hasOption("반려동물불가", "애완동물불가")) {
               badges.push(
-                <span key="pet-deny" title="반려동물 불가" className="flex-shrink-0 relative flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#fef2f2", color: "#b91c1c", border: "1.5px solid #fca5a5" }}>
-                  {petImgIcon}
+                <span key="pet-deny" title="반려동물 불가" className={`${iconCls} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
+                  {petImg}
                   <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <svg width="20" height="20" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="2" x2="12" y2="12" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" /></svg>
                   </span>
                 </span>,
               );
-            } else if (isPetAllowed) {
-              badges.push(
-                <span key="pet-ok" title="반려동물 가능" className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: "#fff7ed", color: "#c2410c", border: "1.5px solid #fdba74" }}>{petImgIcon}</span>,
-              );
+            } else if (hasOption("반려동물가능", "애완동물가능", "반려동물_가능")) {
+              badges.push(<span key="pet-ok" title="반려동물 가능" className={iconCls} style={{ background: "#fff7ed", border: "1px solid #fdba74" }}>{petImg}</span>);
             }
 
-            const iconEntries: [string, IconBadge][] = [
-              ["수도", { icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "수도", bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" }],
-              ["인터넷", { icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "인터넷", bg: "#f0fdf4", color: "#15803d", border: "#86efac" }],
-              ["유선TV", { icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "유선TV", bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" }],
-              ["CCTV", { icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, title: "CCTV", bg: "#fef2f2", color: "#dc2626", border: "#fca5a5" }],
+            const entries: [string, { src: string; alt: string; bg: string; border: string }][] = [
+              ["수도", { src: waterIcon, alt: "수도", bg: "#eff6ff", border: "#93c5fd" }],
+              ["인터넷", { src: internetIcon, alt: "인터넷", bg: "#f0fdf4", border: "#86efac" }],
+              ["유선TV", { src: tvIcon, alt: "유선TV", bg: "#faf5ff", border: "#d8b4fe" }],
+              ["CCTV", { src: cctvIcon, alt: "CCTV", bg: "#fef2f2", border: "#fca5a5" }],
             ];
-
-            iconEntries.forEach(([opt, d]) => {
+            entries.forEach(([opt, d]) => {
               if (!hasOption(opt)) return;
-              badges.push(
-                <span key={opt} title={d.title} className="flex-shrink-0 flex items-center justify-center w-[24px] h-[24px] rounded select-none" style={{ background: d.bg, color: d.color, border: `1.5px solid ${d.border}` }}>{d.icon}</span>,
-              );
+              badges.push(<span key={opt} title={d.alt} className={iconCls} style={{ background: d.bg, border: `1px solid ${d.border}` }}><img src={d.src} alt={d.alt} className={imgCls} style={imgStyle} /></span>);
             });
 
             return badges;
