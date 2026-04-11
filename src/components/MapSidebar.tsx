@@ -2361,7 +2361,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   <img 
                       src={checkDateIcon} 
                       alt="확인" 
-                      className="w-3 h-3 object-contain" 
+                      className="w-5 h-5 object-contain" 
                       style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.4 }} 
                     />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
@@ -2820,8 +2820,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
-                        style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)" }}
+                        className="text-[11px] font-bold whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none tracking-wide"
+                        style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)", fontFamily: "'Pretendard', sans-serif", letterSpacing: "0.04em" }}
                       >
                         건 {buildingPw}
                       </span>
@@ -2836,8 +2836,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {roomPw && (
                     <div className="relative group/rpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
-                        style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)" }}
+                        className="text-[11px] font-bold whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none tracking-wide"
+                        style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)", fontFamily: "'Pretendard', sans-serif", letterSpacing: "0.04em" }}
                       >
                         방 {roomPw}
                       </span>
