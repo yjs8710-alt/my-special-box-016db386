@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, ClipboardList, PenLine } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn, formatPhone } from "@/lib/utils";
@@ -14,6 +14,7 @@ import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
+import memoIcon from "@/assets/memo_icon_new.png";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
@@ -904,7 +905,7 @@ function Step2({
     { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
     { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
     { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-    { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+    { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
   ];
 
   return (
@@ -1241,12 +1242,12 @@ function Step2({
       <Section label="메모">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><ClipboardList className="w-4 h-4 text-primary" strokeWidth={2.2} /> 건물 메모</label>
+            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
             <textarea rows={2} value={form.buildingMemo} onChange={(e) => set("buildingMemo", e.target.value)}
               className={ic(false) + " resize-none"} placeholder="건물 관련 메모" />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><PenLine className="w-4 h-4 text-primary" strokeWidth={2.2} /> 방 메모 (내 메모)</label>
+            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모 (내 메모)</label>
             <textarea rows={2} value={form.myMemo} onChange={(e) => set("myMemo", e.target.value)}
               className={ic(false) + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
           </div>

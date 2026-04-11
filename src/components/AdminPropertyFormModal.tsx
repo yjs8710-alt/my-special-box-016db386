@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ClipboardList, PenLine } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import cctvIcon from "@/assets/cctv_icon.png";
 import tvIcon from "@/assets/tv_icon.png";
@@ -7,6 +7,7 @@ import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
+import memoIcon from "@/assets/memo_icon_new.png";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
@@ -248,7 +249,7 @@ const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNod
   { key: "수도",   label: "수도",   icon: <img src={waterIcon} alt="수도" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#eff6ff", color: "#1d4ed8", border: "#93c5fd" },
   { key: "유선TV", label: "유선TV", icon: <img src={tvIcon} alt="유선TV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#faf5ff", color: "#7e22ce", border: "#d8b4fe" },
   { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
-  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-7 h-7" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
+  { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
 ];
 const DIRECTION_OPTIONS = ["동","서","남","북","동남","남서","북동","북서"];
 const LH_TYPES = ["관계없음","LH가능","LH불가"] as const;
@@ -1444,12 +1445,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               <Section label="메모">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardList className="w-4 h-4 text-primary" strokeWidth={2.2} /> 건물 메모</label>
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
                     <textarea rows={2} value={form.building_memo ?? ""} onChange={(e) => set("building_memo", e.target.value)}
                       className={ic + " resize-none"} placeholder="건물 관련 메모" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><PenLine className="w-4 h-4 text-primary" strokeWidth={2.2} /> 방 메모 (내 메모)</label>
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모 (내 메모)</label>
                     <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
                       className={ic + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
                   </div>
