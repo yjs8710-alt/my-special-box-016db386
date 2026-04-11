@@ -2255,24 +2255,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       });
 
     return (
-      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-[6px]">
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
         <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
           {prop.buildYear && (
             <span
-              className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap rounded"
+              className="flex-shrink-0 text-[11px] font-bold px-1 py-0.5 whitespace-nowrap rounded"
               style={{
                 background: "hsl(var(--primary) / 0.12)",
                 color: "hsl(var(--primary))",
                 border: "1px solid hsl(var(--primary) / 0.3)",
                 letterSpacing: "-0.02em",
-                lineHeight: 1.2,
+                lineHeight: 1.4,
               }}
             >
-              준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
+              준<span style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 600 }}>{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}</span>
             </span>
           )}
-          <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
+          <p className="text-[16px] font-bold text-foreground truncate leading-[1.4] flex-shrink min-w-0">
             {prop.buildingName ?? prop.title}
           </p>
           <button
@@ -2281,7 +2281,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               e.stopPropagation();
               setShowFullAddr((v) => !v);
             }}
-            className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
+            className="text-[14px] font-bold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
             style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
             title="클릭하면 전체 주소 표시"
           >
@@ -2366,7 +2366,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     />
                   {/* 확인일 기준 경과일 (D+N), 없으면 등록일 기준 */}
                   <span
-                    className="text-[10px] font-black whitespace-nowrap tabular-nums"
+                    className="text-[11px] font-medium whitespace-nowrap tabular-nums"
                     style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}
                   >
                     {displayDays !== null ? displayDays : "?"}
@@ -2377,8 +2377,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* 등록일 (최초 등록일자) */}
           {regDate && (
             <span
-              className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums"
-              style={{ color: "#111" }}
+              className="flex-shrink-0 text-[12px] font-normal whitespace-nowrap tabular-nums"
+              style={{ color: "hsl(var(--muted-foreground))", fontFamily: '"Montserrat", sans-serif', lineHeight: 1.4 }}
             >
               {regDate.slice(2).replace(/-/g, ".")}
             </span>
@@ -2400,7 +2400,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* ① 유형 + 층 + 동 + 호수를 하나의 네모칸에 */}
           {(prop.type || floorShort || prop.unitNumber) && (
             <span
-              className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+               className="flex-shrink-0 flex items-center gap-0.5 text-[13px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap"
               style={{
                 background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)",
                 color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))",
@@ -2408,15 +2408,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 textDecoration: isDealCompleted ? "line-through" : "none",
                 textDecorationColor: isDealCompleted ? "hsl(0 80% 50%)" : undefined,
                 textDecorationThickness: isDealCompleted ? "2px" : undefined,
+                lineHeight: 1.4,
               }}
             >
               {prop.type && <span>{prop.type}</span>}
-              {floorShort && <span className="opacity-80">({floorShort})</span>}
+              {floorShort && <span className="opacity-80" style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 600 }}>({floorShort})</span>}
               {(() => {
                 const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
                 return m ? <span className="opacity-80">{m[1].trim()}</span> : null;
               })()}
-              {prop.unitNumber && <span>{prop.unitNumber}</span>}
+              {prop.unitNumber && <span style={{ fontFamily: '"Montserrat", sans-serif', fontWeight: 600 }}>{prop.unitNumber}</span>}
             </span>
           )}
           {/* 구분선 */}
@@ -2432,37 +2433,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             if (hasMulti) {
               return (
                 <div className="flex items-center gap-1 flex-shrink-0" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
-                  {wolseMatch && (
+                   {wolseMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "hsl(var(--foreground))" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "hsl(var(--foreground))", fontFamily: '"Montserrat", sans-serif' }}
                     >
-                      <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
+                      <span style={{ fontFamily: 'inherit', color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
                       <span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
                     </span>
                   )}
                   {halfMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "#1d4ed8" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "#1d4ed8", fontFamily: '"Montserrat", sans-serif' }}
                     >
                       반{halfMatch[1]}/{halfMatch[2]}
                     </span>
                   )}
                   {jeonseMatch && (
                     <span
-                      className="flex-shrink-0 text-[12px] font-extrabold whitespace-nowrap"
-                      style={{ color: "#15803d" }}
+                      className="flex-shrink-0 text-[13px] font-semibold whitespace-nowrap"
+                      style={{ color: "#15803d", fontFamily: '"Montserrat", sans-serif' }}
                     >
                       전{jeonseMatch[1]}
                     </span>
                   )}
                   {areaShort && (
                     <>
-                      <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>
+                      <span className="text-[12px]" style={{ color: "hsl(var(--border))" }}>
                         ·
                       </span>
-                      <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>
+                      <span className="text-[12px] font-semibold" style={{ color: "hsl(25 90% 40%)", fontFamily: '"Montserrat", sans-serif' }}>
                         {areaShort}
                       </span>
                     </>
@@ -2477,36 +2478,36 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap" style={isDealCompleted ? { textDecoration: "line-through", textDecorationColor: "hsl(0 80% 50%)", textDecorationThickness: "2px" } : undefined}>
                 {isSaleProp ? (
                   <>
-                    <span className="text-[11px] font-bold" style={{ color: "hsl(0 85% 55%)" }}>
+                    <span className="text-[12px] font-medium" style={{ color: "hsl(0 85% 55%)" }}>
                       매
                     </span>
-                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(0 85% 45%)" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "hsl(0 85% 45%)", fontFamily: '"Montserrat", sans-serif' }}>
                       {prop.deposit}
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>
+                    <span className="text-[12px] font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>
                       월
                     </span>
-                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--foreground))" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "hsl(var(--foreground))", fontFamily: '"Montserrat", sans-serif' }}>
                       {prop.deposit}
                     </span>
-                    <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>
+                    <span className="text-[12px]" style={{ color: "hsl(var(--border))" }}>
                       /
                     </span>
-                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>
+                    <span className="text-[13px] font-semibold" style={{ color: "hsl(var(--accent))", fontFamily: '"Montserrat", sans-serif' }}>
                       {prop.monthly}
                     </span>
                     {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
                       <>
-                        <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>
+                        <span className="text-[12px] mx-0.5" style={{ color: "hsl(var(--border))" }}>
                           /
                         </span>
-                        <span className="text-[11px] font-bold" style={{ color: "hsl(var(--muted-foreground))" }}>
+                        <span className="text-[12px] font-medium" style={{ color: "hsl(var(--muted-foreground))" }}>
                           관
                         </span>
-                        <span className="text-[11px] font-extrabold" style={{ color: "hsl(var(--muted-foreground))" }}>
+                        <span className="text-[12px] font-semibold" style={{ color: "hsl(var(--muted-foreground))", fontFamily: '"Montserrat", sans-serif' }}>
                           {prop.manageFee}
                         </span>
                       </>
@@ -2515,10 +2516,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
                 {areaShort && (
                   <>
-                    <span className="text-[11px] mx-0.5" style={{ color: "hsl(var(--border))" }}>
+                    <span className="text-[12px] mx-0.5" style={{ color: "hsl(var(--border))" }}>
                       ·
                     </span>
-                    <span className="text-[11px] font-extrabold" style={{ color: "hsl(25 90% 40%)" }}>
+                    <span className="text-[12px] font-semibold" style={{ color: "hsl(25 90% 40%)", fontFamily: '"Montserrat", sans-serif' }}>
                       {areaShort}
                     </span>
                   </>
@@ -2787,7 +2788,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {chips.map((chip, i) => (
                 <span
                   key={i}
-                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  className="flex-shrink-0 text-[12px] font-normal px-1.5 py-0.5 rounded whitespace-nowrap"
                   style={{ background: chip.bg, color: chip.color, border: `1px solid ${chip.border}` }}
                 >
                   {chip.label}
@@ -2797,13 +2798,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 <>
                   {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
                   <span
-                    className="flex-shrink-0 text-[11px] font-extrabold whitespace-nowrap"
+                    className="flex-shrink-0 text-[12px] font-normal whitespace-nowrap"
                     style={{ color: "hsl(var(--muted-foreground))" }}
                   >
                     특이
                   </span>
                   <span
-                    className="text-[11px] font-extrabold leading-tight truncate"
+                    className="text-[12px] font-normal leading-tight truncate"
                     style={{ color: "hsl(var(--foreground))" }}
                   >
                     {prop.description!.length > 40 ? prop.description!.slice(0, 40) + "…" : prop.description}
@@ -2820,7 +2821,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        className="text-[12px] font-normal font-montserrat whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
                         style={{ background: "hsl(220 25% 93%)", color: "hsl(220 45% 32%)", border: "1.5px solid hsl(220 25% 80%)" }}
                       >
                         건 {buildingPw}
@@ -2836,7 +2837,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {roomPw && (
                     <div className="relative group/rpw flex-shrink-0">
                       <span
-                        className="text-[11px] font-extrabold font-mono whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
+                        className="text-[12px] font-normal font-montserrat whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none"
                         style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)" }}
                       >
                         방 {roomPw}
