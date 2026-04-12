@@ -29,7 +29,7 @@ import {
   FileSearch,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon.png";
-import remodelingIcon from "@/assets/remodeling-icon.png";
+import remodelingIcon from "@/assets/remodeling_icon.png";
 import tvIcon from "@/assets/tv_icon.png";
 import waterIcon from "@/assets/water_icon.png";
 import elevatorIcon from "@/assets/elevator_icon.png";
@@ -699,7 +699,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const storageKey = `memo_${propId}_${memoKey}`;
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
-    const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
+    const hasMemoContent = !!(myText?.trim());
 
     return (
       <div ref={ref} className="relative inline-flex">
