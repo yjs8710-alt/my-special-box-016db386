@@ -680,20 +680,19 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
       })();
     }, [open, propertyDbId, userId, memoKey]);
 
-    // 자동 저장 (디바운스 1초)
-    const handleChange = (v: string) => {
-      setMyText(v);
+    // 수동 저장
+    const handleSave = async () => {
       if (!propertyDbId || !userId) return;
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(async () => {
-        setSaving(true);
-        await supabase.from("property_user_memos").upsert(
-          { property_id: propertyDbId, user_id: userId, memo_type: memoKey, content: v },
-          { onConflict: "property_id,user_id,memo_type" }
-        );
-        setSaving(false);
-      }, 1000);
+      setSaving(true);
+      await supabase.from("property_user_memos").upsert(
+        { property_id: propertyDbId, user_id: userId, memo_type: memoKey, content: myText },
+        { onConflict: "property_id,user_id,memo_type" }
+      );
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1500);
     };
+    const [saved, setSaved] = useState(false);
 
     // 비 DB 매물은 localStorage 폴백
     const isDbProp = !!propertyDbId;
