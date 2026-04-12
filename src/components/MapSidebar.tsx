@@ -2786,6 +2786,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               color: "hsl(0 85% 40%)",
               border: "hsl(0 85% 70%)",
             });
+          // 리모델링 배지
+          if ((prop.options ?? []).some(o => o === "리모델링"))
+            chips.push({
+              label: "리모델링",
+              value: "",
+              bg: "hsl(30 100% 95%)",
+              color: "hsl(20 90% 35%)",
+              border: "hsl(30 80% 65%)",
+            });
           // 퇴거 예정일 — 지났으면 공실 표시
           if (prop.vacateDate) {
             const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
