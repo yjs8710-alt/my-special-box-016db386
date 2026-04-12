@@ -771,7 +771,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                     <textarea
                       autoFocus
                       value={loaded ? myText : "불러오는 중..."}
-                      onChange={(e) => handleChange(e.target.value)}
+                      onChange={(e) => setMyText(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
                       placeholder={`${label}를 입력하세요...`}
                       rows={4}
@@ -791,6 +791,27 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                       className="w-full text-[11px] resize-none outline-none bg-muted/50 border border-border rounded-lg px-2.5 py-2"
                     />
                   )}
+                  {/* 저장 버튼 */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isDbProp) {
+                        handleSave();
+                      } else {
+                        setSaved(true);
+                        setTimeout(() => setSaved(false), 1500);
+                      }
+                    }}
+                    disabled={saving}
+                    className="w-full mt-1.5 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+                    style={{
+                      background: saved ? "hsl(var(--stat-green, 142 71% 45%))" : "hsl(var(--primary))",
+                      color: "white",
+                    }}
+                  >
+                    {saving ? "저장 중..." : saved ? "✓ 저장 완료" : "저장"}
+                  </button>
                 </div>
 
                 {/* 관리자 원본 메모 (properties 테이블) */}
