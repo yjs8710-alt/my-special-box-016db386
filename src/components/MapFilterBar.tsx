@@ -463,7 +463,7 @@ const MapFilterBar = ({
   return (
     <div
       className="fixed z-[1000] pointer-events-none"
-      style={{ top: topOffset ?? 96, left: 16, right: "auto", width: "auto", maxWidth: 540 }}
+      style={{ top: topOffset ?? 96, left: 16, right: "auto", width: "auto", maxWidth: 600 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
@@ -473,7 +473,7 @@ const MapFilterBar = ({
             className="flex items-center bg-white overflow-hidden rounded-xl"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
-              minWidth: 380,
+              minWidth: 480,
               width: "fit-content",
               flexShrink: 0,
               border: `2px solid ${searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--primary))"}`,
