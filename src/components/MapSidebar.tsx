@@ -700,6 +700,8 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const storageKey = `memo_${propId}_${memoKey}`;
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
+    const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
+
     return (
       <div ref={ref} className="relative inline-flex">
         <button
@@ -710,10 +712,19 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
             setOpen((v) => !v);
           }}
           className="w-5 h-5 flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
-          style={{ background: "hsl(var(--primary)/0.08)", border: "1px solid hsl(var(--primary)/0.2)" }}
+          style={{
+            background: hasMemoContent ? "hsl(var(--primary)/0.18)" : "hsl(var(--primary)/0.08)",
+            border: hasMemoContent ? "2px solid hsl(var(--primary))" : "1px solid hsl(var(--primary)/0.2)",
+          }}
         >
           {icon}
         </button>
+        {hasMemoContent && (
+          <span
+            className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white"
+            style={{ background: "hsl(var(--primary))" }}
+          />
+        )}
 
         {open && (
           <>
