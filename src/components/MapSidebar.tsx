@@ -2201,11 +2201,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <script>
     var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
 
+    function setStatus(title, desc) {
+      statusEl.innerHTML = "<strong>" + title + "</strong><span>" + desc + "</span>";
+      statusEl.style.display = "flex";
+    }
+
     function toggleView(mode) {
       if (mode === "rv") {
         if (currentView === "rv") return;
-        if (currentView === "map") { currentView = "rv"; }
-        else { currentView = "rv"; }
+        currentView = "rv";
       } else if (mode === "map") {
         if (currentView === "map") { currentView = "rv"; }
         else if (currentView === "rv") { currentView = "both"; }
@@ -2217,7 +2221,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       btnRv.classList.toggle("active", currentView === "rv" || currentView === "both");
       btnMap.classList.toggle("active", currentView === "map" || currentView === "both");
 
-      setTimeout(() => {
+      setTimeout(function() {
         if (currentView !== "map") try { roadview.relayout(); } catch(e) {}
         if (currentView !== "rv") {
           if (!mapInstance) initMap();
@@ -2226,27 +2230,35 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       }, 100);
     }
 
-    let roadview;
     function initMap() {
-      const pos = new kakao.maps.LatLng(data.lat, data.lng);
+      var pos = new kakao.maps.LatLng(data.lat, data.lng);
       mapInstance = new kakao.maps.Map(mapEl, { center: pos, level: 3 });
       new kakao.maps.Marker({ position: pos, map: mapInstance });
       mapInstance.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       mapInstance.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
     }
 
-    const setStatus = (title, desc) => {
-      statusEl.innerHTML = "<strong>" + title + "</strong><span>" + desc + "</span>";
-      statusEl.style.display = "flex";
-    };
+    function initRoadview() {
+      data = ${payload};
+      radii = [30, 50, 100, 200, 400, 800, 1500];
+      statusEl = document.getElementById("status");
+      roadviewEl = document.getElementById("roadview");
+      mapEl = document.getElementById("map");
+      rvPanel = document.getElementById("rvPanel");
+      mapPanel = document.getElementById("mapPanel");
+      btnRv = document.getElementById("btnRv");
+      btnMap = document.getElementById("btnMap");
+      mapInstance = null;
+      currentView = "rv";
 
       try {
-        const position = new kakao.maps.LatLng(data.lat, data.lng);
+        var position = new kakao.maps.LatLng(data.lat, data.lng);
         roadview = new kakao.maps.Roadview(roadviewEl);
-        const roadviewClient = new kakao.maps.RoadviewClient();
+        var roadviewClient = new kakao.maps.RoadviewClient();
 
-        const searchNearest = (index = 0) => {
-          const radius = radii[index];
+        var searchNearest = function(index) {
+          if (index === undefined) index = 0;
+          var radius = radii[index];
           setStatus("가장 가까운 로드뷰를 찾는 중입니다.", radius + "m 반경까지 탐색 중");
 
           roadviewClient.getNearestPanoId(position, radius, function (panoId) {
@@ -2258,12 +2270,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               }, 120);
               return;
             }
-
             if (index < radii.length - 1) {
               searchNearest(index + 1);
               return;
             }
-
             setStatus("주변에서 로드뷰를 찾지 못했습니다.", "좌표 주변 도로까지 자동 탐색했지만 표시 가능한 로드뷰가 없습니다.");
           });
         };
@@ -2273,6 +2283,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.");
       }
     }
+
+    statusEl = document.getElementById("status");
     var sdkScript = document.createElement("script");
     sdkScript.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false";
     sdkScript.onload = function() { kakao.maps.load(function() { initRoadview(); }); };
