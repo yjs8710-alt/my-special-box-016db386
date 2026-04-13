@@ -2735,7 +2735,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
           if (vacancy)
             chips.push({
-              label: vacancy === "공실" ? "공실" : "세입자",
+              label: vacancy === "공실" ? "공실" : "거주중",
               value: "",
               bg: vacancy === "공실" ? "hsl(142 70% 93%)" : "hsl(38 95% 92%)",
               color: vacancy === "공실" ? "hsl(142 60% 30%)" : "hsl(25 90% 40%)",
