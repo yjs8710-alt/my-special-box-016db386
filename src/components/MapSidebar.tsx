@@ -2949,6 +2949,7 @@ interface MapSidebarProps {
   landlordResults?: import("@/components/MapFilterBar").LandlordResult[];
   landlordLoading?: boolean;
   landlordSearched?: boolean;
+  onRefetch?: () => void;
 }
 
 const MIN_WIDTH = 260;
@@ -2969,6 +2970,7 @@ const MapSidebar = ({
   landlordResults,
   landlordLoading,
   landlordSearched,
+  onRefetch,
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
@@ -3362,7 +3364,7 @@ const MapSidebar = ({
                   : null
               }
               onClose={() => setAdminEditProp(null)}
-              onSaved={() => setAdminEditProp(null)}
+              onSaved={() => { setAdminEditProp(null); onRefetch?.(); }}
             />
           );
         })()}
