@@ -28,7 +28,7 @@ const LandSearch = () => {
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  const { properties: dbProperties } = useDBProperties(["토지"]);
+  const { properties: dbProperties, refetch } = useDBProperties(["토지"]);
   const allProperties = useMemo(() => [...LAND_PROPERTIES, ...dbProperties], [dbProperties]);
 
   const toggleType = (t: string) => {
@@ -167,6 +167,7 @@ const LandSearch = () => {
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
+          onRefetch={refetch}
         />
       </main>
     </div>

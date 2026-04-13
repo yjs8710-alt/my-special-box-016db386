@@ -32,7 +32,7 @@ const ApartmentRental = () => {
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  const { properties: dbProperties } = useDBProperties(APARTMENT_DB_TYPES);
+  const { properties: dbProperties, refetch } = useDBProperties(APARTMENT_DB_TYPES);
   const allProperties = useMemo(() => [...APARTMENT_PROPERTIES, ...dbProperties], [dbProperties]);
 
   const toggleType = (t: string) => setActiveTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
@@ -183,6 +183,7 @@ const ApartmentRental = () => {
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
+          onRefetch={refetch}
         />
       </main>
     </div>

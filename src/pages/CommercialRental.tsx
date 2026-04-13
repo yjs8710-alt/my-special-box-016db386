@@ -27,7 +27,7 @@ const CommercialRental = () => {
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  const { properties: dbProperties } = useDBProperties(COMMERCIAL_DB_TYPES);
+  const { properties: dbProperties, refetch } = useDBProperties(COMMERCIAL_DB_TYPES);
   const allProperties = useMemo(() => [...MAP_PROPERTIES, ...dbProperties], [dbProperties]);
 
   const toggleType = (t: string) => {
@@ -155,6 +155,7 @@ const CommercialRental = () => {
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
+          onRefetch={refetch}
         />
         {selectedId !== null && (() => {
           const selected = allProperties.find(p => p.id === selectedId) ?? null;
