@@ -1175,6 +1175,43 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
   const [saveProgress, setSaveProgress] = useState("");
   const [saved, setSaved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
+  const [pendingDragIdx, setPendingDragIdx] = useState<number | null>(null);
+  const [pendingOverIdx, setPendingOverIdx] = useState<number | null>(null);
+
+  // 저장된 사진 드래그 순서 변경
+  const handleSavedDragStart = (e: React.DragEvent, i: number) => { setDragIdx(i); e.dataTransfer.effectAllowed = "move"; };
+  const handleSavedDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setOverIdx(i); };
+  const handleSavedDrop = async (e: React.DragEvent, dropI: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === dropI) { setDragIdx(null); setOverIdx(null); return; }
+    const arr = [...savedPhotos];
+    const [moved] = arr.splice(dragIdx, 1);
+    arr.splice(dropI, 0, moved);
+    if (isDBProperty) {
+      await supabase.rpc("update_property_images", { _property_id: dbId, _images: arr });
+    } else {
+      localStorage.setItem(storageKey, JSON.stringify(arr));
+    }
+    setSavedPhotos(arr);
+    onImagesUpdated?.(arr);
+    setDragIdx(null); setOverIdx(null);
+  };
+  const handleSavedDragEnd = () => { setDragIdx(null); setOverIdx(null); };
+
+  // 대기 사진 드래그 순서 변경
+  const handlePendingDragStart = (e: React.DragEvent, i: number) => { setPendingDragIdx(i); e.dataTransfer.effectAllowed = "move"; };
+  const handlePendingDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setPendingOverIdx(i); };
+  const handlePendingDrop = (e: React.DragEvent, dropI: number) => {
+    e.preventDefault();
+    if (pendingDragIdx === null || pendingDragIdx === dropI) { setPendingDragIdx(null); setPendingOverIdx(null); return; }
+    const arrF = [...pendingFiles]; const [mf] = arrF.splice(pendingDragIdx, 1); arrF.splice(dropI, 0, mf);
+    const arrP = [...pendingPreviews]; const [mp] = arrP.splice(pendingDragIdx, 1); arrP.splice(dropI, 0, mp);
+    setPendingFiles(arrF); setPendingPreviews(arrP);
+    setPendingDragIdx(null); setPendingOverIdx(null);
+  };
+  const handlePendingDragEnd = () => { setPendingDragIdx(null); setPendingOverIdx(null); };
 
   // 파일 선택 → 미리보기만 생성
   const handleSelectFiles = async (files: FileList | null) => {
