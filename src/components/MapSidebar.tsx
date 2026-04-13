@@ -2150,8 +2150,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       <div id="map"></div>
     </div>
   </div>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false"></script>
   <script>
+    function initRoadview() {
     const data = ${payload};
     const radii = [30, 50, 100, 200, 400, 800, 1500];
     const statusEl = document.getElementById("status");
@@ -2203,7 +2203,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       statusEl.style.display = "flex";
     };
 
-    kakao.maps.load(() => {
       try {
         const position = new kakao.maps.LatLng(data.lat, data.lng);
         roadview = new kakao.maps.Roadview(roadviewEl);
@@ -2236,7 +2235,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       } catch (error) {
         setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.");
       }
-    });
+    }
+    var sdkScript = document.createElement("script");
+    sdkScript.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false";
+    sdkScript.onload = function() { kakao.maps.load(function() { initRoadview(); }); };
+    sdkScript.onerror = function() { setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크 연결을 확인해주세요."); };
+    document.head.appendChild(sdkScript);
   </script>
 </body>
 </html>`;
