@@ -1374,16 +1374,21 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
                 >
                   {pendingPreviews.length}장
                 </span>
-                <span className="text-[10px] text-muted-foreground">— 아직 저장되지 않았습니다</span>
+                <span className="text-[10px] text-muted-foreground">— 드래그로 순서 변경</span>
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {pendingPreviews.map((src, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-square rounded-xl overflow-hidden group border-2"
-                    style={{ borderColor: "hsl(var(--accent)/0.4)" }}
+                    draggable
+                    onDragStart={(e) => handlePendingDragStart(e, idx)}
+                    onDragOver={(e) => handlePendingDragOver(e, idx)}
+                    onDrop={(e) => handlePendingDrop(e, idx)}
+                    onDragEnd={handlePendingDragEnd}
+                    className="relative aspect-square rounded-xl overflow-hidden group border-2 cursor-grab active:cursor-grabbing"
+                    style={{ borderColor: pendingOverIdx === idx ? "hsl(var(--primary))" : "hsl(var(--accent)/0.4)", opacity: pendingDragIdx === idx ? 0.4 : 1 }}
                   >
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
                     <button
                       onClick={() => removePending(idx)}
                       className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
