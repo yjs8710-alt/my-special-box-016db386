@@ -1599,6 +1599,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                         return { ...f, images: [url, ...rest] };
                       })
                     }
+                    onReorder={(reordered) =>
+                      setForm((f) => ({ ...f, images: reordered }))
+                    }
                   />
                 )}
                 <button type="button" onClick={() => fileInputRef.current?.click()}
