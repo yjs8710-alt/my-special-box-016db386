@@ -2199,18 +2199,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     </div>
   </div>
   <script>
-    function initRoadview() {
-    const data = ${payload};
-    const radii = [30, 50, 100, 200, 400, 800, 1500];
-    const statusEl = document.getElementById("status");
-    const roadviewEl = document.getElementById("roadview");
-    const mapEl = document.getElementById("map");
-    const rvPanel = document.getElementById("rvPanel");
-    const mapPanel = document.getElementById("mapPanel");
-    const btnRv = document.getElementById("btnRv");
-    const btnMap = document.getElementById("btnMap");
-    let mapInstance = null;
-    let currentView = "rv"; // "rv" | "map" | "both"
+    var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
 
     function toggleView(mode) {
       if (mode === "rv") {
