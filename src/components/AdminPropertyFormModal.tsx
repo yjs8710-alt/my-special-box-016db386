@@ -15,18 +15,44 @@ function ImageCarouselPreview({
   images,
   onRemove,
   onSetMain,
+  onReorder,
 }: {
   images: string[];
   onRemove: (url: string) => void;
   onSetMain?: (url: string) => void;
+  onReorder?: (reordered: string[]) => void;
 }) {
   const [idx, setIdx] = useState(0);
   const safeIdx = Math.min(idx, images.length - 1);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
 
   const handleRemove = useCallback((url: string) => {
     onRemove(url);
     setIdx((i) => Math.min(i, images.length - 2));
   }, [onRemove, images.length]);
+
+  const handleDragStart = (e: React.DragEvent, i: number) => {
+    setDragIdx(i);
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const handleDragOver = (e: React.DragEvent, i: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setOverIdx(i);
+  };
+  const handleDrop = (e: React.DragEvent, dropI: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === dropI) { setDragIdx(null); setOverIdx(null); return; }
+    const arr = [...images];
+    const [moved] = arr.splice(dragIdx, 1);
+    arr.splice(dropI, 0, moved);
+    onReorder?.(arr);
+    setIdx(dropI);
+    setDragIdx(null);
+    setOverIdx(null);
+  };
+  const handleDragEnd = () => { setDragIdx(null); setOverIdx(null); };
 
   if (images.length === 0) return null;
 
@@ -113,18 +139,27 @@ function ImageCarouselPreview({
         )}
       </div>
 
-      {/* 썸네일 스트립 */}
+      {/* 썸네일 스트립 (드래그 순서 변경 가능) */}
       {images.length > 1 && (
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          <span className="text-[9px] text-muted-foreground self-center mr-1 flex-shrink-0">↔ 드래그</span>
           {images.map((src, i) => (
             <button
               key={src}
               type="button"
+              draggable
+              onDragStart={(e) => handleDragStart(e, i)}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDrop={(e) => handleDrop(e, i)}
+              onDragEnd={handleDragEnd}
               onClick={() => setIdx(i)}
-              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
-              style={{ borderColor: i === safeIdx ? "hsl(var(--primary))" : "transparent" }}
+              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing"
+              style={{
+                borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
+                opacity: dragIdx === i ? 0.4 : 1,
+              }}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
               {i === 0 && (
                 <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
               )}
