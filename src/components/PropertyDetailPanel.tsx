@@ -1540,7 +1540,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             const items = [
               vacancy && {
                 label: "빈방여부",
-                value: vacancy === "세입자 거주중" ? "세입자" : vacancy,
+                value: vacancy === "세입자 거주중" ? "거주중" : vacancy,
                 color: vacancy === "공실" ? "hsl(142 71% 45%)" : "hsl(25 95% 53%)",
               },
               direction && { label: "방향", value: direction + "향", color: "hsl(var(--foreground))" },
