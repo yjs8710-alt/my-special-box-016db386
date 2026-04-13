@@ -45,7 +45,7 @@ const NonResidentialRental = () => {
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  const { properties: dbProperties } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
+  const { properties: dbProperties, refetch } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
   const allProperties = useMemo(() => [...NON_RESIDENTIAL_PROPERTIES, ...dbProperties], [dbProperties]);
 
   const toggleType = (k: string) => {
@@ -207,6 +207,7 @@ const NonResidentialRental = () => {
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
+          onRefetch={refetch}
         />
       </main>
     </div>

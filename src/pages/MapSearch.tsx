@@ -22,7 +22,7 @@ const MapSearch = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("map");
 
   // DB에서 실시간으로 매물 불러오기
-  const { properties: dbProperties } = useDBProperties();
+  const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
   // 정적 목 데이터(숨긴 것 제외) + DB 데이터 병합
@@ -184,6 +184,7 @@ const MapSearch = () => {
           activeType={activeType}
           onTypeChange={setActiveType}
           onDeleteProperties={handleDeleteProperties}
+          onRefetch={refetch}
         />
       </main>
     </div>

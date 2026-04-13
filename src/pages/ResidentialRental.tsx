@@ -29,7 +29,7 @@ const ResidentialRental = () => {
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
 
-  const { properties: dbProperties } = useDBProperties(RESIDENTIAL_DB_TYPES);
+  const { properties: dbProperties, refetch } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
   const allProperties = useMemo(
     () => [...RESIDENTIAL_PROPERTIES, ...dbProperties.filter(p =>
@@ -207,6 +207,7 @@ const ResidentialRental = () => {
           landlordResults={landlordResults}
           landlordLoading={landlordLoading}
           landlordSearched={landlordSearched}
+          onRefetch={refetch}
         />
       </main>
     </div>

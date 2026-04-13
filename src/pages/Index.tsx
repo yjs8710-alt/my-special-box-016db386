@@ -13,7 +13,7 @@ const Index = () => {
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
   
-  const { properties: dbProperties } = useDBProperties();
+  const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
 
   const allProperties = useMemo(() => {
@@ -69,6 +69,7 @@ const Index = () => {
           onTypeChange={setActiveType}
           query={query}
           onQueryChange={setQuery}
+          onRefetch={refetch}
         />
 
         {/* Right detail panel */}
