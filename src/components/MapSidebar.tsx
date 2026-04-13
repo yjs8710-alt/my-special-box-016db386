@@ -2236,7 +2236,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       } catch (error) {
         setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.");
       }
-    });
+    }
+    var sdkScript = document.createElement("script");
+    sdkScript.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false";
+    sdkScript.onload = function() { kakao.maps.load(function() { initRoadview(); }); };
+    sdkScript.onerror = function() { setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크 연결을 확인해주세요."); };
+    document.head.appendChild(sdkScript);
   </script>
 </body>
 </html>`;
