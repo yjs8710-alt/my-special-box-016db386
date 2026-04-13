@@ -2150,8 +2150,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       <div id="map"></div>
     </div>
   </div>
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false"></script>
   <script>
+    function initRoadview() {
     const data = ${payload};
     const radii = [30, 50, 100, 200, 400, 800, 1500];
     const statusEl = document.getElementById("status");
