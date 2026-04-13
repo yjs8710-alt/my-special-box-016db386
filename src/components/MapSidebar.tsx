@@ -2203,7 +2203,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       statusEl.style.display = "flex";
     };
 
-    kakao.maps.load(() => {
       try {
         const position = new kakao.maps.LatLng(data.lat, data.lng);
         roadview = new kakao.maps.Roadview(roadviewEl);
