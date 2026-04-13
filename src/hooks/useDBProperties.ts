@@ -82,11 +82,16 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
 export function useDBProperties(typeFilter?: string[]) {
   const [properties, setProperties] = useState<MapProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refetch = useCallback(() => {
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
       let query = supabase
         .from("properties")
@@ -112,7 +117,7 @@ export function useDBProperties(typeFilter?: string[]) {
       }
     };
 
-    fetch();
+    fetchData();
 
     // Realtime 구독: 매물 변경 시 자동 갱신
     const channelName = `db-properties-realtime-${typeFilter ? typeFilter.join(",") : "all"}-${Date.now()}`;
@@ -121,7 +126,7 @@ export function useDBProperties(typeFilter?: string[]) {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "properties" },
-        () => { if (!cancelled) fetch(); }
+        () => { if (!cancelled) fetchData(); }
       )
       .subscribe();
 
@@ -129,7 +134,7 @@ export function useDBProperties(typeFilter?: string[]) {
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [JSON.stringify(typeFilter)]);
+  }, [JSON.stringify(typeFilter), refreshKey]);
 
-  return { properties, loading };
+  return { properties, loading, refetch };
 }
