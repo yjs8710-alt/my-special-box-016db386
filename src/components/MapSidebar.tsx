@@ -1418,13 +1418,19 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
                 >
                   {savedPhotos.length}장
                 </span>
+                <span className="text-[10px] text-muted-foreground">— 드래그로 순서 변경</span>
               </div>
               <div className="grid grid-cols-4 gap-2">
                 {savedPhotos.map((src, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-square rounded-xl overflow-hidden group border-2 transition-all"
-                    style={{ borderColor: idx === 0 ? "hsl(var(--primary))" : "hsl(var(--border))" }}
+                    draggable
+                    onDragStart={(e) => handleSavedDragStart(e, idx)}
+                    onDragOver={(e) => handleSavedDragOver(e, idx)}
+                    onDrop={(e) => handleSavedDrop(e, idx)}
+                    onDragEnd={handleSavedDragEnd}
+                    className="relative aspect-square rounded-xl overflow-hidden group border-2 transition-all cursor-grab active:cursor-grabbing"
+                    style={{ borderColor: overIdx === idx ? "hsl(var(--accent))" : idx === 0 ? "hsl(var(--primary))" : "hsl(var(--border))", opacity: dragIdx === idx ? 0.4 : 1 }}
                   >
                     {idx === 0 ? (
                       <span
@@ -1442,7 +1448,7 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
                         대표설정
                       </button>
                     )}
-                    <img src={src} alt="" className="w-full h-full object-cover" />
+                    <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
                     <button
                       onClick={() => removeSaved(idx)}
                       className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
