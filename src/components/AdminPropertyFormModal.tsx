@@ -495,6 +495,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (initial?.elevator && !merged.options.includes("엘리베이터")) {
       merged.options = [...merged.options, "엘리베이터"];
     }
+    // 수정 모드: DB에 저장되지 않는 buildingType을 type으로부터 자동 추론
+    if (initial?.type) {
+      if (initial.type === "토지") {
+        merged.buildingType = "토지";
+      } else if (COLLECTIVE_TYPES.some(ct => ct === initial.type) || ["아파트매매","오피스텔매매"].includes(initial.type)) {
+        merged.buildingType = "집합건물";
+      }
+      // 그 외는 EMPTY_EXTENDED 기본값 "단독건물" 유지
+    }
     return merged;
   });
   const [saving, setSaving] = useState(false);
