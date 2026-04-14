@@ -3323,6 +3323,7 @@ const MapSidebar = ({
           onImagesUpdated={(imgs) => {
             // 실시간 반영: photoUploadProp의 이미지 업데이트
             setPhotoUploadProp((prev) => (prev ? { ...prev, images: imgs, image: imgs[0] ?? prev.image } : null));
+            onRefetch?.();
           }}
         />
       )}
