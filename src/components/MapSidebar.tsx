@@ -2513,9 +2513,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               sharePropertyToKakao(prop);
             }}
             title="카카오톡 공유"
-            className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded hover:bg-[hsl(50_90%_85%)] transition-colors"
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded hover:bg-[hsl(50_90%_85%)] transition-colors"
           >
-            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-5 h-5 object-contain" />
+            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
           </button>
           {/* 구분선 */}
           {(prop.type || floorShort || prop.unitNumber) && <span className="flex-shrink-0 w-px h-3.5 bg-border" />}
