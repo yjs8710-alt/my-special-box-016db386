@@ -6,6 +6,9 @@ declare global {
   }
 }
 
+/** 퍼블리시 도메인 (카카오 공유 링크용) */
+const SITE_ORIGIN = "https://my-special-box.lovable.app";
+
 /**
  * 카카오톡으로 매물 카드를 공유합니다.
  * 전화번호, 상세 주소는 제외하고 건물명·유형·가격 등만 노출합니다.
@@ -38,16 +41,16 @@ export function sharePropertyToKakao(property: MapProperty) {
       description,
       imageUrl: imageUrl || "https://my-special-box.lovable.app/placeholder.svg",
       link: {
-        mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
-        webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+        mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+        webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
       },
     },
     buttons: [
       {
         title: "매물 보기",
         link: {
-          mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
-          webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+          mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+          webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
         },
       },
     ],
@@ -99,8 +102,8 @@ export function shareMultipleToKakao(properties: MapProperty[]) {
     objectType: "text",
     text: `[집다] 매물 ${properties.length}건\n\n${text}${properties.length > 5 ? `\n... 외 ${properties.length - 5}건` : ""}`,
     link: {
-      mobileWebUrl: window.location.origin,
-      webUrl: window.location.origin,
+      mobileWebUrl: SITE_ORIGIN,
+      webUrl: SITE_ORIGIN,
     },
   });
 }
