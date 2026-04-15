@@ -26,6 +26,7 @@ import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
+import { sharePropertyToKakao } from "@/lib/kakaoShare";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -1412,7 +1413,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             >
               <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
             </button>
-            <button className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors">
+            <button
+              onClick={() => sharePropertyToKakao(property)}
+              className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors"
+            >
               <Share2 className="w-3.5 h-3.5 text-white" />
             </button>
             <button
