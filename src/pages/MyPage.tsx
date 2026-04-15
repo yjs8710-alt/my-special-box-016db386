@@ -296,8 +296,8 @@ const MyPage = () => {
                                 onChange={(e) => {
                                   const v = e.target.value;
                                   if (cell.field === "name") setName(v);
-                                  else if (cell.field === "phone") setPhone(v);
-                                  else if (cell.field === "agencyPhone") setAgencyPhone(v);
+                                   else if (cell.field === "phone") setPhone(formatPhone(v));
+                                   else if (cell.field === "agencyPhone") setAgencyPhone(formatPhone(v));
                                   else if (cell.field === "businessNumber") setBusinessNumber(v);
                                   else if (cell.field === "licenseNumber") setLicenseNumber(v);
                                   else if (cell.field === "agencyName") setAgencyName(v);
