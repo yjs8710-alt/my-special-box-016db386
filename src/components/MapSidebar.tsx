@@ -3079,7 +3079,7 @@ const MapSidebar = ({
     if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
     supabase
       .from("agent_profiles")
-      .select("agency_name, name, phone")
+      .select("agency_name, name, phone, agency_phone")
       .eq("user_id", authUser.userId)
       .maybeSingle()
       .then(({ data }) => {
