@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import logoTransparent from "@/assets/logo-transparent.png";
 
 interface PropertyData {
   id: string;
@@ -26,6 +27,16 @@ interface PropertyData {
   is_new: boolean;
   is_hot: boolean;
   registered_date: string;
+  registered_by: string | null;
+}
+
+interface AgentData {
+  name: string;
+  phone: string;
+  agency_name: string;
+  agency_address: string;
+  license_number: string;
+  member_type: string;
 }
 
 /** 주소에서 동/리 까지만 남기고 번지 이하 제거 */
@@ -40,6 +51,7 @@ function sanitizeAddress(address: string): string {
 export default function PublicProperty() {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<PropertyData | null>(null);
+  const [agent, setAgent] = useState<AgentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
 
@@ -48,11 +60,22 @@ export default function PublicProperty() {
     (async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by")
         .eq("id", id)
         .eq("status", "active")
         .single();
-      if (!error && data) setProperty(data);
+      if (!error && data) {
+        setProperty(data);
+        // Fetch agent info
+        if (data.registered_by) {
+          const { data: agentData } = await supabase
+            .from("agent_profiles")
+            .select("name,phone,agency_name,agency_address,license_number,member_type")
+            .eq("user_id", data.registered_by)
+            .single();
+          if (agentData) setAgent(agentData);
+        }
+      }
       setLoading(false);
     })();
   }, [id]);
@@ -89,25 +112,26 @@ export default function PublicProperty() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <a href="https://jibda.co.kr" className="text-lg font-bold text-primary">집다</a>
+      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
+        <a href="https://jibda.co.kr" className="flex items-center gap-1.5">
+          <img src={logoTransparent} alt="집다" className="h-8 w-auto" />
+        </a>
         <a href="https://jibda.co.kr/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
       </header>
 
-      <div className="max-w-lg mx-auto pb-20">
+      <div className="max-w-lg mx-auto pb-24">
         {/* Image carousel */}
         {imgs.length > 0 ? (
           <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-            <div
-              className="flex h-full transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${imgIdx * 100}%)`, width: `${imgs.length * 100}%` }}
-            >
-              {imgs.map((src, i) => (
-                <div key={i} className="h-full flex-shrink-0" style={{ width: `${100 / imgs.length}%` }}>
-                  <img src={src} alt={`${property.title} ${i + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
+            {imgs.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`${property.title} ${i + 1}`}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                style={{ opacity: i === imgIdx ? 1 : 0 }}
+              />
+            ))}
             {imgs.length > 1 && (
               <>
                 <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
@@ -205,6 +229,25 @@ export default function PublicProperty() {
               {" · "}엘리베이터 <span className="font-bold text-foreground">{property.elevator ? "있음" : "없음"}</span>
             </div>
           </div>
+
+          {/* Agent / Office info */}
+          {agent && (
+            <div className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-2">
+              <p className="text-xs font-bold text-primary mb-1">공유 중개사무소</p>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                <span className="text-muted-foreground">사무소명</span>
+                <span className="font-bold text-foreground">{agent.agency_name}</span>
+                <span className="text-muted-foreground">대표자</span>
+                <span className="font-bold text-foreground">{agent.name}</span>
+                <span className="text-muted-foreground">주소</span>
+                <span className="text-foreground">{agent.agency_address}</span>
+                <span className="text-muted-foreground">연락처</span>
+                <a href={`tel:${agent.phone}`} className="font-bold text-primary">{agent.phone}</a>
+                <span className="text-muted-foreground">개설등록번호</span>
+                <span className="text-foreground">{agent.license_number}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* CTA */}
