@@ -60,9 +60,10 @@ function toPyeong(value: string | null | undefined): string {
   return (num / 3.3058).toFixed(2);
 }
 
-/** 면적 표시: 원본 + (N평) */
+/** 면적 표시: 이미 평 단위면 그대로, 아니면 원본 + (N평) */
 function formatArea(value: string | null | undefined): string {
   if (!value) return "-";
+  if (value.includes("평")) return value;
   const pyeong = toPyeong(value);
   return pyeong ? `${value} (${pyeong}평)` : value;
 }
@@ -153,7 +154,7 @@ export default function PublicProperty() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
         <a href="https://jibda.co.kr" className="flex items-center gap-1.5">
-          <img src={logoTransparent} alt="집다" className="h-8 w-auto" />
+          <img src={logoTransparent} alt="집다" className="h-16 w-auto" />
         </a>
         <a href="https://jibda.co.kr/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
       </header>
@@ -225,7 +226,7 @@ export default function PublicProperty() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatArea(property.area) },
-              { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${property.total_floors}층` },
+              { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: property.parking || "확인필요" },
               { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: property.available_from || "즉시" },
             ].map((item, i) => (
