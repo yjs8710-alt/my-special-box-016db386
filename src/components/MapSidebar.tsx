@@ -4142,6 +4142,7 @@ const MapSidebar = ({
                             userId={authUser?.userId}
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
+                            agencyInfo={myAgencyInfo}
                           />
                         </div>
                       </div>
