@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           agency_address: string
           agency_name: string
+          agency_phone: string | null
           agree_marketing: boolean
           business_number: string
           created_at: string
@@ -35,6 +36,7 @@ export type Database = {
         Insert: {
           agency_address: string
           agency_name: string
+          agency_phone?: string | null
           agree_marketing?: boolean
           business_number: string
           created_at?: string
@@ -52,6 +54,7 @@ export type Database = {
         Update: {
           agency_address?: string
           agency_name?: string
+          agency_phone?: string | null
           agree_marketing?: boolean
           business_number?: string
           created_at?: string
