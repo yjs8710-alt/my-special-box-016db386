@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
@@ -36,9 +36,11 @@ interface AgentData {
   name: string;
   phone: string;
   agency_name: string;
+  agency_phone: string | null;
   agency_address: string;
   license_number: string;
   member_type: string;
+  representative_name: string;
 }
 
 interface BuildingSummaryData {
@@ -176,6 +178,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
 
 export default function PublicProperty() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const [property, setProperty] = useState<PropertyData | null>(null);
   const [agent, setAgent] = useState<AgentData | null>(null);
   const [building, setBuilding] = useState<BuildingSummaryData | null>(null);
@@ -205,11 +208,14 @@ export default function PublicProperty() {
           return;
         }
 
-        const agentRequest = data.registered_by
+        const sharedBy = searchParams.get("sharedBy");
+        const agentUserId = sharedBy || data.registered_by;
+
+        const agentRequest = agentUserId
           ? supabase
               .from("agent_profiles")
-              .select("name,phone,agency_name,agency_address,license_number,member_type")
-              .eq("user_id", data.registered_by)
+              .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name")
+              .eq("user_id", agentUserId)
               .eq("status", "approved")
               .eq("is_active", true)
               .order("created_at", { ascending: false })
@@ -238,7 +244,7 @@ export default function PublicProperty() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, searchParams]);
 
   if (loading) {
     return (
@@ -465,9 +471,11 @@ export default function PublicProperty() {
                 <span className="text-muted-foreground">사무소명</span>
                 <span className="font-bold text-foreground">{agent.agency_name}</span>
                 <span className="text-muted-foreground">대표자</span>
-                <span className="font-bold text-foreground">{agent.name}</span>
+                <span className="font-bold text-foreground">{agent.representative_name || agent.name}</span>
                 <span className="text-muted-foreground">주소</span>
                 <span className="text-foreground">{agent.agency_address}</span>
+                <span className="text-muted-foreground">대표번호</span>
+                <a href={`tel:${agent.agency_phone || ""}`} className="font-bold text-primary">{agent.agency_phone || "-"}</a>
                 <span className="text-muted-foreground">연락처</span>
                 <a href={`tel:${agent.phone}`} className="font-bold text-primary">{agent.phone}</a>
                 <span className="text-muted-foreground">개설등록번호</span>
