@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import logoTransparent from "@/assets/logo-transparent.png";
 
 interface PropertyData {
@@ -39,6 +39,34 @@ interface AgentData {
   member_type: string;
 }
 
+interface BuildingSummaryData {
+  building_name: string | null;
+  main_purpose: string | null;
+  approval_date: string | null;
+  land_area: string | null;
+  building_area: string | null;
+  total_area: string | null;
+  floors_above: string | null;
+  floors_below: string | null;
+  parking_count: string | null;
+  elevator: boolean | null;
+}
+
+/** ㎡ → 평 변환 (소수 2자리) */
+function toPyeong(value: string | null | undefined): string {
+  if (!value) return "";
+  const num = parseFloat(value.replace(/[^0-9.]/g, ""));
+  if (isNaN(num)) return "";
+  return (num / 3.3058).toFixed(2);
+}
+
+/** 면적 표시: 원본 + (N평) */
+function formatArea(value: string | null | undefined): string {
+  if (!value) return "-";
+  const pyeong = toPyeong(value);
+  return pyeong ? `${value} (${pyeong}평)` : value;
+}
+
 /** 주소에서 동/리 까지만 남기고 번지 이하 제거 */
 function sanitizeAddress(address: string): string {
   if (!address) return "";
@@ -52,6 +80,7 @@ export default function PublicProperty() {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<PropertyData | null>(null);
   const [agent, setAgent] = useState<AgentData | null>(null);
+  const [building, setBuilding] = useState<BuildingSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
 
@@ -66,15 +95,36 @@ export default function PublicProperty() {
         .single();
       if (!error && data) {
         setProperty(data);
-        // Fetch agent info
+
+        // Fetch agent & building summary in parallel
+        const promises: Promise<void>[] = [];
+
         if (data.registered_by) {
-          const { data: agentData } = await supabase
-            .from("agent_profiles")
-            .select("name,phone,agency_name,agency_address,license_number,member_type")
-            .eq("user_id", data.registered_by)
-            .single();
-          if (agentData) setAgent(agentData);
+          promises.push(
+            supabase
+              .from("agent_profiles")
+              .select("name,phone,agency_name,agency_address,license_number,member_type")
+              .eq("user_id", data.registered_by)
+              .single()
+              .then(({ data: agentData }) => {
+                if (agentData) setAgent(agentData);
+              })
+          );
         }
+
+        // building_summary uses property_id as text
+        promises.push(
+          supabase
+            .from("building_summary")
+            .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
+            .eq("property_id", id)
+            .maybeSingle()
+            .then(({ data: bData }) => {
+              if (bData) setBuilding(bData);
+            })
+        );
+
+        await Promise.all(promises);
       }
       setLoading(false);
     })();
@@ -103,10 +153,8 @@ export default function PublicProperty() {
 
   const imgs = (property.images || []).filter(Boolean);
   const safeAddress = sanitizeAddress(property.address);
-
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
-
   const isSale = property.type?.includes("매매");
 
   return (
@@ -182,10 +230,10 @@ export default function PublicProperty() {
             )}
           </div>
 
-          {/* Info grid */}
+          {/* Info grid — area in 평 */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: <Layers className="w-4 h-4" />, label: "면적", value: property.area },
+              { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatArea(property.area) },
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${property.total_floors}층` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: property.parking || "확인필요" },
               { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: property.available_from || "즉시" },
@@ -229,6 +277,70 @@ export default function PublicProperty() {
               {" · "}엘리베이터 <span className="font-bold text-foreground">{property.elevator ? "있음" : "없음"}</span>
             </div>
           </div>
+
+          {/* Building Summary (건축물대장) */}
+          {building && (
+            <div className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-2">
+              <div className="flex items-center gap-1.5 mb-1">
+                <FileText className="w-4 h-4 text-primary" />
+                <p className="text-xs font-bold text-primary">건축물대장 정보</p>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                {building.building_name && (
+                  <>
+                    <span className="text-muted-foreground">건물명</span>
+                    <span className="font-bold text-foreground">{building.building_name}</span>
+                  </>
+                )}
+                {building.main_purpose && (
+                  <>
+                    <span className="text-muted-foreground">주용도</span>
+                    <span className="text-foreground">{building.main_purpose}</span>
+                  </>
+                )}
+                {building.land_area && (
+                  <>
+                    <span className="text-muted-foreground">대지면적</span>
+                    <span className="text-foreground">{formatArea(building.land_area)}</span>
+                  </>
+                )}
+                {building.building_area && (
+                  <>
+                    <span className="text-muted-foreground">건축면적</span>
+                    <span className="text-foreground">{formatArea(building.building_area)}</span>
+                  </>
+                )}
+                {building.total_area && (
+                  <>
+                    <span className="text-muted-foreground">연면적</span>
+                    <span className="text-foreground">{formatArea(building.total_area)}</span>
+                  </>
+                )}
+                {(building.floors_above || building.floors_below) && (
+                  <>
+                    <span className="text-muted-foreground">층수</span>
+                    <span className="text-foreground">
+                      지상 {building.floors_above || "-"}층 / 지하 {building.floors_below || "-"}층
+                    </span>
+                  </>
+                )}
+                {building.parking_count && (
+                  <>
+                    <span className="text-muted-foreground">주차대수</span>
+                    <span className="text-foreground">{building.parking_count}대</span>
+                  </>
+                )}
+                {building.approval_date && (
+                  <>
+                    <span className="text-muted-foreground">사용승인일</span>
+                    <span className="text-foreground">{building.approval_date}</span>
+                  </>
+                )}
+                <span className="text-muted-foreground">엘리베이터</span>
+                <span className="text-foreground">{building.elevator ? "있음" : "없음"}</span>
+              </div>
+            </div>
+          )}
 
           {/* Agent / Office info */}
           {agent && (
