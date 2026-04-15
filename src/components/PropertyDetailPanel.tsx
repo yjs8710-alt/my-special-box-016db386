@@ -1361,7 +1361,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
       .eq("user_id", authUser.userId)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
+        if (data) setMyAgencyInfo({ userId: authUser.userId, agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
       });
   }, [authUser?.userId]);
 
