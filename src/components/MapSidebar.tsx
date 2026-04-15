@@ -3079,11 +3079,11 @@ const MapSidebar = ({
     if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
     supabase
       .from("agent_profiles")
-      .select("agency_name, name, phone, agency_phone")
+      .select("agency_name, name, phone, agency_phone, representative_name, agency_address, license_number")
       .eq("user_id", authUser.userId)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "" });
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
       });
   }, [authUser?.userId]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
