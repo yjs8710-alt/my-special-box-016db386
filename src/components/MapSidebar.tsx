@@ -3657,24 +3657,6 @@ const MapSidebar = ({
                 <Printer className="w-3 h-3" />
                 선택인쇄
               </button>
-              <button
-                onClick={() => {
-                  const list = properties.filter((p) => checkedIds.has(p.id));
-                  if (list.length === 0) {
-                    alert("공유할 매물을 선택해주세요.");
-                    return;
-                  }
-                  shareMultipleToKakao(list);
-                }}
-                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
-                style={{
-                  background: "hsl(50 90% 90%)",
-                  color: "hsl(50 80% 20%)",
-                  border: "1px solid hsl(50 70% 60%)",
-                }}
-              >
-                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="#3C1E1E"><path d="M12 3C6.48 3 2 6.58 2 10.9c0 2.78 1.86 5.22 4.65 6.6l-.96 3.56c-.08.3.26.54.52.36L10.2 18.6c.59.08 1.19.12 1.8.12 5.52 0 10-3.58 10-7.9S17.52 3 12 3z"/></svg> 카카오공유
-              </button>
             </div>
           </div>
 
