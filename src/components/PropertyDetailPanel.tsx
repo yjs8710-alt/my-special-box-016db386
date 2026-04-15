@@ -26,8 +26,9 @@ import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
-import { sharePropertyToKakao } from "@/lib/kakaoShare";
+import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon.png";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -1349,6 +1350,20 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [liked, setLiked] = useState(false);
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
+  const { user: authUser } = useAuth();
+  const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+
+  useEffect(() => {
+    if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name, phone, agency_phone")
+      .eq("user_id", authUser.userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "" });
+      });
+  }, [authUser?.userId]);
 
   if (!property) return null;
 
@@ -1415,7 +1430,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
             </button>
             <button
-              onClick={() => sharePropertyToKakao(property)}
+              onClick={() => sharePropertyToKakao(property, myAgencyInfo)}
               title="카카오톡 공유"
               className="w-7 h-7 rounded-full bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center backdrop-blur-sm transition-colors"
             >
