@@ -21,7 +21,7 @@ export interface AgencyInfo {
  * 전화번호, 상세 주소는 제외하고 건물명·유형·가격 등만 노출합니다.
  * agencyInfo가 전달되면 공유한 중개사무소 정보를 표시합니다.
  */
-export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyInfo) {
+export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyInfo, fallbackImageUrl?: string) {
   if (!window.Kakao?.Share) {
     alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
     return;
