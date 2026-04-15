@@ -6,6 +6,9 @@ declare global {
   }
 }
 
+/** 퍼블리시 도메인 (카카오 공유 링크용) */
+const SITE_ORIGIN = "https://my-special-box.lovable.app";
+
 /**
  * 카카오톡으로 매물 카드를 공유합니다.
  * 전화번호, 상세 주소는 제외하고 건물명·유형·가격 등만 노출합니다.
