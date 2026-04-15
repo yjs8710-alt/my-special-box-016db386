@@ -2515,7 +2515,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             title="카카오톡 공유"
             className="flex-shrink-0 flex items-center justify-center transition-colors"
           >
-            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-7 h-7 object-contain" />
+            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-10 h-10 object-contain" />
           </button>
           {/* 구분선 */}
           {(prop.type || floorShort || prop.unitNumber) && <span className="flex-shrink-0 w-px h-3.5 bg-border" />}
