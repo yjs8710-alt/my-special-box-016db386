@@ -18,6 +18,7 @@ interface AgentProfile {
   user_id: string;
   name: string;
   phone: string;
+  agency_phone: string | null;
   agency_name: string;
   license_number: string;
   business_number: string;
@@ -42,6 +43,7 @@ const MyPage = () => {
   // Editable fields
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [agencyPhone, setAgencyPhone] = useState("");
   const [agencyName, setAgencyName] = useState("");
   const [agencyAddress, setAgencyAddress] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -83,9 +85,10 @@ const MyPage = () => {
         .maybeSingle();
 
       if (data) {
-        setProfile(data);
+        setProfile(data as AgentProfile);
         setName(data.name);
         setPhone(data.phone);
+        setAgencyPhone((data as any).agency_phone ?? "");
         setAgencyName(data.agency_name);
         setAgencyAddress(data.agency_address);
         setLicenseNumber(data.license_number);
@@ -117,6 +120,7 @@ const MyPage = () => {
       .update({
         name,
         phone,
+        agency_phone: agencyPhone,
         agency_name: agencyName,
         agency_address: agencyAddress,
         license_number: licenseNumber,
@@ -135,9 +139,10 @@ const MyPage = () => {
         .eq("id", profile.id)
         .maybeSingle();
       if (refreshed) {
-        setProfile(refreshed);
+        setProfile(refreshed as AgentProfile);
         setName(refreshed.name);
         setPhone(refreshed.phone);
+        setAgencyPhone((refreshed as any).agency_phone ?? "");
         setAgencyName(refreshed.agency_name);
         setAgencyAddress(refreshed.agency_address);
         setLicenseNumber(refreshed.license_number);
@@ -246,7 +251,7 @@ const MyPage = () => {
                       { label: "휴대폰 번호", value: phone, editable: true, field: "phone" as const },
                     ],
                     [
-                      { label: "대표번호", value: profile?.phone ?? "", editable: false },
+                      { label: "대표번호", value: agencyPhone, editable: true, field: "agencyPhone" as const },
                       { label: "이메일", value: email, editable: false },
                     ],
                     [
