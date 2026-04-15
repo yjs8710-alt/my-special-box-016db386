@@ -465,7 +465,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       unit_number: form.unitNo || null,
       area: isBuildingSale
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
-        : form.area,
+        : (form.area && !form.area.includes("평") ? (() => { const n = parseFloat(form.area.replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : form.area; })() : form.area),
       floor: form.floor,
       deposit: mainDeposit,
       monthly: mainMonthly,
