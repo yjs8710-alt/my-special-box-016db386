@@ -26,8 +26,9 @@ import { useState, useEffect, useCallback } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
-import { sharePropertyToKakao } from "@/lib/kakaoShare";
+import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon.png";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
