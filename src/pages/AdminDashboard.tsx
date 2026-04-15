@@ -1416,7 +1416,7 @@ const AdminDashboard = () => {
       type: data.type || "",
       room_type: data.room_type || null,
       unit_number: data.unit_number || null,
-      area: data.area ?? "",
+      area: (data.area && !data.area.includes("평")) ? (() => { const n = parseFloat(data.area.replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : data.area; })() : (data.area ?? ""),
       floor: data.floor ?? "",
       deposit: data.deposit ?? "",
       monthly: data.monthly ?? "",
