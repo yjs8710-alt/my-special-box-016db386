@@ -27,6 +27,7 @@ const SignupPage = () => {
     passwordConfirm: "",
     memberType: "",
     agencyName: "",
+    agencyPhone: "",
     licenseNumber: "",
     businessNumber: "",
     agencyAddress: "",
@@ -65,6 +66,7 @@ const SignupPage = () => {
 
   const canNext1 =
     form.agencyName.trim() &&
+    form.agencyPhone.trim() &&
     form.licenseNumber.trim() &&
     form.businessNumber.trim() &&
     form.agencyAddress.trim();
@@ -107,6 +109,7 @@ const SignupPage = () => {
       name: form.name.trim(),
       phone: form.phone.trim(),
       agency_name: form.agencyName.trim(),
+      agency_phone: form.agencyPhone.trim(),
       license_number: form.licenseNumber.trim(),
       business_number: form.businessNumber.trim(),
       agency_address: form.agencyAddress.trim(),
@@ -306,6 +309,10 @@ const SignupPage = () => {
                 <div className="flex flex-col gap-1.5">
                   <Label>부동산 중개사무소명 <span className="text-destructive">*</span></Label>
                   <Input placeholder="예) 집다공인중개사사무소" value={form.agencyName} onChange={(e) => set("agencyName", e.target.value)} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label>대표번호 <span className="text-destructive">*</span></Label>
+                  <Input placeholder="043-000-0000" value={form.agencyPhone} onChange={(e) => set("agencyPhone", formatPhone(e.target.value))} />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>공인중개사 등록번호 <span className="text-destructive">*</span></Label>
