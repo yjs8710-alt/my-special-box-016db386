@@ -175,8 +175,7 @@ export default function PublicProperty() {
             .select("name,phone,agency_name,agency_address,license_number,member_type")
             .eq("user_id", data.registered_by)
             .maybeSingle()
-            .then(({ data: agentData, error: agentError }) => {
-              console.log("Agent fetch result:", agentData, agentError);
+            .then(({ data: agentData }) => {
               if (agentData) setAgent(agentData);
             });
         }
