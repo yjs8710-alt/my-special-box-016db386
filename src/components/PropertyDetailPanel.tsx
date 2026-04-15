@@ -1415,9 +1415,12 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             </button>
             <button
               onClick={() => sharePropertyToKakao(property)}
-              className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors"
+              title="카카오톡 공유"
+              className="w-7 h-7 rounded-full bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center backdrop-blur-sm transition-colors"
             >
-              <Share2 className="w-3.5 h-3.5 text-white" />
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="#3C1E1E">
+                <path d="M12 3C6.48 3 2 6.58 2 10.9c0 2.78 1.86 5.22 4.65 6.6l-.96 3.56c-.08.3.26.54.52.36L10.2 18.6c.59.08 1.19.12 1.8.12 5.52 0 10-3.58 10-7.9S17.52 3 12 3z"/>
+              </svg>
             </button>
             <button
               onClick={onClose}
