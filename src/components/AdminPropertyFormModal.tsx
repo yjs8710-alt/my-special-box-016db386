@@ -829,7 +829,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       type: form.type || "",
       room_type: form.room_type || null,
       unit_number: form.unit_number || null,
-      area: form.area ?? "",
+      area: (form.area && !form.area.includes("평")) ? (() => { const n = parseFloat(form.area.replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : form.area; })() : (form.area ?? ""),
       floor: form.floor ?? "",
       deposit: finalDeposit ?? "",
       monthly: finalMonthly ?? "",
