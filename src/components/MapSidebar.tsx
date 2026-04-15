@@ -2342,9 +2342,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       });
 
     return (
-      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0 gap-0">
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
-        <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
+        <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[18px]">
           {prop.buildYear && (
             <span
               className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap rounded"
@@ -2474,7 +2474,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
 
         {/* 2줄: [세부유형 (층) 호수] | 보증금/월세 관리비 몇평 | 옵션 | 비번 */}
-        <div className="flex items-center gap-0.5 flex-wrap min-h-[22px]">
+        <div className="flex items-center gap-0.5 flex-wrap min-h-[18px]">
           {/* 남향 뱃지 */}
           {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
             <span
