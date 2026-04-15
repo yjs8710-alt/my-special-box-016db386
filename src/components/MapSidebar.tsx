@@ -2301,10 +2301,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       popup.focus();
     };
 
-    // 면적에서 평수만 추출 (예: "49㎡ (15평)" → "15평", "15" → "15평", "99㎡ (30평)" → "30평")
-    const pyeong = prop.area?.match(/\((\d+)평\)/) ?? prop.area?.match(/(\d+)\s*평/);
+    // 면적에서 평수만 추출 (예: "49㎡ (15.2평)" → "15.2평", "15" → "15평", "19.2평" → "19.2평")
+    const pyeong = prop.area?.match(/\((\d+(?:\.\d+)?)평\)/) ?? prop.area?.match(/(\d+(?:\.\d+)?)\s*평/);
     const rawArea = pyeong ? pyeong[1] + "평" : prop.area ? prop.area.split(" ")[0] : "";
-    const areaShort = rawArea && /^\d+$/.test(rawArea) ? rawArea + "평" : rawArea;
+    const areaShort = rawArea && /^\d+(?:\.\d+)?$/.test(rawArea) ? rawArea + "평" : rawArea;
     // floor에서 층 숫자만 (예: "3층" → "3F")
     const floorShort = prop.floor ? prop.floor.replace(/층/g, "F").replace(/지상\s*/g, "") : "";
     // 연락처 버튼 목록
