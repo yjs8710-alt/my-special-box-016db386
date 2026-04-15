@@ -29,6 +29,7 @@ export type Database = {
           name: string
           parent_user_id: string | null
           phone: string
+          representative_name: string
           status: string
           updated_at: string
           user_id: string
@@ -47,6 +48,7 @@ export type Database = {
           name: string
           parent_user_id?: string | null
           phone: string
+          representative_name?: string
           status?: string
           updated_at?: string
           user_id: string
@@ -65,6 +67,7 @@ export type Database = {
           name?: string
           parent_user_id?: string | null
           phone?: string
+          representative_name?: string
           status?: string
           updated_at?: string
           user_id?: string
