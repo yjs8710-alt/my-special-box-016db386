@@ -49,7 +49,7 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
   const description = descParts.join(" · ");
 
   const imageUrl =
-    property.images?.[0] || property.image || "";
+    property.images?.[0] || property.image || fallbackImageUrl || "";
 
   const shareData: any = {
     objectType: "feed",
