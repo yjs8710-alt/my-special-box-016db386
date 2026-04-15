@@ -141,7 +141,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
 
   return (
     <div>
-      <p className="text-xs font-bold text-foreground mb-2">대략적 위치</p>
+      <p className="text-xs font-bold text-foreground mb-2">위치</p>
       <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border" />
       <p className="text-[10px] text-muted-foreground mt-1">정확한 위치는 중개사무소에 문의해주세요.</p>
     </div>
@@ -269,7 +269,7 @@ export default function PublicProperty() {
           <div>
             <div className="flex items-center gap-1.5 mb-2">
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white">{property.type}</span>
-              {property.room_type && (
+              {property.room_type && property.room_type !== property.type && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground">{property.room_type}</span>
               )}
               {property.is_new && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-white">NEW</span>}
