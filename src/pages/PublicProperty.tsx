@@ -60,9 +60,10 @@ function toPyeong(value: string | null | undefined): string {
   return (num / 3.3058).toFixed(2);
 }
 
-/** 면적 표시: 원본 + (N평) */
+/** 면적 표시: 이미 평 단위면 그대로, 아니면 원본 + (N평) */
 function formatArea(value: string | null | undefined): string {
   if (!value) return "-";
+  if (value.includes("평")) return value;
   const pyeong = toPyeong(value);
   return pyeong ? `${value} (${pyeong}평)` : value;
 }
@@ -153,7 +154,7 @@ export default function PublicProperty() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
         <a href="https://jibda.co.kr" className="flex items-center gap-1.5">
-          <img src={logoTransparent} alt="집다" className="h-8 w-auto" />
+          <img src={logoTransparent} alt="집다" className="h-16 w-auto" />
         </a>
         <a href="https://jibda.co.kr/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
       </header>
