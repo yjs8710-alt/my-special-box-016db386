@@ -40,6 +40,7 @@ import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
+import { shareMultipleToKakao, sharePropertyToKakao } from "@/lib/kakaoShare";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
@@ -3642,6 +3643,24 @@ const MapSidebar = ({
               >
                 <Printer className="w-3 h-3" />
                 선택인쇄
+              </button>
+              <button
+                onClick={() => {
+                  const list = properties.filter((p) => checkedIds.has(p.id));
+                  if (list.length === 0) {
+                    alert("공유할 매물을 선택해주세요.");
+                    return;
+                  }
+                  shareMultipleToKakao(list);
+                }}
+                className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
+                style={{
+                  background: "hsl(50 90% 90%)",
+                  color: "hsl(50 80% 20%)",
+                  border: "1px solid hsl(50 70% 60%)",
+                }}
+              >
+                💬 카카오공유
               </button>
             </div>
           </div>
