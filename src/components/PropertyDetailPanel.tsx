@@ -1419,7 +1419,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               title="카카오톡 공유"
               className="w-7 h-7 rounded-full bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center backdrop-blur-sm transition-colors"
             >
-              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-4 h-4" />
+              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={onClose}
