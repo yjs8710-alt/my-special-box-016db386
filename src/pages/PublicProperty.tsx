@@ -97,34 +97,25 @@ export default function PublicProperty() {
         setProperty(data);
 
         // Fetch agent & building summary in parallel
-        const promises: Promise<void>[] = [];
-
         if (data.registered_by) {
-          promises.push(
-            supabase
-              .from("agent_profiles")
-              .select("name,phone,agency_name,agency_address,license_number,member_type")
-              .eq("user_id", data.registered_by)
-              .single()
-              .then(({ data: agentData }) => {
-                if (agentData) setAgent(agentData);
-              })
-          );
+          supabase
+            .from("agent_profiles")
+            .select("name,phone,agency_name,agency_address,license_number,member_type")
+            .eq("user_id", data.registered_by)
+            .single()
+            .then(({ data: agentData }) => {
+              if (agentData) setAgent(agentData);
+            });
         }
 
-        // building_summary uses property_id as text
-        promises.push(
-          supabase
-            .from("building_summary")
-            .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
-            .eq("property_id", id)
-            .maybeSingle()
-            .then(({ data: bData }) => {
-              if (bData) setBuilding(bData);
-            })
-        );
-
-        await Promise.all(promises);
+        supabase
+          .from("building_summary")
+          .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
+          .eq("property_id", id)
+          .maybeSingle()
+          .then(({ data: bData }) => {
+            if (bData) setBuilding(bData);
+          });
       }
       setLoading(false);
     })();
