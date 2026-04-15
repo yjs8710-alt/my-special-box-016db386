@@ -40,7 +40,7 @@ import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
-import { shareMultipleToKakao, sharePropertyToKakao } from "@/lib/kakaoShare";
+import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
