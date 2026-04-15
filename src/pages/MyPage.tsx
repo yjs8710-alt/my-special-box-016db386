@@ -299,6 +299,7 @@ const MyPage = () => {
                                     : cell.field === "businessNumber" ? businessNumber
                                     : cell.field === "licenseNumber" ? licenseNumber
                                     : cell.field === "agencyName" ? agencyName
+                                    : cell.field === "representativeName" ? representativeName
                                     : agencyAddress
                                 }
                                 onChange={(e) => {
@@ -309,6 +310,7 @@ const MyPage = () => {
                                   else if (cell.field === "businessNumber") setBusinessNumber(v);
                                   else if (cell.field === "licenseNumber") setLicenseNumber(v);
                                   else if (cell.field === "agencyName") setAgencyName(v);
+                                  else if (cell.field === "representativeName") setRepresentativeName(v);
                                   else setAgencyAddress(v);
                                 }}
                                 className="h-8 text-sm"
