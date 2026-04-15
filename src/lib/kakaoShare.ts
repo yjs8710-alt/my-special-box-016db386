@@ -14,6 +14,9 @@ export interface AgencyInfo {
   name?: string;
   phone?: string;
   agencyPhone?: string;
+  representativeName?: string;
+  agencyAddress?: string;
+  licenseNumber?: string;
 }
 
 /**
@@ -39,11 +42,15 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
 
   // 중개사무소 정보 추가
   if (agencyInfo?.agencyName) {
-    const phones = [
-      agencyInfo.agencyPhone ? `대표 ${agencyInfo.agencyPhone}` : "",
-      agencyInfo.phone ? `HP ${agencyInfo.phone}` : "",
-    ].filter(Boolean).join(" / ");
-    descParts.push(`📞 ${agencyInfo.agencyName}${phones ? ` ${phones}` : ""}`);
+    const agencyParts = [
+      `🏢 ${agencyInfo.agencyName}`,
+      agencyInfo.representativeName ? `대표 ${agencyInfo.representativeName}` : "",
+      agencyInfo.agencyAddress ? `📍 ${agencyInfo.agencyAddress}` : "",
+      agencyInfo.agencyPhone ? `☎ ${agencyInfo.agencyPhone}` : "",
+      agencyInfo.phone ? `📱 ${agencyInfo.phone}` : "",
+      agencyInfo.licenseNumber ? `등록번호 ${agencyInfo.licenseNumber}` : "",
+    ].filter(Boolean);
+    descParts.push(agencyParts.join("\n"));
   }
 
   const description = descParts.join(" · ");
