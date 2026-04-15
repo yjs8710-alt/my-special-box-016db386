@@ -13,6 +13,7 @@ export interface AgencyInfo {
   agencyName?: string;
   name?: string;
   phone?: string;
+  agencyPhone?: string;
 }
 
 /**
@@ -38,7 +39,11 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
 
   // 중개사무소 정보 추가
   if (agencyInfo?.agencyName) {
-    descParts.push(`📞 ${agencyInfo.agencyName}${agencyInfo.phone ? ` ${agencyInfo.phone}` : ""}`);
+    const phones = [
+      agencyInfo.agencyPhone ? `대표 ${agencyInfo.agencyPhone}` : "",
+      agencyInfo.phone ? `HP ${agencyInfo.phone}` : "",
+    ].filter(Boolean).join(" / ");
+    descParts.push(`📞 ${agencyInfo.agencyName}${phones ? ` ${phones}` : ""}`);
   }
 
   const description = descParts.join(" · ");
