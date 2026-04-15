@@ -94,7 +94,44 @@ function sanitizeAddress(address: string): string {
 declare global {
   interface Window {
     kakao: any;
+    __kakaoMapReady?: boolean;
+    __kakaoMapCallbacks?: Array<() => void>;
   }
+}
+
+const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+
+function loadKakaoMapScript(cb: () => void) {
+  if (window.kakao?.maps && window.__kakaoMapReady) {
+    cb();
+    return;
+  }
+
+  if (window.kakao?.maps && !window.__kakaoMapReady) {
+    window.kakao.maps.load(() => {
+      window.__kakaoMapReady = true;
+      cb();
+    });
+    return;
+  }
+
+  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
+  window.__kakaoMapCallbacks.push(cb);
+
+  if (document.getElementById("kakao-maps-script")) return;
+
+  const script = document.createElement("script");
+  script.id = "kakao-maps-script";
+  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
+  script.async = true;
+  script.onload = () => {
+    window.kakao.maps.load(() => {
+      window.__kakaoMapReady = true;
+      window.__kakaoMapCallbacks?.forEach((fn) => fn());
+      window.__kakaoMapCallbacks = [];
+    });
+  };
+  document.head.appendChild(script);
 }
 
 function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
@@ -103,40 +140,29 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
   useEffect(() => {
     if (!lat || !lng || !mapRef.current) return;
 
-    const loadMap = () => {
-      if (!window.kakao?.maps) return;
-      window.kakao.maps.load(() => {
-        const position = new window.kakao.maps.LatLng(lat, lng);
-        const map = new window.kakao.maps.Map(mapRef.current!, {
-          center: position,
-          level: 4,
-          draggable: false,
-          scrollwheel: false,
-          disableDoubleClickZoom: true,
-        });
+    loadKakaoMapScript(() => {
+      if (!window.kakao?.maps || !mapRef.current) return;
 
-        // 반경 원 표시 (대략적 위치)
-        new window.kakao.maps.Circle({
-          center: position,
-          radius: 150,
-          strokeWeight: 2,
-          strokeColor: "#1B3A5C",
-          strokeOpacity: 0.6,
-          fillColor: "#1B3A5C",
-          fillOpacity: 0.15,
-          map,
-        });
+      const position = new window.kakao.maps.LatLng(lat, lng);
+      const map = new window.kakao.maps.Map(mapRef.current, {
+        center: position,
+        level: 4,
+        draggable: false,
+        scrollwheel: false,
+        disableDoubleClickZoom: true,
       });
-    };
 
-    if (window.kakao?.maps) {
-      loadMap();
-    } else {
-      const script = document.createElement("script");
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=8e0913ea1f7ca5fdf8e78a9bebe2106b&autoload=false`;
-      script.onload = loadMap;
-      document.head.appendChild(script);
-    }
+      new window.kakao.maps.Circle({
+        center: position,
+        radius: 150,
+        strokeWeight: 2,
+        strokeColor: "#1B3A5C",
+        strokeOpacity: 0.6,
+        fillColor: "#1B3A5C",
+        fillOpacity: 0.15,
+        map,
+      });
+    });
   }, [lat, lng]);
 
   return (
@@ -158,39 +184,60 @@ export default function PublicProperty() {
 
   useEffect(() => {
     if (!id) return;
-    (async () => {
-      const { data, error } = await supabase
-        .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
-        .eq("id", id)
-        .eq("status", "active")
-        .single();
-      if (!error && data) {
-        setProperty(data as any);
 
-        // Fetch agent & building summary in parallel
-        if (data.registered_by) {
-          supabase
-            .from("agent_profiles")
-            .select("name,phone,agency_name,agency_address,license_number,member_type")
-            .eq("user_id", data.registered_by)
-            .maybeSingle()
-            .then(({ data: agentData }) => {
-              if (agentData) setAgent(agentData);
-            });
+    let isMounted = true;
+
+    (async () => {
+      setLoading(true);
+      setAgent(null);
+      setBuilding(null);
+
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+          .eq("id", id)
+          .eq("status", "active")
+          .single();
+
+        if (error || !data) {
+          if (isMounted) setProperty(null);
+          return;
         }
 
-        supabase
+        const agentRequest = data.registered_by
+          ? supabase
+              .from("agent_profiles")
+              .select("name,phone,agency_name,agency_address,license_number,member_type")
+              .eq("user_id", data.registered_by)
+              .eq("status", "approved")
+              .eq("is_active", true)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle()
+          : Promise.resolve({ data: null as AgentData | null, error: null });
+
+        const buildingRequest = supabase
           .from("building_summary")
           .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
           .eq("property_id", id)
-          .maybeSingle()
-          .then(({ data: bData }) => {
-            if (bData) setBuilding(bData);
-          });
+          .maybeSingle();
+
+        const [agentResult, buildingResult] = await Promise.all([agentRequest, buildingRequest]);
+
+        if (!isMounted) return;
+
+        setProperty(data as PropertyData);
+        setAgent(agentResult.data ?? null);
+        setBuilding(buildingResult.data ?? null);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) {
