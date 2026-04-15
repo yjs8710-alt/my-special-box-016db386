@@ -2510,7 +2510,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              sharePropertyToKakao(prop, agencyInfo);
+              sharePropertyToKakao(prop, agencyInfo, fallbackImage);
             }}
             title="카카오톡 공유"
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded transition-colors"
