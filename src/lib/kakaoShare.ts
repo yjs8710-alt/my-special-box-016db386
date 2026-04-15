@@ -41,16 +41,16 @@ export function sharePropertyToKakao(property: MapProperty) {
       description,
       imageUrl: imageUrl || "https://my-special-box.lovable.app/placeholder.svg",
       link: {
-        mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
-        webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+        mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+        webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
       },
     },
     buttons: [
       {
         title: "매물 보기",
         link: {
-          mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
-          webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+          mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+          webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
         },
       },
     ],
@@ -102,8 +102,8 @@ export function shareMultipleToKakao(properties: MapProperty[]) {
     objectType: "text",
     text: `[집다] 매물 ${properties.length}건\n\n${text}${properties.length > 5 ? `\n... 외 ${properties.length - 5}건` : ""}`,
     link: {
-      mobileWebUrl: window.location.origin,
-      webUrl: window.location.origin,
+      mobileWebUrl: SITE_ORIGIN,
+      webUrl: SITE_ORIGIN,
     },
   });
 }
