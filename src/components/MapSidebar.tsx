@@ -40,7 +40,7 @@ import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
-import { shareMultipleToKakao, sharePropertyToKakao } from "@/lib/kakaoShare";
+import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
@@ -2055,8 +2055,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement> }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -2510,7 +2510,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              sharePropertyToKakao(prop);
+              sharePropertyToKakao(prop, agencyInfo);
             }}
             title="카카오톡 공유"
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded transition-colors"
@@ -3073,6 +3073,19 @@ const MapSidebar = ({
     loadDealCompleted();
   }, []);
   const listScrollRef = useRef<HTMLDivElement>(null);
+  // 공유 시 사용할 중개사무소 정보
+  const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+  useEffect(() => {
+    if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name, phone")
+      .eq("user_id", authUser.userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone });
+      });
+  }, [authUser?.userId]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
@@ -4129,6 +4142,7 @@ const MapSidebar = ({
                             userId={authUser?.userId}
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
+                            agencyInfo={myAgencyInfo}
                           />
                         </div>
                       </div>
