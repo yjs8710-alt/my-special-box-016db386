@@ -10,6 +10,7 @@ declare global {
 const SITE_ORIGIN = "https://jibda.co.kr";
 
 export interface AgencyInfo {
+  userId?: string;
   agencyName?: string;
   name?: string;
   phone?: string;
@@ -29,6 +30,8 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
     alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
     return;
   }
+
+  const shareUrl = buildPropertyShareUrl(property, agencyInfo?.userId);
 
   // 주소에서 동 단위까지만 표시 (상세 번지 제거)
   const safeAddress = sanitizeAddress(property.address);
@@ -65,16 +68,16 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
       description,
       imageUrl: imageUrl || "https://my-special-box.lovable.app/placeholder.svg",
       link: {
-        mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
-        webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+        mobileWebUrl: shareUrl,
+        webUrl: shareUrl,
       },
     },
     buttons: [
       {
         title: "매물 보기",
         link: {
-          mobileWebUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
-          webUrl: `${SITE_ORIGIN}/property/${property.dbId || property.id}`,
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
         },
       },
     ],
@@ -86,6 +89,17 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
   }
 
   window.Kakao.Share.sendDefault(shareData);
+}
+
+function buildPropertyShareUrl(property: MapProperty, sharerUserId?: string): string {
+  const propertyId = property.dbId || property.id;
+  const shareUrl = new URL(`/property/${propertyId}`, SITE_ORIGIN);
+
+  if (sharerUserId) {
+    shareUrl.searchParams.set("sharedBy", sharerUserId);
+  }
+
+  return shareUrl.toString();
 }
 
 /** 주소에서 동/리 까지만 남기고 번지 이하 제거 */
