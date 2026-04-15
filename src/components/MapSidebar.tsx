@@ -2055,8 +2055,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -2510,7 +2510,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <button
             onClick={(e) => {
               e.stopPropagation();
-              sharePropertyToKakao(prop, agencyInfo);
+              sharePropertyToKakao(prop, agencyInfo, fallbackImage);
             }}
             title="카카오톡 공유"
             className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded transition-colors"
@@ -4143,6 +4143,12 @@ const MapSidebar = ({
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
                             agencyInfo={myAgencyInfo}
+                            fallbackImage={(() => {
+                              const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              if (hasOwn) return undefined;
+                              const ref = findRefImage(prop, displayProperties);
+                              return ref?.image;
+                            })()}
                           />
                         </div>
                       </div>

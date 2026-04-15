@@ -1430,7 +1430,15 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
             </button>
             <button
-              onClick={() => sharePropertyToKakao(property, myAgencyInfo)}
+              onClick={() => {
+                const hasOwn = (property.images && property.images.length > 0) || (property.image && property.image.length > 0);
+                let fallback: string | undefined;
+                if (!hasOwn && sameProperties.length > 0) {
+                  const sibling = sameProperties.find(p => p.images && p.images.length > 0);
+                  fallback = sibling?.images?.[0] || sibling?.image;
+                }
+                sharePropertyToKakao(property, myAgencyInfo, fallback);
+              }}
               title="카카오톡 공유"
               className="w-7 h-7 rounded-full bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center backdrop-blur-sm transition-colors"
             >
