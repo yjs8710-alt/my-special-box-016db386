@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import logoTransparent from "@/assets/logo-transparent.png";
@@ -28,6 +28,8 @@ interface PropertyData {
   is_hot: boolean;
   registered_date: string;
   registered_by: string | null;
+  lat: number;
+  lng: number;
 }
 
 interface AgentData {
@@ -60,17 +62,24 @@ function toPyeong(value: string | null | undefined): string {
   return (num / 3.3058).toFixed(2);
 }
 
-/** 면적 표시: 평↔㎡ 양방향 변환하여 둘 다 표시 */
+/** 면적 표시: 평이면 평만, ㎡이면 ㎡(평) */
 function formatArea(value: string | null | undefined): string {
   if (!value) return "-";
   if (value.includes("평")) {
-    // 평 → ㎡ 역변환하여 둘 다 표시
-    const num = parseFloat(value.replace(/[^0-9.]/g, ""));
-    if (!isNaN(num) && num > 0) return `${(num * 3.3058).toFixed(2)}㎡ (${num}평)`;
-    return value;
+    return value; // 평으로 저장되어 있으면 그대로 표시
   }
   const pyeong = toPyeong(value);
   return pyeong ? `${value} (${pyeong}평)` : value;
+}
+
+/** 매물카드용 면적: 평만 표시 */
+function formatAreaShort(value: string | null | undefined): string {
+  if (!value) return "-";
+  if (value.includes("평")) {
+    return value;
+  }
+  const pyeong = toPyeong(value);
+  return pyeong ? `${pyeong}평` : value;
 }
 
 /** 주소에서 동/리 까지만 남기고 번지 이하 제거 */
@@ -80,6 +89,63 @@ function sanitizeAddress(address: string): string {
     /(?:.*?(?:시|군)\s+)?(?:.*?(?:구|군)\s+)?[\uAC00-\uD7A3]+(?:동|리|읍|면)/
   );
   return match ? match[0] : address.split(" ").slice(0, -1).join(" ") || address;
+}
+
+declare global {
+  interface Window {
+    kakao: any;
+  }
+}
+
+function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!lat || !lng || !mapRef.current) return;
+
+    const loadMap = () => {
+      if (!window.kakao?.maps) return;
+      window.kakao.maps.load(() => {
+        const position = new window.kakao.maps.LatLng(lat, lng);
+        const map = new window.kakao.maps.Map(mapRef.current!, {
+          center: position,
+          level: 4,
+          draggable: false,
+          scrollwheel: false,
+          disableDoubleClickZoom: true,
+        });
+
+        // 반경 원 표시 (대략적 위치)
+        new window.kakao.maps.Circle({
+          center: position,
+          radius: 150,
+          strokeWeight: 2,
+          strokeColor: "#1B3A5C",
+          strokeOpacity: 0.6,
+          fillColor: "#1B3A5C",
+          fillOpacity: 0.15,
+          map,
+        });
+      });
+    };
+
+    if (window.kakao?.maps) {
+      loadMap();
+    } else {
+      const script = document.createElement("script");
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=8e0913ea1f7ca5fdf8e78a9bebe2106b&autoload=false`;
+      script.onload = loadMap;
+      document.head.appendChild(script);
+    }
+  }, [lat, lng]);
+
+  return (
+    <div>
+      <p className="text-xs font-bold text-foreground mb-2">대략적 위치</p>
+      <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border" />
+      <p className="text-[10px] text-muted-foreground mt-1">정확한 위치는 중개사무소에 문의해주세요.</p>
+    </div>
+  );
 }
 
 export default function PublicProperty() {
@@ -95,12 +161,12 @@ export default function PublicProperty() {
     (async () => {
       const { data, error } = await supabase
         .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
         .eq("id", id)
         .eq("status", "active")
         .single();
       if (!error && data) {
-        setProperty(data);
+        setProperty(data as any);
 
         // Fetch agent & building summary in parallel
         if (data.registered_by) {
@@ -108,7 +174,7 @@ export default function PublicProperty() {
             .from("agent_profiles")
             .select("name,phone,agency_name,agency_address,license_number,member_type")
             .eq("user_id", data.registered_by)
-            .single()
+            .maybeSingle()
             .then(({ data: agentData }) => {
               if (agentData) setAgent(agentData);
             });
@@ -156,10 +222,10 @@ export default function PublicProperty() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
+      {/* Header - 로고 2배 크기 */}
+      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-1 flex items-center justify-between">
         <a href="https://jibda.co.kr" className="flex items-center gap-1.5">
-          <img src={logoTransparent} alt="집다" className="h-32 w-auto" />
+          <img src={logoTransparent} alt="집다" className="h-14 w-auto" />
         </a>
         <a href="https://jibda.co.kr/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
       </header>
@@ -227,10 +293,10 @@ export default function PublicProperty() {
             )}
           </div>
 
-          {/* Info grid — area in 평 */}
+          {/* Info grid — 면적은 평만 표시 */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatArea(property.area) },
+              { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatAreaShort(property.area) },
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: property.parking || "확인필요" },
               { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: property.available_from || "즉시" },
@@ -337,6 +403,11 @@ export default function PublicProperty() {
                 <span className="text-foreground">{building.elevator ? "있음" : "없음"}</span>
               </div>
             </div>
+          )}
+
+          {/* 대략적 위치 지도 */}
+          {property.lat && property.lng && (
+            <KakaoMapPreview lat={property.lat} lng={property.lng} address={safeAddress} />
           )}
 
           {/* Agent / Office info */}
