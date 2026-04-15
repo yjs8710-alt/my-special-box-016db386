@@ -71,9 +71,9 @@ export default function PublicProperty() {
         <Building2 className="w-16 h-16 text-muted-foreground/30" />
         <p className="text-lg font-bold text-foreground">매물을 찾을 수 없습니다</p>
         <p className="text-sm text-muted-foreground">삭제되었거나 비공개 처리된 매물입니다.</p>
-        <Link to="/" className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary hover:opacity-90 transition-opacity">
+        <a href="https://my-special-box.lovable.app" className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary hover:opacity-90 transition-opacity">
           집다 홈으로
-        </Link>
+        </a>
       </div>
     );
   }
@@ -90,8 +90,8 @@ export default function PublicProperty() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="text-lg font-bold text-primary">집다</Link>
-        <Link to="/login" className="text-xs font-bold text-primary hover:underline">로그인</Link>
+        <a href="https://my-special-box.lovable.app" className="text-lg font-bold text-primary">집다</a>
+        <a href="https://my-special-box.lovable.app/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
       </header>
 
       <div className="max-w-lg mx-auto pb-20">
@@ -209,12 +209,12 @@ export default function PublicProperty() {
 
         {/* CTA */}
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 flex justify-center z-40">
-          <Link
-            to="/login"
+          <a
+            href="https://my-special-box.lovable.app"
             className="w-full max-w-lg h-12 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center hover:opacity-90 transition-opacity"
           >
-            집다에서 더 자세히 보기
-          </Link>
+            집다에서 더 많은 매물 보기
+          </a>
         </div>
       </div>
     </div>
