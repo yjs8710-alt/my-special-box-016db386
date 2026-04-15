@@ -266,7 +266,11 @@ const MyPage = () => {
                     ],
                     [
                       { label: "상호명", value: agencyName, editable: true, field: "agencyName" as const },
+                      { label: "대표자", value: representativeName, editable: true, field: "representativeName" as const },
+                    ],
+                    [
                       { label: "주소(신청용)", value: agencyAddress, editable: true, field: "agencyAddress" as const },
+                      null,
                     ],
                     [
                       { label: "회원유형", value: profile?.member_type ?? "", editable: false },
