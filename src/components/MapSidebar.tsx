@@ -3083,7 +3083,7 @@ const MapSidebar = ({
       .eq("user_id", authUser.userId)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: (data as any).agency_phone ?? "" });
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "" });
       });
   }, [authUser?.userId]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
