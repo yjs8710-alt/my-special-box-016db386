@@ -1430,7 +1430,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               <Heart className={`w-3.5 h-3.5 ${liked ? "fill-red-400 text-red-400" : "text-white"}`} />
             </button>
             <button
-              onClick={() => sharePropertyToKakao(property)}
+              onClick={() => sharePropertyToKakao(property, myAgencyInfo)}
               title="카카오톡 공유"
               className="w-7 h-7 rounded-full bg-[#FEE500] hover:bg-[#F5DC00] flex items-center justify-center backdrop-blur-sm transition-colors"
             >
