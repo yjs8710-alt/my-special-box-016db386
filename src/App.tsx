@@ -16,6 +16,7 @@ import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
 import CommercialRental from "./pages/CommercialRental";
 import NotFound from "./pages/NotFound";
+import PublicProperty from "./pages/PublicProperty";
 import AdminLogin from "./pages/AdminLogin";
 import MyProperties from "./pages/MyProperties";
 import MyPage from "./pages/MyPage";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/property/:id" element={<PublicProperty />} />
 
           {/* 인증 필요 페이지 */}
           <Route path="/" element={<Home />} />

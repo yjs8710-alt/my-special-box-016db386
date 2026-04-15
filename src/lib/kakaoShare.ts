@@ -38,16 +38,16 @@ export function sharePropertyToKakao(property: MapProperty) {
       description,
       imageUrl: imageUrl || "https://my-special-box.lovable.app/placeholder.svg",
       link: {
-        mobileWebUrl: window.location.origin,
-        webUrl: window.location.origin,
+        mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+        webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
       },
     },
     buttons: [
       {
         title: "매물 보기",
         link: {
-          mobileWebUrl: window.location.origin,
-          webUrl: window.location.origin,
+          mobileWebUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
+          webUrl: `${window.location.origin}/property/${property.dbId || property.id}`,
         },
       },
     ],
