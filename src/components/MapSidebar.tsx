@@ -2474,7 +2474,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
 
         {/* 2줄: [세부유형 (층) 호수] | 보증금/월세 관리비 몇평 | 옵션 | 비번 */}
-        <div className="flex items-center gap-1 flex-wrap min-h-[22px]">
+        <div className="flex items-center gap-0.5 flex-wrap min-h-[22px]">
           {/* 남향 뱃지 */}
           {prop.note && /남향|북향|동향|서향/.test(prop.note) && (
             <span
@@ -2513,9 +2513,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               sharePropertyToKakao(prop);
             }}
             title="카카오톡 공유"
-            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded transition-colors"
+            className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded transition-colors"
           >
-            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
+            <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-6 h-6 object-contain" />
           </button>
           {/* 구분선 */}
           {(prop.type || floorShort || prop.unitNumber) && <span className="flex-shrink-0 w-px h-3.5 bg-border" />}
