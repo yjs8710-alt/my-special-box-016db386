@@ -1350,6 +1350,20 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [liked, setLiked] = useState(false);
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
+  const { user: authUser } = useAuth();
+  const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+
+  useEffect(() => {
+    if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name, phone, agency_phone")
+      .eq("user_id", authUser.userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "" });
+      });
+  }, [authUser?.userId]);
 
   if (!property) return null;
 
