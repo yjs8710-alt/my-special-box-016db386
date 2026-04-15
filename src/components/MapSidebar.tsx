@@ -3073,6 +3073,19 @@ const MapSidebar = ({
     loadDealCompleted();
   }, []);
   const listScrollRef = useRef<HTMLDivElement>(null);
+  // 공유 시 사용할 중개사무소 정보
+  const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+  useEffect(() => {
+    if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name, phone")
+      .eq("user_id", authUser.userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setMyAgencyInfo({ agencyName: data.agency_name, name: data.name, phone: data.phone });
+      });
+  }, [authUser?.userId]);
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
