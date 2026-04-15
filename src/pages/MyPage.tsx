@@ -47,6 +47,7 @@ const MyPage = () => {
   const [agencyPhone, setAgencyPhone] = useState("");
   const [agencyName, setAgencyName] = useState("");
   const [agencyAddress, setAgencyAddress] = useState("");
+  const [representativeName, setRepresentativeName] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [businessNumber, setBusinessNumber] = useState("");
 
@@ -92,6 +93,7 @@ const MyPage = () => {
         setAgencyPhone((data as any).agency_phone ?? "");
         setAgencyName(data.agency_name);
         setAgencyAddress(data.agency_address);
+        setRepresentativeName((data as any).representative_name ?? "");
         setLicenseNumber(data.license_number);
         setBusinessNumber(data.business_number);
       }
@@ -124,9 +126,10 @@ const MyPage = () => {
         agency_phone: agencyPhone,
         agency_name: agencyName,
         agency_address: agencyAddress,
+        representative_name: representativeName,
         license_number: licenseNumber,
         business_number: businessNumber,
-      })
+      } as any)
       .eq("id", profile.id);
     setSaving(false);
     if (error) {
@@ -147,6 +150,7 @@ const MyPage = () => {
         setAgencyPhone((refreshed as any).agency_phone ?? "");
         setAgencyName(refreshed.agency_name);
         setAgencyAddress(refreshed.agency_address);
+        setRepresentativeName((refreshed as any).representative_name ?? "");
         setLicenseNumber(refreshed.license_number);
         setBusinessNumber(refreshed.business_number);
       }
