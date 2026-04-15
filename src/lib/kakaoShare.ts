@@ -7,7 +7,7 @@ declare global {
 }
 
 /** 퍼블리시 도메인 (카카오 공유 링크용) */
-const SITE_ORIGIN = "https://my-special-box.lovable.app";
+const SITE_ORIGIN = "https://jibda.co.kr";
 
 /**
  * 카카오톡으로 매물 카드를 공유합니다.
