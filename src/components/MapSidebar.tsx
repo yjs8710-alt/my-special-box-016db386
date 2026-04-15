@@ -4143,6 +4143,12 @@ const MapSidebar = ({
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
                             agencyInfo={myAgencyInfo}
+                            fallbackImage={(() => {
+                              const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              if (hasOwn) return undefined;
+                              const ref = findRefImage(prop, displayProperties);
+                              return ref?.image;
+                            })()}
                           />
                         </div>
                       </div>
