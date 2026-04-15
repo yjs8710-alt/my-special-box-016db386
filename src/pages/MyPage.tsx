@@ -47,6 +47,7 @@ const MyPage = () => {
   const [agencyPhone, setAgencyPhone] = useState("");
   const [agencyName, setAgencyName] = useState("");
   const [agencyAddress, setAgencyAddress] = useState("");
+  const [representativeName, setRepresentativeName] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [businessNumber, setBusinessNumber] = useState("");
 
@@ -92,6 +93,7 @@ const MyPage = () => {
         setAgencyPhone((data as any).agency_phone ?? "");
         setAgencyName(data.agency_name);
         setAgencyAddress(data.agency_address);
+        setRepresentativeName((data as any).representative_name ?? "");
         setLicenseNumber(data.license_number);
         setBusinessNumber(data.business_number);
       }
@@ -124,9 +126,10 @@ const MyPage = () => {
         agency_phone: agencyPhone,
         agency_name: agencyName,
         agency_address: agencyAddress,
+        representative_name: representativeName,
         license_number: licenseNumber,
         business_number: businessNumber,
-      })
+      } as any)
       .eq("id", profile.id);
     setSaving(false);
     if (error) {
@@ -147,6 +150,7 @@ const MyPage = () => {
         setAgencyPhone((refreshed as any).agency_phone ?? "");
         setAgencyName(refreshed.agency_name);
         setAgencyAddress(refreshed.agency_address);
+        setRepresentativeName((refreshed as any).representative_name ?? "");
         setLicenseNumber(refreshed.license_number);
         setBusinessNumber(refreshed.business_number);
       }
@@ -262,7 +266,11 @@ const MyPage = () => {
                     ],
                     [
                       { label: "상호명", value: agencyName, editable: true, field: "agencyName" as const },
+                      { label: "대표자", value: representativeName, editable: true, field: "representativeName" as const },
+                    ],
+                    [
                       { label: "주소(신청용)", value: agencyAddress, editable: true, field: "agencyAddress" as const },
+                      null,
                     ],
                     [
                       { label: "회원유형", value: profile?.member_type ?? "", editable: false },
@@ -291,6 +299,7 @@ const MyPage = () => {
                                     : cell.field === "businessNumber" ? businessNumber
                                     : cell.field === "licenseNumber" ? licenseNumber
                                     : cell.field === "agencyName" ? agencyName
+                                    : cell.field === "representativeName" ? representativeName
                                     : agencyAddress
                                 }
                                 onChange={(e) => {
@@ -301,6 +310,7 @@ const MyPage = () => {
                                   else if (cell.field === "businessNumber") setBusinessNumber(v);
                                   else if (cell.field === "licenseNumber") setLicenseNumber(v);
                                   else if (cell.field === "agencyName") setAgencyName(v);
+                                  else if (cell.field === "representativeName") setRepresentativeName(v);
                                   else setAgencyAddress(v);
                                 }}
                                 className="h-8 text-sm"
