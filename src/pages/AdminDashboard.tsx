@@ -119,6 +119,7 @@ type PropertyReport = {
   admin_memo?: string;
   submitted_by?: string | null;
   created_at: string;
+  building_name?: string;
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
