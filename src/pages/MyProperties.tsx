@@ -448,23 +448,30 @@ const PropertyRow = ({
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
           {/* 관리자 전용: 등록자 정보 */}
-          {isAdmin && displayRegistrant && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                👤 {displayRegistrant}
-              </span>
-              {!registrantInfo && !prop.agent_name && (
-                <span className="text-[10px] text-muted-foreground">등록자 정보 없음</span>
+          {isAdmin && (
+            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+              {registrantInfo?.agency_name && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--chart-2) / 0.1)", color: "hsl(var(--chart-2))", borderColor: "hsl(var(--chart-2) / 0.25)" }}>
+                  🏢 {registrantInfo.agency_name}
+                </span>
               )}
-            </div>
-          )}
-          {isAdmin && !displayRegistrant && (
-            <div className="mt-0.5">
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
-                👤 등록자 미상
-              </span>
+              {displayRegistrant ? (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                  👤 {displayRegistrant}
+                </span>
+              ) : (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
+                  👤 등록자 미상
+                </span>
+              )}
+              {prop.registered_date && (
+                <span className="text-[10px] text-muted-foreground">
+                  · {prop.registered_date}
+                </span>
+              )}
             </div>
           )}
         </div>
