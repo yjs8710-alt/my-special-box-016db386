@@ -1223,7 +1223,16 @@ const AdminDashboard = () => {
       .from("property_reports")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setReports(data as PropertyReport[]);
+    if (!error && data) {
+      // property_id로 건물명 매핑
+      const propIds = [...new Set(data.map((r: any) => r.property_id))];
+      const { data: props } = await supabase
+        .from("properties")
+        .select("id, building_name")
+        .in("id", propIds);
+      const nameMap = new Map((props || []).map((p: any) => [p.id, p.building_name]));
+      setReports(data.map((r: any) => ({ ...r, building_name: nameMap.get(r.property_id) || "" })) as PropertyReport[]);
+    }
     if (!silent) setReportsLoading(false);
   }, []);
 
