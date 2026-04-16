@@ -701,7 +701,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const storageKey = `memo_${propId}_${memoKey}`;
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
-    const hasMemoContent = !!(initialText?.trim());
+    const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
 
     return (
       <div ref={ref} className="relative inline-flex">
