@@ -80,7 +80,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                   style={
                     isActive(item.path)
                       ? { background: "rgba(255,255,255,0.12)", color: "white" }
-                      : { color: "rgba(255,255,255,0.65)" }
+                      : { color: "white" }
                   }
                 >
                   {item.label}
