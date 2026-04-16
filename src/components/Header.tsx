@@ -80,7 +80,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                   style={
                     isActive(item.path)
                       ? { background: "rgba(255,255,255,0.12)", color: "white" }
-                      : { color: "rgba(255,255,255,0.65)" }
+                      : { color: "white" }
                   }
                 >
                   {item.label}
@@ -92,7 +92,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
                 style={
                   isActive("/community")
                     ? { background: "rgba(255,255,255,0.12)", color: "white" }
-                    : { color: "rgba(255,255,255,0.65)" }
+                    : { color: "white" }
                 }
               >
                 <Users className="w-3.5 h-3.5" />
