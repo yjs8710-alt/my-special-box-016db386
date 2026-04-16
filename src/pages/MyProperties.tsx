@@ -448,23 +448,30 @@ const PropertyRow = ({
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
           {/* 관리자 전용: 등록자 정보 */}
-          {isAdmin && displayRegistrant && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                👤 {displayRegistrant}
-              </span>
-              {!registrantInfo && !prop.agent_name && (
-                <span className="text-[10px] text-muted-foreground">등록자 정보 없음</span>
+          {isAdmin && (
+            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+              {registrantInfo?.agency_name && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--chart-2) / 0.1)", color: "hsl(var(--chart-2))", borderColor: "hsl(var(--chart-2) / 0.25)" }}>
+                  🏢 {registrantInfo.agency_name}
+                </span>
               )}
-            </div>
-          )}
-          {isAdmin && !displayRegistrant && (
-            <div className="mt-0.5">
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
-                👤 등록자 미상
-              </span>
+              {displayRegistrant ? (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
+                  👤 {displayRegistrant}
+                </span>
+              ) : (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                  style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
+                  👤 등록자 미상
+                </span>
+              )}
+              {prop.registered_date && (
+                <span className="text-[10px] text-muted-foreground">
+                  · {prop.registered_date}
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -711,9 +718,9 @@ const MyProperties = () => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
-    const matchAgency = !isAdminView || agencyTab === "전체" || (
-      p.registered_by && registrantMap[p.registered_by]?.agency_name === agencyTab
-    );
+    const getRegistrantInfo = (p: DBProperty) =>
+      p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
+    const matchAgency = !isAdminView || agencyTab === "전체" || getRegistrantInfo(p)?.agency_name === agencyTab;
     return matchStatus && matchSearch && matchAgent && matchAgency;
   });
 
@@ -789,6 +796,46 @@ const MyProperties = () => {
                     }
                   >
                     {agent === "전체" ? "👥" : "👤"} {agent}
+                    <span
+                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
+                      style={isActive
+                        ? { background: "rgba(255,255,255,0.25)", color: "inherit" }
+                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                      }
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 관리자 전용: 부동산별 탭 필터 */}
+        {isAdminView && agencyList.length > 1 && (
+          <div className="mb-4 -mx-1 px-1 overflow-x-auto">
+            <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">🏢 부동산별</p>
+            <div className="flex gap-1.5 min-w-max pb-1">
+              {agencyList.map(agency => {
+                const count = agency === "전체"
+                  ? properties.length
+                  : properties.filter(p => {
+                      const info = p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
+                      return info?.agency_name === agency;
+                    }).length;
+                const isActive = agencyTab === agency;
+                return (
+                  <button
+                    key={agency}
+                    onClick={() => setAgencyTab(agency)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
+                    style={isActive
+                      ? { background: "hsl(var(--chart-2))", color: "white", borderColor: "hsl(var(--chart-2))" }
+                      : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                    }
+                  >
+                    🏢 {agency}
                     <span
                       className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
                       style={isActive
