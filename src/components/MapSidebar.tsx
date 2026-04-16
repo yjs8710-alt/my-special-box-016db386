@@ -1591,7 +1591,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
 
   const [totalDepositInput, setTotalDepositInput] = useState("");
   const [totalMortgageInput, setTotalMortgageInput] = useState("");
-  const [note, setNote] = useState(prop.buildingMemo ?? prop.memo ?? "");
+  const [note, setNote] = useState(prop.buildingMemo ?? "");
   const [saved, setSaved] = useState(false);
 
   // 호실 편집
@@ -3941,7 +3941,7 @@ const MapSidebar = ({
                       return regB - regA;
                     })
                 ).map((prop, idx) => {
-                  const buildingMemo = prop.buildingMemo ?? prop.memo;
+                  const buildingMemo = prop.buildingMemo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
                   const roomPw = prop.roomPassword;
