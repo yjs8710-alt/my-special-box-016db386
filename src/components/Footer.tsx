@@ -8,10 +8,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <img src={logoImg} alt="집다 로고" className="h-8 object-contain" />
-            </div>
-            <p className="text-sm text-white/50 max-w-sm leading-relaxed">
+            <p className="text-sm text-white max-w-sm leading-relaxed">
               중개사만을 위한 청주 공실 전문 플랫폼. 검증된 실매물 정보로 빠르고 정확한 중개 서비스를 제공하세요.
             </p>
             <div className="flex gap-4 mt-4">
