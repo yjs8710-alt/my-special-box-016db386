@@ -1324,6 +1324,32 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
   };
 
+  // ─── 회원 정보 수정 ──────────────────────────────────────────────────────
+  const [memberEditData, setMemberEditData] = useState<Record<string, Partial<AgentProfile>>>({});
+  const [memberSaving, setMemberSaving] = useState<string | null>(null);
+
+  const getMemberEditValue = (m: AgentProfile, field: keyof AgentProfile) => {
+    return memberEditData[m.id]?.[field] ?? m[field] ?? "";
+  };
+
+  const setMemberEditField = (id: string, field: keyof AgentProfile, value: string) => {
+    setMemberEditData(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] ?? {}), [field]: value },
+    }));
+  };
+
+  const saveMemberProfile = async (m: AgentProfile) => {
+    const edits = memberEditData[m.id];
+    if (!edits || Object.keys(edits).length === 0) return;
+    setMemberSaving(m.id);
+    const { error } = await supabase.from("agent_profiles").update(edits as Record<string, unknown>).eq("id", m.id);
+    setMemberSaving(null);
+    if (error) { alert("수정 오류: " + error.message); return; }
+    setMembers(prev => prev.map(p => p.id === m.id ? { ...p, ...edits } : p));
+    setMemberEditData(prev => { const n = { ...prev }; delete n[m.id]; return n; });
+  };
+
   // ─── 회원 삭제 ──────────────────────────────────────────────────────────
   const deleteMember = async (m: AgentProfile) => {
     if (!window.confirm(`'${m.name}' 회원을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
