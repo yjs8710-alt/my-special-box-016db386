@@ -26,6 +26,8 @@ type AgentProfile = {
   name: string;
   phone: string;
   agency_name: string;
+  agency_phone?: string;
+  representative_name?: string;
   license_number: string;
   business_number: string;
   agency_address: string;
