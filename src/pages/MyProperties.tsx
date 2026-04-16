@@ -702,37 +702,16 @@ const MyProperties = () => {
 
   const isAdminView = agentName === "관리자";
 
-  // 부동산별 통합 탭 (관리자 전용): agency_name 기준, 소속 회원 포함
-  const getPropertyAgency = (p: DBProperty) => {
-    const info = p.registered_by
-      ? registrantMap[p.registered_by]
-      : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
-    return info?.agency_name || null;
-  };
-
-  const agencyList = isAdminView
-    ? ["전체", ...Array.from(new Set(
-        properties.map(p => getPropertyAgency(p)).filter(Boolean) as string[]
-      )).sort(), "미분류"]
+  // 등록자(개인)별 탭 목록 (관리자 전용)
+  const agentList = isAdminView
+    ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
     : [];
-
-  // 부동산별 소속 회원 목록
-  const agencyMembers = isAdminView
-    ? Object.values(registrantMap).reduce<Record<string, string[]>>((acc, r) => {
-        if (r.agency_name) {
-          if (!acc[r.agency_name]) acc[r.agency_name] = [];
-          if (!acc[r.agency_name].includes(r.name)) acc[r.agency_name].push(r.name);
-        }
-        return acc;
-      }, {})
-    : {};
 
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    const agency = getPropertyAgency(p);
-    const matchAgency = !isAdminView || agencyTab === "전체" || (agencyTab === "미분류" ? !agency : agency === agencyTab);
-    return matchStatus && matchSearch && matchAgency;
+    const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
+    return matchStatus && matchSearch && matchAgent;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
