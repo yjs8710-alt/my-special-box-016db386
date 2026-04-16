@@ -119,6 +119,7 @@ type PropertyReport = {
   admin_memo?: string;
   submitted_by?: string | null;
   created_at: string;
+  building_name?: string;
 };
 
 const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
@@ -1222,7 +1223,16 @@ const AdminDashboard = () => {
       .from("property_reports")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setReports(data as PropertyReport[]);
+    if (!error && data) {
+      // property_id로 건물명 매핑
+      const propIds = [...new Set(data.map((r: any) => r.property_id))];
+      const { data: props } = await supabase
+        .from("properties")
+        .select("id, building_name")
+        .in("id", propIds);
+      const nameMap = new Map((props || []).map((p: any) => [p.id, p.building_name]));
+      setReports(data.map((r: any) => ({ ...r, building_name: nameMap.get(r.property_id) || "" })) as PropertyReport[]);
+    }
     if (!silent) setReportsLoading(false);
   }, []);
 
@@ -2687,7 +2697,7 @@ const AdminDashboard = () => {
 
                           {/* 매물 정보 */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">{r.property_title}</p>
+                            <p className="text-sm font-semibold text-foreground truncate">{r.building_name || r.property_title}</p>
                             <p className="text-xs text-muted-foreground truncate">{r.property_address}</p>
                             {/* 신청자 표시 */}
                             {submitter && (
