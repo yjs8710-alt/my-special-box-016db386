@@ -1343,7 +1343,8 @@ const AdminDashboard = () => {
     const edits = memberEditData[m.id];
     if (!edits || Object.keys(edits).length === 0) return;
     setMemberSaving(m.id);
-    const { error } = await supabase.from("agent_profiles").update(edits as Record<string, unknown>).eq("id", m.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("agent_profiles").update(edits as any).eq("id", m.id);
     setMemberSaving(null);
     if (error) { alert("수정 오류: " + error.message); return; }
     setMembers(prev => prev.map(p => p.id === m.id ? { ...p, ...edits } : p));
