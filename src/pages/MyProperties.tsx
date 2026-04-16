@@ -718,9 +718,9 @@ const MyProperties = () => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
-    const matchAgency = !isAdminView || agencyTab === "전체" || (
-      p.registered_by && registrantMap[p.registered_by]?.agency_name === agencyTab
-    );
+    const getRegistrantInfo = (p: DBProperty) =>
+      p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
+    const matchAgency = !isAdminView || agencyTab === "전체" || getRegistrantInfo(p)?.agency_name === agencyTab;
     return matchStatus && matchSearch && matchAgent && matchAgency;
   });
 
