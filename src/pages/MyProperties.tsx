@@ -702,26 +702,37 @@ const MyProperties = () => {
 
   const isAdminView = agentName === "관리자";
 
-  // 등록자 탭 목록 (관리자 전용)
-  const agentList = isAdminView
-    ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
-    : [];
+  // 부동산별 통합 탭 (관리자 전용): agency_name 기준, 소속 회원 포함
+  const getPropertyAgency = (p: DBProperty) => {
+    const info = p.registered_by
+      ? registrantMap[p.registered_by]
+      : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
+    return info?.agency_name || null;
+  };
 
-  // 부동산(사무소)별 탭 목록 (관리자 전용)
   const agencyList = isAdminView
     ? ["전체", ...Array.from(new Set(
-        Object.values(registrantMap).map(r => r.agency_name).filter(Boolean)
-      )).sort()]
+        properties.map(p => getPropertyAgency(p)).filter(Boolean) as string[]
+      )).sort(), "미분류"]
     : [];
+
+  // 부동산별 소속 회원 목록
+  const agencyMembers = isAdminView
+    ? Object.values(registrantMap).reduce<Record<string, string[]>>((acc, r) => {
+        if (r.agency_name) {
+          if (!acc[r.agency_name]) acc[r.agency_name] = [];
+          if (!acc[r.agency_name].includes(r.name)) acc[r.agency_name].push(r.name);
+        }
+        return acc;
+      }, {})
+    : {};
 
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
-    const getRegistrantInfo = (p: DBProperty) =>
-      p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
-    const matchAgency = !isAdminView || agencyTab === "전체" || getRegistrantInfo(p)?.agency_name === agencyTab;
-    return matchStatus && matchSearch && matchAgent && matchAgency;
+    const agency = getPropertyAgency(p);
+    const matchAgency = !isAdminView || agencyTab === "전체" || (agencyTab === "미분류" ? !agency : agency === agencyTab);
+    return matchStatus && matchSearch && matchAgency;
   });
 
   const activeCount = properties.filter(p => p.status === "active").length;
@@ -775,67 +786,35 @@ const MyProperties = () => {
           ))}
         </div>
 
-        {/* 관리자 전용: 등록자별 탭 필터 */}
-        {isAdminView && agentList.length > 1 && (
-          <div className="mb-4 -mx-1 px-1 overflow-x-auto">
-            <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
-            <div className="flex gap-1.5 min-w-max pb-1">
-              {agentList.map(agent => {
-                const count = agent === "전체"
-                  ? properties.length
-                  : properties.filter(p => p.agent_name === agent).length;
-                const isActive = agentTab === agent;
-                return (
-                  <button
-                    key={agent}
-                    onClick={() => setAgentTab(agent)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
-                    style={isActive
-                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
-                      : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                    }
-                  >
-                    {agent === "전체" ? "👥" : "👤"} {agent}
-                    <span
-                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
-                      style={isActive
-                        ? { background: "rgba(255,255,255,0.25)", color: "inherit" }
-                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
-                      }
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* 관리자 전용: 부동산별 탭 필터 */}
-        {isAdminView && agencyList.length > 1 && (
+        {/* 관리자 전용: 부동산별 통합 필터 */}
+        {isAdminView && agencyList.length > 2 && (
           <div className="mb-4 -mx-1 px-1 overflow-x-auto">
             <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">🏢 부동산별</p>
             <div className="flex gap-1.5 min-w-max pb-1">
               {agencyList.map(agency => {
                 const count = agency === "전체"
                   ? properties.length
-                  : properties.filter(p => {
-                      const info = p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
-                      return info?.agency_name === agency;
-                    }).length;
+                  : agency === "미분류"
+                    ? properties.filter(p => !getPropertyAgency(p)).length
+                    : properties.filter(p => getPropertyAgency(p) === agency).length;
+                if (agency === "미분류" && count === 0) return null;
                 const isActive = agencyTab === agency;
+                const members = agency !== "전체" && agency !== "미분류" ? agencyMembers[agency] : null;
                 return (
                   <button
                     key={agency}
                     onClick={() => setAgencyTab(agency)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
                     style={isActive
-                      ? { background: "hsl(var(--chart-2))", color: "white", borderColor: "hsl(var(--chart-2))" }
+                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                       : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                     }
+                    title={members ? `소속: ${members.join(", ")}` : undefined}
                   >
-                    🏢 {agency}
+                    {agency === "전체" ? "👥" : agency === "미분류" ? "❓" : "🏢"} {agency}
+                    {members && members.length > 0 && (
+                      <span className="text-[10px] opacity-70">({members.join("·")})</span>
+                    )}
                     <span
                       className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
                       style={isActive
