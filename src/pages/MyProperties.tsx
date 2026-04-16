@@ -786,67 +786,35 @@ const MyProperties = () => {
           ))}
         </div>
 
-        {/* 관리자 전용: 등록자별 탭 필터 */}
-        {isAdminView && agentList.length > 1 && (
-          <div className="mb-4 -mx-1 px-1 overflow-x-auto">
-            <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
-            <div className="flex gap-1.5 min-w-max pb-1">
-              {agentList.map(agent => {
-                const count = agent === "전체"
-                  ? properties.length
-                  : properties.filter(p => p.agent_name === agent).length;
-                const isActive = agentTab === agent;
-                return (
-                  <button
-                    key={agent}
-                    onClick={() => setAgentTab(agent)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
-                    style={isActive
-                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
-                      : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
-                    }
-                  >
-                    {agent === "전체" ? "👥" : "👤"} {agent}
-                    <span
-                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
-                      style={isActive
-                        ? { background: "rgba(255,255,255,0.25)", color: "inherit" }
-                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
-                      }
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* 관리자 전용: 부동산별 탭 필터 */}
-        {isAdminView && agencyList.length > 1 && (
+        {/* 관리자 전용: 부동산별 통합 필터 */}
+        {isAdminView && agencyList.length > 2 && (
           <div className="mb-4 -mx-1 px-1 overflow-x-auto">
             <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">🏢 부동산별</p>
             <div className="flex gap-1.5 min-w-max pb-1">
               {agencyList.map(agency => {
                 const count = agency === "전체"
                   ? properties.length
-                  : properties.filter(p => {
-                      const info = p.registered_by ? registrantMap[p.registered_by] : (p.agent_name ? registrantMap[`agent_name:${p.agent_name}`] : null);
-                      return info?.agency_name === agency;
-                    }).length;
+                  : agency === "미분류"
+                    ? properties.filter(p => !getPropertyAgency(p)).length
+                    : properties.filter(p => getPropertyAgency(p) === agency).length;
+                if (agency === "미분류" && count === 0) return null;
                 const isActive = agencyTab === agency;
+                const members = agency !== "전체" && agency !== "미분류" ? agencyMembers[agency] : null;
                 return (
                   <button
                     key={agency}
                     onClick={() => setAgencyTab(agency)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
                     style={isActive
-                      ? { background: "hsl(var(--chart-2))", color: "white", borderColor: "hsl(var(--chart-2))" }
+                      ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                       : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                     }
+                    title={members ? `소속: ${members.join(", ")}` : undefined}
                   >
-                    🏢 {agency}
+                    {agency === "전체" ? "👥" : agency === "미분류" ? "❓" : "🏢"} {agency}
+                    {members && members.length > 0 && (
+                      <span className="text-[10px] opacity-70">({members.join("·")})</span>
+                    )}
                     <span
                       className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
                       style={isActive
