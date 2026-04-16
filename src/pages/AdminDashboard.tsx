@@ -2697,7 +2697,7 @@ const AdminDashboard = () => {
 
                           {/* 매물 정보 */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">{r.property_title}</p>
+                            <p className="text-sm font-semibold text-foreground truncate">{r.building_name || r.property_title}</p>
                             <p className="text-xs text-muted-foreground truncate">{r.property_address}</p>
                             {/* 신청자 표시 */}
                             {submitter && (
