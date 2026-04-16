@@ -692,7 +692,6 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
       );
       setSaving(false);
       setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
     };
     const [saved, setSaved] = useState(false);
 
@@ -701,7 +700,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const storageKey = `memo_${propId}_${memoKey}`;
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
-    const hasMemoContent = !!(initialText?.trim());
+    const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
 
     return (
       <div ref={ref} className="relative inline-flex">
@@ -798,11 +797,11 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (isDbProp) {
-                        handleSave();
+                    if (isDbProp) {
+                        handleSave().then(() => setOpen(false));
                       } else {
                         setSaved(true);
-                        setTimeout(() => setSaved(false), 1500);
+                        setTimeout(() => { setSaved(false); setOpen(false); }, 800);
                       }
                     }}
                     disabled={saving}
