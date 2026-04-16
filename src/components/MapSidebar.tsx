@@ -692,7 +692,6 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
       );
       setSaving(false);
       setSaved(true);
-      setTimeout(() => setSaved(false), 1500);
     };
     const [saved, setSaved] = useState(false);
 
