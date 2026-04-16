@@ -782,6 +782,27 @@ serve(async (req) => {
         addrParams = await resolveAddressParams(propertyAddress, kakaoApiKey);
       }
 
+      // ── 카카오 결과를 BJDONG_MAP과 교차 검증 ────────────────────
+      // 카카오가 잘못된 법정동코드를 반환하는 경우(예: 서원구 사창동 → 흥덕구) 보정
+      if (addrParams) {
+        const fallbackCheck = fallbackParseAddress(propertyAddress);
+        if (fallbackCheck.sigunguCd && fallbackCheck.bjdongCd) {
+          const kakaoMatch = `${addrParams.sigunguCd}${addrParams.bjdongCd}`;
+          const mapMatch   = `${fallbackCheck.sigunguCd}${fallbackCheck.bjdongCd}`;
+          if (kakaoMatch !== mapMatch) {
+            console.log(`⚠️ [카카오 교차검증 불일치] 카카오: ${kakaoMatch} vs 맵: ${mapMatch} → 맵 기준으로 보정`);
+            // 카카오의 bun/ji/platGbCd는 유지하되 sigunguCd/bjdongCd는 맵 기준으로 보정
+            addrParams = {
+              ...addrParams,
+              sigunguCd: fallbackCheck.sigunguCd,
+              bjdongCd:  fallbackCheck.bjdongCd,
+              pnu: `${fallbackCheck.sigunguCd}${fallbackCheck.bjdongCd}${addrParams.platGbCd}${addrParams.bun}${addrParams.ji}`,
+              source: "kakao",
+            };
+          }
+        }
+      }
+
       // 카카오 실패 시 fallback
       if (!addrParams) {
         console.log("⚠️ [카카오 실패] fallback 문자열 파싱으로 전환");
