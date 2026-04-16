@@ -782,23 +782,17 @@ serve(async (req) => {
         addrParams = await resolveAddressParams(propertyAddress, kakaoApiKey);
       }
 
-      // ── 카카오 결과를 BJDONG_MAP과 교차 검증 ────────────────────
-      // 카카오가 잘못된 법정동코드를 반환하는 경우(예: 서원구 사창동 → 흥덕구) 보정
+      // ── 카카오 결과를 BJDONG_MAP과 교차 검증 (로그만, 카카오 우선) ──
+      // 청주시 구 개편(2014) 이후 법정동코드는 변경되지 않았으므로
+      // 카카오 API의 b_code(정부 공식 데이터)를 신뢰하고 BJDONG_MAP은 참고용으로만 사용
       if (addrParams) {
         const fallbackCheck = fallbackParseAddress(propertyAddress);
         if (fallbackCheck.sigunguCd && fallbackCheck.bjdongCd) {
           const kakaoMatch = `${addrParams.sigunguCd}${addrParams.bjdongCd}`;
           const mapMatch   = `${fallbackCheck.sigunguCd}${fallbackCheck.bjdongCd}`;
           if (kakaoMatch !== mapMatch) {
-            console.log(`⚠️ [카카오 교차검증 불일치] 카카오: ${kakaoMatch} vs 맵: ${mapMatch} → 맵 기준으로 보정`);
-            // 카카오의 bun/ji/platGbCd는 유지하되 sigunguCd/bjdongCd는 맵 기준으로 보정
-            addrParams = {
-              ...addrParams,
-              sigunguCd: fallbackCheck.sigunguCd,
-              bjdongCd:  fallbackCheck.bjdongCd,
-              pnu: `${fallbackCheck.sigunguCd}${fallbackCheck.bjdongCd}${addrParams.platGbCd}${addrParams.bun}${addrParams.ji}`,
-              source: "kakao",
-            };
+            console.log(`ℹ️ [카카오 교차검증 불일치] 카카오: ${kakaoMatch} vs 맵: ${mapMatch} → 카카오(공식코드) 기준 유지`);
+            // 카카오 결과를 그대로 사용 (덮어쓰지 않음)
           }
         }
       }
