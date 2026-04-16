@@ -701,7 +701,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const storageKey = `memo_${propId}_${memoKey}`;
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
-    const hasMemoContent = !!(myText?.trim()) || !!(initialText?.trim());
+    const hasMemoContent = !!(initialText?.trim());
 
     return (
       <div ref={ref} className="relative inline-flex">
@@ -723,7 +723,7 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
         {hasMemoContent && (
           <span
             className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white"
-            style={{ background: "hsl(var(--primary))" }}
+            style={{ background: "hsl(var(--destructive))" }}
           />
         )}
 
@@ -816,15 +816,6 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                   </button>
                 </div>
 
-                {/* 관리자 원본 메모 (properties 테이블) */}
-                {initialText && (
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground mb-1">관리자 메모</p>
-                    <div className="text-[11px] text-foreground bg-muted/30 border border-border rounded-lg px-2.5 py-2 whitespace-pre-wrap">
-                      {initialText}
-                    </div>
-                  </div>
-                )}
 
                 {/* 같은 사무소 다른 회원 메모 */}
                 {otherMemos.length > 0 && (
