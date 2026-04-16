@@ -798,11 +798,11 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (isDbProp) {
-                        handleSave();
+                    if (isDbProp) {
+                        handleSave().then(() => setOpen(false));
                       } else {
                         setSaved(true);
-                        setTimeout(() => setSaved(false), 1500);
+                        setTimeout(() => { setSaved(false); setOpen(false); }, 800);
                       }
                     }}
                     disabled={saving}
