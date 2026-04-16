@@ -97,7 +97,8 @@ export function useDBProperties(typeFilter?: string[]) {
         .from("properties")
         .select("*")
         .eq("status", "active")
-        .order("checked_date", { ascending: false, nullsFirst: false });
+        .order("checked_date", { ascending: false, nullsFirst: false })
+        .order("registered_date", { ascending: false });
 
       if (typeFilter && typeFilter.length > 0) {
         query = query.in("type", typeFilter);
