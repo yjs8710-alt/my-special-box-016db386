@@ -26,6 +26,8 @@ type AgentProfile = {
   name: string;
   phone: string;
   agency_name: string;
+  agency_phone?: string;
+  representative_name?: string;
   license_number: string;
   business_number: string;
   agency_address: string;
@@ -1324,6 +1326,33 @@ const AdminDashboard = () => {
     setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
   };
 
+  // ─── 회원 정보 수정 ──────────────────────────────────────────────────────
+  const [memberEditData, setMemberEditData] = useState<Record<string, Partial<AgentProfile>>>({});
+  const [memberSaving, setMemberSaving] = useState<string | null>(null);
+
+  const getMemberEditValue = (m: AgentProfile, field: keyof AgentProfile) => {
+    return memberEditData[m.id]?.[field] ?? m[field] ?? "";
+  };
+
+  const setMemberEditField = (id: string, field: keyof AgentProfile, value: string) => {
+    setMemberEditData(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] ?? {}), [field]: value },
+    }));
+  };
+
+  const saveMemberProfile = async (m: AgentProfile) => {
+    const edits = memberEditData[m.id];
+    if (!edits || Object.keys(edits).length === 0) return;
+    setMemberSaving(m.id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("agent_profiles").update(edits as any).eq("id", m.id);
+    setMemberSaving(null);
+    if (error) { alert("수정 오류: " + error.message); return; }
+    setMembers(prev => prev.map(p => p.id === m.id ? { ...p, ...edits } : p));
+    setMemberEditData(prev => { const n = { ...prev }; delete n[m.id]; return n; });
+  };
+
   // ─── 회원 삭제 ──────────────────────────────────────────────────────────
   const deleteMember = async (m: AgentProfile) => {
     if (!window.confirm(`'${m.name}' 회원을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -1959,23 +1988,53 @@ const AdminDashboard = () => {
                       {/* 확장 패널 */}
                       {expandedMember === m.id && (
                         <div className="mx-5 mb-4 rounded-xl p-4 flex flex-col gap-4 border" onClick={(e) => e.stopPropagation()} style={{ background: "hsl(var(--muted) / 0.4)", borderColor: "hsl(var(--border))" }}>
-                           {/* 기본 정보 */}
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                             {[
-                               { label: "사무소명", value: m.agency_name },
-                               { label: "공인중개사 등록번호", value: m.license_number },
-                               { label: "사업자 등록번호", value: m.business_number },
-                               { label: "사무소 주소", value: m.agency_address },
-                               { label: "전화번호", value: m.phone },
-                               { label: "가입일", value: m.created_at.slice(0, 10) },
-                               { label: "접속 상태", value: m.is_active !== false ? "✅ 허용" : "🚫 차단" },
-                             ].map(({ label, value }) => (
-                               <div key={label}>
-                                 <div className="text-muted-foreground mb-0.5">{label}</div>
-                                 <div className="font-medium text-foreground">{value}</div>
-                               </div>
-                             ))}
-                           </div>
+                           {/* 기본 정보 (수정 가능) */}
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-bold text-foreground flex items-center gap-1.5"><Pencil className="w-3.5 h-3.5" /> 회원 정보 수정</p>
+                              {memberEditData[m.id] && Object.keys(memberEditData[m.id]).length > 0 && (
+                                <button
+                                  onClick={() => saveMemberProfile(m)}
+                                  disabled={memberSaving === m.id}
+                                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-60"
+                                  style={{ background: "hsl(var(--primary))", color: "#fff" }}
+                                >
+                                  {memberSaving === m.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                  저장
+                                </button>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                              {([
+                                { label: "이름", field: "name" as const },
+                                { label: "사무소명", field: "agency_name" as const },
+                                { label: "대표자명", field: "representative_name" as const },
+                                { label: "공인중개사 등록번호", field: "license_number" as const },
+                                { label: "사업자 등록번호", field: "business_number" as const },
+                                { label: "사무소 주소", field: "agency_address" as const },
+                                { label: "전화번호 (개인)", field: "phone" as const },
+                                { label: "사무소 전화번호", field: "agency_phone" as const },
+                              ]).map(({ label, field }) => (
+                                <div key={field} className="flex flex-col gap-0.5">
+                                  <label className="text-[11px] text-muted-foreground font-medium">{label}</label>
+                                  <input
+                                    type="text"
+                                    value={String(getMemberEditValue(m, field))}
+                                    onChange={e => setMemberEditField(m.id, field, e.target.value)}
+                                    className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus:outline-none focus:border-primary"
+                                  />
+                                </div>
+                              ))}
+                              <div className="flex flex-col gap-0.5">
+                                <label className="text-[11px] text-muted-foreground font-medium">가입일</label>
+                                <div className="h-8 rounded-lg border border-border bg-muted/30 px-2 flex items-center text-xs text-muted-foreground">{m.created_at.slice(0, 10)}</div>
+                              </div>
+                              <div className="flex flex-col gap-0.5">
+                                <label className="text-[11px] text-muted-foreground font-medium">접속 상태</label>
+                                <div className="h-8 rounded-lg border border-border bg-muted/30 px-2 flex items-center text-xs text-foreground">{m.is_active !== false ? "✅ 허용" : "🚫 차단"}</div>
+                              </div>
+                            </div>
+                          </div>
 
                            {/* ── 아이디 / 비밀번호 관리 ── */}
                            <div className="pt-3 border-t border-border flex flex-col gap-3">
