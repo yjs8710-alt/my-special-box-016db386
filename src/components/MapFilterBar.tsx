@@ -414,13 +414,44 @@ const MapFilterBar = ({
 
   const switchToLandlord = () => {
     setSearchMode("landlord");
-    setLandlordSearched(false);
-    setLandlordResults([]);
-    onLandlordResults?.([], false, false);
+    // 일반 검색에 입력된 값(번지수 등)을 그대로 가져와 자동 검색 실행
+    const carry = (query ?? "").trim();
+    if (carry) {
+      setLandlordQuery(carry);
+      setLandlordSearched(true);
+      setLandlordLoading(true);
+      setLandlordError("");
+      onLandlordResults?.([], true, true);
+      supabase.functions
+        .invoke("landlord-search", { body: { q: carry } })
+        .then(({ data, error: fnErr }) => {
+          if (fnErr) throw fnErr;
+          if (data?.error) throw new Error(data.error);
+          const results = (data?.results ?? []) as LandlordResult[];
+          setLandlordResults(results);
+          onLandlordResults?.(results, false, true);
+        })
+        .catch((e: unknown) => {
+          setLandlordError(e instanceof Error ? e.message : String(e));
+          setLandlordResults([]);
+          onLandlordResults?.([], false, true);
+        })
+        .finally(() => setLandlordLoading(false));
+    } else {
+      setLandlordSearched(false);
+      setLandlordResults([]);
+      onLandlordResults?.([], false, false);
+    }
     setTimeout(() => landlordInputRef.current?.focus(), 50);
   };
   const switchToNormal = () => {
     setSearchMode("normal");
+    // landlordQuery를 일반 검색창으로 옮겨 입력값 유지
+    const carry = (landlordQuery ?? "").trim();
+    if (carry) {
+      onQueryChange(carry);
+      onPropertyIdChange("");
+    }
     setLandlordQuery("");
     setLandlordSearched(false);
     setLandlordResults([]);
