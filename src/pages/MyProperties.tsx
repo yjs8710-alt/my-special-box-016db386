@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
+import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type DBProperty = {
