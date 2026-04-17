@@ -722,7 +722,23 @@ const MyProperties = () => {
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
       <Header onRegisterChange={setShowRegister} />
       {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
-      {editTarget && <EditModal initial={editTarget} onClose={() => setEditTarget(null)} onSave={handleEdit} />}
+      {editTarget && (
+        <AdminPropertyFormModal
+          initial={editTarget as unknown as Record<string, unknown>}
+          onClose={() => setEditTarget(null)}
+          onSaved={async () => {
+            // 저장 후 매물 새로고침
+            const isAdmin = agentName === "관리자";
+            let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+            if (!isAdmin && user?.userId) {
+              q = (q as ReturnType<typeof supabase.from>).or(`registered_by.eq.${user.userId}${agentName ? `,agent_name.eq.${agentName}` : ""}`) as typeof q;
+            }
+            const { data } = await q;
+            if (data) setProperties(data as DBProperty[]);
+            setEditTarget(null);
+          }}
+        />
+      )}
       {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} isAdmin={isAdminView} />}
 
       <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
