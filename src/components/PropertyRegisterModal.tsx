@@ -352,6 +352,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
     if (!form.dong) e.dong = "동을 선택해주세요";
     if (form.buildingType !== "토지" && !form.detailType) e.detailType = "세부 종류를 선택해주세요";
+    if (form.detailType === "원룸" && !form.oneRoomLayout) e.oneRoomLayout = "원룸 형태(오픈형/분리형)를 선택해주세요";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
