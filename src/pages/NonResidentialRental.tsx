@@ -135,10 +135,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "지식산업", "상가임대", "기타임대"];
     if (activeTypes.includes("매매-전체")) return ALL_SALE_TYPES;
     const expansionMap: Record<string, string[]> = {
-      "아파트매매-그룹": ["아파트", "아파트매매"],
-      "오피스텔매매-그룹": ["오피스텔", "오피스텔매매"],
-      "연립매매-그룹": ["연립", "연립매매"],
-      "다세대매매-그룹": ["다세대", "다세대매매"],
+      "사무실매매-그룹": ["사무실", "사무실매매"],
       "지식산업매매-그룹": ["지식산업", "지식산업매매"],
       "공장창고매매-그룹": ["공장·창고", "창고/공장매매"],
     };
@@ -149,8 +146,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     if (activeTypes.includes("전체")) return "all";
     const RENTAL_KEYS = new Set(["임대-전체", "상가", "사무실", "공장·창고", "지식산업"]);
     const SALE_KEYS = new Set([
-      "매매-전체", "상가매매", "건물매매",
-      "아파트매매-그룹", "오피스텔매매-그룹", "연립매매-그룹", "다세대매매-그룹",
+      "매매-전체", "상가매매", "사무실매매-그룹",
       "지식산업매매-그룹", "공장창고매매-그룹",
     ]);
     const hasRental = activeTypes.some(t => RENTAL_KEYS.has(t));
