@@ -110,18 +110,21 @@ function LightboxModal({
           {units.map((u, i) => {
             const isCurrent = i === unitIdx;
             const isRef = u.isReference;
+            const unitLabel = u.unitNumber ?? u.label ?? "";
+            const roomLabel = u.roomType ?? "";
             return (
               <button
                 key={i}
                 onClick={() => handleUnitChange(i)}
-                className="px-3 py-1 rounded-full text-xs font-bold transition-all"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center leading-tight"
                 style={
                   isCurrent
                     ? { background: "hsl(var(--primary))", color: "#fff" }
                     : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
                 }
               >
-                {isRef ? `${u.label}(다른방)` : `${u.label}(현재방)`}
+                <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
+                {roomLabel && <span className="text-[10px] font-normal opacity-80 mt-0.5">{roomLabel}</span>}
               </button>
             );
           })}
@@ -4072,7 +4075,16 @@ const MapSidebar = ({
                                   e.stopPropagation();
                                   if (!hasOwnImages && ref) {
                                     // 참고용 사진 lightbox
-                                    setLightbox({ units: [{ label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`, images: ref.images, isReference: true }], unitIdx: 0 });
+                                    setLightbox({
+                                      units: [{
+                                        unitNumber: ref.unitNumber,
+                                        roomType: ref.roomType,
+                                        label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`,
+                                        images: ref.images,
+                                        isReference: true
+                                      }],
+                                      unitIdx: 0
+                                    });
                                     return;
                                   }
                                   // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
@@ -4087,6 +4099,8 @@ const MapSidebar = ({
                                           const others = sameAddr.filter((p) => p.id !== prop.id);
                                           const sorted = current ? [current, ...others] : sameAddr;
                                           return sorted.map((p) => ({
+                                            unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
+                                            roomType: p.roomType || undefined,
                                             label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                             images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                             isReference: p.id !== prop.id,
