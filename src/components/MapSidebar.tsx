@@ -551,6 +551,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
     if (!showPopup && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       setPopupPos({ top: rect.top + rect.height / 2, left: rect.right + 4 });
+      // 다른 연락처 팝업 닫도록 알림
+      window.dispatchEvent(new CustomEvent("contact-popup-open", { detail: popupId }));
     }
     setShowPopup((v) => !v);
   };
