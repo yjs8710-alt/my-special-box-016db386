@@ -74,11 +74,14 @@ type LhType = typeof LH_TYPES[number];
 const RENT_MODES = ["월세", "반전세", "전세"] as const;
 type RentMode = typeof RENT_MODES[number];
 
+type OneRoomLayout = "오픈형" | "분리형" | "";
+
 interface FormState {
   brokerType: BrokerType;
   tradeType: TradeType;
   buildingType: BuildingType;
   detailType: DetailType;
+  oneRoomLayout: OneRoomLayout;
   sido: string;
   sigungu: string;
   dong: string;
