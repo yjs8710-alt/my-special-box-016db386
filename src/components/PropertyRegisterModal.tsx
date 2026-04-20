@@ -16,6 +16,8 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import oneroomOpenImg from "@/assets/oneroom-open.png";
+import oneroomSeparatedImg from "@/assets/oneroom-separated.png";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
