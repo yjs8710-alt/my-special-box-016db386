@@ -152,6 +152,32 @@ const ResidentialRental = () => {
             선택 삭제
           </button>
         )}
+
+        <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
+        {(["월세", "전세"] as const).map(dt => {
+          const isActive = filters.dealType.includes(dt);
+          return (
+            <button
+              key={dt}
+              onClick={() => {
+                setFilters(prev => ({
+                  ...prev,
+                  dealType: isActive
+                    ? prev.dealType.filter(x => x !== dt)
+                    : [...prev.dealType.filter(x => x !== "월세" && x !== "전세"), dt],
+                }));
+              }}
+              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+              }
+            >
+              {dt}
+            </button>
+          );
+        })}
       </div>
 
       <main
