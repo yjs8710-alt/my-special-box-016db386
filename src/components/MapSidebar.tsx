@@ -4108,6 +4108,8 @@ const MapSidebar = ({
                                         })()
                                       : [
                                           {
+                                            unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
+                                            roomType: prop.roomType || undefined,
                                             label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
                                             images:
                                               prop.images && prop.images.length > 0
@@ -4115,6 +4117,7 @@ const MapSidebar = ({
                                                 : prop.image
                                                   ? [prop.image]
                                                   : [],
+                                            isReference: false,
                                           },
                                         ];
                                   setLightbox({ units, unitIdx: 0 });
