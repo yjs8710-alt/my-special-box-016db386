@@ -1802,29 +1802,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           )}
 
           {/* ── 연락처 ── */}
-          {(property.contactOwner || property.contactManager) && (
-            <>
-              <div className="h-2 bg-muted/50 my-2" />
-              <div className="px-4 pb-3 flex flex-col gap-2">
-                <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
-                <RevealPhone label="소유주" phone={property.contactOwner} />
-                <RevealPhone label="관리인" phone={property.contactManager} />
-                {property.contact && (
-                  <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
-                        <Phone className="w-3 h-3 text-accent" />
-                      </div>
-                      <span className="text-xs font-semibold text-foreground">부동산</span>
-                    </div>
-                    <a href={`tel:${property.contact}`} className="text-xs font-bold text-accent hover:underline">
-                      {property.contact}
-                    </a>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+          <ContactGroup property={property} />
 
           {/* Divider */}
           <div className="h-2 bg-muted/50 my-2" />
