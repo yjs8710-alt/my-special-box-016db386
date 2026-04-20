@@ -8,7 +8,7 @@ import AdminEditBar from "@/components/AdminEditBar";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
-  { label: "주거 매물", path: "/residential", icon: Building },
+  { label: "주거·임대", path: "/residential", icon: Building },
   { label: "상업·임대·매매", path: "/non-residential", icon: Building },
   { label: "집합건물·건물매매", path: "/collective-sale", icon: Building },
   { label: "토지", path: "/land", icon: Building },
