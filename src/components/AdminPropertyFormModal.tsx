@@ -9,6 +9,8 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import oneroomOpenImg from "@/assets/oneroom-open.png";
+import oneroomSeparatedImg from "@/assets/oneroom-separated.png";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({
@@ -1759,11 +1761,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   set("room_type", opt);
                   setShowOneRoomModal(false);
                 }}
-                  className="flex flex-col items-center gap-2 py-5 rounded-xl border-2 transition-all hover:scale-105"
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all hover:scale-105"
                   style={form.room_type === opt
                     ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                     : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--muted))" }}>
-                  <span className="text-2xl">{opt === "오픈형" ? "🏠" : "🚪"}</span>
+                  <img src={opt === "오픈형" ? oneroomOpenImg : oneroomSeparatedImg}
+                    alt={opt} className="w-24 h-24 object-contain rounded-lg bg-white" />
                   <span className="text-sm font-bold">{opt}</span>
                   <span className="text-[10px] opacity-80">{opt === "오픈형" ? "방·주방 통합" : "방·주방 분리"}</span>
                 </button>
