@@ -2518,7 +2518,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             >
               {prop.type && <span>{prop.type}</span>}
               {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && (
-                <span className="opacity-90">·{prop.roomType}</span>
+                <span
+                  className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold"
+                  style={{ background: "hsl(48 100% 60%)", color: "hsl(222 28% 11%)" }}
+                >
+                  {prop.roomType}
+                </span>
               )}
               {floorShort && <span className="opacity-80">({floorShort})</span>}
               {(() => {
