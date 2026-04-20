@@ -31,7 +31,7 @@ const FULL_NON_RESIDENTIAL_SUBTYPES = [
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가", group: "매매", key: "상가매매" },
   { label: "사무실", group: "매매", key: "사무실매매-그룹" },
-  { label: "공장.창고", group: "매매", key: "공장창고매매-그룹" },
+  { label: "공장·창고", group: "매매", key: "공장창고매매-그룹" },
   { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
 ];
 
@@ -86,12 +86,13 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   // 집합건물.매매 페이지에 표시될 type 집합 (매매 한정)
   const COLLECTIVE_SALE_TYPE_SET = new Set([
     "건물매매", "상가건물매매", "상가주택매매", "구분상가매매",
+    "단독매매", "다가구매매", "다중매매",
     "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매", "분양권매매",
   ]);
   const isCollectiveSaleProp = (p: { type?: string; note?: string | null }) => {
     const t = p.type ?? "";
     if (COLLECTIVE_SALE_TYPE_SET.has(t)) return true;
-    if (["아파트", "오피스텔", "연립", "다세대", "주상복합", "분양권"].includes(t)) {
+    if (["아파트", "오피스텔", "연립", "다세대", "주상복합", "분양권", "단독주택", "다가구"].includes(t)) {
       return (p.note ?? "").includes("매매가:");
     }
     return false;
