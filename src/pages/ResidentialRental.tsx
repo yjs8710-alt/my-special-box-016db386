@@ -167,11 +167,11 @@ const ResidentialRental = () => {
                     : [...prev.dealType.filter(x => x !== "월세" && x !== "전세"), dt],
                 }));
               }}
-              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+              className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
               style={
                 isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))", boxShadow: "0 0 0 2px hsl(var(--accent) / 0.25)" }
+                  : { background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))", borderColor: "hsl(var(--accent) / 0.5)" }
               }
             >
               {dt}

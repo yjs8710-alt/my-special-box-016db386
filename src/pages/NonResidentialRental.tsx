@@ -154,7 +154,7 @@ const NonResidentialRental = () => {
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
-        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">임대</span>
+        <span className="text-[12px] font-extrabold whitespace-nowrap flex-shrink-0 px-2 py-0.5 rounded-md" style={{ color: "hsl(var(--accent))", background: "hsl(var(--accent) / 0.12)", border: "1px solid hsl(var(--accent) / 0.4)" }}>임대</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "임대").map(t => {
           const isActive = activeTypes.includes(t.key);
           return (
@@ -167,7 +167,7 @@ const NonResidentialRental = () => {
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
-        <span className="text-white/40 text-[10px] font-semibold whitespace-nowrap flex-shrink-0">매매</span>
+        <span className="text-[12px] font-extrabold whitespace-nowrap flex-shrink-0 px-2 py-0.5 rounded-md" style={{ color: "hsl(var(--accent))", background: "hsl(var(--accent) / 0.12)", border: "1px solid hsl(var(--accent) / 0.4)" }}>매매</span>
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "매매").map(t => {
           const isActive = activeTypes.includes(t.key);
           return (
