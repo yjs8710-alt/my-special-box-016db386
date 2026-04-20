@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, forwardRef } from "react";
 import ReactDOM from "react-dom";
 import {
   MapPin,
@@ -511,6 +511,17 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
   const [showPopup, setShowPopup] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const [popupPos, setPopupPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const popupId = useMemo(() => `${propId}-${type}-${Math.random().toString(36).slice(2, 8)}`, [propId, type]);
+
+  // 다른 연락처 팝업이 열리면 이 팝업 닫기
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (detail !== popupId) setShowPopup(false);
+    };
+    window.addEventListener("contact-popup-open", handler);
+    return () => window.removeEventListener("contact-popup-open", handler);
+  }, [popupId]);
 
   const typeColor: Record<string, string> = {
     owner: "hsl(var(--primary))",
@@ -540,6 +551,8 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
     if (!showPopup && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       setPopupPos({ top: rect.top + rect.height / 2, left: rect.right + 4 });
+      // 다른 연락처 팝업 닫도록 알림
+      window.dispatchEvent(new CustomEvent("contact-popup-open", { detail: popupId }));
     }
     setShowPopup((v) => !v);
   };
