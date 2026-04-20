@@ -154,8 +154,9 @@ const ResidentialRental = () => {
         )}
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
-        {(["월세", "전세"] as const).map(dt => {
+        {(["월세", "전세", "단기임대"] as const).map(dt => {
           const isActive = filters.dealType.includes(dt);
+          const displayLabel = dt === "단기임대" ? "단기" : dt;
           return (
             <button
               key={dt}
@@ -164,7 +165,7 @@ const ResidentialRental = () => {
                   ...prev,
                   dealType: isActive
                     ? prev.dealType.filter(x => x !== dt)
-                    : [...prev.dealType.filter(x => x !== "월세" && x !== "전세"), dt],
+                    : [...prev.dealType.filter(x => x !== "월세" && x !== "전세" && x !== "단기임대"), dt],
                 }));
               }}
               className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
@@ -174,10 +175,34 @@ const ResidentialRental = () => {
                   : { background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))", borderColor: "hsl(var(--accent) / 0.5)" }
               }
             >
-              {dt}
+              {displayLabel}
             </button>
           );
         })}
+        {(() => {
+          const petKey = "애완동물가능";
+          const isActive = filters.buildingOptions.includes(petKey);
+          return (
+            <button
+              onClick={() => {
+                setFilters(prev => ({
+                  ...prev,
+                  buildingOptions: isActive
+                    ? prev.buildingOptions.filter(x => x !== petKey)
+                    : [...prev.buildingOptions, petKey],
+                }));
+              }}
+              className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
+              style={
+                isActive
+                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))", boxShadow: "0 0 0 2px hsl(var(--accent) / 0.25)" }
+                  : { background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))", borderColor: "hsl(var(--accent) / 0.5)" }
+              }
+            >
+              반려동물
+            </button>
+          );
+        })()}
       </div>
 
       <main
