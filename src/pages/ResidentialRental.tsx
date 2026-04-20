@@ -165,7 +165,7 @@ const ResidentialRental = () => {
                   ...prev,
                   dealType: isActive
                     ? prev.dealType.filter(x => x !== dt)
-                    : [...prev.dealType.filter(x => x !== "월세" && x !== "전세" && x !== "단기임대"), dt],
+                    : [...prev.dealType, dt],
                 }));
               }}
               className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
