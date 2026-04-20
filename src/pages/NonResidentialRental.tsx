@@ -17,8 +17,10 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "공장·창고", group: "임대", key: "공장·창고" },
   { label: "지식산업", group: "임대", key: "지식산업" },
   { label: "매매전체", group: "매매", key: "매매-전체" },
-  { label: "상가매매", group: "매매", key: "상가매매" },
-  { label: "건물매매", group: "매매", key: "건물매매" },
+  { label: "상가", group: "매매", key: "상가매매" },
+  { label: "건물", group: "매매", key: "건물매매" },
+  { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
+  { label: "공장창고", group: "매매", key: "공장창고매매-그룹" },
   { label: "아파트", group: "매매", key: "아파트매매-그룹" },
   { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
   { label: "연립", group: "매매", key: "연립매매-그룹" },
@@ -87,6 +89,8 @@ const NonResidentialRental = () => {
       "오피스텔매매-그룹": ["오피스텔", "오피스텔매매"],
       "연립매매-그룹": ["연립", "연립매매"],
       "다세대매매-그룹": ["다세대", "다세대매매"],
+      "지식산업매매-그룹": ["지식산업", "지식산업매매"],
+      "공장창고매매-그룹": ["공장·창고", "창고/공장매매"],
     };
     return activeTypes.flatMap(t => expansionMap[t] ?? [t]);
   }, [activeTypes]);
