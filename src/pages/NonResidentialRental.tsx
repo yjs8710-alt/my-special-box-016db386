@@ -9,7 +9,19 @@ import { MapProperty } from "@/data/mapProperties";
 
 const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
-const NON_RESIDENTIAL_SUBTYPES = [
+// 집합건물 매매로 분류되는 키 (Header의 '집합건물.매매' 메뉴)
+const COLLECTIVE_SALE_KEYS = new Set([
+  "건물매매", "상가건물매매", "상가주택매매", "구분상가매매",
+  "아파트매매-그룹", "오피스텔매매-그룹", "연립매매-그룹", "다세대매매-그룹", "주상복합매매-그룹",
+]);
+// 집합건물 매매에 매핑되는 실제 type 값들
+const COLLECTIVE_SALE_DB_TYPES = [
+  "건물매매", "상가건물매매", "상가주택매매", "구분상가매매",
+  "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매",
+  "아파트", "오피스텔", "연립", "다세대", "주상복합",
+];
+
+const FULL_NON_RESIDENTIAL_SUBTYPES = [
   { label: "전체", group: "전체", key: "전체" },
   { label: "임대전체", group: "임대", key: "임대-전체" },
   { label: "상가", group: "임대", key: "상가" },
@@ -27,6 +39,17 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "다세대", group: "매매", key: "다세대매매-그룹" },
 ];
 
+// 집합건물.매매 페이지 전용 서브타입
+const COLLECTIVE_SALE_SUBTYPES = [
+  { label: "전체", group: "전체", key: "전체" },
+  { label: "건물", group: "매매", key: "건물매매" },
+  { label: "아파트", group: "매매", key: "아파트매매-그룹" },
+  { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
+  { label: "연립", group: "매매", key: "연립매매-그룹" },
+  { label: "다세대", group: "매매", key: "다세대매매-그룹" },
+  { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
+];
+
 const NON_RESIDENTIAL_DB_TYPES = [
   "상가", "사무실", "공장·창고", "식당·카페", "병원·학원", "지식산업",
   "상가매매", "건물매매",
@@ -38,7 +61,13 @@ const NON_RESIDENTIAL_DB_TYPES = [
   "아파트", "오피스텔", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구",
 ];
 
-const NonResidentialRental = () => {
+interface NonResidentialRentalProps {
+  mode?: "default" | "collective-sale";
+}
+
+const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) => {
+  const isCollectiveSale = mode === "collective-sale";
+  const NON_RESIDENTIAL_SUBTYPES = isCollectiveSale ? COLLECTIVE_SALE_SUBTYPES : FULL_NON_RESIDENTIAL_SUBTYPES;
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
@@ -57,17 +86,34 @@ const NonResidentialRental = () => {
   const { properties: dbProperties, refetch } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
   // 주거형 type은 매매(note에 "매매가:")인 경우에만 포함
   const RESIDENTIAL_TYPES = ["아파트", "오피스텔", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구"];
+  // 집합건물.매매 페이지에 표시될 type 집합 (매매 한정)
+  const COLLECTIVE_SALE_TYPE_SET = new Set([
+    "건물매매", "상가건물매매", "상가주택매매", "구분상가매매",
+    "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매",
+  ]);
+  const isCollectiveSaleProp = (p: { type?: string; note?: string | null }) => {
+    const t = p.type ?? "";
+    if (COLLECTIVE_SALE_TYPE_SET.has(t)) return true;
+    if (["아파트", "오피스텔", "연립", "다세대", "주상복합"].includes(t)) {
+      return (p.note ?? "").includes("매매가:");
+    }
+    return false;
+  };
   const allProperties = useMemo(
-    () => [
-      ...NON_RESIDENTIAL_PROPERTIES,
-      ...dbProperties.filter(p => {
-        if (RESIDENTIAL_TYPES.includes(p.type)) {
-          return (p.note ?? "").includes("매매가:") || p.type.includes("매매");
-        }
-        return true;
-      }),
-    ],
-    [dbProperties]
+    () => {
+      const base = [
+        ...NON_RESIDENTIAL_PROPERTIES,
+        ...dbProperties.filter(p => {
+          if (RESIDENTIAL_TYPES.includes(p.type)) {
+            return (p.note ?? "").includes("매매가:") || p.type.includes("매매");
+          }
+          return true;
+        }),
+      ];
+      if (isCollectiveSale) return base.filter(isCollectiveSaleProp);
+      return base.filter(p => !isCollectiveSaleProp(p));
+    },
+    [dbProperties, isCollectiveSale]
   );
 
 
