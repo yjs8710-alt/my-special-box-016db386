@@ -466,7 +466,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
         : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
+      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : (form.detailType || null)),
       unit_number: form.unitNo || null,
       area: isBuildingSale
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
