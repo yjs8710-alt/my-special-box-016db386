@@ -804,11 +804,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
                   set("oneRoomLayout", opt);
                   setShowOneRoomModal(false);
                 }}
-                  className="flex flex-col items-center gap-2 py-5 rounded-xl border-2 transition-all hover:scale-105"
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all hover:scale-105"
                   style={form.oneRoomLayout === opt
                     ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                     : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--muted))" }}>
-                  <span className="text-2xl">{opt === "오픈형" ? "🏠" : "🚪"}</span>
+                  <img src={opt === "오픈형" ? oneroomOpenImg : oneroomSeparatedImg}
+                    alt={opt} className="w-24 h-24 object-contain rounded-lg bg-white" />
                   <span className="text-sm font-bold">{opt}</span>
                   <span className="text-[10px] opacity-80">{opt === "오픈형" ? "방·주방 통합" : "방·주방 분리"}</span>
                 </button>
