@@ -190,9 +190,16 @@ function Lightbox({
 }
 
 /* ─── 전화번호 클릭시 노출 컴포넌트 ─── */
-function RevealPhone({ label, phone }: { label: string; phone?: string }) {
-  const [revealed, setRevealed] = useState(false);
+interface RevealPhoneProps {
+  label: string;
+  phone?: string;
+  itemKey: string;
+  activeKey: string | null;
+  onActivate: (key: string | null) => void;
+}
+function RevealPhone({ label, phone, itemKey, activeKey, onActivate }: RevealPhoneProps) {
   if (!phone) return null;
+  const revealed = activeKey === itemKey;
 
   return (
     <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
@@ -208,7 +215,7 @@ function RevealPhone({ label, phone }: { label: string; phone?: string }) {
             {phone}
           </a>
           <button
-            onClick={() => setRevealed(false)}
+            onClick={() => onActivate(null)}
             className="p-1 rounded-md hover:bg-muted transition-colors"
             title="숨기기"
           >
@@ -217,7 +224,7 @@ function RevealPhone({ label, phone }: { label: string; phone?: string }) {
         </div>
       ) : (
         <button
-          onClick={() => setRevealed(true)}
+          onClick={() => onActivate(itemKey)}
           className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors"
           style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
         >
@@ -226,6 +233,60 @@ function RevealPhone({ label, phone }: { label: string; phone?: string }) {
         </button>
       )}
     </div>
+  );
+}
+
+/* ─── 연락처 그룹 (상호 배타적 노출) ─── */
+function ContactGroup({ property }: { property: MapProperty }) {
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+
+  const hasOwner = !!property.contactOwner;
+  const hasManager = !!property.contactManager;
+  const hasTenant = !!property.contactTenant;
+
+  if (!hasOwner && !hasManager && !hasTenant) return null;
+
+  return (
+    <>
+      <div className="h-2 bg-muted/50 my-2" />
+      <div className="px-4 pb-3 flex flex-col gap-2">
+        <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
+        <RevealPhone
+          label="소유주"
+          phone={property.contactOwner}
+          itemKey="owner"
+          activeKey={activeKey}
+          onActivate={setActiveKey}
+        />
+        <RevealPhone
+          label="관리인"
+          phone={property.contactManager}
+          itemKey="manager"
+          activeKey={activeKey}
+          onActivate={setActiveKey}
+        />
+        <RevealPhone
+          label="세입자"
+          phone={property.contactTenant}
+          itemKey="tenant"
+          activeKey={activeKey}
+          onActivate={setActiveKey}
+        />
+        {property.contact && (
+          <div className="flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+                <Phone className="w-3 h-3 text-accent" />
+              </div>
+              <span className="text-xs font-semibold text-foreground">부동산</span>
+            </div>
+            <a href={`tel:${property.contact}`} className="text-xs font-bold text-accent hover:underline">
+              {property.contact}
+            </a>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
