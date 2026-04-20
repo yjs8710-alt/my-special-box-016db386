@@ -107,11 +107,7 @@ const PropertyCard = ({
             {type}
           </span>
           {type === "원룸" && (roomType === "오픈형" || roomType === "분리형") && (
-            <span
-              className={`bg-white/90 text-xs font-extrabold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-sm ${
-                roomType === "오픈형" ? "text-rose-600" : "text-emerald-600"
-              }`}
-            >
+            <span className="bg-accent/90 text-accent-foreground text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
               {roomType}
             </span>
           )}
