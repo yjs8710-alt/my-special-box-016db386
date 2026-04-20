@@ -74,11 +74,14 @@ type LhType = typeof LH_TYPES[number];
 const RENT_MODES = ["월세", "반전세", "전세"] as const;
 type RentMode = typeof RENT_MODES[number];
 
+type OneRoomLayout = "오픈형" | "분리형" | "";
+
 interface FormState {
   brokerType: BrokerType;
   tradeType: TradeType;
   buildingType: BuildingType;
   detailType: DetailType;
+  oneRoomLayout: OneRoomLayout;
   sido: string;
   sigungu: string;
   dong: string;
@@ -141,6 +144,7 @@ interface FormState {
 const INITIAL: FormState = {
   brokerType: "일반중개", tradeType: "임대", buildingType: "단독건물",
   detailType: "",
+  oneRoomLayout: "",
   sido: "충북", sigungu: "", dong: "", lotNumber: "",
   buildingName: "", floor: "", unitNo: "", area: "",
   landArea: "", buildingArea: "", buildingSaleType: "일반건물",
@@ -348,6 +352,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
     if (!form.sigungu) e.sigungu = "시/군/구를 선택해주세요";
     if (!form.dong) e.dong = "동을 선택해주세요";
     if (form.buildingType !== "토지" && !form.detailType) e.detailType = "세부 종류를 선택해주세요";
+    if (form.detailType === "원룸" && !form.oneRoomLayout) e.oneRoomLayout = "원룸 형태(오픈형/분리형)를 선택해주세요";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -461,7 +466,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
         : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType || null),
+      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : (form.detailType || null)),
       unit_number: form.unitNo || null,
       area: isBuildingSale
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
@@ -669,6 +674,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
   const [addressVerified, setAddressVerified] = useState<null | "success" | "fail">(null);
   const [verifying, setVerifying] = useState(false);
+  const [showOneRoomModal, setShowOneRoomModal] = useState(false);
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
@@ -746,13 +752,20 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
 
       {/* 세부 종류 - 매물종류 토지 선택 시 숨김 */}
       {form.buildingType !== "토지" && (
-        <Section label="세부 종류" error={errors.detailType}>
+        <Section label="세부 종류" error={errors.detailType || errors.oneRoomLayout}>
           {PROPERTY_TYPE_GROUPS_REG.filter(({ group }) => !(["단독건물","집합건물"].includes(form.buildingType) && group === "토지")).map(({ group, types }) => (
             <div key={group} className="flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
               <div className="flex flex-wrap gap-1.5">
                 {types.map((t) => (
-                  <button key={t} type="button" onClick={() => set("detailType", t)}
+                  <button key={t} type="button" onClick={() => {
+                    set("detailType", t);
+                    if (t === "원룸") {
+                      setShowOneRoomModal(true);
+                    } else {
+                      set("oneRoomLayout", "");
+                    }
+                  }}
                     className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                     style={form.detailType === t
                       ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
@@ -763,7 +776,48 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
               </div>
             </div>
           ))}
+          {form.detailType === "원룸" && form.oneRoomLayout && (
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-bold text-muted-foreground">원룸 형태</span>
+              <button type="button" onClick={() => setShowOneRoomModal(true)}
+                className="px-2.5 py-1 rounded-full text-xs font-bold border transition-all"
+                style={{ background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }}>
+                {form.oneRoomLayout}
+              </button>
+              <span className="text-[10px] text-muted-foreground">(클릭하여 변경)</span>
+            </div>
+          )}
         </Section>
+      )}
+
+      {/* 원룸 형태 선택 모달 */}
+      {showOneRoomModal && (
+        <div className="fixed inset-0 z-[10300] flex items-center justify-center bg-black/60" onClick={() => setShowOneRoomModal(false)}>
+          <div className="bg-background rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-foreground mb-1">원룸 형태 선택</h3>
+            <p className="text-xs text-muted-foreground mb-4">방 구조 형태를 선택해주세요</p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["오픈형", "분리형"] as const).map((opt) => (
+                <button key={opt} type="button" onClick={() => {
+                  set("oneRoomLayout", opt);
+                  setShowOneRoomModal(false);
+                }}
+                  className="flex flex-col items-center gap-2 py-5 rounded-xl border-2 transition-all hover:scale-105"
+                  style={form.oneRoomLayout === opt
+                    ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                    : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--muted))" }}>
+                  <span className="text-2xl">{opt === "오픈형" ? "🏠" : "🚪"}</span>
+                  <span className="text-sm font-bold">{opt}</span>
+                  <span className="text-[10px] opacity-80">{opt === "오픈형" ? "방·주방 통합" : "방·주방 분리"}</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setShowOneRoomModal(false)}
+              className="w-full mt-4 py-2 rounded-lg text-xs font-bold border border-border text-muted-foreground hover:bg-muted">
+              취소
+            </button>
+          </div>
+        </div>
       )}
 
 

@@ -7,6 +7,7 @@ interface PropertyCardProps {
   title: string;
   address: string;
   type: string;
+  roomType?: string;
   area: string;
   floor: string;
   deposit: string;
@@ -22,7 +23,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({
-  image, title, address, type, area, floor, deposit, monthly,
+  image, title, address, type, roomType, area, floor, deposit, monthly,
   isNew, isHot, views, buildYear, elevator, onDelete, referenceImage, referenceUnit
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
@@ -101,10 +102,15 @@ const PropertyCard = ({
           </button>
         </div>
         {/* Type badge */}
-        <div className="absolute bottom-3 left-3">
+        <div className="absolute bottom-3 left-3 flex gap-1.5">
           <span className="bg-primary/90 text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm">
             {type}
           </span>
+          {type === "원룸" && (roomType === "오픈형" || roomType === "분리형") && (
+            <span className="bg-accent/90 text-accent-foreground text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+              {roomType}
+            </span>
+          )}
         </div>
         {/* 건축년도 badge */}
         {buildYearShort && (

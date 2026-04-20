@@ -2517,6 +2517,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               }}
             >
               {prop.type && <span>{prop.type}</span>}
+              {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && (
+                <span className="opacity-90">·{prop.roomType}</span>
+              )}
               {floorShort && <span className="opacity-80">({floorShort})</span>}
               {(() => {
                 const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
