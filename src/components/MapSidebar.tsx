@@ -834,6 +834,17 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
                 </div>
 
 
+
+                {/* 등록된 매물 메모 (관리자/등록자가 입력) */}
+                {initialText?.trim() && (
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground mb-1">등록 메모</p>
+                    <div className="text-[11px] text-foreground bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-2 whitespace-pre-wrap">
+                      {initialText}
+                    </div>
+                  </div>
+                )}
+
                 {/* 같은 사무소 다른 회원 메모 */}
                 {otherMemos.length > 0 && (
                   <div>
