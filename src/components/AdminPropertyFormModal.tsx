@@ -1727,7 +1727,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           )}
           <div className="flex-1" />
           {formStep < 3 ? (
-            <button type="button" onClick={() => { setFormStep((s) => (s + 1) as 2 | 3); bodyScrollRef.current?.scrollTo(0, 0); }}
+            <button type="button" onClick={() => {
+              if (formStep === 1 && form.type === "원룸" && form.room_type !== "오픈형" && form.room_type !== "분리형") {
+                setShowOneRoomModal(true);
+                return;
+              }
+              setFormStep((s) => (s + 1) as 2 | 3);
+              bodyScrollRef.current?.scrollTo(0, 0);
+            }}
               className="px-6 py-2 rounded-full text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90">
               다음
             </button>
