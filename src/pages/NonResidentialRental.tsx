@@ -30,13 +30,9 @@ const FULL_NON_RESIDENTIAL_SUBTYPES = [
   { label: "지식산업", group: "임대", key: "지식산업" },
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가", group: "매매", key: "상가매매" },
-  { label: "건물", group: "매매", key: "건물매매" },
-  { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
+  { label: "사무실", group: "매매", key: "사무실매매-그룹" },
   { label: "공장창고", group: "매매", key: "공장창고매매-그룹" },
-  { label: "아파트", group: "매매", key: "아파트매매-그룹" },
-  { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
-  { label: "연립", group: "매매", key: "연립매매-그룹" },
-  { label: "다세대", group: "매매", key: "다세대매매-그룹" },
+  { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
 ];
 
 // 집합건물.매매 페이지 전용 서브타입
@@ -127,11 +123,8 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   };
 
   const ALL_SALE_TYPES = [
-    "상가매매", "건물매매", "단독매매", "상가주택매매", "상가건물매매",
-    "구분상가매매", "창고/공장매매", "다가구매매", "다중매매", "지식산업매매",
-    "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매",
-    "아파트", "오피스텔", "연립", "다세대", "주상복합", "단독주택", "다가구",
-    "지식산업", "공장·창고",
+    "상가매매", "사무실매매", "지식산업매매", "창고/공장매매",
+    "사무실", "지식산업", "공장·창고",
   ];
 
   const nonResidentialTypeLabels = useMemo(() => {
@@ -139,10 +132,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "지식산업", "상가임대", "기타임대"];
     if (activeTypes.includes("매매-전체")) return ALL_SALE_TYPES;
     const expansionMap: Record<string, string[]> = {
-      "아파트매매-그룹": ["아파트", "아파트매매"],
-      "오피스텔매매-그룹": ["오피스텔", "오피스텔매매"],
-      "연립매매-그룹": ["연립", "연립매매"],
-      "다세대매매-그룹": ["다세대", "다세대매매"],
+      "사무실매매-그룹": ["사무실", "사무실매매"],
       "지식산업매매-그룹": ["지식산업", "지식산업매매"],
       "공장창고매매-그룹": ["공장·창고", "창고/공장매매"],
     };
@@ -153,8 +143,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     if (activeTypes.includes("전체")) return "all";
     const RENTAL_KEYS = new Set(["임대-전체", "상가", "사무실", "공장·창고", "지식산업"]);
     const SALE_KEYS = new Set([
-      "매매-전체", "상가매매", "건물매매",
-      "아파트매매-그룹", "오피스텔매매-그룹", "연립매매-그룹", "다세대매매-그룹",
+      "매매-전체", "상가매매", "사무실매매-그룹",
       "지식산업매매-그룹", "공장창고매매-그룹",
     ]);
     const hasRental = activeTypes.some(t => RENTAL_KEYS.has(t));
