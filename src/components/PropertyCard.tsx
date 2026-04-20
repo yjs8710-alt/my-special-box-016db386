@@ -107,7 +107,13 @@ const PropertyCard = ({
             {type}
           </span>
           {type === "원룸" && (roomType === "오픈형" || roomType === "분리형") && (
-            <span className="bg-accent/90 text-accent-foreground text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
+            <span
+              className={`text-xs font-extrabold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md ring-2 ring-white/70 text-white ${
+                roomType === "오픈형"
+                  ? "bg-gradient-to-r from-pink-500 to-rose-500"
+                  : "bg-gradient-to-r from-emerald-500 to-teal-500"
+              }`}
+            >
               {roomType}
             </span>
           )}
