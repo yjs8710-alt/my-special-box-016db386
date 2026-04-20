@@ -1048,7 +1048,7 @@ const ContactEditModal = ({
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-muted-foreground">
                 동(棟)
-                <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+                <span className="ml-1 text-[10px] text-primary font-normal">공동주택용</span>
               </label>
               <Input
                 value={form.building_dong ?? ""}
@@ -1061,7 +1061,7 @@ const ContactEditModal = ({
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground">
               호수
-              <span className="ml-1 text-[10px] text-primary font-normal">집합건물용</span>
+              <span className="ml-1 text-[10px] text-primary font-normal">공동주택용</span>
             </label>
             <Input
               value={form.unit_number ?? ""}
