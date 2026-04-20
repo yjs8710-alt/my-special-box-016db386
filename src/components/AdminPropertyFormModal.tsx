@@ -992,6 +992,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                           if (COLLECTIVE_TYPES.some(ct => ct === t)) {
                             set("buildingType", "집합건물");
                           }
+                          // 원룸 선택 시 오픈형/분리형 모달 오픈
+                          if (t === "원룸") {
+                            // 기존 값이 오픈/분리형이 아니면 비우고 모달 표시
+                            if (form.room_type !== "오픈형" && form.room_type !== "분리형") {
+                              set("room_type", "");
+                            }
+                            setShowOneRoomModal(true);
+                          }
                         }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                           style={form.type === t
@@ -1003,6 +1011,18 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     </div>
                   </div>
                 ))}
+                {/* 원룸 형태 표시 */}
+                {form.type === "원룸" && (form.room_type === "오픈형" || form.room_type === "분리형") && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[10px] font-bold text-muted-foreground">원룸 형태</span>
+                    <button type="button" onClick={() => setShowOneRoomModal(true)}
+                      className="px-2.5 py-1 rounded-full text-xs font-bold border transition-all"
+                      style={{ background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }}>
+                      {form.room_type}
+                    </button>
+                    <span className="text-[10px] text-muted-foreground">(클릭하여 변경)</span>
+                  </div>
+                )}
               </Section>
 
               {/* 주소 입력 */}
