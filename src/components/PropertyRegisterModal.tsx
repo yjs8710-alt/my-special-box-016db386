@@ -850,7 +850,17 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
           {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">집합건물 동(棟) <span className="text-muted-foreground font-normal">(선택)</span></label>
-              <input type="text" placeholder="예) 101동, A동" value={form.buildingDong} onChange={(e) => set("buildingDong", e.target.value)} className={ic(false)} />
+              <input
+                type="text"
+                placeholder="예) 101동, A동"
+                value={form.buildingDong}
+                onChange={(e) => set("buildingDong", e.target.value)}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  if (v && !/동$/.test(v)) set("buildingDong", `${v}동`);
+                }}
+                className={ic(false)}
+              />
             </div>
           )}
           <div className="grid grid-cols-3 gap-3">

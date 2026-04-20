@@ -1108,6 +1108,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       placeholder="예) 101동, A동"
                       value={form.buildingDong}
                       onChange={(e) => set("buildingDong", e.target.value)}
+                      onBlur={(e) => {
+                        const v = e.target.value.trim();
+                        if (v && !/동$/.test(v)) set("buildingDong", `${v}동`);
+                      }}
                       className={ic}
                     />
                   </div>
