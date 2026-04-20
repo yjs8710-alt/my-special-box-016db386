@@ -49,7 +49,9 @@ import PublicRecordModal from "@/components/PublicRecordModal";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
-  label: string; // 예) "101호", "A동" 또는 단일 매물명
+  unitNumber?: string; // 호수 (e.g., "202호")
+  roomType?: string;     // 방종류 (e.g., "원룸")
+  label?: string;        // legacy fallback (단일 매물명 등)
   images: string[];
   isReference?: boolean; // 참고용 사진 여부
 }
