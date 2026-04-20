@@ -19,6 +19,10 @@ const NON_RESIDENTIAL_SUBTYPES = [
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가매매", group: "매매", key: "상가매매" },
   { label: "건물매매", group: "매매", key: "건물매매" },
+  { label: "아파트", group: "매매", key: "아파트매매-그룹" },
+  { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
+  { label: "연립", group: "매매", key: "연립매매-그룹" },
+  { label: "다세대", group: "매매", key: "다세대매매-그룹" },
 ];
 
 const NON_RESIDENTIAL_DB_TYPES = [
@@ -78,7 +82,13 @@ const NonResidentialRental = () => {
     if (activeTypes.includes("전체")) return ["전체"];
     if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "지식산업", "상가임대", "기타임대"];
     if (activeTypes.includes("매매-전체")) return ["상가매매", "건물매매"];
-    return activeTypes;
+    const expansionMap: Record<string, string[]> = {
+      "아파트매매-그룹": ["아파트", "아파트매매"],
+      "오피스텔매매-그룹": ["오피스텔", "오피스텔매매"],
+      "연립매매-그룹": ["연립", "연립매매"],
+      "다세대매매-그룹": ["다세대", "다세대매매"],
+    };
+    return activeTypes.flatMap(t => expansionMap[t] ?? [t]);
   }, [activeTypes]);
 
   const filtered = usePropertyFilter(allProperties, filters, nonResidentialTypeLabels, query, propertyId);
