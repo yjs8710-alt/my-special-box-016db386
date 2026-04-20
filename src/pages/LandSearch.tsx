@@ -10,7 +10,7 @@ import { MapProperty } from "@/data/mapProperties";
 
 const LAND_PROPERTIES: MapProperty[] = [];
 
-const LAND_SUBTYPES = ["전체", "대지", "임야", "농지"];
+const LAND_SUBTYPES = ["전체"];
 
 const LandSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
