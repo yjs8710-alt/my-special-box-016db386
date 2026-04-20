@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
   { label: "주거 매물", path: "/residential", icon: Building },
-  { label: "상업매물 집합 매매", path: "/non-residential", icon: Building },
+  { label: "상업매물.집합.매매", path: "/non-residential", icon: Building },
   { label: "토지", path: "/land", icon: Building },
   { label: "내 임대·매매 관리", path: "/my-properties", icon: ClipboardList },
 ];
