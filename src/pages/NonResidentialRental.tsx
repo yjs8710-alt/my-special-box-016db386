@@ -31,7 +31,7 @@ const FULL_NON_RESIDENTIAL_SUBTYPES = [
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가", group: "매매", key: "상가매매" },
   { label: "사무실", group: "매매", key: "사무실매매-그룹" },
-  { label: "공장.창고", group: "매매", key: "공장창고매매-그룹" },
+  { label: "공장·창고", group: "매매", key: "공장창고매매-그룹" },
   { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
 ];
 
