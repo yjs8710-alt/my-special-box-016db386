@@ -31,7 +31,7 @@ const FULL_NON_RESIDENTIAL_SUBTYPES = [
   { label: "매매전체", group: "매매", key: "매매-전체" },
   { label: "상가", group: "매매", key: "상가매매" },
   { label: "사무실", group: "매매", key: "사무실매매-그룹" },
-  { label: "공장창고", group: "매매", key: "공장창고매매-그룹" },
+  { label: "공장.창고", group: "매매", key: "공장창고매매-그룹" },
   { label: "지식산업", group: "매매", key: "지식산업매매-그룹" },
 ];
 
@@ -40,10 +40,11 @@ const COLLECTIVE_SALE_SUBTYPES = [
   { label: "전체", group: "전체", key: "전체" },
   { label: "건물", group: "매매", key: "건물매매" },
   { label: "아파트", group: "매매", key: "아파트매매-그룹" },
+  { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
+  { label: "분양권", group: "매매", key: "분양권매매-그룹" },
   { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
   { label: "연립", group: "매매", key: "연립매매-그룹" },
   { label: "다세대", group: "매매", key: "다세대매매-그룹" },
-  { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
 ];
 
 const NON_RESIDENTIAL_DB_TYPES = [
@@ -217,18 +218,22 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           );
         })}
 
-        <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
+        {!isCollectiveSale && (
+          <>
+            <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
-        <span className="text-[12px] font-extrabold whitespace-nowrap flex-shrink-0 px-2 py-0.5 rounded-md" style={{ color: "hsl(var(--accent))", background: "hsl(var(--accent) / 0.12)", border: "1px solid hsl(var(--accent) / 0.4)" }}>임대</span>
-        {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "임대").map(t => {
-          const isActive = activeTypes.includes(t.key);
-          return (
-            <button key={t.key} onClick={() => toggleType(t.key)}
-              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
-            >{t.label}</button>
-          );
-        })}
+            <span className="text-[12px] font-extrabold whitespace-nowrap flex-shrink-0 px-2 py-0.5 rounded-md" style={{ color: "hsl(var(--accent))", background: "hsl(var(--accent) / 0.12)", border: "1px solid hsl(var(--accent) / 0.4)" }}>임대</span>
+            {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "임대").map(t => {
+              const isActive = activeTypes.includes(t.key);
+              return (
+                <button key={t.key} onClick={() => toggleType(t.key)}
+                  className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
+                  style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+                >{t.label}</button>
+              );
+            })}
+          </>
+        )}
 
         <div className="w-px h-4 mx-1 flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }} />
 
