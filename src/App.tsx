@@ -10,7 +10,6 @@ import ResetPassword from "./pages/ResetPassword";
 
 import SignupPage from "./pages/Signup";
 import Community from "./pages/Community";
-import ApartmentRental from "./pages/ApartmentRental";
 import ResidentialRental from "./pages/ResidentialRental";
 import LandSearch from "./pages/LandSearch";
 import NonResidentialRental from "./pages/NonResidentialRental";
@@ -44,7 +43,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           
           <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
-          <Route path="/apartment" element={<ProtectedRoute><ApartmentRental /></ProtectedRoute>} />
+          <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
           <Route path="/residential" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
           <Route path="/land" element={<ProtectedRoute><LandSearch /></ProtectedRoute>} />
           <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
