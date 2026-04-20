@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, forwardRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, forwardRef } from "react";
 import ReactDOM from "react-dom";
 import {
   MapPin,
