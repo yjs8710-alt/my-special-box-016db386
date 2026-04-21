@@ -677,6 +677,7 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof FormState>(k: K, v: FormState[K]) => void; errors: Record<string, string> }) {
   const [addressVerified, setAddressVerified] = useState<null | "success" | "fail">(null);
   const [verifying, setVerifying] = useState(false);
+  const [oneRoomModalOpen, setOneRoomModalOpen] = useState(false);
   const sigunguList = CHEONGJU_SIGUNGU;
   const dongList = DONG_MAP[form.sigungu] ?? [];
 
