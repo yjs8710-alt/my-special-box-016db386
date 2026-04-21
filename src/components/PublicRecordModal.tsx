@@ -417,10 +417,17 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           setFetchedFrom(finalFetchedFrom);
           setEnhancing(false);
           if (!hasDBData) setLoading(false);
-          console.log("✅ [Phase 2] 최종 병합 완료 → 캐시 저장");
+          console.log("✅ [Phase 2] 최종 병합 완료");
 
-          // 캐시에 저장
-          recordCache.set(cacheKey, { building: bSum, land: lSum, fetchedFrom: finalFetchedFrom });
+          // 빈 결과는 캐시하지 않음 (재시도 가능하도록)
+          const hasAnyData = !!(bSum?.main_purpose || bSum?.total_area || bSum?.approval_date ||
+                                lSum?.land_area || lSum?.land_category || lSum?.official_price);
+          if (hasAnyData) {
+            recordCache.set(cacheKey, { building: bSum, land: lSum, fetchedFrom: finalFetchedFrom });
+            console.log("💾 캐시 저장");
+          } else {
+            console.log("⚠️ 빈 결과 → 캐시 저장 안 함");
+          }
         }
       } catch (e: any) {
         if (!cancelled) {

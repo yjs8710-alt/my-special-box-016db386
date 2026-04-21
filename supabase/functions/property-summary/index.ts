@@ -744,20 +744,26 @@ serve(async (req) => {
 
     console.log("📌 [property_id]:", pid, "| [address]:", propertyAddress);
 
-    if (!pid) {
+    // pid가 없어도 주소만 있으면 공적장부 조회를 진행 (DB 저장은 스킵)
+    const skipDbWrite = !pid;
+    if (!pid && !propertyAddress) {
       return new Response(
         JSON.stringify({ property_id: null, address, building_summary: null, land_summary: null, has_building: false, has_land: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ── 2. DB 기존 데이터 조회 ───────────────────────────────────────
-    const [bRes, lRes] = await Promise.all([
-      supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
-      supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
-    ]);
-    let buildingData = bRes.data as Record<string, unknown> | null;
-    let landData     = lRes.data as Record<string, unknown> | null;
+    // ── 2. DB 기존 데이터 조회 (pid가 있을 때만) ─────────────────────
+    let buildingData: Record<string, unknown> | null = null;
+    let landData:     Record<string, unknown> | null = null;
+    if (pid) {
+      const [bRes, lRes] = await Promise.all([
+        supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
+        supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
+      ]);
+      buildingData = bRes.data as Record<string, unknown> | null;
+      landData     = lRes.data as Record<string, unknown> | null;
+    }
 
     // 공백/무의미한 값도 빈 데이터로 취급
     const trimOrNull = (v: unknown) => v && String(v).trim() ? String(v).trim() : null;
@@ -1001,7 +1007,24 @@ serve(async (req) => {
             }),
           };
 
-          if (buildingData && !isBuildingEmpty && !isBuildingPoor) {
+          if (skipDbWrite) {
+            // pid가 없을 때: API 결과를 메모리에서만 구성하여 응답
+            buildingData = {
+              property_id: null,
+              building_name: mappedBuilding?.building_name ?? null,
+              main_purpose:  mappedBuilding?.main_purpose  ?? null,
+              approval_date: mappedBuilding?.approval_date ?? null,
+              land_area:     mappedBuilding?.land_area     ?? null,
+              building_area: mappedBuilding?.building_area ?? null,
+              total_area:    mappedBuilding?.total_area    ?? null,
+              floors_above:  mappedBuilding?.floors_above  ?? null,
+              floors_below:  mappedBuilding?.floors_below  ?? null,
+              parking_count: mappedBuilding?.parking_count ?? null,
+              elevator:      mappedBuilding?.elevator      ?? false,
+              _raw: rawWithStatus,
+            };
+            console.log("✅ [건축물대장] 비등록 매물 — 메모리 응답");
+          } else if (buildingData && !isBuildingEmpty && !isBuildingPoor) {
             // DB에 유효한 데이터가 이미 있으면 _raw만 붙여서 반환 (DB 업데이트 불필요)
             buildingData = { ...buildingData, _raw: rawWithStatus };
             console.log("✅ [건축물대장] DB 캐시 + _raw 병합");
@@ -1173,7 +1196,19 @@ serve(async (req) => {
           const dongName = propertyAddress.match(/([가-힣]+동|[가-힣]+면|[가-힣]+읍)/)?.[1] || "";
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "") || "0"}-${ji.replace(/^0+/, "") || "0"}`.trim();
 
-          if (landData) {
+          if (skipDbWrite) {
+            landData = {
+              property_id: null,
+              lot_number: lotStr,
+              official_price: officialPrice,
+              land_category: landCategory,
+              land_area: landArea,
+              use_zone: useZone,
+              road_access: null,
+              _diagnostics: landDiagnostics,
+            };
+            console.log("✅ [토지] 비등록 매물 — 메모리 응답");
+          } else if (landData) {
             const { data: updated } = await supabase
               .from("land_summary")
               .update({
@@ -1204,7 +1239,7 @@ serve(async (req) => {
 
         } else if (needLand && !pnu) {
           console.log("⚠️ [PNU 생성 실패] 법정동코드 없음 → 토지 조회 불가");
-          if (!landData) {
+          if (!skipDbWrite && !landData) {
             const { data: inserted } = await supabase.from("land_summary")
               .insert({ property_id: pid, lot_number: null, land_category: null, land_area: null, official_price: null, use_zone: null, road_access: null })
               .select().single();
@@ -1213,13 +1248,13 @@ serve(async (req) => {
         }
       } else {
         console.log("⚠️ [주소 파싱 실패] 시군구:", sigunguCd, "| 법정동:", bjdongCd);
-        if (needBuilding) {
+        if (!skipDbWrite && needBuilding) {
           const { data: inserted } = await supabase.from("building_summary")
             .insert({ property_id: pid, building_name: null, main_purpose: null, approval_date: null, land_area: null, building_area: null, total_area: null, floors_above: null, floors_below: null, parking_count: null, elevator: false })
             .select().single();
           if (inserted) buildingData = inserted;
         }
-        if (!landData) {
+        if (!skipDbWrite && !landData) {
           const { data: inserted } = await supabase.from("land_summary")
             .insert({ property_id: pid, lot_number: null, land_category: null, land_area: null, official_price: null, use_zone: null, road_access: null })
             .select().single();
