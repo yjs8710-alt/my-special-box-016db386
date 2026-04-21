@@ -996,6 +996,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                             if (form.room_type !== "오픈형" && form.room_type !== "분리형") {
                               set("room_type", "");
                             }
+                            setShowOneRoomModal(true);
                           }
                         }}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
@@ -1010,23 +1011,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 ))}
                 {/* 원룸 형태 표시 */}
                 {form.type === "원룸" && (
-                  <div className="flex flex-col gap-1.5 mt-1">
+                  <div className="flex items-center gap-2 mt-1">
                     <span className="text-[10px] font-bold text-muted-foreground">원룸 형태</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {(["오픈형", "분리형"] as const).map((opt) => (
-                        <button
-                          key={opt}
-                          type="button"
-                          onClick={() => set("room_type", opt)}
-                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                          style={form.room_type === opt
-                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-                        >
-                          {opt}
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowOneRoomModal(true)}
+                      className="px-2.5 py-1 rounded-full text-xs font-bold border transition-all"
+                      style={(form.room_type === "오픈형" || form.room_type === "분리형")
+                        ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
+                    >
+                      {(form.room_type === "오픈형" || form.room_type === "분리형") ? form.room_type : "선택하기"}
+                    </button>
+                    <span className="text-[10px] text-muted-foreground">(클릭하여 변경)</span>
                   </div>
                 )}
               </Section>
