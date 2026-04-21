@@ -1007,7 +1007,24 @@ serve(async (req) => {
             }),
           };
 
-          if (buildingData && !isBuildingEmpty && !isBuildingPoor) {
+          if (skipDbWrite) {
+            // pid가 없을 때: API 결과를 메모리에서만 구성하여 응답
+            buildingData = {
+              property_id: null,
+              building_name: mappedBuilding?.building_name ?? null,
+              main_purpose:  mappedBuilding?.main_purpose  ?? null,
+              approval_date: mappedBuilding?.approval_date ?? null,
+              land_area:     mappedBuilding?.land_area     ?? null,
+              building_area: mappedBuilding?.building_area ?? null,
+              total_area:    mappedBuilding?.total_area    ?? null,
+              floors_above:  mappedBuilding?.floors_above  ?? null,
+              floors_below:  mappedBuilding?.floors_below  ?? null,
+              parking_count: mappedBuilding?.parking_count ?? null,
+              elevator:      mappedBuilding?.elevator      ?? false,
+              _raw: rawWithStatus,
+            };
+            console.log("✅ [건축물대장] 비등록 매물 — 메모리 응답");
+          } else if (buildingData && !isBuildingEmpty && !isBuildingPoor) {
             // DB에 유효한 데이터가 이미 있으면 _raw만 붙여서 반환 (DB 업데이트 불필요)
             buildingData = { ...buildingData, _raw: rawWithStatus };
             console.log("✅ [건축물대장] DB 캐시 + _raw 병합");
