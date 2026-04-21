@@ -609,7 +609,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
               <Layers className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-[13px] font-extrabold text-foreground">공적장부 열람</h2>
+              <h2 className="text-[13px] font-extrabold text-foreground">건축물대장·토지대장</h2>
               <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight truncate max-w-[520px]">{address}</p>
             </div>
           </div>
@@ -661,7 +661,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
           {!loading && !error && (building || land) && (
             <div className="flex flex-col">
-              <SectionHeader emoji="🌍" title="토지 정보" bg="hsl(142 50% 96%)" />
+              <SectionHeader emoji="🗺️" title="토지 정보" bg="hsl(142 50% 96%)" />
 
               {hasAnyLandData ? (
                 <div className="px-4 py-1">
@@ -679,7 +679,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
               <div className="h-1.5 bg-muted/40 my-1" />
 
-              <SectionHeader emoji="🏢" title="건축물대장" bg="hsl(var(--primary) / 0.05)" />
+              <SectionHeader emoji="🏛️" title="건축물대장" bg="hsl(var(--primary) / 0.05)" />
 
               {building && hasViolationInfo && (
                 <div
