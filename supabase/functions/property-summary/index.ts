@@ -744,20 +744,26 @@ serve(async (req) => {
 
     console.log("📌 [property_id]:", pid, "| [address]:", propertyAddress);
 
-    if (!pid) {
+    // pid가 없어도 주소만 있으면 공적장부 조회를 진행 (DB 저장은 스킵)
+    const skipDbWrite = !pid;
+    if (!pid && !propertyAddress) {
       return new Response(
         JSON.stringify({ property_id: null, address, building_summary: null, land_summary: null, has_building: false, has_land: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // ── 2. DB 기존 데이터 조회 ───────────────────────────────────────
-    const [bRes, lRes] = await Promise.all([
-      supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
-      supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
-    ]);
-    let buildingData = bRes.data as Record<string, unknown> | null;
-    let landData     = lRes.data as Record<string, unknown> | null;
+    // ── 2. DB 기존 데이터 조회 (pid가 있을 때만) ─────────────────────
+    let buildingData: Record<string, unknown> | null = null;
+    let landData:     Record<string, unknown> | null = null;
+    if (pid) {
+      const [bRes, lRes] = await Promise.all([
+        supabase.from("building_summary").select("*").eq("property_id", pid).maybeSingle(),
+        supabase.from("land_summary").select("*").eq("property_id", pid).maybeSingle(),
+      ]);
+      buildingData = bRes.data as Record<string, unknown> | null;
+      landData     = lRes.data as Record<string, unknown> | null;
+    }
 
     // 공백/무의미한 값도 빈 데이터로 취급
     const trimOrNull = (v: unknown) => v && String(v).trim() ? String(v).trim() : null;
