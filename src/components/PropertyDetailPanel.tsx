@@ -1031,14 +1031,16 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
         return;
       }
       try {
+        const { data: { session } } = await supabase.auth.getSession();
         const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const bearer = session?.access_token ?? apiKey;
         const res = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             apikey: apiKey,
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${bearer}`,
           },
           body: JSON.stringify({ address }),
         });

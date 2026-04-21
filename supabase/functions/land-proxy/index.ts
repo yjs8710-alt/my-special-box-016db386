@@ -352,12 +352,37 @@ async function callNsdiCharFallback(pnu: string, apiKey: string): Promise<{
 }
 
 // ── 메인 핸들러 ───────────────────────────────────────────────────────────
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // ── JWT 인증 검증 ────────────────────────────────────────────────
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const _userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: _claimsData, error: _claimsErr } = await _userClient.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+    if (_claimsErr || !_claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const body = await req.json();
     const { pnu, property_id, stdrYear, address, bun, ji } = body;
 

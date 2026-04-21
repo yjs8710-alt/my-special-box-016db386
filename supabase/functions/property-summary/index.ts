@@ -695,6 +695,28 @@ serve(async (req) => {
   }
 
   try {
+    // ── JWT 인증 검증 ────────────────────────────────────────────────
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const _supabaseUrlForAuth = Deno.env.get("SUPABASE_URL")!;
+    const _anonKeyForAuth = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const _userClient = createClient(_supabaseUrlForAuth, _anonKeyForAuth, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const _token = authHeader.replace("Bearer ", "");
+    const { data: _claimsData, error: _claimsErr } = await _userClient.auth.getClaims(_token);
+    if (_claimsErr || !_claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { address, property_id } = await req.json();
     console.log("🔍 [property-summary] 요청:", { address, property_id });
 
