@@ -373,8 +373,10 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
         // ── Phase 2: Edge Function으로 _raw 보강 ────────────────────
         if (hasDBData) setEnhancing(true);
 
-        const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
+        const { data: { session } } = await supabase.auth.getSession();
         const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const bearer = session?.access_token ?? apiKey;
+        const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/property-summary`;
 
         console.log("⚡ [Phase 2] Edge Function 호출:", address);
 
@@ -383,7 +385,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           headers: {
             "Content-Type": "application/json",
             apikey: apiKey,
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${bearer}`,
           },
           body: JSON.stringify({ address, property_id: pid }),
         });
