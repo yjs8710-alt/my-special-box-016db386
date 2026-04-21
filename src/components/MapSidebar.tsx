@@ -2223,6 +2223,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
     var sdkLoadAttempts = 0;
     var MAX_SDK_ATTEMPTS = 3;
+    var SDK_TIMEOUT = 8000;
+    var PANO_TIMEOUT = 3500;
 
     function setStatus(title, desc, showFallback) {
       var html = "<strong>" + title + "</strong><span>" + desc + "</span>";
@@ -2298,7 +2300,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             } else {
               setStatus("로드뷰 응답이 지연되고 있습니다.", "잠시 후 다시 시도해주세요.", true);
             }
-          }, 4000);
+          }, PANO_TIMEOUT);
 
           try {
             roadviewClient.getNearestPanoId(position, radius, function (panoId) {
@@ -2339,49 +2341,71 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     function loadSdk() {
       sdkLoadAttempts++;
-      // 이미 로드된 경우 즉시 초기화
-      if (window.kakao && window.kakao.maps) {
-        try { kakao.maps.load(function() { initRoadview(); }); return; } catch(e) {}
+      if (window.__kakaoRvLoaderPromise) {
+        window.__kakaoRvLoaderPromise.then(initRoadview).catch(function() {
+          setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크를 확인하거나 카카오맵에서 직접 확인해주세요.", true);
+        });
+        return;
       }
-      var existing = document.getElementById("kakao-sdk-rv");
-      if (existing) existing.parentNode.removeChild(existing);
+      window.__kakaoRvLoaderPromise = new Promise(function(resolve, reject) {
+        if (window.kakao && window.kakao.maps) {
+          try {
+            kakao.maps.load(function() { resolve(window.kakao.maps); });
+            return;
+          } catch (e) {}
+        }
 
-      var sdkScript = document.createElement("script");
-      sdkScript.id = "kakao-sdk-rv";
-      sdkScript.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false&libraries=services";
-      sdkScript.async = true;
+        var existing = document.getElementById("kakao-sdk-rv");
+        if (existing) existing.parentNode.removeChild(existing);
 
-      var loaded = false;
-      var loadTimer = setTimeout(function() {
-        if (loaded) return;
+        var sdkScript = document.createElement("script");
+        sdkScript.id = "kakao-sdk-rv";
+        sdkScript.src = "https://dapi.kakao.com/v2/maps/sdk.js?appkey=9b1ab990830e8319b8bafb3104e5ae50&autoload=false&libraries=services";
+        sdkScript.async = true;
+
+        var settled = false;
+        var loadTimer = setTimeout(function() {
+          if (settled) return;
+          settled = true;
+          sdkScript.remove();
+          reject(new Error("timeout"));
+        }, SDK_TIMEOUT);
+
+        sdkScript.onload = function() {
+          if (settled) return;
+          try {
+            kakao.maps.load(function() {
+              if (settled) return;
+              settled = true;
+              clearTimeout(loadTimer);
+              resolve(window.kakao.maps);
+            });
+          } catch (e) {
+            settled = true;
+            clearTimeout(loadTimer);
+            reject(e);
+          }
+        };
+        sdkScript.onerror = function() {
+          if (settled) return;
+          settled = true;
+          clearTimeout(loadTimer);
+          sdkScript.remove();
+          reject(new Error("load_error"));
+        };
+        document.head.appendChild(sdkScript);
+      }).then(function() {
+        return initRoadview();
+      }).catch(function(error) {
+        window.__kakaoRvLoaderPromise = null;
         if (sdkLoadAttempts < MAX_SDK_ATTEMPTS) {
           setStatus("SDK 로딩 재시도 중...", "시도 " + (sdkLoadAttempts + 1) + "/" + MAX_SDK_ATTEMPTS);
-          loadSdk();
-        } else {
-          setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크를 확인하거나 카카오맵에서 직접 확인해주세요.", true);
+          setTimeout(loadSdk, 700);
+          return;
         }
-      }, 8000);
-
-      sdkScript.onload = function() {
-        loaded = true;
-        clearTimeout(loadTimer);
-        try {
-          kakao.maps.load(function() { initRoadview(); });
-        } catch (e) {
-          setStatus("SDK 초기화에 실패했습니다.", "카카오맵에서 직접 확인해주세요.", true);
-        }
-      };
-      sdkScript.onerror = function() {
-        loaded = true;
-        clearTimeout(loadTimer);
-        if (sdkLoadAttempts < MAX_SDK_ATTEMPTS) {
-          setStatus("SDK 로딩 재시도 중...", "시도 " + (sdkLoadAttempts + 1) + "/" + MAX_SDK_ATTEMPTS);
-          setTimeout(loadSdk, 500);
-        } else {
-          setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크를 확인하거나 카카오맵에서 직접 확인해주세요.", true);
-        }
-      };
-      document.head.appendChild(sdkScript);
+        setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크를 확인하거나 카카오맵에서 직접 확인해주세요.", true);
+        throw error;
+      });
     }
 
     // 초기 statusEl 참조 + data 미리 세팅 (fallback 링크용)
