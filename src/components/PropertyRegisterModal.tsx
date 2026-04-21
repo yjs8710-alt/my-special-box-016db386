@@ -207,16 +207,17 @@ export default function PropertyRegisterModal({ onClose }: Props) {
 
   // ── 주소(동+번지) 변경 시 전화번호 + 건물비밀번호 자동 로드 (단독건물: 동+번지 기준) ──────
   useEffect(() => {
-    if (!form.dong || isCollectiveBuilding) return;
+    // 번지(lot_number) 없이는 조회하지 않음 — 같은 동의 다른 번지 연락처가 잘못 들어가는 것을 방지
+    if (!form.dong || !form.lotNumber || isCollectiveBuilding) return;
     const run = async () => {
-      // 연락처 자동 로드
-      let q = supabase
+      // 연락처 자동 로드 (정확히 동+번지+호수없음 일치 시에만)
+      const { data } = await supabase
         .from("cheongju_contacts")
         .select("contact_owner,contact_manager,contact_broker,phone")
         .eq("dong", form.dong)
-        .is("unit_number", null);
-      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
-      const { data } = await q.maybeSingle();
+        .eq("lot_number", form.lotNumber)
+        .is("unit_number", null)
+        .maybeSingle();
       if (data) {
         setForm((prev) => ({
           ...prev,
