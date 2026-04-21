@@ -1094,7 +1094,7 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
               <Layers className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">공적장부 열람</h2>
+              <h2 className="text-sm font-bold text-foreground">건축물대장·토지대장</h2>
               <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{address}</p>
             </div>
           </div>
