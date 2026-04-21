@@ -1,15 +1,6 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { MapProperty } from "@/data/mapProperties";
-
-declare global {
-  interface Window {
-    kakao: any;
-    __kakaoMapReady?: boolean;
-    __kakaoMapCallbacks?: Array<() => void>;
-  }
-}
-
-const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -142,31 +133,6 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   `;
 }
 
-function loadKakaoScript(cb: () => void) {
-  if (window.kakao && window.kakao.maps) {
-    cb();
-    return;
-  }
-
-  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
-  window.__kakaoMapCallbacks.push(cb);
-
-  if (document.getElementById("kakao-maps-script")) return;
-
-  const script = document.createElement("script");
-  script.id = "kakao-maps-script";
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
-  script.async = true;
-  script.onload = () => {
-    window.kakao.maps.load(() => {
-      window.__kakaoMapReady = true;
-      window.__kakaoMapCallbacks?.forEach((fn) => fn());
-      window.__kakaoMapCallbacks = [];
-    });
-  };
-  document.head.appendChild(script);
-}
-
 export interface MapBounds {
   swLat: number; swLng: number; neLat: number; neLng: number;
 }
@@ -187,6 +153,8 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
   const zoomLevelRef = useRef<number>(5);
+  const [mapError, setMapError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
   const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange });
@@ -243,45 +211,55 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   useEffect(() => {
     mountedRef.current = true;
 
-    loadKakaoScript(() => {
-      if (!mountedRef.current || !containerRef.current) return;
-      if (mapRef.current) return;
+    let cancelled = false;
+    setMapError(false);
 
-      const map = new window.kakao.maps.Map(containerRef.current, {
-        center: new window.kakao.maps.LatLng(36.6285, 127.4568),
-        level: 5,
-      });
+    (async () => {
+      try {
+        await loadKakaoMaps();
+        if (cancelled || !mountedRef.current || !containerRef.current || mapRef.current) return;
 
-      mapRef.current = map;
-      zoomLevelRef.current = map.getLevel();
-      renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
+        const map = new window.kakao.maps.Map(containerRef.current, {
+          center: new window.kakao.maps.LatLng(36.6285, 127.4568),
+          level: 5,
+        });
 
-      // 초기 bounds 전달
-      setTimeout(() => fireBounds(map), 300);
+        mapRef.current = map;
+        zoomLevelRef.current = map.getLevel();
+        renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
 
-      // 줌 변경 시 핀 크기 자동 재렌더 + bounds 전달
-      window.kakao.maps.event.addListener(map, "zoom_changed", () => {
-        if (!mountedRef.current) return;
-        const newZoom = map.getLevel();
-        zoomLevelRef.current = newZoom;
-        renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
-        fireBounds(map);
-      });
+        setTimeout(() => {
+          if (!cancelled) fireBounds(map);
+        }, 300);
 
-      // 드래그 후 bounds 전달
-      window.kakao.maps.event.addListener(map, "dragend", () => {
-        if (!mountedRef.current) return;
-        fireBounds(map);
-      });
-    });
+        window.kakao.maps.event.addListener(map, "zoom_changed", () => {
+          if (!mountedRef.current) return;
+          const newZoom = map.getLevel();
+          zoomLevelRef.current = newZoom;
+          renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
+          fireBounds(map);
+        });
+
+        window.kakao.maps.event.addListener(map, "dragend", () => {
+          if (!mountedRef.current) return;
+          fireBounds(map);
+        });
+      } catch (_) {
+        if (!cancelled) {
+          setMapError(true);
+          clearOverlays();
+          mapRef.current = null;
+        }
+      }
+    })();
 
     return () => {
+      cancelled = true;
       mountedRef.current = false;
       clearOverlays();
       mapRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [clearOverlays, fireBounds, renderOverlays, retryKey]);
 
   // 핀 업데이트 (properties/selectedId 변경 시)
   useEffect(() => {
@@ -312,7 +290,24 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     return () => ro.disconnect();
   }, []);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return (
+    <div className="relative w-full h-full">
+      <div ref={containerRef} className="w-full h-full" />
+      {mapError && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-toolbar-bg/95 px-6 text-center">
+          <strong className="text-sm font-extrabold text-foreground">지도를 불러오지 못했습니다.</strong>
+          <span className="text-xs font-medium text-muted-foreground">네트워크 상태를 확인한 뒤 다시 시도해주세요.</span>
+          <button
+            type="button"
+            onClick={() => setRetryKey((prev) => prev + 1)}
+            className="rounded-md bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            다시 불러오기
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MapView;
