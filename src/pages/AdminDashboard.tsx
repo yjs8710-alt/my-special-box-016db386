@@ -1540,6 +1540,7 @@ const AdminDashboard = () => {
         district: updated.district,
         dong: updated.dong,
         lot_number: updated.lot_number ?? "",
+        building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
         phone: updated.phone,
