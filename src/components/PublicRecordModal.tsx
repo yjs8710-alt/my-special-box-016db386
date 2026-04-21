@@ -660,25 +660,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
 
           {!loading && !error && (building || land) && (
             <div className="flex flex-col">
-              <SectionHeader emoji="🗺️" title="토지 정보" bg="hsl(142 50% 96%)" />
-
-              {hasAnyLandData ? (
-                <div className="px-4 py-1">
-                  <Row label="PNU" value={str(land?.pnu)} />
-                  <Row label="지목" value={str(land?.land_category) ?? str(land?.jimok)} />
-                  <Row label="토지면적" value={str(land?.land_area) ?? str(land?.area)} />
-                  <Row label="용도지역" value={str(land?.use_zone) ?? str(land?.zone)} />
-                  <Row label="공시지가" value={str(land?.official_price) ?? str(land?.price)} />
-                </div>
-              ) : (
-                <div className="px-4 py-4">
-                  <p className="text-[11px] text-muted-foreground">토지 데이터 없음 또는 일부 항목만 조회됨</p>
-                </div>
-              )}
-
-              <div className="h-1.5 bg-muted/40 my-1" />
-
               <SectionHeader emoji="🏛️" title="건축물대장" bg="hsl(var(--primary) / 0.05)" />
+
 
               {building && hasViolationInfo && (
                 <div
