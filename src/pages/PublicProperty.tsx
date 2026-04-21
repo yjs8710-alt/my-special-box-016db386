@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import logoTransparent from "@/assets/logo-transparent.png";
+import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 interface PropertyData {
   id: string;
@@ -93,78 +94,54 @@ function sanitizeAddress(address: string): string {
   return match ? match[0] : address.split(" ").slice(0, -1).join(" ") || address;
 }
 
-declare global {
-  interface Window {
-    kakao: any;
-    __kakaoMapReady?: boolean;
-    __kakaoMapCallbacks?: Array<() => void>;
-  }
-}
-
-const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
-
-function loadKakaoMapScript(cb: () => void) {
-  if (window.kakao?.maps && window.__kakaoMapReady) {
-    cb();
-    return;
-  }
-
-  if (window.kakao?.maps && !window.__kakaoMapReady) {
-    window.kakao.maps.load(() => {
-      window.__kakaoMapReady = true;
-      cb();
-    });
-    return;
-  }
-
-  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
-  window.__kakaoMapCallbacks.push(cb);
-
-  if (document.getElementById("kakao-maps-script")) return;
-
-  const script = document.createElement("script");
-  script.id = "kakao-maps-script";
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
-  script.async = true;
-  script.onload = () => {
-    window.kakao.maps.load(() => {
-      window.__kakaoMapReady = true;
-      window.__kakaoMapCallbacks?.forEach((fn) => fn());
-      window.__kakaoMapCallbacks = [];
-    });
-  };
-  document.head.appendChild(script);
-}
-
 function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!lat || !lng || !mapRef.current) return;
 
-    loadKakaoMapScript(() => {
-      if (!window.kakao?.maps || !mapRef.current) return;
+    let cancelled = false;
 
-      const position = new window.kakao.maps.LatLng(lat, lng);
-      const map = new window.kakao.maps.Map(mapRef.current, {
-        center: position,
-        level: 4,
-        draggable: false,
-        scrollwheel: false,
-        disableDoubleClickZoom: true,
-      });
+    (async () => {
+      try {
+        await loadKakaoMaps();
+        if (cancelled || !window.kakao?.maps || !mapRef.current) return;
 
-      new window.kakao.maps.Circle({
-        center: position,
-        radius: 150,
-        strokeWeight: 2,
-        strokeColor: "#1B3A5C",
-        strokeOpacity: 0.6,
-        fillColor: "#1B3A5C",
-        fillOpacity: 0.15,
-        map,
-      });
-    });
+        const position = new window.kakao.maps.LatLng(lat, lng);
+        const map = new window.kakao.maps.Map(mapRef.current, {
+          center: position,
+          level: 4,
+          draggable: false,
+          scrollwheel: false,
+          disableDoubleClickZoom: true,
+        });
+
+        new window.kakao.maps.Circle({
+          center: position,
+          radius: 150,
+          strokeWeight: 2,
+          strokeColor: "#1B3A5C",
+          strokeOpacity: 0.6,
+          fillColor: "#1B3A5C",
+          fillOpacity: 0.15,
+          map,
+        });
+
+        window.setTimeout(() => {
+          if (!cancelled) {
+            try { map.relayout(); } catch (_) {}
+          }
+        }, 120);
+      } catch (_) {
+        if (mapRef.current) {
+          mapRef.current.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;background:hsl(220 16% 97%);color:hsl(218 14% 48%);font-size:12px;font-weight:700;">지도를 불러오지 못했습니다.</div>';
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [lat, lng]);
 
   return (

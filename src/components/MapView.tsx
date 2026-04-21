@@ -1,15 +1,6 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { MapProperty } from "@/data/mapProperties";
-
-declare global {
-  interface Window {
-    kakao: any;
-    __kakaoMapReady?: boolean;
-    __kakaoMapCallbacks?: Array<() => void>;
-  }
-}
-
-const KAKAO_JS_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -140,31 +131,6 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
       "></div>
     </div>
   `;
-}
-
-function loadKakaoScript(cb: () => void) {
-  if (window.kakao && window.kakao.maps) {
-    cb();
-    return;
-  }
-
-  if (!window.__kakaoMapCallbacks) window.__kakaoMapCallbacks = [];
-  window.__kakaoMapCallbacks.push(cb);
-
-  if (document.getElementById("kakao-maps-script")) return;
-
-  const script = document.createElement("script");
-  script.id = "kakao-maps-script";
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`;
-  script.async = true;
-  script.onload = () => {
-    window.kakao.maps.load(() => {
-      window.__kakaoMapReady = true;
-      window.__kakaoMapCallbacks?.forEach((fn) => fn());
-      window.__kakaoMapCallbacks = [];
-    });
-  };
-  document.head.appendChild(script);
 }
 
 export interface MapBounds {
