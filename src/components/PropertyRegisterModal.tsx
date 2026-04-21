@@ -205,49 +205,51 @@ export default function PropertyRegisterModal({ onClose }: Props) {
   // 집합건물 여부 판단: 건물유형이 집합건물이거나 세부유형이 아파트/오피스텔/빌라/연립 등
   const isCollectiveBuilding = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
-  // ── 주소(동+번지) 변경 시 전화번호 + 건물비밀번호 자동 로드 (단독건물: 동+번지 기준) ──────
+  // ── 주소(동+번지) 변경 시: ──
+  //   1) 단독건물에 한해 연락처 자동 로드(같은 동의 다른 번지 오기재 방지)
+  //   2) 건물 비밀번호는 건물유형과 무관하게 같은 건물(동+번지)에서 최신값 자동 로드
   useEffect(() => {
-    // 번지(lot_number) 없이는 조회하지 않음 — 같은 동의 다른 번지 연락처가 잘못 들어가는 것을 방지
-    if (!form.dong || !form.lotNumber || isCollectiveBuilding) return;
+    if (!form.dong || !form.lotNumber) return;
     const run = async () => {
-      // 연락처 자동 로드 (정확히 동+번지+호수없음 일치 시에만)
-      const { data } = await supabase
-        .from("cheongju_contacts")
-        .select("contact_owner,contact_manager,contact_broker,phone")
-        .eq("dong", form.dong)
-        .eq("lot_number", form.lotNumber)
-        .is("unit_number", null)
-        .maybeSingle();
-      if (data) {
-        setForm((prev) => ({
-          ...prev,
-          contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
-          contactManager: prev.contactManager || data.contact_manager || "",
-          contactBroker: prev.contactBroker || data.contact_broker || "",
-        }));
-      }
-
-      // 건물 비밀번호 자동 로드 (기존 매물에서)
-      if (form.lotNumber) {
-        let pq = supabase
-          .from("properties")
-          .select("building_password")
+      // (1) 연락처 — 단독건물에서만, 호수 없는 row와 정확히 매칭
+      if (!isCollectiveBuilding) {
+        const { data } = await supabase
+          .from("cheongju_contacts")
+          .select("contact_owner,contact_manager,contact_broker,phone")
           .eq("dong", form.dong)
           .eq("lot_number", form.lotNumber)
-          .not("building_password", "is", null)
-          .order("registered_date", { ascending: false })
-          .limit(1);
-        const { data: propData } = await pq.maybeSingle();
-        if (propData?.building_password) {
+          .is("unit_number", null)
+          .maybeSingle();
+        if (data) {
           setForm((prev) => ({
             ...prev,
-            buildingPassword: prev.buildingPassword || propData.building_password || "",
+            contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
+            contactManager: prev.contactManager || data.contact_manager || "",
+            contactBroker: prev.contactBroker || data.contact_broker || "",
           }));
         }
       }
+
+      // (2) 건물 비밀번호 — 같은 건물(동+번지)의 최신 매물에서 호수와 무관하게 로드
+      const { data: propData } = await supabase
+        .from("properties")
+        .select("building_password")
+        .eq("dong", form.dong)
+        .eq("lot_number", form.lotNumber)
+        .not("building_password", "is", null)
+        .neq("building_password", "")
+        .order("registered_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (propData?.building_password) {
+        setForm((prev) => ({
+          ...prev,
+          buildingPassword: prev.buildingPassword || propData.building_password || "",
+        }));
+      }
     };
     run();
-  }, [form.dong, form.lotNumber, form.buildingType, form.detailType]);
+  }, [form.dong, form.lotNumber, isCollectiveBuilding]);
 
   // ── 집합건물/아파트/오피스텔/빌라 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   useEffect(() => {
