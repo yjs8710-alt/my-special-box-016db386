@@ -764,39 +764,67 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
                     set("detailType", t);
                     if (t !== "원룸") {
                       set("oneRoomLayout", "");
+                    } else {
+                      setOneRoomModalOpen(true);
                     }
                   }}
                     className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
                     style={form.detailType === t
                       ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                       : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
-                    {t}
+                    {t}{t === "원룸" && form.oneRoomLayout ? ` (${form.oneRoomLayout})` : ""}
                   </button>
                 ))}
               </div>
             </div>
           ))}
-          {form.detailType === "원룸" && (
-            <div className="flex flex-col gap-1.5 mt-1">
-              <span className="text-[10px] font-bold text-muted-foreground">원룸 형태</span>
-              <div className="flex flex-wrap gap-1.5">
-                {(["오픈형", "분리형"] as const).map((opt) => (
-                  <button
-                    key={opt}
-                    type="button"
-                    onClick={() => set("oneRoomLayout", opt)}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                    style={form.oneRoomLayout === opt
-                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </Section>
+      )}
+
+      {/* 원룸 형태 선택 모달 */}
+      {oneRoomModalOpen && (
+        <div
+          className="fixed inset-0 z-[10300] flex items-center justify-center bg-black/50"
+          onClick={() => setOneRoomModalOpen(false)}
+        >
+          <div
+            className="bg-background rounded-2xl shadow-2xl w-[90%] max-w-sm p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-foreground">원룸 형태 선택</h3>
+              <button
+                type="button"
+                onClick={() => setOneRoomModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">원룸의 구조 형태를 선택해주세요.</p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["오픈형", "분리형"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    set("oneRoomLayout", opt);
+                    setOneRoomModalOpen(false);
+                  }}
+                  className="flex flex-col items-center justify-center gap-1 py-4 rounded-xl border-2 transition-all"
+                  style={form.oneRoomLayout === opt
+                    ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                    : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
+                >
+                  <span className="text-base font-bold">{opt}</span>
+                  <span className="text-[10px] opacity-80">
+                    {opt === "오픈형" ? "방·주방 일체형" : "방·주방 분리형"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
 
