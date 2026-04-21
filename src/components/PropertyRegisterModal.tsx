@@ -1144,7 +1144,7 @@ function Step2({
                   <button
                     key={String(v)}
                     type="button"
-                    onClick={() => set("pet", v)}
+                    onClick={() => set("pet", form.pet === v ? "" : v)}
                     className="flex-1 py-2 rounded-xl text-sm font-bold border-2 transition-all"
                     style={
                       isActive
