@@ -1196,7 +1196,19 @@ serve(async (req) => {
           const dongName = propertyAddress.match(/([가-힣]+동|[가-힣]+면|[가-힣]+읍)/)?.[1] || "";
           const lotStr   = `${dongName} ${bun.replace(/^0+/, "") || "0"}-${ji.replace(/^0+/, "") || "0"}`.trim();
 
-          if (landData) {
+          if (skipDbWrite) {
+            landData = {
+              property_id: null,
+              lot_number: lotStr,
+              official_price: officialPrice,
+              land_category: landCategory,
+              land_area: landArea,
+              use_zone: useZone,
+              road_access: null,
+              _diagnostics: landDiagnostics,
+            };
+            console.log("✅ [토지] 비등록 매물 — 메모리 응답");
+          } else if (landData) {
             const { data: updated } = await supabase
               .from("land_summary")
               .update({
@@ -1227,7 +1239,7 @@ serve(async (req) => {
 
         } else if (needLand && !pnu) {
           console.log("⚠️ [PNU 생성 실패] 법정동코드 없음 → 토지 조회 불가");
-          if (!landData) {
+          if (!skipDbWrite && !landData) {
             const { data: inserted } = await supabase.from("land_summary")
               .insert({ property_id: pid, lot_number: null, land_category: null, land_area: null, official_price: null, use_zone: null, road_access: null })
               .select().single();
@@ -1236,13 +1248,13 @@ serve(async (req) => {
         }
       } else {
         console.log("⚠️ [주소 파싱 실패] 시군구:", sigunguCd, "| 법정동:", bjdongCd);
-        if (needBuilding) {
+        if (!skipDbWrite && needBuilding) {
           const { data: inserted } = await supabase.from("building_summary")
             .insert({ property_id: pid, building_name: null, main_purpose: null, approval_date: null, land_area: null, building_area: null, total_area: null, floors_above: null, floors_below: null, parking_count: null, elevator: false })
             .select().single();
           if (inserted) buildingData = inserted;
         }
-        if (!landData) {
+        if (!skipDbWrite && !landData) {
           const { data: inserted } = await supabase.from("land_summary")
             .insert({ property_id: pid, lot_number: null, land_category: null, land_area: null, official_price: null, use_zone: null, road_access: null })
             .select().single();
