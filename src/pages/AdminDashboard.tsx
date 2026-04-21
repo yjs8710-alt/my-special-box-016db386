@@ -89,6 +89,7 @@ type CheongJuContact = {
   district: string;
   dong: string;
   lot_number?: string;
+  building_name?: string | null; // 건물명 (예: OO빌딩)
   building_dong?: string | null; // 집합건물 동(棟) 번호
   unit_number?: string | null;
   phone: string;
@@ -976,7 +977,7 @@ const ContactEditModal = ({
   onSave: (updated: CheongJuContact) => Promise<void>;
 }) => {
   const [form, setForm] = useState<CheongJuContact>(
-    contact ?? { id: "", district: "", dong: "", lot_number: "", building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
+    contact ?? { id: "", district: "", dong: "", lot_number: "", building_name: null, building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
   const [saving, setSaving] = useState(false);
 
@@ -1056,7 +1057,16 @@ const ContactEditModal = ({
                 placeholder="예: 101동"
                 className="h-9 text-sm"
               />
-            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground">건물명</label>
+            <Input
+              value={form.building_name ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, building_name: e.target.value || null }))}
+              placeholder="예: 집다빌딩"
+              className="h-9 text-sm"
+            />
+          </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground">
@@ -1512,6 +1522,7 @@ const AdminDashboard = () => {
     if (updated.id) {
       const payload: ContactRow = {
         lot_number: updated.lot_number ?? "",
+        building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
         phone: updated.phone,
@@ -1529,6 +1540,7 @@ const AdminDashboard = () => {
         district: updated.district,
         dong: updated.dong,
         lot_number: updated.lot_number ?? "",
+        building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
         phone: updated.phone,

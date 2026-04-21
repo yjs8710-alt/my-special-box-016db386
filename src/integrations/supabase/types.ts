@@ -128,6 +128,7 @@ export type Database = {
       cheongju_contacts: {
         Row: {
           building_dong: string | null
+          building_name: string | null
           contact_broker: string | null
           contact_manager: string | null
           contact_owner: string | null
@@ -144,6 +145,7 @@ export type Database = {
         }
         Insert: {
           building_dong?: string | null
+          building_name?: string | null
           contact_broker?: string | null
           contact_manager?: string | null
           contact_owner?: string | null
@@ -160,6 +162,7 @@ export type Database = {
         }
         Update: {
           building_dong?: string | null
+          building_name?: string | null
           contact_broker?: string | null
           contact_manager?: string | null
           contact_owner?: string | null
