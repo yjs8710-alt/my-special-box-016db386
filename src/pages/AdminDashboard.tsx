@@ -1083,16 +1083,16 @@ const ContactEditModal = ({
                 placeholder="예: 101동"
                 className="h-9 text-sm"
               />
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground">건물명</label>
             <Input
               value={form.building_name ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, building_name: e.target.value || null }))}
-              placeholder="예: 집다빌딩"
+              placeholder="예: 집다빌딩 (같은 주소면 자동 로드)"
               className="h-9 text-sm"
             />
-          </div>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground">
