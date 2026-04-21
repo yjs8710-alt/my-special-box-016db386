@@ -174,7 +174,7 @@ function waitForExistingScript(script: HTMLScriptElement, timeoutMs: number) {
       });
     }, SCRIPT_POLL_INTERVAL_MS);
 
-    if (script.readyState === "complete" || getScriptStatus(script) === "loaded") {
+    if ((script as HTMLScriptElement & { readyState?: string }).readyState === "complete" || getScriptStatus(script) === "loaded") {
       handleLoad();
     }
   });
