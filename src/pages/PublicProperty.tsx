@@ -103,18 +103,31 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
 
     let cancelled = false;
 
+    const waitForContainerReady = async () => {
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        if (!mapRef.current) return false;
+        if (mapRef.current.clientWidth > 0 && mapRef.current.clientHeight > 0) return true;
+        await new Promise((resolve) => window.setTimeout(resolve, 120));
+      }
+      return Boolean(mapRef.current?.clientWidth && mapRef.current?.clientHeight);
+    };
+
     const relayout = () => {
       if (!mapInstanceRef.current || !window.kakao?.maps) return;
       try {
         mapInstanceRef.current.relayout();
         mapInstanceRef.current.setCenter(new window.kakao.maps.LatLng(lat, lng));
-      } catch (_) {}
+      } catch (_) {
+        mapInstanceRef.current = null;
+      }
     };
 
     (async () => {
       try {
         await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
         if (cancelled || !window.kakao?.maps || !mapRef.current) return;
+        const containerReady = await waitForContainerReady();
+        if (!containerReady || cancelled || !mapRef.current) return;
 
         const position = new window.kakao.maps.LatLng(lat, lng);
         const map = new window.kakao.maps.Map(mapRef.current, {

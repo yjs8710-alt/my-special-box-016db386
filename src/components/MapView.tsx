@@ -164,6 +164,17 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     propsRef.current = { properties, selectedId, onSelect, onBoundsChange };
   });
 
+  const waitForContainerReady = useCallback(async () => {
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      if (!mountedRef.current || !containerRef.current) return false;
+      if (containerRef.current.clientWidth > 0 && containerRef.current.clientHeight > 0) {
+        return true;
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 150));
+    }
+    return Boolean(containerRef.current?.clientWidth && containerRef.current?.clientHeight);
+  }, []);
+
   const fireBounds = useCallback((map: any) => {
     try {
       const b = map.getBounds();
@@ -182,6 +193,11 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     });
     overlaysRef.current.clear();
   }, []);
+
+  const resetMapInstance = useCallback(() => {
+    clearOverlays();
+    mapRef.current = null;
+  }, [clearOverlays]);
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
@@ -221,9 +237,8 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
         await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
         if (cancelled || !mountedRef.current || !containerRef.current || mapRef.current) return;
 
-        if (containerRef.current.clientWidth === 0 || containerRef.current.clientHeight === 0) {
-          await new Promise((resolve) => window.setTimeout(resolve, 180));
-        }
+        const containerReady = await waitForContainerReady();
+        if (!containerReady) throw new Error("map_container_not_ready");
         if (cancelled || !mountedRef.current || !containerRef.current || mapRef.current) return;
 
         const map = new window.kakao.maps.Map(containerRef.current, {
@@ -264,8 +279,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
       } catch (_) {
         if (!cancelled) {
           setMapError(true);
-          clearOverlays();
-          mapRef.current = null;
+          resetMapInstance();
 
           if (autoRetryCountRef.current < 2) {
             autoRetryCountRef.current += 1;
@@ -285,10 +299,9 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
         window.clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
       }
-      clearOverlays();
-      mapRef.current = null;
+      resetMapInstance();
     };
-  }, [clearOverlays, fireBounds, renderOverlays, retryKey]);
+  }, [fireBounds, renderOverlays, resetMapInstance, retryKey, waitForContainerReady]);
 
   // 핀 업데이트 (properties/selectedId 변경 시)
   useEffect(() => {
@@ -325,7 +338,11 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
         try {
           mapRef.current.relayout();
           fireBounds(mapRef.current);
-        } catch (_) {}
+        } catch (_) {
+          resetMapInstance();
+          setMapError(true);
+          setRetryKey((prev) => prev + 1);
+        }
         return;
       }
 
@@ -346,7 +363,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
       window.removeEventListener("online", recoverMapLayout);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [fireBounds, mapError]);
+  }, [fireBounds, mapError, resetMapInstance]);
 
   return (
     <div className="relative w-full h-full">
