@@ -1029,7 +1029,7 @@ const ContactEditModal = ({
                   className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none disabled:opacity-50"
                 >
                   <option value="">{form.district ? "동 선택" : "구 먼저 선택"}</option>
-                  {availableDongs.map((d) => <option key={d} value={d}>{d}</option>)}
+                  {[...availableDongs].sort((a, b) => a.localeCompare(b, 'ko-KR')).map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
