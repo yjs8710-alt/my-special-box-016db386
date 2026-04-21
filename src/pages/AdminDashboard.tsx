@@ -89,6 +89,7 @@ type CheongJuContact = {
   district: string;
   dong: string;
   lot_number?: string;
+  building_name?: string | null; // 건물명 (예: OO빌딩)
   building_dong?: string | null; // 집합건물 동(棟) 번호
   unit_number?: string | null;
   phone: string;
