@@ -18,12 +18,37 @@ async function searchKakao(query: string, apiKey: string) {
   return data?.documents?.length > 0 ? data.documents[0] : null;
 }
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // ── JWT 인증 검증 ────────────────────────────────────────────────
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const _userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: _claimsData, error: _claimsErr } = await _userClient.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+    if (_claimsErr || !_claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const kakaoApiKey = Deno.env.get("KAKAO_API_KEY");
     console.log("[geocode] KAKAO_API_KEY loaded:", !!kakaoApiKey);
 
