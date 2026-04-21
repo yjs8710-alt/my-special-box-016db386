@@ -155,6 +155,8 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const zoomLevelRef = useRef<number>(5);
   const [mapError, setMapError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const retryTimeoutRef = useRef<number | null>(null);
+  const autoRetryCountRef = useRef(0);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
   const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange });
@@ -216,7 +218,12 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
 
     (async () => {
       try {
-        await loadKakaoMaps();
+        await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
+        if (cancelled || !mountedRef.current || !containerRef.current || mapRef.current) return;
+
+        if (containerRef.current.clientWidth === 0 || containerRef.current.clientHeight === 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, 180));
+        }
         if (cancelled || !mountedRef.current || !containerRef.current || mapRef.current) return;
 
         const map = new window.kakao.maps.Map(containerRef.current, {
@@ -226,11 +233,21 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
 
         mapRef.current = map;
         zoomLevelRef.current = map.getLevel();
+        autoRetryCountRef.current = 0;
         renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
 
         setTimeout(() => {
-          if (!cancelled) fireBounds(map);
+          if (!cancelled) {
+            try { map.relayout(); } catch (_) {}
+            fireBounds(map);
+          }
         }, 300);
+
+        setTimeout(() => {
+          if (!cancelled) {
+            try { map.relayout(); } catch (_) {}
+          }
+        }, 900);
 
         window.kakao.maps.event.addListener(map, "zoom_changed", () => {
           if (!mountedRef.current) return;
@@ -249,6 +266,14 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
           setMapError(true);
           clearOverlays();
           mapRef.current = null;
+
+          if (autoRetryCountRef.current < 2) {
+            autoRetryCountRef.current += 1;
+            if (retryTimeoutRef.current) window.clearTimeout(retryTimeoutRef.current);
+            retryTimeoutRef.current = window.setTimeout(() => {
+              setRetryKey((prev) => prev + 1);
+            }, autoRetryCountRef.current * 1200);
+          }
         }
       }
     })();
@@ -256,6 +281,10 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     return () => {
       cancelled = true;
       mountedRef.current = false;
+      if (retryTimeoutRef.current) {
+        window.clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
       clearOverlays();
       mapRef.current = null;
     };
@@ -289,6 +318,35 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  useEffect(() => {
+    const recoverMapLayout = () => {
+      if (mapRef.current && window.kakao?.maps) {
+        try {
+          mapRef.current.relayout();
+          fireBounds(mapRef.current);
+        } catch (_) {}
+        return;
+      }
+
+      if (!mapError) return;
+      setRetryKey((prev) => prev + 1);
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") recoverMapLayout();
+    };
+
+    window.addEventListener("pageshow", recoverMapLayout);
+    window.addEventListener("online", recoverMapLayout);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("pageshow", recoverMapLayout);
+      window.removeEventListener("online", recoverMapLayout);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fireBounds, mapError]);
 
   return (
     <div className="relative w-full h-full">

@@ -96,15 +96,24 @@ function sanitizeAddress(address: string): string {
 
 function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
     if (!lat || !lng || !mapRef.current) return;
 
     let cancelled = false;
 
+    const relayout = () => {
+      if (!mapInstanceRef.current || !window.kakao?.maps) return;
+      try {
+        mapInstanceRef.current.relayout();
+        mapInstanceRef.current.setCenter(new window.kakao.maps.LatLng(lat, lng));
+      } catch (_) {}
+    };
+
     (async () => {
       try {
-        await loadKakaoMaps();
+        await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
         if (cancelled || !window.kakao?.maps || !mapRef.current) return;
 
         const position = new window.kakao.maps.LatLng(lat, lng);
@@ -115,6 +124,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
           scrollwheel: false,
           disableDoubleClickZoom: true,
         });
+        mapInstanceRef.current = map;
 
         new window.kakao.maps.Circle({
           center: position,
@@ -129,9 +139,13 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
 
         window.setTimeout(() => {
           if (!cancelled) {
-            try { map.relayout(); } catch (_) {}
+            relayout();
           }
         }, 120);
+
+        window.setTimeout(() => {
+          if (!cancelled) relayout();
+        }, 700);
       } catch (_) {
         if (mapRef.current) {
           mapRef.current.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;background:hsl(220 16% 97%);color:hsl(218 14% 48%);font-size:12px;font-weight:700;">지도를 불러오지 못했습니다.</div>';
@@ -139,8 +153,20 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
       }
     })();
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") relayout();
+    };
+
+    window.addEventListener("pageshow", relayout);
+    window.addEventListener("online", relayout);
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       cancelled = true;
+      mapInstanceRef.current = null;
+      window.removeEventListener("pageshow", relayout);
+      window.removeEventListener("online", relayout);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [lat, lng]);
 
