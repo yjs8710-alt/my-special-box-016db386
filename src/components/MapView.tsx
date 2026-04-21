@@ -164,11 +164,6 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     propsRef.current = { properties, selectedId, onSelect, onBoundsChange };
   });
 
-  const resetMapInstance = useCallback(() => {
-    clearOverlays();
-    mapRef.current = null;
-  }, [clearOverlays]);
-
   const waitForContainerReady = useCallback(async () => {
     for (let attempt = 0; attempt < 12; attempt += 1) {
       if (!mountedRef.current || !containerRef.current) return false;
@@ -198,6 +193,11 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     });
     overlaysRef.current.clear();
   }, []);
+
+  const resetMapInstance = useCallback(() => {
+    clearOverlays();
+    mapRef.current = null;
+  }, [clearOverlays]);
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
