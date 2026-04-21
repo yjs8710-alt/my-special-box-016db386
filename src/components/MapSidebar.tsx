@@ -2222,9 +2222,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <script>
     var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
     var sdkLoadAttempts = 0;
-    var MAX_SDK_ATTEMPTS = 3;
-    var SDK_TIMEOUT = 8000;
-    var PANO_TIMEOUT = 3500;
+    var roadviewInitAttempts = 0;
+    var MAX_SDK_ATTEMPTS = 4;
+    var MAX_ROADVIEW_ATTEMPTS = 2;
+    var SDK_TIMEOUT = 10000;
+    var PANO_TIMEOUT = 4500;
 
     function setStatus(title, desc, showFallback) {
       var html = "<strong>" + title + "</strong><span>" + desc + "</span>";
@@ -2281,6 +2283,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       currentView = "rv";
 
       try {
+        roadviewInitAttempts++;
         var position = new kakao.maps.LatLng(data.lat, data.lng);
         roadview = new kakao.maps.Roadview(roadviewEl);
         var roadviewClient = new kakao.maps.RoadviewClient();
@@ -2295,10 +2298,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             if (settled) return;
             settled = true;
             // 응답 지연 시 다음 반경으로 진행
-            if (index < radii.length - 1) {
+             if (index < radii.length - 1) {
               searchNearest(index + 1);
             } else {
-              setStatus("로드뷰 응답이 지연되고 있습니다.", "잠시 후 다시 시도해주세요.", true);
+               if (roadviewInitAttempts < MAX_ROADVIEW_ATTEMPTS) {
+                 setStatus("로드뷰 응답이 지연되고 있습니다.", "자동으로 다시 연결하고 있습니다.");
+                 setTimeout(initRoadview, 900);
+               } else {
+                 setStatus("로드뷰 응답이 지연되고 있습니다.", "잠시 후 다시 시도해주세요.", true);
+               }
             }
           }, PANO_TIMEOUT);
 
@@ -2323,19 +2331,34 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 searchNearest(index + 1);
                 return;
               }
-              setStatus("주변에서 로드뷰를 찾지 못했습니다.", "이 위치에는 표시 가능한 로드뷰가 없습니다.", true);
+               if (roadviewInitAttempts < MAX_ROADVIEW_ATTEMPTS) {
+                 setStatus("주변 로드뷰를 다시 찾고 있습니다.", "탐색 범위를 다시 확인 중입니다.");
+                 setTimeout(initRoadview, 900);
+                 return;
+               }
+               setStatus("주변에서 로드뷰를 찾지 못했습니다.", "이 위치에는 표시 가능한 로드뷰가 없습니다.", true);
             });
           } catch (e) {
             if (settled) return;
             settled = true;
             clearTimeout(timer);
-            setStatus("로드뷰 요청 중 오류가 발생했습니다.", "카카오맵에서 직접 확인해주세요.", true);
+             if (roadviewInitAttempts < MAX_ROADVIEW_ATTEMPTS) {
+               setStatus("로드뷰 요청 중 오류가 발생했습니다.", "자동으로 다시 연결하고 있습니다.");
+               setTimeout(initRoadview, 900);
+               return;
+             }
+             setStatus("로드뷰 요청 중 오류가 발생했습니다.", "카카오맵에서 직접 확인해주세요.", true);
           }
         };
 
         searchNearest();
       } catch (error) {
-        setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.", true);
+         if (roadviewInitAttempts < MAX_ROADVIEW_ATTEMPTS) {
+           setStatus("로드뷰를 불러오는 중입니다.", "초기화를 다시 시도하고 있습니다.");
+           setTimeout(initRoadview, 900);
+           return;
+         }
+         setStatus("로드뷰를 불러오지 못했습니다.", "잠시 후 다시 시도해주세요.", true);
       }
     }
 
@@ -2398,9 +2421,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         return initRoadview();
       }).catch(function(error) {
         window.__kakaoRvLoaderPromise = null;
-        if (sdkLoadAttempts < MAX_SDK_ATTEMPTS) {
+         if (sdkLoadAttempts < MAX_SDK_ATTEMPTS) {
           setStatus("SDK 로딩 재시도 중...", "시도 " + (sdkLoadAttempts + 1) + "/" + MAX_SDK_ATTEMPTS);
-          setTimeout(loadSdk, 700);
+           setTimeout(loadSdk, sdkLoadAttempts * 800);
           return;
         }
         setStatus("카카오 지도 SDK를 불러오지 못했습니다.", "네트워크를 확인하거나 카카오맵에서 직접 확인해주세요.", true);
