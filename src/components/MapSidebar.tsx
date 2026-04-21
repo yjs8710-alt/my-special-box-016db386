@@ -3162,6 +3162,8 @@ interface MapSidebarProps {
   landlordLoading?: boolean;
   landlordSearched?: boolean;
   onRefetch?: () => void;
+  /** 참고용 사진 검색용 전체 매물 풀 (필터링 전) */
+  referencePool?: MapProperty[];
 }
 
 const MIN_WIDTH = 260;
@@ -3183,6 +3185,7 @@ const MapSidebar = ({
   landlordLoading,
   landlordSearched,
   onRefetch,
+  referencePool,
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
@@ -3242,8 +3245,9 @@ const MapSidebar = ({
   useEffect(() => {
     let cancelled = false;
     const fetchInactiveRefs = async () => {
-      // 현재 사진 없는 매물의 주소 목록
-      const noImageAddrs = properties
+      // 참고용 풀(referencePool 우선) 기준으로 사진 없는 매물의 주소 목록 산출
+      const pool = referencePool && referencePool.length > 0 ? referencePool : properties;
+      const noImageAddrs = pool
         .filter((p) => !p.image || p.image.length === 0)
         .map((p) => p.address)
         .filter((a, i, arr) => arr.indexOf(a) === i);
@@ -3275,21 +3279,24 @@ const MapSidebar = ({
     };
     fetchInactiveRefs();
     return () => { cancelled = true; };
-  }, [properties]);
+  }, [properties, referencePool]);
 
-  // 참고용 사진 찾기 헬퍼: 동일주소 active 매물 → inactive 매물 순
+  // 참고용 사진 찾기 헬퍼: 동일주소 active 매물(전체 풀) → inactive 매물 순
   const findRefImage = useCallback((prop: MapProperty, pool: MapProperty[]) => {
-    // 1) 동일 주소 active 매물에서 찾기
-    const sibling = pool.find(
-      (p) => p.id !== prop.id && p.address === prop.address && p.image && p.image.length > 0
-    );
-    if (sibling) return {
-      image: sibling.image,
-      images: sibling.images && sibling.images.length > 0 ? sibling.images : [sibling.image],
-      unitNumber: sibling.unitNumber || "?",
-      roomType: sibling.roomType || "",
-    };
-    // 2) inactive 매물에서 찾기
+    // 항상 referencePool(전체)을 우선 검색하고, 없으면 전달받은 pool에서 찾음
+    const searchPools = [referencePool, pool].filter(Boolean) as MapProperty[][];
+    for (const sp of searchPools) {
+      const sibling = sp.find(
+        (p) => p.id !== prop.id && p.address === prop.address && p.image && p.image.length > 0
+      );
+      if (sibling) return {
+        image: sibling.image,
+        images: sibling.images && sibling.images.length > 0 ? sibling.images : [sibling.image],
+        unitNumber: sibling.unitNumber || "?",
+        roomType: sibling.roomType || "",
+      };
+    }
+    // inactive 매물에서 찾기
     const inactive = inactiveRefMap.get(prop.address);
     if (inactive) return {
       image: inactive.image,
@@ -3298,7 +3305,7 @@ const MapSidebar = ({
       roomType: inactive.roomType || "",
     };
     return null;
-  }, [inactiveRefMap]);
+  }, [inactiveRefMap, referencePool]);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터

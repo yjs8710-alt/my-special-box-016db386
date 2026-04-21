@@ -62,6 +62,7 @@ const Index = () => {
         {/* Left sidebar */}
         <MapSidebar
           properties={filtered}
+          referencePool={allProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}

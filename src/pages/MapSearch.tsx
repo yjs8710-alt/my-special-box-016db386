@@ -178,6 +178,7 @@ const MapSearch = () => {
         {/* 우측 사이드바 */}
         <MapSidebar
           properties={filtered}
+          referencePool={allProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}

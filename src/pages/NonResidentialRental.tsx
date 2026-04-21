@@ -301,6 +301,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
         </div>
         <MapSidebar
           properties={sidebarProperties}
+          referencePool={allProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}

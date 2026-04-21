@@ -241,6 +241,7 @@ const ResidentialRental = () => {
         </div>
         <MapSidebar
           properties={sidebarProperties}
+          referencePool={allProperties}
           selectedId={selectedId}
           onSelect={setSelectedId}
           onDeselect={() => setSelectedId(null)}
