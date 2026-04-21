@@ -3240,12 +3240,11 @@ const MapSidebar = ({
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
-  // 종료된 매물에서 참고용 사진 가져오기
+  // 동일 주소 참고용 사진 (RLS 우회 RPC 사용 — 일반 사용자도 inactive/타카테고리 사진 조회 가능)
   const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>>(new Map());
   useEffect(() => {
     let cancelled = false;
     const fetchInactiveRefs = async () => {
-      // 참고용 풀(referencePool 우선) 기준으로 사진 없는 매물의 주소 목록 산출
       const pool = referencePool && referencePool.length > 0 ? referencePool : properties;
       const noImageAddrs = pool
         .filter((p) => !p.image || p.image.length === 0)
@@ -3253,23 +3252,18 @@ const MapSidebar = ({
         .filter((a, i, arr) => arr.indexOf(a) === i);
       if (noImageAddrs.length === 0) return;
 
-      const { data } = await supabase
-        .from("properties")
-        .select("address, unit_number, images, room_type")
-        .in("address", noImageAddrs)
-        .neq("status", "active")
-        .not("images", "eq", "{}");
+      const { data } = await supabase.rpc("get_reference_images", { _addresses: noImageAddrs });
 
       if (!cancelled && data) {
         const map = new Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>();
-        for (const row of data) {
-          const imgs = row.images as string[];
+        for (const row of data as Array<{ address: string; unit_number: string; room_type: string; images: string[] }>) {
+          const imgs = row.images;
           if (imgs && imgs.length > 0 && imgs[0] && !map.has(row.address)) {
             map.set(row.address, {
               image: imgs[0],
               images: imgs,
               unitNumber: row.unit_number || "?",
-              roomType: (row as any).room_type || "",
+              roomType: row.room_type || "",
               address: row.address,
             });
           }

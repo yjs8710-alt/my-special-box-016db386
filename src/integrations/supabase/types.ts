@@ -526,6 +526,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_reference_images: {
+        Args: { _addresses: string[] }
+        Returns: {
+          address: string
+          images: string[]
+          room_type: string
+          unit_number: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
