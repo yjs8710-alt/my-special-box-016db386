@@ -3185,6 +3185,7 @@ const MapSidebar = ({
   landlordLoading,
   landlordSearched,
   onRefetch,
+  referencePool,
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
