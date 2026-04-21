@@ -1732,6 +1732,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           {formStep < 3 ? (
             <button type="button" onClick={() => {
               if (formStep === 1 && form.type === "원룸" && form.room_type !== "오픈형" && form.room_type !== "분리형") {
+                setShowOneRoomModal(true);
                 return;
               }
               setFormStep((s) => (s + 1) as 2 | 3);
@@ -1749,6 +1750,49 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         </div>
       </div>
 
+      {/* 원룸 형태 선택 모달 */}
+      {showOneRoomModal && (
+        <div
+          className="fixed inset-0 z-[10300] flex items-center justify-center bg-black/60"
+          onClick={() => setShowOneRoomModal(false)}
+        >
+          <div
+            className="bg-background rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-bold text-foreground mb-1">원룸 형태 선택</h3>
+            <p className="text-xs text-muted-foreground mb-4">방 구조 형태를 선택해주세요</p>
+            <div className="grid grid-cols-2 gap-3">
+              {(["오픈형", "분리형"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    set("room_type", opt);
+                    setShowOneRoomModal(false);
+                  }}
+                  className="flex flex-col items-center gap-1 p-4 rounded-xl border-2 transition-all hover:scale-105"
+                  style={form.room_type === opt
+                    ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                    : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--muted))" }}
+                >
+                  <span className="text-base font-bold">{opt}</span>
+                  <span className="text-[11px] opacity-80">
+                    {opt === "오픈형" ? "방·주방 통합" : "방·주방 분리"}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowOneRoomModal(false)}
+              className="w-full mt-4 py-2 rounded-lg text-xs font-bold border border-border text-muted-foreground hover:bg-muted"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
