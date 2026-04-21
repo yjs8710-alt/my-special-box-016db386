@@ -78,11 +78,10 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-function SectionHeader({ emoji, title, bg }: { emoji: string; title: string; bg: string }) {
+function SectionHeader({ title, bg }: { emoji?: string; title: string; bg: string }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border" style={{ background: bg }}>
-      <span className="text-base leading-none">{emoji}</span>
-      <span className="text-[12px] font-extrabold text-foreground">{title}</span>
+    <div className="flex items-center gap-2 px-4 py-3.5 border-b border-border" style={{ background: bg }}>
+      <span className="text-[16px] font-extrabold text-foreground">{title}</span>
     </div>
   );
 }
