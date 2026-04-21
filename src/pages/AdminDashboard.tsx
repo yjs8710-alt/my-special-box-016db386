@@ -992,6 +992,32 @@ const ContactEditModal = ({
     ? (DONG_MAP[DISTRICT_SHORT_TO_FULL[form.district]] ?? [])
     : [];
 
+  // 같은 주소(구+동+번지)에 이미 등록된 건물명을 자동 로드
+  // 사용자가 직접 입력 중이면 덮어쓰지 않음
+  useEffect(() => {
+    if (contact?.id) return; // 수정 모드는 스킵
+    if (!form.district || !form.dong || !form.lot_number) return;
+    if (form.building_name) return; // 이미 입력된 경우 유지
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("cheongju_contacts")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .select("building_name" as any)
+        .eq("district", form.district)
+        .eq("dong", form.dong)
+        .eq("lot_number", form.lot_number)
+        .not("building_name", "is", null)
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const found = (data as any)?.building_name as string | null | undefined;
+      if (found) setForm((f) => (f.building_name ? f : { ...f, building_name: found }));
+    }, 300);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [contact?.id, form.district, form.dong, form.lot_number, form.building_name]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div
