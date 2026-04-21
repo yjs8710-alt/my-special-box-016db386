@@ -3162,6 +3162,8 @@ interface MapSidebarProps {
   landlordLoading?: boolean;
   landlordSearched?: boolean;
   onRefetch?: () => void;
+  /** 참고용 사진 검색용 전체 매물 풀 (필터링 전) */
+  referencePool?: MapProperty[];
 }
 
 const MIN_WIDTH = 260;
