@@ -14,37 +14,37 @@ const PROPERTIES = [
     id: 1, image: property1, title: "강남역 초역세권 1층 상가",
     address: "서울특별시 강남구 역삼동 123-4", type: "상가",
     area: "85㎡ (25평)", floor: "1층", deposit: "5,000만원",
-    monthly: "350만원", isNew: true, isHot: true, views: 3241,
+    monthly: "350만원", manageFee: "30만원", isNew: true, isHot: true, views: 3241,
   },
   {
     id: 2, image: property2, title: "여의도 IFC몰 인근 프리미엄 사무실",
     address: "서울특별시 영등포구 여의도동 31", type: "사무실",
     area: "165㎡ (50평)", floor: "12층", deposit: "1억원",
-    monthly: "680만원", isNew: true, isHot: false, views: 1872,
+    monthly: "680만원", manageFee: "50만원", isNew: true, isHot: false, views: 1872,
   },
   {
     id: 3, image: property3, title: "홍대 상권 중심 1층 빈 상가",
     address: "서울특별시 마포구 서교동 353", type: "상가",
     area: "66㎡ (20평)", floor: "1층", deposit: "3,000만원",
-    monthly: "280만원", isNew: false, isHot: true, views: 5610,
+    monthly: "280만원", manageFee: "20만원", isNew: false, isHot: true, views: 5610,
   },
   {
     id: 4, image: property4, title: "이태원 세계음식거리 식당 공실",
     address: "서울특별시 용산구 이태원동 129-3", type: "식당·카페",
     area: "132㎡ (40평)", floor: "1층", deposit: "8,000만원",
-    monthly: "420만원", isNew: false, isHot: false, views: 2103,
+    monthly: "420만원", manageFee: "40만원", isNew: false, isHot: false, views: 2103,
   },
   {
     id: 5, image: property5, title: "판교 테크노밸리 대형 오피스",
     address: "경기도 성남시 분당구 판교역로 166", type: "사무실",
     area: "330㎡ (100평)", floor: "8층", deposit: "2억원",
-    monthly: "1,200만원", isNew: true, isHot: false, views: 987,
+    monthly: "1,200만원", manageFee: "80만원", isNew: true, isHot: false, views: 987,
   },
   {
     id: 6, image: property6, title: "신촌 로데오거리 소형 상가 임대",
     address: "서울특별시 서대문구 창천동 52", type: "상가",
     area: "33㎡ (10평)", floor: "1층", deposit: "2,000만원",
-    monthly: "130만원", isNew: false, isHot: false, views: 1456,
+    monthly: "130만원", manageFee: "10만원", isNew: false, isHot: false, views: 1456,
   },
 ];
 
