@@ -392,6 +392,7 @@ const PropertyRow = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  onReregister,
   isAdmin,
   registrantInfo,
 }: {
@@ -399,6 +400,7 @@ const PropertyRow = ({
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  onReregister: (p: DBProperty) => void;
   isAdmin?: boolean;
   registrantInfo?: { name: string; agency_name?: string } | null;
 }) => {
