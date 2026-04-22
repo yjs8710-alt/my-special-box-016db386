@@ -2337,23 +2337,24 @@ const AdminDashboard = () => {
                             <div className="flex flex-col gap-2 pt-3 border-t border-border">
                               <p className="text-xs font-bold text-foreground">소속 하위 회원 ({subMembers.length}명)</p>
                               <div className="flex flex-col gap-1">
-                                {subMembers.map((s) => (
-                                  <div key={s.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
-                                    <div className="flex items-center gap-2">
-                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
-                                        {MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.emoji}
-                                      </span>
-                                      <span className="font-medium text-foreground">{s.name}</span>
-                                      <span className="text-muted-foreground">{s.agency_name}</span>
-                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
-                                        {s.member_type ?? "소속중개사"}
-                                      </span>
+                                {subMembers.map((s) => {
+                                  const sType = s.member_type ?? "소속중개사";
+                                  const sStyle = MEMBER_TYPE_LABELS[sType] ?? MEMBER_TYPE_LABELS["소속중개사"];
+                                  const SIcon = sStyle.Icon;
+                                  return (
+                                    <div key={s.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
+                                      <div className="flex items-center gap-2">
+                                        <SIcon className="w-3.5 h-3.5" style={{ color: sStyle.color }} />
+                                        <span className="font-medium text-foreground">{s.name}</span>
+                                        <span className="text-muted-foreground">{s.agency_name}</span>
+                                        <span style={{ color: sStyle.color }}>{sType}</span>
+                                      </div>
+                                      <button onClick={() => deleteMember(s)} className="p-1 rounded" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     </div>
-                                    <button onClick={() => deleteMember(s)} className="p-1 rounded" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
