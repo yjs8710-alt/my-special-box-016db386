@@ -186,6 +186,7 @@ const MapSearch = () => {
             properties={mappableProperties}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            onBoundsChange={setCurrentBounds}
           />
           {/* 필터 바 오버레이 */}
           <MapFilterBar
@@ -198,6 +199,7 @@ const MapSearch = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            onSearchClick={handleSearchInArea}
             topOffset={96}
           />
         </div>
