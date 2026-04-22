@@ -53,17 +53,20 @@ const MapSearch = () => {
     if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
+    // 지도 영역 필터 — "이 지역에서 검색" 클릭 후 활성화
+    if (searchBounds) {
+      if (!p.lat || !p.lng) return false;
+      const { swLat, swLng, neLat, neLng } = searchBounds;
+      if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
+    }
     if (query) {
       const q = query.toLowerCase().trim();
-      // "번지" 접미사 제거 (예: "율량동 1994번지" → "율량동 1994")
       const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
-      // 동+번지 패턴 매칭 (예: "율량동 1994", "율량동 1994번지")
       const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
       const dongLotMatch = dongLotPattern !== null &&
         addr.includes(dongLotPattern[1]) &&
         addr.includes(dongLotPattern[2]);
-      // 번지수만 입력 (예: "1994" or "1994번지") — 단어 경계로 정확 매칭
       const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
       const lotOnlyMatch = lotOnlyPattern !== null &&
         new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
@@ -83,6 +86,12 @@ const MapSearch = () => {
   const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
 
   const selected = allProperties.find((p) => p.id === selectedId) ?? null;
+
+  const handleSearchInArea = () => {
+    // 현재 지도 영역을 스냅샷하여 사이드바 매물을 화면 안 매물로만 제한
+    if (currentBounds) setSearchBounds(currentBounds);
+  };
+  const handleClearAreaSearch = () => setSearchBounds(null);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
