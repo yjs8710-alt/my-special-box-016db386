@@ -1152,6 +1152,8 @@ const AdminDashboard = () => {
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
+  const [memberGroupByAgency, setMemberGroupByAgency] = useState(false);
+  const [collapsedAgencies, setCollapsedAgencies] = useState<Record<string, boolean>>({});
   const [propertySearch, setPropertySearch] = useState("");
   // 비밀번호 관리 상태
   const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
@@ -1935,6 +1937,18 @@ const AdminDashboard = () => {
                         }>{f.label}</button>
                     ))}
                   </div>
+                  {/* 부동산별 그룹 토글 */}
+                  <button
+                    onClick={() => setMemberGroupByAgency((v) => !v)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all border"
+                    style={memberGroupByAgency
+                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                      : { color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.06)" }
+                    }
+                    title="부동산(사무소)별로 그룹화"
+                  >
+                    🏢 부동산별 보기
+                  </button>
                    <div className="relative">
                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                      <Input placeholder="이름·이메일·전화·사무소 검색" className="pl-7 h-8 text-xs w-52" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
@@ -1959,12 +1973,72 @@ const AdminDashboard = () => {
                 </div>
                 {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
-                {!membersLoading && filteredMembers.map((m) => {
-                  const mt = (m.member_type ?? "대표중개사") as MemberType;
-                  const mtStyle = MEMBER_TYPE_LABELS[mt] ?? MEMBER_TYPE_LABELS["대표중개사"];
-                  const parentAgent = m.parent_user_id ? members.find(x => x.user_id === m.parent_user_id) : null;
-                  // 이 사람의 하위 회원들
-                  const subMembers = members.filter(x => x.parent_user_id === m.user_id);
+                {!membersLoading && (() => {
+                  // 부동산별 그룹 보기일 때, agency_name 기준으로 정렬하고 그룹 헤더 삽입
+                  let displayList: Array<{ kind: "header"; agency: string; count: number; rep: AgentProfile | null; approved: number; pending: number; collapsed: boolean } | { kind: "row"; member: AgentProfile }> = [];
+                  if (memberGroupByAgency) {
+                    const groups = new Map<string, AgentProfile[]>();
+                    filteredMembers.forEach((m) => {
+                      const key = (m.agency_name || "(미지정)").trim();
+                      if (!groups.has(key)) groups.set(key, []);
+                      groups.get(key)!.push(m);
+                    });
+                    const sortedGroups = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], "ko"));
+                    sortedGroups.forEach(([agency, list]) => {
+                      const sortedList = [...list].sort((a, b) => {
+                        const order = (x: AgentProfile) => x.role === "admin" ? 0 : (x.member_type ?? "대표중개사") === "대표중개사" ? 1 : x.member_type === "소속중개사" ? 2 : 3;
+                        return order(a) - order(b);
+                      });
+                      const collapsed = !!collapsedAgencies[agency];
+                      displayList.push({
+                        kind: "header",
+                        agency,
+                        count: sortedList.length,
+                        rep: sortedList.find(x => (x.member_type ?? "대표중개사") === "대표중개사") ?? null,
+                        approved: sortedList.filter(x => x.status === "approved").length,
+                        pending: sortedList.filter(x => x.status === "pending").length,
+                        collapsed,
+                      });
+                      if (!collapsed) sortedList.forEach((m) => displayList.push({ kind: "row", member: m }));
+                    });
+                  } else {
+                    displayList = filteredMembers.map((m) => ({ kind: "row" as const, member: m }));
+                  }
+
+                  return displayList.map((item, idx) => {
+                    if (item.kind === "header") {
+                      return (
+                        <button
+                          key={`hdr-${item.agency}`}
+                          type="button"
+                          onClick={() => setCollapsedAgencies((p) => ({ ...p, [item.agency]: !p[item.agency] }))}
+                          className="w-full flex items-center justify-between px-5 py-2.5 border-b border-border hover:bg-muted/30 transition-colors"
+                          style={{ background: "hsl(var(--primary) / 0.06)" }}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            {item.collapsed ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />}
+                            <Building2 className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
+                            <span className="text-sm font-bold text-foreground truncate">{item.agency}</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+                              {item.count}명
+                            </span>
+                            {item.rep && (
+                              <span className="text-[10px] text-muted-foreground hidden md:inline">대표: {item.rep.name} · {item.rep.phone}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-medium">
+                            <span style={{ color: "hsl(var(--chart-2))" }}>승인 {item.approved}</span>
+                            <span style={{ color: "hsl(var(--chart-4))" }}>대기 {item.pending}</span>
+                          </div>
+                        </button>
+                      );
+                    }
+                    const m = item.member;
+                    const mt = (m.member_type ?? "대표중개사") as MemberType;
+                    const mtStyle = MEMBER_TYPE_LABELS[mt] ?? MEMBER_TYPE_LABELS["대표중개사"];
+                    const parentAgent = m.parent_user_id ? members.find(x => x.user_id === m.parent_user_id) : null;
+                    // 이 사람의 하위 회원들
+                    const subMembers = members.filter(x => x.parent_user_id === m.user_id);
 
                   return (
                     <div key={m.id} className={`border-b border-border last:border-0 ${expandedMember === m.id ? "bg-muted/20" : ""} ${!m.is_active ? "opacity-60" : ""}`}>
@@ -2278,7 +2352,8 @@ const AdminDashboard = () => {
                       )}
                     </div>
                   );
-                })}
+                });
+                })()}
               </div>
             </div>
             );
