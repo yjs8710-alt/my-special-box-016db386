@@ -488,22 +488,41 @@ const PropertyRow = ({
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1">
-          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-            className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-            title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
-            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
-            {prop.status === "active" ? "노출" : "숨김"}
-          </button>
+          {prop.status === "ended" ? (
+            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
+              className="px-2 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
+              title="이 매물 정보를 그대로 가져와 새로 등록"
+              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+              재등록
+            </button>
+          ) : (
+            <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+              className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+              title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
+              style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+              {prop.status === "active" ? "노출" : "숨김"}
+            </button>
+          )}
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
           </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
-            className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
-            style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
-            title={isAdmin ? "삭제" : "종료"}>
-            {isAdmin ? "삭제" : "종료"}
-          </button>
+          {prop.status !== "ended" && (
+            <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
+              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
+              title={isAdmin ? "삭제" : "종료"}>
+              {isAdmin ? "삭제" : "종료"}
+            </button>
+          )}
+          {isAdmin && prop.status === "ended" && (
+            <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
+              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              style={{ color: "hsl(var(--destructive))" }}
+              title="삭제">
+              삭제
+            </button>
+          )}
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
       </div>
