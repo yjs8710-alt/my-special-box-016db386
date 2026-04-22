@@ -142,6 +142,20 @@ const MapSearch = () => {
           </span>
         </div>
 
+        {/* 지도 영역 검색 활성 표시 */}
+        {searchBounds && (
+          <button
+            onClick={handleClearAreaSearch}
+            className="flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-bold transition-colors"
+            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
+            title="지도 영역 검색 해제"
+          >
+            <Map className="w-3 h-3" />
+            화면 안 매물만
+            <X className="w-3 h-3" />
+          </button>
+        )}
+
         <div className="flex-1" />
 
         {/* 유형 칩 */}
