@@ -2113,9 +2113,9 @@ const AdminDashboard = () => {
                             <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
                            )}
                            <div className="mt-1 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--accent) / 0.10)", color: "hsl(var(--accent))" }} title="PC 접속 허용 IP (1개). 비우면 제한 없음.">
-                               <Monitor className="w-3 h-3" />
-                               PC 허용 IP
+                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--accent) / 0.10)", color: "hsl(var(--accent))" }} title="접속 허용 IP (PC/모바일 공통, 1개). 비우면 제한 없음.">
+                               <Globe className="w-3 h-3" />
+                               허용 IP
                              </span>
                              <Input
                                defaultValue={m.allowed_pc_ip ?? ""}
