@@ -4134,12 +4134,6 @@ const MapSidebar = ({
                                 </div>
                               )}
 
-                              {/* 3행: 연락처 — '번호 공개' 클릭 시에만 노출 */}
-                              <LandlordContactReveal
-                                owner={item.contactOwner}
-                                manager={item.contactManager}
-                                broker={item.contactBroker}
-                              />
                             </div>
                           </div>
                         </div>
