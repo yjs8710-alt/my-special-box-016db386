@@ -2154,19 +2154,35 @@ const AdminDashboard = () => {
                                상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
                              </div>
                            )}
-                           {(activeSessions[m.user_id] ?? []).length > 0 && (
+                           {(activeSessions[m.user_id] ?? []).length > 0 ? (
                              <div className="flex flex-wrap gap-1 mt-1">
                                {activeSessions[m.user_id].map((s) => {
                                  const DIcon = s.device_type === "mobile" ? Smartphone : Monitor;
+                                 const last = s.last_seen_at ? new Date(s.last_seen_at).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
                                  return (
-                                   <span key={s.device_type} className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))" }}>
+                                   <span
+                                     key={s.device_type}
+                                     className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border"
+                                     style={{
+                                       background: "hsl(var(--primary) / 0.10)",
+                                       color: "hsl(var(--primary))",
+                                       borderColor: "hsl(var(--primary) / 0.25)",
+                                     }}
+                                     title={`마지막 접속: ${last}`}
+                                   >
                                      <DIcon className="w-3 h-3" />
                                      {s.device_type === "mobile" ? "모바일" : "PC"}
-                                     <Globe className="w-2.5 h-2.5 opacity-60" />
+                                     <Globe className="w-2.5 h-2.5 opacity-70" />
                                      <span className="font-mono">{s.ip_address || "IP 미확인"}</span>
+                                     {last && <span className="opacity-60 font-normal">· {last}</span>}
                                    </span>
                                  );
                                })}
+                             </div>
+                           ) : (
+                             <div className="mt-1 text-[10px] inline-flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
+                               <Globe className="w-2.5 h-2.5" />
+                               미접속(로그인 기록 없음)
                              </div>
                            )}
                          </div>
