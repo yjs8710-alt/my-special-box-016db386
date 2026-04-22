@@ -1107,8 +1107,9 @@ const ContactEditModal = ({
             />
           </div>
           {[
-            { key: "phone", label: "소유주 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
-            { key: "contact_owner", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
+            { key: "phone", label: "소유주 전화번호 (대표)", placeholder: "010-XXXX-XXXX", isPhone: true },
+            { key: "contact_owner", label: "소유주 전화번호 (추가)", placeholder: "010-XXXX-XXXX", isPhone: true },
+            { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
             { key: "contact_broker", label: "부동산 전화번호", placeholder: "043-XXXX-XXXX", isPhone: true },
             { key: "memo", label: "메모", placeholder: "비고", isPhone: false },
           ].map(({ key, label, placeholder, isPhone }) => (
