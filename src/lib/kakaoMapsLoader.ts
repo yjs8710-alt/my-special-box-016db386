@@ -183,7 +183,6 @@ function waitForExistingScript(script: HTMLScriptElement, timeoutMs: number) {
 function injectKakaoScript(timeoutMs: number) {
   const existing = getPrimaryScript();
   if (existing && getScriptStatus(existing) !== "error") {
-    cleanupDuplicateScripts(existing);
     return waitForExistingScript(existing, timeoutMs);
   }
 
@@ -198,6 +197,9 @@ function injectKakaoScript(timeoutMs: number) {
     script.async = true;
     script.defer = true;
     markScriptStatus(script, "loading");
+    // Append immediately so concurrent callers can find & reuse this script
+    // instead of creating duplicates that then remove each other.
+    document.head.appendChild(script);
 
     let settled = false;
     let pollTimer = 0;
@@ -219,7 +221,6 @@ function injectKakaoScript(timeoutMs: number) {
       waitForKakaoGlobal(timeoutMs)
         .then(() => finish(() => {
           markScriptStatus(script, "loaded");
-          cleanupDuplicateScripts(script);
           resolve();
         }))
         .catch(() => finish(() => {
@@ -241,7 +242,6 @@ function injectKakaoScript(timeoutMs: number) {
       if (isKakaoMapsAvailable()) {
         finish(() => {
           markScriptStatus(script, "loaded");
-          cleanupDuplicateScripts(script);
           resolve();
         });
         return;
@@ -260,11 +260,9 @@ function injectKakaoScript(timeoutMs: number) {
       if (!isKakaoMapsAvailable()) return;
       finish(() => {
         markScriptStatus(script, "loaded");
-        cleanupDuplicateScripts(script);
         resolve();
       });
     }, SCRIPT_POLL_INTERVAL_MS);
-    document.head.appendChild(script);
   });
 }
 
@@ -296,11 +294,14 @@ export async function loadKakaoMaps(options?: { retries?: number; timeoutMs?: nu
         lastError = error;
         window.__kakaoMapReady = false;
 
+        // Only remove the script if it's actually in error state.
+        // Removing a still-loading script causes the "added/removed" loop
+        // observed when multiple components mount concurrently.
         if (attempt < retries) {
-          removeKakaoScripts();
-        }
-
-        if (attempt < retries) {
+          const primary = getPrimaryScript();
+          if (primary && getScriptStatus(primary) === "error") {
+            primary.remove();
+          }
           await sleep(Math.min(4000, 500 * attempt));
         }
       }
