@@ -382,6 +382,9 @@ const MapFilterBar = ({
   apartmentDealTypes = [],
   onApartmentDealTypeChange,
   onClearApartmentDealTypes,
+  radiusMode = false,
+  onRadiusModeToggle,
+  radiusInfo,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
