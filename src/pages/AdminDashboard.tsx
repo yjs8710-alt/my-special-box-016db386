@@ -2310,15 +2310,21 @@ const AdminDashboard = () => {
                                 {mainAgents.filter(a => a.id !== m.id).map((a) => {
                                   const agencyLabel = (a.agency_name || "").trim() || "(사무소 미지정)";
                                   const nameLabel = (a.name || "").trim() || "(이름 미지정)";
+                                  const isSelected = m.parent_user_id === a.user_id;
                                   return (
                                     <button key={a.id}
                                       onClick={() => updateParent(m.id, a.user_id)}
-                                      className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                      style={m.parent_user_id === a.user_id
-                                        ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "transparent" }
-                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--background))" }
+                                      className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5"
+                                      style={isSelected
+                                        ? { background: "hsl(var(--chart-2))", color: "#ffffff", borderColor: "hsl(var(--chart-2))" }
+                                        : { borderColor: "hsl(var(--primary) / 0.3)", color: "hsl(var(--foreground))", background: "hsl(var(--card))" }
                                       }
-                                    >🏢 {agencyLabel} ({nameLabel})</button>
+                                    >
+                                      <Building2 className="w-3.5 h-3.5" style={{ color: isSelected ? "#ffffff" : "hsl(var(--primary))" }} />
+                                      <span style={{ color: isSelected ? "#ffffff" : "hsl(var(--foreground))" }}>
+                                        {agencyLabel} <span style={{ opacity: 0.7 }}>({nameLabel})</span>
+                                      </span>
+                                    </button>
                                   );
                                 })}
                               </div>
