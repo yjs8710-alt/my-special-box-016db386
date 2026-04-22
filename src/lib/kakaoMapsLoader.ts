@@ -221,7 +221,6 @@ function injectKakaoScript(timeoutMs: number) {
       waitForKakaoGlobal(timeoutMs)
         .then(() => finish(() => {
           markScriptStatus(script, "loaded");
-          cleanupDuplicateScripts(script);
           resolve();
         }))
         .catch(() => finish(() => {
@@ -243,7 +242,6 @@ function injectKakaoScript(timeoutMs: number) {
       if (isKakaoMapsAvailable()) {
         finish(() => {
           markScriptStatus(script, "loaded");
-          cleanupDuplicateScripts(script);
           resolve();
         });
         return;
@@ -262,11 +260,9 @@ function injectKakaoScript(timeoutMs: number) {
       if (!isKakaoMapsAvailable()) return;
       finish(() => {
         markScriptStatus(script, "loaded");
-        cleanupDuplicateScripts(script);
         resolve();
       });
     }, SCRIPT_POLL_INTERVAL_MS);
-    document.head.appendChild(script);
   });
 }
 
