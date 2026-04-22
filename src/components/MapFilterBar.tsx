@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 
