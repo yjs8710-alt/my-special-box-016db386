@@ -164,10 +164,18 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const retryTimeoutRef = useRef<number | null>(null);
   const autoRetryCountRef = useRef(0);
 
+  // 반경검색 관련 ref
+  const circleOverlayRef = useRef<any>(null);
+  const radiusLabelRef = useRef<any>(null);
+  const draggingRef = useRef(false);
+  const dragCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const radiusModeRef = useRef<boolean>(!!radiusMode);
+  useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
+
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange });
+  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange, onRadiusChange });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, onSelect, onBoundsChange };
+    propsRef.current = { properties, selectedId, onSelect, onBoundsChange, onRadiusChange };
   });
 
   const waitForContainerReady = useCallback(async () => {
