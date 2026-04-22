@@ -2301,16 +2301,20 @@ const AdminDashboard = () => {
                                     : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                                   }
                                 >없음</button>
-                                {mainAgents.filter(a => a.id !== m.id).map((a) => (
-                                  <button key={a.id}
-                                    onClick={() => updateParent(m.id, a.user_id)}
-                                    className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                    style={m.parent_user_id === a.user_id
-                                      ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "transparent" }
-                                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                                    }
-                                  >🏢 {a.agency_name} ({a.name})</button>
-                                ))}
+                                {mainAgents.filter(a => a.id !== m.id).map((a) => {
+                                  const agencyLabel = (a.agency_name || "").trim() || "(사무소 미지정)";
+                                  const nameLabel = (a.name || "").trim() || "(이름 미지정)";
+                                  return (
+                                    <button key={a.id}
+                                      onClick={() => updateParent(m.id, a.user_id)}
+                                      className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                                      style={m.parent_user_id === a.user_id
+                                        ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "transparent" }
+                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--background))" }
+                                      }
+                                    >🏢 {agencyLabel} ({nameLabel})</button>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
