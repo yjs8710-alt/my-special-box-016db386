@@ -1973,7 +1973,68 @@ const AdminDashboard = () => {
                 </div>
                 {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
-                {!membersLoading && filteredMembers.map((m) => {
+                {!membersLoading && (() => {
+                  // 회원 카드 렌더링 함수
+                  const renderMemberRow = (m: typeof filteredMembers[number]) => {
+                    const mt = (m.member_type ?? "대표중개사") as MemberType;
+                    const mtStyle = MEMBER_TYPE_LABELS[mt] ?? MEMBER_TYPE_LABELS["대표중개사"];
+                    const parentAgent = m.parent_user_id ? members.find(x => x.user_id === m.parent_user_id) : null;
+                    const subMembers = members.filter(x => x.parent_user_id === m.user_id);
+                    return renderRowInner(m, mt, mtStyle, parentAgent, subMembers);
+                  };
+
+                  if (memberGroupByAgency) {
+                    // agency_name 기준 그룹화 (대표중개사 우선 정렬)
+                    const groups = new Map<string, typeof filteredMembers>();
+                    filteredMembers.forEach((m) => {
+                      const key = (m.agency_name || "(미지정)").trim();
+                      if (!groups.has(key)) groups.set(key, [] as typeof filteredMembers);
+                      groups.get(key)!.push(m);
+                    });
+                    const sortedGroups = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], "ko"));
+                    return sortedGroups.map(([agency, list]) => {
+                      const sortedList = [...list].sort((a, b) => {
+                        const order = (x: typeof a) => x.role === "admin" ? 0 : (x.member_type ?? "대표중개사") === "대표중개사" ? 1 : x.member_type === "소속중개사" ? 2 : 3;
+                        return order(a) - order(b);
+                      });
+                      const collapsed = collapsedAgencies[agency];
+                      const rep = sortedList.find(x => (x.member_type ?? "대표중개사") === "대표중개사");
+                      const approvedInGroup = sortedList.filter(x => x.status === "approved").length;
+                      const pendingInGroup = sortedList.filter(x => x.status === "pending").length;
+                      return (
+                        <div key={agency}>
+                          <button
+                            type="button"
+                            onClick={() => setCollapsedAgencies((p) => ({ ...p, [agency]: !p[agency] }))}
+                            className="w-full flex items-center justify-between px-5 py-2.5 border-b border-border hover:bg-muted/30 transition-colors"
+                            style={{ background: "hsl(var(--primary) / 0.06)" }}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {collapsed ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />}
+                              <Building2 className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
+                              <span className="text-sm font-bold text-foreground truncate">{agency}</span>
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+                                {sortedList.length}명
+                              </span>
+                              {rep && (
+                                <span className="text-[10px] text-muted-foreground hidden md:inline">대표: {rep.name} · {rep.phone}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] font-medium">
+                              <span style={{ color: "hsl(var(--chart-2))" }}>승인 {approvedInGroup}</span>
+                              <span style={{ color: "hsl(var(--chart-4))" }}>대기 {pendingInGroup}</span>
+                            </div>
+                          </button>
+                          {!collapsed && sortedList.map(renderMemberRow)}
+                        </div>
+                      );
+                    });
+                  }
+
+                  return filteredMembers.map(renderMemberRow);
+                })()}
+                {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
+                {false && filteredMembers.map((m) => {
                   const mt = (m.member_type ?? "대표중개사") as MemberType;
                   const mtStyle = MEMBER_TYPE_LABELS[mt] ?? MEMBER_TYPE_LABELS["대표중개사"];
                   const parentAgent = m.parent_user_id ? members.find(x => x.user_id === m.parent_user_id) : null;
