@@ -1937,6 +1937,18 @@ const AdminDashboard = () => {
                         }>{f.label}</button>
                     ))}
                   </div>
+                  {/* 부동산별 그룹 토글 */}
+                  <button
+                    onClick={() => setMemberGroupByAgency((v) => !v)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all border"
+                    style={memberGroupByAgency
+                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                      : { color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.06)" }
+                    }
+                    title="부동산(사무소)별로 그룹화"
+                  >
+                    🏢 부동산별 보기
+                  </button>
                    <div className="relative">
                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                      <Input placeholder="이름·이메일·전화·사무소 검색" className="pl-7 h-8 text-xs w-52" value={memberSearch} onChange={(e) => setMemberSearch(e.target.value)} />
