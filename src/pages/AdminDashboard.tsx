@@ -2150,7 +2150,15 @@ const AdminDashboard = () => {
                                   <input
                                     type="text"
                                     value={String(getMemberEditValue(m, field))}
-                                    onChange={e => setMemberEditField(m.id, field, e.target.value)}
+                                    onChange={e => {
+                                      const raw = e.target.value;
+                                      const v = field === "license_number" ? formatLicenseNumber(raw)
+                                        : (field === "phone" || field === "agency_phone") ? formatPhone(raw)
+                                        : raw;
+                                      setMemberEditField(m.id, field, v);
+                                    }}
+                                    inputMode={field === "license_number" || field === "business_number" ? "numeric" : undefined}
+                                    maxLength={field === "license_number" ? 16 : undefined}
                                     className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus:outline-none focus:border-primary"
                                   />
                                 </div>
