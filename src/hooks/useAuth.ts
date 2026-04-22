@@ -37,7 +37,7 @@ async function forceLogoutDueToIpRestriction() {
   kickedOut = true;
   try { await supabase.auth.signOut(); } catch {}
   if (typeof window !== "undefined") {
-    alert("이 PC는 등록된 사무실 IP가 아니어서 접속할 수 없습니다.\n관리자에게 PC 허용 IP 등록을 요청하세요.");
+    alert("등록된 사무실 IP가 아니어서 접속할 수 없습니다.\n관리자에게 허용 IP 등록을 요청하세요.");
   }
   notify("unauthorized", null);
 }

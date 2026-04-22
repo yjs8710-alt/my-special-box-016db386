@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
 import Header from "@/components/Header";
-import MapView from "@/components/MapView";
+import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
-import { LayoutGrid, Map, List } from "lucide-react";
+import { LayoutGrid, Map, List, X } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
@@ -20,6 +20,10 @@ const MapSearch = () => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("map");
+  // 현재 지도가 보고 있는 영역(실시간 추적용)
+  const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null);
+  // "이 지역에서 검색" 버튼 클릭 시 스냅샷된 영역 (사이드바 필터링에 사용)
+  const [searchBounds, setSearchBounds] = useState<MapBounds | null>(null);
 
   // DB에서 실시간으로 매물 불러오기
   const { properties: dbProperties, refetch } = useDBProperties();
@@ -49,17 +53,20 @@ const MapSearch = () => {
     if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId)) return false;
+    // 지도 영역 필터 — "이 지역에서 검색" 클릭 후 활성화
+    if (searchBounds) {
+      if (!p.lat || !p.lng) return false;
+      const { swLat, swLng, neLat, neLng } = searchBounds;
+      if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
+    }
     if (query) {
       const q = query.toLowerCase().trim();
-      // "번지" 접미사 제거 (예: "율량동 1994번지" → "율량동 1994")
       const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
-      // 동+번지 패턴 매칭 (예: "율량동 1994", "율량동 1994번지")
       const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
       const dongLotMatch = dongLotPattern !== null &&
         addr.includes(dongLotPattern[1]) &&
         addr.includes(dongLotPattern[2]);
-      // 번지수만 입력 (예: "1994" or "1994번지") — 단어 경계로 정확 매칭
       const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
       const lotOnlyMatch = lotOnlyPattern !== null &&
         new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
@@ -79,6 +86,12 @@ const MapSearch = () => {
   const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
 
   const selected = allProperties.find((p) => p.id === selectedId) ?? null;
+
+  const handleSearchInArea = () => {
+    // 현재 지도 영역을 스냅샷하여 사이드바 매물을 화면 안 매물로만 제한
+    if (currentBounds) setSearchBounds(currentBounds);
+  };
+  const handleClearAreaSearch = () => setSearchBounds(null);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
@@ -129,6 +142,20 @@ const MapSearch = () => {
           </span>
         </div>
 
+        {/* 지도 영역 검색 활성 표시 */}
+        {searchBounds && (
+          <button
+            onClick={handleClearAreaSearch}
+            className="flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-bold transition-colors"
+            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
+            title="지도 영역 검색 해제"
+          >
+            <Map className="w-3 h-3" />
+            화면 안 매물만
+            <X className="w-3 h-3" />
+          </button>
+        )}
+
         <div className="flex-1" />
 
         {/* 유형 칩 */}
@@ -159,6 +186,7 @@ const MapSearch = () => {
             properties={mappableProperties}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            onBoundsChange={setCurrentBounds}
           />
           {/* 필터 바 오버레이 */}
           <MapFilterBar
@@ -171,6 +199,7 @@ const MapSearch = () => {
             filters={filters}
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
+            onSearchClick={handleSearchInArea}
             topOffset={96}
           />
         </div>
