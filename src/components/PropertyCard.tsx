@@ -12,6 +12,7 @@ interface PropertyCardProps {
   floor: string;
   deposit: string;
   monthly: string;
+  manageFee?: string;
   isNew?: boolean;
   isHot?: boolean;
   views: number;
@@ -23,7 +24,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({
-  image, title, address, type, roomType, area, floor, deposit, monthly,
+  image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
   isNew, isHot, views, buildYear, elevator, onDelete, referenceImage, referenceUnit
 }: PropertyCardProps) => {
   const [liked, setLiked] = useState(false);
@@ -172,6 +173,11 @@ const PropertyCard = ({
             <p className="text-xs text-muted-foreground">보증금 / 월세</p>
             <p className="font-bold text-primary text-sm">
               {deposit} / <span className="text-accent">{monthly}</span>
+              {manageFee && manageFee !== "0" && manageFee !== "" && (
+                <span className="text-xs text-muted-foreground font-normal ml-2">
+                  (관리비 {manageFee})
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
