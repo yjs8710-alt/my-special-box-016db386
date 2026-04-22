@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
 import Header from "@/components/Header";
-import MapView from "@/components/MapView";
+import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
-import { LayoutGrid, Map, List } from "lucide-react";
+import { LayoutGrid, Map, List, X } from "lucide-react";
 
 type ViewMode = "map" | "list";
 
@@ -20,6 +20,10 @@ const MapSearch = () => {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("map");
+  // 현재 지도가 보고 있는 영역(실시간 추적용)
+  const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null);
+  // "이 지역에서 검색" 버튼 클릭 시 스냅샷된 영역 (사이드바 필터링에 사용)
+  const [searchBounds, setSearchBounds] = useState<MapBounds | null>(null);
 
   // DB에서 실시간으로 매물 불러오기
   const { properties: dbProperties, refetch } = useDBProperties();
