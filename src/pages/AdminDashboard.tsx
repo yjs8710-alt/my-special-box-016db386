@@ -1239,6 +1239,27 @@ const AdminDashboard = () => {
       role: roleMap[m.user_id] ?? "user",
       email: emailMap[m.user_id] ?? m.email ?? "",
     } as AgentProfile)));
+
+    // 활성 디바이스 세션(IP) 로드
+    try {
+      const { data: sess } = await supabase
+        .from("user_active_sessions")
+        .select("user_id, device_type, device_id, ip_address, user_agent, last_seen_at")
+        .order("last_seen_at", { ascending: false });
+      const byUser: Record<string, Array<{ device_type: string; device_id: string; ip_address: string | null; user_agent: string | null; last_seen_at: string }>> = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (sess ?? []).forEach((s: any) => {
+        (byUser[s.user_id] ??= []).push({
+          device_type: s.device_type,
+          device_id: s.device_id,
+          ip_address: s.ip_address ?? null,
+          user_agent: s.user_agent ?? null,
+          last_seen_at: s.last_seen_at,
+        });
+      });
+      setActiveSessions(byUser);
+    } catch { /* ignore */ }
+
     setMembersLoading(false);
   }, []);
 
