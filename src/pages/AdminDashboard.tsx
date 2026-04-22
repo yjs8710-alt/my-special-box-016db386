@@ -10,7 +10,9 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
+  Crown, Briefcase, HandHelping,
 } from "lucide-react";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -1682,8 +1684,8 @@ const AdminDashboard = () => {
         onClick={() => { navigate("/"); setSidebarOpen(false); }}
         title="일반 페이지로 이동"
       >
-        <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
-          <Home className="w-4 h-4 text-white" />
+        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden p-1">
+          <img src={logoTransparent} alt="집다" className="w-full h-full object-contain" />
         </div>
         <div>
           <div className="text-sm font-extrabold text-white leading-none">집다</div>
@@ -1882,10 +1884,10 @@ const AdminDashboard = () => {
 
           {/* ── 회원 관리 ── */}
           {tab === "members" && (() => {
-            const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string }> = {
-              "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "🏢" },
-              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "👔" },
-              "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🤝" },
+            const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string; Icon: typeof Crown }> = {
+              "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "👑", Icon: Crown },
+              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "💼", Icon: Briefcase },
+              "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🧑‍🤝‍🧑", Icon: HandHelping },
             };
             // 대표중개사 목록 (parent 선택용)
             const mainAgents = members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin");
@@ -2084,8 +2086,9 @@ const AdminDashboard = () => {
                         </div>
                         {/* 멤버 유형 배지 */}
                         <div className="hidden md:flex justify-center">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: mtStyle.bg, color: mtStyle.color }}>
-                            {mtStyle.emoji} {mtStyle.label}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: mtStyle.bg, color: mtStyle.color }}>
+                            <mtStyle.Icon className="w-3 h-3" />
+                            {mtStyle.label}
                           </span>
                         </div>
                         {/* 승인 상태 */}
@@ -2270,19 +2273,23 @@ const AdminDashboard = () => {
                               <div className="flex flex-col gap-1.5">
                                 <span className="text-[11px] text-muted-foreground font-medium">중개사 유형</span>
                                 <div className="flex gap-2 flex-wrap">
-                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => (
-                                    <button key={t}
-                                      onClick={() => updateMemberType(m.id, t)}
-                                      className="px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-1"
-                                      style={mt === t
-                                        ? { background: MEMBER_TYPE_LABELS[t].bg, color: MEMBER_TYPE_LABELS[t].color, borderColor: MEMBER_TYPE_LABELS[t].color }
-                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                                      }
-                                    >
-                                      {MEMBER_TYPE_LABELS[t].emoji} {t}
-                                      {mt === t && <span className="text-[9px] opacity-70">현재</span>}
-                                    </button>
-                                  ))}
+                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => {
+                                    const TypeIcon = MEMBER_TYPE_LABELS[t].Icon;
+                                    return (
+                                      <button key={t}
+                                        onClick={() => updateMemberType(m.id, t)}
+                                        className="px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5"
+                                        style={mt === t
+                                          ? { background: MEMBER_TYPE_LABELS[t].bg, color: MEMBER_TYPE_LABELS[t].color, borderColor: MEMBER_TYPE_LABELS[t].color }
+                                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                        }
+                                      >
+                                        <TypeIcon className="w-3.5 h-3.5" />
+                                        {t}
+                                        {mt === t && <span className="text-[9px] opacity-70">현재</span>}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -2304,15 +2311,21 @@ const AdminDashboard = () => {
                                 {mainAgents.filter(a => a.id !== m.id).map((a) => {
                                   const agencyLabel = (a.agency_name || "").trim() || "(사무소 미지정)";
                                   const nameLabel = (a.name || "").trim() || "(이름 미지정)";
+                                  const isSelected = m.parent_user_id === a.user_id;
                                   return (
                                     <button key={a.id}
                                       onClick={() => updateParent(m.id, a.user_id)}
-                                      className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
-                                      style={m.parent_user_id === a.user_id
-                                        ? { background: "hsl(var(--chart-2))", color: "#fff", borderColor: "transparent" }
-                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))", background: "hsl(var(--background))" }
+                                      className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5"
+                                      style={isSelected
+                                        ? { background: "hsl(var(--chart-2))", color: "#ffffff", borderColor: "hsl(var(--chart-2))" }
+                                        : { borderColor: "hsl(var(--primary) / 0.3)", color: "hsl(var(--foreground))", background: "hsl(var(--card))" }
                                       }
-                                    >🏢 {agencyLabel} ({nameLabel})</button>
+                                    >
+                                      <Building2 className="w-3.5 h-3.5" style={{ color: isSelected ? "#ffffff" : "hsl(var(--primary))" }} />
+                                      <span style={{ color: isSelected ? "#ffffff" : "hsl(var(--foreground))" }}>
+                                        {agencyLabel} <span style={{ opacity: 0.7 }}>({nameLabel})</span>
+                                      </span>
+                                    </button>
                                   );
                                 })}
                               </div>
@@ -2324,23 +2337,24 @@ const AdminDashboard = () => {
                             <div className="flex flex-col gap-2 pt-3 border-t border-border">
                               <p className="text-xs font-bold text-foreground">소속 하위 회원 ({subMembers.length}명)</p>
                               <div className="flex flex-col gap-1">
-                                {subMembers.map((s) => (
-                                  <div key={s.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
-                                    <div className="flex items-center gap-2">
-                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
-                                        {MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.emoji}
-                                      </span>
-                                      <span className="font-medium text-foreground">{s.name}</span>
-                                      <span className="text-muted-foreground">{s.agency_name}</span>
-                                      <span style={{ color: MEMBER_TYPE_LABELS[s.member_type ?? "소속중개사"]?.color }}>
-                                        {s.member_type ?? "소속중개사"}
-                                      </span>
+                                {subMembers.map((s) => {
+                                  const sType = s.member_type ?? "소속중개사";
+                                  const sStyle = MEMBER_TYPE_LABELS[sType] ?? MEMBER_TYPE_LABELS["소속중개사"];
+                                  const SIcon = sStyle.Icon;
+                                  return (
+                                    <div key={s.id} className="flex items-center justify-between rounded-lg px-3 py-2 text-xs" style={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}>
+                                      <div className="flex items-center gap-2">
+                                        <SIcon className="w-3.5 h-3.5" style={{ color: sStyle.color }} />
+                                        <span className="font-medium text-foreground">{s.name}</span>
+                                        <span className="text-muted-foreground">{s.agency_name}</span>
+                                        <span style={{ color: sStyle.color }}>{sType}</span>
+                                      </div>
+                                      <button onClick={() => deleteMember(s)} className="p-1 rounded" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     </div>
-                                    <button onClick={() => deleteMember(s)} className="p-1 rounded" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
