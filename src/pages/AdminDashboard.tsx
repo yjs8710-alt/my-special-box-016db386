@@ -10,7 +10,7 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
-  Crown, Briefcase, HandHelping,
+  Gem, BadgeCheck, UserCog,
 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
@@ -1884,10 +1884,10 @@ const AdminDashboard = () => {
 
           {/* ── 회원 관리 ── */}
           {tab === "members" && (() => {
-            const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string; Icon: typeof Crown }> = {
-              "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "👑", Icon: Crown },
-              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "💼", Icon: Briefcase },
-              "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🧑‍🤝‍🧑", Icon: HandHelping },
+            const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string; Icon: typeof Gem }> = {
+              "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "💎", Icon: Gem },
+              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "✅", Icon: BadgeCheck },
+              "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🧑", Icon: UserCog },
             };
             // 대표중개사 목록 (parent 선택용)
             const mainAgents = members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin");
