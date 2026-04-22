@@ -323,7 +323,7 @@ const SignupPage = () => {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>공인중개사 등록번호 <span className="text-destructive">*</span></Label>
-                  <Input placeholder="예) 11350-2024-00001" value={form.licenseNumber} onChange={(e) => set("licenseNumber", e.target.value)} />
+                  <Input placeholder="예) 43112-2024-00034" value={form.licenseNumber} onChange={(e) => set("licenseNumber", formatLicenseNumber(e.target.value))} inputMode="numeric" maxLength={16} />
                   <p className="text-xs text-muted-foreground">등록증에 표기된 번호를 입력해 주세요.</p>
                 </div>
                 <div className="flex flex-col gap-1.5">
