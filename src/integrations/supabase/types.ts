@@ -20,6 +20,7 @@ export type Database = {
           agency_name: string
           agency_phone: string | null
           agree_marketing: boolean
+          allowed_pc_ip: string | null
           business_number: string
           created_at: string
           id: string
@@ -39,6 +40,7 @@ export type Database = {
           agency_name: string
           agency_phone?: string | null
           agree_marketing?: boolean
+          allowed_pc_ip?: string | null
           business_number: string
           created_at?: string
           id?: string
@@ -58,6 +60,7 @@ export type Database = {
           agency_name?: string
           agency_phone?: string | null
           agree_marketing?: boolean
+          allowed_pc_ip?: string | null
           business_number?: string
           created_at?: string
           id?: string
@@ -601,6 +604,7 @@ export type Database = {
         Args: { _device_id: string; _device_type: string }
         Returns: boolean
       }
+      verify_pc_ip: { Args: { _ip_address: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"

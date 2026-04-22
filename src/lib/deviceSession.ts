@@ -66,3 +66,17 @@ export async function verifyDeviceSlot(): Promise<boolean> {
   if (error) return true; // 네트워크 오류 시 강제 로그아웃 방지
   return data === true;
 }
+
+/** PC(데스크톱) 접속자 한정: 관리자가 등록한 허용 IP와 현재 IP가 일치하는지 검증.
+ *  - 모바일은 항상 통과
+ *  - 허용 IP가 비어있으면 통과 (제한 없음)
+ *  - 관리자는 RPC 내부에서 면제됨 */
+export async function verifyPcIpAllowed(): Promise<boolean> {
+  if (getDeviceType() !== "desktop") return true;
+  const ip = await fetchPublicIp();
+  if (!ip) return true; // IP 조회 실패 시 강제 로그아웃 방지
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)("verify_pc_ip", { _ip_address: ip });
+  if (error) return true;
+  return data === true;
+}

@@ -41,6 +41,7 @@ type AgentProfile = {
   member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
   parent_user_id?: string | null; // 대표중개사 user_id
   is_active?: boolean;            // 사이트 접속 가능 여부
+  allowed_pc_ip?: string | null;  // PC 접속 허용 IP (1개, 비어있으면 제한 없음)
   tempPassword?: string;          // 관리자가 설정한 임시 비번 (로컬 상태)
 };
 
@@ -1397,6 +1398,22 @@ const AdminDashboard = () => {
     const { error } = await supabase.from("agent_profiles").update({ is_active: newActive }).eq("id", m.id);
     if (error) { alert("접속 상태 변경 오류: " + error.message); return; }
     setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
+
+  // ─── PC 허용 IP 변경 ─────────────────────────────────────────────────────
+  };
+
+  const updateAllowedPcIp = async (m: AgentProfile, raw: string) => {
+    const next = raw.trim();
+    // 간단한 IPv4 검증 (빈 값은 허용 — 제한 해제)
+    if (next && !/^(\d{1,3}\.){3}\d{1,3}$/.test(next)) {
+      alert("올바른 IPv4 형식이 아닙니다. 예: 211.234.56.78");
+      return;
+    }
+    const value = next === "" ? null : next;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("agent_profiles").update({ allowed_pc_ip: value } as any).eq("id", m.id);
+    if (error) { alert("PC 허용 IP 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, allowed_pc_ip: value } : p));
   };
 
   // ─── 회원 정보 수정 ──────────────────────────────────────────────────────
@@ -2094,8 +2111,37 @@ const AdminDashboard = () => {
                           <div className="text-xs text-muted-foreground">{m.agency_name}</div>
                           {subMembers.length > 0 && (
                             <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
-                          )}
-                        </div>
+                           )}
+                           <div className="mt-1 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--accent) / 0.10)", color: "hsl(var(--accent))" }} title="PC 접속 허용 IP (1개). 비우면 제한 없음.">
+                               <Monitor className="w-3 h-3" />
+                               PC 허용 IP
+                             </span>
+                             <Input
+                               defaultValue={m.allowed_pc_ip ?? ""}
+                               placeholder="예: 211.234.56.78"
+                               className="h-6 px-2 py-0 text-[11px] font-mono w-[140px]"
+                               onBlur={(e) => {
+                                 const v = e.target.value.trim();
+                                 if ((m.allowed_pc_ip ?? "") !== v) updateAllowedPcIp(m, v);
+                               }}
+                               onKeyDown={(e) => {
+                                 if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                               }}
+                             />
+                             {m.allowed_pc_ip && (
+                               <button
+                                 type="button"
+                                 onClick={() => updateAllowedPcIp(m, "")}
+                                 className="text-[10px] px-1.5 py-0.5 rounded"
+                                 style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
+                                 title="IP 제한 해제"
+                               >
+                                 해제
+                               </button>
+                             )}
+                           </div>
+                         </div>
                          <div className="hidden md:block">
                            <div className="text-xs font-medium text-foreground flex items-center gap-1">
                              <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>

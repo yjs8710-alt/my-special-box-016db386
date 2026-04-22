@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { claimDeviceSlot, verifyDeviceSlot, getDeviceType, getOrCreateDeviceId } from "@/lib/deviceSession";
+import { claimDeviceSlot, verifyDeviceSlot, verifyPcIpAllowed, getDeviceType, getOrCreateDeviceId } from "@/lib/deviceSession";
 
 type AuthStatus = "loading" | "authorized" | "unauthorized";
 
@@ -28,6 +28,16 @@ async function forceLogoutDueToDeviceConflict() {
   try { await supabase.auth.signOut(); } catch {}
   if (typeof window !== "undefined") {
     alert("다른 기기에서 동일한 계정으로 로그인되어 이 기기는 로그아웃됩니다.\n(휴대폰 1대 + PC 1대만 동시 사용 가능)");
+  }
+  notify("unauthorized", null);
+}
+
+async function forceLogoutDueToIpRestriction() {
+  if (kickedOut) return;
+  kickedOut = true;
+  try { await supabase.auth.signOut(); } catch {}
+  if (typeof window !== "undefined") {
+    alert("이 PC는 등록된 사무실 IP가 아니어서 접속할 수 없습니다.\n관리자에게 PC 허용 IP 등록을 요청하세요.");
   }
   notify("unauthorized", null);
 }
@@ -119,6 +129,12 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       await claimDeviceSlot();
     } catch {}
     setupDeviceChannel(session.user.id);
+    // PC 허용 IP 검증 (PC 한정, 모바일은 통과)
+    const ipOk = await verifyPcIpAllowed();
+    if (!ipOk) {
+      await forceLogoutDueToIpRestriction();
+      return;
+    }
     // 탭 복귀 후 정합성 재검증
     const ok = await verifyDeviceSlot();
     if (!ok) {
@@ -137,7 +153,9 @@ if (typeof document !== "undefined") {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     const ok = await verifyDeviceSlot();
-    if (!ok) await forceLogoutDueToDeviceConflict();
+    if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
+    const ipOk = await verifyPcIpAllowed();
+    if (!ipOk) await forceLogoutDueToIpRestriction();
   });
 }
 
