@@ -1152,6 +1152,8 @@ const AdminDashboard = () => {
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
+  const [memberGroupByAgency, setMemberGroupByAgency] = useState(false);
+  const [collapsedAgencies, setCollapsedAgencies] = useState<Record<string, boolean>>({});
   const [propertySearch, setPropertySearch] = useState("");
   // 비밀번호 관리 상태
   const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
