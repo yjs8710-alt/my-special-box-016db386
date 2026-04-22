@@ -124,7 +124,7 @@ export function usePropertyFilter(
           if (dt === "매매") return isMaemae;
           if (dt === "월세") return isWolse;
           if (dt === "전세") return isJeonse;
-          if (dt === "단기임대") return (p.availableFrom ?? "").includes("단기");
+          if (dt === "단기임대") return (p.options ?? []).includes("단기가능") || (p.availableFrom ?? "").includes("단기");
           if (dt === "임대") return !isMaemae;
           return true;
         });
