@@ -2086,8 +2086,9 @@ const AdminDashboard = () => {
                         </div>
                         {/* 멤버 유형 배지 */}
                         <div className="hidden md:flex justify-center">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: mtStyle.bg, color: mtStyle.color }}>
-                            {mtStyle.emoji} {mtStyle.label}
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: mtStyle.bg, color: mtStyle.color }}>
+                            <mtStyle.Icon className="w-3 h-3" />
+                            {mtStyle.label}
                           </span>
                         </div>
                         {/* 승인 상태 */}
