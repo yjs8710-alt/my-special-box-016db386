@@ -2108,6 +2108,21 @@ const AdminDashboard = () => {
                                상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
                              </div>
                            )}
+                           {(activeSessions[m.user_id] ?? []).length > 0 && (
+                             <div className="flex flex-wrap gap-1 mt-1">
+                               {activeSessions[m.user_id].map((s) => {
+                                 const DIcon = s.device_type === "mobile" ? Smartphone : Monitor;
+                                 return (
+                                   <span key={s.device_type} className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))" }}>
+                                     <DIcon className="w-3 h-3" />
+                                     {s.device_type === "mobile" ? "모바일" : "PC"}
+                                     <Globe className="w-2.5 h-2.5 opacity-60" />
+                                     <span className="font-mono">{s.ip_address || "IP 미확인"}</span>
+                                   </span>
+                                 );
+                               })}
+                             </div>
+                           )}
                          </div>
                         {/* 역할 배지 */}
                         <div className="hidden md:flex justify-center">
