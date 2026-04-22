@@ -31,3 +31,15 @@ export function formatPhone(value: string): string {
   }
 }
 
+/**
+ * 공인중개사 등록번호 자동 하이픈 포맷
+ * 형식: XXXXX-YYYY-NNNNN (예: 43112-2024-00034)
+ * - 앞 5자리(시군구 코드) - 4자리(연도) - 5자리(일련번호)
+ */
+export function formatLicenseNumber(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 14);
+  if (digits.length <= 5) return digits;
+  if (digits.length <= 9) return digits.slice(0, 5) + "-" + digits.slice(5);
+  return digits.slice(0, 5) + "-" + digits.slice(5, 9) + "-" + digits.slice(9, 14);
+}
+
