@@ -146,9 +146,14 @@ interface MapViewProps {
   onBoundsChange?: (bounds: MapBounds) => void;
   /** true이면 selectedId 변경 시 panTo 억제 */
   suppressPan?: boolean;
+  /** 반경검색 모드 활성화 — true면 지도 클릭/드래그로 원 그리기 */
+  radiusMode?: boolean;
+  /** 반경검색 결과 콜백 (null = 해제) */
+  radiusCircle?: RadiusCircle | null;
+  onRadiusChange?: (c: RadiusCircle | null) => void;
 }
 
-const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan }: MapViewProps) => {
+const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
