@@ -10,7 +10,7 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
-  Gem, BadgeCheck, UserCog,
+  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
