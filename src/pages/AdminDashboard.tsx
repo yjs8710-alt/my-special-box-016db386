@@ -10,7 +10,7 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
-  Gem, BadgeCheck, UserCog,
+  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
 } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
@@ -1150,6 +1150,7 @@ const AdminDashboard = () => {
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
+  const [activeSessions, setActiveSessions] = useState<Record<string, Array<{ device_type: string; device_id: string; ip_address: string | null; user_agent: string | null; last_seen_at: string }>>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [memberSearch, setMemberSearch] = useState("");
@@ -1238,6 +1239,27 @@ const AdminDashboard = () => {
       role: roleMap[m.user_id] ?? "user",
       email: emailMap[m.user_id] ?? m.email ?? "",
     } as AgentProfile)));
+
+    // 활성 디바이스 세션(IP) 로드
+    try {
+      const { data: sess } = await supabase
+        .from("user_active_sessions")
+        .select("user_id, device_type, device_id, ip_address, user_agent, last_seen_at")
+        .order("last_seen_at", { ascending: false });
+      const byUser: Record<string, Array<{ device_type: string; device_id: string; ip_address: string | null; user_agent: string | null; last_seen_at: string }>> = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (sess ?? []).forEach((s: any) => {
+        (byUser[s.user_id] ??= []).push({
+          device_type: s.device_type,
+          device_id: s.device_id,
+          ip_address: s.ip_address ?? null,
+          user_agent: s.user_agent ?? null,
+          last_seen_at: s.last_seen_at,
+        });
+      });
+      setActiveSessions(byUser);
+    } catch { /* ignore */ }
+
     setMembersLoading(false);
   }, []);
 
@@ -2084,6 +2106,21 @@ const AdminDashboard = () => {
                              <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
                                <Building2 className="w-3 h-3" />
                                상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
+                             </div>
+                           )}
+                           {(activeSessions[m.user_id] ?? []).length > 0 && (
+                             <div className="flex flex-wrap gap-1 mt-1">
+                               {activeSessions[m.user_id].map((s) => {
+                                 const DIcon = s.device_type === "mobile" ? Smartphone : Monitor;
+                                 return (
+                                   <span key={s.device_type} className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))" }}>
+                                     <DIcon className="w-3 h-3" />
+                                     {s.device_type === "mobile" ? "모바일" : "PC"}
+                                     <Globe className="w-2.5 h-2.5 opacity-60" />
+                                     <span className="font-mono">{s.ip_address || "IP 미확인"}</span>
+                                   </span>
+                                 );
+                               })}
                              </div>
                            )}
                          </div>

@@ -509,6 +509,7 @@ export type Database = {
           device_id: string
           device_type: string
           id: string
+          ip_address: string | null
           last_seen_at: string
           user_agent: string | null
           user_id: string
@@ -518,6 +519,7 @@ export type Database = {
           device_id: string
           device_type: string
           id?: string
+          ip_address?: string | null
           last_seen_at?: string
           user_agent?: string | null
           user_id: string
@@ -527,6 +529,7 @@ export type Database = {
           device_id?: string
           device_type?: string
           id?: string
+          ip_address?: string | null
           last_seen_at?: string
           user_agent?: string | null
           user_id?: string
@@ -556,10 +559,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      claim_device_slot: {
-        Args: { _device_id: string; _device_type: string; _user_agent?: string }
-        Returns: string
-      }
+      claim_device_slot:
+        | {
+            Args: {
+              _device_id: string
+              _device_type: string
+              _user_agent?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _device_id: string
+              _device_type: string
+              _ip_address?: string
+              _user_agent?: string
+            }
+            Returns: string
+          }
       get_reference_images: {
         Args: { _addresses: string[] }
         Returns: {

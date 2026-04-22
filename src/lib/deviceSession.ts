@@ -27,15 +27,31 @@ export function getOrCreateDeviceId(): string {
   }
 }
 
+async function fetchPublicIp(): Promise<string | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const j = await res.json();
+    return typeof j?.ip === "string" ? j.ip : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 로그인 직후 호출: 같은 슬롯의 기존 디바이스를 밀어내고 본 디바이스를 활성화 */
 export async function claimDeviceSlot(): Promise<void> {
   const deviceType = getDeviceType();
   const deviceId = getOrCreateDeviceId();
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : null;
+  const ip = await fetchPublicIp();
   await supabase.rpc("claim_device_slot", {
     _device_type: deviceType,
     _device_id: deviceId,
     _user_agent: ua,
+    _ip_address: ip,
   });
 }
 
