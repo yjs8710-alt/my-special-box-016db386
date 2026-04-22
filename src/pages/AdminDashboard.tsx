@@ -1398,6 +1398,22 @@ const AdminDashboard = () => {
     const { error } = await supabase.from("agent_profiles").update({ is_active: newActive }).eq("id", m.id);
     if (error) { alert("접속 상태 변경 오류: " + error.message); return; }
     setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, is_active: newActive } : p));
+
+  // ─── PC 허용 IP 변경 ─────────────────────────────────────────────────────
+  };
+
+  const updateAllowedPcIp = async (m: AgentProfile, raw: string) => {
+    const next = raw.trim();
+    // 간단한 IPv4 검증 (빈 값은 허용 — 제한 해제)
+    if (next && !/^(\d{1,3}\.){3}\d{1,3}$/.test(next)) {
+      alert("올바른 IPv4 형식이 아닙니다. 예: 211.234.56.78");
+      return;
+    }
+    const value = next === "" ? null : next;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from("agent_profiles").update({ allowed_pc_ip: value } as any).eq("id", m.id);
+    if (error) { alert("PC 허용 IP 변경 오류: " + error.message); return; }
+    setMembers((prev) => prev.map((p) => p.id === m.id ? { ...p, allowed_pc_ip: value } : p));
   };
 
   // ─── 회원 정보 수정 ──────────────────────────────────────────────────────
