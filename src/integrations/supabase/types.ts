@@ -503,6 +503,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_active_sessions: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_type: string
+          id: string
+          last_seen_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_type: string
+          id?: string
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_type?: string
+          id?: string
+          last_seen_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -526,6 +556,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_device_slot: {
+        Args: { _device_id: string; _device_type: string; _user_agent?: string }
+        Returns: string
+      }
       get_reference_images: {
         Args: { _addresses: string[] }
         Returns: {
@@ -544,6 +578,10 @@ export type Database = {
       }
       update_property_images: {
         Args: { _images: string[]; _property_id: string }
+        Returns: boolean
+      }
+      verify_device_slot: {
+        Args: { _device_id: string; _device_type: string }
         Returns: boolean
       }
     }
