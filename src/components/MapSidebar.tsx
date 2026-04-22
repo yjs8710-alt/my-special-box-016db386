@@ -3422,6 +3422,9 @@ const MapSidebar = ({
         <th style="width:60px">관리비</th>
         <th style="width:80px">입주가능일</th>
         <th style="width:65px">유형</th>
+        <th style="width:60px">방유형</th>
+        <th style="width:55px">준공</th>
+        ${passwordHeader}
         ${contactHeader}
       </tr>
     </thead>
