@@ -1602,8 +1602,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
     loadBuildingSummary();
   }, [prop.dbId]);
 
-  const [units, setUnits] = useState<UnitRow[]>(() =>
-    sameBuilding.map((p, i) => ({
+  const PROPOSAL_PREFIX = "__PROPOSAL_JSON__";
+  const defaultUnits = (): UnitRow[] =>
+    sameBuilding.map((p) => ({
       id: String(p.id),
       unitNumber: p.unitNumber ?? "",
       type: p.type,
@@ -1612,14 +1613,41 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
       deposit: p.deposit ?? "",
       monthly: p.monthly ?? "",
       status: p.availableFrom === "공실" ? "공실" : "임차중",
-    })),
-  );
+    }));
 
-  const [mortgages, setMortgages] = useState<MortgageRow[]>([{ id: "1", creditor: "", amount: "" }]);
+  // 저장된 제안서가 있으면 로드, 없으면 sameBuilding 기반 자동 생성
+  const initial = (() => {
+    const memo = prop.buildingMemo ?? "";
+    if (memo.startsWith(PROPOSAL_PREFIX)) {
+      try {
+        const parsed = JSON.parse(memo.slice(PROPOSAL_PREFIX.length));
+        return {
+          units: parsed.units ?? [],
+          mortgages: parsed.mortgages ?? [{ id: "1", creditor: "", amount: "" }],
+          totalDeposit: parsed.totalDeposit ?? "",
+          totalMortgage: parsed.totalMortgage ?? "",
+          note: parsed.note ?? "",
+          loaded: true,
+        };
+      } catch {
+        // fallthrough
+      }
+    }
+    return {
+      units: defaultUnits(),
+      mortgages: [{ id: "1", creditor: "", amount: "" }] as MortgageRow[],
+      totalDeposit: "",
+      totalMortgage: "",
+      note: memo,
+      loaded: false,
+    };
+  })();
 
-  const [totalDepositInput, setTotalDepositInput] = useState("");
-  const [totalMortgageInput, setTotalMortgageInput] = useState("");
-  const [note, setNote] = useState(prop.buildingMemo ?? "");
+  const [units, setUnits] = useState<UnitRow[]>(initial.units);
+  const [mortgages, setMortgages] = useState<MortgageRow[]>(initial.mortgages);
+  const [totalDepositInput, setTotalDepositInput] = useState(initial.totalDeposit);
+  const [totalMortgageInput, setTotalMortgageInput] = useState(initial.totalMortgage);
+  const [note, setNote] = useState(initial.note);
   const [saved, setSaved] = useState(false);
 
   // 호실 편집
@@ -1651,45 +1679,48 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
   const updateBuildingRow = (idx: number, val: string) =>
     setBuildingInfoRows((prev) => prev.map((r, i) => (i === idx ? [r[0], val] : r)));
 
-  // 저장 (DB에 proposal 내용을 note로 저장)
+  // 저장 (구조화된 JSON으로 building_memo에 저장)
   const handleSave = async () => {
-    const content = [
-      "=== 임대제안서 ===",
-      buildingInfoRows.map(([k, v]) => `${k}: ${v}`).join("\n"),
-      "\n--- 호수별 임대현황 ---",
-      units
-        .map(
-          (u) =>
-            `${u.unitNumber}호 | ${u.type} | ${u.floor} | ${u.area} | 보증금 ${u.deposit} | 월세 ${u.monthly} | ${u.status}`,
-        )
-        .join("\n"),
-      `\n보증금 합계: ${totalDepositInput}`,
-      "\n--- 근저당 내역 ---",
-      mortgages.map((m) => `${m.creditor}: ${m.amount}`).join("\n"),
-      `근저당 합계: ${totalMortgageInput}`,
-      note ? `\n--- 특이사항 ---\n${note}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    if (prop.dbId) {
-      await supabase.from("properties").update({ building_memo: content }).eq("id", prop.dbId);
+    if (!prop.dbId) {
+      alert("저장할 매물 ID가 없습니다.");
+      return;
+    }
+    const payload = {
+      units,
+      mortgages,
+      totalDeposit: totalDepositInput,
+      totalMortgage: totalMortgageInput,
+      note,
+      buildingInfoRows,
+    };
+    const content = PROPOSAL_PREFIX + JSON.stringify(payload);
+    const { error } = await supabase.from("properties").update({ building_memo: content }).eq("id", prop.dbId);
+    if (error) {
+      alert("저장 실패: " + error.message);
+      return;
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  // 삭제 (내용 초기화)
+  // 삭제 (DB에서도 완전 초기화)
   const handleDelete = async () => {
     if (!confirm("임대제안서 내용을 초기화하시겠습니까?")) return;
+    if (!prop.dbId) {
+      alert("삭제할 매물 ID가 없습니다.");
+      return;
+    }
+    const { error } = await supabase.from("properties").update({ building_memo: null }).eq("id", prop.dbId);
+    if (error) {
+      alert("삭제 실패: " + error.message);
+      return;
+    }
     setUnits([]);
     setMortgages([{ id: "1", creditor: "", amount: "" }]);
     setTotalDepositInput("");
     setTotalMortgageInput("");
     setNote("");
-    if (prop.dbId) {
-      await supabase.from("properties").update({ building_memo: null }).eq("id", prop.dbId);
-    }
+    alert("임대제안서가 초기화되었습니다.");
   };
 
   const ic =
@@ -1722,13 +1753,23 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               🖨️ 인쇄
             </button>
             {isAdmin && (
-              <button
-                onClick={handleSave}
-                className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
-                style={{ background: "hsl(var(--primary))", color: "#fff" }}
-              >
-                {saved ? "✓ 저장됨" : "💾 저장"}
-              </button>
+              <>
+                <button
+                  onClick={handleSave}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                  style={{ background: "hsl(var(--primary))", color: "#fff" }}
+                >
+                  {saved ? "✓ 저장됨" : "💾 저장"}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                  style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}
+                  title="저장된 임대제안서 초기화"
+                >
+                  🗑 삭제
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
