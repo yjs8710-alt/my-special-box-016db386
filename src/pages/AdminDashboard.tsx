@@ -1979,7 +1979,8 @@ const AdminDashboard = () => {
                   if (memberGroupByAgency) {
                     const groups = new Map<string, AgentProfile[]>();
                     filteredMembers.forEach((m) => {
-                      const key = (m.license_number || "(등록번호 미지정)").trim();
+                      const raw = (m.license_number || "").trim();
+                      const key = raw ? formatLicenseNumber(raw) : "(등록번호 미지정)";
                       if (!groups.has(key)) groups.set(key, []);
                       groups.get(key)!.push(m);
                     });
