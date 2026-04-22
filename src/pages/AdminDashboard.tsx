@@ -1150,6 +1150,7 @@ const AdminDashboard = () => {
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
+  const [activeSessions, setActiveSessions] = useState<Record<string, Array<{ device_type: string; device_id: string; ip_address: string | null; user_agent: string | null; last_seen_at: string }>>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [posts, setPosts] = useState(MOCK_POSTS);
   const [memberSearch, setMemberSearch] = useState("");
