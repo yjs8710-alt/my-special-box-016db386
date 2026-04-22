@@ -395,10 +395,10 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
   const isApproved = !authLoading && isAuthorized;
 
   const handleReveal = (id: string) => {
-    markRevealed(id);
     setRevealed((prev) => ({ ...prev, [id]: true }));
   };
-  const isRevealed = (id: string) => isApproved || revealed[id] || hasRevealedToday(id);
+  // 매번 '번호 공개' 버튼을 눌러야만 노출 (localStorage/승인 여부 무시)
+  const isRevealed = (id: string) => !!revealed[id];
 
   const handleSearch = async () => {
     if (!query.trim()) return;
