@@ -2301,7 +2301,16 @@ const AdminDashboard = () => {
                           {/* 상위 부동산 연결 (소속/보조원만) */}
                           {m.role !== "admin" && (mt === "소속중개사" || mt === "중개보조원") && (
                             <div className="flex flex-col gap-2 pt-3 border-t border-border">
-                              <p className="text-xs font-bold text-foreground">🏢 상위(대표) 부동산 연결</p>
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <p className="text-xs font-bold text-foreground">🏢 상위(대표) 부동산 연결</p>
+                                <div className="text-[11px] font-semibold inline-flex items-center gap-1 px-2 py-1 rounded-md"
+                                  style={{ background: parentAgent ? "hsl(var(--chart-2) / 0.12)" : "hsl(var(--muted))", color: parentAgent ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+                                  <Building2 className="w-3 h-3" />
+                                  현재 연결: {parentAgent
+                                    ? `${(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} (${(parentAgent.name || "").trim() || "-"})`
+                                    : "없음"}
+                                </div>
+                              </div>
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => updateParent(m.id, null)}
