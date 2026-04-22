@@ -3325,6 +3325,13 @@ const MapSidebar = ({
     // 관리자 여부에 따라 연락처 열 포함 여부 결정
     const showContacts = isAdmin;
 
+    const shortAddress = (addr: string) => {
+      if (!addr) return "-";
+      const tokens = addr.trim().split(/\s+/);
+      if (tokens.length >= 2) return tokens.slice(-2).join(" ");
+      return addr;
+    };
+
     const rows = list
       .map((p, i) => {
         const buildYearShort = p.buildYear ? p.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
@@ -3346,25 +3353,26 @@ const MapSidebar = ({
           : "";
         return `<tr>
         <td style="text-align:center;color:#888">${i + 1}</td>
-        <td><strong>${p.buildingName ?? p.title}</strong><br/><span style="color:#888;font-size:10px">${p.unitNumber ?? ""}</span></td>
-        <td style="color:#555">${p.address}</td>
-        <td style="text-align:center">${p.floor ?? "-"}</td>
-        <td style="text-align:center">${p.area ?? "-"}</td>
-        <td style="text-align:center;color:#1a56db;font-weight:bold">${p.deposit}</td>
-        <td style="text-align:center;color:#e11d48;font-weight:bold">${p.monthly}</td>
-        <td style="text-align:center;color:#555">${p.manageFee ?? "-"}</td>
-        <td style="text-align:center">${p.availableFrom ?? "-"}</td>
+        <td style="color:#555">${shortAddress(p.address)}</td>
+        <td><strong>${p.buildingName ?? p.title}</strong></td>
         <td style="text-align:center"><span style="background:#e8f0ff;color:#1a56db;border-radius:4px;padding:2px 6px;font-size:10px">${p.type}</span></td>
         <td style="text-align:center;color:#555">${roomTypeText || "-"}</td>
-        <td style="text-align:center;color:#555">${buildYearShort ? `${buildYearShort}년` : "-"}</td>
         ${passwordCell}
+        <td style="text-align:center">${[p.floor, p.unitNumber].filter(Boolean).join(" / ") || "-"}</td>
+        <td style="text-align:center">${p.area ?? "-"}</td>
+        <td style="text-align:center;line-height:1.5">
+          <span style="color:#1a56db;font-weight:bold">${p.deposit || "-"}</span>
+          <span style="color:#888"> / </span>
+          <span style="color:#e11d48;font-weight:bold">${p.monthly || "-"}</span>
+        </td>
+        <td style="text-align:center;color:#555">${p.manageFee ?? "-"}</td>
+        <td style="text-align:center">${p.availableFrom ?? "-"}</td>
+        <td style="text-align:center;color:#555">${buildYearShort ? `${buildYearShort}년` : "-"}</td>
         ${contactCell}
       </tr>`;
       })
       .join("");
 
-    const roomTypeHeader = `<th style="width:60px">방유형</th>`;
-    const buildYearHeader = `<th style="width:55px">준공</th>`;
     const passwordHeader = showContacts ? `<th style="width:90px">비밀번호 (관리자용)</th>` : "";
     const contactHeader = showContacts ? `<th style="width:130px">연락처 (관리자용)</th>` : "";
 
@@ -3405,26 +3413,24 @@ const MapSidebar = ({
       ${adminWatermark}
     </div>
     <div class="meta">
-      출력일: ${today}<br/>
-      공실박스
+      출력일: ${today}
     </div>
   </div>
   <table>
     <thead>
       <tr>
         <th style="width:28px">No.</th>
-        <th style="width:130px">건물명 / 호수</th>
         <th>주소</th>
-        <th style="width:40px">층</th>
-        <th style="width:70px">면적</th>
-        <th style="width:80px">보증금</th>
-        <th style="width:80px">월세</th>
-        <th style="width:60px">관리비</th>
-        <th style="width:80px">입주가능일</th>
+        <th style="width:130px">건물명</th>
         <th style="width:65px">유형</th>
         <th style="width:60px">방유형</th>
-        <th style="width:55px">준공</th>
         ${passwordHeader}
+        <th style="width:80px">층 / 호수</th>
+        <th style="width:70px">면적</th>
+        <th style="width:130px">보증금 / 월세</th>
+        <th style="width:60px">관리비</th>
+        <th style="width:80px">입주가능일</th>
+        <th style="width:55px">준공</th>
         ${contactHeader}
       </tr>
     </thead>
