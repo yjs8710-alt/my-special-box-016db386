@@ -743,7 +743,12 @@ const MyProperties = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
+      {showRegister && (
+        <PropertyRegisterModal
+          onClose={() => { setShowRegister(false); setReregisterPrefill(null); }}
+          prefill={reregisterPrefill ?? undefined}
+        />
+      )}
       {editTarget && (
         <AdminPropertyFormModal
           initial={editTarget as unknown as Record<string, unknown>}
