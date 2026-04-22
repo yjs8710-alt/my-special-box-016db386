@@ -12,7 +12,7 @@ import {
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
   Crown, Briefcase, HandHelping,
 } from "lucide-react";
-import logoTransparent from "@/assets/logo-transparent.png";
+import logoImg from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -1684,13 +1684,13 @@ const AdminDashboard = () => {
         onClick={() => { navigate("/"); setSidebarOpen(false); }}
         title="일반 페이지로 이동"
       >
-        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden p-1">
-          <img src={logoTransparent} alt="집다" className="w-full h-full object-contain" />
-        </div>
-        <div>
-          <div className="text-sm font-extrabold text-white leading-none">집다</div>
-          <div className="text-[10px] text-white/40 leading-none mt-0.5">관리자</div>
-        </div>
+        <img src={logoImg} alt="집다 로고" className="h-11 object-contain" />
+        <span
+          className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+          style={{ background: "hsl(var(--accent) / 0.18)", color: "hsl(var(--accent))" }}
+        >
+          관리자
+        </span>
       </div>
       <nav className="flex flex-col gap-0.5 px-3 py-4 flex-1">
         {NAV.map(({ key, label, icon: Icon }) => (
@@ -2073,7 +2073,10 @@ const AdminDashboard = () => {
                            </div>
                            <div className="text-xs text-muted-foreground">{m.phone}</div>
                            {parentAgent && (
-                             <div className="text-[10px] text-muted-foreground mt-0.5">상위: {parentAgent.agency_name}</div>
+                             <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
+                               <Building2 className="w-3 h-3" />
+                               상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
+                             </div>
                            )}
                          </div>
                         {/* 역할 배지 */}
