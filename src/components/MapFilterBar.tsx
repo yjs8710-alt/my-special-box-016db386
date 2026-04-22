@@ -173,6 +173,12 @@ interface MapFilterBarProps {
   apartmentDealTypes?: string[];
   onApartmentDealTypeChange?: (t: string) => void;
   onClearApartmentDealTypes?: () => void;
+  /** 반경검색 모드 활성 여부 */
+  radiusMode?: boolean;
+  /** 반경검색 모드 토글 */
+  onRadiusModeToggle?: () => void;
+  /** 반경 정보 (활성 표시용) */
+  radiusInfo?: { radius: number } | null;
 }
 
 function makeFormatManwon(max: number) {
