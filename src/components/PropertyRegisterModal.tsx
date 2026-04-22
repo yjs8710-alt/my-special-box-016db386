@@ -173,12 +173,139 @@ const INITIAL: FormState = {
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
 
-interface Props { onClose: () => void; }
+interface Props {
+  onClose: () => void;
+  /** 종료된 매물 등 기존 매물 정보를 그대로 가져와서 새 매물로 재등록할 때 사용 */
+  prefill?: Record<string, unknown>;
+}
 
-export default function PropertyRegisterModal({ onClose }: Props) {
+/** DB row → FormState 매핑 (재등록용) */
+function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
+  const get = (k: string) => (row[k] == null ? "" : String(row[k]));
+  const note = get("note");
+  const parseNote = (key: string): string => {
+    const pattern = key === "건물주"
+      ? /건물주(?!2)[:\s]+([^\n|]+)/
+      : new RegExp(`${key}[:\\s]+([^\\n|]+)`);
+    const m = note.match(pattern);
+    return m ? m[1].trim() : "";
+  };
+  const roadAddr = parseNote("도로명");
+  const districtVal = get("district");
+  const sigunguVal = districtVal ? `청주시 ${districtVal}` : "";
+  const detailType = get("type");
+  const roomType = get("room_type");
+  const allOptions = Array.isArray(row.options) ? (row.options as string[]) : [];
+  const petOpt = allOptions.find((o) => o.startsWith("반려동물_"));
+  const facilityNames = ["엘리베이터","수도","인터넷","TV","CCTV","리모델링"];
+  const facilities = allOptions.filter((o) => facilityNames.includes(o));
+  const options = allOptions.filter((o) => !facilityNames.includes(o) && !o.startsWith("반려동물_"));
+  const buildingSaleType: BuildingSaleType =
+    (BUILDING_SALE_TYPES as readonly string[]).includes(roomType) ? (roomType as BuildingSaleType) : "일반건물";
+  const isBuildingSaleRow = detailType.includes("매매");
+  const isLand = detailType === "토지";
+  const buildingType: BuildingType = isLand
+    ? "토지"
+    : (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(detailType)
+      ? "집합건물"
+      : "단독건물";
+  const tradeType: TradeType = isBuildingSaleRow ? "매매" : "임대";
+  // 면적에서 대지/건평 분리 (매매)
+  let landArea = "", buildingArea = "", area = get("area");
+  if (isBuildingSaleRow && area.includes("/")) {
+    const lm = area.match(/대지\s*([0-9.]+)/);
+    const bm = area.match(/건평\s*([0-9.]+)/);
+    if (lm) landArea = lm[1];
+    if (bm) buildingArea = bm[1];
+    area = "";
+  }
+  // rentModes 추출 (note의 "월세:", "반전세:", "전세:" 패턴)
+  const rentModes: RentMode[] = [];
+  if (/월세[:\s]/.test(note) && !/반전세/.test(note.match(/월세[:\s][^\n]*/)?.[0] ?? "")) rentModes.push("월세");
+  if (/반전세[:\s]/.test(note)) rentModes.push("반전세");
+  if (/전세[:\s]/.test(note) && !/반전세/.test(note)) rentModes.push("전세");
+  if (rentModes.length === 0 && tradeType === "임대") rentModes.push("월세");
+
+  const wolseM = note.match(/월세:\s*보증금\s*([0-9]+).*?월세\s*([0-9]+)/);
+  const halfM = note.match(/반전세:\s*보증금\s*([0-9]+).*?월세\s*([0-9]+)/);
+  const jeonseM = note.match(/전세:\s*보증금\s*([0-9]+)/);
+  const directionM = note.match(/방향:\s*([^\n|]+)/);
+  const lhM = note.match(/LH:\s*([^\n|]+)/);
+  const cleanM = note.match(/청소비:\s*([^\n|]+)/);
+  const brokerFeeM = note.match(/중개보수:\s*([^\n|]+)/);
+  const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
+  const buildingDongM = note.match(/동\(棟\):\s*([^\n|]+)/);
+  const tenantDepositM = note.match(/세입자전세금:\s*([^\n|]+)/);
+  const tenantMonthlyM = note.match(/세입자월세:\s*([^\n|]+)/);
+
+  return {
+    brokerType: "일반중개",
+    tradeType,
+    buildingType,
+    detailType: detailType as DetailType,
+    oneRoomLayout: detailType === "원룸" && (roomType === "오픈형" || roomType === "분리형") ? (roomType as OneRoomLayout) : "",
+    sido: "충북",
+    sigungu: sigunguVal,
+    dong: get("dong"),
+    lotNumber: get("lot_number"),
+    buildingName: get("building_name"),
+    floor: get("floor"),
+    unitNo: get("unit_number"),
+    area,
+    landArea,
+    buildingArea,
+    totalFloors: get("total_floors"),
+    buildYear: get("build_year"),
+    buildingSaleType,
+    options,
+    facilities,
+    pet: (petOpt ? petOpt.replace("반려동물_", "") : "") as PetType,
+    buildingPassword: get("building_password"),
+    roomPassword: get("room_password"),
+    direction: directionM ? directionM[1].trim() : "",
+    vacancy: (get("available_from") === "세입자 거주중" ? "세입자 거주중" : "공실") as VacancyType,
+    rentModes,
+    deposit: wolseM ? wolseM[1] : (tradeType === "임대" && !isBuildingSaleRow ? get("deposit") : ""),
+    monthlyRent: wolseM ? wolseM[2] : (tradeType === "임대" && !isBuildingSaleRow ? get("monthly") : ""),
+    halfDeposit: halfM ? halfM[1] : "",
+    halfMonthly: halfM ? halfM[2] : "",
+    jeonseDeposit: jeonseM ? jeonseM[1] : "",
+    managementFee: get("manage_fee"),
+    salePrice: (isBuildingSaleRow || tradeType === "매매") ? get("deposit") : "",
+    keyMoney: keyMoneyM ? keyMoneyM[1].trim() : "",
+    lhType: (lhM && (LH_TYPES as readonly string[]).includes(lhM[1].trim()) ? lhM[1].trim() : "관계없음") as LhType,
+    exitCleanFee: cleanM ? cleanM[1].trim() : "",
+    brokerFee: brokerFeeM ? brokerFeeM[1].trim() : "",
+    myMemo: get("room_memo"),
+    description: get("description"),
+    contactBroker: parseNote("부동산"),
+    contactOwner: parseNote("건물주"),
+    contactOwner2: parseNote("건물주2"),
+    contactTenant: parseNote("세입자"),
+    contactManager: parseNote("관리인"),
+    roadAddress: roadAddr,
+    tenantOccupied: /세입자거주:\s*예/.test(note),
+    tenantDeposit: tenantDepositM ? tenantDepositM[1].trim() : "",
+    tenantMonthly: tenantMonthlyM ? tenantMonthlyM[1].trim() : "",
+    vacateDate: "",
+    earlyExit: /중도퇴거/.test(note),
+    expose: true,
+    allowAddressView: false,
+    images: Array.isArray(row.images) ? (row.images as string[]) : [],
+    elevator: Boolean(row.elevator),
+    isNew: false,
+    isHot: false,
+    buildingMemo: get("building_memo"),
+    buildingDong: buildingDongM ? buildingDongM[1].trim() : "",
+  };
+}
+
+export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   const { user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [form, setForm] = useState<FormState>(INITIAL);
+  const [form, setForm] = useState<FormState>(() =>
+    prefill ? { ...INITIAL, ...dbRowToFormState(prefill) } : INITIAL
+  );
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
