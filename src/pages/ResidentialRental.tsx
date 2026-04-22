@@ -104,8 +104,13 @@ const ResidentialRental = () => {
     setPinnedAddress(prop.address);
   }, [filtered, allProperties, pinnedIds]);
 
-  // 사이드바 매물: 돋보기 → 지도 내 매물, 핀 선택 → 해당 id들, 기본 → filtered 전체
+  // 사이드바 매물: 반경 우선 → 돋보기 → 핀 선택 → 기본
   const sidebarProperties = useMemo(() => {
+    if (radiusCircle) {
+      return filtered.filter(p =>
+        p.lat && p.lng && isInsideRadius(p.lat, p.lng, radiusCircle)
+      );
+    }
     if (showAllFromSearch) {
       const b = mapBoundsRef.current;
       if (b) return filtered.filter(p =>
@@ -117,7 +122,7 @@ const ResidentialRental = () => {
     }
     if (pinnedIds.length === 0) return filtered;
     return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch]);
+  }, [filtered, pinnedIds, showAllFromSearch, radiusCircle]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
