@@ -1684,8 +1684,8 @@ const AdminDashboard = () => {
         onClick={() => { navigate("/"); setSidebarOpen(false); }}
         title="일반 페이지로 이동"
       >
-        <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
-          <Home className="w-4 h-4 text-white" />
+        <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center overflow-hidden p-1">
+          <img src={logoTransparent} alt="집다" className="w-full h-full object-contain" />
         </div>
         <div>
           <div className="text-sm font-extrabold text-white leading-none">집다</div>
