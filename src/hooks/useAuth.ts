@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { claimDeviceSlot, verifyDeviceSlot, getDeviceType, getOrCreateDeviceId } from "@/lib/deviceSession";
+import { claimDeviceSlot, verifyDeviceSlot, verifyPcIpAllowed, getDeviceType, getOrCreateDeviceId } from "@/lib/deviceSession";
 
 type AuthStatus = "loading" | "authorized" | "unauthorized";
 
