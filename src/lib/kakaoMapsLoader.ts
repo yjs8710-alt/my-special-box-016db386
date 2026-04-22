@@ -294,11 +294,14 @@ export async function loadKakaoMaps(options?: { retries?: number; timeoutMs?: nu
         lastError = error;
         window.__kakaoMapReady = false;
 
+        // Only remove the script if it's actually in error state.
+        // Removing a still-loading script causes the "added/removed" loop
+        // observed when multiple components mount concurrently.
         if (attempt < retries) {
-          removeKakaoScripts();
-        }
-
-        if (attempt < retries) {
+          const primary = getPrimaryScript();
+          if (primary && getScriptStatus(primary) === "error") {
+            primary.remove();
+          }
           await sleep(Math.min(4000, 500 * attempt));
         }
       }
