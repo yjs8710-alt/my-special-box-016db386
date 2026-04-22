@@ -420,6 +420,23 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     renderOverlays(mapRef.current, properties, selectedId, onSelect, zoomLevelRef.current);
   }, [properties, selectedId, onSelect, renderOverlays]);
 
+  // 외부에서 radiusCircle 변경(해제 등) 동기화
+  useEffect(() => {
+    if (!mapRef.current || !window.kakao?.maps) return;
+    if (radiusCircle) {
+      drawCircle({ lat: radiusCircle.lat, lng: radiusCircle.lng }, radiusCircle.radius);
+    } else {
+      clearRadiusCircle();
+    }
+  }, [radiusCircle, drawCircle, clearRadiusCircle]);
+
+  // 반경검색 모드 진입/해제 시 커서 변경
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.cursor = radiusMode ? "crosshair" : "";
+    }
+  }, [radiusMode]);
+
   // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
   useEffect(() => {
     if (!mapRef.current || selectedId === null || !window.kakao?.maps) return;
