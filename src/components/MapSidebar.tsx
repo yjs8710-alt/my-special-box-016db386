@@ -1602,8 +1602,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
     loadBuildingSummary();
   }, [prop.dbId]);
 
-  const [units, setUnits] = useState<UnitRow[]>(() =>
-    sameBuilding.map((p, i) => ({
+  const PROPOSAL_PREFIX = "__PROPOSAL_JSON__";
+  const defaultUnits = (): UnitRow[] =>
+    sameBuilding.map((p) => ({
       id: String(p.id),
       unitNumber: p.unitNumber ?? "",
       type: p.type,
@@ -1612,14 +1613,41 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
       deposit: p.deposit ?? "",
       monthly: p.monthly ?? "",
       status: p.availableFrom === "공실" ? "공실" : "임차중",
-    })),
-  );
+    }));
 
-  const [mortgages, setMortgages] = useState<MortgageRow[]>([{ id: "1", creditor: "", amount: "" }]);
+  // 저장된 제안서가 있으면 로드, 없으면 sameBuilding 기반 자동 생성
+  const initial = (() => {
+    const memo = prop.buildingMemo ?? "";
+    if (memo.startsWith(PROPOSAL_PREFIX)) {
+      try {
+        const parsed = JSON.parse(memo.slice(PROPOSAL_PREFIX.length));
+        return {
+          units: parsed.units ?? [],
+          mortgages: parsed.mortgages ?? [{ id: "1", creditor: "", amount: "" }],
+          totalDeposit: parsed.totalDeposit ?? "",
+          totalMortgage: parsed.totalMortgage ?? "",
+          note: parsed.note ?? "",
+          loaded: true,
+        };
+      } catch {
+        // fallthrough
+      }
+    }
+    return {
+      units: defaultUnits(),
+      mortgages: [{ id: "1", creditor: "", amount: "" }] as MortgageRow[],
+      totalDeposit: "",
+      totalMortgage: "",
+      note: memo,
+      loaded: false,
+    };
+  })();
 
-  const [totalDepositInput, setTotalDepositInput] = useState("");
-  const [totalMortgageInput, setTotalMortgageInput] = useState("");
-  const [note, setNote] = useState(prop.buildingMemo ?? "");
+  const [units, setUnits] = useState<UnitRow[]>(initial.units);
+  const [mortgages, setMortgages] = useState<MortgageRow[]>(initial.mortgages);
+  const [totalDepositInput, setTotalDepositInput] = useState(initial.totalDeposit);
+  const [totalMortgageInput, setTotalMortgageInput] = useState(initial.totalMortgage);
+  const [note, setNote] = useState(initial.note);
   const [saved, setSaved] = useState(false);
 
   // 호실 편집
