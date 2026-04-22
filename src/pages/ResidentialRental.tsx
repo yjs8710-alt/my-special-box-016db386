@@ -6,6 +6,7 @@ import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
+import { RadiusCircle, isInsideRadius } from "@/lib/geoDistance";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
@@ -28,6 +29,8 @@ const ResidentialRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [radiusMode, setRadiusMode] = useState(false);
+  const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
@@ -101,8 +104,13 @@ const ResidentialRental = () => {
     setPinnedAddress(prop.address);
   }, [filtered, allProperties, pinnedIds]);
 
-  // 사이드바 매물: 돋보기 → 지도 내 매물, 핀 선택 → 해당 id들, 기본 → filtered 전체
+  // 사이드바 매물: 반경 우선 → 돋보기 → 핀 선택 → 기본
   const sidebarProperties = useMemo(() => {
+    if (radiusCircle) {
+      return filtered.filter(p =>
+        p.lat && p.lng && isInsideRadius(p.lat, p.lng, radiusCircle)
+      );
+    }
     if (showAllFromSearch) {
       const b = mapBoundsRef.current;
       if (b) return filtered.filter(p =>
@@ -114,7 +122,7 @@ const ResidentialRental = () => {
     }
     if (pinnedIds.length === 0) return filtered;
     return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch]);
+  }, [filtered, pinnedIds, showAllFromSearch, radiusCircle]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -216,6 +224,9 @@ const ResidentialRental = () => {
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
+            radiusMode={radiusMode}
+            radiusCircle={radiusCircle}
+            onRadiusChange={setRadiusCircle}
           />
           <MapFilterBar
             activeType={activeType}
@@ -237,6 +248,16 @@ const ResidentialRental = () => {
             showResidentialTypes={true}
             showBuildingOptions={true}
             showRoomTypes={false}
+            radiusMode={radiusMode}
+            radiusInfo={radiusCircle ? { radius: radiusCircle.radius } : null}
+            onRadiusModeToggle={() => {
+              if (radiusMode) {
+                setRadiusMode(false);
+                setRadiusCircle(null);
+              } else {
+                setRadiusMode(true);
+              }
+            }}
           />
         </div>
         <MapSidebar

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -173,6 +173,12 @@ interface MapFilterBarProps {
   apartmentDealTypes?: string[];
   onApartmentDealTypeChange?: (t: string) => void;
   onClearApartmentDealTypes?: () => void;
+  /** 반경검색 모드 활성 여부 */
+  radiusMode?: boolean;
+  /** 반경검색 모드 토글 */
+  onRadiusModeToggle?: () => void;
+  /** 반경 정보 (활성 표시용) */
+  radiusInfo?: { radius: number } | null;
 }
 
 function makeFormatManwon(max: number) {
@@ -376,6 +382,9 @@ const MapFilterBar = ({
   apartmentDealTypes = [],
   onApartmentDealTypeChange,
   onClearApartmentDealTypes,
+  radiusMode = false,
+  onRadiusModeToggle,
+  radiusInfo,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -598,6 +607,28 @@ const MapFilterBar = ({
                   >
                     <X className="w-3 h-3" />
                     <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
+                  </button>
+                )}
+                {onRadiusModeToggle && (
+                  <button
+                    onClick={onRadiusModeToggle}
+                    title={radiusMode ? "반경검색 종료" : "지도 클릭 후 드래그로 반경 지정"}
+                    className="relative flex items-center gap-1 px-2.5 h-10 transition-all"
+                    style={{
+                      borderLeft: "1px solid hsl(var(--border))",
+                      background: radiusMode ? "hsl(var(--accent))" : "transparent",
+                      color: radiusMode ? "#fff" : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    <Target className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-bold whitespace-nowrap">
+                      {radiusMode && radiusInfo
+                        ? `반경 ${radiusInfo.radius >= 1000 ? (radiusInfo.radius/1000).toFixed(2)+"km" : Math.round(radiusInfo.radius)+"m"}`
+                        : "반경검색"}
+                    </span>
+                    {radiusMode && (
+                      <X className="w-3 h-3 opacity-80" />
+                    )}
                   </button>
                 )}
                 <button

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
+import { RadiusCircle, haversineMeters, formatRadius } from "@/lib/geoDistance";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -145,9 +146,14 @@ interface MapViewProps {
   onBoundsChange?: (bounds: MapBounds) => void;
   /** true이면 selectedId 변경 시 panTo 억제 */
   suppressPan?: boolean;
+  /** 반경검색 모드 활성화 — true면 지도 클릭/드래그로 원 그리기 */
+  radiusMode?: boolean;
+  /** 반경검색 결과 콜백 (null = 해제) */
+  radiusCircle?: RadiusCircle | null;
+  onRadiusChange?: (c: RadiusCircle | null) => void;
 }
 
-const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan }: MapViewProps) => {
+const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -158,10 +164,18 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   const retryTimeoutRef = useRef<number | null>(null);
   const autoRetryCountRef = useRef(0);
 
+  // 반경검색 관련 ref
+  const circleOverlayRef = useRef<any>(null);
+  const radiusLabelRef = useRef<any>(null);
+  const draggingRef = useRef(false);
+  const dragCenterRef = useRef<{ lat: number; lng: number } | null>(null);
+  const radiusModeRef = useRef<boolean>(!!radiusMode);
+  useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
+
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange });
+  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange, onRadiusChange });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, onSelect, onBoundsChange };
+    propsRef.current = { properties, selectedId, onSelect, onBoundsChange, onRadiusChange };
   });
 
   const waitForContainerReady = useCallback(async () => {
@@ -194,10 +208,67 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     overlaysRef.current.clear();
   }, []);
 
+  const clearRadiusCircle = useCallback(() => {
+    if (circleOverlayRef.current) {
+      try { circleOverlayRef.current.setMap(null); } catch (_) {}
+      circleOverlayRef.current = null;
+    }
+    if (radiusLabelRef.current) {
+      try { radiusLabelRef.current.setMap(null); } catch (_) {}
+      radiusLabelRef.current = null;
+    }
+  }, []);
+
+  const drawCircle = useCallback((center: { lat: number; lng: number }, radius: number) => {
+    const map = mapRef.current;
+    if (!map || !window.kakao?.maps) return;
+    const pos = new window.kakao.maps.LatLng(center.lat, center.lng);
+
+    if (!circleOverlayRef.current) {
+      circleOverlayRef.current = new window.kakao.maps.Circle({
+        center: pos,
+        radius: Math.max(radius, 1),
+        strokeWeight: 2,
+        strokeColor: "#1e40af",
+        strokeOpacity: 0.9,
+        strokeStyle: "solid",
+        fillColor: "#3b82f6",
+        fillOpacity: 0.18,
+      });
+      circleOverlayRef.current.setMap(map);
+    } else {
+      circleOverlayRef.current.setPosition(pos);
+      circleOverlayRef.current.setRadius(Math.max(radius, 1));
+    }
+
+    // 반경 라벨
+    const labelHtml = `
+      <div style="
+        background:#1e40af;color:#fff;font-size:11px;font-weight:700;
+        padding:3px 8px;border-radius:999px;white-space:nowrap;
+        box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:translate(-50%,-50%);
+      ">반경 ${formatRadius(radius)}</div>
+    `;
+    const labelDiv = document.createElement("div");
+    labelDiv.innerHTML = labelHtml;
+    if (!radiusLabelRef.current) {
+      radiusLabelRef.current = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: labelDiv,
+        map,
+        zIndex: 2000,
+      });
+    } else {
+      radiusLabelRef.current.setPosition(pos);
+      radiusLabelRef.current.setContent(labelDiv);
+    }
+  }, []);
+
   const resetMapInstance = useCallback(() => {
     clearOverlays();
+    clearRadiusCircle();
     mapRef.current = null;
-  }, [clearOverlays]);
+  }, [clearOverlays, clearRadiusCircle]);
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
@@ -276,6 +347,46 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
           if (!mountedRef.current) return;
           fireBounds(map);
         });
+
+        // 반경검색 — 마우스 down → 중심 설정, move → 반경 확장, up → 확정
+        window.kakao.maps.event.addListener(map, "mousedown", (mouseEvent: any) => {
+          if (!radiusModeRef.current) return;
+          const latlng = mouseEvent.latLng;
+          dragCenterRef.current = { lat: latlng.getLat(), lng: latlng.getLng() };
+          draggingRef.current = true;
+          // 지도 드래그 비활성 (원 그리기 우선)
+          try { map.setDraggable(false); } catch (_) {}
+          drawCircle(dragCenterRef.current, 0);
+        });
+
+        window.kakao.maps.event.addListener(map, "mousemove", (mouseEvent: any) => {
+          if (!radiusModeRef.current || !draggingRef.current || !dragCenterRef.current) return;
+          const latlng = mouseEvent.latLng;
+          const r = haversineMeters(
+            dragCenterRef.current.lat, dragCenterRef.current.lng,
+            latlng.getLat(), latlng.getLng()
+          );
+          drawCircle(dragCenterRef.current, r);
+        });
+
+        const finishDrag = (mouseEvent?: any) => {
+          if (!radiusModeRef.current || !draggingRef.current || !dragCenterRef.current) return;
+          draggingRef.current = false;
+          try { map.setDraggable(true); } catch (_) {}
+          let r = 0;
+          if (mouseEvent?.latLng) {
+            r = haversineMeters(
+              dragCenterRef.current.lat, dragCenterRef.current.lng,
+              mouseEvent.latLng.getLat(), mouseEvent.latLng.getLng()
+            );
+          }
+          // 클릭만 한 경우(반경=0) 기본 500m
+          if (r < 30) r = 500;
+          const center = dragCenterRef.current;
+          drawCircle(center, r);
+          propsRef.current.onRadiusChange?.({ lat: center.lat, lng: center.lng, radius: r });
+        };
+        window.kakao.maps.event.addListener(map, "mouseup", finishDrag);
       } catch (_) {
         if (!cancelled) {
           setMapError(true);
@@ -308,6 +419,23 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     if (!mapRef.current || !window.kakao?.maps) return;
     renderOverlays(mapRef.current, properties, selectedId, onSelect, zoomLevelRef.current);
   }, [properties, selectedId, onSelect, renderOverlays]);
+
+  // 외부에서 radiusCircle 변경(해제 등) 동기화
+  useEffect(() => {
+    if (!mapRef.current || !window.kakao?.maps) return;
+    if (radiusCircle) {
+      drawCircle({ lat: radiusCircle.lat, lng: radiusCircle.lng }, radiusCircle.radius);
+    } else {
+      clearRadiusCircle();
+    }
+  }, [radiusCircle, drawCircle, clearRadiusCircle]);
+
+  // 반경검색 모드 진입/해제 시 커서 변경
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.cursor = radiusMode ? "crosshair" : "";
+    }
+  }, [radiusMode]);
 
   // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
   useEffect(() => {
