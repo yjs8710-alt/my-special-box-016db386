@@ -6,6 +6,7 @@ import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
+import { RadiusCircle, isInsideRadius } from "@/lib/geoDistance";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
