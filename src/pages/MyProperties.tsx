@@ -591,6 +591,7 @@ const MyProperties = () => {
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [reregisterPrefill, setReregisterPrefill] = useState<Record<string, unknown> | null>(null);
   const [agentName, setAgentName] = useState("");
   // 관리자 전용: user_id → {name, email} 맵
   const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; agency_name?: string }>>({});
