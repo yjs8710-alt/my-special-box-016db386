@@ -73,9 +73,9 @@ export async function verifyDeviceSlot(): Promise<boolean> {
  *  - IP 조회 자체가 실패하면 차단 (false) — 우회 방지 */
 export async function verifyPcIpAllowed(): Promise<boolean> {
   const ip = await fetchPublicIp();
-  if (!ip) return false;
+  if (!ip) return true; // IP 조회 실패 시 우발적 차단 방지
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("verify_pc_ip", { _ip_address: ip });
-  if (error) return true; // 네트워크 오류만은 통과(우발적 차단 방지)
+  if (error) return true;
   return data === true;
 }

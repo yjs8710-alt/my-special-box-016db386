@@ -115,35 +115,30 @@ async function checkSession() {
 // 앱 시작 시 한번 체크
 checkSession();
 
-supabase.auth.onAuthStateChange(async (event, session) => {
+supabase.auth.onAuthStateChange((event, session) => {
   if (!session) {
     teardownDeviceChannel();
     notify("unauthorized", null);
     return;
   }
 
-  // 로그인/세션 갱신 시: 디바이스 슬롯 클레임 + 검증 + 채널 구독
+  // 세션 상태 즉시 갱신 (IP/디바이스 검증은 백그라운드)
+  checkSession();
+
+  // 로그인/세션 갱신 시: 디바이스 슬롯 클레임 + 검증 + 채널 구독 (비동기)
   if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
     kickedOut = false;
-    try {
-      await claimDeviceSlot();
-    } catch {}
-    setupDeviceChannel(session.user.id);
-    // PC 허용 IP 검증 (PC 한정, 모바일은 통과)
-    const ipOk = await verifyPcIpAllowed();
-    if (!ipOk) {
-      await forceLogoutDueToIpRestriction();
-      return;
-    }
-    // 탭 복귀 후 정합성 재검증
-    const ok = await verifyDeviceSlot();
-    if (!ok) {
-      await forceLogoutDueToDeviceConflict();
-      return;
-    }
+    (async () => {
+      try { await claimDeviceSlot(); } catch {}
+      setupDeviceChannel(session.user.id);
+      // 허용 IP 검증 (PC/모바일 공통)
+      const ipOk = await verifyPcIpAllowed();
+      if (!ipOk) { await forceLogoutDueToIpRestriction(); return; }
+      // 디바이스 슬롯 정합성 검증
+      const ok = await verifyDeviceSlot();
+      if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
+    })();
   }
-
-  checkSession();
 });
 
 // 탭이 다시 보일 때 디바이스 슬롯 정합성 재검증
