@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { formatPhone } from "@/lib/utils";
+import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -1979,7 +1979,8 @@ const AdminDashboard = () => {
                   if (memberGroupByAgency) {
                     const groups = new Map<string, AgentProfile[]>();
                     filteredMembers.forEach((m) => {
-                      const key = (m.license_number || "(등록번호 미지정)").trim();
+                      const raw = (m.license_number || "").trim();
+                      const key = raw ? formatLicenseNumber(raw) : "(등록번호 미지정)";
                       if (!groups.has(key)) groups.set(key, []);
                       groups.get(key)!.push(m);
                     });
@@ -2150,7 +2151,15 @@ const AdminDashboard = () => {
                                   <input
                                     type="text"
                                     value={String(getMemberEditValue(m, field))}
-                                    onChange={e => setMemberEditField(m.id, field, e.target.value)}
+                                    onChange={e => {
+                                      const raw = e.target.value;
+                                      const v = field === "license_number" ? formatLicenseNumber(raw)
+                                        : (field === "phone" || field === "agency_phone") ? formatPhone(raw)
+                                        : raw;
+                                      setMemberEditField(m.id, field, v);
+                                    }}
+                                    inputMode={field === "license_number" || field === "business_number" ? "numeric" : undefined}
+                                    maxLength={field === "license_number" ? 16 : undefined}
                                     className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground focus:outline-none focus:border-primary"
                                   />
                                 </div>

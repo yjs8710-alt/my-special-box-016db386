@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
-import { formatPhone } from "@/lib/utils";
+import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 
 interface AgentProfile {
   id: string;
@@ -308,7 +308,7 @@ const MyPage = () => {
                                    else if (cell.field === "phone") setPhone(formatPhone(v));
                                    else if (cell.field === "agencyPhone") setAgencyPhone(formatPhone(v));
                                   else if (cell.field === "businessNumber") setBusinessNumber(v);
-                                  else if (cell.field === "licenseNumber") setLicenseNumber(v);
+                                  else if (cell.field === "licenseNumber") setLicenseNumber(formatLicenseNumber(v));
                                   else if (cell.field === "agencyName") setAgencyName(v);
                                   else if (cell.field === "representativeName") setRepresentativeName(v);
                                   else setAgencyAddress(v);
