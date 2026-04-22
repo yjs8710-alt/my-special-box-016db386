@@ -609,6 +609,28 @@ const MapFilterBar = ({
                     <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
                   </button>
                 )}
+                {onRadiusModeToggle && (
+                  <button
+                    onClick={onRadiusModeToggle}
+                    title={radiusMode ? "반경검색 종료" : "지도 클릭 후 드래그로 반경 지정"}
+                    className="relative flex items-center gap-1 px-2.5 h-10 transition-all"
+                    style={{
+                      borderLeft: "1px solid hsl(var(--border))",
+                      background: radiusMode ? "hsl(var(--accent))" : "transparent",
+                      color: radiusMode ? "#fff" : "hsl(var(--muted-foreground))",
+                    }}
+                  >
+                    <Target className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-bold whitespace-nowrap">
+                      {radiusMode && radiusInfo
+                        ? `반경 ${radiusInfo.radius >= 1000 ? (radiusInfo.radius/1000).toFixed(2)+"km" : Math.round(radiusInfo.radius)+"m"}`
+                        : "반경검색"}
+                    </span>
+                    {radiusMode && (
+                      <X className="w-3 h-3 opacity-80" />
+                    )}
+                  </button>
+                )}
                 <button
                   onClick={() => onSearchClick?.()}
                   className="flex items-center justify-center h-10 px-4 text-xs font-bold"
