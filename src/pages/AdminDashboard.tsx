@@ -1974,27 +1974,31 @@ const AdminDashboard = () => {
                 {membersLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!membersLoading && filteredMembers.length === 0 && <div className="py-16 text-center text-sm text-muted-foreground">해당 조건의 회원이 없습니다.</div>}
                 {!membersLoading && (() => {
-                  // 부동산별 그룹 보기일 때, agency_name 기준으로 정렬하고 그룹 헤더 삽입
-                  let displayList: Array<{ kind: "header"; agency: string; count: number; rep: AgentProfile | null; approved: number; pending: number; collapsed: boolean } | { kind: "row"; member: AgentProfile }> = [];
+                  // 부동산별 그룹 보기일 때, 공인중개사 등록번호(license_number) 기준으로 그룹화
+                  let displayList: Array<{ kind: "header"; groupKey: string; license: string; agency: string; count: number; rep: AgentProfile | null; approved: number; pending: number; collapsed: boolean } | { kind: "row"; member: AgentProfile }> = [];
                   if (memberGroupByAgency) {
                     const groups = new Map<string, AgentProfile[]>();
                     filteredMembers.forEach((m) => {
-                      const key = (m.agency_name || "(미지정)").trim();
+                      const key = (m.license_number || "(등록번호 미지정)").trim();
                       if (!groups.has(key)) groups.set(key, []);
                       groups.get(key)!.push(m);
                     });
                     const sortedGroups = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], "ko"));
-                    sortedGroups.forEach(([agency, list]) => {
+                    sortedGroups.forEach(([license, list]) => {
                       const sortedList = [...list].sort((a, b) => {
                         const order = (x: AgentProfile) => x.role === "admin" ? 0 : (x.member_type ?? "대표중개사") === "대표중개사" ? 1 : x.member_type === "소속중개사" ? 2 : 3;
                         return order(a) - order(b);
                       });
-                      const collapsed = !!collapsedAgencies[agency];
+                      const collapsed = !!collapsedAgencies[license];
+                      const rep = sortedList.find(x => (x.member_type ?? "대표중개사") === "대표중개사") ?? null;
+                      const agencyName = (rep?.agency_name || sortedList[0]?.agency_name || "(사무소 미지정)").trim();
                       displayList.push({
                         kind: "header",
-                        agency,
+                        groupKey: license,
+                        license,
+                        agency: agencyName,
                         count: sortedList.length,
-                        rep: sortedList.find(x => (x.member_type ?? "대표중개사") === "대표중개사") ?? null,
+                        rep,
                         approved: sortedList.filter(x => x.status === "approved").length,
                         pending: sortedList.filter(x => x.status === "pending").length,
                         collapsed,
@@ -2009,9 +2013,9 @@ const AdminDashboard = () => {
                     if (item.kind === "header") {
                       return (
                         <button
-                          key={`hdr-${item.agency}`}
+                          key={`hdr-${item.groupKey}`}
                           type="button"
-                          onClick={() => setCollapsedAgencies((p) => ({ ...p, [item.agency]: !p[item.agency] }))}
+                          onClick={() => setCollapsedAgencies((p) => ({ ...p, [item.groupKey]: !p[item.groupKey] }))}
                           className="w-full flex items-center justify-between px-5 py-2.5 border-b border-border hover:bg-muted/30 transition-colors"
                           style={{ background: "hsl(var(--primary) / 0.06)" }}
                         >
@@ -2019,6 +2023,9 @@ const AdminDashboard = () => {
                             {item.collapsed ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />}
                             <Building2 className="w-3.5 h-3.5" style={{ color: "hsl(var(--primary))" }} />
                             <span className="text-sm font-bold text-foreground truncate">{item.agency}</span>
+                            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
+                              등록번호 {item.license}
+                            </span>
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
                               {item.count}명
                             </span>
