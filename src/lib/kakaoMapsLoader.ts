@@ -183,7 +183,6 @@ function waitForExistingScript(script: HTMLScriptElement, timeoutMs: number) {
 function injectKakaoScript(timeoutMs: number) {
   const existing = getPrimaryScript();
   if (existing && getScriptStatus(existing) !== "error") {
-    cleanupDuplicateScripts(existing);
     return waitForExistingScript(existing, timeoutMs);
   }
 
@@ -198,6 +197,9 @@ function injectKakaoScript(timeoutMs: number) {
     script.async = true;
     script.defer = true;
     markScriptStatus(script, "loading");
+    // Append immediately so concurrent callers can find & reuse this script
+    // instead of creating duplicates that then remove each other.
+    document.head.appendChild(script);
 
     let settled = false;
     let pollTimer = 0;
