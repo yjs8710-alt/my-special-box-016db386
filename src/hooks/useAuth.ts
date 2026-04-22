@@ -141,9 +141,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 });
 
-  checkSession();
-});
-
 // 탭이 다시 보일 때 디바이스 슬롯 정합성 재검증
 if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", async () => {
