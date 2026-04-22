@@ -153,7 +153,9 @@ if (typeof document !== "undefined") {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     const ok = await verifyDeviceSlot();
-    if (!ok) await forceLogoutDueToDeviceConflict();
+    if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
+    const ipOk = await verifyPcIpAllowed();
+    if (!ipOk) await forceLogoutDueToIpRestriction();
   });
 }
 
