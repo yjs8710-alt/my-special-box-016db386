@@ -308,7 +308,7 @@ const MyPage = () => {
                                    else if (cell.field === "phone") setPhone(formatPhone(v));
                                    else if (cell.field === "agencyPhone") setAgencyPhone(formatPhone(v));
                                   else if (cell.field === "businessNumber") setBusinessNumber(v);
-                                  else if (cell.field === "licenseNumber") setLicenseNumber(v);
+                                  else if (cell.field === "licenseNumber") setLicenseNumber(formatLicenseNumber(v));
                                   else if (cell.field === "agencyName") setAgencyName(v);
                                   else if (cell.field === "representativeName") setRepresentativeName(v);
                                   else setAgencyAddress(v);
