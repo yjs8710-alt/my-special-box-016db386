@@ -170,8 +170,8 @@ interface ResultCardProps {
   isSelected: boolean;
 }
 const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel, isSelected }: ResultCardProps) => {
-  // 승인된 회원은 제한 없이 바로 노출
-  const phoneVisible = isApproved || show;
+  // 번호는 항상 '번호 공개' 버튼을 눌러야만 노출
+  const phoneVisible = show;
   const [expanded, setExpanded] = useState(false);
   const isContact = item.source === "contact";
   const isHidden = item.source === "property" && item.status !== "active";
