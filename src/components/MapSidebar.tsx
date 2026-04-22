@@ -1753,13 +1753,23 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               🖨️ 인쇄
             </button>
             {isAdmin && (
-              <button
-                onClick={handleSave}
-                className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
-                style={{ background: "hsl(var(--primary))", color: "#fff" }}
-              >
-                {saved ? "✓ 저장됨" : "💾 저장"}
-              </button>
+              <>
+                <button
+                  onClick={handleSave}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                  style={{ background: "hsl(var(--primary))", color: "#fff" }}
+                >
+                  {saved ? "✓ 저장됨" : "💾 저장"}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                  style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}
+                  title="저장된 임대제안서 초기화"
+                >
+                  🗑 삭제
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
