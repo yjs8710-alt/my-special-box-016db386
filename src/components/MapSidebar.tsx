@@ -2724,6 +2724,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     >
                       <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
                       <span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
+                      {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {" "}/ 관 {prop.manageFee}
+                        </span>
+                      )}
                     </span>
                   )}
                   {halfMatch && (
@@ -2732,6 +2737,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       style={{ color: "#1d4ed8" }}
                     >
                       반{halfMatch[1]}/{halfMatch[2]}
+                      {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {" "}/ 관 {prop.manageFee}
+                        </span>
+                      )}
                     </span>
                   )}
                   {jeonseMatch && (
@@ -2740,6 +2750,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       style={{ color: "#15803d" }}
                     >
                       전{jeonseMatch[1]}
+                      {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {" "}/ 관 {prop.manageFee}
+                        </span>
+                      )}
                     </span>
                   )}
                   {areaShort && (
