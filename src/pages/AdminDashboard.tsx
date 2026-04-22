@@ -2272,19 +2272,23 @@ const AdminDashboard = () => {
                               <div className="flex flex-col gap-1.5">
                                 <span className="text-[11px] text-muted-foreground font-medium">중개사 유형</span>
                                 <div className="flex gap-2 flex-wrap">
-                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => (
-                                    <button key={t}
-                                      onClick={() => updateMemberType(m.id, t)}
-                                      className="px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-1"
-                                      style={mt === t
-                                        ? { background: MEMBER_TYPE_LABELS[t].bg, color: MEMBER_TYPE_LABELS[t].color, borderColor: MEMBER_TYPE_LABELS[t].color }
-                                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                                      }
-                                    >
-                                      {MEMBER_TYPE_LABELS[t].emoji} {t}
-                                      {mt === t && <span className="text-[9px] opacity-70">현재</span>}
-                                    </button>
-                                  ))}
+                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => {
+                                    const TypeIcon = MEMBER_TYPE_LABELS[t].Icon;
+                                    return (
+                                      <button key={t}
+                                        onClick={() => updateMemberType(m.id, t)}
+                                        className="px-3 py-2 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5"
+                                        style={mt === t
+                                          ? { background: MEMBER_TYPE_LABELS[t].bg, color: MEMBER_TYPE_LABELS[t].color, borderColor: MEMBER_TYPE_LABELS[t].color }
+                                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                                        }
+                                      >
+                                        <TypeIcon className="w-3.5 h-3.5" />
+                                        {t}
+                                        {mt === t && <span className="text-[9px] opacity-70">현재</span>}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
