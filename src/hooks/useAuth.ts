@@ -129,6 +129,12 @@ supabase.auth.onAuthStateChange(async (event, session) => {
       await claimDeviceSlot();
     } catch {}
     setupDeviceChannel(session.user.id);
+    // PC 허용 IP 검증 (PC 한정, 모바일은 통과)
+    const ipOk = await verifyPcIpAllowed();
+    if (!ipOk) {
+      await forceLogoutDueToIpRestriction();
+      return;
+    }
     // 탭 복귀 후 정합성 재검증
     const ok = await verifyDeviceSlot();
     if (!ok) {
