@@ -224,6 +224,9 @@ const ResidentialRental = () => {
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
+            radiusMode={radiusMode}
+            radiusCircle={radiusCircle}
+            onRadiusChange={setRadiusCircle}
           />
           <MapFilterBar
             activeType={activeType}
@@ -245,6 +248,16 @@ const ResidentialRental = () => {
             showResidentialTypes={true}
             showBuildingOptions={true}
             showRoomTypes={false}
+            radiusMode={radiusMode}
+            radiusInfo={radiusCircle ? { radius: radiusCircle.radius } : null}
+            onRadiusModeToggle={() => {
+              if (radiusMode) {
+                setRadiusMode(false);
+                setRadiusCircle(null);
+              } else {
+                setRadiusMode(true);
+              }
+            }}
           />
         </div>
         <MapSidebar
