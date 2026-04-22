@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { formatPhone } from "@/lib/utils";
+import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 
 const STEPS = ["기본 정보", "자격 인증", "약관 동의"];
 
