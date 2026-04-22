@@ -12,6 +12,7 @@ interface PropertyCardProps {
   floor: string;
   deposit: string;
   monthly: string;
+  manageFee?: string;
   isNew?: boolean;
   isHot?: boolean;
   views: number;
