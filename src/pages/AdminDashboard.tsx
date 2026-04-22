@@ -1909,19 +1909,26 @@ const AdminDashboard = () => {
                   {/* 등급 필터 */}
                   <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
                     {[
-                      { key: "all", label: "전체" },
-                      { key: "role_admin", label: "🛡관리자" },
-                      { key: "대표중개사", label: "🏢대표" },
-                      { key: "소속중개사", label: "👔소속" },
-                      { key: "중개보조원", label: "🤝보조원" },
-                    ].map((f) => (
-                      <button key={f.key} onClick={() => setMemberFilter(f.key)}
-                        className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
-                        style={memberFilter === f.key
-                          ? { background: "hsl(var(--primary))", color: "#fff" }
-                          : { color: "hsl(var(--muted-foreground))" }
-                        }>{f.label}</button>
-                    ))}
+                      { key: "all", label: "전체", Icon: Users },
+                      { key: "role_admin", label: "관리자", Icon: ShieldCheck },
+                      { key: "대표중개사", label: "대표", Icon: Gem },
+                      { key: "소속중개사", label: "소속", Icon: BadgeCheck },
+                      { key: "중개보조원", label: "보조원", Icon: UserCog },
+                    ].map((f) => {
+                      const active = memberFilter === f.key;
+                      const FIcon = f.Icon;
+                      return (
+                        <button key={f.key} onClick={() => setMemberFilter(f.key)}
+                          className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all inline-flex items-center gap-1"
+                          style={active
+                            ? { background: "hsl(var(--primary))", color: "#fff" }
+                            : { color: "hsl(var(--muted-foreground))" }
+                          }>
+                          <FIcon className="w-3.5 h-3.5" />
+                          {f.label}
+                        </button>
+                      );
+                    })}
                   </div>
                   {/* 상태 필터 */}
                   <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/20 p-1">
@@ -1942,14 +1949,15 @@ const AdminDashboard = () => {
                   {/* 부동산별 그룹 토글 */}
                   <button
                     onClick={() => setMemberGroupByAgency((v) => !v)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all border"
+                    className="px-2.5 py-1 rounded-lg text-xs font-bold transition-all border inline-flex items-center gap-1"
                     style={memberGroupByAgency
                       ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                       : { color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.4)", background: "hsl(var(--primary) / 0.06)" }
                     }
                     title="부동산(사무소)별로 그룹화"
                   >
-                    🏢 부동산별 보기
+                    <Building2 className="w-3.5 h-3.5" />
+                    부동산별 보기
                   </button>
                    <div className="relative">
                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
