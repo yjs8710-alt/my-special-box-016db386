@@ -4134,39 +4134,12 @@ const MapSidebar = ({
                                 </div>
                               )}
 
-                              {/* 3행: 연락처 직접 표시 (텍스트) */}
-                              <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                                {item.contactOwner && (
-                                  <a
-                                    href={`tel:${item.contactOwner}`}
-                                    className="flex items-center gap-0.5 text-[10px] font-bold"
-                                    style={{ color: "hsl(var(--primary))" }}
-                                  >
-                                    <Phone className="w-2.5 h-2.5" />
-                                    소유주 {item.contactOwner}
-                                  </a>
-                                )}
-                                {item.contactManager && (
-                                  <a
-                                    href={`tel:${item.contactManager}`}
-                                    className="flex items-center gap-0.5 text-[10px] font-bold"
-                                    style={{ color: "hsl(217 91% 55%)" }}
-                                  >
-                                    <Phone className="w-2.5 h-2.5" />
-                                    관리인 {item.contactManager}
-                                  </a>
-                                )}
-                                {item.contactBroker && (
-                                  <a
-                                    href={`tel:${item.contactBroker}`}
-                                    className="flex items-center gap-0.5 text-[10px] font-bold"
-                                    style={{ color: "hsl(25 95% 53%)" }}
-                                  >
-                                    <Phone className="w-2.5 h-2.5" />
-                                    부동산 {item.contactBroker}
-                                  </a>
-                                )}
-                              </div>
+                              {/* 3행: 연락처 — '번호 공개' 클릭 시에만 노출 */}
+                              <LandlordContactReveal
+                                owner={item.contactOwner}
+                                manager={item.contactManager}
+                                broker={item.contactBroker}
+                              />
                             </div>
                           </div>
                         </div>
