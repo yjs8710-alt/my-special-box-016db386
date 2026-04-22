@@ -10,7 +10,9 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
+  Crown, Briefcase, HandHelping,
 } from "lucide-react";
+import logoTransparent from "@/assets/logo-transparent.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
