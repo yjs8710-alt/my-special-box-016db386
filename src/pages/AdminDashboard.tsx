@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { formatPhone } from "@/lib/utils";
+import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
