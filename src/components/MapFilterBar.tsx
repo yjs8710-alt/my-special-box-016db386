@@ -621,7 +621,16 @@ const MapFilterBar = ({
                       color: radiusMode ? "#fff" : "hsl(var(--muted-foreground))",
                     }}
                   >
-                    <Target className="w-3.5 h-3.5" />
+                    <img
+                      src={radarIcon}
+                      alt=""
+                      className="w-4 h-4"
+                      style={{
+                        filter: radiusMode
+                          ? "brightness(0) invert(1)"
+                          : "brightness(0) opacity(0.55)",
+                      }}
+                    />
                     <span className="text-[11px] font-bold whitespace-nowrap">
                       {radiusMode && radiusInfo
                         ? `반경 ${radiusInfo.radius >= 1000 ? (radiusInfo.radius/1000).toFixed(2)+"km" : Math.round(radiusInfo.radius)+"m"}`
