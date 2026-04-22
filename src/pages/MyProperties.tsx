@@ -392,6 +392,7 @@ const PropertyRow = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  onReregister,
   isAdmin,
   registrantInfo,
 }: {
@@ -399,6 +400,7 @@ const PropertyRow = ({
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
+  onReregister: (p: DBProperty) => void;
   isAdmin?: boolean;
   registrantInfo?: { name: string; agency_name?: string } | null;
 }) => {
@@ -486,22 +488,41 @@ const PropertyRow = ({
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0 ml-1">
-          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-            className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-            title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
-            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
-            {prop.status === "active" ? "노출" : "숨김"}
-          </button>
+          {prop.status === "ended" ? (
+            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
+              className="px-2 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
+              title="이 매물 정보를 그대로 가져와 새로 등록"
+              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+              재등록
+            </button>
+          ) : (
+            <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+              className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+              title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
+              style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+              {prop.status === "active" ? "노출" : "숨김"}
+            </button>
+          )}
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
           </button>
-          <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
-            className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
-            style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
-            title={isAdmin ? "삭제" : "종료"}>
-            {isAdmin ? "삭제" : "종료"}
-          </button>
+          {prop.status !== "ended" && (
+            <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
+              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
+              title={isAdmin ? "삭제" : "종료"}>
+              {isAdmin ? "삭제" : "종료"}
+            </button>
+          )}
+          {isAdmin && prop.status === "ended" && (
+            <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
+              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              style={{ color: "hsl(var(--destructive))" }}
+              title="삭제">
+              삭제
+            </button>
+          )}
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
       </div>
@@ -570,6 +591,7 @@ const MyProperties = () => {
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
+  const [reregisterPrefill, setReregisterPrefill] = useState<Record<string, unknown> | null>(null);
   const [agentName, setAgentName] = useState("");
   // 관리자 전용: user_id → {name, email} 맵
   const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; agency_name?: string }>>({});
@@ -721,7 +743,12 @@ const MyProperties = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
       <Header onRegisterChange={setShowRegister} />
-      {showRegister && <PropertyRegisterModal onClose={() => setShowRegister(false)} />}
+      {showRegister && (
+        <PropertyRegisterModal
+          onClose={() => { setShowRegister(false); setReregisterPrefill(null); }}
+          prefill={reregisterPrefill ?? undefined}
+        />
+      )}
       {editTarget && (
         <AdminPropertyFormModal
           initial={editTarget as unknown as Record<string, unknown>}
@@ -874,6 +901,7 @@ const MyProperties = () => {
                 onEdit={setEditTarget}
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
+                onReregister={(p) => { setReregisterPrefill(p as unknown as Record<string, unknown>); setShowRegister(true); }}
                 isAdmin={agentName === "관리자"}
                 registrantInfo={agentName === "관리자" ? (
                   prop.registered_by
