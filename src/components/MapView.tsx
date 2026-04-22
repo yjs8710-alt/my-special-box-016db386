@@ -290,6 +290,46 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
           if (!mountedRef.current) return;
           fireBounds(map);
         });
+
+        // 반경검색 — 마우스 down → 중심 설정, move → 반경 확장, up → 확정
+        window.kakao.maps.event.addListener(map, "mousedown", (mouseEvent: any) => {
+          if (!radiusModeRef.current) return;
+          const latlng = mouseEvent.latLng;
+          dragCenterRef.current = { lat: latlng.getLat(), lng: latlng.getLng() };
+          draggingRef.current = true;
+          // 지도 드래그 비활성 (원 그리기 우선)
+          try { map.setDraggable(false); } catch (_) {}
+          drawCircle(dragCenterRef.current, 0);
+        });
+
+        window.kakao.maps.event.addListener(map, "mousemove", (mouseEvent: any) => {
+          if (!radiusModeRef.current || !draggingRef.current || !dragCenterRef.current) return;
+          const latlng = mouseEvent.latLng;
+          const r = haversineMeters(
+            dragCenterRef.current.lat, dragCenterRef.current.lng,
+            latlng.getLat(), latlng.getLng()
+          );
+          drawCircle(dragCenterRef.current, r);
+        });
+
+        const finishDrag = (mouseEvent?: any) => {
+          if (!radiusModeRef.current || !draggingRef.current || !dragCenterRef.current) return;
+          draggingRef.current = false;
+          try { map.setDraggable(true); } catch (_) {}
+          let r = 0;
+          if (mouseEvent?.latLng) {
+            r = haversineMeters(
+              dragCenterRef.current.lat, dragCenterRef.current.lng,
+              mouseEvent.latLng.getLat(), mouseEvent.latLng.getLng()
+            );
+          }
+          // 클릭만 한 경우(반경=0) 기본 500m
+          if (r < 30) r = 500;
+          const center = dragCenterRef.current;
+          drawCircle(center, r);
+          propsRef.current.onRadiusChange?.({ lat: center.lat, lng: center.lng, radius: r });
+        };
+        window.kakao.maps.event.addListener(map, "mouseup", finishDrag);
       } catch (_) {
         if (!cancelled) {
           setMapError(true);
