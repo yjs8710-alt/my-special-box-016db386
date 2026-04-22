@@ -3327,6 +3327,15 @@ const MapSidebar = ({
 
     const rows = list
       .map((p, i) => {
+        const buildYearShort = p.buildYear ? p.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
+        const roomTypeText = p.type === "원룸" && p.roomType ? p.roomType : (p.roomType ?? "-");
+        const passwordCell = showContacts
+          ? `<td style="font-size:10px;color:#333;line-height:1.6;text-align:center">
+            ${p.buildingPassword || p.password ? `<span style="color:#15803d;font-weight:600">건물</span> ${p.buildingPassword ?? p.password}<br/>` : ""}
+            ${p.roomPassword ? `<span style="color:#1d4ed8;font-weight:600">방</span> ${p.roomPassword}` : ""}
+            ${!p.buildingPassword && !p.password && !p.roomPassword ? "-" : ""}
+           </td>`
+          : "";
         const contactCell = showContacts
           ? `<td style="font-size:10px;color:#333;line-height:1.6">
             ${p.contactOwner ? `<span style="color:#15803d;font-weight:600">건물주</span> ${p.contactOwner}<br/>` : ""}
@@ -3346,11 +3355,17 @@ const MapSidebar = ({
         <td style="text-align:center;color:#555">${p.manageFee ?? "-"}</td>
         <td style="text-align:center">${p.availableFrom ?? "-"}</td>
         <td style="text-align:center"><span style="background:#e8f0ff;color:#1a56db;border-radius:4px;padding:2px 6px;font-size:10px">${p.type}</span></td>
+        <td style="text-align:center;color:#555">${roomTypeText || "-"}</td>
+        <td style="text-align:center;color:#555">${buildYearShort ? `${buildYearShort}년` : "-"}</td>
+        ${passwordCell}
         ${contactCell}
       </tr>`;
       })
       .join("");
 
+    const roomTypeHeader = `<th style="width:60px">방유형</th>`;
+    const buildYearHeader = `<th style="width:55px">준공</th>`;
+    const passwordHeader = showContacts ? `<th style="width:90px">비밀번호 (관리자용)</th>` : "";
     const contactHeader = showContacts ? `<th style="width:130px">연락처 (관리자용)</th>` : "";
 
     const adminWatermark = showContacts
@@ -3407,6 +3422,9 @@ const MapSidebar = ({
         <th style="width:60px">관리비</th>
         <th style="width:80px">입주가능일</th>
         <th style="width:65px">유형</th>
+        <th style="width:60px">방유형</th>
+        <th style="width:55px">준공</th>
+        ${passwordHeader}
         ${contactHeader}
       </tr>
     </thead>
