@@ -208,10 +208,67 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     overlaysRef.current.clear();
   }, []);
 
+  const clearRadiusCircle = useCallback(() => {
+    if (circleOverlayRef.current) {
+      try { circleOverlayRef.current.setMap(null); } catch (_) {}
+      circleOverlayRef.current = null;
+    }
+    if (radiusLabelRef.current) {
+      try { radiusLabelRef.current.setMap(null); } catch (_) {}
+      radiusLabelRef.current = null;
+    }
+  }, []);
+
+  const drawCircle = useCallback((center: { lat: number; lng: number }, radius: number) => {
+    const map = mapRef.current;
+    if (!map || !window.kakao?.maps) return;
+    const pos = new window.kakao.maps.LatLng(center.lat, center.lng);
+
+    if (!circleOverlayRef.current) {
+      circleOverlayRef.current = new window.kakao.maps.Circle({
+        center: pos,
+        radius: Math.max(radius, 1),
+        strokeWeight: 2,
+        strokeColor: "#1e40af",
+        strokeOpacity: 0.9,
+        strokeStyle: "solid",
+        fillColor: "#3b82f6",
+        fillOpacity: 0.18,
+      });
+      circleOverlayRef.current.setMap(map);
+    } else {
+      circleOverlayRef.current.setPosition(pos);
+      circleOverlayRef.current.setRadius(Math.max(radius, 1));
+    }
+
+    // 반경 라벨
+    const labelHtml = `
+      <div style="
+        background:#1e40af;color:#fff;font-size:11px;font-weight:700;
+        padding:3px 8px;border-radius:999px;white-space:nowrap;
+        box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:translate(-50%,-50%);
+      ">반경 ${formatRadius(radius)}</div>
+    `;
+    const labelDiv = document.createElement("div");
+    labelDiv.innerHTML = labelHtml;
+    if (!radiusLabelRef.current) {
+      radiusLabelRef.current = new window.kakao.maps.CustomOverlay({
+        position: pos,
+        content: labelDiv,
+        map,
+        zIndex: 2000,
+      });
+    } else {
+      radiusLabelRef.current.setPosition(pos);
+      radiusLabelRef.current.setContent(labelDiv);
+    }
+  }, []);
+
   const resetMapInstance = useCallback(() => {
     clearOverlays();
+    clearRadiusCircle();
     mapRef.current = null;
-  }, [clearOverlays]);
+  }, [clearOverlays, clearRadiusCircle]);
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
