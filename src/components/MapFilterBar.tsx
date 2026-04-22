@@ -633,14 +633,15 @@ const MapFilterBar = ({
                 )}
                 <button
                   onClick={() => onSearchClick?.()}
-                  className="flex items-center justify-center h-10 px-4 text-xs font-bold -mr-px"
+                  className="flex items-center justify-center h-10 px-4 text-xs font-bold"
                   style={{
                     background: "hsl(var(--primary))",
                     color: "hsl(var(--primary-foreground))",
-                    borderTopRightRadius: "10px",
-                    borderBottomRightRadius: "10px",
-                    marginRight: "-2px",
-                    boxShadow: "inset 0 0 0 2px hsl(var(--primary))",
+                    borderTopRightRadius: "12px",
+                    borderBottomRightRadius: "12px",
+                    margin: "-2px -2px -2px 0",
+                    height: "calc(100% + 4px)",
+                    minHeight: "44px",
                   }}
                 >
                   <Search className="w-3.5 h-3.5" strokeWidth={2.5} />
