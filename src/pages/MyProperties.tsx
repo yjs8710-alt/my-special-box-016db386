@@ -901,6 +901,7 @@ const MyProperties = () => {
                 onEdit={setEditTarget}
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
+                onReregister={(p) => { setReregisterPrefill(p as unknown as Record<string, unknown>); setShowRegister(true); }}
                 isAdmin={agentName === "관리자"}
                 registrantInfo={agentName === "관리자" ? (
                   prop.registered_by
