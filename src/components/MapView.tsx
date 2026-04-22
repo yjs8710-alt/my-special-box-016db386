@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
+import { RadiusCircle, haversineMeters, formatRadius } from "@/lib/geoDistance";
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
