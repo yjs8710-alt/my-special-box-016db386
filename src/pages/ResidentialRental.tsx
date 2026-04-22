@@ -29,6 +29,8 @@ const ResidentialRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [radiusMode, setRadiusMode] = useState(false);
+  const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
