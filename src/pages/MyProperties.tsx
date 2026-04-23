@@ -512,33 +512,7 @@ const PropertyRow = ({
             <span className="truncate">{prop.address}</span>
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
-          {/* 관리자 전용: 등록자 정보 */}
-          {isAdmin && (
-            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-              {registrantInfo?.agency_name && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--chart-2) / 0.1)", color: "hsl(var(--chart-2))", borderColor: "hsl(var(--chart-2) / 0.25)" }}>
-                  🏢 {registrantInfo.agency_name}
-                </span>
-              )}
-              {displayRegistrant ? (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                  👤 {displayRegistrant}
-                </span>
-              ) : (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
-                  👤 등록자 미상
-                </span>
-              )}
-              {prop.registered_date && (
-                <span className="text-[10px] text-muted-foreground">
-                  · {prop.registered_date}
-                </span>
-              )}
-            </div>
-          )}
+          {/* 등록자 정보는 카드 상단 정보 바에서 노출 */}
         </div>
 
         <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
