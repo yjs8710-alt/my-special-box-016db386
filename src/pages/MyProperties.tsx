@@ -944,6 +944,13 @@ const MyProperties = () => {
                     ? registrantMap[prop.registered_by] ?? (prop.agent_name ? registrantMap[`agent_name:${prop.agent_name}`] ?? null : null)
                     : (prop.agent_name ? registrantMap[`agent_name:${prop.agent_name}`] ?? null : null)
                 ) : null}
+                matchedBy={agentName === "관리자" ? (
+                  prop.registered_by && registrantMap[prop.registered_by]
+                    ? "registered_by"
+                    : prop.agent_name && registrantMap[`agent_name:${prop.agent_name}`]
+                      ? "agent_name"
+                      : null
+                ) : null}
               />
             ))}
           </div>
