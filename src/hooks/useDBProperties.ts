@@ -91,8 +91,9 @@ const cache = new Map<string, MapProperty[]>();
  */
 export function useDBProperties(typeFilter?: string[]) {
   const cacheKey = typeFilter ? typeFilter.slice().sort().join(",") : "__all__";
-  const [properties, setProperties] = useState<MapProperty[]>(() => cache.get(cacheKey) ?? []);
-  const [loading, setLoading] = useState(() => !cache.has(cacheKey));
+  const cached = cache.get(cacheKey);
+  const [properties, setProperties] = useState<MapProperty[]>(cached ?? []);
+  const [loading, setLoading] = useState<boolean>(!cached);
   const [refreshKey, setRefreshKey] = useState(0);
   const debounceRef = useRef<number | null>(null);
 
