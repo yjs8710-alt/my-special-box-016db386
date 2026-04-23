@@ -30,8 +30,6 @@ export type Database = {
           name: string
           parent_user_id: string | null
           phone: string
-          phone_verified: boolean
-          phone_verified_at: string | null
           representative_name: string
           status: string
           updated_at: string
@@ -52,8 +50,6 @@ export type Database = {
           name: string
           parent_user_id?: string | null
           phone: string
-          phone_verified?: boolean
-          phone_verified_at?: string | null
           representative_name?: string
           status?: string
           updated_at?: string
@@ -74,8 +70,6 @@ export type Database = {
           name?: string
           parent_user_id?: string | null
           phone?: string
-          phone_verified?: boolean
-          phone_verified_at?: string | null
           representative_name?: string
           status?: string
           updated_at?: string
@@ -224,42 +218,6 @@ export type Database = {
           road_access?: string | null
           updated_at?: string
           use_zone?: string | null
-        }
-        Relationships: []
-      }
-      phone_otp_codes: {
-        Row: {
-          attempts: number
-          code_hash: string
-          consumed_at: string | null
-          created_at: string
-          expires_at: string
-          id: string
-          phone: string
-          purpose: string
-          verified: boolean
-        }
-        Insert: {
-          attempts?: number
-          code_hash: string
-          consumed_at?: string | null
-          created_at?: string
-          expires_at: string
-          id?: string
-          phone: string
-          purpose?: string
-          verified?: boolean
-        }
-        Update: {
-          attempts?: number
-          code_hash?: string
-          consumed_at?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          phone?: string
-          purpose?: string
-          verified?: boolean
         }
         Relationships: []
       }
@@ -638,7 +596,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_phone_registered: { Args: { _phone: string }; Returns: boolean }
       update_property_images: {
         Args: { _images: string[]; _property_id: string }
         Returns: boolean
