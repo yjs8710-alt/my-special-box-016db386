@@ -49,15 +49,15 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
 
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
-        <div className="w-full px-3 sm:px-5">
-          <div className="flex items-center h-12 gap-1">
+        <div className="w-full pr-3 sm:pr-5">
+          <div className="flex items-center h-20 gap-2">
 
             {/* 로고 */}
             <div
-              className="flex items-center gap-2 cursor-pointer mr-3 select-none flex-shrink-0"
+              className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0 -ml-1"
               onClick={() => navigate("/")}
             >
-              <img src={logoImg} alt="집다 로고" className="h-22 object-contain" style={{ height: "5.5rem" }} />
+              <img src={logoImg} alt="집다 로고" className="h-20 object-contain" />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
