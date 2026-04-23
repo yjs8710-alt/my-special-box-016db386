@@ -427,7 +427,7 @@ const PropertyRow = ({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-foreground truncate">{prop.title}</span>
+            <span className="text-sm font-semibold text-foreground truncate">{prop.building_name?.trim() || prop.title}</span>
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
               style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>
               {prop.type}
