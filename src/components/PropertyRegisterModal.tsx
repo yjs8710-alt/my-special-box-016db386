@@ -1158,7 +1158,7 @@ function Step2({
             <button
               type="button"
               onClick={() => {
-                const FULL_OPTIONS = ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"];
+                const FULL_OPTIONS = ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지","수도"];
                 const current = new Set(form.options);
                 const allSelected = FULL_OPTIONS.every(o => current.has(o));
                 if (allSelected) {
@@ -1170,7 +1170,7 @@ function Step2({
               }}
               className="px-4 py-1.5 rounded-xl text-xs font-extrabold border-2 transition-all"
               style={
-                ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지"].every(o => form.options.includes(o))
+                ["냉장고","세탁기","에어컨","TV","전자레인지","인터넷","가스레인지","수도"].every(o => form.options.includes(o))
                   ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                   : { background: "transparent", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" }
               }

@@ -2914,7 +2914,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {prop.options &&
             prop.options.length > 0 &&
             (() => {
-              const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지"];
+              const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
               const isFull = prop.options!.includes("풀옵션") || FULL_OPT.every((o) => prop.options!.includes(o));
               return (
                 <div
