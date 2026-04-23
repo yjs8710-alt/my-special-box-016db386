@@ -2842,7 +2842,7 @@ const AdminDashboard = () => {
             const REPORT_TYPE_META = {
               error_report:    { label: "오류제보",  color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)", emoji: "⚠️" },
               deal_complete:   { label: "거래완료",  color: "hsl(var(--chart-2))",     bg: "hsl(var(--chart-2) / 0.12)",    emoji: "✅" },
-              rental_proposal: { label: "임대제안서", color: "hsl(var(--primary))",     bg: "hsl(var(--primary) / 0.10)",    emoji: "📋" },
+              rental_proposal: { label: "임대현황", color: "hsl(var(--primary))",     bg: "hsl(var(--primary) / 0.10)",    emoji: "📋" },
             };
             const REPORT_STATUS_META = {
               pending:  { label: "미처리", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)" },
@@ -2911,7 +2911,7 @@ const AdminDashboard = () => {
                       { key: "all", label: "전체" },
                       { key: "error_report", label: "⚠️ 오류제보" },
                       { key: "deal_complete", label: "✅ 거래완료" },
-                      { key: "rental_proposal", label: "📋 임대제안서" },
+                      { key: "rental_proposal", label: "📋 임대현황" },
                     ] as const).map((f) => (
                       <button key={f.key} onClick={() => setReportFilter(f.key)}
                         className="px-2.5 py-1 rounded-lg text-xs font-medium transition-all"

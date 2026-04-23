@@ -49,7 +49,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
       : "",
     images: Array.isArray(row.images) ? (row.images as string[]) : [],
     description: String(row.description ?? ""),
-    // 임대제안서 JSON(__PROPOSAL_JSON__ prefix)은 건물 메모로 노출하지 않음
+    // 임대현황 JSON(__PROPOSAL_JSON__ prefix)은 건물 메모로 노출하지 않음
     buildingMemo: row.building_memo && !String(row.building_memo).startsWith("__PROPOSAL_JSON__")
       ? String(row.building_memo)
       : undefined,
