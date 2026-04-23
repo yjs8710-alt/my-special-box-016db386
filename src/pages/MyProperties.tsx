@@ -395,6 +395,7 @@ const PropertyRow = ({
   onReregister,
   isAdmin,
   registrantInfo,
+  matchedBy,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
