@@ -4,6 +4,7 @@ import {
   Building2, Pencil, Trash2, Eye, EyeOff, Plus,
   Search, RefreshCw, ChevronDown, ChevronUp,
   ImagePlus, Loader2, X, Save, Phone, MapPin,
+  Store, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -434,12 +435,12 @@ const PropertyRow = ({
                 className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md"
                 style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
               >
-                🏢 {registrantInfo.agency_name}
+                <Store className="w-3.5 h-3.5" /> {registrantInfo.agency_name}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-muted-foreground"
                 style={{ background: "hsl(var(--muted))" }}>
-                🏢 사무소 미상
+                <Store className="w-3.5 h-3.5" /> 사무소 미상
               </span>
             )}
             <span className="text-muted-foreground">|</span>
@@ -467,8 +468,8 @@ const PropertyRow = ({
               </span>
             )}
           </div>
-          <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap">
-            📅 {prop.registered_date}
+          <span className="inline-flex items-center gap-1 text-muted-foreground flex-shrink-0 whitespace-nowrap">
+            <Clock className="w-3.5 h-3.5" /> {prop.registered_date}
           </span>
         </div>
       )}
