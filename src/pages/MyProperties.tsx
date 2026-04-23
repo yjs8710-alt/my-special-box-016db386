@@ -4,6 +4,7 @@ import {
   Building2, Pencil, Trash2, Eye, EyeOff, Plus,
   Search, RefreshCw, ChevronDown, ChevronUp,
   ImagePlus, Loader2, X, Save, Phone, MapPin,
+  Store, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
