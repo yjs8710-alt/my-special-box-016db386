@@ -395,6 +395,7 @@ const PropertyRow = ({
   onReregister,
   isAdmin,
   registrantInfo,
+  matchedBy,
 }: {
   prop: DBProperty;
   onEdit: (p: DBProperty) => void;
@@ -403,14 +404,75 @@ const PropertyRow = ({
   onReregister: (p: DBProperty) => void;
   isAdmin?: boolean;
   registrantInfo?: { name: string; agency_name?: string } | null;
+  matchedBy?: "registered_by" | "agent_name" | null;
 }) => {
   const [expanded, setExpanded] = useState(false);
 
   // 관리자 뷰에서 등록자 표시: registrantInfo(프로필 기반) > agent_name 순으로
   const displayRegistrant = registrantInfo?.name || prop.agent_name || null;
+  const isStrictMatch = matchedBy === "registered_by";
+  const isFallbackMatch = matchedBy === "agent_name";
+  const isUnknown = isAdmin && !displayRegistrant;
 
   return (
     <div className="border border-border rounded-xl overflow-hidden" style={{ background: "hsl(var(--card))" }}>
+      {/* 관리자 전용: 등록자 정보 바 */}
+      {isAdmin && (
+        <div
+          className="flex items-center justify-between gap-3 px-4 py-2 border-b border-border/60 text-xs"
+          style={{
+            background: isUnknown
+              ? "hsl(var(--muted) / 0.5)"
+              : isStrictMatch
+                ? "hsl(var(--primary) / 0.08)"
+                : "hsl(var(--accent) / 0.06)",
+          }}
+        >
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            {registrantInfo?.agency_name ? (
+              <span
+                className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md"
+                style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
+              >
+                🏢 {registrantInfo.agency_name}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-muted-foreground"
+                style={{ background: "hsl(var(--muted))" }}>
+                🏢 사무소 미상
+              </span>
+            )}
+            <span className="text-muted-foreground">|</span>
+            {displayRegistrant ? (
+              <span
+                className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md"
+                style={{
+                  background: isStrictMatch ? "hsl(var(--primary) / 0.15)" : "hsl(var(--accent) / 0.15)",
+                  color: isStrictMatch ? "hsl(var(--primary))" : "hsl(var(--accent))",
+                }}
+                title={isStrictMatch ? "계정(registered_by) 기준 매칭" : "이름(agent_name) 기준 매칭"}
+              >
+                👤 {displayRegistrant}
+                {isFallbackMatch && (
+                  <span className="text-[9px] font-normal opacity-70">(이름매칭)</span>
+                )}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md"
+                style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}>
+                ⚠ 등록자 미상
+                {prop.agent_name && (
+                  <span className="text-[9px] font-normal opacity-80">(원본: {prop.agent_name})</span>
+                )}
+              </span>
+            )}
+          </div>
+          <span className="text-muted-foreground flex-shrink-0 whitespace-nowrap">
+            📅 {prop.registered_date}
+          </span>
+        </div>
+      )}
+
       {/* 요약 행 */}
       <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpanded(e => !e)}>
         {/* 상태 dot */}
@@ -450,33 +512,7 @@ const PropertyRow = ({
             <span className="truncate">{prop.address}</span>
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
-          {/* 관리자 전용: 등록자 정보 */}
-          {isAdmin && (
-            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-              {registrantInfo?.agency_name && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--chart-2) / 0.1)", color: "hsl(var(--chart-2))", borderColor: "hsl(var(--chart-2) / 0.25)" }}>
-                  🏢 {registrantInfo.agency_name}
-                </span>
-              )}
-              {displayRegistrant ? (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary) / 0.25)" }}>
-                  👤 {displayRegistrant}
-                </span>
-              ) : (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                  style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }}>
-                  👤 등록자 미상
-                </span>
-              )}
-              {prop.registered_date && (
-                <span className="text-[10px] text-muted-foreground">
-                  · {prop.registered_date}
-                </span>
-              )}
-            </div>
-          )}
+          {/* 등록자 정보는 카드 상단 정보 바에서 노출 */}
         </div>
 
         <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
@@ -907,6 +943,13 @@ const MyProperties = () => {
                   prop.registered_by
                     ? registrantMap[prop.registered_by] ?? (prop.agent_name ? registrantMap[`agent_name:${prop.agent_name}`] ?? null : null)
                     : (prop.agent_name ? registrantMap[`agent_name:${prop.agent_name}`] ?? null : null)
+                ) : null}
+                matchedBy={agentName === "관리자" ? (
+                  prop.registered_by && registrantMap[prop.registered_by]
+                    ? "registered_by"
+                    : prop.agent_name && registrantMap[`agent_name:${prop.agent_name}`]
+                      ? "agent_name"
+                      : null
                 ) : null}
               />
             ))}
