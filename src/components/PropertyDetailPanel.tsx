@@ -584,7 +584,7 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
   );
 }
 
-/* ─── 임대제안서 모달 (건물매매 전용: 동일주소 임대매물 자동로드 + 근저당/보증금 합계) ─── */
+/* ─── 임대현황 모달 (건물매매 전용: 동일주소 임대매물 자동로드 + 근저당/보증금 합계) ─── */
 interface RoomRow {
   unit: string;
   deposit: string;
@@ -711,7 +711,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
       if (error) throw error;
       setDone(true);
     } catch (e) {
-      console.error("임대제안서 저장 실패:", e);
+      console.error("임대현황 저장 실패:", e);
       alert("저장 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
@@ -1847,7 +1847,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 style={{ borderColor: "hsl(var(--primary) / 0.3)" }}
               >
                 <ClipboardList className="w-4 h-4 text-primary" />
-                <span className="text-[11px] font-semibold text-foreground">임대제안서</span>
+                <span className="text-[11px] font-semibold text-foreground">임대현황</span>
               </button>
               <button
                 onClick={() => setActiveModal("deal")}

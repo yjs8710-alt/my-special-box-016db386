@@ -1705,7 +1705,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
 
   // 삭제 (DB에서도 완전 초기화)
   const handleDelete = async () => {
-    if (!confirm("임대제안서 내용을 초기화하시겠습니까?")) return;
+    if (!confirm("임대현황 내용을 초기화하시겠습니까?")) return;
     if (!prop.dbId) {
       alert("삭제할 매물 ID가 없습니다.");
       return;
@@ -1720,7 +1720,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
     setTotalDepositInput("");
     setTotalMortgageInput("");
     setNote("");
-    alert("임대제안서가 초기화되었습니다.");
+    alert("임대현황이 초기화되었습니다.");
   };
 
   const ic =
@@ -1741,7 +1741,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
               <ClipboardList className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">임대제안서</p>
+              <p className="text-sm font-bold text-foreground">임대현황</p>
               <p className="text-[10px] text-muted-foreground">{isAdmin ? "직접 수정 후 저장할 수 있습니다" : "열람 전용"}</p>
             </div>
           </div>
@@ -1765,7 +1765,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProp
                   onClick={handleDelete}
                   className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
                   style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}
-                  title="저장된 임대제안서 초기화"
+                  title="저장된 임대현황 초기화"
                 >
                   🗑 삭제
                 </button>
@@ -4449,7 +4449,7 @@ const MapSidebar = ({
                             <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
                             <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
                           </button>
-                          {/* 임대제안서 */}
+                          {/* 임대현황 */}
                           <button
                             type="button"
                             onClick={(e) => {
@@ -4459,7 +4459,7 @@ const MapSidebar = ({
                             className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20 min-w-0"
                           >
                             <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
-                            <span className="text-[8px] font-bold text-purple-700 leading-none">임대제안서</span>
+                            <span className="text-[8px] font-bold text-purple-700 leading-none">임대현황</span>
                           </button>
                           {/* 거래완료 */}
                           <button
