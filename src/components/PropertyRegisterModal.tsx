@@ -1711,18 +1711,30 @@ function ImagePreviewCarousel({
       {images.length > 1 && (
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
           {images.map((src, i) => (
-            <button
+            <div
               key={src}
-              type="button"
-              onClick={() => setIdx(i)}
               className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
               style={{ borderColor: i === safeIdx ? "hsl(var(--primary))" : "transparent" }}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
-              {i === 0 && (
-                <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={() => setIdx(i)}
+                className="w-full h-full"
+              >
+                <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
+                {i === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
+                className="absolute top-0 right-0 w-4 h-4 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
+                title="사진 삭제"
+              >
+                <X className="w-2.5 h-2.5 text-white" />
+              </button>
+            </div>
           ))}
         </div>
       )}
