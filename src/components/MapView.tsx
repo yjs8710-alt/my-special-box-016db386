@@ -272,14 +272,33 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
 
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
-      clearOverlays();
+      const existing = overlaysRef.current;
+      const nextIds = new Set<number>();
+
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
+        nextIds.add(prop.id);
         const isSelected = prop.id === selId;
+        const prev = existing.get(prop.id);
+
+        if (prev) {
+          // 기존 오버레이 재사용 — 콘텐츠/zIndex만 업데이트
+          const content = prev.getContent() as HTMLDivElement;
+          if (content && content.dataset) {
+            const sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+            if (content.dataset.sig !== sig) {
+              content.innerHTML = createPinHtml(prop, isSelected, zoom);
+              content.dataset.sig = sig;
+            }
+          }
+          try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
+          return;
+        }
 
         const content = document.createElement("div");
         content.innerHTML = createPinHtml(prop, isSelected, zoom);
         content.style.cssText = "cursor:pointer;";
+        content.dataset.sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
         content.addEventListener("click", () => onSelectFn(prop.id));
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -290,10 +309,18 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
           zIndex: isSelected ? 1000 : 0,
         });
 
-        overlaysRef.current.set(prop.id, overlay);
+        existing.set(prop.id, overlay);
+      });
+
+      // 사라진 핀만 제거
+      existing.forEach((overlay, id) => {
+        if (!nextIds.has(id)) {
+          try { overlay.setMap(null); } catch (_) {}
+          existing.delete(id);
+        }
       });
     },
-    [clearOverlays]
+    []
   );
 
   // 지도 초기화 + zoom_changed / drag_end 이벤트 등록

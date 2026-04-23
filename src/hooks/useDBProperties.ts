@@ -1,15 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 
+// 매물 카드/지도에 필요한 컬럼만 선택 (성능 개선)
+const PROPERTY_COLUMNS = [
+  "id", "title", "building_name", "address", "type", "room_type", "unit_number",
+  "area", "floor", "deposit", "monthly", "manage_fee", "parking", "elevator",
+  "available_from", "total_floors", "build_year", "description",
+  "building_memo", "room_memo", "note", "vacate_date",
+  "building_password", "room_password",
+  "options", "views", "lat", "lng", "is_new", "is_hot",
+  "registered_date", "checked_date", "agent_name", "images",
+].join(",");
+
 // 관리자 DB 매물 → MapProperty 변환
-// DB에는 이미지가 없으므로 빈 문자열(썸네일 없음)로 처리
 function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
-  // note 필드에서 건물주/관리인 연락처 파싱
-  // 형식: "건물주: 010-xxxx\n관리인: 010-yyyy" 또는 "건물주:010-xxxx|관리인:010-yyyy"
   const noteStr = String(row.note ?? row.agent_name ?? "");
   const parseContact = (key: string) => {
-    // "건물주"를 찾을 때 "건물주2"에 매칭되지 않도록 word boundary 처리
     const pattern = key === "건물주"
       ? /건물주(?!2)[:\s]+([0-9\-]+)/
       : new RegExp(`${key}[:\\s]+([0-9\\-]+)`);
@@ -17,7 +24,6 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     return m ? m[1].trim() : undefined;
   };
   const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
-  // note에 도로명이 없으면 lot_number에서 도로명 감지 (한글+로/길 패턴)
   const lotStr = String(row.lot_number ?? "");
   const isRoadLot = /[가-힣].*(로|길)/.test(lotStr);
   const roadAddress = roadMatch
@@ -28,7 +34,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
 
   return {
     id: 100000 + idx,
-    dbId: String(row.id ?? ""),  // 실제 DB UUID 저장
+    dbId: String(row.id ?? ""),
     title: String(row.title ?? ""),
     buildingName: row.building_name ? String(row.building_name) : undefined,
     address: String(row.address ?? ""),
@@ -49,7 +55,6 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
       : "",
     images: Array.isArray(row.images) ? (row.images as string[]) : [],
     description: String(row.description ?? ""),
-    // 임대현황 JSON(__PROPOSAL_JSON__ prefix)은 건물 메모로 노출하지 않음
     buildingMemo: row.building_memo && !String(row.building_memo).startsWith("__PROPOSAL_JSON__")
       ? String(row.building_memo)
       : undefined,
@@ -78,14 +83,18 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
   };
 }
 
+// 같은 typeFilter 요청은 모듈 단위 캐시로 즉시 반환 (페이지 전환 시 재요청 방지)
+const cache = new Map<string, MapProperty[]>();
+
 /**
  * Supabase properties 테이블에서 active 매물을 불러와 MapProperty[]로 변환
- * @param typeFilter  undefined이면 전체, 배열이면 해당 type만
  */
 export function useDBProperties(typeFilter?: string[]) {
-  const [properties, setProperties] = useState<MapProperty[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = typeFilter ? typeFilter.slice().sort().join(",") : "__all__";
+  const [properties, setProperties] = useState<MapProperty[]>(() => cache.get(cacheKey) ?? []);
+  const [loading, setLoading] = useState(() => !cache.has(cacheKey));
   const [refreshKey, setRefreshKey] = useState(0);
+  const debounceRef = useRef<number | null>(null);
 
   const refetch = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -95,13 +104,13 @@ export function useDBProperties(typeFilter?: string[]) {
     let cancelled = false;
 
     const fetchData = async () => {
-      setLoading(true);
       let query = supabase
         .from("properties")
-        .select("*")
+        .select(PROPERTY_COLUMNS)
         .eq("status", "active")
         .order("checked_date", { ascending: false, nullsFirst: false })
-        .order("registered_date", { ascending: false });
+        .order("registered_date", { ascending: false })
+        .limit(2000);
 
       if (typeFilter && typeFilter.length > 0) {
         query = query.in("type", typeFilter);
@@ -111,11 +120,11 @@ export function useDBProperties(typeFilter?: string[]) {
 
       if (!cancelled) {
         if (!error && data) {
-          setProperties(
-            (data as Record<string, unknown>[]).map((row, idx) =>
-              dbToMapProperty(row, idx)
-            )
+          const mapped = (data as unknown as Record<string, unknown>[]).map((row, idx) =>
+            dbToMapProperty(row, idx)
           );
+          cache.set(cacheKey, mapped);
+          setProperties(mapped);
         }
         setLoading(false);
       }
@@ -123,22 +132,29 @@ export function useDBProperties(typeFilter?: string[]) {
 
     fetchData();
 
-    // Realtime 구독: 매물 변경 시 자동 갱신
-    const channelName = `db-properties-realtime-${typeFilter ? typeFilter.join(",") : "all"}-${Date.now()}`;
+    // Realtime 구독: 변경 다발 시 debounce(800ms)로 묶어서 한 번만 refetch
+    const channelName = `db-properties-${cacheKey}`;
     const channel = supabase
       .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "properties" },
-        () => { if (!cancelled) fetchData(); }
+        () => {
+          if (cancelled) return;
+          if (debounceRef.current) window.clearTimeout(debounceRef.current);
+          debounceRef.current = window.setTimeout(() => {
+            if (!cancelled) fetchData();
+          }, 800);
+        }
       )
       .subscribe();
 
     return () => {
       cancelled = true;
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
       supabase.removeChannel(channel);
     };
-  }, [JSON.stringify(typeFilter), refreshKey]);
+  }, [cacheKey, refreshKey]);
 
   return { properties, loading, refetch };
 }
