@@ -500,19 +500,17 @@ const MapFilterBar = ({
 
   return (
     <div
-      className="fixed z-[1000] pointer-events-none"
-      style={{ top: topOffset ?? 96, left: 16, right: "auto", width: "auto", maxWidth: 600 }}
+      className="fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4"
+      style={{ top: topOffset ?? 96, maxWidth: 600 }}
     >
       <div className="pointer-events-auto flex flex-col gap-2">
 
         {/* 검색바 */}
         <div className={`flex flex-col transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
           <div
-            className="flex items-center bg-white overflow-hidden rounded-xl"
+            className="flex items-center bg-white overflow-hidden rounded-xl w-full md:w-fit md:min-w-[480px]"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
-              minWidth: 480,
-              width: "fit-content",
               flexShrink: 0,
               border: `2px solid ${searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--primary))"}`,
               transition: "border-color 0.2s",

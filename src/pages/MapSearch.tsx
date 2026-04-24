@@ -220,15 +220,25 @@ const MapSearch = () => {
           />
         </div>
 
-        {/* 모바일 하단 시트 — 매물 클릭/검색 시에만 표시 */}
+        {/* 모바일 하단 시트 — 매물 클릭/검색/필터/유형 변경 시에만 표시 */}
         <MobileMapSheet
           count={filtered.length}
-          hasInteraction={selectedId !== null || query.trim().length > 0 || propertyId.trim().length > 0}
+          hasInteraction={
+            selectedId !== null ||
+            query.trim().length > 0 ||
+            propertyId.trim().length > 0 ||
+            activeType !== "전체" ||
+            JSON.stringify(filters) !== JSON.stringify(DEFAULT_FILTERS) ||
+            searchBounds !== null
+          }
           shouldAutoExpand={selectedId !== null}
           onClose={() => {
             setSelectedId(null);
             setQuery("");
             setPropertyId("");
+            setActiveType("전체");
+            setFilters(DEFAULT_FILTERS);
+            setSearchBounds(null);
           }}
         >
           <MapSidebar
