@@ -10,6 +10,11 @@ interface InstallAppCardProps {
   variant?: "floating" | "inline";
 }
 
+const isAndroidChromeLike = () => {
+  const ua = window.navigator.userAgent;
+  return /Android/i.test(ua) && /Chrome|SamsungBrowser|EdgA|CriOS/i.test(ua);
+};
+
 const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
@@ -31,7 +36,9 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
     setIsIOS(iOS);
 
     const handler = (e: Event) => {
-      e.preventDefault();
+      if (!isAndroidChromeLike()) {
+        e.preventDefault();
+      }
       setDeferred(e as BeforeInstallPromptEvent);
     };
     window.addEventListener("beforeinstallprompt", handler);
@@ -54,14 +61,18 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
       return;
     }
     if (!deferred) {
-      // 데스크톱이거나 지원 안 되는 경우 → 가이드 띄우기
+      // 지원 브라우저가 바로 설치 UI를 띄우는 경우에는 브라우저 기본 설치 흐름을 사용
       setShowIOSGuide(true);
       return;
     }
-    await deferred.prompt();
-    const { outcome } = await deferred.userChoice;
-    if (outcome === "accepted") setInstalled(true);
-    setDeferred(null);
+    try {
+      await deferred.prompt();
+      const { outcome } = await deferred.userChoice;
+      if (outcome === "accepted") setInstalled(true);
+      setDeferred(null);
+    } catch {
+      setShowIOSGuide(true);
+    }
   };
 
   if (installed) {
