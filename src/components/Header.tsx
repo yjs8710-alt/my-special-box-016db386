@@ -17,10 +17,15 @@ const NAV_ITEMS = [
 
 interface HeaderProps {
   onRegisterChange?: (open: boolean) => void;
+  onMenuOpenChange?: (open: boolean) => void;
 }
 
-const Header = ({ onRegisterChange }: HeaderProps) => {
-  const [menuOpen, setMenuOpen] = useState(false);
+const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
+  const [menuOpen, _setMenuOpen] = useState(false);
+  const setMenuOpen = (v: boolean) => {
+    _setMenuOpen(v);
+    onMenuOpenChange?.(v);
+  };
   const [showRegister, setShowRegister] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,7 +62,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
               className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0 ml-2"
               onClick={() => navigate("/")}
             >
-              <img src={logoImg} alt="집다 로고" className="h-12 md:h-13 object-contain block" />
+              <img src={logoImg} alt="집다 로고" className="h-16 md:h-13 object-contain block" />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
@@ -180,6 +185,7 @@ const Header = ({ onRegisterChange }: HeaderProps) => {
             <button
               className="md:hidden text-white p-1 ml-auto"
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="메뉴"
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>

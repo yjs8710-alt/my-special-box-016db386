@@ -14,6 +14,7 @@ type ViewMode = "map" | "list";
 
 const MapSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
@@ -96,7 +97,7 @@ const MapSearch = () => {
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
-      <Header />
+      <Header onMenuOpenChange={setMobileMenuOpen} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
@@ -186,7 +187,7 @@ const MapSearch = () => {
           <MapView
             properties={mappableProperties}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
             onBoundsChange={setCurrentBounds}
           />
           {/* 필터 바 오버레이 */}
@@ -202,6 +203,7 @@ const MapSearch = () => {
             onLandlordClick={() => setShowLandlord(true)}
             onSearchClick={handleSearchInArea}
             topOffset={92}
+            hideSearchBar={mobileMenuOpen}
           />
         </div>
 

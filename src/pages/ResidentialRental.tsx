@@ -24,6 +24,7 @@ const ResidentialRental = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showRegister, setShowRegister] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
@@ -126,7 +127,7 @@ const ResidentialRental = () => {
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
-      <Header onRegisterChange={setShowRegister} />
+      <Header onRegisterChange={setShowRegister} onMenuOpenChange={setMobileMenuOpen} />
 
       {/* 주거 유형 탭 - 다중 선택 (모바일에서는 숨김) */}
       <div
@@ -244,7 +245,7 @@ const ResidentialRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            hideSearchBar={showRegister}
+            hideSearchBar={showRegister || mobileMenuOpen}
             showResidentialTypes={true}
             showBuildingOptions={true}
             showRoomTypes={false}

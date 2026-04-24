@@ -500,9 +500,10 @@ const MapFilterBar = ({
 
   return (
     <div
-      className="fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4"
-      style={{ top: topOffset ?? 96, maxWidth: 600 }}
+      className="mfb-pos fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4 top-[64px]"
+      style={{ ['--mfb-md-top' as any]: `${topOffset ?? 96}px`, maxWidth: 600 }}
     >
+      <style>{`@media (min-width: 768px){ .mfb-pos{ top: var(--mfb-md-top); } }`}</style>
       <div className="pointer-events-auto flex flex-col gap-2">
 
         {/* 검색바 */}
