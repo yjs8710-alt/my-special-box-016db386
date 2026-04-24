@@ -3718,12 +3718,12 @@ const MapSidebar = ({
                   mobileStep === 0
                     ? "56px"
                     : mobileStep === 1
-                    ? "25vh"
+                    ? "calc((100vh - 92px) * 0.25 + 56px)"
                     : mobileStep === 2
-                    ? "50vh"
+                    ? "calc((100vh - 92px) * 0.50 + 56px)"
                     : mobileStep === 3
-                    ? "75vh"
-                    : "100vh",
+                    ? "calc((100vh - 92px) * 0.75 + 56px)"
+                    : "calc(100vh - 92px)",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
