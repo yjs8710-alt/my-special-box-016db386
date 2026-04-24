@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
-import MobileMapSheet from "@/components/MobileMapSheet";
+
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
