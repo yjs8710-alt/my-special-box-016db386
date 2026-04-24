@@ -538,7 +538,7 @@ const MapFilterBar = ({
 
             {/* 입력창 */}
             {searchMode === "normal" ? (
-              <div className="flex items-center flex-1 px-3 gap-2 h-10">
+              <div className="flex items-center flex-1 min-w-0 px-2 sm:px-3 gap-2 h-10">
                 <input
                   type="text"
                   value={query}
