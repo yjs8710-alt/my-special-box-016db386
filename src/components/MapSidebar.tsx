@@ -3685,35 +3685,30 @@ const MapSidebar = ({
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
       )}
 
-      {/* 데스크톱: 우측 사이드바 / 모바일: 하단 시트 */}
-      {isMobile ? (
-        <MobileMapSheet
-          count={properties.length}
-          hasInteraction={
-            selectedId !== null ||
-            (pinnedIds && pinnedIds.length > 0) ||
-            !!landlordSearched ||
-            properties.length > 0
-          }
-          shouldAutoExpand={selectedId !== null}
-          onClose={() => {
-            onDeselect?.();
-            onClearPinnedIds?.();
-            onClearPin?.();
-          }}
-        >
-          <div className="flex flex-col h-full w-full bg-white">
-      ) : (
+      {/* collapsed 시 absolute로 지도 위에 겹치게, 열릴 때는 flex로 공간 차지
+          모바일(<768px): 하단 시트로 동작 */}
       <div
-        className="hidden md:flex h-full"
-        style={{
-          position: collapsed ? "absolute" : "relative",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: collapsed ? 50 : "auto",
-          flexShrink: 0,
-        }}
+        className={isMobile ? "" : "flex h-full"}
+        style={
+          isMobile
+            ? {
+                position: "fixed",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                top: "auto",
+                zIndex: 60,
+                flexShrink: 0,
+              }
+            : {
+                position: collapsed ? "absolute" : "relative",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: collapsed ? 50 : "auto",
+                flexShrink: 0,
+              }
+        }
       >
         {/* Toggle tab — 사이드바 왼쪽 */}
         <button
