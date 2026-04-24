@@ -531,7 +531,7 @@ const MapFilterBar = ({
                 ? <Phone className="w-3.5 h-3.5" />
                 : <Search className="w-3.5 h-3.5" />
               }
-              <span className="text-[10px] font-bold hidden sm:block">
+              <span className="text-[10px] font-bold hidden md:block">
                 {searchMode === "landlord" ? "소유주" : "소유주검색"}
               </span>
             </button>
