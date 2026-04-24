@@ -231,6 +231,16 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 >
                   마이페이지
                 </button>
+                {user?.isAdmin && (
+                  <button
+                    onClick={() => { navigate("/admin"); setMenuOpen(false); }}
+                    className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+                    style={{ color: "hsl(var(--accent))" }}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    관리자 모드
+                  </button>
+                )}
                 <button
                   className="w-full text-sm text-white/50 font-medium py-2 mt-1"
                   onClick={handleLogout}
@@ -238,6 +248,15 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   로그아웃
                 </button>
               </>
+            )}
+            {!isAuthorized && (
+              <button
+                onClick={() => { navigate("/admin/login"); setMenuOpen(false); }}
+                className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                관리자 로그인
+              </button>
             )}
           </div>
         </div>
