@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 import heroLogo from "@/assets/hero-logo.png";
+import InstallAppCard from "@/components/InstallAppCard";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -22,13 +23,22 @@ const HeroSection = () => {
           className="w-72 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-
         <button
           onClick={() => navigate("/residential")}
           className="mt-2 px-12 py-3 rounded-xl border-2 border-white/50 text-white text-xl font-bold hover:bg-white hover:text-primary transition-all duration-200 backdrop-blur-sm drop-shadow-lg"
         >
           청주
         </button>
+      </div>
+
+      {/* 우측 앱 설치 카드 */}
+      <div className="hidden md:block absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-20">
+        <InstallAppCard />
+      </div>
+
+      {/* 모바일: 하단 고정 */}
+      <div className="md:hidden absolute left-4 right-4 bottom-6 z-20 flex justify-center">
+        <InstallAppCard />
       </div>
     </section>
   );
