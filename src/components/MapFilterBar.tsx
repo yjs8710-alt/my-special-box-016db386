@@ -231,11 +231,11 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+      className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
       style={
         active
           ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-          : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+          : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
       }
     >
       {children}
