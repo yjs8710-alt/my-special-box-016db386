@@ -47,6 +47,8 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
+import MobileMapSheet from "@/components/MobileMapSheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
