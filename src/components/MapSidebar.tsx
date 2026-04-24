@@ -3694,8 +3694,16 @@ const MapSidebar = ({
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
       )}
 
+      {/* 모바일에서 시트가 3단계 이상 펼쳐졌을 때 배경 어둡게 */}
+      {isMobile && mobileStep >= 3 && (
+        <div
+          className="fixed inset-0 bg-black/30 z-[55]"
+          onClick={() => setMobileStep(1)}
+        />
+      )}
+
       {/* collapsed 시 absolute로 지도 위에 겹치게, 열릴 때는 flex로 공간 차지
-          모바일(<768px): 하단 시트로 동작 */}
+          모바일(<768px): 하단 시트로 동작, mobileStep으로 높이 제어 */}
       <div
         className={isMobile ? "" : "flex h-full"}
         style={
@@ -3706,7 +3714,25 @@ const MapSidebar = ({
                 right: 0,
                 bottom: 0,
                 top: "auto",
+                height:
+                  mobileStep === 0
+                    ? "56px"
+                    : mobileStep === 1
+                    ? "25vh"
+                    : mobileStep === 2
+                    ? "50vh"
+                    : mobileStep === 3
+                    ? "75vh"
+                    : "100vh",
                 zIndex: 60,
+                background: "white",
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                boxShadow: "0 -8px 24px rgba(0,0,0,0.18)",
+                transition: "height 0.3s ease",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
                 flexShrink: 0,
               }
             : {
@@ -3719,28 +3745,101 @@ const MapSidebar = ({
               }
         }
       >
-        {/* Toggle tab — 사이드바 왼쪽 */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
-          style={{ marginTop: "32px" }}
-        >
-          {collapsed ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-        </button>
+        {/* Toggle tab — 사이드바 왼쪽 (데스크톱 전용) */}
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
+            style={{ marginTop: "32px" }}
+          >
+            {collapsed ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+        )}
+
+        {/* 모바일 전용 peek 헤더 — 탭하면 단계적 확장 */}
+        {isMobile && (
+          <button
+            onClick={() => setMobileStep((p) => (p < 4 ? ((p + 1) as 0 | 1 | 2 | 3 | 4) : 4))}
+            className="flex-shrink-0 w-full px-4 pt-2 pb-2 flex flex-col items-stretch border-b border-border bg-white"
+          >
+            <span className="mx-auto w-10 h-1 rounded-full bg-muted-foreground/30 mb-1.5" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--stat-green))" }} />
+                <span className="text-sm font-bold text-foreground">매물정보</span>
+                <span className="text-xs text-muted-foreground">({properties.length}개)</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {mobileStep > 0 && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMobileStep((p) => (p > 0 ? ((p - 1) as 0 | 1 | 2 | 3 | 4) : 0));
+                    }}
+                    className="p-1 rounded hover:bg-muted"
+                    title="한 단계 줄이기"
+                  >
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                  </span>
+                )}
+                {mobileStep < 4 && <ChevronUp className="w-5 h-5 text-muted-foreground" />}
+                {mobileStep > 0 && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMobileStep(0);
+                      onDeselect?.();
+                      onClearPinnedIds?.();
+                      onClearPin?.();
+                    }}
+                    className="ml-1 p-1 rounded hover:bg-muted"
+                    title="닫기"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </span>
+                )}
+              </div>
+            </div>
+            {mobileStep > 0 && (
+              <div className="flex items-center justify-center gap-1 mt-1.5">
+                {[1, 2, 3, 4].map((n) => (
+                  <span
+                    key={n}
+                    className="h-1 rounded-full transition-all"
+                    style={{
+                      width: mobileStep >= n ? 16 : 8,
+                      background: mobileStep >= n ? "hsl(var(--primary))" : "hsl(var(--border))",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </button>
+        )}
 
         {/* Panel */}
         <aside
-          className={`bg-white border-l border-border flex flex-col transition-all duration-300 ${
-            collapsed ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "opacity-100"
+          className={`bg-white flex flex-col transition-all duration-300 ${
+            isMobile
+              ? "flex-1 w-full min-h-0"
+              : `border-l border-border ${collapsed ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "opacity-100"}`
           }`}
-          style={{
-            width: collapsed ? 0 : width,
-            boxShadow: "-2px 0 16px rgba(10,45,110,0.08)",
-            flexShrink: 0,
-          }}
+          style={
+            isMobile
+              ? { display: mobileStep === 0 ? "none" : "flex" }
+              : {
+                  width: collapsed ? 0 : width,
+                  boxShadow: "-2px 0 16px rgba(10,45,110,0.08)",
+                  flexShrink: 0,
+                }
+          }
         >
-          {/* Drag handle — 사이드바 왼쪽 끝 */}
-          {!collapsed && (
+          {/* Drag handle — 데스크톱 전용 */}
+          {!isMobile && !collapsed && (
             <div
               onMouseDown={onMouseDown}
               className="absolute top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
