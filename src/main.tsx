@@ -14,14 +14,16 @@ const isInIframe = (() => {
 })();
 
 const host = window.location.hostname;
+
+// Lovable 에디터/프리뷰 호스트만 명확히 차단
 const isPreviewHost =
   host.includes("id-preview--") ||
   host.includes("lovableproject.com") ||
-  host.includes("lovable.app") === false && host.includes("lovable") ||
-  host === "localhost";
+  host === "localhost" ||
+  host === "127.0.0.1";
 
-const isProductionHost =
-  host.endsWith("lovable.app") || host === "jibda.co.kr" || host.endsWith(".jibda.co.kr");
+// 프로덕션: 그 외 모든 호스트 (lovable.app, jibda.co.kr, 커스텀 도메인 등)
+const isProductionHost = !isPreviewHost;
 
 if (isPreviewHost || isInIframe) {
   // 프리뷰/iframe 에서는 SW 등록 금지 + 기존 SW 제거
