@@ -82,7 +82,9 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
           </div>
           <div>
             <p className="text-sm font-extrabold leading-tight">집다 앱 설치</p>
-            <p className="text-[11px] text-white/70 leading-tight mt-2">홈 화면에서 빠르게</p>
+            <p className="text-[11px] text-white/70 leading-tight mt-2">
+              {isIOS ? "공유 → 홈 화면에 추가" : "버튼 한 번으로 설치"}
+            </p>
           </div>
         </div>
         <div className="mb-6" />
@@ -91,7 +93,7 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
           className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
         >
           <Download className="w-4 h-4" />
-          홈 화면에 추가
+          {isIOS ? "설치 방법 보기" : deferred ? "지금 설치하기" : "홈 화면에 추가"}
         </button>
       </div>
 
