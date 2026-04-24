@@ -187,7 +187,7 @@ const MapSearch = () => {
           <MapView
             properties={mappableProperties}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
             onBoundsChange={setCurrentBounds}
           />
           {/* 필터 바 오버레이 */}
