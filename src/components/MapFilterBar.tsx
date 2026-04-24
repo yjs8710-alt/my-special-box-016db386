@@ -549,7 +549,7 @@ const MapFilterBar = ({
                     onPropertyIdChange("");
                   }}
                   placeholder="주소, 건물명, 동명, 번지수 검색"
-                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                  className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {query && (
                   <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
