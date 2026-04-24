@@ -4727,6 +4727,76 @@ const MapSidebar = ({
                       </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
+                      {selectedId === prop.id && isMobile && (() => {
+                        const owner = prop.contactOwner?.trim();
+                        const owner2 = prop.contactOwner2?.trim();
+                        const manager = prop.contactManager?.trim();
+                        const tenant = prop.contactTenant?.trim();
+                        const hasAnyContact = !!(owner || owner2 || manager || tenant);
+                        const note = prop.note ?? "";
+                        const brokerMatch = note.match(/중개보수[:\s]+([^\n|]+)/);
+                        const cleanMatch = note.match(/청소비[:\s]+([^\n|]+)/);
+                        const dirMatch = note.match(/방향[:\s]+([^\n|]+)/);
+                        const lhMatch = note.match(/LH[:\s]+([^\n|]+)/);
+                        const brokerFee = brokerMatch?.[1]?.trim();
+                        const cleanFee = cleanMatch?.[1]?.trim();
+                        const direction = dirMatch?.[1]?.trim();
+                        const lhVal = lhMatch?.[1]?.trim();
+                        const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
+                        return (
+                          <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                            {/* 1행: 연락처 모달 트리거 | 우측: 확인일/등록일 */}
+                            <div className="flex items-center justify-between gap-2">
+                              {hasAnyContact ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md font-bold"
+                                  style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                >
+                                  <Phone className="w-3 h-3" />
+                                  연락처 보기
+                                </button>
+                              ) : (
+                                <span className="text-muted-foreground">연락처 없음</span>
+                              )}
+                              <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                                {chkDate && <span>확인 {chkDate.slice(5)}</span>}
+                                {regDate && <span>등록 {regDate.slice(5)}</span>}
+                              </div>
+                            </div>
+                            {/* 2행: 도로명 주소 */}
+                            {prop.roadAddress && (
+                              <div className="text-[11px] text-foreground/80 truncate">
+                                <span className="font-bold text-muted-foreground mr-1">도로명</span>
+                                {prop.roadAddress}
+                              </div>
+                            )}
+                            {/* 3행: 현관비번/방비번 */}
+                            {(prop.buildingPassword || prop.password || prop.roomPassword) && (
+                              <div className="flex items-center gap-2 text-[11px] flex-wrap">
+                                <KeyRound className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                {(prop.buildingPassword || prop.password) && (
+                                  <span><span className="font-bold text-muted-foreground">현관</span> {prop.buildingPassword || prop.password}</span>
+                                )}
+                                {prop.roomPassword && (
+                                  <span><span className="font-bold text-muted-foreground">방</span> {prop.roomPassword}</span>
+                                )}
+                              </div>
+                            )}
+                            {/* 4행: 수수료/메모 등 부가 정보 */}
+                            {(brokerFee || cleanFee || direction || lhVal || memos) && (
+                              <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
+                                {brokerFee && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>수수료 {brokerFee}</span>}
+                                {cleanFee && <span className="px-1.5 py-0.5 rounded font-bold bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>}
+                                {direction && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>{direction}향</span>}
+                                {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
+                                {memos && <span className="text-foreground/70 truncate">📝 {memos}</span>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {selectedId === prop.id && (
                         <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
                           {/* 관리자 수정 버튼 */}
