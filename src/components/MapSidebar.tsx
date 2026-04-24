@@ -3442,6 +3442,7 @@ const MapSidebar = ({
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
+  const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
 
   // 기존 거래완료 제보 불러오기 — 매물이 active인 경우에만 취소선 표시
