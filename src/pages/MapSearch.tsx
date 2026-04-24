@@ -201,7 +201,7 @@ const MapSearch = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             onSearchClick={handleSearchInArea}
-            topOffset={96}
+            topOffset={92}
           />
         </div>
 
