@@ -508,7 +508,7 @@ const MapFilterBar = ({
         {/* 검색바 */}
         <div className={`flex flex-col transition-all duration-200 ${hideSearchBar ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
           <div
-            className="flex items-center bg-white overflow-hidden rounded-xl w-full md:w-fit"
+            className="flex items-center bg-white overflow-hidden rounded-xl w-full md:w-fit md:min-w-[480px]"
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
               flexShrink: 0,
