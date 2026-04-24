@@ -24,6 +24,7 @@ const ResidentialRental = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showRegister, setShowRegister] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
