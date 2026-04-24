@@ -203,6 +203,7 @@ const MapSearch = () => {
             onLandlordClick={() => setShowLandlord(true)}
             onSearchClick={handleSearchInArea}
             topOffset={92}
+            hideSearchBar={mobileMenuOpen}
           />
         </div>
 
