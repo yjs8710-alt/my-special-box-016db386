@@ -531,14 +531,14 @@ const MapFilterBar = ({
                 ? <Phone className="w-3.5 h-3.5" />
                 : <Search className="w-3.5 h-3.5" />
               }
-              <span className="text-[10px] font-bold hidden sm:block">
+              <span className="text-[10px] font-bold hidden md:block">
                 {searchMode === "landlord" ? "소유주" : "소유주검색"}
               </span>
             </button>
 
             {/* 입력창 */}
             {searchMode === "normal" ? (
-              <div className="flex items-center flex-1 px-3 gap-2 h-10">
+              <div className="flex items-center flex-1 min-w-0 px-2 sm:px-3 gap-2 h-10">
                 <input
                   type="text"
                   value={query}
@@ -549,7 +549,7 @@ const MapFilterBar = ({
                     onPropertyIdChange("");
                   }}
                   placeholder="주소, 건물명, 동명, 번지수 검색"
-                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                  className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {query && (
                   <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
@@ -558,7 +558,7 @@ const MapFilterBar = ({
                 )}
               </div>
             ) : (
-              <div className="flex items-center flex-1 px-3 gap-2 h-10">
+              <div className="flex items-center flex-1 min-w-0 px-2 sm:px-3 gap-2 h-10">
                 <input
                   ref={landlordInputRef}
                   type="text"
@@ -566,7 +566,7 @@ const MapFilterBar = ({
                   onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
                   onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
                   placeholder="동명, 번지, 건물명, 전화번호 검색"
-                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                  className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {landlordQuery && (
                   <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }} className="text-muted-foreground hover:text-foreground">
@@ -581,11 +581,11 @@ const MapFilterBar = ({
               <>
                 <button
                   onClick={() => setShowFilter((v) => !v)}
-                  className="relative flex items-center gap-1 px-3 h-10 transition-colors"
+                  className="relative flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{ borderLeft: "1px solid hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium">필터</span>
+                  <span className="text-xs font-medium hidden md:inline">필터</span>
                   {activeFilterCount > 0 && (
                     <span
                       className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
@@ -598,18 +598,18 @@ const MapFilterBar = ({
                 {activeFilterCount > 0 && (
                   <button
                     onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
-                    className="flex items-center gap-1 px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80"
+                    className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80 flex-shrink-0"
                     style={{ borderLeft: "1px solid hsl(var(--border))" }}
                   >
                     <X className="w-3 h-3" />
-                    <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
+                    <span className="text-[10px] font-bold whitespace-nowrap hidden md:inline">필터해제</span>
                   </button>
                 )}
                 {onRadiusModeToggle && (
                   <button
                     onClick={onRadiusModeToggle}
                     title={radiusMode ? "반경검색 종료" : "지도 클릭 후 드래그로 반경 지정"}
-                    className="relative flex items-center gap-1 px-2.5 h-10 transition-all"
+                    className="relative flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-all flex-shrink-0"
                     style={{
                       borderLeft: "1px solid hsl(var(--border))",
                       background: radiusMode ? "hsl(var(--accent))" : "transparent",
@@ -617,7 +617,7 @@ const MapFilterBar = ({
                     }}
                   >
                     <Target className="w-3.5 h-3.5" />
-                    <span className="text-[11px] font-bold whitespace-nowrap">
+                    <span className="text-[11px] font-bold whitespace-nowrap hidden md:inline">
                       {radiusMode && radiusInfo
                         ? `반경 ${radiusInfo.radius >= 1000 ? (radiusInfo.radius/1000).toFixed(2)+"km" : Math.round(radiusInfo.radius)+"m"}`
                         : "반경검색"}
@@ -629,7 +629,7 @@ const MapFilterBar = ({
                 )}
                 <button
                   onClick={() => onSearchClick?.()}
-                  className="flex items-center justify-center h-10 px-4 text-xs font-bold"
+                  className="flex items-center justify-center h-10 px-3 sm:px-4 text-xs font-bold flex-shrink-0"
                   style={{
                     background: "hsl(var(--primary))",
                     color: "hsl(var(--primary-foreground))",
