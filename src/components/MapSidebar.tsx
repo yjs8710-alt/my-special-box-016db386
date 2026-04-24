@@ -3423,6 +3423,8 @@ interface MapSidebarProps {
   onRefetch?: () => void;
   /** 참고용 사진 검색용 전체 매물 풀 (필터링 전) */
   referencePool?: MapProperty[];
+  /** 현재 지도 영역 — 모바일 시트 매물 갯수 표시용 */
+  currentBounds?: { swLat: number; swLng: number; neLat: number; neLng: number } | null;
 }
 
 const MIN_WIDTH = 260;
