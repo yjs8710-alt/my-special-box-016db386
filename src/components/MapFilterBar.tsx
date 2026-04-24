@@ -598,11 +598,11 @@ const MapFilterBar = ({
                 {activeFilterCount > 0 && (
                   <button
                     onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
-                    className="flex items-center gap-1 px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80"
+                    className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80 flex-shrink-0"
                     style={{ borderLeft: "1px solid hsl(var(--border))" }}
                   >
                     <X className="w-3 h-3" />
-                    <span className="text-[10px] font-bold whitespace-nowrap">필터해제</span>
+                    <span className="text-[10px] font-bold whitespace-nowrap hidden md:inline">필터해제</span>
                   </button>
                 )}
                 {onRadiusModeToggle && (
