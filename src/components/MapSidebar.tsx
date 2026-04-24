@@ -2635,17 +2635,30 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </span>
             )}
-            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색 */}
-            <span
-              title={hasPhotos ? "사진 있음" : "사진 없음"}
-              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded"
+            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
+              title={hasPhotos ? "사진 보기" : "사진 없음"}
+              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded transition-transform active:scale-95"
               style={{
-                background: hasPhotos ? "hsl(var(--primary)/0.15)" : "#fff",
+                background: hasPhotos ? "hsl(var(--primary))" : "#fff",
                 border: `1.5px solid ${hasPhotos ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
               }}
             >
-              <Camera className="w-4 h-4" style={{ color: hasPhotos ? "hsl(var(--primary))" : "hsl(var(--muted-foreground)/0.5)" }} />
-            </span>
+              <Camera className="w-4 h-4" style={{ color: hasPhotos ? "#fff" : "hsl(var(--muted-foreground)/0.5)" }} />
+            </button>
+            {/* 평수 표기 */}
+            {prop.area && (
+              <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
+                {(() => {
+                  const a = prop.area;
+                  if (/평/.test(a)) return a;
+                  const n = parseFloat(a.replace(/[^0-9.]/g, ""));
+                  return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
+                })()}
+              </span>
+            )}
             <span className="flex-1" />
             {/* 카카오톡 공유 */}
             <button
