@@ -139,7 +139,7 @@ const MapSearch = () => {
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--stat-green))" }} />
           <span className="text-[11px] font-semibold" style={{ color: "hsl(var(--muted-foreground))" }}>
-            {filtered.length}개 매물
+            {mappableProperties.length}개 매물
           </span>
         </div>
 
