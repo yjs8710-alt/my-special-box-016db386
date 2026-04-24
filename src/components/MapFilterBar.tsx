@@ -69,15 +69,13 @@ const ZONE_TYPES = [
 ];
 
 const BUILDING_OPTIONS = [
-  { key: "신축", label: "신축" },
-  { key: "올리모델링", label: "올리모델링" },
   { key: "엘리베이터", label: "엘리베이터" },
-  { key: "애완동물가능", label: "반려동물 가능" },
-  { key: "애완동물불가", label: "반려동물 불가" },
-  { key: "유선IPTV", label: "유선/IPTV" },
-  { key: "수도세포함", label: "수도세 포함" },
-  { key: "주차가능", label: "주차 가능" },
-  { key: "무인택배함", label: "무인 택배함" },
+  { key: "리모델링", label: "리모델링" },
+  { key: "반려동물_가능", label: "반려동물 가능" },
+  { key: "반려동물_불가", label: "반려동물 불가" },
+  { key: "유선TV", label: "유선/IPTV" },
+  { key: "수도", label: "수도" },
+  { key: "주차", label: "주차 가능" },
   { key: "인터넷", label: "인터넷" },
   { key: "CCTV", label: "CCTV" },
   { key: "여성전용", label: "여성전용" },
@@ -216,7 +214,7 @@ function parseManwon(s: string): number | null {
 }
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[10px] font-bold tracking-wide mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+  <p className="text-[10px] font-bold tracking-wide mb-1.5" style={{ color: "hsl(var(--foreground))" }}>
     {children}
   </p>
 );
@@ -233,11 +231,11 @@ function Chip({
   return (
     <button
       onClick={onClick}
-      className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+      className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
       style={
         active
           ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-          : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+          : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
       }
     >
       {children}

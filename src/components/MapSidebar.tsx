@@ -36,6 +36,7 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import femaleOnlyIcon from "@/assets/female_only_icon.png";
 import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -2902,6 +2903,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               ["유선TV", { src: tvIcon, alt: "유선TV", bg: "#faf5ff", border: "#d8b4fe" }],
               ["CCTV", { src: cctvIcon, alt: "CCTV", bg: "#fef2f2", border: "#fca5a5" }],
               ["리모델링", { src: remodelingIcon, alt: "리모델링", bg: "#fff7ed", border: "#fdba74" }],
+              ["여성전용", { src: femaleOnlyIcon, alt: "여성전용", bg: "#fdf2f8", border: "#f9a8d4" }],
             ];
             entries.forEach(([opt, d]) => {
               if (!hasOption(opt)) return;

@@ -176,13 +176,14 @@ export function usePropertyFilter(
         if (!matchBuildYear(p.buildYear, filters.buildYear)) return false;
       }
 
-      // 건물 옵션 (options 배열 매칭)
+      // 건물 옵션 (options 배열 매칭) - 정확 일치 + 공백 무시
       if (filters.buildingOptions.length > 0 || filters.roomOptions.length > 0) {
-        const opts = (p.options ?? []).map((o) => o.toLowerCase());
+        const norm = (s: string) => String(s).replace(/\s+/g, "").toLowerCase();
+        const optsSet = new Set((p.options ?? []).map(norm));
+        // 엘리베이터는 별도 boolean 컬럼도 함께 고려
+        if (p.elevator) optsSet.add(norm("엘리베이터"));
         const allSelected = [...filters.buildingOptions, ...filters.roomOptions];
-        const allMatch = allSelected.every((sel) =>
-          opts.some((o) => o.includes(sel.toLowerCase()))
-        );
+        const allMatch = allSelected.every((sel) => optsSet.has(norm(sel)));
         if (!allMatch) return false;
       }
 
