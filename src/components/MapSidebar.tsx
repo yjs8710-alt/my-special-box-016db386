@@ -2529,7 +2529,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       });
 
     return (
-      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+      <div className="flex-1 min-w-0 flex flex-col md:border-l md:border-border/30 px-2 py-1 gap-0.5">
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
         <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
           {prop.buildYear && (
@@ -4313,10 +4313,10 @@ const MapSidebar = ({
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                         }`}
                       >
-                        {/* Row: 3줄 레이아웃 */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
+                        {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
+                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
                           {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}
-                          <div
+                          {!isMobile && <div
                             className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
                             style={{ minHeight: "96px" }}
                           >
@@ -4471,14 +4471,14 @@ const MapSidebar = ({
                               </button>
                               );
                             })()}
-                          </div>
+                          </div>}
 
-                          {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 */}
-                          <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
+                          {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일에서는 숨김) */}
+                          {!isMobile && <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
                             <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} number2={prop.contactOwner2 ?? null} />
                             <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
                             <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
-                          </div>
+                          </div>}
 
                           {/* ③메인 정보 — 3줄 고정 레이아웃 */}
                           <AddressToggleCard
