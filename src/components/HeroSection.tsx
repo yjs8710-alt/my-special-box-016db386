@@ -31,16 +31,16 @@ const HeroSection = () => {
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        {/* 카테고리 그리드 — 모바일/데스크톱 모두 노출 */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-md md:max-w-2xl mt-2">
+        {/* 카테고리 그리드 — 모바일 전용 (데스크톱은 기존 빈 상태 유지) */}
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
           {CATEGORIES.map(({ label, path, Icon }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-auto md:py-8 rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
+              className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <Icon className="w-7 h-7 md:w-9 md:h-9" strokeWidth={1.8} />
-              <span className="text-sm md:text-lg font-bold leading-tight px-2">{label}</span>
+              <Icon className="w-7 h-7" strokeWidth={1.8} />
+              <span className="text-sm font-bold leading-tight px-2">{label}</span>
             </button>
           ))}
         </div>
