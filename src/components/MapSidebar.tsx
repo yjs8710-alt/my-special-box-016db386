@@ -3249,6 +3249,7 @@ const MapSidebar = ({
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
+  const isMobile = useIsMobile();
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
