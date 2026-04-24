@@ -566,7 +566,7 @@ const MapFilterBar = ({
                   onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
                   onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
                   placeholder="동명, 번지, 건물명, 전화번호 검색"
-                  className="flex-1 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                  className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {landlordQuery && (
                   <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }} className="text-muted-foreground hover:text-foreground">
