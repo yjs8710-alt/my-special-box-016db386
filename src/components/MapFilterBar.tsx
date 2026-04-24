@@ -214,7 +214,7 @@ function parseManwon(s: string): number | null {
 }
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[10px] font-bold tracking-wide mb-1.5" style={{ color: "hsl(var(--muted-foreground))" }}>
+  <p className="text-[10px] font-bold tracking-wide mb-1.5" style={{ color: "hsl(var(--foreground))" }}>
     {children}
   </p>
 );
