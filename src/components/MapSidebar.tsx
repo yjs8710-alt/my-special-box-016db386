@@ -47,7 +47,6 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
-import MobilePropertyCard from "@/components/MobilePropertyCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
@@ -3719,12 +3718,12 @@ const MapSidebar = ({
                   mobileStep === 0
                     ? "56px"
                     : mobileStep === 1
-                    ? "calc((100vh - 92px) * 0.25 + 56px)"
+                    ? "25vh"
                     : mobileStep === 2
-                    ? "calc((100vh - 92px) * 0.50 + 56px)"
+                    ? "50vh"
                     : mobileStep === 3
-                    ? "calc((100vh - 92px) * 0.75 + 56px)"
-                    : "calc(100vh - 92px)",
+                    ? "75vh"
+                    : "100vh",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
@@ -4296,28 +4295,6 @@ const MapSidebar = ({
                   const regDate = prop.registeredDate;
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
-
-                  // 모바일 전용 카드
-                  if (isMobile) {
-                    const fb = (() => {
-                      const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
-                      if (hasOwn) return undefined;
-                      const ref = findRefImage(prop, displayProperties);
-                      return ref?.image;
-                    })();
-                    return (
-                      <MobilePropertyCard
-                        key={prop.id}
-                        prop={prop}
-                        selected={selectedId === prop.id}
-                        onSelect={() => (selectedId === prop.id ? onDeselect?.() : onSelect(prop.id))}
-                        isAdmin={isAdmin}
-                        agencyInfo={myAgencyInfo}
-                        fallbackImage={fb}
-                      />
-                    );
-                  }
-
                   return (
                     <div key={prop.id} className="flex flex-col">
                       <div
