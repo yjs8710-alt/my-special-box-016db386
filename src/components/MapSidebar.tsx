@@ -4674,6 +4674,48 @@ const MapSidebar = ({
                             listScrollRef={listScrollRef}
                             agencyInfo={myAgencyInfo}
                             isMobile={isMobile}
+                            onOpenPhotos={() => {
+                              const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              const ref = !hasOwnImages ? findRefImage(prop, displayProperties) : null;
+                              if (!hasOwnImages && !ref) return;
+                              if (!hasOwnImages && ref) {
+                                setLightbox({
+                                  units: [{
+                                    unitNumber: ref.unitNumber,
+                                    roomType: ref.roomType,
+                                    label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`,
+                                    images: ref.images,
+                                    isReference: true,
+                                  }],
+                                  unitIdx: 0,
+                                });
+                                return;
+                              }
+                              const sameAddr = properties.filter(
+                                (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
+                              );
+                              const units: LightboxUnit[] = sameAddr.length > 1
+                                ? (() => {
+                                    const current = sameAddr.find((p) => p.id === prop.id);
+                                    const others = sameAddr.filter((p) => p.id !== prop.id);
+                                    const sorted = current ? [current, ...others] : sameAddr;
+                                    return sorted.map((p) => ({
+                                      unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
+                                      roomType: p.roomType || undefined,
+                                      label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
+                                      images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                      isReference: p.id !== prop.id,
+                                    }));
+                                  })()
+                                : [{
+                                    unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
+                                    roomType: prop.roomType || undefined,
+                                    label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
+                                    images: prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [],
+                                    isReference: false,
+                                  }];
+                              setLightbox({ units, unitIdx: 0 });
+                            }}
                             fallbackImage={(() => {
                               const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               if (hasOwn) return undefined;
