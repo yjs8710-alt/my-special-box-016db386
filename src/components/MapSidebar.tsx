@@ -4295,6 +4295,28 @@ const MapSidebar = ({
                   const regDate = prop.registeredDate;
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
+
+                  // 모바일 전용 카드
+                  if (isMobile) {
+                    const fb = (() => {
+                      const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                      if (hasOwn) return undefined;
+                      const ref = findRefImage(prop, displayProperties);
+                      return ref?.image;
+                    })();
+                    return (
+                      <MobilePropertyCard
+                        key={prop.id}
+                        prop={prop}
+                        selected={selectedId === prop.id}
+                        onSelect={() => (selectedId === prop.id ? onDeselect?.() : onSelect(prop.id))}
+                        isAdmin={isAdmin}
+                        agencyInfo={myAgencyInfo}
+                        fallbackImage={fb}
+                      />
+                    );
+                  }
+
                   return (
                     <div key={prop.id} className="flex flex-col">
                       <div
