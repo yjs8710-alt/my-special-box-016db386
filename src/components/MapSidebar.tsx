@@ -3284,6 +3284,13 @@ const MapSidebar = ({
     };
     loadDealCompleted();
   }, []);
+
+  // 모바일: 매물 핀 선택 시 자동으로 1단계 펼침
+  useEffect(() => {
+    if (isMobile && selectedId !== null) {
+      setMobileStep((prev) => (prev === 0 ? 1 : prev));
+    }
+  }, [isMobile, selectedId]);
   const listScrollRef = useRef<HTMLDivElement>(null);
   // 공유 시 사용할 중개사무소 정보
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
