@@ -4156,8 +4156,8 @@ const MapSidebar = ({
                 </div>
               </div>
             </div>
-            {/* 외부링크 + 선택인쇄 바 */}
-            <div className="flex items-center gap-1 px-3 py-1.5 flex-wrap">
+            {/* 외부링크 + 선택인쇄 바 (모바일에서는 숨김) */}
+            <div className="hidden md:flex items-center gap-1 px-3 py-1.5 flex-wrap">
               {[
                 {
                   label: "등기소",
@@ -4817,52 +4817,46 @@ const MapSidebar = ({
                         const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
                         return (
                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                            {/* 1행: 연락처 (소유주 우선, 입력된 항목만) — 클릭 시 모든 번호 펼침 | 우측: 확인일/등록일 */}
-                            <div className="flex items-center justify-between gap-2">
-                              {hasAnyContact ? (
-                                <button
-                                  type="button"
-                                  onClick={(e) => { e.stopPropagation(); setExpandedContactsId((cur) => cur === prop.id ? null : prop.id); }}
-                                  className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold flex-wrap"
-                                  style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
-                                >
-                                  <Phone className="w-3 h-3" />
-                                  {owner && <span>소유주 {owner}</span>}
-                                  {!owner && owner2 && <span>소유주 {owner2}</span>}
-                                  {!owner && !owner2 && manager && <span>관리인 {manager}</span>}
-                                  {!owner && !owner2 && !manager && tenant && <span>세입자 {tenant}</span>}
-                                  <span className="text-[9px] opacity-70">{expandedContactsId === prop.id ? "▴" : "▾"}</span>
-                                </button>
-                              ) : (
-                                <span className="text-muted-foreground">연락처 없음</span>
-                              )}
+                            {/* 1행: 연락처 라벨 칩 (소유주/관리인/세입자) — 클릭 시 모달로 번호 공개 | 우측: 확인일/등록일 */}
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <div className="flex items-center gap-1 flex-wrap">
+                                {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
+                                {(owner || owner2) && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                    style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                  >
+                                    <Phone className="w-3 h-3" /> 소유주
+                                  </button>
+                                )}
+                                {manager && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                    style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
+                                  >
+                                    <Phone className="w-3 h-3" /> 관리인
+                                  </button>
+                                )}
+                                {tenant && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                    style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
+                                  >
+                                    <Phone className="w-3 h-3" /> 세입자
+                                  </button>
+                                )}
+                              </div>
                               <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
                                 {chkDate && <span>확인 {chkDate.slice(5)}</span>}
                                 {regDate && <span>등록 {regDate.slice(5)}</span>}
                               </div>
                             </div>
-                            {/* 펼쳐진 연락처 목록 — 입력된 항목만 tel: 링크로 노출 */}
-                            {expandedContactsId === prop.id && hasAnyContact && (
-                              <div className="flex flex-col gap-1 pl-1">
-                                {[
-                                  { label: "소유주", num: owner },
-                                  { label: "소유주2", num: owner2 },
-                                  { label: "관리인", num: manager },
-                                  { label: "세입자", num: tenant },
-                                ].filter((c) => c.num).map((c) => (
-                                  <a
-                                    key={c.label}
-                                    href={`tel:${c.num}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md border bg-white"
-                                    style={{ borderColor: "hsl(var(--primary)/0.25)" }}
-                                  >
-                                    <span className="text-[11px] font-bold text-muted-foreground">{c.label}</span>
-                                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--primary))" }}>{c.num}</span>
-                                  </a>
-                                ))}
-                              </div>
-                            )}
                             {/* 2행: 현관비번/방비번 — 진한 글씨 | 우측: 방향 */}
                             {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
                               <div className="flex items-center gap-2 text-[12px] flex-wrap">
