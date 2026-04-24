@@ -3872,6 +3872,52 @@ const MapSidebar = ({
       {lightbox && (
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
       )}
+      {/* 모바일 연락처 모달 — 입력된 연락처만 노출 */}
+      {mobileContactsProp && ReactDOM.createPortal(
+        <div
+          className="fixed inset-0 z-[10000] bg-black/60 flex items-end md:items-center justify-center p-4"
+          onClick={() => setMobileContactsProp(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ background: "hsl(var(--primary)/0.05)" }}>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
+                <span className="font-extrabold text-[14px]">연락처</span>
+              </div>
+              <button onClick={() => setMobileContactsProp(null)} className="p-1 rounded hover:bg-muted">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-3 flex flex-col gap-2">
+              {[
+                { label: "소유주", num: mobileContactsProp.contactOwner?.trim() },
+                { label: "소유주2", num: mobileContactsProp.contactOwner2?.trim() },
+                { label: "관리인", num: mobileContactsProp.contactManager?.trim() },
+                { label: "세입자", num: mobileContactsProp.contactTenant?.trim() },
+              ]
+                .filter((c) => c.num)
+                .map((c) => (
+                  <a
+                    key={c.label}
+                    href={`tel:${c.num}`}
+                    className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border transition-colors hover:bg-primary/5"
+                    style={{ borderColor: "hsl(var(--border))" }}
+                  >
+                    <span className="text-[12px] font-bold text-muted-foreground">{c.label}</span>
+                    <span className="text-[14px] font-extrabold" style={{ color: "hsl(var(--primary))" }}>{c.num}</span>
+                  </a>
+                ))}
+              {!(mobileContactsProp.contactOwner?.trim() || mobileContactsProp.contactOwner2?.trim() || mobileContactsProp.contactManager?.trim() || mobileContactsProp.contactTenant?.trim()) && (
+                <p className="text-center text-[12px] text-muted-foreground py-4">등록된 연락처가 없습니다</p>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {/* 모바일에서 시트가 3단계 이상 펼쳐졌을 때 배경 어둡게 */}
       {isMobile && mobileStep >= 3 && (
