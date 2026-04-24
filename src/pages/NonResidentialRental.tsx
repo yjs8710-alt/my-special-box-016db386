@@ -212,7 +212,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
       <Header onRegisterChange={setShowRegister} />
 
       <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
+        className="hidden md:flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         {NON_RESIDENTIAL_SUBTYPES.filter(t => t.group === "전체").map(t => {

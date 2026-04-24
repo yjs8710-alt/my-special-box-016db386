@@ -85,7 +85,7 @@ const LandSearch = () => {
       <Header onRegisterChange={setShowRegister} />
 
       <div
-        className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
+        className="hidden md:flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
         <span className="text-white/50 text-xs font-semibold whitespace-nowrap">토지 유형</span>
