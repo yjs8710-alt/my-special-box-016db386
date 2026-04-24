@@ -3423,6 +3423,8 @@ interface MapSidebarProps {
   onRefetch?: () => void;
   /** 참고용 사진 검색용 전체 매물 풀 (필터링 전) */
   referencePool?: MapProperty[];
+  /** 현재 지도 영역 — 모바일 시트 매물 갯수 표시용 */
+  currentBounds?: { swLat: number; swLng: number; neLat: number; neLng: number } | null;
 }
 
 const MIN_WIDTH = 260;
@@ -3445,6 +3447,7 @@ const MapSidebar = ({
   landlordSearched,
   onRefetch,
   referencePool,
+  currentBounds,
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
@@ -3464,6 +3467,7 @@ const MapSidebar = ({
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
   const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
+  const [expandedContactsId, setExpandedContactsId] = useState<number | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
 
   // 기존 거래완료 제보 불러오기 — 매물이 active인 경우에만 취소선 표시
@@ -4013,7 +4017,7 @@ const MapSidebar = ({
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--stat-green))" }} />
                 <span className="text-sm font-bold text-foreground">매물정보</span>
-                <span className="text-xs text-muted-foreground">({properties.filter((p) => p.lat !== 0 && p.lng !== 0).length}개)</span>
+                <span className="text-xs text-muted-foreground">({(currentBounds ? properties.filter((p) => p.lat !== 0 && p.lng !== 0 && p.lat >= currentBounds.swLat && p.lat <= currentBounds.neLat && p.lng >= currentBounds.swLng && p.lng <= currentBounds.neLng) : properties.filter((p) => p.lat !== 0 && p.lng !== 0)).length}개)</span>
               </div>
               <div className="flex items-center gap-1">
                 {mobileStep > 0 && (
@@ -4813,12 +4817,12 @@ const MapSidebar = ({
                         const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
                         return (
                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                            {/* 1행: 연락처 (소유주 우선, 입력된 항목만) | 우측: 확인일/등록일 */}
+                            {/* 1행: 연락처 (소유주 우선, 입력된 항목만) — 클릭 시 모든 번호 펼침 | 우측: 확인일/등록일 */}
                             <div className="flex items-center justify-between gap-2">
                               {hasAnyContact ? (
                                 <button
                                   type="button"
-                                  onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                  onClick={(e) => { e.stopPropagation(); setExpandedContactsId((cur) => cur === prop.id ? null : prop.id); }}
                                   className="flex items-center gap-1.5 px-2 py-1 rounded-md font-bold flex-wrap"
                                   style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
                                 >
@@ -4827,6 +4831,7 @@ const MapSidebar = ({
                                   {!owner && owner2 && <span>소유주 {owner2}</span>}
                                   {!owner && !owner2 && manager && <span>관리인 {manager}</span>}
                                   {!owner && !owner2 && !manager && tenant && <span>세입자 {tenant}</span>}
+                                  <span className="text-[9px] opacity-70">{expandedContactsId === prop.id ? "▴" : "▾"}</span>
                                 </button>
                               ) : (
                                 <span className="text-muted-foreground">연락처 없음</span>
@@ -4836,6 +4841,28 @@ const MapSidebar = ({
                                 {regDate && <span>등록 {regDate.slice(5)}</span>}
                               </div>
                             </div>
+                            {/* 펼쳐진 연락처 목록 — 입력된 항목만 tel: 링크로 노출 */}
+                            {expandedContactsId === prop.id && hasAnyContact && (
+                              <div className="flex flex-col gap-1 pl-1">
+                                {[
+                                  { label: "소유주", num: owner },
+                                  { label: "소유주2", num: owner2 },
+                                  { label: "관리인", num: manager },
+                                  { label: "세입자", num: tenant },
+                                ].filter((c) => c.num).map((c) => (
+                                  <a
+                                    key={c.label}
+                                    href={`tel:${c.num}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md border bg-white"
+                                    style={{ borderColor: "hsl(var(--primary)/0.25)" }}
+                                  >
+                                    <span className="text-[11px] font-bold text-muted-foreground">{c.label}</span>
+                                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--primary))" }}>{c.num}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                             {/* 2행: 현관비번/방비번 — 진한 글씨 | 우측: 방향 */}
                             {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
                               <div className="flex items-center gap-2 text-[12px] flex-wrap">

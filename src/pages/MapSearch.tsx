@@ -216,6 +216,7 @@ const MapSearch = () => {
           onTypeChange={setActiveType}
           onDeleteProperties={handleDeleteProperties}
           onRefetch={refetch}
+          currentBounds={currentBounds}
         />
       </main>
     </div>
