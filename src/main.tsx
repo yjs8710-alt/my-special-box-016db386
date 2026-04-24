@@ -33,7 +33,29 @@ if (isPreviewHost || isInIframe) {
 } else if (isProductionHost && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     import("virtual:pwa-register").then(({ registerSW }) => {
-      registerSW({ immediate: true });
+      const updateSW = registerSW({
+        immediate: true,
+        // 새 버전 감지 → 즉시 SW 활성화 후 페이지 리로드 (사용자 별도 조작 불필요)
+        onNeedRefresh() {
+          updateSW(true);
+        },
+        // 매 1시간마다 새 버전 체크 (앱이 켜져 있는 동안)
+        onRegisteredSW(swUrl, registration) {
+          if (!registration) return;
+          setInterval(() => {
+            registration.update().catch(() => {});
+          }, 60 * 60 * 1000);
+        },
+      });
+
+      // 앱이 다시 포그라운드로 올 때마다 즉시 업데이트 체크
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+          navigator.serviceWorker.getRegistration().then((reg) => {
+            reg?.update().catch(() => {});
+          });
+        }
+      });
     });
   });
 }
