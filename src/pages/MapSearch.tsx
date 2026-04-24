@@ -97,7 +97,7 @@ const MapSearch = () => {
 
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
-      <Header />
+      <Header onMenuOpenChange={setMobileMenuOpen} />
       {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
