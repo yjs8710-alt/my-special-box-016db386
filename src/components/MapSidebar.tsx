@@ -2118,8 +2118,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -2635,17 +2635,30 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </span>
             )}
-            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색 */}
-            <span
-              title={hasPhotos ? "사진 있음" : "사진 없음"}
-              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded"
+            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
+              title={hasPhotos ? "사진 보기" : "사진 없음"}
+              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded transition-transform active:scale-95"
               style={{
-                background: hasPhotos ? "hsl(var(--primary)/0.15)" : "#fff",
+                background: hasPhotos ? "hsl(var(--primary))" : "#fff",
                 border: `1.5px solid ${hasPhotos ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
               }}
             >
-              <Camera className="w-4 h-4" style={{ color: hasPhotos ? "hsl(var(--primary))" : "hsl(var(--muted-foreground)/0.5)" }} />
-            </span>
+              <Camera className="w-4 h-4" style={{ color: hasPhotos ? "#fff" : "hsl(var(--muted-foreground)/0.5)" }} />
+            </button>
+            {/* 평수 표기 */}
+            {prop.area && (
+              <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
+                {(() => {
+                  const a = prop.area;
+                  if (/평/.test(a)) return a;
+                  const n = parseFloat(a.replace(/[^0-9.]/g, ""));
+                  return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
+                })()}
+              </span>
+            )}
             <span className="flex-1" />
             {/* 카카오톡 공유 */}
             <button
@@ -3429,6 +3442,7 @@ const MapSidebar = ({
   const [leaseProposalProp, setLeaseProposalProp] = useState<MapProperty | null>(null);
   const [errorReportProp, setErrorReportProp] = useState<MapProperty | null>(null);
   const [dealCompleteProp, setDealCompleteProp] = useState<MapProperty | null>(null);
+  const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
 
   // 기존 거래완료 제보 불러오기 — 매물이 active인 경우에만 취소선 표시
@@ -3857,6 +3871,52 @@ const MapSidebar = ({
       {/* Lightbox — 호실별 탭 + 여러 장 좌우 탐색 */}
       {lightbox && (
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
+      )}
+      {/* 모바일 연락처 모달 — 입력된 연락처만 노출 */}
+      {mobileContactsProp && ReactDOM.createPortal(
+        <div
+          className="fixed inset-0 z-[10000] bg-black/60 flex items-end md:items-center justify-center p-4"
+          onClick={() => setMobileContactsProp(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ background: "hsl(var(--primary)/0.05)" }}>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />
+                <span className="font-extrabold text-[14px]">연락처</span>
+              </div>
+              <button onClick={() => setMobileContactsProp(null)} className="p-1 rounded hover:bg-muted">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-3 flex flex-col gap-2">
+              {[
+                { label: "소유주", num: mobileContactsProp.contactOwner?.trim() },
+                { label: "소유주2", num: mobileContactsProp.contactOwner2?.trim() },
+                { label: "관리인", num: mobileContactsProp.contactManager?.trim() },
+                { label: "세입자", num: mobileContactsProp.contactTenant?.trim() },
+              ]
+                .filter((c) => c.num)
+                .map((c) => (
+                  <a
+                    key={c.label}
+                    href={`tel:${c.num}`}
+                    className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border transition-colors hover:bg-primary/5"
+                    style={{ borderColor: "hsl(var(--border))" }}
+                  >
+                    <span className="text-[12px] font-bold text-muted-foreground">{c.label}</span>
+                    <span className="text-[14px] font-extrabold" style={{ color: "hsl(var(--primary))" }}>{c.num}</span>
+                  </a>
+                ))}
+              {!(mobileContactsProp.contactOwner?.trim() || mobileContactsProp.contactOwner2?.trim() || mobileContactsProp.contactManager?.trim() || mobileContactsProp.contactTenant?.trim()) && (
+                <p className="text-center text-[12px] text-muted-foreground py-4">등록된 연락처가 없습니다</p>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body,
       )}
 
       {/* 모바일에서 시트가 3단계 이상 펼쳐졌을 때 배경 어둡게 */}
@@ -4661,6 +4721,48 @@ const MapSidebar = ({
                             listScrollRef={listScrollRef}
                             agencyInfo={myAgencyInfo}
                             isMobile={isMobile}
+                            onOpenPhotos={() => {
+                              const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              const ref = !hasOwnImages ? findRefImage(prop, displayProperties) : null;
+                              if (!hasOwnImages && !ref) return;
+                              if (!hasOwnImages && ref) {
+                                setLightbox({
+                                  units: [{
+                                    unitNumber: ref.unitNumber,
+                                    roomType: ref.roomType,
+                                    label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`,
+                                    images: ref.images,
+                                    isReference: true,
+                                  }],
+                                  unitIdx: 0,
+                                });
+                                return;
+                              }
+                              const sameAddr = properties.filter(
+                                (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
+                              );
+                              const units: LightboxUnit[] = sameAddr.length > 1
+                                ? (() => {
+                                    const current = sameAddr.find((p) => p.id === prop.id);
+                                    const others = sameAddr.filter((p) => p.id !== prop.id);
+                                    const sorted = current ? [current, ...others] : sameAddr;
+                                    return sorted.map((p) => ({
+                                      unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
+                                      roomType: p.roomType || undefined,
+                                      label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
+                                      images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                      isReference: p.id !== prop.id,
+                                    }));
+                                  })()
+                                : [{
+                                    unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
+                                    roomType: prop.roomType || undefined,
+                                    label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
+                                    images: prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [],
+                                    isReference: false,
+                                  }];
+                              setLightbox({ units, unitIdx: 0 });
+                            }}
                             fallbackImage={(() => {
                               const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               if (hasOwn) return undefined;
@@ -4672,6 +4774,76 @@ const MapSidebar = ({
                       </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
+                      {selectedId === prop.id && isMobile && (() => {
+                        const owner = prop.contactOwner?.trim();
+                        const owner2 = prop.contactOwner2?.trim();
+                        const manager = prop.contactManager?.trim();
+                        const tenant = prop.contactTenant?.trim();
+                        const hasAnyContact = !!(owner || owner2 || manager || tenant);
+                        const note = prop.note ?? "";
+                        const brokerMatch = note.match(/중개보수[:\s]+([^\n|]+)/);
+                        const cleanMatch = note.match(/청소비[:\s]+([^\n|]+)/);
+                        const dirMatch = note.match(/방향[:\s]+([^\n|]+)/);
+                        const lhMatch = note.match(/LH[:\s]+([^\n|]+)/);
+                        const brokerFee = brokerMatch?.[1]?.trim();
+                        const cleanFee = cleanMatch?.[1]?.trim();
+                        const direction = dirMatch?.[1]?.trim();
+                        const lhVal = lhMatch?.[1]?.trim();
+                        const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
+                        return (
+                          <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                            {/* 1행: 연락처 모달 트리거 | 우측: 확인일/등록일 */}
+                            <div className="flex items-center justify-between gap-2">
+                              {hasAnyContact ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md font-bold"
+                                  style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                >
+                                  <Phone className="w-3 h-3" />
+                                  연락처 보기
+                                </button>
+                              ) : (
+                                <span className="text-muted-foreground">연락처 없음</span>
+                              )}
+                              <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                                {chkDate && <span>확인 {chkDate.slice(5)}</span>}
+                                {regDate && <span>등록 {regDate.slice(5)}</span>}
+                              </div>
+                            </div>
+                            {/* 2행: 도로명 주소 */}
+                            {prop.roadAddress && (
+                              <div className="text-[11px] text-foreground/80 truncate">
+                                <span className="font-bold text-muted-foreground mr-1">도로명</span>
+                                {prop.roadAddress}
+                              </div>
+                            )}
+                            {/* 3행: 현관비번/방비번 */}
+                            {(prop.buildingPassword || prop.password || prop.roomPassword) && (
+                              <div className="flex items-center gap-2 text-[11px] flex-wrap">
+                                <KeyRound className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                {(prop.buildingPassword || prop.password) && (
+                                  <span><span className="font-bold text-muted-foreground">현관</span> {prop.buildingPassword || prop.password}</span>
+                                )}
+                                {prop.roomPassword && (
+                                  <span><span className="font-bold text-muted-foreground">방</span> {prop.roomPassword}</span>
+                                )}
+                              </div>
+                            )}
+                            {/* 4행: 수수료/메모 등 부가 정보 */}
+                            {(brokerFee || cleanFee || direction || lhVal || memos) && (
+                              <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
+                                {brokerFee && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>수수료 {brokerFee}</span>}
+                                {cleanFee && <span className="px-1.5 py-0.5 rounded font-bold bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>}
+                                {direction && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>{direction}향</span>}
+                                {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
+                                {memos && <span className="text-foreground/70 truncate">📝 {memos}</span>}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                       {selectedId === prop.id && (
                         <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
                           {/* 관리자 수정 버튼 */}
