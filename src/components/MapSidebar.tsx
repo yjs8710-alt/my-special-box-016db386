@@ -4316,7 +4316,7 @@ const MapSidebar = ({
                         {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
                         <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
                           {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}
-                          <div
+                          {!isMobile && <div
                             className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
                             style={{ minHeight: "96px" }}
                           >
