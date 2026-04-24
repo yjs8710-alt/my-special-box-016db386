@@ -31,8 +31,8 @@ const HeroSection = () => {
         </button>
       </div>
 
-      {/* 우측 앱 설치 카드 */}
-      <div className="hidden md:block absolute right-6 lg:right-10 top-1/2 -translate-y-1/2 z-20">
+      {/* 우측 상단 앱 설치 카드 (데스크톱) */}
+      <div className="hidden md:block absolute right-6 lg:right-10 top-6 z-20">
         <InstallAppCard />
       </div>
 

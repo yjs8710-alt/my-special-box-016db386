@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
+import MobileMapSheet from "@/components/MobileMapSheet";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS } from "@/components/MapFilterBar";
 import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -204,18 +205,44 @@ const MapSearch = () => {
           />
         </div>
 
-        {/* 우측 사이드바 */}
-        <MapSidebar
-          properties={filtered}
-          referencePool={allProperties}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onDeselect={() => setSelectedId(null)}
-          activeType={activeType}
-          onTypeChange={setActiveType}
-          onDeleteProperties={handleDeleteProperties}
-          onRefetch={refetch}
-        />
+        {/* 우측 사이드바 (데스크톱) */}
+        <div className="hidden md:flex h-full">
+          <MapSidebar
+            properties={filtered}
+            referencePool={allProperties}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onDeselect={() => setSelectedId(null)}
+            activeType={activeType}
+            onTypeChange={setActiveType}
+            onDeleteProperties={handleDeleteProperties}
+            onRefetch={refetch}
+          />
+        </div>
+
+        {/* 모바일 하단 시트 — 매물 클릭/검색 시에만 표시 */}
+        <MobileMapSheet
+          count={filtered.length}
+          hasInteraction={selectedId !== null || query.trim().length > 0 || propertyId.trim().length > 0}
+          shouldAutoExpand={selectedId !== null}
+          onClose={() => {
+            setSelectedId(null);
+            setQuery("");
+            setPropertyId("");
+          }}
+        >
+          <MapSidebar
+            properties={filtered}
+            referencePool={allProperties}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onDeselect={() => setSelectedId(null)}
+            activeType={activeType}
+            onTypeChange={setActiveType}
+            onDeleteProperties={handleDeleteProperties}
+            onRefetch={refetch}
+          />
+        </MobileMapSheet>
       </main>
     </div>
   );

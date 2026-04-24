@@ -65,8 +65,9 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
   };
 
   if (installed) {
+    // 모바일에서는 설치 완료 안내 숨김
     return (
-      <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-5 text-white text-center">
+      <div className="hidden md:block rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md p-5 text-white text-center">
         <Check className="w-6 h-6 mx-auto mb-1.5 text-emerald-300" />
         <p className="text-sm font-bold">앱이 설치되어 있습니다</p>
       </div>
