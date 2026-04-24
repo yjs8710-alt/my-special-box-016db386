@@ -2529,7 +2529,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       });
 
     return (
-      <div className="flex-1 min-w-0 flex flex-col border-l border-border/30 px-2 py-0.5 gap-0.5">
+      <div className={`flex-1 min-w-0 flex flex-col px-2 py-1 gap-0.5 ${isMobile ? "" : "border-l border-border/30"}`}>
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
         <div className="flex items-center gap-1 overflow-hidden flex-nowrap min-h-[22px]">
           {prop.buildYear && (
