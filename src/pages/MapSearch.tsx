@@ -14,6 +14,7 @@ type ViewMode = "map" | "list";
 
 const MapSearch = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
