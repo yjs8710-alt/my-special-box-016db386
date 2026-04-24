@@ -4495,6 +4495,7 @@ const MapSidebar = ({
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
                             agencyInfo={myAgencyInfo}
+                            isMobile={isMobile}
                             fallbackImage={(() => {
                               const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               if (hasOwn) return undefined;
