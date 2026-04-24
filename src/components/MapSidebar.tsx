@@ -4016,7 +4016,7 @@ const MapSidebar = ({
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--stat-green))" }} />
                 <span className="text-sm font-bold text-foreground">매물정보</span>
-                <span className="text-xs text-muted-foreground">({properties.filter((p) => p.lat !== 0 && p.lng !== 0).length}개)</span>
+                <span className="text-xs text-muted-foreground">({(currentBounds ? properties.filter((p) => p.lat !== 0 && p.lng !== 0 && p.lat >= currentBounds.swLat && p.lat <= currentBounds.neLat && p.lng >= currentBounds.swLng && p.lng <= currentBounds.neLng) : properties.filter((p) => p.lat !== 0 && p.lng !== 0)).length}개)</span>
               </div>
               <div className="flex items-center gap-1">
                 {mobileStep > 0 && (
