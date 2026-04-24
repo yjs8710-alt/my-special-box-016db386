@@ -581,11 +581,11 @@ const MapFilterBar = ({
               <>
                 <button
                   onClick={() => setShowFilter((v) => !v)}
-                  className="relative flex items-center gap-1 px-3 h-10 transition-colors"
+                  className="relative flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{ borderLeft: "1px solid hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium">필터</span>
+                  <span className="text-xs font-medium hidden md:inline">필터</span>
                   {activeFilterCount > 0 && (
                     <span
                       className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
