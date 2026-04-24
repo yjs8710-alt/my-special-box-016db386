@@ -2579,13 +2579,34 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </p>
             <button
               type="button"
-              onClick={handleRoadviewOpen}
-              title="주소 클릭 → 로드뷰 열기"
+              onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
-              style={{ color: "hsl(var(--primary))" }}
+              style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+              title="클릭하면 전체 주소 표시"
             >
-              {shortAddress(prop.address)}
+              {showFullAddr ? prop.address : shortAddress(prop.address)}
             </button>
+            {/* 로드뷰 버튼 */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleRoadviewOpen(e); }}
+              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
+              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+            >
+              로드뷰
+            </button>
+            {/* 도로명 버튼 (탭 시 도로명주소 모달 표시) */}
+            {prop.roadAddress && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); alert(`도로명 주소\n\n${prop.roadAddress}`); }}
+                className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
+                style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+                title={prop.roadAddress}
+              >
+                도로명
+              </button>
+            )}
             <span className="flex-1" />
             <MemoNotepad
               propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
