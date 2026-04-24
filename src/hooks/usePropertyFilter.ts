@@ -180,6 +180,8 @@ export function usePropertyFilter(
       if (filters.buildingOptions.length > 0 || filters.roomOptions.length > 0) {
         const norm = (s: string) => String(s).replace(/\s+/g, "").toLowerCase();
         const optsSet = new Set((p.options ?? []).map(norm));
+        // 엘리베이터는 별도 boolean 컬럼도 함께 고려
+        if (p.elevator) optsSet.add(norm("엘리베이터"));
         const allSelected = [...filters.buildingOptions, ...filters.roomOptions];
         const allMatch = allSelected.every((sel) => optsSet.has(norm(sel)));
         if (!allMatch) return false;
