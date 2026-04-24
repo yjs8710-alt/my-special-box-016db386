@@ -12,7 +12,7 @@ import {
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
   Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
 } from "lucide-react";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/hero-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
