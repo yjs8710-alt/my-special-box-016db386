@@ -82,14 +82,10 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
           </div>
           <div>
             <p className="text-sm font-extrabold leading-tight">집다 앱 설치</p>
-            <p className="text-[11px] text-white/70 leading-tight mt-0.5">홈 화면에서 빠르게</p>
+            <p className="text-[11px] text-white/70 leading-tight mt-2">홈 화면에서 빠르게</p>
           </div>
         </div>
-        <ul className="text-[11px] text-white/80 space-y-1 mb-3.5">
-          <li>· 주소창 없는 전체 화면</li>
-          <li>· 빠른 로딩 · 오프라인 지원</li>
-          <li>· 별도 앱스토어 가입 불필요</li>
-        </ul>
+        <div className="mb-6" />
         <button
           onClick={handleInstall}
           className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
