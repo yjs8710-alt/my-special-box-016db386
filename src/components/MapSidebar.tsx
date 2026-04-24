@@ -2528,6 +2528,171 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         border: { background: "transparent", color: "#c2410c", borderColor: "#fdba74" },
       });
 
+    // 모바일: 컴팩트 3행 레이아웃 (사용자 요청 사양)
+    if (isMobile) {
+      const buildYr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
+      const hasPhotos = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+      const note = prop.note ?? "";
+      const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+      const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
+      const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+      const isSaleProp = note.includes("매매가:") || (!prop.monthly && !!prop.deposit);
+      // 부가시설 아이콘 수집
+      const opts = prop.options ?? [];
+      const normalizedOpts = new Set(opts.map((o) => String(o).replace(/\s+/g, "").toLowerCase()));
+      const hasOpt = (...c: string[]) => c.some((x) => normalizedOpts.has(x.replace(/\s+/g, "").toLowerCase()));
+      const facilityBadges: JSX.Element[] = [];
+      const fIcon = "flex-shrink-0 flex items-center justify-center w-6 h-6 rounded";
+      const fImg = "w-5 h-5 object-contain";
+      const fStyle = { imageRendering: '-webkit-optimize-contrast' as any };
+      if (prop.elevator || hasOpt("엘리베이터"))
+        facilityBadges.push(<span key="el" title="엘리베이터" className={fIcon} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="" className={fImg} style={fStyle} /></span>);
+      if (hasOpt("반려동물불가", "애완동물불가"))
+        facilityBadges.push(<span key="pd" title="반려동물 불가" className={`${fIcon} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /><span className="absolute inset-0 flex items-center justify-center pointer-events-none"><svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg></span></span>);
+      else if (hasOpt("반려동물가능", "애완동물가능"))
+        facilityBadges.push(<span key="po" title="반려동물 가능" className={fIcon} style={{ background: "#fff7ed", border: "1px solid #fdba74" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /></span>);
+      ([
+        ["수도", waterIcon, "#eff6ff", "#93c5fd"],
+        ["인터넷", internetIcon, "#f0fdf4", "#86efac"],
+        ["유선TV", tvIcon, "#faf5ff", "#d8b4fe"],
+        ["CCTV", cctvIcon, "#fef2f2", "#fca5a5"],
+        ["리모델링", remodelingIcon, "#fff7ed", "#fdba74"],
+        ["여성전용", femaleOnlyIcon, "#fdf2f8", "#f9a8d4"],
+      ] as const).forEach(([opt, src, bg, br]) => {
+        if (!hasOpt(opt)) return;
+        facilityBadges.push(<span key={opt} title={opt} className={fIcon} style={{ background: bg, border: `1px solid ${br}` }}><img src={src} alt="" className={fImg} style={fStyle} /></span>);
+      });
+      const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
+      const isFull = opts.includes("풀옵션") || FULL_OPT.every((o) => opts.includes(o));
+
+      return (
+        <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
+          {/* 1행: 준YYYY · 건물명 · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          <div className="flex items-center gap-1 min-h-[22px]">
+            {buildYr && (
+              <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
+                준{buildYr}
+              </span>
+            )}
+            <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
+              {prop.buildingName ?? prop.title}
+            </p>
+            <button
+              type="button"
+              onClick={handleRoadviewOpen}
+              title="주소 클릭 → 로드뷰 열기"
+              className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
+              style={{ color: "hsl(var(--primary))" }}
+            >
+              {shortAddress(prop.address)}
+            </button>
+            <span className="flex-1" />
+            <MemoNotepad
+              propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
+              propId={prop.id}
+              memoKey="building"
+              icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+              label="건물메모"
+              initialText={buildingMemo ?? ""}
+              userId={userId}
+              isAdmin={isAdmin}
+            />
+            <MemoNotepad
+              propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
+              propId={prop.id}
+              memoKey="room"
+              icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+              label="방메모"
+              initialText={roomMemo ?? ""}
+              userId={userId}
+              isAdmin={isAdmin}
+            />
+          </div>
+
+          {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
+          <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
+            {(prop.type || floorShort || prop.unitNumber) && (
+              <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
+                {prop.type && <span>{prop.type}</span>}
+                {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
+                {floorShort && <span className="opacity-80">({floorShort})</span>}
+                {prop.unitNumber && <span>{prop.unitNumber}</span>}
+              </span>
+            )}
+            {/* 가격 */}
+            {(wolseMatch || halfMatch || jeonseMatch) ? (
+              <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
+                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span></span>}
+                {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+              </span>
+            ) : (
+              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
+                {isSaleProp ? (
+                  <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                ) : (
+                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span></>
+                )}
+              </span>
+            )}
+            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색 */}
+            <span
+              title={hasPhotos ? "사진 있음" : "사진 없음"}
+              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded"
+              style={{
+                background: hasPhotos ? "hsl(var(--primary)/0.15)" : "#fff",
+                border: `1.5px solid ${hasPhotos ? "hsl(var(--primary))" : "hsl(var(--border))"}`,
+              }}
+            >
+              <Camera className="w-4 h-4" style={{ color: hasPhotos ? "hsl(var(--primary))" : "hsl(var(--muted-foreground)/0.5)" }} />
+            </span>
+            <span className="flex-1" />
+            {/* 카카오톡 공유 */}
+            <button
+              onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
+              title="카카오톡 공유"
+              className="flex-shrink-0 flex items-center justify-center"
+            >
+              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
+            </button>
+          </div>
+
+          {/* 3행: 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
+          {(facilityBadges.length > 0 || opts.length > 0) && (
+            <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
+              {facilityBadges}
+              <span className="flex-1" />
+              {opts.length > 0 && (
+                <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
+                  {isFull ? (
+                    <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>
+                      풀옵션
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>
+                      옵션 ▾
+                    </span>
+                  )}
+                  {showOptPopup && (
+                    <div className="absolute right-0 bottom-full mb-1 z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5" style={{ minWidth: "180px", maxWidth: "240px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}>
+                      <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                        {isFull ? "풀옵션 구성" : `옵션 항목 (${opts.length}개)`}
+                      </p>
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                        {opts.map((opt) => (
+                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="flex-1 min-w-0 flex flex-col md:border-l md:border-border/30 px-2 py-1 gap-0.5">
         {/* 1줄: 준YYYY | 건물명 | 주소(토글) | 로드뷰 → 확인/등록 */}
