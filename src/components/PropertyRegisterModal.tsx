@@ -16,6 +16,7 @@ import elevatorIcon from "@/assets/elevator_icon.png";
 import internetIcon from "@/assets/internet_icon.png";
 import petIcon from "@/assets/pet_icon.png";
 import memoIcon from "@/assets/memo_icon_new.png";
+import femaleOnlyIcon from "@/assets/female_only_icon.png";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
@@ -1110,6 +1111,7 @@ function Step2({
     { key: "인터넷", label: "인터넷", icon: <img src={internetIcon} alt="인터넷" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f0fdf4", color: "#15803d", border: "#86efac" },
     { key: "CCTV",  label: "CCTV",  icon: <img src={cctvIcon} alt="CCTV" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#f8fafc", color: "#475569", border: "#cbd5e1" },
     { key: "리모델링", label: "리모델링", icon: <img src={remodelingIcon} alt="리모델링" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#fff7ed", color: "#c2410c", border: "#fdba74" },
+    { key: "여성전용", label: "여성전용", icon: <img src={femaleOnlyIcon} alt="여성전용" className="w-5 h-5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />, bg: "#fdf2f8", color: "#be185d", border: "#f9a8d4" },
   ];
 
   return (
