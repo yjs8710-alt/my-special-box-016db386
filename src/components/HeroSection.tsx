@@ -44,6 +44,11 @@ const HeroSection = () => {
             </button>
           ))}
         </div>
+
+        {/* 모바일 전용 앱 설치 카드 */}
+        <div className="md:hidden w-full max-w-md mt-3 flex justify-center">
+          <InstallAppCard />
+        </div>
       </div>
 
       {/* 우측 상단 앱 설치 카드 (데스크톱) */}
