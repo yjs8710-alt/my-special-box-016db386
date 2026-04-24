@@ -22,7 +22,7 @@ import MyPage from "./pages/MyPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-import InstallPWAPrompt from "./components/InstallPWAPrompt";
+
 
 const queryClient = new QueryClient();
 
@@ -31,7 +31,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <InstallPWAPrompt />
       <BrowserRouter>
         <Routes>
           {/* 공개 페이지 */}
