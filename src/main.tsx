@@ -34,30 +34,31 @@ if (isPreviewHost || isInIframe) {
   }
 } else if (isProductionHost && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    import("virtual:pwa-register").then(({ registerSW }) => {
-      const updateSW = registerSW({
-        immediate: true,
-        // 새 버전 감지 → 즉시 SW 활성화 후 페이지 리로드 (사용자 별도 조작 불필요)
-        onNeedRefresh() {
-          updateSW(true);
-        },
-        // 매 1시간마다 새 버전 체크 (앱이 켜져 있는 동안)
-        onRegisteredSW(swUrl, registration) {
-          if (!registration) return;
-          setInterval(() => {
-            registration.update().catch(() => {});
-          }, 60 * 60 * 1000);
-        },
-      });
+    let hasReloadedForUpdate = false;
 
-      // 앱이 다시 포그라운드로 올 때마다 즉시 업데이트 체크
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") {
-          navigator.serviceWorker.getRegistration().then((reg) => {
-            reg?.update().catch(() => {});
-          });
-        }
-      });
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        const checkForUpdates = () => {
+          registration.update().catch(() => {});
+        };
+
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (hasReloadedForUpdate) return;
+          hasReloadedForUpdate = true;
+          window.location.reload();
+        });
+
+        setInterval(checkForUpdates, 60 * 60 * 1000);
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") {
+            checkForUpdates();
+          }
+        });
+
+        window.addEventListener("focus", checkForUpdates);
+      })
+      .catch(() => {});
   });
 }
