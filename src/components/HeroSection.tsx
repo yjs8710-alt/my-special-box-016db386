@@ -14,7 +14,7 @@ const CATEGORIES = [
 ];
 
 const APP_ACTIONS = [
-  { label: "지도검색", path: "/map", Icon: Search },
+  { label: "주거임대", path: "/residential", Icon: Search },
   { label: "내 매물", path: "/my-properties", Icon: ClipboardList },
   { label: "마이페이지", path: "/my-page", Icon: User },
 ];
