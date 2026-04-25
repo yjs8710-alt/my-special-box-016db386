@@ -610,7 +610,7 @@ const MapFilterBar = ({
                   <button
                     onClick={onRadiusModeToggle}
                     title={radiusMode ? "반경검색 종료" : "지도 클릭 후 드래그로 반경 지정"}
-                    className="relative flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-all flex-shrink-0"
+                    className="relative hidden md:flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-all flex-shrink-0"
                     style={{
                       borderLeft: "1px solid hsl(var(--border))",
                       background: radiusMode ? "hsl(var(--accent))" : "transparent",
