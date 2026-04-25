@@ -4032,7 +4032,7 @@ const MapSidebar = ({
                     <ChevronDown className="w-5 h-5 text-muted-foreground" />
                   </span>
                 )}
-                {mobileStep < 4 && <ChevronUp className="w-5 h-5 text-muted-foreground" />}
+                {mobileStep < 2 && <ChevronUp className="w-5 h-5 text-muted-foreground" />}
                 {mobileStep > 0 && (
                   <span
                     role="button"
