@@ -9,6 +9,7 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import { LayoutGrid, Map, List, X } from "lucide-react";
+import { toast } from "sonner";
 
 type ViewMode = "map" | "list";
 
