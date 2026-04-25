@@ -9,6 +9,7 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import { LayoutGrid, Map, List, X } from "lucide-react";
+import { toast } from "sonner";
 
 type ViewMode = "map" | "list";
 
@@ -91,7 +92,26 @@ const MapSearch = () => {
 
   const handleSearchInArea = () => {
     // 현재 지도 영역을 스냅샷하여 사이드바 매물을 화면 안 매물로만 제한
-    if (currentBounds) setSearchBounds(currentBounds);
+    const bounds = currentBounds;
+    if (!bounds) {
+      toast.error("지도 영역을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+    setSearchBounds(bounds);
+    // 영역 검색 시에는 텍스트 검색은 초기화 (사용자가 화면 안 매물만 보고 싶어하는 의도)
+    setQuery("");
+    setPropertyId("");
+    const inArea = allProperties.filter(
+      (p) =>
+        p.lat &&
+        p.lng &&
+        p.lat >= bounds.swLat &&
+        p.lat <= bounds.neLat &&
+        p.lng >= bounds.swLng &&
+        p.lng <= bounds.neLng &&
+        !deletedIds.has(p.id)
+    ).length;
+    toast.success(`화면 안 매물 ${inArea}개를 표시합니다`);
   };
   const handleClearAreaSearch = () => setSearchBounds(null);
 
