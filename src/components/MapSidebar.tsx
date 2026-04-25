@@ -3452,8 +3452,9 @@ const MapSidebar = ({
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
   const isMobile = useIsMobile();
-  // 모바일 시트 단계: 0=peek(헤더만), 1=1/4, 2=2/4, 3=3/4, 4=전체
-  const [mobileStep, setMobileStep] = useState<0 | 1 | 2 | 3 | 4>(0);
+  // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
+  // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
+  const [mobileStep, setMobileStep] = useState<0 | 1 | 2>(0);
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
@@ -3944,8 +3945,8 @@ const MapSidebar = ({
         document.body,
       )}
 
-      {/* 모바일에서 시트가 3단계 이상 펼쳐졌을 때 배경 어둡게 */}
-      {isMobile && mobileStep >= 3 && (
+      {/* 모바일에서 시트가 4/4(100%)로 펼쳐졌을 때 배경 어둡게 */}
+      {isMobile && mobileStep === 2 && (
         <div
           className="fixed inset-0 bg-black/30 z-[55]"
           onClick={() => setMobileStep(1)}
@@ -3968,13 +3969,9 @@ const MapSidebar = ({
                   mobileStep === 0
                     ? "56px"
                     : mobileStep === 1
-                    ? "25vh"
-                    : mobileStep === 2
                     ? "50vh"
-                    : mobileStep === 3
-                    ? "70vh"
-                    : "calc(100vh - 120px)",
-                maxHeight: "calc(100vh - 120px)",
+                    : "calc(100vh - 56px)",
+                maxHeight: "calc(100vh - 56px)",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
@@ -4010,7 +4007,7 @@ const MapSidebar = ({
         {/* 모바일 전용 peek 헤더 — 탭하면 단계적 확장 */}
         {isMobile && (
           <button
-            onClick={() => setMobileStep((p) => (p < 4 ? ((p + 1) as 0 | 1 | 2 | 3 | 4) : 4))}
+            onClick={() => setMobileStep((p) => (((p + 1) % 3) as 0 | 1 | 2))}
             className="flex-shrink-0 w-full px-4 pt-2 pb-2 flex flex-col items-stretch border-b border-border bg-white"
           >
             <span className="mx-auto w-10 h-1 rounded-full bg-muted-foreground/30 mb-1.5" />
@@ -4027,7 +4024,7 @@ const MapSidebar = ({
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMobileStep((p) => (p > 0 ? ((p - 1) as 0 | 1 | 2 | 3 | 4) : 0));
+                      setMobileStep((p) => (p > 0 ? ((p - 1) as 0 | 1 | 2) : 0));
                     }}
                     className="p-1 rounded hover:bg-muted"
                     title="한 단계 줄이기"
@@ -4035,7 +4032,7 @@ const MapSidebar = ({
                     <ChevronDown className="w-5 h-5 text-muted-foreground" />
                   </span>
                 )}
-                {mobileStep < 4 && <ChevronUp className="w-5 h-5 text-muted-foreground" />}
+                {mobileStep < 2 && <ChevronUp className="w-5 h-5 text-muted-foreground" />}
                 {mobileStep > 0 && (
                   <span
                     role="button"
@@ -4057,7 +4054,7 @@ const MapSidebar = ({
             </div>
             {mobileStep > 0 && (
               <div className="flex items-center justify-center gap-1 mt-1.5">
-                {[1, 2, 3, 4].map((n) => (
+                {[1, 2].map((n) => (
                   <span
                     key={n}
                     className="h-1 rounded-full transition-all"
