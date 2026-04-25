@@ -19,17 +19,10 @@ const detectDevice = (): {
   kind: DeviceKind;
   isInApp: boolean;
 } => {
-  const ua = window.navigator.userAgent || "";
-  const iOS = /iPad|iPhone|iPod/.test(ua) && !("MSStream" in window);
-  const android = /Android/i.test(ua);
+  const isInApp = isInAppBrowser();
 
-  // 카카오톡, 네이버앱, 인스타그램, 페이스북, 라인 등 인앱 브라우저 감지
-  const isInApp =
-    /KAKAOTALK|NAVER\(inapp|FB_IAB|FBAN|FBAV|Instagram|Line\/|wv\)/i.test(ua) &&
-    !/Chrome\/\d+\.\d+ Mobile Safari/.test(ua.replace(/; wv\)/, ""));
-
-  if (iOS) return { kind: "ios", isInApp };
-  if (android) return { kind: "android", isInApp };
+  if (isIOS()) return { kind: "ios", isInApp };
+  if (isAndroid()) return { kind: "android", isInApp };
   return { kind: "desktop", isInApp };
 };
 
@@ -42,12 +35,7 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
 
   useEffect(() => {
     const checkStandalone = () => {
-      const mql = window.matchMedia("(display-mode: standalone)");
-      const isStandalone =
-        mql.matches ||
-        // @ts-expect-error iOS Safari only
-        window.navigator.standalone === true ||
-        document.referrer.startsWith("android-app://");
+      const isStandalone = isStandaloneMode();
       if (isStandalone) setInstalled(true);
       return isStandalone;
     };
