@@ -212,9 +212,9 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
             {guide === "inapp" && (
               <div className="space-y-3">
                 <p className="text-sm text-foreground">
-                  카카오톡·네이버 등 인앱 브라우저에서는 앱 설치가 지원되지 않습니다.
+                  카카오톡/네이버 앱 안에서는 설치가 제한될 수 있습니다.
                   <br />
-                  <b>Chrome 또는 Safari</b>에서 열어주세요.
+                  오른쪽 상단 메뉴에서 <b>Chrome 또는 Safari</b>로 열어 설치해주세요.
                 </p>
                 <button
                   onClick={openInExternalBrowser}
