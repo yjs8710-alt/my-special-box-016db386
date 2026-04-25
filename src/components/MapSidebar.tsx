@@ -39,6 +39,7 @@ import memoIcon from "@/assets/memo_icon_new.png";
 import femaleOnlyIcon from "@/assets/female_only_icon.png";
 import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
+import cameraIcon from "@/assets/camera_icon.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
