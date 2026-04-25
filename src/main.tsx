@@ -65,21 +65,56 @@ if (isPreviewHost || isInIframe) {
           registration.update().catch(() => {});
         };
 
+        // 새 SW 가 설치되면 즉시 활성화하도록 메시지 전송
+        const promoteWaiting = () => {
+          if (registration.waiting) {
+            registration.waiting.postMessage("SKIP_WAITING");
+          }
+        };
+
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", () => {
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+              // 대기 중인 새 워커를 즉시 활성화
+              newWorker.postMessage("SKIP_WAITING");
+            }
+          });
+        });
+
         navigator.serviceWorker.addEventListener("controllerchange", () => {
           if (hasReloadedForUpdate) return;
           hasReloadedForUpdate = true;
           window.location.reload();
         });
 
-        setInterval(checkForUpdates, 60 * 60 * 1000);
+        // SW 가 활성화 후 보내는 업데이트 알림 처리 → 즉시 새로고침
+        navigator.serviceWorker.addEventListener("message", (event) => {
+          if (event.data?.type === "SW_UPDATED") {
+            if (hasReloadedForUpdate) return;
+            hasReloadedForUpdate = true;
+            window.location.reload();
+          }
+        });
+
+        // 주기적/포커스 시 업데이트 확인 (1시간 → 10분으로 단축)
+        setInterval(checkForUpdates, 10 * 60 * 1000);
 
         document.addEventListener("visibilitychange", () => {
           if (document.visibilityState === "visible") {
             checkForUpdates();
+            promoteWaiting();
           }
         });
 
-        window.addEventListener("focus", checkForUpdates);
+        window.addEventListener("focus", () => {
+          checkForUpdates();
+          promoteWaiting();
+        });
+
+        // 초기 로드 시에도 즉시 한 번 체크
+        checkForUpdates();
       })
       .catch(() => {});
   });
