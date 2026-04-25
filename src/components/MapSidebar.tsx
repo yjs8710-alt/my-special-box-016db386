@@ -72,6 +72,14 @@ function LightboxModal({
 }) {
   const [unitIdx, setUnitIdx] = useState(startUnitIdx);
   const [imgIdx, setImgIdx] = useState(startImgIdx);
+  // 모바일 감지 — 세로 스크롤 나열 모드
+  const [isMobileView, setIsMobileView] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobileView(window.matchMedia("(max-width: 767px)").matches);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const currentImages = units[unitIdx]?.images ?? [];
   const prev = useCallback(
@@ -87,6 +95,7 @@ function LightboxModal({
   }, []);
 
   useEffect(() => {
+    if (isMobileView) return; // 모바일은 키보드 좌/우 슬라이드 비활성
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
       else if (e.key === "ArrowRight") next();
@@ -94,19 +103,21 @@ function LightboxModal({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [prev, next, onClose]);
+  }, [prev, next, onClose, isMobileView]);
+
+  const hasTabs = units.length > 1 || units.some((u) => u.isReference);
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-10"
+        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-20"
       >
         <X className="w-5 h-5 text-white" />
       </button>
 
       {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
-      {(units.length > 1 || units.some((u) => u.isReference)) && (
+      {hasTabs && (
         <div
           className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
           onClick={(e) => e.stopPropagation()}
@@ -135,87 +146,125 @@ function LightboxModal({
         </div>
       )}
 
-      {/* 사진 카운터 — 탭 없을 때 중앙, 탭 있을 때 우측 상단 */}
-      <div
-        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${(units.length > 1 || units.some((u) => u.isReference)) ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {imgIdx + 1} / {currentImages.length}
-      </div>
-
-      <div
-        className="relative w-full h-full overflow-hidden"
-        style={{ paddingTop: (units.length > 1 || units.some((u) => u.isReference)) ? "56px" : "0" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 슬라이드 트랙 */}
+      {/* ── 모바일: 세로 스크롤 나열 ── */}
+      {isMobileView ? (
         <div
-          className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${imgIdx * 100}vw)`, width: `${currentImages.length * 100}vw` }}
-        >
-          {currentImages.map((src, i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 h-full flex items-center justify-center px-16"
-              style={{ width: "100vw" }}
-            >
-              <img
-                src={src}
-                alt={`사진 ${i + 1}`}
-                className="max-w-full max-h-full object-contain rounded-lg select-none"
-                draggable={false}
-              />
-            </div>
-          ))}
-        </div>
-        {/* 참고용 안내 메시지 */}
-        {units[unitIdx]?.isReference && (
-          <div
-            className="absolute left-1/2 -translate-x-1/2 text-center z-10"
-            style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--primary))" }}>
-              다른 매물 사진입니다. 참고용입니다.
-            </span>
-          </div>
-        )}
-        {currentImages.length > 1 && (
-          <>
-            <button
-              onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6 text-white" />
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
-            >
-              <ChevronRight className="w-6 h-6 text-white" />
-            </button>
-          </>
-        )}
-      </div>
-      {currentImages.length > 1 && (
-        <div
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
+          className="flex-1 overflow-y-auto overflow-x-hidden w-full"
+          style={{ paddingTop: hasTabs ? "72px" : "56px", paddingBottom: "32px" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {currentImages.map((src, i) => (
-            <button
-              key={i}
-              onClick={() => setImgIdx(i)}
-              className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all"
-              style={{
-                borderColor: i === imgIdx ? "hsl(var(--primary))" : "transparent",
-                opacity: i === imgIdx ? 1 : 0.5,
-              }}
-            >
-              <img src={src} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
+          {/* 사진 카운터 */}
+          <div className="sticky top-0 left-0 right-0 flex justify-center mb-3 z-10 pointer-events-none">
+            <div className="bg-black/60 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
+              총 {currentImages.length}장
+            </div>
+          </div>
+          {units[unitIdx]?.isReference && (
+            <div className="text-center mb-3 px-4">
+              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--primary))" }}>
+                다른 매물 사진입니다. 참고용입니다.
+              </span>
+            </div>
+          )}
+          <div className="flex flex-col gap-3 px-3">
+            {currentImages.map((src, i) => (
+              <div key={i} className="w-full flex flex-col items-center">
+                <img
+                  src={src}
+                  alt={`사진 ${i + 1}`}
+                  className="w-full h-auto object-contain rounded-lg select-none"
+                  draggable={false}
+                  loading="lazy"
+                />
+                <span className="text-[11px] text-white/60 mt-1">{i + 1} / {currentImages.length}</span>
+              </div>
+            ))}
+          </div>
         </div>
+      ) : (
+        <>
+          {/* 사진 카운터 — 데스크톱 */}
+          <div
+            className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${hasTabs ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {imgIdx + 1} / {currentImages.length}
+          </div>
+
+          <div
+            className="relative w-full h-full overflow-hidden"
+            style={{ paddingTop: hasTabs ? "56px" : "0" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 슬라이드 트랙 */}
+            <div
+              className="flex h-full transition-transform duration-300 ease-in-out"
+              style={{ transform: `translateX(-${imgIdx * 100}vw)`, width: `${currentImages.length * 100}vw` }}
+            >
+              {currentImages.map((src, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 h-full flex items-center justify-center px-16"
+                  style={{ width: "100vw" }}
+                >
+                  <img
+                    src={src}
+                    alt={`사진 ${i + 1}`}
+                    className="max-w-full max-h-full object-contain rounded-lg select-none"
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+            {units[unitIdx]?.isReference && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 text-center z-10"
+                style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--primary))" }}>
+                  다른 매물 사진입니다. 참고용입니다.
+                </span>
+              </div>
+            )}
+            {currentImages.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={next}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center backdrop-blur-sm transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+          </div>
+          {currentImages.length > 1 && (
+            <div
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {currentImages.map((src, i) => (
+                <button
+                  key={i}
+                  onClick={() => setImgIdx(i)}
+                  className="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all"
+                  style={{
+                    borderColor: i === imgIdx ? "hsl(var(--primary))" : "transparent",
+                    opacity: i === imgIdx ? 1 : 0.5,
+                  }}
+                >
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
