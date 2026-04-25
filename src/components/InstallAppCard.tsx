@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Download, Smartphone, Check, ExternalLink, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { isAndroid, isIOS, isInAppBrowser, isStandaloneMode } from "@/utils/pwa";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
