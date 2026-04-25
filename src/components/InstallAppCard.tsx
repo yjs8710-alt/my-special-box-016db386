@@ -149,14 +149,24 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
             <p className="text-[11px] text-white/70 leading-tight mt-2">{subText}</p>
           </div>
         </div>
-        <div className="mb-6" />
-        <button
-          onClick={handleInstall}
-          className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
-        >
-          {isInApp ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-          {buttonText}
-        </button>
+        {isInApp ? (
+          <p className="text-xs font-semibold leading-relaxed text-white/90">
+            카카오톡/네이버 앱 안에서는 설치가 제한될 수 있습니다.
+            <br />
+            오른쪽 상단 메뉴에서 Chrome 또는 Safari로 열어 설치해주세요.
+          </p>
+        ) : (
+          <>
+            <div className="mb-6" />
+            <button
+              onClick={handleInstall}
+              className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              {buttonText}
+            </button>
+          </>
+        )}
       </div>
 
       {guide && (
