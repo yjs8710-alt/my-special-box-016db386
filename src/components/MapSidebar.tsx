@@ -3945,8 +3945,8 @@ const MapSidebar = ({
         document.body,
       )}
 
-      {/* 모바일에서 시트가 3단계 이상 펼쳐졌을 때 배경 어둡게 */}
-      {isMobile && mobileStep >= 3 && (
+      {/* 모바일에서 시트가 4/4(100%)로 펼쳐졌을 때 배경 어둡게 */}
+      {isMobile && mobileStep === 2 && (
         <div
           className="fixed inset-0 bg-black/30 z-[55]"
           onClick={() => setMobileStep(1)}
