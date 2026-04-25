@@ -4024,7 +4024,7 @@ const MapSidebar = ({
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMobileStep((p) => (p > 0 ? ((p - 1) as 0 | 1 | 2 | 3 | 4) : 0));
+                      setMobileStep((p) => (p > 0 ? ((p - 1) as 0 | 1 | 2) : 0));
                     }}
                     className="p-1 rounded hover:bg-muted"
                     title="한 단계 줄이기"
