@@ -4022,8 +4022,8 @@ const MapSidebar = ({
                     ? "56px"
                     : mobileStep === 1
                     ? "50vh"
-                    : "calc(100vh - 56px)",
-                maxHeight: "calc(100vh - 56px)",
+                    : "calc(100vh - 120px)",
+                maxHeight: "calc(100vh - 120px)",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
