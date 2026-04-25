@@ -1,0 +1,17 @@
+{
+  "name": "집다 - 집을 찾다",
+  "short_name": "집다",
+  "description": "청주 공인중개사 전용 공실 임대·매매 플랫폼",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F2A5C",
+  "theme_color": "#0F2A5C",
+  "lang": "ko",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

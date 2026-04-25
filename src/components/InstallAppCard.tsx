@@ -40,14 +40,18 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
   const [guide, setGuide] = useState<GuideKind | null>(null);
 
   useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      // @ts-expect-error iOS Safari
-      window.navigator.standalone === true;
-    if (standalone) {
-      setInstalled(true);
-      return;
-    }
+    const checkStandalone = () => {
+      const mql = window.matchMedia("(display-mode: standalone)");
+      const isStandalone =
+        mql.matches ||
+        // @ts-expect-error iOS Safari only
+        window.navigator.standalone === true ||
+        document.referrer.startsWith("android-app://");
+      if (isStandalone) setInstalled(true);
+      return isStandalone;
+    };
+
+    if (checkStandalone()) return;
 
     const d = detectDevice();
     setDevice(d.kind);
@@ -65,9 +69,17 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
     };
     window.addEventListener("appinstalled", installedHandler);
 
+    // display-mode 가 도중에 바뀌는 경우 (설치 직후 등) 감지
+    const mql = window.matchMedia("(display-mode: standalone)");
+    const mqlHandler = (e: MediaQueryListEvent) => {
+      if (e.matches) setInstalled(true);
+    };
+    mql.addEventListener?.("change", mqlHandler);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
+      mql.removeEventListener?.("change", mqlHandler);
     };
   }, []);
 
