@@ -12,23 +12,20 @@ interface MobileMapSheetProps {
   children: ReactNode;
 }
 
-// 0: 닫힘(헤더만, ~64px), 1: 1/4, 2: 2/4, 3: 3/4, 4: 4/4
-type Step = 0 | 1 | 2 | 3 | 4;
+// 0: 닫힘(헤더만, ~64px), 1: 2/4(50%), 2: 4/4(100%)
+// 매물정보 바를 누르면 0→1→2→0 으로 순환
+type Step = 0 | 1 | 2;
 
 const STEP_HEIGHTS: Record<Step, string> = {
   0: "64px",
-  1: "25vh",
-  2: "50vh",
-  3: "75vh",
-  4: "100vh",
+  1: "50vh",
+  2: "100vh",
 };
 
 /**
  * 모바일 전용 하단 시트.
  * - 사용자가 지도 핀 클릭 / 검색 / 필터를 적용하기 전에는 표시되지 않음.
- * - 트리거 발생 시 하단에 "매물정보" 바가 올라옴.
- * - 바를 한 번 탭하면 1/4, 두 번 2/4, 세 번 3/4, 네 번 4/4(전체)로 단계적 확장.
- * - 화살표 아이콘을 ▼ 방향으로 누르면 한 단계씩 축소.
+ * - "매물정보" 바를 한 번 탭하면 2/4(50%), 두 번이면 4/4(100%), 세 번 누르면 다시 닫힘.
  */
 const MobileMapSheet = ({
   count,
@@ -39,7 +36,7 @@ const MobileMapSheet = ({
 }: MobileMapSheetProps) => {
   const [step, setStep] = useState<Step>(0);
 
-  // 매물 선택 시 최소 1단계 펼침
+  // 매물 선택 시 최소 1단계(50%) 펼침
   useEffect(() => {
     if (shouldAutoExpand) {
       setStep((prev) => (prev === 0 ? 1 : prev));
@@ -53,8 +50,9 @@ const MobileMapSheet = ({
 
   if (!hasInteraction) return null;
 
-  const expandOnce = () => {
-    setStep((prev) => (prev < 4 ? ((prev + 1) as Step) : 4));
+  // 0 → 1 → 2 → 0 순환
+  const cycleStep = () => {
+    setStep((prev) => (((prev + 1) % 3) as Step));
   };
   const collapseOnce = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,8 +63,8 @@ const MobileMapSheet = ({
 
   return (
     <>
-      {/* 확장 시 배경 어둡게 (3단계 이상일 때만) */}
-      {step >= 3 && (
+      {/* 4/4 확장 시 배경 어둡게 */}
+      {step === 2 && (
         <div
           className="md:hidden fixed inset-0 bg-black/30 z-[55]"
           onClick={() => setStep(1)}
@@ -79,7 +77,7 @@ const MobileMapSheet = ({
       >
         {/* 핸들 + 매물정보 바 */}
         <button
-          onClick={expandOnce}
+          onClick={cycleStep}
           className="flex-shrink-0 w-full px-4 pt-2 pb-2 flex flex-col items-stretch border-b border-border"
         >
           <span className="mx-auto w-10 h-1 rounded-full bg-muted-foreground/30 mb-1.5" />
@@ -104,7 +102,7 @@ const MobileMapSheet = ({
                   <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 </span>
               )}
-              {step < 4 && (
+              {step < 2 && (
                 <ChevronUp className="w-5 h-5 text-muted-foreground" />
               )}
               {onClose && expanded && (
@@ -127,7 +125,7 @@ const MobileMapSheet = ({
           {/* 단계 인디케이터 */}
           {expanded && (
             <div className="flex items-center justify-center gap-1 mt-1.5">
-              {[1, 2, 3, 4].map((n) => (
+              {[1, 2].map((n) => (
                 <span
                   key={n}
                   className="h-1 rounded-full transition-all"
