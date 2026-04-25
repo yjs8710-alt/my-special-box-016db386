@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Download, Smartphone, Check, ExternalLink, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { isAndroid, isIOS, isInAppBrowser, isStandaloneMode } from "@/utils/pwa";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -18,17 +19,10 @@ const detectDevice = (): {
   kind: DeviceKind;
   isInApp: boolean;
 } => {
-  const ua = window.navigator.userAgent || "";
-  const iOS = /iPad|iPhone|iPod/.test(ua) && !("MSStream" in window);
-  const android = /Android/i.test(ua);
+  const isInApp = isInAppBrowser();
 
-  // 카카오톡, 네이버앱, 인스타그램, 페이스북, 라인 등 인앱 브라우저 감지
-  const isInApp =
-    /KAKAOTALK|NAVER\(inapp|FB_IAB|FBAN|FBAV|Instagram|Line\/|wv\)/i.test(ua) &&
-    !/Chrome\/\d+\.\d+ Mobile Safari/.test(ua.replace(/; wv\)/, ""));
-
-  if (iOS) return { kind: "ios", isInApp };
-  if (android) return { kind: "android", isInApp };
+  if (isIOS()) return { kind: "ios", isInApp };
+  if (isAndroid()) return { kind: "android", isInApp };
   return { kind: "desktop", isInApp };
 };
 
@@ -41,12 +35,7 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
 
   useEffect(() => {
     const checkStandalone = () => {
-      const mql = window.matchMedia("(display-mode: standalone)");
-      const isStandalone =
-        mql.matches ||
-        // @ts-expect-error iOS Safari only
-        window.navigator.standalone === true ||
-        document.referrer.startsWith("android-app://");
+      const isStandalone = isStandaloneMode();
       if (isStandalone) setInstalled(true);
       return isStandalone;
     };
@@ -160,14 +149,24 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
             <p className="text-[11px] text-white/70 leading-tight mt-2">{subText}</p>
           </div>
         </div>
-        <div className="mb-6" />
-        <button
-          onClick={handleInstall}
-          className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
-        >
-          {isInApp ? <ExternalLink className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-          {buttonText}
-        </button>
+        {isInApp ? (
+          <p className="text-xs font-semibold leading-relaxed text-white/90">
+            카카오톡/네이버 앱 안에서는 설치가 제한될 수 있습니다.
+            <br />
+            오른쪽 상단 메뉴에서 Chrome 또는 Safari로 열어 설치해주세요.
+          </p>
+        ) : (
+          <>
+            <div className="mb-6" />
+            <button
+              onClick={handleInstall}
+              className="w-full flex items-center justify-center gap-1.5 text-sm font-bold px-3 py-2.5 rounded-xl bg-white text-primary hover:bg-white/90 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              {buttonText}
+            </button>
+          </>
+        )}
       </div>
 
       {guide && (
@@ -223,9 +222,9 @@ const InstallAppCard = ({ variant = "inline" }: InstallAppCardProps) => {
             {guide === "inapp" && (
               <div className="space-y-3">
                 <p className="text-sm text-foreground">
-                  카카오톡·네이버 등 인앱 브라우저에서는 앱 설치가 지원되지 않습니다.
+                  카카오톡/네이버 앱 안에서는 설치가 제한될 수 있습니다.
                   <br />
-                  <b>Chrome 또는 Safari</b>에서 열어주세요.
+                  오른쪽 상단 메뉴에서 <b>Chrome 또는 Safari</b>로 열어 설치해주세요.
                 </p>
                 <button
                   onClick={openInExternalBrowser}

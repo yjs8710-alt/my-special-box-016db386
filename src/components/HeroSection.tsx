@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building, Store, Building2, Trees } from "lucide-react";
+import { Building, Store, Building2, Trees, CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import heroLogo from "@/assets/hero-logo.png";
 import InstallAppCard from "@/components/InstallAppCard";
+import { isStandaloneMode } from "@/utils/pwa";
 
 const CATEGORIES = [
   { label: "주거·임대", path: "/residential", Icon: Building },
@@ -11,8 +13,29 @@ const CATEGORIES = [
   { label: "토지", path: "/land", Icon: Trees },
 ];
 
+const APP_ACTIONS = [
+  { label: "주거임대", path: "/residential", Icon: Search },
+  { label: "내 매물", path: "/my-properties", Icon: ClipboardList },
+  { label: "마이페이지", path: "/my-page", Icon: User },
+];
+
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [isAppMode, setIsAppMode] = useState(false);
+
+  useEffect(() => {
+    const updateAppMode = () => setIsAppMode(isStandaloneMode());
+    updateAppMode();
+
+    const mql = window.matchMedia("(display-mode: standalone)");
+    mql.addEventListener?.("change", updateAppMode);
+    window.addEventListener("focus", updateAppMode);
+
+    return () => {
+      mql.removeEventListener?.("change", updateAppMode);
+      window.removeEventListener("focus", updateAppMode);
+    };
+  }, []);
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
@@ -25,6 +48,13 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
+        {isAppMode && (
+          <div className="md:hidden inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-primary/90 px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg backdrop-blur-md">
+            <CheckCircle2 className="h-4 w-4" />
+            집다 앱으로 실행 중
+          </div>
+        )}
+
         <img
           src={heroLogo}
           alt="집다 로고"
@@ -45,10 +75,29 @@ const HeroSection = () => {
           ))}
         </div>
 
+        {isAppMode && (
+          <div className="md:hidden w-full max-w-md rounded-2xl border border-white/25 bg-white/10 p-3 shadow-2xl backdrop-blur-md">
+            <div className="grid grid-cols-3 gap-2">
+              {APP_ACTIONS.map(({ label, path, Icon }) => (
+                <button
+                  key={label}
+                  onClick={() => navigate(path)}
+                  className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl bg-white text-primary shadow-sm transition-colors hover:bg-white/90"
+                >
+                  <Icon className="h-5 w-5" strokeWidth={2} />
+                  <span className="text-[11px] font-extrabold leading-tight">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* 모바일 전용 앱 설치 카드 */}
-        <div className="md:hidden w-full max-w-md mt-3 flex justify-center">
-          <InstallAppCard />
-        </div>
+        {!isAppMode && (
+          <div className="md:hidden w-full max-w-md mt-3 flex justify-center">
+            <InstallAppCard />
+          </div>
+        )}
       </div>
 
       {/* 우측 상단 앱 설치 카드 (데스크톱) */}

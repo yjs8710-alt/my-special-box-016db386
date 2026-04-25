@@ -1,8 +1,14 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { isStandaloneMode } from "@/utils/pwa";
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+console.log("PWA standalone:", isStandaloneMode());
+console.log("UserAgent:", navigator.userAgent);
+console.log("Display mode:", window.matchMedia("(display-mode: standalone)").matches);
+console.log("PWA update note: 배포 후 기존 설치 앱 삭제 → 브라우저 캐시 삭제 → 재설치해야 최신 앱 모드와 캐시가 적용됩니다.");
 
 // ── PWA Service Worker 등록 (프리뷰 iframe / Lovable 호스트 제외) ──
 const isInIframe = (() => {
