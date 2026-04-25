@@ -153,12 +153,7 @@ function LightboxModal({
           style={{ paddingTop: hasTabs ? "72px" : "56px", paddingBottom: "32px" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 사진 카운터 */}
-          <div className="sticky top-0 left-0 right-0 flex justify-center mb-3 z-10 pointer-events-none">
-            <div className="bg-black/60 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">
-              총 {currentImages.length}장
-            </div>
-          </div>
+          {/* 카운터 표시 제거 — 오로지 사진만 보이도록 */}
           {units[unitIdx]?.isReference && (
             <div className="text-center mb-3 px-4">
               <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--primary))" }}>
