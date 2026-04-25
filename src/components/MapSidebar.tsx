@@ -171,7 +171,7 @@ function LightboxModal({
                   draggable={false}
                   loading="lazy"
                 />
-                <span className="text-[11px] text-white/60 mt-1">{i + 1} / {currentImages.length}</span>
+                <span className="sr-only">{`사진 ${i + 1} / ${currentImages.length}`}</span>
               </div>
             ))}
           </div>
