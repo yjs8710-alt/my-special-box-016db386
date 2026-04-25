@@ -3452,8 +3452,9 @@ const MapSidebar = ({
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
   const isMobile = useIsMobile();
-  // 모바일 시트 단계: 0=peek(헤더만), 1=1/4, 2=2/4, 3=3/4, 4=전체
-  const [mobileStep, setMobileStep] = useState<0 | 1 | 2 | 3 | 4>(0);
+  // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
+  // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
+  const [mobileStep, setMobileStep] = useState<0 | 1 | 2>(0);
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
