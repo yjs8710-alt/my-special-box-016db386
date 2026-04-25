@@ -2662,7 +2662,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               type="button"
               onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
               title={hasPhotos ? "사진 보기" : "사진 없음"}
-              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded transition-transform active:scale-95"
+              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
               style={{
                 background: "transparent",
                 border: "none",
@@ -2672,8 +2672,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               <img
                 src={cameraIcon}
                 alt="사진"
-                className="w-6 h-6 object-contain"
-                style={{ imageRendering: "auto" }}
+                className="w-8 h-8 object-contain"
+                style={{ imageRendering: "auto", transform: "scale(1.35)" }}
                 draggable={false}
               />
             </button>
