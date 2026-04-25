@@ -4007,7 +4007,7 @@ const MapSidebar = ({
         {/* 모바일 전용 peek 헤더 — 탭하면 단계적 확장 */}
         {isMobile && (
           <button
-            onClick={() => setMobileStep((p) => (p < 4 ? ((p + 1) as 0 | 1 | 2 | 3 | 4) : 4))}
+            onClick={() => setMobileStep((p) => (((p + 1) % 3) as 0 | 1 | 2))}
             className="flex-shrink-0 w-full px-4 pt-2 pb-2 flex flex-col items-stretch border-b border-border bg-white"
           >
             <span className="mx-auto w-10 h-1 rounded-full bg-muted-foreground/30 mb-1.5" />
