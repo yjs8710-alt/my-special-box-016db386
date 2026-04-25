@@ -1,9 +1,25 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { isStandaloneMode } from "@/utils/pwa";
+import { isStandaloneMode, forceOpenInExternalBrowser } from "@/utils/pwa";
 
-createRoot(document.getElementById("root")!).render(<App />);
+// 카카오/네이버 등 인앱 브라우저에서 접속하면 외부 Chrome/Safari 로 강제 이동
+// (프리뷰/iframe 환경에서는 실행 금지)
+const _host = window.location.hostname;
+const _isPreview =
+  _host.includes("id-preview--") ||
+  _host.includes("lovableproject.com") ||
+  _host === "localhost" ||
+  _host === "127.0.0.1";
+
+let _redirected = false;
+if (!_isPreview) {
+  _redirected = forceOpenInExternalBrowser();
+}
+
+if (!_redirected) {
+  createRoot(document.getElementById("root")!).render(<App />);
+}
 
 console.log("PWA standalone:", isStandaloneMode());
 console.log("UserAgent:", navigator.userAgent);
