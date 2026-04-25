@@ -4054,7 +4054,7 @@ const MapSidebar = ({
             </div>
             {mobileStep > 0 && (
               <div className="flex items-center justify-center gap-1 mt-1.5">
-                {[1, 2, 3, 4].map((n) => (
+                {[1, 2].map((n) => (
                   <span
                     key={n}
                     className="h-1 rounded-full transition-all"
