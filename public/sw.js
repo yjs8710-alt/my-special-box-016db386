@@ -1,9 +1,10 @@
 // 집다 PWA Service Worker
 // 배포할 때마다 CACHE_VERSION 을 갱신하면 자동으로 캐시가 교체됩니다.
-const CACHE_VERSION = "jibda-v3-2026-04-25";
+const CACHE_NAME = "jibda-pwa-v20260426-01";
 const APP_SHELL = [
   "/",
-  "/manifest.webmanifest",
+  "/?source=pwa&v=20260426",
+  "/manifest.json",
   "/icon-192.png",
   "/icon-512.png",
   "/icon-maskable-512.png",
@@ -13,7 +14,7 @@ const APP_SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
-      .open(CACHE_VERSION)
+      .open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL).catch(() => {}))
       .then(() => self.skipWaiting())
   );
@@ -26,13 +27,16 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) =>
         Promise.all(
-          keys
-            .filter((k) => k !== CACHE_VERSION)
-            .map((k) => caches.delete(k))
+          keys.map((key) => {
+            if (key !== CACHE_NAME) {
+              return caches.delete(key);
+            }
+            return Promise.resolve(false);
+          })
         )
       )
-      .then(() => self.clients.claim())
   );
+  self.clients.claim();
 });
 
 // 메시지로 즉시 갱신 트리거 가능
@@ -68,7 +72,7 @@ self.addEventListener("fetch", (event) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE_VERSION).then((c) => c.put("/", copy)).catch(() => {});
+          caches.open(CACHE_NAME).then((c) => c.put("/", copy)).catch(() => {});
           return res;
         })
         .catch(() => caches.match("/").then((r) => r || Response.error()))
@@ -89,7 +93,7 @@ self.addEventListener("fetch", (event) => {
           .then((res) => {
             if (res && res.status === 200) {
               const copy = res.clone();
-              caches.open(CACHE_VERSION).then((c) => c.put(req, copy)).catch(() => {});
+              caches.open(CACHE_NAME).then((c) => c.put(req, copy)).catch(() => {});
             }
             return res;
           })
