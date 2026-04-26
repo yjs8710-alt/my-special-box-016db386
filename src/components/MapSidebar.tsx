@@ -4465,7 +4465,7 @@ const MapSidebar = ({
                                 }
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
-                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none scale-150" />
+                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none p-1" />
                                   </div>
     
                                 );
@@ -4657,7 +4657,7 @@ const MapSidebar = ({
                                         const logo = document.createElement("img");
                                         logo.src = zibdaPlaceholder;
                                         logo.alt = "집다 로고";
-                                        logo.className = "w-full h-full object-contain select-none scale-150";
+                                        logo.className = "w-full h-full object-contain select-none p-1";
 
                                         fallback.appendChild(logo);
                                         parent.prepend(fallback);
@@ -4675,7 +4675,7 @@ const MapSidebar = ({
                               }
                               return (
                               <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
-                                <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none scale-150" />
+                                <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none p-1" />
                               </div>
     
                               );
