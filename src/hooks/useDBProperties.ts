@@ -10,7 +10,7 @@ const PROPERTY_COLUMNS = [
   "building_memo", "room_memo", "note", "vacate_date",
   "building_password", "room_password",
   "options", "views", "lat", "lng", "is_new", "is_hot",
-  "registered_date", "checked_date", "agent_name", "images",
+  "registered_date", "checked_date", "agent_name", "images", "registered_by",
 ].join(",");
 
 // 관리자 DB 매물 → MapProperty 변환
@@ -80,6 +80,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     buildYear: String(row.build_year ?? ""),
     memo: String(row.id ?? ""),
     roadAddress,
+    registeredBy: row.registered_by ? String(row.registered_by) : undefined,
   };
 }
 
