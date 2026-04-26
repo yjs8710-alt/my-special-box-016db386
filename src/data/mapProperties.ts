@@ -44,5 +44,6 @@ export interface MapProperty {
   buildYear: string;
   roadAddress?: string;
   registeredBy?: string;   // 등록한 회원 user_id (본인 매물 수정 권한 판단용)
+}
 
 export const MAP_PROPERTIES: MapProperty[] = [];
