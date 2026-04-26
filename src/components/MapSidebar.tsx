@@ -4652,12 +4652,12 @@ const MapSidebar = ({
 
                                         const fallback = document.createElement("div");
                                         fallback.setAttribute("data-thumb-fallback", "logo");
-                                        fallback.className = "absolute inset-0 flex items-center justify-center bg-muted pointer-events-none";
+                                        fallback.className = "absolute inset-0 flex items-center justify-center bg-muted overflow-hidden pointer-events-none";
 
                                         const logo = document.createElement("img");
-                                        logo.src = logoTransparent;
+                                        logo.src = zibdaPlaceholder;
                                         logo.alt = "집다 로고";
-                                        logo.className = "w-24 h-auto opacity-40 select-none";
+                                        logo.className = "w-[85%] h-auto object-contain select-none";
 
                                         fallback.appendChild(logo);
                                         parent.prepend(fallback);
