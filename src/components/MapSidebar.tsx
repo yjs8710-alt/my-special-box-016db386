@@ -2350,39 +2350,54 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       position: relative;
       display: flex; flex-direction: column; align-items: center;
       pointer-events: none;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45));
+      filter: drop-shadow(0 8px 18px rgba(15,23,42,0.55));
+      animation: rv-pin-float 2.4s ease-in-out infinite;
+    }
+    @keyframes rv-pin-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
     }
     .rv-pin .pin-label {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
+      background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%);
       color: #fff;
-      padding: 6px 12px;
+      padding: 7px 14px 7px 12px;
       border-radius: 999px;
       font-size: 12px; font-weight: 700;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.02em;
       white-space: nowrap;
-      border: 2px solid #fff;
+      border: 2px solid rgba(255,255,255,0.95);
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.45);
+    }
+    .rv-pin .pin-label .pin-ico {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      font-size: 10px;
     }
     .rv-pin .pin-tail {
       width: 0; height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 12px solid #dc2626;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-top: 13px solid #6366f1;
       margin-top: -1px;
     }
     .rv-pin .pin-dot {
-      width: 14px; height: 14px;
+      width: 16px; height: 16px;
       border-radius: 50%;
-      background: #dc2626;
+      background: radial-gradient(circle at 30% 30%, #c4b5fd, #6366f1 60%, #4338ca);
       border: 3px solid #fff;
-      margin-top: 2px;
+      margin-top: 3px;
+      box-shadow: 0 0 0 4px rgba(99,102,241,0.25);
     }
     @media (max-width: 640px) {
       .toolbar { padding: 10px 14px; gap: 6px; }
       .toolbar h1 { font-size: 13px; }
       .toolbar .addr { display: none; }
       .toolbar button { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
-      .rv-pin .pin-label { font-size: 11px; padding: 5px 10px; }
+      .rv-pin .pin-label { font-size: 11px; padding: 6px 12px; }
     }
   </style>
 </head>
