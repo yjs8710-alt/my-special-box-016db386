@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 
-// 빌드할 때마다 public/sw.js 의 CACHE_NAME 을 현재 타임스탬프로 자동 치환해
+// 빌드할 때마다 public/sw.js 의 CACHE_VERSION 을 현재 타임스탬프로 자동 치환해
 // 새 배포가 있을 때 항상 새로운 캐시 버전이 활성화되도록 한다.
 function swVersionPlugin(): Plugin {
   const buildId = `jibda-pwa-${new Date()
@@ -16,7 +16,7 @@ function swVersionPlugin(): Plugin {
     apply: "build",
     transform(code, id) {
       if (id.endsWith("/public/sw.js") || id.endsWith("\\public\\sw.js")) {
-        return code.replace(/const CACHE_NAME = ".*?";/, `const CACHE_NAME = "${buildId}";`);
+        return code.replace(/const CACHE_VERSION = ".*?";/, `const CACHE_VERSION = "${buildId}";`);
       }
       return null;
     },
@@ -26,8 +26,8 @@ function swVersionPlugin(): Plugin {
       try {
         const original = fs.readFileSync(swPath, "utf-8");
         const replaced = original.replace(
-          /const CACHE_NAME = ".*?";/,
-          `const CACHE_NAME = "${buildId}";`
+          /const CACHE_VERSION = ".*?";/,
+          `const CACHE_VERSION = "${buildId}";`
         );
         this.emitFile({
           type: "asset",
