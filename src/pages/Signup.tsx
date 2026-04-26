@@ -123,20 +123,21 @@ const SignupPage = () => {
       return;
     }
 
-    // 2. 중개사 프로필 저장
+    // 2. 회원 프로필 저장 (일반회원은 자동 승인)
     const { error: profileError } = await supabase.from("agent_profiles").insert({
       user_id: userId,
       name: form.name.trim(),
       phone: form.phone.trim(),
-      agency_name: form.agencyName.trim(),
-      agency_phone: form.agencyPhone.trim(),
-      representative_name: form.representativeName.trim(),
-      license_number: form.licenseNumber.trim(),
-      business_number: form.businessNumber.trim(),
-      agency_address: form.agencyAddress.trim(),
+      agency_name: isGeneralMember ? "" : form.agencyName.trim(),
+      agency_phone: isGeneralMember ? "" : form.agencyPhone.trim(),
+      representative_name: isGeneralMember ? "" : form.representativeName.trim(),
+      license_number: isGeneralMember ? null : form.licenseNumber.trim(),
+      business_number: isGeneralMember ? null : form.businessNumber.trim(),
+      agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
       agree_marketing: form.agreeMarketing,
       member_type: form.memberType,
-      status: "pending",
+      status: isGeneralMember ? "approved" : "pending",
+      is_active: true,
     });
 
     setLoading(false);
