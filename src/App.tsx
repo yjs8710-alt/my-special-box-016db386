@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PwaUpdateBanner from "./components/PwaUpdateBanner";
+import DomainCheck from "./pages/DomainCheck";
 
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/property/:id" element={<PublicProperty />} />
+          <Route path="/domain-check" element={<DomainCheck />} />
 
           {/* 인증 필요 페이지 */}
           <Route path="/" element={<Home />} />
