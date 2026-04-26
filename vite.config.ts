@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 
 // 빌드할 때마다 public/sw.js 의 CACHE_NAME 을 현재 타임스탬프로 자동 치환해
