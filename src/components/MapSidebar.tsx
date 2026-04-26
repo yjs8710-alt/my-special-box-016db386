@@ -2364,6 +2364,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <div class="content">
     <div class="panel" id="rvPanel">
       <div id="roadview"></div>
+      <div class="addr-pill" id="addrPill">
+        <span class="addr-icon">📍</span>
+        <span class="addr-text">${prop.address}</span>
+      </div>
       <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
     </div>
     <div class="panel hidden" id="mapPanel">
