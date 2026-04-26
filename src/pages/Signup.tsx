@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CheckCircle2, ChevronRight, ArrowLeft } from "lucide-react";
-import logoImg from "@/assets/logo-zibda-20260427.png";
+import logoImg from "@/assets/logo-zibda-20260427-v2-20260427.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

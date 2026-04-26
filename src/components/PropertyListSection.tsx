@@ -2,12 +2,12 @@ import { useState } from "react";
 import { SlidersHorizontal, ChevronDown, Grid3X3, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "./PropertyCard";
-import property1 from "@/assets/property1.jpg";
-import property2 from "@/assets/property2.jpg";
-import property3 from "@/assets/property3.jpg";
-import property4 from "@/assets/property4.jpg";
-import property5 from "@/assets/property5.jpg";
-import property6 from "@/assets/property6.jpg";
+import property1 from "@/assets/property1-v2-20260427.jpg";
+import property2 from "@/assets/property2-v2-20260427.jpg";
+import property3 from "@/assets/property3-v2-20260427.jpg";
+import property4 from "@/assets/property4-v2-20260427.jpg";
+import property5 from "@/assets/property5-v2-20260427.jpg";
+import property6 from "@/assets/property6-v2-20260427.jpg";
 
 const PROPERTIES = [
   {

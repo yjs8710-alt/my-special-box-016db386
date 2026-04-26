@@ -28,23 +28,23 @@ import {
   Loader2,
   FileSearch,
 } from "lucide-react";
-import cctvIcon from "@/assets/cctv_icon.png";
-import remodelingIcon from "@/assets/remodeling_icon.png";
-import tvIcon from "@/assets/tv_icon.png";
-import waterIcon from "@/assets/water_icon.png";
-import elevatorIcon from "@/assets/elevator_icon.png";
-import internetIcon from "@/assets/internet_icon.png";
-import petIcon from "@/assets/pet_icon.png";
-import memoIcon from "@/assets/memo_icon_new.png";
-import femaleOnlyIcon from "@/assets/female_only_icon.png";
-import checkDateIcon from "@/assets/check_date_icon.png";
-import logoTransparent from "@/assets/logo-transparent-zibda-20260427.png";
-import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427.png";
-import cameraIcon from "@/assets/camera_icon.png";
+import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
+import remodelingIcon from "@/assets/remodeling_icon-v2-20260427.png";
+import tvIcon from "@/assets/tv_icon-v2-20260427.png";
+import waterIcon from "@/assets/water_icon-v2-20260427.png";
+import elevatorIcon from "@/assets/elevator_icon-v2-20260427.png";
+import internetIcon from "@/assets/internet_icon-v2-20260427.png";
+import petIcon from "@/assets/pet_icon-v2-20260427.png";
+import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
+import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
+import checkDateIcon from "@/assets/check_date_icon-v2-20260427.png";
+import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-20260427.png";
+import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
+import cameraIcon from "@/assets/camera_icon-v2-20260427.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
 import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
-import kakaoTalkIcon from "@/assets/kakao-talk-icon.png";
+import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";

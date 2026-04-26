@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
-import heroBg from "@/assets/main-bg-20260427.jpg";
-import heroLogo from "@/assets/logo-zibda-20260427.png";
-import iconResidential from "@/assets/icon-residential.png";
-import iconCommercial from "@/assets/icon-commercial.png";
-import iconCollective from "@/assets/icon-collective.png";
-import iconLand from "@/assets/icon-land.png";
+import heroBg from "@/assets/main-bg-20260427-v2-20260427.jpg";
+import heroLogo from "@/assets/logo-zibda-20260427-v2-20260427.png";
+import iconResidential from "@/assets/icon-residential-v2-20260427.png";
+import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
+import iconCollective from "@/assets/icon-collective-v2-20260427.png";
+import iconLand from "@/assets/icon-land-v2-20260427.png";
 import InstallAppCard from "@/components/InstallAppCard";
 import { isStandaloneMode } from "@/utils/pwa";
 
@@ -52,6 +52,10 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
+        <h1 className="rounded-xl border-2 border-accent bg-background px-5 py-3 text-2xl md:text-4xl font-extrabold text-primary shadow-2xl">
+          집다 테스트 NEW 2026
+        </h1>
+
         {isAppMode && (
           <div className="md:hidden inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-primary/90 px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4" />
