@@ -2476,6 +2476,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         roadview = new kakao.maps.Roadview(roadviewEl);
         var roadviewClient = new kakao.maps.RoadviewClient();
 
+        // 로드뷰 init 이벤트: 파노라마 이미지 안의 실제 좌표 위치에 핀 마커 표시
+        kakao.maps.event.addListener(roadview, 'init', function() {
+          try {
+            var pinContent = '<div class="rv-pin">' +
+              '<div class="pin-label">📍 ' + (data.title || data.address) + '</div>' +
+              '<div class="pin-tail"></div>' +
+              '<div class="pin-dot"></div>' +
+            '</div>';
+
+            var pinOverlay = new kakao.maps.CustomOverlay({
+              position: position,
+              content: pinContent,
+              xAnchor: 0.5,
+              yAnchor: 1,
+            });
+            // 사람 시야 높이(약 2m) 정도 위에 띄워 잘 보이도록
+            try { pinOverlay.setAltitude(2); } catch(e) {}
+            pinOverlay.setMap(roadview);
+
+            // 시점을 핀 위치로 자동 회전 (어디인지 바로 보이도록)
+            try {
+              var projection = roadview.getProjection();
+              var viewpoint = projection.viewpointFromCoords(
+                pinOverlay.getPosition(),
+                pinOverlay.getAltitude ? pinOverlay.getAltitude() : 2
+              );
+              roadview.setViewpoint(viewpoint);
+            } catch(e) {}
+          } catch(e) {}
+        });
+
         var searchNearest = function(index) {
           if (index === undefined) index = 0;
           var radius = radii[index];
