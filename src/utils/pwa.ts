@@ -29,40 +29,29 @@ export function isAndroid() {
 }
 
 /**
- * 카카오톡/네이버/라인/페이스북/인스타그램 인앱 브라우저에서 접속 시
- * 자동으로 외부 Chrome(Android) 또는 Safari(iOS)로 강제 이동시킨다.
+ * (비활성화됨) 인앱 브라우저에서 외부 Chrome/Safari 로 자동 이동시키는 로직.
  *
- * - Android: `intent://` 스킴으로 Chrome을 직접 호출
- * - iOS: 카카오톡은 `kakaotalk://web/openExternal` 로 Safari 열기,
- *        그 외는 안내가 어려우므로 사용자에게 alert 후 클립보드 복사 시도
- *
- * @returns true 면 리다이렉트를 수행했음 (앱 렌더링 중단 권장)
+ * 자동 redirect 는 네이버/카카오 인앱에서 최신 배포가 안 보이거나 흰 화면이
+ * 뜨는 등 부작용이 컸기 때문에 제거됨. 이 함수는 호환성을 위해 export 만
+ * 유지하며 항상 false 를 반환한다. 사용자가 직접 "Chrome에서 열기" 버튼을
+ * 눌렀을 때만 외부 브라우저 이동을 시도해야 한다.
  */
 export function forceOpenInExternalBrowser(): boolean {
+  return false;
+}
+
+/**
+ * 사용자가 명시적으로 버튼을 눌렀을 때만 호출되는 외부 브라우저 열기.
+ * 인앱 브라우저가 아니면 아무 것도 하지 않는다.
+ */
+export function openInExternalBrowser(): boolean {
   if (typeof window === "undefined") return false;
   if (!isInAppBrowser()) return false;
-  if (isStandaloneMode()) return false;
-
-  const ua = navigator.userAgent.toLowerCase();
-  // Naver 브라우저는 웹 화면 자체에서 최신 배포를 확인해야 하므로 자동 외부 브라우저 이동을 하지 않는다.
-  if (ua.includes("naver")) return false;
-
-  // 카카오 등 일부 인앱은 캐시가 매우 공격적이라 매 진입마다 외부 브라우저로 보낸다.
-  // 그 외(라인/페북/인스타 등)는 무한 루프 방지를 위해 세션당 1회만 시도.
-  const isAggressiveInApp = ua.includes("kakaotalk");
-  if (!isAggressiveInApp) {
-    try {
-      if (sessionStorage.getItem("__jibda_external_redirect__") === "1") return false;
-      sessionStorage.setItem("__jibda_external_redirect__", "1");
-    } catch {
-      // sessionStorage 접근 불가하면 그냥 진행
-    }
-  }
 
   const url = window.location.href;
+  const ua = navigator.userAgent.toLowerCase();
 
   if (isAndroid()) {
-    // Android: Chrome intent 로 강제 오픈
     const cleanUrl = url.replace(/^https?:\/\//, "");
     const intentUrl = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
     window.location.href = intentUrl;
@@ -70,19 +59,16 @@ export function forceOpenInExternalBrowser(): boolean {
   }
 
   if (isIOS()) {
-    // iOS 카카오톡: 외부 브라우저(Safari)로 강제 오픈하는 전용 스킴
     if (ua.includes("kakaotalk")) {
       window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`;
       return true;
     }
-    // iOS 네이버 앱: 외부 브라우저로 여는 공식 스킴
     if (ua.includes("naver")) {
       window.location.href = `naversearchapp://inappbrowser/close?target=current&url=${encodeURIComponent(
         url
       )}`;
       return true;
     }
-    // 그 외 iOS 인앱(라인/페북/인스타): 자동 이동 불가 → 안내
     try {
       navigator.clipboard?.writeText(url).catch(() => {});
     } catch {
