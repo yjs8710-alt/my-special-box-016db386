@@ -2346,11 +2346,33 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     #status strong { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
     #status span { font-size: 13px; color: #94a3b8; font-weight: 500; }
     .divider { width: 4px; background: #334155; cursor: col-resize; flex-shrink: 0; }
+    .addr-pill {
+      position: absolute; top: 16px; left: 16px; z-index: 6;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 13px; font-weight: 600; letter-spacing: -0.01em;
+      box-shadow: 0 6px 20px rgba(15,23,42,0.35);
+      max-width: calc(100% - 32px);
+      pointer-events: none;
+    }
+    .addr-pill .addr-icon { font-size: 14px; }
+    .addr-pill .addr-text {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 70vw;
+    }
     @media (max-width: 640px) {
       .toolbar { padding: 10px 14px; gap: 6px; }
       .toolbar h1 { font-size: 13px; }
       .toolbar .addr { display: none; }
       .toolbar button { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+      .addr-pill { top: 12px; left: 12px; padding: 8px 12px; font-size: 12px; }
+      .addr-pill .addr-text { max-width: 60vw; }
     }
   </style>
 </head>
@@ -2364,6 +2386,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <div class="content">
     <div class="panel" id="rvPanel">
       <div id="roadview"></div>
+      <div class="addr-pill" id="addrPill">
+        <span class="addr-icon">📍</span>
+        <span class="addr-text">${prop.address}</span>
+      </div>
       <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
     </div>
     <div class="panel hidden" id="mapPanel">
@@ -2416,6 +2442,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       var pos = new kakao.maps.LatLng(data.lat, data.lng);
       mapInstance = new kakao.maps.Map(mapEl, { center: pos, level: 3 });
       new kakao.maps.Marker({ position: pos, map: mapInstance });
+      var iwContent = '<div style="padding:8px 12px;font-size:12px;font-weight:700;color:#0f172a;font-family:Pretendard,-apple-system,BlinkMacSystemFont,Apple SD Gothic Neo,Malgun Gothic,sans-serif;letter-spacing:-0.01em;white-space:nowrap;">' +
+        (data.title ? '<div style="color:#2563eb;font-size:11px;margin-bottom:2px;">' + data.title + '</div>' : '') +
+        '<div>' + data.address + '</div></div>';
+      var infowindow = new kakao.maps.InfoWindow({ content: iwContent, removable: false });
+      infowindow.open(mapInstance, new kakao.maps.Marker({ position: pos, map: mapInstance }));
       mapInstance.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       mapInstance.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
     }
@@ -4083,9 +4114,9 @@ const MapSidebar = ({
                   mobileStep === 0
                     ? "56px"
                     : mobileStep === 1
-                    ? "50vh"
-                    : "calc(100vh - 120px)",
-                maxHeight: "calc(100vh - 120px)",
+                    ? "55vh"
+                    : "calc(100vh - 100px)",
+                maxHeight: "calc(100vh - 100px)",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
