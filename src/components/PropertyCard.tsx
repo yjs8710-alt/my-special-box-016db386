@@ -58,7 +58,7 @@ const PropertyCard = ({
                 if (parent) {
                   const fallback = document.createElement("div");
                   fallback.className = "w-full h-full flex items-center justify-center bg-muted absolute inset-0";
-                  fallback.innerHTML = `<img src="${zibdaPlaceholder}" alt="집다 로고" class="w-2/3 h-auto opacity-90 object-contain" />`;
+                  fallback.innerHTML = `<img src="${zibdaPlaceholder}" alt="집다 로고" class="w-full h-full object-contain p-1" />`;
                   parent.appendChild(fallback);
                   img.style.display = "none";
                 }
@@ -74,7 +74,7 @@ const PropertyCard = ({
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
-            <img src={zibdaPlaceholder} alt="집다 로고" className="w-2/3 h-auto object-contain" />
+            <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain p-1" />
           </div>
         )}
         {/* Badges */}
