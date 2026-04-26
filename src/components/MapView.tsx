@@ -299,7 +299,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
         content.innerHTML = createPinHtml(prop, isSelected, zoom);
         content.style.cssText = "cursor:pointer;";
         content.dataset.sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
-        content.addEventListener("click", () => onSelectFn(prop.id));
+        content.addEventListener("click", () => propsRef.current.onSelect(prop.id));
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
