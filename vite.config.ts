@@ -55,6 +55,15 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode !== "development" && swVersionPlugin(),
   ].filter(Boolean) as Plugin[],
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: "assets/[name]-20260427-[hash].js",
+        chunkFileNames: "assets/[name]-20260427-[hash].js",
+        assetFileNames: "assets/[name]-20260427-[hash][extname]",
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
