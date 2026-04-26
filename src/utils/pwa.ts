@@ -43,10 +43,13 @@ export function forceOpenInExternalBrowser(): boolean {
   if (!isInAppBrowser()) return false;
   if (isStandaloneMode()) return false;
 
-  // 네이버/카카오 인앱은 캐시가 매우 공격적이라 매 진입마다 외부 브라우저로 보낸다.
-  // 그 외(라인/페북/인스타 등)는 무한 루프 방지를 위해 세션당 1회만 시도.
   const ua = navigator.userAgent.toLowerCase();
-  const isAggressiveInApp = ua.includes("naver") || ua.includes("kakaotalk");
+  // Naver 브라우저는 웹 화면 자체에서 최신 배포를 확인해야 하므로 자동 외부 브라우저 이동을 하지 않는다.
+  if (ua.includes("naver")) return false;
+
+  // 카카오 등 일부 인앱은 캐시가 매우 공격적이라 매 진입마다 외부 브라우저로 보낸다.
+  // 그 외(라인/페북/인스타 등)는 무한 루프 방지를 위해 세션당 1회만 시도.
+  const isAggressiveInApp = ua.includes("kakaotalk");
   if (!isAggressiveInApp) {
     try {
       if (sessionStorage.getItem("__jibda_external_redirect__") === "1") return false;
