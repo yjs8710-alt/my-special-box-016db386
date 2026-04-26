@@ -57,6 +57,8 @@ const SignupPage = () => {
     setForm(next);
   };
 
+  const isGeneralMember = form.memberType === "일반회원";
+
   const canNext0 =
     form.name.trim() &&
     form.phone.trim() &&
@@ -66,17 +68,33 @@ const SignupPage = () => {
     form.memberType;
 
   const canNext1 =
-    form.agencyName.trim() &&
-    form.representativeName.trim() &&
-    form.agencyPhone.trim() &&
-    form.licenseNumber.trim() &&
-    form.businessNumber.trim() &&
-    form.agencyAddress.trim();
+    isGeneralMember ||
+    (form.agencyName.trim() &&
+      form.representativeName.trim() &&
+      form.agencyPhone.trim() &&
+      form.licenseNumber.trim() &&
+      form.businessNumber.trim() &&
+      form.agencyAddress.trim());
 
   const canSubmit = form.agreeTerms && form.agreePrivacy;
 
-  const handleNext = () => { setError(""); setStep((s) => s + 1); };
-  const handleBack = () => { setError(""); setStep((s) => s - 1); };
+  const handleNext = () => {
+    setError("");
+    // 일반회원은 자격 인증(step 1) 단계 스킵
+    if (step === 0 && isGeneralMember) {
+      setStep(2);
+    } else {
+      setStep((s) => s + 1);
+    }
+  };
+  const handleBack = () => {
+    setError("");
+    if (step === 2 && isGeneralMember) {
+      setStep(0);
+    } else {
+      setStep((s) => s - 1);
+    }
+  };
 
   const handleSubmit = async () => {
     setError("");
