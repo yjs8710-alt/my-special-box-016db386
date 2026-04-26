@@ -157,20 +157,28 @@ const SignupPage = () => {
           <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
             <CheckCircle2 className="w-9 h-9" style={{ color: "hsl(var(--primary))" }} />
           </div>
-          <h2 className="text-xl font-bold text-foreground">가입 신청이 완료되었습니다</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            관리자가 <strong className="text-foreground">{form.licenseNumber}</strong>(공인중개사 등록번호) 및{" "}
-            <strong className="text-foreground">{form.businessNumber}</strong>(사업자 등록번호)를
-            확인 후 승인 처리합니다.
-            <br /><br />
-            승인 결과는 <strong className="text-foreground">{form.email}</strong>로 안내드립니다.
-          </p>
+          <h2 className="text-xl font-bold text-foreground">
+            {isGeneralMember ? "가입이 완료되었습니다" : "가입 신청이 완료되었습니다"}
+          </h2>
+          {isGeneralMember ? (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">{form.email}</strong> 계정으로 바로 로그인하여 매물을 등록하실 수 있습니다.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              관리자가 <strong className="text-foreground">{form.licenseNumber}</strong>(공인중개사 등록번호) 및{" "}
+              <strong className="text-foreground">{form.businessNumber}</strong>(사업자 등록번호)를
+              확인 후 승인 처리합니다.
+              <br /><br />
+              승인 결과는 <strong className="text-foreground">{form.email}</strong>로 안내드립니다.
+            </p>
+          )}
           <Button
             className="w-full rounded-full font-semibold mt-2"
             style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate(isGeneralMember ? "/login" : "/")}
           >
-            홈으로 돌아가기
+            {isGeneralMember ? "로그인하러 가기" : "홈으로 돌아가기"}
           </Button>
         </div>
       </div>
