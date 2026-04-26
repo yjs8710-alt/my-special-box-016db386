@@ -252,7 +252,7 @@ const SignupPage = () => {
                       { value: "대표중개사", label: "부동산 대표자", desc: "대표 공인중개사" },
                       { value: "소속중개사", label: "소속공인중개사", desc: "소속 공인중개사" },
                       { value: "중개보조원", label: "중개보조원", desc: "중개 보조 직원" },
-                      { value: "일반회원", label: "일반회원", desc: "자격 인증 없이 가입" },
+                      { value: "일반회원", label: "일반회원", desc: "자격 인증 없이 가입 (관리자 승인 필요)" },
                     ].map(({ value, label, desc }) => {
                       const isActive = form.memberType === value;
                       return (
