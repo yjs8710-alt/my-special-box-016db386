@@ -54,6 +54,8 @@ export function forceOpenInExternalBrowser(): boolean {
     } catch {
       // sessionStorage 접근 불가하면 그냥 진행
     }
+  }
+
   const url = window.location.href;
 
   if (isAndroid()) {
