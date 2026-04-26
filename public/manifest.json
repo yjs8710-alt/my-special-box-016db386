@@ -2,7 +2,7 @@
   "name": "집다",
   "short_name": "집다",
   "description": "청주 공인중개사 전용 공실 임대·매매 플랫폼",
-  "start_url": "/?source=pwa&v=20260426",
+  "start_url": "/?source=pwa&v=20260426-04",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
