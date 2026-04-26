@@ -80,6 +80,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     buildYear: String(row.build_year ?? ""),
     memo: String(row.id ?? ""),
     roadAddress,
+    registeredBy: row.registered_by ? String(row.registered_by) : undefined,
   };
 }
 
