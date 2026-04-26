@@ -1,15 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
-import cctvIcon from "@/assets/cctv_icon.png";
-import remodelingIcon from "@/assets/remodeling-icon.png";
-import tvIcon from "@/assets/tv_icon.png";
-import waterIcon from "@/assets/water_icon.png";
-import elevatorIcon from "@/assets/elevator_icon.png";
-import internetIcon from "@/assets/internet_icon.png";
-import petIcon from "@/assets/pet_icon.png";
-import memoIcon from "@/assets/memo_icon_new.png";
-import femaleOnlyIcon from "@/assets/female_only_icon.png";
+import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
+import remodelingIcon from "@/assets/remodeling-icon-v2-20260427.png";
+import tvIcon from "@/assets/tv_icon-v2-20260427.png";
+import waterIcon from "@/assets/water_icon-v2-20260427.png";
+import elevatorIcon from "@/assets/elevator_icon-v2-20260427.png";
+import internetIcon from "@/assets/internet_icon-v2-20260427.png";
+import petIcon from "@/assets/pet_icon-v2-20260427.png";
+import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
+import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
 
 // ─── Image Carousel Preview (사진 등록 캐러셀) ────────────────────────────────
 function ImageCarouselPreview({

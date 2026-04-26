@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
-import heroBg from "@/assets/main-bg-20260427.jpg";
-import heroLogo from "@/assets/logo-zibda-20260427.png";
-import iconResidential from "@/assets/icon-residential.png";
-import iconCommercial from "@/assets/icon-commercial.png";
-import iconCollective from "@/assets/icon-collective.png";
-import iconLand from "@/assets/icon-land.png";
+import heroBg from "@/assets/main-bg-20260427-v2-20260427.jpg";
+import heroLogo from "@/assets/logo-zibda-20260427-v2-20260427.png";
+import iconResidential from "@/assets/icon-residential-v2-20260427.png";
+import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
+import iconCollective from "@/assets/icon-collective-v2-20260427.png";
+import iconLand from "@/assets/icon-land-v2-20260427.png";
 import InstallAppCard from "@/components/InstallAppCard";
 import { isStandaloneMode } from "@/utils/pwa";
 
