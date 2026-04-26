@@ -105,7 +105,7 @@ if (isPreviewHost || isInIframe) {
     let hasReloadedForUpdate = false;
 
     navigator.serviceWorker
-      .register("/sw.js")
+      .register(`/sw.js?v=${encodeURIComponent(APP_VERSION)}`)
       .then((registration) => {
         const checkForUpdates = () => {
           registration.update().catch(() => {});
