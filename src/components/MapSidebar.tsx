@@ -39,6 +39,7 @@ import memoIcon from "@/assets/memo_icon_new.png";
 import femaleOnlyIcon from "@/assets/female_only_icon.png";
 import checkDateIcon from "@/assets/check_date_icon.png";
 import logoTransparent from "@/assets/logo-transparent.png";
+import zibdaPlaceholder from "@/assets/zibda-placeholder.png";
 import cameraIcon from "@/assets/camera_icon.png";
 import { supabase } from "@/integrations/supabase/client";
 import { MapProperty } from "@/data/mapProperties";
@@ -4463,8 +4464,8 @@ const MapSidebar = ({
                                   );
                                 }
                                 return (
-                                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                                    <img src={logoTransparent} alt="집다 로고" className="w-24 h-auto opacity-40 select-none" />
+                                  <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
+                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-[85%] h-auto object-contain select-none" />
                                   </div>
     
                                 );
@@ -4651,12 +4652,12 @@ const MapSidebar = ({
 
                                         const fallback = document.createElement("div");
                                         fallback.setAttribute("data-thumb-fallback", "logo");
-                                        fallback.className = "absolute inset-0 flex items-center justify-center bg-muted pointer-events-none";
+                                        fallback.className = "absolute inset-0 flex items-center justify-center bg-muted overflow-hidden pointer-events-none";
 
                                         const logo = document.createElement("img");
-                                        logo.src = logoTransparent;
+                                        logo.src = zibdaPlaceholder;
                                         logo.alt = "집다 로고";
-                                        logo.className = "w-24 h-auto opacity-40 select-none";
+                                        logo.className = "w-[85%] h-auto object-contain select-none";
 
                                         fallback.appendChild(logo);
                                         parent.prepend(fallback);
@@ -4673,9 +4674,9 @@ const MapSidebar = ({
                                 );
                               }
                               return (
-                                <div className="w-full h-full flex items-center justify-center bg-muted">
-                                  <img src={logoTransparent} alt="집다 로고" className="w-24 h-auto opacity-40 select-none" />
-                                </div>
+                              <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
+                                <img src={zibdaPlaceholder} alt="집다 로고" className="w-[85%] h-auto object-contain select-none" />
+                              </div>
     
                               );
                             })()}
