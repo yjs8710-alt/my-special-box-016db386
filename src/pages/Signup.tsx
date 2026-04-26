@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, Eye, EyeOff, CheckCircle2, ChevronRight, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, ChevronRight, ArrowLeft } from "lucide-react";
+import logoImg from "@/assets/hero-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -192,11 +193,8 @@ const SignupPage = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b" style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
         <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => navigate("/")}>
-            <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
-              <Home className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
+            <img src={logoImg} alt="집다 로고" className="h-20 object-contain block" />
           </div>
           <span className="text-sm text-white/60">중개사 회원가입</span>
         </div>
