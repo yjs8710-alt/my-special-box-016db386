@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { isStandaloneMode, forceOpenInExternalBrowser } from "@/utils/pwa";
+import { isStandaloneMode } from "@/utils/pwa";
 import { APP_VERSION } from "@/lib/appVersion";
 
 // ── 버전 변경 감지 → 옛 cache storage 전부 삭제 + 1회 자동 새로고침 ──
