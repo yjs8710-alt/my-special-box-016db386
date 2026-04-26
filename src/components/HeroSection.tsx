@@ -7,8 +7,6 @@ import iconResidential from "@/assets/icon-residential-v2-20260427.png";
 import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
 import iconCollective from "@/assets/icon-collective-v2-20260427.png";
 import iconLand from "@/assets/icon-land-v2-20260427.png";
-import InstallAppCard from "@/components/InstallAppCard";
-import { isStandaloneMode } from "@/utils/pwa";
 
 const CATEGORIES = [
   { label: "주거·임대", path: "/residential", icon: iconResidential },
@@ -25,21 +23,7 @@ const APP_ACTIONS = [
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const [isAppMode, setIsAppMode] = useState(false);
-
-  useEffect(() => {
-    const updateAppMode = () => setIsAppMode(isStandaloneMode());
-    updateAppMode();
-
-    const mql = window.matchMedia("(display-mode: standalone)");
-    mql.addEventListener?.("change", updateAppMode);
-    window.addEventListener("focus", updateAppMode);
-
-    return () => {
-      mql.removeEventListener?.("change", updateAppMode);
-      window.removeEventListener("focus", updateAppMode);
-    };
-  }, []);
+  const [isAppMode] = useState(false);
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
@@ -95,20 +79,9 @@ const HeroSection = () => {
             </div>
           </div>
         )}
-
-        {/* 모바일 전용 앱 설치 카드 */}
-        {!isAppMode && (
-          <div className="md:hidden w-full max-w-md mt-3 flex justify-center">
-            <InstallAppCard />
-          </div>
-        )}
-      </div>
-
-      {/* 우측 상단 앱 설치 카드 (데스크톱) */}
-      <div className="hidden md:block absolute right-6 lg:right-10 top-6 z-20">
-        <InstallAppCard />
       </div>
     </section>
+
   );
 };
 
