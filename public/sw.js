@@ -1,6 +1,5 @@
-// 집다 Service Worker: 웹 화면 캐시에 관여하지 않음
-// Naver/Kakao 내장 브라우저에서 오래된 화면이 남지 않도록 모든 Cache Storage 를 정리하고 네트워크만 사용합니다.
-const CACHE_VERSION = "v2026-04-27-04";
+// 집다 Service Worker 제거용 파일: 더 이상 어떤 요청도 캐시하지 않으며 즉시 자신을 unregister 합니다.
+const CACHE_VERSION = "v2-2026-04-27";
 
 // 설치: 즉시 활성화
 self.addEventListener("install", (event) => {
@@ -13,6 +12,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keys = await caches.keys();
       await Promise.all(keys.map((key) => caches.delete(key)));
+      await self.registration.unregister();
       await self.clients.claim();
       const clients = await self.clients.matchAll({ type: "window" });
       clients.forEach((client) => {
