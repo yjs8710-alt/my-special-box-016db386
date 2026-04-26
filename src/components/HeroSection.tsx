@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building, Store, Building2, Trees, CheckCircle2, ClipboardList, Search, User } from "lucide-react";
+import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import heroLogo from "@/assets/hero-logo.png";
+import iconResidential from "@/assets/icon-residential.png";
+import iconCommercial from "@/assets/icon-commercial.png";
+import iconCollective from "@/assets/icon-collective.png";
+import iconLand from "@/assets/icon-land.png";
 import InstallAppCard from "@/components/InstallAppCard";
 import { isStandaloneMode } from "@/utils/pwa";
 
 const CATEGORIES = [
-  { label: "주거·임대", path: "/residential", Icon: Building },
-  { label: "상업·임대·매매", path: "/non-residential", Icon: Store },
-  { label: "집합건물·건물매매", path: "/collective-sale", Icon: Building2 },
-  { label: "토지", path: "/land", Icon: Trees },
+  { label: "주거·임대", path: "/residential", icon: iconResidential },
+  { label: "상업·임대·매매", path: "/non-residential", icon: iconCommercial },
+  { label: "집합건물·건물매매", path: "/collective-sale", icon: iconCollective },
+  { label: "토지", path: "/land", icon: iconLand },
 ];
 
 const APP_ACTIONS = [
