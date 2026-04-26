@@ -43,16 +43,18 @@ export function forceOpenInExternalBrowser(): boolean {
   if (!isInAppBrowser()) return false;
   if (isStandaloneMode()) return false;
 
-  // 무한 루프 방지: 한 번 시도하면 세션 동안 다시 안 함
-  try {
-    if (sessionStorage.getItem("__jibda_external_redirect__") === "1") return false;
-    sessionStorage.setItem("__jibda_external_redirect__", "1");
-  } catch {
-    // sessionStorage 접근 불가하면 그냥 진행
-  }
-
-  const url = window.location.href;
+  // 네이버/카카오 인앱은 캐시가 매우 공격적이라 매 진입마다 외부 브라우저로 보낸다.
+  // 그 외(라인/페북/인스타 등)는 무한 루프 방지를 위해 세션당 1회만 시도.
   const ua = navigator.userAgent.toLowerCase();
+  const isAggressiveInApp = ua.includes("naver") || ua.includes("kakaotalk");
+  if (!isAggressiveInApp) {
+    try {
+      if (sessionStorage.getItem("__jibda_external_redirect__") === "1") return false;
+      sessionStorage.setItem("__jibda_external_redirect__", "1");
+    } catch {
+      // sessionStorage 접근 불가하면 그냥 진행
+    }
+  }
 
   if (isAndroid()) {
     // Android: Chrome intent 로 강제 오픈
