@@ -33,23 +33,10 @@ import { APP_VERSION } from "@/lib/appVersion";
 })();
 
 
-// 카카오/네이버 등 인앱 브라우저에서 접속하면 외부 Chrome/Safari 로 강제 이동
-// (프리뷰/iframe 환경에서는 실행 금지)
-const _host = window.location.hostname;
-const _isPreview =
-  _host.includes("id-preview--") ||
-  _host.includes("lovableproject.com") ||
-  _host === "localhost" ||
-  _host === "127.0.0.1";
-
-let _redirected = false;
-if (!_isPreview) {
-  _redirected = forceOpenInExternalBrowser();
-}
-
-if (!_redirected) {
-  createRoot(document.getElementById("root")!).render(<App />);
-}
+// 자동 외부 브라우저 이동 로직 제거: 모든 환경(네이버/카카오 인앱 포함)에서
+// 동일한 최신 화면이 즉시 보이도록 강제 redirect 를 수행하지 않는다.
+// "Chrome에서 열기" 등은 InstallAppCard 의 안내 버튼을 통해서만 동작한다.
+createRoot(document.getElementById("root")!).render(<App />);
 
 console.log("PWA standalone:", isStandaloneMode());
 console.log("UserAgent:", navigator.userAgent);
