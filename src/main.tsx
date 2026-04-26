@@ -1,7 +1,23 @@
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import App from "./App.tsx";
 import "./index.css";
 import { isStandaloneMode, forceOpenInExternalBrowser } from "@/utils/pwa";
+
+// 자동 새로고침 직전에 사용자에게 한 번 토스트로 알린다.
+function notifyAutoUpdateAndReload() {
+  try {
+    toast.success("새 버전 적용 중...", {
+      description: "잠시 후 자동으로 새로고침됩니다.",
+      duration: 1500,
+    });
+  } catch {
+    // toast 가 아직 마운트 전이어도 무시하고 그냥 reload
+  }
+  setTimeout(() => {
+    window.location.reload();
+  }, 800);
+}
 
 // 카카오/네이버 등 인앱 브라우저에서 접속하면 외부 Chrome/Safari 로 강제 이동
 // (프리뷰/iframe 환경에서는 실행 금지)
@@ -86,7 +102,7 @@ if (isPreviewHost || isInIframe) {
         navigator.serviceWorker.addEventListener("controllerchange", () => {
           if (hasReloadedForUpdate) return;
           hasReloadedForUpdate = true;
-          window.location.reload();
+          notifyAutoUpdateAndReload();
         });
 
         // SW 가 활성화 후 보내는 업데이트 알림 처리 → 즉시 새로고침
@@ -94,7 +110,7 @@ if (isPreviewHost || isInIframe) {
           if (event.data?.type === "SW_UPDATED") {
             if (hasReloadedForUpdate) return;
             hasReloadedForUpdate = true;
-            window.location.reload();
+            notifyAutoUpdateAndReload();
           }
         });
 
