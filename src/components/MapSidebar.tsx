@@ -2495,7 +2495,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         kakao.maps.event.addListener(roadview, 'init', function() {
           try {
             var pinContent = '<div class="rv-pin">' +
-              '<div class="pin-label">📍 ' + (data.title || data.address) + '</div>' +
+              '<div class="pin-label"><span class="pin-ico">📍</span>현위치</div>' +
               '<div class="pin-tail"></div>' +
               '<div class="pin-dot"></div>' +
             '</div>';
