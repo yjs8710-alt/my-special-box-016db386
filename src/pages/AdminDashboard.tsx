@@ -1723,7 +1723,7 @@ const AdminDashboard = () => {
         onClick={() => { navigate("/"); setSidebarOpen(false); }}
         title="일반 페이지로 이동"
       >
-        <img src={logoImg} alt="집다 로고" className="h-16 object-contain" />
+        <img src={logoImg} alt="집다 로고" className="h-24 object-contain" />
         <span
           className="text-[10px] font-medium px-1.5 py-0.5 rounded"
           style={{ background: "hsl(var(--accent) / 0.18)", color: "hsl(var(--accent))" }}
