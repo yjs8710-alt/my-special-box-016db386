@@ -1,6 +1,6 @@
 // 집다 PWA Service Worker
 // 배포할 때마다 CACHE_VERSION 을 갱신하면 자동으로 캐시가 교체됩니다.
-const CACHE_NAME = "jibda-pwa-v20260426-06";
+const CACHE_NAME = "jibda-cache-2026-04-27-01";
 const APP_SHELL = [
   "/manifest.json",
   "/icon-192.png",
