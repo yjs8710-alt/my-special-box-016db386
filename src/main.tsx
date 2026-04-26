@@ -37,8 +37,8 @@ import { APP_VERSION } from "@/lib/appVersion";
 // 자동 새로고침 직전에 사용자에게 한 번 토스트로 알린다.
 function notifyAutoUpdateAndReload() {
   try {
-    toast.success("새 버전 적용 중...", {
-      description: "잠시 후 자동으로 새로고침됩니다.",
+    toast.success("새 버전이 있습니다. 업데이트합니다.", {
+      description: "최신 화면으로 자동 새로고침됩니다.",
       duration: 1500,
     });
   } catch {
