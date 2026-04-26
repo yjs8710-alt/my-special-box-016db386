@@ -62,7 +62,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0 ml-2"
               onClick={() => navigate("/")}
             >
-              <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block -mb-6 mt-2" />
+              <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block" />
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
