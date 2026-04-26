@@ -22,7 +22,6 @@ import MyPage from "./pages/MyPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
-import PwaUpdateBanner from "./components/PwaUpdateBanner";
 import DomainCheck from "./pages/DomainCheck";
 
 
@@ -33,7 +32,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PwaUpdateBanner />
       <BrowserRouter>
         <Routes>
           {/* 공개 페이지 */}
