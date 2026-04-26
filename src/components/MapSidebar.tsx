@@ -4464,8 +4464,8 @@ const MapSidebar = ({
                                   );
                                 }
                                 return (
-                                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                                    <img src={logoTransparent} alt="집다 로고" className="w-24 h-auto opacity-40 select-none" />
+                                  <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
+                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-[85%] h-auto object-contain select-none" />
                                   </div>
     
                                 );
