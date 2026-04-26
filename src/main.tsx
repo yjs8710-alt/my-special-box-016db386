@@ -102,7 +102,7 @@ if (isPreviewHost || isInIframe) {
         navigator.serviceWorker.addEventListener("controllerchange", () => {
           if (hasReloadedForUpdate) return;
           hasReloadedForUpdate = true;
-          window.location.reload();
+          notifyAutoUpdateAndReload();
         });
 
         // SW 가 활성화 후 보내는 업데이트 알림 처리 → 즉시 새로고침
@@ -110,7 +110,7 @@ if (isPreviewHost || isInIframe) {
           if (event.data?.type === "SW_UPDATED") {
             if (hasReloadedForUpdate) return;
             hasReloadedForUpdate = true;
-            window.location.reload();
+            notifyAutoUpdateAndReload();
           }
         });
 
