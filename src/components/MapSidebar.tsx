@@ -2346,33 +2346,43 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     #status strong { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
     #status span { font-size: 13px; color: #94a3b8; font-weight: 500; }
     .divider { width: 4px; background: #334155; cursor: col-resize; flex-shrink: 0; }
-    .addr-pill {
-      position: absolute; top: 16px; left: 16px; z-index: 6;
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 16px;
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 999px;
-      color: #fff;
-      font-size: 13px; font-weight: 600; letter-spacing: -0.01em;
-      box-shadow: 0 6px 20px rgba(15,23,42,0.35);
-      max-width: calc(100% - 32px);
+    .rv-pin {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center;
       pointer-events: none;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.45));
     }
-    .addr-pill .addr-icon { font-size: 14px; }
-    .addr-pill .addr-text {
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      max-width: 70vw;
+    .rv-pin .pin-label {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      border: 2px solid #fff;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    }
+    .rv-pin .pin-tail {
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 12px solid #dc2626;
+      margin-top: -1px;
+    }
+    .rv-pin .pin-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #dc2626;
+      border: 3px solid #fff;
+      margin-top: 2px;
     }
     @media (max-width: 640px) {
       .toolbar { padding: 10px 14px; gap: 6px; }
       .toolbar h1 { font-size: 13px; }
       .toolbar .addr { display: none; }
       .toolbar button { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
-      .addr-pill { top: 12px; left: 12px; padding: 8px 12px; font-size: 12px; }
-      .addr-pill .addr-text { max-width: 60vw; }
+      .rv-pin .pin-label { font-size: 11px; padding: 5px 10px; }
     }
   </style>
 </head>
@@ -2386,10 +2396,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <div class="content">
     <div class="panel" id="rvPanel">
       <div id="roadview"></div>
-      <div class="addr-pill" id="addrPill">
-        <span class="addr-icon">📍</span>
-        <span class="addr-text">${prop.address}</span>
-      </div>
       <div id="status"><strong>가장 가까운 로드뷰를 찾는 중입니다.</strong><span>주변 도로를 자동 탐색하고 있습니다.</span></div>
     </div>
     <div class="panel hidden" id="mapPanel">
@@ -2469,6 +2475,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         var position = new kakao.maps.LatLng(data.lat, data.lng);
         roadview = new kakao.maps.Roadview(roadviewEl);
         var roadviewClient = new kakao.maps.RoadviewClient();
+
+        // 로드뷰 init 이벤트: 파노라마 이미지 안의 실제 좌표 위치에 핀 마커 표시
+        kakao.maps.event.addListener(roadview, 'init', function() {
+          try {
+            var pinContent = '<div class="rv-pin">' +
+              '<div class="pin-label">📍 ' + (data.title || data.address) + '</div>' +
+              '<div class="pin-tail"></div>' +
+              '<div class="pin-dot"></div>' +
+            '</div>';
+
+            var pinOverlay = new kakao.maps.CustomOverlay({
+              position: position,
+              content: pinContent,
+              xAnchor: 0.5,
+              yAnchor: 1,
+            });
+            // 사람 시야 높이(약 2m) 정도 위에 띄워 잘 보이도록
+            try { pinOverlay.setAltitude(2); } catch(e) {}
+            pinOverlay.setMap(roadview);
+
+            // 시점을 핀 위치로 자동 회전 (어디인지 바로 보이도록)
+            try {
+              var projection = roadview.getProjection();
+              var viewpoint = projection.viewpointFromCoords(
+                pinOverlay.getPosition(),
+                pinOverlay.getAltitude ? pinOverlay.getAltitude() : 2
+              );
+              roadview.setViewpoint(viewpoint);
+            } catch(e) {}
+          } catch(e) {}
+        });
 
         var searchNearest = function(index) {
           if (index === undefined) index = 0;
