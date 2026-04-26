@@ -136,7 +136,7 @@ const SignupPage = () => {
       agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
       agree_marketing: form.agreeMarketing,
       member_type: form.memberType,
-      status: isGeneralMember ? "approved" : "pending",
+      status: "pending",
       is_active: true,
     });
 
@@ -158,11 +158,13 @@ const SignupPage = () => {
             <CheckCircle2 className="w-9 h-9" style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h2 className="text-xl font-bold text-foreground">
-            {isGeneralMember ? "가입이 완료되었습니다" : "가입 신청이 완료되었습니다"}
+            가입 신청이 완료되었습니다
           </h2>
           {isGeneralMember ? (
             <p className="text-sm text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">{form.email}</strong> 계정으로 바로 로그인하여 매물을 등록하실 수 있습니다.
+              관리자 승인 후 매물을 등록하실 수 있습니다.
+              <br /><br />
+              승인 결과는 <strong className="text-foreground">{form.email}</strong>로 안내드립니다.
             </p>
           ) : (
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -176,9 +178,9 @@ const SignupPage = () => {
           <Button
             className="w-full rounded-full font-semibold mt-2"
             style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-            onClick={() => navigate(isGeneralMember ? "/login" : "/")}
+            onClick={() => navigate("/")}
           >
-            {isGeneralMember ? "로그인하러 가기" : "홈으로 돌아가기"}
+            홈으로 돌아가기
           </Button>
         </div>
       </div>
@@ -250,7 +252,7 @@ const SignupPage = () => {
                       { value: "대표중개사", label: "부동산 대표자", desc: "대표 공인중개사" },
                       { value: "소속중개사", label: "소속공인중개사", desc: "소속 공인중개사" },
                       { value: "중개보조원", label: "중개보조원", desc: "중개 보조 직원" },
-                      { value: "일반회원", label: "일반회원", desc: "자격 인증 없이 가입" },
+                      { value: "일반회원", label: "일반회원", desc: "자격 인증 없이 가입 (관리자 승인 필요)" },
                     ].map(({ value, label, desc }) => {
                       const isActive = form.memberType === value;
                       return (
