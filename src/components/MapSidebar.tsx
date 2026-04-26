@@ -3687,12 +3687,8 @@ const MapSidebar = ({
     loadDealCompleted();
   }, []);
 
-  // 모바일: 매물 핀 선택 시 자동으로 1단계 펼침
-  useEffect(() => {
-    if (isMobile && selectedId !== null) {
-      setMobileStep((prev) => (prev === 0 ? 1 : prev));
-    }
-  }, [isMobile, selectedId]);
+  // 모바일: 매물 핀 선택만으로는 시트를 자동으로 펼치지 않음
+  // (사용자가 매물 정보를 클릭하면 시트를 위로 올림 — 카드 onClick에서 처리)
   const listScrollRef = useRef<HTMLDivElement>(null);
   // 공유 시 사용할 중개사무소 정보
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
