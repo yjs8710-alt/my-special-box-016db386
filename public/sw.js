@@ -1,7 +1,7 @@
 // 집다 PWA Service Worker
 // ※ CACHE_NAME 의 버전 문자열을 바꾸면 자동으로 옛 캐시가 모두 제거되고
 //    최신 빌드(index.html / JS / CSS / 이미지)가 다시 다운로드됩니다.
-const CACHE_VERSION = "v2026-04-27-02";
+const CACHE_VERSION = "v2026-04-27-03";
 const CACHE_NAME = `jibda-cache-${CACHE_VERSION}`;
 
 const APP_SHELL = [
