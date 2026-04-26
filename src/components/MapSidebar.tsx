@@ -2346,11 +2346,33 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     #status strong { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
     #status span { font-size: 13px; color: #94a3b8; font-weight: 500; }
     .divider { width: 4px; background: #334155; cursor: col-resize; flex-shrink: 0; }
+    .addr-pill {
+      position: absolute; top: 16px; left: 16px; z-index: 6;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 999px;
+      color: #fff;
+      font-size: 13px; font-weight: 600; letter-spacing: -0.01em;
+      box-shadow: 0 6px 20px rgba(15,23,42,0.35);
+      max-width: calc(100% - 32px);
+      pointer-events: none;
+    }
+    .addr-pill .addr-icon { font-size: 14px; }
+    .addr-pill .addr-text {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 70vw;
+    }
     @media (max-width: 640px) {
       .toolbar { padding: 10px 14px; gap: 6px; }
       .toolbar h1 { font-size: 13px; }
       .toolbar .addr { display: none; }
       .toolbar button { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+      .addr-pill { top: 12px; left: 12px; padding: 8px 12px; font-size: 12px; }
+      .addr-pill .addr-text { max-width: 60vw; }
     }
   </style>
 </head>
