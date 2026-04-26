@@ -22,7 +22,6 @@ function swVersionPlugin(): Plugin {
     },
     generateBundle() {
       // sw.js 는 public/ 라서 transform 을 안 탈 수 있음 → emit 으로 직접 갱신
-      const fs = require("fs");
       const swPath = path.resolve(__dirname, "public/sw.js");
       try {
         const original = fs.readFileSync(swPath, "utf-8");
