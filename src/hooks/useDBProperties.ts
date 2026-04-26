@@ -10,7 +10,7 @@ const PROPERTY_COLUMNS = [
   "building_memo", "room_memo", "note", "vacate_date",
   "building_password", "room_password",
   "options", "views", "lat", "lng", "is_new", "is_hot",
-  "registered_date", "checked_date", "agent_name", "images",
+  "registered_date", "checked_date", "agent_name", "images", "registered_by",
 ].join(",");
 
 // 관리자 DB 매물 → MapProperty 변환
