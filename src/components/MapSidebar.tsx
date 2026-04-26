@@ -2442,6 +2442,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       var pos = new kakao.maps.LatLng(data.lat, data.lng);
       mapInstance = new kakao.maps.Map(mapEl, { center: pos, level: 3 });
       new kakao.maps.Marker({ position: pos, map: mapInstance });
+      var iwContent = '<div style="padding:8px 12px;font-size:12px;font-weight:700;color:#0f172a;font-family:Pretendard,-apple-system,BlinkMacSystemFont,Apple SD Gothic Neo,Malgun Gothic,sans-serif;letter-spacing:-0.01em;white-space:nowrap;">' +
+        (data.title ? '<div style="color:#2563eb;font-size:11px;margin-bottom:2px;">' + data.title + '</div>' : '') +
+        '<div>' + data.address + '</div></div>';
+      var infowindow = new kakao.maps.InfoWindow({ content: iwContent, removable: false });
+      infowindow.open(mapInstance, new kakao.maps.Marker({ position: pos, map: mapInstance }));
       mapInstance.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       mapInstance.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
     }
