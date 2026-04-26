@@ -17,17 +17,10 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
   ].filter(Boolean) as Plugin[],
   build: {
-    rollupOptions: {
-      output: {
-        entryFileNames: "assets/app-v2-20260427-[hash].js",
-        chunkFileNames: "assets/[name]-v2-20260427-[hash].js",
-        assetFileNames: (assetInfo) => {
-          const name = assetInfo.name ?? "asset";
-          if (name.endsWith(".css")) return "assets/main-v2-20260427-[hash][extname]";
-          return "assets/[name]-v2-20260427-[hash][extname]";
-        },
-      },
-    },
+    // Vite 기본 content-hash 사용:
+    //   assets/[name]-[hash].js / [name]-[hash].css / [name]-[hash][extname]
+    // → 파일 내용이 바뀌면 파일명이 자동 변경되어 브라우저/CDN 캐시가 자연 무효화됨.
+    rollupOptions: {},
   },
   resolve: {
     alias: {
