@@ -7,8 +7,6 @@ import iconResidential from "@/assets/icon-residential-v2-20260427.png";
 import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
 import iconCollective from "@/assets/icon-collective-v2-20260427.png";
 import iconLand from "@/assets/icon-land-v2-20260427.png";
-import InstallAppCard from "@/components/InstallAppCard";
-import { isStandaloneMode } from "@/utils/pwa";
 
 const CATEGORIES = [
   { label: "주거·임대", path: "/residential", icon: iconResidential },
