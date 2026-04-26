@@ -23,21 +23,7 @@ const APP_ACTIONS = [
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const [isAppMode, setIsAppMode] = useState(false);
-
-  useEffect(() => {
-    const updateAppMode = () => setIsAppMode(isStandaloneMode());
-    updateAppMode();
-
-    const mql = window.matchMedia("(display-mode: standalone)");
-    mql.addEventListener?.("change", updateAppMode);
-    window.addEventListener("focus", updateAppMode);
-
-    return () => {
-      mql.removeEventListener?.("change", updateAppMode);
-      window.removeEventListener("focus", updateAppMode);
-    };
-  }, []);
+  const [isAppMode] = useState(false);
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
