@@ -1,6 +1,6 @@
 import { MapPin, Eye, Heart, X } from "lucide-react";
-import logoTransparent from "@/assets/logo-transparent.png";
-import zibdaPlaceholder from "@/assets/zibda-placeholder.png";
+import logoTransparent from "@/assets/logo-transparent-zibda-20260427.png";
+import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427.png";
 import { useState } from "react";
 
 interface PropertyCardProps {

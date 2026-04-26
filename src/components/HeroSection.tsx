@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
-import heroLogo from "@/assets/hero-logo.png";
+import heroBg from "@/assets/main-bg-20260427.jpg";
+import heroLogo from "@/assets/logo-zibda-20260427.png";
 import iconResidential from "@/assets/icon-residential.png";
 import iconCommercial from "@/assets/icon-commercial.png";
 import iconCollective from "@/assets/icon-collective.png";
