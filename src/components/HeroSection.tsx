@@ -52,10 +52,6 @@ const HeroSection = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
-        <h1 className="rounded-xl border-2 border-accent bg-background px-5 py-3 text-2xl md:text-4xl font-extrabold text-primary shadow-2xl">
-          집다 테스트 NEW 2026
-        </h1>
-
         {isAppMode && (
           <div className="md:hidden inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-primary/90 px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4" />
