@@ -1,6 +1,9 @@
 // 집다 PWA Service Worker
-// 배포할 때마다 CACHE_VERSION 을 갱신하면 자동으로 캐시가 교체됩니다.
-const CACHE_NAME = "jibda-cache-2026-04-27-01";
+// ※ CACHE_NAME 의 버전 문자열을 바꾸면 자동으로 옛 캐시가 모두 제거되고
+//    최신 빌드(index.html / JS / CSS / 이미지)가 다시 다운로드됩니다.
+const CACHE_VERSION = "v2026-04-27-02";
+const CACHE_NAME = `jibda-cache-${CACHE_VERSION}`;
+
 const APP_SHELL = [
   "/manifest.json",
   "/icon-192.png",
@@ -23,6 +26,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
+      // 현재 버전이 아닌 모든 캐시(jibda-* 포함, 이전 prefix 도) 삭제
       await Promise.all(
         keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : Promise.resolve(false)))
       );
@@ -46,8 +50,6 @@ self.addEventListener("message", (event) => {
 // fetch 전략
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-
-  // GET 이외 요청은 패스
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
@@ -65,7 +67,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML 네비게이션: 항상 네트워크 우선, 캐시는 오프라인 폴백 용도로만 사용 (절대 HTML 을 캐시에 저장하지 않음)
+  // HTML 네비게이션: 항상 네트워크 우선 (HTML 은 절대 캐시에 저장하지 않음)
   if (req.mode === "navigate" || req.destination === "document") {
     event.respondWith(
       fetch(req, { cache: "no-store" }).catch(() =>
@@ -75,13 +77,20 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // index.html 자체 요청도 절대 캐싱 안 함
   if (url.pathname === "/" || url.pathname.endsWith(".html")) {
     event.respondWith(fetch(req, { cache: "no-store" }).catch(() => caches.match(req)));
     return;
   }
 
-  // JS/CSS: 네트워크 우선 (최신 빌드 해시 즉시 반영), 실패 시 캐시 폴백
+  // manifest.json 도 항상 네트워크 우선
+  if (url.pathname.endsWith("/manifest.json") || url.pathname.endsWith(".webmanifest")) {
+    event.respondWith(
+      fetch(req, { cache: "no-store" }).catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // JS/CSS: 네트워크 우선, 실패 시 캐시 폴백
   if (req.destination === "script" || req.destination === "style") {
     event.respondWith(
       fetch(req)
@@ -97,7 +106,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 이미지/폰트: 캐시 우선 + 백그라운드 갱신 (성능)
+  // 이미지/폰트: 캐시 우선 + 백그라운드 갱신
   if (req.destination === "image" || req.destination === "font") {
     event.respondWith(
       caches.match(req).then((cached) => {
