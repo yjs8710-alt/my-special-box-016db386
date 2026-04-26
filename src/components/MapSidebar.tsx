@@ -2271,26 +2271,87 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: #0f172a; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; overflow: hidden; }
+    html, body {
+      height: 100%;
+      background: #f8fafc;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      letter-spacing: -0.01em;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
     body { display: flex; flex-direction: column; }
-    .toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #1e293b; color: #fff; z-index: 10; flex-shrink: 0; }
-    .toolbar h1 { font-size: 14px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .toolbar .addr { font-size: 11px; color: #94a3b8; margin-left: 8px; }
-    .toolbar button { padding: 6px 14px; border-radius: 6px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
-    .btn-rv { background: #3b82f6; color: #fff; }
-    .btn-rv.active { background: #2563eb; box-shadow: 0 0 0 2px #60a5fa; }
-    .btn-map { background: #475569; color: #fff; }
-    .btn-map.active { background: #059669; box-shadow: 0 0 0 2px #34d399; }
-    .btn-close { background: #ef4444; color: #fff; }
-    .btn-close:hover { background: #dc2626; }
-    .content { flex: 1; display: flex; position: relative; min-height: 0; }
+    .toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      color: #0f172a; z-index: 10; flex-shrink: 0;
+    }
+    .toolbar h1 {
+      font-size: 15px; font-weight: 700; flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #0f172a; letter-spacing: -0.02em;
+    }
+    .toolbar .addr {
+      font-size: 12px; font-weight: 500; color: #64748b;
+      margin-left: 10px; letter-spacing: -0.01em;
+    }
+    .toolbar button {
+      padding: 8px 16px; border-radius: 10px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .toolbar button:hover { transform: translateY(-1px); }
+    .btn-rv {
+      background: #eff6ff; color: #2563eb;
+      box-shadow: inset 0 0 0 1px #dbeafe;
+    }
+    .btn-rv.active {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+    }
+    .btn-map {
+      background: #ecfdf5; color: #059669;
+      box-shadow: inset 0 0 0 1px #d1fae5;
+    }
+    .btn-map.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(5,150,105,0.35);
+    }
+    .btn-close {
+      background: #fef2f2; color: #dc2626;
+      box-shadow: inset 0 0 0 1px #fecaca;
+    }
+    .btn-close:hover {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(220,38,38,0.35);
+    }
+    .content { flex: 1; display: flex; position: relative; min-height: 0; background: #0f172a; }
     .panel { flex: 1; min-width: 0; min-height: 0; position: relative; }
     .panel.hidden { display: none; }
     #roadview, #map { width: 100%; height: 100%; }
-    #status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(15,23,42,0.92); color: #fff; text-align: center; padding: 24px; z-index: 5; }
-    #status strong { font-size: 16px; }
-    #status span { font-size: 13px; color: #94a3b8; }
+    #status {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
+      background: rgba(15,23,42,0.94);
+      backdrop-filter: blur(8px);
+      color: #fff; text-align: center; padding: 24px; z-index: 5;
+    }
+    #status strong { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+    #status span { font-size: 13px; color: #94a3b8; font-weight: 500; }
     .divider { width: 4px; background: #334155; cursor: col-resize; flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .toolbar { padding: 10px 14px; gap: 6px; }
+      .toolbar h1 { font-size: 13px; }
+      .toolbar .addr { display: none; }
+      .toolbar button { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+    }
   </style>
 </head>
 <body>

@@ -500,7 +500,7 @@ const MapFilterBar = ({
 
   return (
     <div
-      className="mfb-pos fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4 top-[64px]"
+      className="mfb-pos fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4 top-[50px]"
       style={{ ['--mfb-md-top' as any]: `${topOffset ?? 96}px`, maxWidth: 600 }}
     >
       <style>{`@media (min-width: 768px){ .mfb-pos{ top: var(--mfb-md-top); } }`}</style>
