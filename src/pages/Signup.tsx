@@ -136,7 +136,7 @@ const SignupPage = () => {
       agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
       agree_marketing: form.agreeMarketing,
       member_type: form.memberType,
-      status: isGeneralMember ? "approved" : "pending",
+      status: "pending",
       is_active: true,
     });
 
