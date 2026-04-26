@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building, Store, Building2, Trees, CheckCircle2, ClipboardList, Search, User } from "lucide-react";
+import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import heroLogo from "@/assets/hero-logo.png";
+import iconResidential from "@/assets/icon-residential.png";
+import iconCommercial from "@/assets/icon-commercial.png";
+import iconCollective from "@/assets/icon-collective.png";
+import iconLand from "@/assets/icon-land.png";
 import InstallAppCard from "@/components/InstallAppCard";
 import { isStandaloneMode } from "@/utils/pwa";
 
 const CATEGORIES = [
-  { label: "주거·임대", path: "/residential", Icon: Building },
-  { label: "상업·임대·매매", path: "/non-residential", Icon: Store },
-  { label: "집합건물·건물매매", path: "/collective-sale", Icon: Building2 },
-  { label: "토지", path: "/land", Icon: Trees },
+  { label: "주거·임대", path: "/residential", icon: iconResidential },
+  { label: "상업·임대·매매", path: "/non-residential", icon: iconCommercial },
+  { label: "집합건물·건물매매", path: "/collective-sale", icon: iconCollective },
+  { label: "토지", path: "/land", icon: iconLand },
 ];
 
 const APP_ACTIONS = [
@@ -63,13 +67,13 @@ const HeroSection = () => {
 
         {/* 카테고리 그리드 — 모바일 전용 (데스크톱은 기존 빈 상태 유지) */}
         <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
-          {CATEGORIES.map(({ label, path, Icon }) => (
+          {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
               className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <Icon className="w-7 h-7" strokeWidth={1.8} />
+              <img src={icon} alt={label} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
               <span className="text-sm font-bold leading-tight px-2">{label}</span>
             </button>
           ))}
