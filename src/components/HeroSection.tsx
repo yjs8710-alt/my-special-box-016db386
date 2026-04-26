@@ -79,20 +79,9 @@ const HeroSection = () => {
             </div>
           </div>
         )}
-
-        {/* 모바일 전용 앱 설치 카드 */}
-        {!isAppMode && (
-          <div className="md:hidden w-full max-w-md mt-3 flex justify-center">
-            <InstallAppCard />
-          </div>
-        )}
-      </div>
-
-      {/* 우측 상단 앱 설치 카드 (데스크톱) */}
-      <div className="hidden md:block absolute right-6 lg:right-10 top-6 z-20">
-        <InstallAppCard />
       </div>
     </section>
+
   );
 };
 
