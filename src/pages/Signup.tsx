@@ -57,6 +57,8 @@ const SignupPage = () => {
     setForm(next);
   };
 
+  const isGeneralMember = form.memberType === "일반회원";
+
   const canNext0 =
     form.name.trim() &&
     form.phone.trim() &&
@@ -66,17 +68,33 @@ const SignupPage = () => {
     form.memberType;
 
   const canNext1 =
-    form.agencyName.trim() &&
-    form.representativeName.trim() &&
-    form.agencyPhone.trim() &&
-    form.licenseNumber.trim() &&
-    form.businessNumber.trim() &&
-    form.agencyAddress.trim();
+    isGeneralMember ||
+    (form.agencyName.trim() &&
+      form.representativeName.trim() &&
+      form.agencyPhone.trim() &&
+      form.licenseNumber.trim() &&
+      form.businessNumber.trim() &&
+      form.agencyAddress.trim());
 
   const canSubmit = form.agreeTerms && form.agreePrivacy;
 
-  const handleNext = () => { setError(""); setStep((s) => s + 1); };
-  const handleBack = () => { setError(""); setStep((s) => s - 1); };
+  const handleNext = () => {
+    setError("");
+    // 일반회원은 자격 인증(step 1) 단계 스킵
+    if (step === 0 && isGeneralMember) {
+      setStep(2);
+    } else {
+      setStep((s) => s + 1);
+    }
+  };
+  const handleBack = () => {
+    setError("");
+    if (step === 2 && isGeneralMember) {
+      setStep(0);
+    } else {
+      setStep((s) => s - 1);
+    }
+  };
 
   const handleSubmit = async () => {
     setError("");
@@ -105,20 +123,21 @@ const SignupPage = () => {
       return;
     }
 
-    // 2. 중개사 프로필 저장
+    // 2. 회원 프로필 저장 (일반회원은 자동 승인)
     const { error: profileError } = await supabase.from("agent_profiles").insert({
       user_id: userId,
       name: form.name.trim(),
       phone: form.phone.trim(),
-      agency_name: form.agencyName.trim(),
-      agency_phone: form.agencyPhone.trim(),
-      representative_name: form.representativeName.trim(),
-      license_number: form.licenseNumber.trim(),
-      business_number: form.businessNumber.trim(),
-      agency_address: form.agencyAddress.trim(),
+      agency_name: isGeneralMember ? "" : form.agencyName.trim(),
+      agency_phone: isGeneralMember ? "" : form.agencyPhone.trim(),
+      representative_name: isGeneralMember ? "" : form.representativeName.trim(),
+      license_number: isGeneralMember ? null : form.licenseNumber.trim(),
+      business_number: isGeneralMember ? null : form.businessNumber.trim(),
+      agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
       agree_marketing: form.agreeMarketing,
       member_type: form.memberType,
-      status: "pending",
+      status: isGeneralMember ? "approved" : "pending",
+      is_active: true,
     });
 
     setLoading(false);
@@ -138,20 +157,28 @@ const SignupPage = () => {
           <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
             <CheckCircle2 className="w-9 h-9" style={{ color: "hsl(var(--primary))" }} />
           </div>
-          <h2 className="text-xl font-bold text-foreground">가입 신청이 완료되었습니다</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            관리자가 <strong className="text-foreground">{form.licenseNumber}</strong>(공인중개사 등록번호) 및{" "}
-            <strong className="text-foreground">{form.businessNumber}</strong>(사업자 등록번호)를
-            확인 후 승인 처리합니다.
-            <br /><br />
-            승인 결과는 <strong className="text-foreground">{form.email}</strong>로 안내드립니다.
-          </p>
+          <h2 className="text-xl font-bold text-foreground">
+            {isGeneralMember ? "가입이 완료되었습니다" : "가입 신청이 완료되었습니다"}
+          </h2>
+          {isGeneralMember ? (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">{form.email}</strong> 계정으로 바로 로그인하여 매물을 등록하실 수 있습니다.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              관리자가 <strong className="text-foreground">{form.licenseNumber}</strong>(공인중개사 등록번호) 및{" "}
+              <strong className="text-foreground">{form.businessNumber}</strong>(사업자 등록번호)를
+              확인 후 승인 처리합니다.
+              <br /><br />
+              승인 결과는 <strong className="text-foreground">{form.email}</strong>로 안내드립니다.
+            </p>
+          )}
           <Button
             className="w-full rounded-full font-semibold mt-2"
             style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate(isGeneralMember ? "/login" : "/")}
           >
-            홈으로 돌아가기
+            {isGeneralMember ? "로그인하러 가기" : "홈으로 돌아가기"}
           </Button>
         </div>
       </div>
@@ -218,11 +245,12 @@ const SignupPage = () => {
                 {/* 회원 유형 선택 */}
                 <div className="flex flex-col gap-2">
                   <Label>회원 유형 <span className="text-destructive">*</span></Label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {[
                       { value: "대표중개사", label: "부동산 대표자", desc: "대표 공인중개사" },
                       { value: "소속중개사", label: "소속공인중개사", desc: "소속 공인중개사" },
                       { value: "중개보조원", label: "중개보조원", desc: "중개 보조 직원" },
+                      { value: "일반회원", label: "일반회원", desc: "자격 인증 없이 가입" },
                     ].map(({ value, label, desc }) => {
                       const isActive = form.memberType === value;
                       return (

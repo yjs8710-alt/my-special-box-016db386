@@ -16,67 +16,67 @@ export type Database = {
     Tables: {
       agent_profiles: {
         Row: {
-          agency_address: string
-          agency_name: string
+          agency_address: string | null
+          agency_name: string | null
           agency_phone: string | null
           agree_marketing: boolean
           allowed_pc_ip: string | null
-          business_number: string
+          business_number: string | null
           created_at: string
           id: string
           is_active: boolean
-          license_number: string
+          license_number: string | null
           member_type: string
           name: string
           parent_user_id: string | null
           phone: string
           phone_verified: boolean
           phone_verified_at: string | null
-          representative_name: string
+          representative_name: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          agency_address: string
-          agency_name: string
+          agency_address?: string | null
+          agency_name?: string | null
           agency_phone?: string | null
           agree_marketing?: boolean
           allowed_pc_ip?: string | null
-          business_number: string
+          business_number?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
-          license_number: string
+          license_number?: string | null
           member_type?: string
           name: string
           parent_user_id?: string | null
           phone: string
           phone_verified?: boolean
           phone_verified_at?: string | null
-          representative_name?: string
+          representative_name?: string | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          agency_address?: string
-          agency_name?: string
+          agency_address?: string | null
+          agency_name?: string | null
           agency_phone?: string | null
           agree_marketing?: boolean
           allowed_pc_ip?: string | null
-          business_number?: string
+          business_number?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
-          license_number?: string
+          license_number?: string | null
           member_type?: string
           name?: string
           parent_user_id?: string | null
           phone?: string
           phone_verified?: boolean
           phone_verified_at?: string | null
-          representative_name?: string
+          representative_name?: string | null
           status?: string
           updated_at?: string
           user_id?: string
