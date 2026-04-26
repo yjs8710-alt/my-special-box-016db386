@@ -56,17 +56,18 @@ console.log("UserAgent:", navigator.userAgent);
 console.log("Display mode:", window.matchMedia("(display-mode: standalone)").matches);
 console.log("PWA update note: 배포 후 기존 설치 앱 삭제 → 브라우저 캐시 삭제 → 재설치해야 최신 앱 모드와 캐시가 적용됩니다.");
 
-// ── PWA Service Worker 완전 비활성화: 기존 등록 제거 + Cache Storage 삭제 ──
+// ── 기존에 등록되었던 Service Worker 자동 제거 ──
+// (이 프로젝트는 더 이상 SW를 사용하지 않음. 과거 방문자에 남아있는 SW가
+//  옛 번들을 서빙하지 못하도록 즉시 unregister 하고 SW 캐시를 비운다.)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.getRegistrations().then((regs) => {
-      regs.forEach((registration) => registration.unregister());
-    }).catch(() => {});
+    navigator.serviceWorker.getRegistrations()
+      .then((regs) => regs.forEach((r) => r.unregister()))
+      .catch(() => {});
+    if ("caches" in window) {
+      caches.keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .catch(() => {});
+    }
   });
-}
-
-if ("caches" in window) {
-  caches.keys().then((keys) => {
-    keys.forEach((key) => caches.delete(key));
-  }).catch(() => {});
 }
