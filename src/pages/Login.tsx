@@ -198,16 +198,10 @@ const LoginPage = () => {
       >
         <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
           <div
-            className="flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => navigate("/")}
           >
-            <div
-              className="w-7 h-7 rounded flex items-center justify-center"
-              style={{ background: "hsl(var(--accent))" }}
-            >
-              <Home className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
+            <img src={logoImg} alt="집다 로고" className="h-20 object-contain block" />
           </div>
           <span className="text-sm text-white/60">중개사 전용 플랫폼</span>
         </div>
