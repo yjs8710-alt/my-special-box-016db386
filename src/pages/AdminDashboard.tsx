@@ -1718,14 +1718,14 @@ const AdminDashboard = () => {
   const SidebarContent = () => (
     <>
       <div
-        className="px-5 py-4 border-b flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+        className="px-5 py-4 border-b flex items-center justify-start gap-2 cursor-pointer hover:opacity-80 transition-opacity"
         style={{ borderColor: "hsl(var(--header-border))" }}
         onClick={() => { navigate("/"); setSidebarOpen(false); }}
         title="일반 페이지로 이동"
       >
-        <img src={logoImg} alt="집다 로고" className="h-24 object-contain" />
+        <img src={logoImg} alt="집다 로고" className="h-24 object-contain shrink-0" />
         <span
-          className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+          className="text-[10px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap shrink-0"
           style={{ background: "hsl(var(--accent) / 0.18)", color: "hsl(var(--accent))" }}
         >
           관리자
