@@ -2,14 +2,16 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { writeFileSync } from "node:fs";
 
-// Build ID used to detect fresh deployments. Changes on every build.
-const BUILD_ID = `${Date.now()}`;
+// Build version used to detect fresh deployments. Changes on every build.
+const BUILD_VERSION = `${Date.now()}`;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
-    __APP_BUILD_ID__: JSON.stringify(BUILD_ID),
+    __APP_BUILD_ID__: JSON.stringify(BUILD_VERSION),
+    __APP_BUILD_VERSION__: JSON.stringify(BUILD_VERSION),
   },
   server: {
     host: "::",
@@ -23,17 +25,26 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     {
       name: "jibda-build-id",
+      buildStart() {
+        writeFileSync(
+          path.resolve(__dirname, "public/version.json"),
+          `${JSON.stringify({ buildVersion: BUILD_VERSION }, null, 2)}\n`
+        );
+      },
       transformIndexHtml(html: string) {
         return html.replace(
+          '<link rel="manifest" href="/manifest.webmanifest" />',
+          `<link rel="manifest" href="/manifest.webmanifest?v=${BUILD_VERSION}" />`
+        ).replace(
           "</head>",
-          `<meta name="app-build-id" content="${BUILD_ID}" /></head>`
+          `<meta name="app-build-version" content="${BUILD_VERSION}" /></head>`
         );
       },
       generateBundle(this: { emitFile: (file: { type: "asset"; fileName: string; source: string }) => void }) {
         this.emitFile({
           type: "asset",
           fileName: "version.json",
-          source: JSON.stringify({ buildId: BUILD_ID }, null, 2),
+          source: JSON.stringify({ buildVersion: BUILD_VERSION }, null, 2),
         });
       },
     },
