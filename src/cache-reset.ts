@@ -33,12 +33,28 @@ const reloadWithFreshMobileParam = () => {
   window.location.replace(url.toString());
 };
 
+const hasReloadedInThisSession = () => {
+  try {
+    return sessionStorage.getItem(MOBILE_INAPP_RELOAD_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+const markReloadedInThisSession = () => {
+  try {
+    sessionStorage.setItem(MOBILE_INAPP_RELOAD_KEY, "1");
+  } catch {
+    // sessionStorage 접근이 제한된 인앱브라우저에서도 계속 진행합니다.
+  }
+};
+
 if (typeof window !== "undefined" && isMobileInAppBrowser()) {
   void (async () => {
     await clearServiceWorkersAndCaches();
 
-    if (!sessionStorage.getItem(MOBILE_INAPP_RELOAD_KEY)) {
-      sessionStorage.setItem(MOBILE_INAPP_RELOAD_KEY, "1");
+    if (!hasReloadedInThisSession()) {
+      markReloadedInThisSession();
       reloadWithFreshMobileParam();
     }
   })();
