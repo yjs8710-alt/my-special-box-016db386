@@ -21,6 +21,15 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    {
+      name: "jibda-build-id",
+      transformIndexHtml(html) {
+        return html.replace(
+          "</head>",
+          `<meta name="app-build-id" content="${BUILD_ID}" /></head>`
+        );
+      },
+    },
   ].filter(Boolean) as Plugin[],
   build: {
     rollupOptions: {},
