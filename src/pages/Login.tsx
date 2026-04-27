@@ -196,12 +196,12 @@ const LoginPage = () => {
         className="sticky top-0 z-50 border-b"
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-4 h-12 flex items-center justify-between">
           <div
-            className="flex items-center gap-2 cursor-pointer select-none"
+            className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0"
             onClick={() => navigate("/")}
           >
-            <img src={logoImg} alt="집다 로고" className="h-20 object-contain block" />
+            <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
           </div>
           <span className="text-sm text-white/60">중개사 전용 플랫폼</span>
         </div>
