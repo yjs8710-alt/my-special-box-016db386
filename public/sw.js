@@ -1,6 +1,4 @@
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
-});
+self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -12,18 +10,18 @@ self.addEventListener("activate", (event) => {
         // ignore
       }
 
-      try {
-        await self.registration.unregister();
-      } catch {
-        // ignore
-      }
-
       const clientsList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-      await Promise.all(clientsList.map((client) => client.navigate(client.url)));
+      await Promise.all(
+        clientsList.map((client) => {
+          const url = new URL(client.url);
+          url.searchParams.set("v", `${Date.now()}`);
+          return client.navigate(url.toString());
+        })
+      );
     })()
   );
 });
 
-self.addEventListener("fetch", () => {
-  return;
+self.addEventListener("fetch", (event) => {
+  event.respondWith(fetch(event.request, { cache: "no-store" }));
 });
