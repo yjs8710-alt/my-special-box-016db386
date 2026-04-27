@@ -32,9 +32,9 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: [
         "favicon-zibda-v2-20260427.png",
-        "apple-touch-icon-zibda-v2-20260427.png",
-        "icon-zibda-192-v2-20260427.png",
-        "icon-zibda-512-v2-20260427.png",
+        "apple-touch-icon-zibda-active-v3-20260427.png",
+        "icon-zibda-active-192-v3-20260427.png",
+        "icon-zibda-active-512-v3-20260427.png",
         "robots.txt",
       ],
       manifest: {
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
         name: "집다 - 청주 공실 플랫폼",
         short_name: "집다",
         description: "중개사 전용 청주 공실 정보 플랫폼",
-        start_url: "/?v=20260427-v2",
+        start_url: "/?v=20260427-v3",
         scope: "/",
         display: "standalone",
         background_color: "#0F2A5C",
@@ -51,13 +51,13 @@ export default defineConfig(({ mode }) => ({
         orientation: "portrait",
         icons: [
           {
-            src: "/icon-zibda-192-v2-20260427.png",
+            src: "/icon-zibda-active-192-v3-20260427.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any maskable",
           },
           {
-            src: "/icon-zibda-512-v2-20260427.png",
+            src: "/icon-zibda-active-512-v3-20260427.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",

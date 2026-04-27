@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User } from "lucide-react";
-import logoImg from "@/assets/logo-zibda-main-20260427-v2.png";
+import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
@@ -63,6 +63,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               onClick={() => navigate("/")}
             >
               <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
+              <span className="text-[9px] font-mono text-muted-foreground/60 hidden md:inline">LOGO_AREA_UPDATED_20260427</span>
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
