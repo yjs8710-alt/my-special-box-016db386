@@ -1,5 +1,6 @@
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
@@ -23,6 +24,21 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    VitePWA({
+      registerType: "autoUpdate",
+      cleanupOutdatedCaches: true,
+      devOptions: {
+        enabled: false,
+      },
+      workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        globPatterns: ["**/*.{js,css,ico,png,svg,webp,woff,woff2,json}"],
+        globIgnores: ["**/index.html"],
+        navigateFallback: null,
+      },
+    }),
     {
       name: "jibda-build-id",
       buildStart() {
