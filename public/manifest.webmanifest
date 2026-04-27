@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Zibda",
-  "short_name": "Zibda",
+  "name": " ",
+  "short_name": " ",
   "description": "중개사 전용 청주 공실 정보 플랫폼",
   "start_url": "/",
   "scope": "/",
@@ -12,13 +12,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-zibda-active-192-v4-20260427.png",
+      "src": "/splash-blank-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-zibda-active-512-v4-20260427.png",
+      "src": "/splash-blank-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
