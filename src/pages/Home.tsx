@@ -55,6 +55,7 @@ const Home = () => {
           Chrome 권장
         </span>
       </button>
+      )}
 
       <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
 
