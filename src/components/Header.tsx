@@ -229,6 +229,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
           >
             커뮤니티
           </button>
+          <button
+            onClick={() => { setShowInstall(true); setMenuOpen(false); }}
+            className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
+          >
+            <Download className="w-4 h-4" />
+            앱 설치하기
+          </button>
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
             {location.pathname !== "/" && (
               <Button
