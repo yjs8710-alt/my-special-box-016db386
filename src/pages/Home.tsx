@@ -5,8 +5,8 @@ import Footer from "@/components/Footer";
 const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="w-full bg-yellow-400 text-black text-center py-2 text-sm font-mono font-bold">
-        LOGO_TEST_VISIBLE_20260427
+      <div className="w-full bg-yellow-400 text-black text-center py-4 text-2xl md:text-4xl font-mono font-extrabold tracking-wider">
+        TEST_MAIN_VISIBLE_0427
       </div>
       <Header />
       <main className="flex-1">
