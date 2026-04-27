@@ -117,7 +117,7 @@ export function PwaUpdatePrompt() {
       if (!serverBuildVersion) return;
 
       const storedBuildVersion = localStorage.getItem(BUILD_VERSION_STORAGE_KEY);
-      const isRunningOldBundle = serverBuildVersion !== __APP_BUILD_ID__;
+      const isRunningOldBundle = serverBuildVersion !== __APP_BUILD_VERSION__;
       const needsRefresh = storedBuildVersion !== serverBuildVersion || isRunningOldBundle;
       const reloadKey = `jibda_version_refresh_once_${serverBuildVersion}`;
 
