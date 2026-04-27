@@ -4,7 +4,6 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import InstallAppModal from "@/components/InstallAppModal";
-import { APP_BUILD_VERSION } from "@/lib/freshUrl";
 
 const Home = () => {
   const [showInstall, setShowInstall] = useState(false);
@@ -36,9 +35,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      <div className="fixed top-0 left-0 right-0 z-[100000] bg-primary px-3 py-3 text-center text-xl font-extrabold text-primary-foreground shadow-lg sm:text-2xl">
-        {APP_BUILD_VERSION}
-      </div>
       <Header />
 
       {/* 우측 상단 플로팅 "모바일 앱 설치" 버튼 (메인 화면 전용) */}
