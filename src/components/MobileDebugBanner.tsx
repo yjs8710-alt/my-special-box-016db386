@@ -18,7 +18,7 @@ export const MobileDebugBanner = () => {
   useEffect(() => {
     fetch(`/version.json?t=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
-      .then((d) => setServerVersion(String(d.buildVersion ?? "n/a")))
+      .then((d) => setServerVersion(String(d.build ?? d.buildVersion ?? "n/a")))
       .catch(() => setServerVersion("fetch-failed"));
   }, []);
 
