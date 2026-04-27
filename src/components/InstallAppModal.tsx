@@ -67,6 +67,28 @@ export function InstallAppModal({ open, onClose }: InstallAppModalProps) {
     }
   };
 
+  const openInChrome = () => {
+    const ua = navigator.userAgent;
+    // Android: Chrome intent URL → Chrome 앱으로 강제 실행
+    if (/Android/i.test(ua)) {
+      window.location.href =
+        "intent://jibda.co.kr/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fjibda.co.kr;end";
+      return;
+    }
+    // iOS: googlechromes:// 스킴 (Chrome 미설치 시 App Store로 안내)
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      const fallback = setTimeout(() => {
+        window.location.href = "https://apps.apple.com/app/google-chrome/id535886823";
+      }, 1500);
+      window.location.href = "googlechromes://jibda.co.kr";
+      window.addEventListener("pagehide", () => clearTimeout(fallback), { once: true });
+      return;
+    }
+    // 데스크톱: Chrome 강제 실행 불가 → 주소 복사 + Chrome 다운로드 안내
+    copyUrl();
+    window.open("https://www.google.com/chrome/", "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div
       className="fixed inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
@@ -210,6 +232,23 @@ export function InstallAppModal({ open, onClose }: InstallAppModalProps) {
               </Button>
             </div>
           )}
+        </div>
+
+        {/* Chrome 바로가기 */}
+        <div className="px-5 py-3 border-t border-border bg-primary/5 space-y-2">
+          <Button
+            onClick={openInChrome}
+            className="w-full h-11 text-sm font-bold gap-2"
+            style={{ background: "#1a73e8", color: "white" }}
+          >
+            <Chrome className="w-4 h-4" />
+            Chrome으로 설치 / 사이트 열기
+          </Button>
+          <p className="text-[11px] text-center text-muted-foreground leading-relaxed">
+            현재 브라우저가 Chrome이 아닐 경우 Chrome 앱에서 자동으로 사이트가 열립니다.
+            <br />
+            Chrome이 설치되어 있지 않으면 설치 페이지로 이동합니다.
+          </p>
         </div>
 
         <div className="px-5 py-3 border-t border-border bg-muted/30">
