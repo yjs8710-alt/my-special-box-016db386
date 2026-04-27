@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
+import { MobileDebugBanner } from "./components/MobileDebugBanner";
 
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <PwaUpdatePrompt />
+      <MobileDebugBanner />
       <BrowserRouter>
         <Routes>
           {/* 공개 페이지 */}
