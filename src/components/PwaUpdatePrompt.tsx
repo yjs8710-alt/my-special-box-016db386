@@ -49,16 +49,68 @@ export function PwaUpdatePrompt() {
       return;
     }
 
-    // In-app browser cache busting (Naver / Kakao) — one-time URL bump
+    // In-app browser cache busting (Naver / Kakao / Line / Instagram / Facebook)
+    // 인앱 브라우저는 HTML/JS 캐시가 매우 공격적이라 단순 URL bump만으로는
+    // 새 빌드가 반영되지 않음 → 빌드ID가 바뀌면 모든 캐시 + SW 제거 후 hard reload.
     const ua = navigator.userAgent || "";
-    const isInApp = /NAVER|Whale|KAKAOTALK|kakaotalk/i.test(ua);
+    const isInApp = /NAVER|Whale|KAKAOTALK|kakaotalk|Line|Instagram|FBAN|FBAV/i.test(ua);
     if (isInApp) {
       const url = new URL(window.location.href);
       const current = url.searchParams.get("_bv");
       if (current !== __APP_BUILD_ID__) {
         url.searchParams.set("_bv", __APP_BUILD_ID__);
-        window.history.replaceState({}, "", url.toString());
+
+        // 캐시 + SW 정리 후 새 빌드로 강제 이동
+        const purge = async () => {
+          try {
+            if (typeof caches !== "undefined") {
+              const keys = await caches.keys();
+              await Promise.all(keys.map((k) => caches.delete(k)));
+            }
+            if ("serviceWorker" in navigator) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map((r) => r.unregister()));
+            }
+          } catch {
+            // ignore
+          } finally {
+            // hard reload — 인앱 브라우저 HTML 캐시까지 우회
+            window.location.replace(url.toString());
+          }
+        };
+        purge();
+        return; // 리로드 예정이므로 SW 등록 보류
       }
+
+      // 빌드ID 일치 시: 진입 때마다 백그라운드에서 새 HTML이 있는지 확인
+      // (HEAD 요청 → ETag/Last-Modified 변동 시 reload)
+      fetch("/index.html", { cache: "no-store" })
+        .then((res) => res.text())
+        .then((html) => {
+          const match = html.match(/__APP_BUILD_ID__\s*[:=]\s*"(\d+)"/);
+          // 인앱에서는 위 패턴이 안 잡히므로 단순히 main.tsx 해시 변동을 본다
+          const scriptMatch = html.match(/\/assets\/index-([a-zA-Z0-9_-]+)\.js/);
+          const currentScript = document
+            .querySelector('script[src*="/assets/index-"]')
+            ?.getAttribute("src");
+          if (
+            scriptMatch &&
+            currentScript &&
+            !currentScript.includes(scriptMatch[1])
+          ) {
+            // 새 번들 감지 → 캐시 비우고 reload
+            if (typeof caches !== "undefined") {
+              caches.keys().then((keys) =>
+                Promise.all(keys.map((k) => caches.delete(k))).then(() => {
+                  window.location.reload();
+                })
+              );
+            } else {
+              window.location.reload();
+            }
+          }
+        })
+        .catch(() => {});
     }
 
     setEnabled(true);
