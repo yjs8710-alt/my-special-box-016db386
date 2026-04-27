@@ -28,6 +28,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     onMenuOpenChange?.(v);
   };
   const [showRegister, setShowRegister] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
