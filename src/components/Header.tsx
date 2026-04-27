@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User } from "lucide-react";
+import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminEditBar from "@/components/AdminEditBar";
+import InstallAppModal from "@/components/InstallAppModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
@@ -27,6 +28,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     onMenuOpenChange?.(v);
   };
   const [showRegister, setShowRegister] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
@@ -51,6 +53,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
       {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
+      <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
 
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
@@ -107,6 +110,20 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 우측 액션 */}
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
+              <button
+                onClick={() => setShowInstall(true)}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.85)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                }}
+                title="앱 설치 안내"
+              >
+                <Download className="w-3.5 h-3.5" />
+                앱 설치
+              </button>
+
               <button
                 className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}
@@ -211,6 +228,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
           >
             커뮤니티
+          </button>
+          <button
+            onClick={() => { setShowInstall(true); setMenuOpen(false); }}
+            className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
+          >
+            <Download className="w-4 h-4" />
+            앱 설치하기
           </button>
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
             {location.pathname !== "/" && (
