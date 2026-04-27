@@ -83,6 +83,7 @@ export function PwaUpdatePrompt() {
 
         if (response.ok) {
           const data = await response.json();
+          if (typeof data?.build === "string") return data.build;
           if (typeof data?.buildVersion === "string") return data.buildVersion;
         }
       } catch {
