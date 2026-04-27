@@ -4,6 +4,51 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <script>
+      (function () {
+        var build = "MOBILE_INAPP_FIX_20260427_02";
+        var ua = navigator.userAgent || "";
+        var isInApp = /KakaoTalk|KAKAOTALK|NAVER|NAVER\(inapp|Whale|inapp/i.test(ua);
+        var storageKey = "jibda_html_entry_build";
+        var reloadKey = "jibda_html_mobile_fresh_" + build;
+        var stale = false;
+
+        try { stale = localStorage.getItem(storageKey) !== build; } catch (e) { stale = true; }
+
+        if (!isInApp) {
+          try { localStorage.setItem(storageKey, build); } catch (e) {}
+          return;
+        }
+
+        try {
+          if (navigator.serviceWorker) {
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              regs.forEach(function (reg) { reg.unregister(); });
+            });
+          }
+        } catch (e) {}
+
+        try {
+          if (window.caches) {
+            caches.keys().then(function (keys) {
+              keys.forEach(function (key) { caches.delete(key); });
+            });
+          }
+        } catch (e) {}
+
+        if (stale) {
+          try { localStorage.setItem(storageKey, build); } catch (e) {}
+          try {
+            if (sessionStorage.getItem(reloadKey) === "1") return;
+            sessionStorage.setItem(reloadKey, "1");
+          } catch (e) {}
+
+          var url = new URL(window.location.href);
+          url.searchParams.set("mobileFresh", String(Date.now()));
+          window.location.replace(url.toString());
+        }
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.webmanifest" />
