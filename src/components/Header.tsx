@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User } from "lucide-react";
+import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminEditBar from "@/components/AdminEditBar";
+import InstallAppModal from "@/components/InstallAppModal";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
