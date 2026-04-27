@@ -29,6 +29,13 @@ export default defineConfig(({ mode }) => ({
           `<meta name="app-build-id" content="${BUILD_ID}" /></head>`
         );
       },
+      generateBundle() {
+        this.emitFile({
+          type: "asset",
+          fileName: "version.json",
+          source: JSON.stringify({ buildId: BUILD_ID }, null, 2),
+        });
+      },
     },
   ].filter(Boolean) as Plugin[],
   build: {
