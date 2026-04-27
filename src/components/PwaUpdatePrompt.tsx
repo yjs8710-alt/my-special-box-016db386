@@ -1,10 +1,22 @@
 import { useEffect } from "react";
 
 const FRESH_CHECK_INTERVAL = 60_000;
+const BUILD_VERSION_STORAGE_KEY = "jibda_buildVersion";
+const OLD_VERSION_STORAGE_KEYS = [
+  "jibda_build_id",
+  "jibda_build_version",
+  "jibda_cache_version",
+  "jibda_version",
+];
 
 export function PwaUpdatePrompt() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isKakaoInAppBrowser = userAgent.includes("kakaotalk");
+    const isNaverInAppBrowser = userAgent.includes("naver") || userAgent.includes("naver(inapp");
+    const isAggressiveInAppBrowser = isKakaoInAppBrowser || isNaverInAppBrowser;
 
     const host = window.location.hostname;
     const isPreviewHost =
@@ -41,27 +53,37 @@ export function PwaUpdatePrompt() {
       return hadLegacyCache;
     };
 
-    const moveToFreshUrl = (buildId: string) => {
-      if (isPreviewHost || inIframe) return;
+    const removeOldCacheVersionStorage = () => {
+      OLD_VERSION_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
 
-      const url = new URL(window.location.href);
-      url.searchParams.set("_v", buildId);
-      url.searchParams.set("_r", `${Date.now()}`);
-      window.location.replace(url.toString());
+      for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("jibda_cache_")) {
+          localStorage.removeItem(key);
+        }
+      }
     };
 
-    const getLatestBuildId = async () => {
+    const moveToFreshUrl = () => {
+      if (isPreviewHost || inIframe) return;
+      window.location.replace(`${window.location.pathname}?v=${Date.now()}`);
+    };
+
+    const getServerBuildVersion = async () => {
       try {
         const versionUrl = new URL("/version.json", window.location.origin);
-        versionUrl.searchParams.set("_", `${Date.now()}`);
+        versionUrl.searchParams.set("v", `${Date.now()}`);
         const response = await fetch(versionUrl.toString(), {
           cache: "no-store",
-          headers: { "Cache-Control": "no-cache" },
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
         });
 
         if (response.ok) {
           const data = await response.json();
-          if (typeof data?.buildId === "string") return data.buildId;
+          if (typeof data?.buildVersion === "string") return data.buildVersion;
         }
       } catch {
         // index.html 확인으로 대체
@@ -72,10 +94,13 @@ export function PwaUpdatePrompt() {
         htmlUrl.searchParams.set("_fresh", `${Date.now()}`);
         const response = await fetch(htmlUrl.toString(), {
           cache: "no-store",
-          headers: { "Cache-Control": "no-cache" },
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
         });
         const html = await response.text();
-        return html.match(/<meta name="app-build-id" content="([^"]+)"/i)?.[1] ?? null;
+        return html.match(/<meta name="app-build-version" content="([^"]+)"/i)?.[1] ?? null;
       } catch {
         return null;
       }
@@ -84,23 +109,30 @@ export function PwaUpdatePrompt() {
     const refreshOnceForBuild = async () => {
       if (isPreviewHost || inIframe) return;
 
-      const hadLegacyCache = await clearOldAppCache();
-      const legacyReloadKey = `jibda_legacy_cache_cleared_${__APP_BUILD_ID__}`;
+      if (isAggressiveInAppBrowser) {
+        await clearOldAppCache();
+      }
 
-      if (hadLegacyCache && !sessionStorage.getItem(legacyReloadKey)) {
-        sessionStorage.setItem(legacyReloadKey, "1");
-        moveToFreshUrl(__APP_BUILD_ID__);
+      const serverBuildVersion = await getServerBuildVersion();
+      if (!serverBuildVersion) return;
+
+      const storedBuildVersion = localStorage.getItem(BUILD_VERSION_STORAGE_KEY);
+      const isRunningOldBundle = serverBuildVersion !== __APP_BUILD_VERSION__;
+      const needsRefresh = storedBuildVersion !== serverBuildVersion || isRunningOldBundle;
+      const reloadKey = `jibda_version_refresh_once_${serverBuildVersion}`;
+
+      if (needsRefresh && !sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, "1");
+        removeOldCacheVersionStorage();
+        await clearOldAppCache();
+        localStorage.setItem(BUILD_VERSION_STORAGE_KEY, serverBuildVersion);
+        moveToFreshUrl();
         return;
       }
 
-      const latestBuildId = await getLatestBuildId();
-      const reloadKey = `jibda_reloaded_${latestBuildId ?? __APP_BUILD_ID__}`;
-      localStorage.setItem("jibda_build_id", __APP_BUILD_ID__);
-
-      if (latestBuildId && latestBuildId !== __APP_BUILD_ID__ && !sessionStorage.getItem(reloadKey)) {
-        sessionStorage.setItem(reloadKey, "1");
-        await clearOldAppCache();
-        moveToFreshUrl(latestBuildId);
+      if (!storedBuildVersion || storedBuildVersion !== serverBuildVersion) {
+        removeOldCacheVersionStorage();
+        localStorage.setItem(BUILD_VERSION_STORAGE_KEY, serverBuildVersion);
       }
     };
 
