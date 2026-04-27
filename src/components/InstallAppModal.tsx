@@ -234,6 +234,23 @@ export function InstallAppModal({ open, onClose }: InstallAppModalProps) {
           )}
         </div>
 
+        {/* Chrome 바로가기 */}
+        <div className="px-5 py-3 border-t border-border bg-primary/5 space-y-2">
+          <Button
+            onClick={openInChrome}
+            className="w-full h-11 text-sm font-bold gap-2"
+            style={{ background: "#1a73e8", color: "white" }}
+          >
+            <Chrome className="w-4 h-4" />
+            Chrome으로 설치 / 사이트 열기
+          </Button>
+          <p className="text-[11px] text-center text-muted-foreground leading-relaxed">
+            현재 브라우저가 Chrome이 아닐 경우 Chrome 앱에서 자동으로 사이트가 열립니다.
+            <br />
+            Chrome이 설치되어 있지 않으면 설치 페이지로 이동합니다.
+          </p>
+        </div>
+
         <div className="px-5 py-3 border-t border-border bg-muted/30">
           <button
             onClick={onClose}
