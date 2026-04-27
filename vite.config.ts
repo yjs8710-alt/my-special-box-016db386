@@ -23,13 +23,6 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     {
       name: "jibda-build-id",
-      generateBundle() {
-        this.emitFile({
-          type: "asset",
-          fileName: "version.json",
-          source: JSON.stringify({ buildId: BUILD_ID }),
-        });
-      },
       transformIndexHtml(html: string) {
         return html.replace(
           "</head>",
