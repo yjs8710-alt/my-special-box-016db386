@@ -53,6 +53,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
       {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
+      <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
 
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
