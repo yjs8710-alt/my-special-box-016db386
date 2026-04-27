@@ -12,20 +12,20 @@ const Home = () => {
     <div className="min-h-screen flex flex-col relative">
       <Header />
 
-      {/* 우측 상단 플로팅 "앱 설치" 버튼 (메인 화면 전용) */}
+      {/* 우측 상단 플로팅 "모바일 앱 설치" 버튼 (메인 화면 전용) */}
       <button
         onClick={() => setShowInstall(true)}
         className="fixed top-16 right-4 sm:top-20 sm:right-6 z-[900] flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg transition-all hover:scale-105 hover:shadow-xl animate-fade-in"
         style={{
-          background: "hsl(var(--accent))",
+          background: "hsl(var(--header-bg))",
           color: "white",
-          border: "2px solid rgba(255,255,255,0.2)",
+          border: "1px solid hsl(var(--header-border))",
         }}
-        aria-label="앱 설치 안내 열기"
+        aria-label="모바일 앱 설치 안내 열기"
       >
         <Download className="w-4 h-4" />
-        <span className="text-sm font-bold whitespace-nowrap">앱 설치</span>
-        <span className="hidden sm:inline text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/20 ml-1">
+        <span className="text-sm font-bold whitespace-nowrap">모바일 앱 설치</span>
+        <span className="hidden sm:inline text-[10px] font-semibold px-1.5 py-0.5 rounded ml-1" style={{ background: "hsl(var(--accent))", color: "white" }}>
           Chrome 권장
         </span>
       </button>
