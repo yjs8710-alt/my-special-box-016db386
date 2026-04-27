@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
+import { addMobileFreshParams } from "@/lib/freshUrl";
 
 const STORAGE_KEY = "kakao_chrome_banner_dismissed";
 
@@ -17,7 +18,7 @@ export const KakaoOpenInChromeBanner = () => {
   if (!visible) return null;
 
   const openInChrome = () => {
-    const url = window.location.href;
+    const url = addMobileFreshParams(window.location.href);
     // KakaoTalk 인앱브라우저 외부 브라우저 열기 스킴
     window.location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url);
   };
