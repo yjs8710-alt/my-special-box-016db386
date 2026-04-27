@@ -47,9 +47,6 @@ const Footer = () => {
           <p className="text-xs text-white/30">© 2024 집다. All rights reserved.</p>
           <p className="text-xs text-white/30">사업자등록번호: 123-45-67890 | 대표: 홍길동</p>
         </div>
-        <div className="mt-4 text-center">
-          <p className="text-xs text-white/40 font-mono">LOGO_BUILD_20260427_V3</p>
-        </div>
       </div>
     </footer>
   );
