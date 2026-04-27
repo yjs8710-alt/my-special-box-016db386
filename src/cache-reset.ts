@@ -1,4 +1,5 @@
-const MOBILE_INAPP_RELOAD_KEY = "jibda_mobile_inapp_fresh_20260427_02";
+const MOBILE_INAPP_RELOAD_KEY = "jibda_mobile_inapp_fresh_20260427_03";
+const MOBILE_INAPP_BUILD = "MOBILE_INAPP_FIX_20260427_03";
 
 const isMobileInAppBrowser = () => {
   if (typeof navigator === "undefined") return false;
@@ -30,6 +31,7 @@ const clearServiceWorkersAndCaches = async () => {
 const reloadWithFreshMobileParam = () => {
   const url = new URL(window.location.href);
   url.searchParams.set("mobileFresh", `${Date.now()}`);
+  url.searchParams.set("kakaoFresh", MOBILE_INAPP_BUILD);
   window.location.replace(url.toString());
 };
 
@@ -53,6 +55,7 @@ if (typeof window !== "undefined" && isMobileInAppBrowser()) {
   void (async () => {
     try {
       localStorage.removeItem("jibda_mobile_inapp_fresh_20260427_01");
+      localStorage.removeItem("jibda_mobile_inapp_fresh_20260427_02");
       localStorage.removeItem("jibda_buildVersion");
       localStorage.removeItem("jibda_build_id");
       localStorage.removeItem("jibda_build_version");
