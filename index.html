@@ -6,7 +6,7 @@
     <meta http-equiv="Expires" content="0" />
     <script>
       (function () {
-        var build = "MOBILE_INAPP_FIX_20260427_02";
+        var build = "MOBILE_INAPP_FIX_20260427_03";
         var ua = navigator.userAgent || "";
         var isInApp = /KakaoTalk|KAKAOTALK|NAVER|NAVER\(inapp|Whale|inapp/i.test(ua);
         var storageKey = "jibda_html_entry_build";
@@ -45,6 +45,7 @@
 
           var url = new URL(window.location.href);
           url.searchParams.set("mobileFresh", String(Date.now()));
+          url.searchParams.set("kakaoFresh", build);
           window.location.replace(url.toString());
         }
       })();
