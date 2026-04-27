@@ -1,4 +1,4 @@
-const MOBILE_INAPP_RELOAD_KEY = "jibda_mobile_inapp_fresh_20260427_01";
+const MOBILE_INAPP_RELOAD_KEY = "jibda_mobile_inapp_fresh_20260427_02";
 
 const isMobileInAppBrowser = () => {
   if (typeof navigator === "undefined") return false;
@@ -51,6 +51,17 @@ const markReloadedInThisSession = () => {
 
 if (typeof window !== "undefined" && isMobileInAppBrowser()) {
   void (async () => {
+    try {
+      localStorage.removeItem("jibda_mobile_inapp_fresh_20260427_01");
+      localStorage.removeItem("jibda_buildVersion");
+      localStorage.removeItem("jibda_build_id");
+      localStorage.removeItem("jibda_build_version");
+      localStorage.removeItem("jibda_cache_version");
+      localStorage.removeItem("jibda_version");
+    } catch {
+      // localStorage 접근 실패는 무시합니다.
+    }
+
     await clearServiceWorkersAndCaches();
 
     if (!hasReloadedInThisSession()) {
