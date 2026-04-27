@@ -505,10 +505,6 @@ export default function PublicProperty() {
         <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 flex justify-center z-40">
           <a
             href="https://jibda.co.kr"
-            onClick={(event) => {
-              event.preventDefault();
-              window.location.href = `${window.location.origin}/?kakaoFresh=${__APP_BUILD_VERSION__}&mobileFresh=${Date.now()}`;
-            }}
             className="w-full max-w-lg h-12 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center hover:opacity-90 transition-opacity"
           >
             집다에서 더 많은 매물 보기
