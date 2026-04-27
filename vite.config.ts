@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
 
 // Build version used to detect fresh deployments. Changes on every build.
-const BUILD_VERSION = "MOBILE_INAPP_FIX_20260427_02";
+const BUILD_VERSION = "MOBILE_INAPP_FIX_20260427_03";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
+import { addMobileFreshParams } from "@/lib/freshUrl";
 
 const STORAGE_KEY = "kakao_chrome_banner_dismissed";
 
@@ -17,7 +18,7 @@ export const KakaoOpenInChromeBanner = () => {
   if (!visible) return null;
 
   const openInChrome = () => {
-    const url = window.location.href;
+    const url = addMobileFreshParams(window.location.href);
     // KakaoTalk 인앱브라우저 외부 브라우저 열기 스킴
     window.location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(url);
   };
@@ -29,7 +30,7 @@ export const KakaoOpenInChromeBanner = () => {
 
   return (
     <div
-      className="fixed left-0 right-0 z-[99999] bg-amber-500 text-black shadow-lg"
+      className="fixed left-0 right-0 z-[99999] bg-primary text-primary-foreground shadow-lg"
       style={{ top: 0 }}
       role="alert"
     >
@@ -42,7 +43,7 @@ export const KakaoOpenInChromeBanner = () => {
         </div>
         <button
           onClick={openInChrome}
-          className="flex items-center gap-1 bg-black text-white px-3 py-2 rounded-md text-xs font-bold whitespace-nowrap"
+          className="flex items-center gap-1 bg-primary-foreground text-primary px-3 py-2 rounded-md text-xs font-bold whitespace-nowrap"
         >
           <ExternalLink className="w-3.5 h-3.5" />
           외부 열기
@@ -50,7 +51,7 @@ export const KakaoOpenInChromeBanner = () => {
         <button
           onClick={dismiss}
           aria-label="닫기"
-          className="p-1 rounded hover:bg-black/10"
+          className="p-1 rounded hover:bg-primary-foreground/10"
         >
           <X className="w-4 h-4" />
         </button>
