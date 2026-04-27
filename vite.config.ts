@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
           `<meta name="app-build-id" content="${BUILD_ID}" /></head>`
         );
       },
-      generateBundle() {
+      generateBundle(this: { emitFile: (file: { type: "asset"; fileName: string; source: string }) => void }) {
         this.emitFile({
           type: "asset",
           fileName: "version.json",
