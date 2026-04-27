@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
 
 type ApprovalStatus = "approved" | "pending" | "rejected" | null;
 
@@ -195,18 +196,12 @@ const LoginPage = () => {
         className="sticky top-0 z-50 border-b"
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        <div className="max-w-screen-xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-screen-xl mx-auto px-4 h-12 flex items-center justify-between">
           <div
-            className="flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0"
             onClick={() => navigate("/")}
           >
-            <div
-              className="w-7 h-7 rounded flex items-center justify-center"
-              style={{ background: "hsl(var(--accent))" }}
-            >
-              <Home className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-extrabold text-white tracking-tight">집다</span>
+            <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
           </div>
           <span className="text-sm text-white/60">중개사 전용 플랫폼</span>
         </div>
