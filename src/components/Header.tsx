@@ -63,7 +63,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               onClick={() => navigate("/")}
             >
               <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
-              <span className="text-[10px] font-mono text-muted-foreground/70 hidden md:inline">HEADER_LOGO_UPDATED_20260427</span>
               <span
                 className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
                 style={{
