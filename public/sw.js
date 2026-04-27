@@ -10,6 +10,12 @@ self.addEventListener("activate", (event) => {
         // ignore
       }
 
+      try {
+        await self.registration.unregister();
+      } catch {
+        // ignore
+      }
+
       const clientsList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       await Promise.all(
         clientsList.map((client) => {
