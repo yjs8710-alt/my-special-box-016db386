@@ -73,6 +73,7 @@ export default defineConfig(({ mode }) => ({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/admin\//],
         globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,webp,ico,woff2}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         // Always go to network for index.html so deploys are picked up immediately
         runtimeCaching: [
           {
