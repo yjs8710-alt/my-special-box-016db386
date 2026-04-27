@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     {
       name: "jibda-build-id",
-      transformIndexHtml(html) {
+      transformIndexHtml(html: string) {
         return html.replace(
           "</head>",
           `<meta name="app-build-id" content="${BUILD_ID}" /></head>`
