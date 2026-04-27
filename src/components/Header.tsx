@@ -111,20 +111,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 */}
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
-                onClick={() => setShowInstall(true)}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.85)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
-                title="앱 설치 안내"
-              >
-                <Download className="w-3.5 h-3.5" />
-                앱 설치
-              </button>
-
-              <button
                 className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}
               >
