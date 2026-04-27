@@ -1,13 +1,11 @@
 import { MapProperty } from "@/data/mapProperties";
+import { buildFreshSiteUrl, SITE_ORIGIN } from "@/lib/freshUrl";
 
 declare global {
   interface Window {
     Kakao: any;
   }
 }
-
-/** 퍼블리시 도메인 (카카오 공유 링크용) */
-const SITE_ORIGIN = "https://jibda.co.kr";
 
 export interface AgencyInfo {
   userId?: string;
@@ -93,7 +91,7 @@ export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyI
 
 function buildPropertyShareUrl(property: MapProperty, sharerUserId?: string): string {
   const propertyId = property.dbId || property.id;
-  const shareUrl = new URL(`/property/${propertyId}`, SITE_ORIGIN);
+  const shareUrl = new URL(buildFreshSiteUrl(`/property/${propertyId}`));
 
   if (sharerUserId) {
     shareUrl.searchParams.set("sharedBy", sharerUserId);
@@ -140,8 +138,8 @@ export function shareMultipleToKakao(properties: MapProperty[]) {
     objectType: "text",
     text: `[집다] 매물 ${properties.length}건\n\n${text}${properties.length > 5 ? `\n... 외 ${properties.length - 5}건` : ""}`,
     link: {
-      mobileWebUrl: SITE_ORIGIN,
-      webUrl: SITE_ORIGIN,
+      mobileWebUrl: buildFreshSiteUrl(),
+      webUrl: buildFreshSiteUrl(),
     },
   });
 }
