@@ -36,7 +36,7 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col relative">
       <div className="fixed top-0 left-0 right-0 z-[100000] bg-primary px-3 py-3 text-center text-xl font-extrabold text-primary-foreground shadow-lg sm:text-2xl">
-        MOBILE_INAPP_FIX_20260427_01
+        MOBILE_INAPP_FIX_20260427_02
       </div>
       <Header />
 
