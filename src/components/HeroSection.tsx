@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBg from "@/assets/main-bg-20260427-v2-20260427.jpg";
-import heroLogo from "@/assets/logo-zibda-active-20260427-v3.png";
+import heroLogo from "@/assets/logo-zibda-active-20260427-v4.png";
 import iconResidential from "@/assets/icon-residential-v2-20260427.png";
 import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
 import iconCollective from "@/assets/icon-collective-v2-20260427.png";
@@ -48,6 +48,7 @@ const HeroSection = () => {
           alt="집다 로고"
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
+        <span className="text-[11px] font-mono text-white/80 bg-black/30 px-2 py-0.5 rounded">HERO_LOGO_UPDATED_20260427</span>
 
         {/* 카테고리 그리드 — 모바일 전용 (데스크톱은 기존 빈 상태 유지) */}
         <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
