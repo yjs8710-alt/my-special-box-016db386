@@ -67,6 +67,28 @@ export function InstallAppModal({ open, onClose }: InstallAppModalProps) {
     }
   };
 
+  const openInChrome = () => {
+    const ua = navigator.userAgent;
+    // Android: Chrome intent URL → Chrome 앱으로 강제 실행
+    if (/Android/i.test(ua)) {
+      window.location.href =
+        "intent://jibda.co.kr/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fjibda.co.kr;end";
+      return;
+    }
+    // iOS: googlechromes:// 스킴 (Chrome 미설치 시 App Store로 안내)
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      const fallback = setTimeout(() => {
+        window.location.href = "https://apps.apple.com/app/google-chrome/id535886823";
+      }, 1500);
+      window.location.href = "googlechromes://jibda.co.kr";
+      window.addEventListener("pagehide", () => clearTimeout(fallback), { once: true });
+      return;
+    }
+    // 데스크톱: Chrome 강제 실행 불가 → 주소 복사 + Chrome 다운로드 안내
+    copyUrl();
+    window.open("https://www.google.com/chrome/", "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div
       className="fixed inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4"
