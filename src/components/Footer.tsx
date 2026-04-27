@@ -1,5 +1,5 @@
 import { Phone, Mail } from "lucide-react";
-import logoImg from "@/assets/footer-logo-zibda-20260427-v2-20260427.png";
+import logoImg from "@/assets/logo-zibda-main-20260427-v2.png";
 
 const Footer = () => {
   return (
