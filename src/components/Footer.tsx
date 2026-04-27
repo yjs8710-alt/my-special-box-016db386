@@ -1,5 +1,5 @@
 import { Phone, Mail } from "lucide-react";
-import logoImg from "@/assets/footer-logo-zibda-20260427-v2-20260427.png";
+import logoImg from "@/assets/logo-zibda-main-20260427-v2.png";
 
 const Footer = () => {
   return (
@@ -48,7 +48,7 @@ const Footer = () => {
           <p className="text-xs text-white/30">사업자등록번호: 123-45-67890 | 대표: 홍길동</p>
         </div>
         <div className="mt-4 text-center">
-          <p className="text-xs text-white/40 font-mono">WEB_BUILD_CHECK_20260427_01</p>
+          <p className="text-xs text-white/40 font-mono">LOGO_BUILD_20260427_V2</p>
         </div>
       </div>
     </footer>
