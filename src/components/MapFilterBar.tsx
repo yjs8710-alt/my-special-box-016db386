@@ -84,7 +84,6 @@ const ROOM_OPTIONS = [
   { key: "테라스", label: "테라스" },
   { key: "옥탑", label: "옥탑" },
   { key: "복층", label: "복층" },
-  { key: "지하", label: "지하" },
   { key: "주차", label: "주차" },
   { key: "LH가능", label: "LH가능" },
   { key: "신발장", label: "신발장" },
@@ -899,7 +898,8 @@ const MapFilterBar = ({
                 ticks={["0", "250만", "500만", "750만", "무제한"]}
               />
 
-              {/* 매매가 */}
+              {/* 매매가 - 주거형 임대에서는 제외 */}
+              {!showResidentialTypes && (
               <RangeInput
                 label="매매가"
                 min={0} max={200000} step={1000}
@@ -910,7 +910,7 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "5억", "10억", "15억", "무제한"]}
               />
-
+              )}
               {/* 층수 */}
               {showFloor && (
               <RangeInput
