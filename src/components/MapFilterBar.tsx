@@ -898,7 +898,8 @@ const MapFilterBar = ({
                 ticks={["0", "250만", "500만", "750만", "무제한"]}
               />
 
-              {/* 매매가 */}
+              {/* 매매가 - 주거형 임대에서는 제외 */}
+              {!showResidentialTypes && (
               <RangeInput
                 label="매매가"
                 min={0} max={200000} step={1000}
@@ -909,7 +910,7 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "5억", "10억", "15억", "무제한"]}
               />
-
+              )}
               {/* 층수 */}
               {showFloor && (
               <RangeInput
