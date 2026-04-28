@@ -50,7 +50,7 @@ const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", 
 const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "고시원"];
 const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세", "단기임대"];
 const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
-const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이내", "20년 이상"];
+const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내"];
 
 const LAND_CATEGORIES = [
   "전", "답", "과수원", "목장용지", "임야", "대", "공장용지", "주차장",
