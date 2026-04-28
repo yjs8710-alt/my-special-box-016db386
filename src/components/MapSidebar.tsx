@@ -2164,8 +2164,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
@@ -2721,7 +2721,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     // 모바일: 컴팩트 3행 레이아웃 (사용자 요청 사양)
     if (isMobile) {
       const buildYr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
-      const hasPhotos = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+      const hasOwnPhotos = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+      const hasPhotos = hasOwnPhotos || !!hasReferencePhotos;
       const note = prop.note ?? "";
       const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
       const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
@@ -2850,7 +2851,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
-              title={hasPhotos ? "사진 보기" : "사진 없음"}
+              title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
               className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
               style={{
                 background: "transparent",
@@ -4988,6 +4989,11 @@ const MapSidebar = ({
                               if (hasOwn) return undefined;
                               const ref = findRefImage(prop, displayProperties);
                               return ref?.image;
+                            })()}
+                            hasReferencePhotos={(() => {
+                              const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              if (hasOwn) return false;
+                              return !!findRefImage(prop, displayProperties);
                             })()}
                           />
                         </div>
