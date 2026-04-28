@@ -2851,7 +2851,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
-              title={hasPhotos ? "사진 보기" : "사진 없음"}
+              title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
               className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
               style={{
                 background: "transparent",
