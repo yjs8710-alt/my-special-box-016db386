@@ -3789,6 +3789,10 @@ const MapSidebar = ({
       alert("인쇄할 매물을 선택해주세요.");
       return;
     }
+    if (list.length > 10) {
+      alert("선택인쇄는 최대 10개까지 가능합니다.");
+      return;
+    }
     const today = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
     // 관리자 여부에 따라 연락처 열 포함 여부 결정
