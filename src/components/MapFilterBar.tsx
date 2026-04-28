@@ -84,7 +84,6 @@ const ROOM_OPTIONS = [
   { key: "테라스", label: "테라스" },
   { key: "옥탑", label: "옥탑" },
   { key: "복층", label: "복층" },
-  { key: "지하", label: "지하" },
   { key: "주차", label: "주차" },
   { key: "LH가능", label: "LH가능" },
   { key: "신발장", label: "신발장" },
