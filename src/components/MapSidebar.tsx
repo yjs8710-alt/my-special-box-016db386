@@ -4990,6 +4990,11 @@ const MapSidebar = ({
                               const ref = findRefImage(prop, displayProperties);
                               return ref?.image;
                             })()}
+                            hasReferencePhotos={(() => {
+                              const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+                              if (hasOwn) return false;
+                              return !!findRefImage(prop, displayProperties);
+                            })()}
                           />
                         </div>
                       </div>
