@@ -976,6 +976,24 @@ const MapFilterBar = ({
               </div>
               )}
 
+              {/* 방향 */}
+              {showBuildingOptions && (
+              <div>
+                <SectionLabel>방향</SectionLabel>
+                <div className="flex flex-wrap gap-1">
+                  {["동향", "서향", "남향", "북향"].map((key) => (
+                    <Chip
+                      key={key}
+                      active={filters.roomOptions.includes(key)}
+                      onClick={() => set("roomOptions", toggleArr(filters.roomOptions, key))}
+                    >
+                      {key}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+              )}
+
               {/* 방 옵션 */}
               {showBuildingOptions && (
               <div>
