@@ -380,19 +380,20 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   // ── 집합건물/아파트/오피스텔/빌라 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
   useEffect(() => {
     if (!form.dong || !form.unitNo || !isCollectiveBuilding) return;
+    if (!form.lotNumber) return; // 정확한 주소 일치를 위해 번지 필수
     const run = async () => {
-      // 1순위: cheongju_contacts에서 호수별 소유주 조회
-      let q = supabase
+      // 1순위: cheongju_contacts에서 동+번지+호수 정확 일치 조회
+      const { data: contactData } = await supabase
         .from("cheongju_contacts")
-        .select("contact_owner,contact_manager,contact_broker,phone")
+        .select("contact_owner,contact_manager,contact_broker")
         .eq("dong", form.dong)
-        .eq("unit_number", form.unitNo);
-      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
-      const { data: contactData } = await q.maybeSingle();
+        .eq("lot_number", form.lotNumber)
+        .eq("unit_number", form.unitNo)
+        .maybeSingle();
       if (contactData) {
         setForm((prev) => ({
           ...prev,
-          contactOwner: contactData.contact_owner || contactData.phone || prev.contactOwner,
+          contactOwner: contactData.contact_owner || prev.contactOwner,
           contactManager: prev.contactManager || contactData.contact_manager || "",
           contactBroker: prev.contactBroker || contactData.contact_broker || "",
         }));
