@@ -619,15 +619,15 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
 
   // 청주 연락처 자동 불러오기
-  // 청주 연락처 자동 불러오기 (단독건물: 동+번지 기준, 집합건물: 호수별)
+  // 정확한 주소(동+번지[+호]) 일치만 매칭하여 잘못된 번호 노출을 방지
   const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string, unitVal?: string, isCollective?: boolean) => {
-    if (!dongVal) return;
+    if (!dongVal || !lotVal) return; // 번지 없으면 매칭 안 함
+    if (isCollective && !unitVal) return; // 집합건물은 호수까지 있어야만 매칭
     let query = supabase
       .from("cheongju_contacts")
-      .select("contact_owner,contact_manager,contact_broker,phone")
-      .eq("dong", dongVal);
-    if (lotVal) query = query.eq("lot_number", lotVal);
-    // 집합건물이고 호수가 있으면 호수별 조회, 없으면 null 조회
+      .select("contact_owner,contact_manager,contact_broker")
+      .eq("dong", dongVal)
+      .eq("lot_number", lotVal);
     if (isCollective && unitVal) {
       query = query.eq("unit_number", unitVal);
     } else {
@@ -635,7 +635,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
     const { data } = await query.maybeSingle();
     if (data) {
-      const owner = data.contact_owner || data.phone || "";
+      const owner = data.contact_owner || "";
       const manager = data.contact_manager || "";
       const broker = data.contact_broker || "";
       if (owner || manager || broker) {
