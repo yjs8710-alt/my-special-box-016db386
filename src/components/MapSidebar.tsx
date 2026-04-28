@@ -2721,7 +2721,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     // 모바일: 컴팩트 3행 레이아웃 (사용자 요청 사양)
     if (isMobile) {
       const buildYr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
-      const hasPhotos = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+      const hasOwnPhotos = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
+      const hasPhotos = hasOwnPhotos || !!hasReferencePhotos;
       const note = prop.note ?? "";
       const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
       const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
