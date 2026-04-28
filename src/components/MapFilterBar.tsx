@@ -71,13 +71,16 @@ const ZONE_TYPES = [
 const BUILDING_OPTIONS = [
   { key: "엘리베이터", label: "엘리베이터" },
   { key: "리모델링", label: "리모델링" },
-  { key: "반려동물_가능", label: "반려동물 가능" },
-  { key: "반려동물_불가", label: "반려동물 불가" },
   { key: "수도", label: "수도" },
   { key: "주차", label: "주차 가능" },
   { key: "인터넷", label: "인터넷" },
   { key: "CCTV", label: "CCTV" },
   { key: "여성전용", label: "여성전용" },
+];
+
+const PET_OPTIONS = [
+  { key: "반려동물_가능", label: "반려동물 가능" },
+  { key: "반려동물_불가", label: "반려동물 불가" },
 ];
 
 const ROOM_OPTIONS = [
