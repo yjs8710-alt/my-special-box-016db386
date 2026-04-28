@@ -2164,8 +2164,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
     const [checking, setChecking] = useState(false);
     const isChecked = !!chkDate;
 
