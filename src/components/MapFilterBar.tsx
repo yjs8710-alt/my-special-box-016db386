@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
@@ -385,6 +385,13 @@ const MapFilterBar = ({
   radiusInfo,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
+
+  // 매물 등록 모달이 열리면 필터 패널을 자동으로 닫음
+  useEffect(() => {
+    const handleClose = () => setShowFilter(false);
+    window.addEventListener("close-map-filter", handleClose);
+    return () => window.removeEventListener("close-map-filter", handleClose);
+  }, []);
 
   // ── 소유주 번호 통합 검색 상태 ──
   const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
