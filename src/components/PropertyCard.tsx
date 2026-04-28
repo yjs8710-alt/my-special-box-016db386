@@ -19,6 +19,7 @@ interface PropertyCardProps {
   views: number;
   buildYear?: string;
   elevator?: boolean;
+  vacateDate?: string;
   onDelete?: () => void;
   referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
   referenceUnit?: string;  // 참고용 사진의 호수
@@ -26,8 +27,21 @@ interface PropertyCardProps {
 
 const PropertyCard = ({
   image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
-  isNew, isHot, views, buildYear, elevator, onDelete, referenceImage, referenceUnit
+  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit
 }: PropertyCardProps) => {
+  // 퇴거일이 오늘 이전이면 공실로 표기
+  const isVacant = (() => {
+    if (!vacateDate) return false;
+    const digits = vacateDate.replace(/[^0-9]/g, "");
+    if (digits.length < 8) return false;
+    const y = parseInt(digits.slice(0, 4), 10);
+    const m = parseInt(digits.slice(4, 6), 10);
+    const d = parseInt(digits.slice(6, 8), 10);
+    const vacate = new Date(y, m - 1, d);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return vacate.getTime() <= today.getTime();
+  })();
   const [liked, setLiked] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
