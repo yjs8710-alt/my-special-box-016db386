@@ -386,6 +386,13 @@ const MapFilterBar = ({
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
+  // 매물 등록 모달이 열리면 필터 패널을 자동으로 닫음
+  useEffect(() => {
+    const handleClose = () => setShowFilter(false);
+    window.addEventListener("close-map-filter", handleClose);
+    return () => window.removeEventListener("close-map-filter", handleClose);
+  }, []);
+
   // ── 소유주 번호 통합 검색 상태 ──
   const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
   const [landlordQuery, setLandlordQuery] = useState("");
