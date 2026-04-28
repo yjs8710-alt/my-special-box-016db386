@@ -101,7 +101,7 @@ const ROOM_OPTIONS = [
   { key: "책상", label: "책상" },
   { key: "옷장붙박이", label: "옷장(붙)" },
   { key: "전자키", label: "전자키" },
-  { key: "베란다없음", label: "베란다없음" },
+  { key: "베란다", label: "베란다" },
 ];
 
 export interface FilterState {
