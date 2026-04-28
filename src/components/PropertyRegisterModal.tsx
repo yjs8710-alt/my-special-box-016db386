@@ -332,16 +332,16 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   const isCollectiveBuilding = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
 
   // ── 주소(동+번지) 변경 시: ──
-  //   1) 단독건물에 한해 연락처 자동 로드(같은 동의 다른 번지 오기재 방지)
+  //   1) 단독건물에 한해 연락처 자동 로드 (정확한 동+번지 일치만)
   //   2) 건물 비밀번호는 건물유형과 무관하게 같은 건물(동+번지)에서 최신값 자동 로드
   useEffect(() => {
     if (!form.dong || !form.lotNumber) return;
     const run = async () => {
-      // (1) 연락처 — 단독건물에서만, 호수 없는 row와 정확히 매칭
+      // (1) 연락처 — 단독건물에서만, 동+번지 정확 일치 + 호수 없는 row
       if (!isCollectiveBuilding) {
         const { data } = await supabase
           .from("cheongju_contacts")
-          .select("contact_owner,contact_manager,contact_broker,phone")
+          .select("contact_owner,contact_manager,contact_broker")
           .eq("dong", form.dong)
           .eq("lot_number", form.lotNumber)
           .is("unit_number", null)
@@ -349,7 +349,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         if (data) {
           setForm((prev) => ({
             ...prev,
-            contactOwner: prev.contactOwner || data.contact_owner || data.phone || "",
+            contactOwner: prev.contactOwner || data.contact_owner || "",
             contactManager: prev.contactManager || data.contact_manager || "",
             contactBroker: prev.contactBroker || data.contact_broker || "",
           }));
