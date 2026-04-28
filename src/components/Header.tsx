@@ -34,6 +34,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const { isAuthorized, user, logout } = useAuth();
 
   const openRegister = () => {
+    window.dispatchEvent(new Event("close-map-filter"));
     setShowRegister(true);
     onRegisterChange?.(true);
   };
