@@ -76,12 +76,12 @@ Deno.serve(async (req) => {
       adminClient
         .from("properties")
         .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number")
-        .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,note.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
+        .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
         .limit(30),
       adminClient
         .from("cheongju_contacts")
-        .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible")
-        .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,contact_owner.ilike.%${keyword}%,contact_manager.ilike.%${keyword}%,contact_broker.ilike.%${keyword}%,phone.ilike.%${keyword}%`)
+        .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible, building_name")
+        .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,building_name.ilike.%${keyword}%`)
         .limit(30),
     ]);
 
