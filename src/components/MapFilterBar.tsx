@@ -47,7 +47,7 @@ const CATEGORY_TYPES = [
 ];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층", "주인세대"];
-const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원"];
+const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "연립", "고시원"];
 const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세", "단기임대"];
 const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내", "15년 이내", "20년 이상"];
@@ -73,7 +73,6 @@ const BUILDING_OPTIONS = [
   { key: "리모델링", label: "리모델링" },
   { key: "반려동물_가능", label: "반려동물 가능" },
   { key: "반려동물_불가", label: "반려동물 불가" },
-  { key: "유선TV", label: "유선/IPTV" },
   { key: "수도", label: "수도" },
   { key: "주차", label: "주차 가능" },
   { key: "인터넷", label: "인터넷" },
@@ -88,10 +87,7 @@ const ROOM_OPTIONS = [
   { key: "지하", label: "지하" },
   { key: "주차", label: "주차" },
   { key: "LH가능", label: "LH가능" },
-  { key: "동향", label: "동향" },
-  { key: "서향", label: "서향" },
-  { key: "남향", label: "남향" },
-  { key: "북향", label: "북향" },
+  { key: "신발장", label: "신발장" },
   { key: "냉장고", label: "냉장고" },
   { key: "세탁기", label: "세탁기" },
   { key: "드럼세탁기", label: "드럼세탁기" },
