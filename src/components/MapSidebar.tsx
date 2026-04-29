@@ -2799,17 +2799,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 거주중
               </span>
             )}
-            {(vacateLabel || earlyExit) && (
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setShowVacateInfo(true); }}
-                className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap"
-                style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}
-                title="퇴거 정보 보기"
-              >
-                {earlyExit && vacateLabel ? "퇴거정보 ▾" : earlyExit ? "중도퇴거 ▾" : "퇴거정보 ▾"}
-              </button>
-            )}
+            {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}
