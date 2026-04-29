@@ -2845,7 +2845,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {prop.type && <span>{prop.type}</span>}
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
-                {prop.unitNumber && <span>{prop.unitNumber}</span>}
+                {prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
               </span>
             )}
             {/* 가격 */}
