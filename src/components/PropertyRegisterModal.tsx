@@ -1572,13 +1572,14 @@ function Step3({
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
-              {!showOwner2 && (
-                <button type="button" onClick={() => setShowOwner2(true)}
-                  className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
-                  <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
-                  추가
-                </button>
-              )}
+              <button type="button" onClick={() => {
+                if (!form.contactOwner2) { setShowOwner2(true); }
+                else { set("extraOwners", [...form.extraOwners, ""]); }
+              }}
+                className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                소유주 추가
+              </button>
             </div>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1605,6 +1606,28 @@ function Step3({
               </div>
             </div>
           )}
+          {/* 추가 소유주들 (3, 4, 5...) */}
+          {form.extraOwners.map((owner, idx) => (
+            <div key={idx} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-foreground/70">소유주 연락처 {idx + 3}</label>
+                <button type="button"
+                  onClick={() => set("extraOwners", form.extraOwners.filter((_, i) => i !== idx))}
+                  className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder={`예) 010-0000-0000`}
+                  value={owner}
+                  onChange={(e) => {
+                    const next = [...form.extraOwners];
+                    next[idx] = formatPhone(e.target.value);
+                    set("extraOwners", next);
+                  }}
+                  className={ic(false) + " pl-9"} />
+              </div>
+            </div>
+          ))}
           {/* 나머지 연락처 */}
           {contacts.filter(c => c.key !== "contactOwner").map(({ key, label, placeholder, required }) => (
             <div key={key} className="flex flex-col gap-1">
