@@ -5109,7 +5109,7 @@ const MapSidebar = ({
                                 )}
                                 {earlyExitM && (
                                   <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                    중도퇴거 가능
+                                    중도퇴거
                                   </span>
                                 )}
                               </div>
