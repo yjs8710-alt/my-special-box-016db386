@@ -51,7 +51,7 @@ type BuildingSaleType = typeof BUILDING_SALE_TYPES[number];
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","신발장","전자키","복층","옥탑","테라스","주차","베란다",
+  "옷장","신발장","복층","옥탑","테라스","주차","베란다",
 ] as const;
 
 type PetType = "가능" | "불가" | "";
@@ -124,6 +124,7 @@ interface FormState {
   contactBroker: string;
   contactOwner: string;
   contactOwner2: string;
+  extraOwners: string[]; // 소유주 3,4,5... 추가 소유주들
   contactTenant: string;
   contactManager: string;
   roadAddress: string;
@@ -162,7 +163,7 @@ const INITIAL: FormState = {
   lhType: "관계없음", exitCleanFee: "", brokerFee: "",
   myMemo: "",
   description: "",
-  contactBroker: "", contactOwner: "", contactOwner2: "", contactTenant: "", contactManager: "",
+  contactBroker: "", contactOwner: "", contactOwner2: "", extraOwners: [], contactTenant: "", contactManager: "",
   roadAddress: "",
   tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
   earlyExit: false,
@@ -282,6 +283,14 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
     contactBroker: parseNote("부동산"),
     contactOwner: parseNote("건물주"),
     contactOwner2: parseNote("건물주2"),
+    extraOwners: (() => {
+      const arr: string[] = [];
+      for (let i = 3; i <= 20; i++) {
+        const m = note.match(new RegExp(`건물주${i}[:\\s]+([^\\n|]+)`));
+        if (m) arr.push(m[1].trim());
+      }
+      return arr;
+    })(),
     contactTenant: parseNote("세입자"),
     contactManager: parseNote("관리인"),
     roadAddress: roadAddr,
@@ -341,17 +350,52 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       if (!isCollectiveBuilding) {
         const { data } = await supabase
           .from("cheongju_contacts")
-          .select("contact_owner,contact_manager,contact_broker")
+          .select("contact_owner,contact_manager,contact_broker,memo")
           .eq("dong", form.dong)
           .eq("lot_number", form.lotNumber)
           .is("unit_number", null)
           .maybeSingle();
         if (data) {
+          // memo에서 추가 소유주 파싱: EXTRA_OWNERS:[전화1,전화2,...]
+          let owner2 = "";
+          let extras: string[] = [];
+          const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+          if (m) {
+            const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
+            owner2 = list[0] || "";
+            extras = list.slice(1);
+          }
           setForm((prev) => ({
             ...prev,
             contactOwner: prev.contactOwner || data.contact_owner || "",
+            contactOwner2: prev.contactOwner2 || owner2,
+            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
             contactManager: prev.contactManager || data.contact_manager || "",
             contactBroker: prev.contactBroker || data.contact_broker || "",
+          }));
+        }
+
+        // 같은 주소의 가장 최근 properties.note에서도 건물주2/3 정보 보완 로드
+        const { data: lastProp } = await supabase
+          .from("properties")
+          .select("note")
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lotNumber)
+          .order("registered_date", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (lastProp?.note) {
+          const noteStr = String(lastProp.note);
+          const o2 = noteStr.match(/건물주2[:\s]+([^\n|]+)/);
+          const exs: string[] = [];
+          for (let i = 3; i <= 20; i++) {
+            const mm = noteStr.match(new RegExp(`건물주${i}[:\\s]+([^\\n|]+)`));
+            if (mm) exs.push(mm[1].trim());
+          }
+          setForm((prev) => ({
+            ...prev,
+            contactOwner2: prev.contactOwner2 || (o2 ? o2[1].trim() : ""),
+            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : exs,
           }));
         }
       }
@@ -385,15 +429,25 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       // 1순위: cheongju_contacts에서 동+번지+호수 정확 일치 조회
       const { data: contactData } = await supabase
         .from("cheongju_contacts")
-        .select("contact_owner,contact_manager,contact_broker")
+        .select("contact_owner,contact_manager,contact_broker,memo")
         .eq("dong", form.dong)
         .eq("lot_number", form.lotNumber)
         .eq("unit_number", form.unitNo)
         .maybeSingle();
       if (contactData) {
+        let owner2 = "";
+        let extras: string[] = [];
+        const m = (contactData.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+        if (m) {
+          const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
+          owner2 = list[0] || "";
+          extras = list.slice(1);
+        }
         setForm((prev) => ({
           ...prev,
           contactOwner: contactData.contact_owner || prev.contactOwner,
+          contactOwner2: prev.contactOwner2 || owner2,
+          extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
           contactManager: prev.contactManager || contactData.contact_manager || "",
           contactBroker: prev.contactBroker || contactData.contact_broker || "",
         }));
@@ -557,6 +611,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     const contactParts = [
       form.contactOwner && `건물주:${form.contactOwner}`,
       form.contactOwner2 && `건물주2:${form.contactOwner2}`,
+      ...form.extraOwners.map((o, i) => o && `건물주${i + 3}:${o}`).filter(Boolean),
       form.contactBroker && `부동산:${form.contactBroker}`,
       form.contactTenant && `세입자:${form.contactTenant}`,
       form.contactManager && `관리인:${form.contactManager}`,
@@ -612,8 +667,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       total_floors: form.totalFloors || "",
       build_year: form.buildYear || "",
       description: form.description,
-      room_memo: form.myMemo || null,
-      building_memo: form.buildingMemo || null,
+      room_memo: null,
+      building_memo: null,
       building_password: form.buildingPassword || null,
       room_password: form.roomPassword || null,
       options: [
@@ -635,6 +690,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       note: [
         form.contactOwner && `건물주: ${form.contactOwner}`,
         form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
+        ...form.extraOwners.map((o, i) => o && `건물주${i + 3}: ${o}`).filter(Boolean),
         form.contactBroker && `부동산: ${form.contactBroker}`,
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
@@ -663,7 +719,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     if (!error && form.dong) {
       // ── cheongju_contacts 동기화 ──
       const contactDistrict = districtVal ?? "";
-      const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
+      const hasContact = form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker;
       const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
       const unitVal = form.unitNo || null;
 
@@ -671,6 +727,9 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       const canSaveContact = hasContact && (isCollective ? !!unitVal : true);
 
       if (canSaveContact) {
+        // 추가 소유주들(2번째 이후) memo에 보존
+        const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
+        const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
@@ -680,6 +739,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
+          memo: extraMemo,
+          building_name: form.buildingName || null,
           is_visible: true,
         };
         const { error: contactErr } = await supabase
@@ -1433,8 +1494,8 @@ function Step2({
         )}
       </Section>
 
-      {/* LH 전세대출 — 매매 타입 제외 */}
-      {!isWarehouseSale && form.tradeType !== "매매" && !isLand && (
+      {/* LH 전세대출 — '전세' 임대방식 선택 시에만 표시 */}
+      {!isWarehouseSale && form.tradeType !== "매매" && !isLand && form.rentModes.includes("전세") && (
         <Section label="LH (전세대출)">
           <div className="flex gap-5">
             {LH_TYPES.map((t) => (
@@ -1443,23 +1504,6 @@ function Step2({
           </div>
         </Section>
       )}
-
-
-      {/* 메모 */}
-      <Section label="메모">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
-            <textarea rows={2} value={form.buildingMemo} onChange={(e) => set("buildingMemo", e.target.value)}
-              className={ic(false) + " resize-none" + (form.buildingMemo?.trim() ? " !border-destructive !ring-destructive/20" : "")} placeholder="건물 관련 메모" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-foreground/70 flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모</label>
-            <textarea rows={2} value={form.myMemo} onChange={(e) => set("myMemo", e.target.value)}
-              className={ic(false) + " resize-none" + (form.myMemo?.trim() ? " !border-destructive !ring-destructive/20" : "")} placeholder="방 관련 메모" />
-          </div>
-        </div>
-      </Section>
 
       {/* 매물 소개 */}
       <Section label="매물 소개">
@@ -1528,13 +1572,14 @@ function Step3({
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
-              {!showOwner2 && (
-                <button type="button" onClick={() => setShowOwner2(true)}
-                  className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
-                  <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
-                  추가
-                </button>
-              )}
+              <button type="button" onClick={() => {
+                if (!form.contactOwner2) { setShowOwner2(true); }
+                else { set("extraOwners", [...form.extraOwners, ""]); }
+              }}
+                className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                소유주 추가
+              </button>
             </div>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -1561,6 +1606,28 @@ function Step3({
               </div>
             </div>
           )}
+          {/* 추가 소유주들 (3, 4, 5...) */}
+          {form.extraOwners.map((owner, idx) => (
+            <div key={idx} className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-foreground/70">소유주 연락처 {idx + 3}</label>
+                <button type="button"
+                  onClick={() => set("extraOwners", form.extraOwners.filter((_, i) => i !== idx))}
+                  className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input type="tel" placeholder={`예) 010-0000-0000`}
+                  value={owner}
+                  onChange={(e) => {
+                    const next = [...form.extraOwners];
+                    next[idx] = formatPhone(e.target.value);
+                    set("extraOwners", next);
+                  }}
+                  className={ic(false) + " pl-9"} />
+              </div>
+            </div>
+          ))}
           {/* 나머지 연락처 */}
           {contacts.filter(c => c.key !== "contactOwner").map(({ key, label, placeholder, required }) => (
             <div key={key} className="flex flex-col gap-1">

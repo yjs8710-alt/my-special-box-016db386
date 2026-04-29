@@ -2756,9 +2756,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
       const isFull = opts.includes("풀옵션") || FULL_OPT.every((o) => opts.includes(o));
 
+      // 동(棟), 퇴거일, 중도퇴거, 거주중/공실 뱃지
+      const dongMatch = note.match(/동\(棟\)[:\s]+([^\n|]+)/);
+      const buildingDong = dongMatch?.[1]?.trim();
+      const earlyExit = note.includes("중도퇴거:");
+      const isSalePropM = prop.type?.includes("매매");
+      const vacancyM = !isSalePropM && prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null;
+      let vacatePast = false;
+      let vacateLabel = "";
+      if (prop.vacateDate) {
+        const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+        const vacateTime = new Date(vacateStr).getTime();
+        vacatePast = !isNaN(vacateTime) && vacateTime < Date.now();
+        if (!vacatePast && !isNaN(vacateTime)) vacateLabel = `퇴거 ${prop.vacateDate}`;
+      }
+
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
-          {/* 1행: 준YYYY · 건물명 · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          {/* 1행: 준YYYY · 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
           <div className="flex items-center gap-1 min-h-[22px]">
             {buildYr && (
               <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
@@ -2768,6 +2783,31 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
+            {buildingDong && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 70%)" }}>
+                {buildingDong}동
+              </span>
+            )}
+            {(vacancyM === "공실" || vacatePast) && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
+                공실
+              </span>
+            )}
+            {vacancyM === "세입자 거주중" && !vacatePast && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
+                거주중
+              </span>
+            )}
+            {vacateLabel && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                {vacateLabel}
+              </span>
+            )}
+            {earlyExit && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 70%)" }}>
+                중도퇴거
+              </span>
+            )}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}

@@ -290,7 +290,7 @@ const FLOOR_OPTIONS = [
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","신발장","전자키","복층","옥탑","테라스","주차","베란다",
+  "옷장","신발장","복층","옥탑","테라스","주차","베란다",
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
@@ -360,6 +360,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   brokerFee: string;
   contactOwner: string;
   contactOwner2: string;
+  extraOwners: string[];
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
@@ -387,6 +388,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   brokerFee: "",
   contactOwner: "",
   contactOwner2: "",
+  extraOwners: [],
   contactTenant: "",
   contactManager: "",
   contactBroker: "",
@@ -488,7 +490,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
 
     const noteStr = init.note ?? init.agent_name ?? "";
-    const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
+    const ownerMatch = noteStr.match(/건물주(?!2)[:\s]+([0-9\-]+)/);
     const owner2Match = noteStr.match(/건물주2[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
@@ -496,6 +498,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (owner2Match) contacts.contactOwner2 = owner2Match[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+    // 건물주3, 4, 5... extraOwners
+    const extras: string[] = [];
+    for (let i = 3; i <= 20; i++) {
+      const mm = noteStr.match(new RegExp(`건물주${i}[:\\s]+([0-9\\-]+)`));
+      if (mm) extras.push(mm[1].trim());
+    }
+    contacts.extraOwners = extras;
     const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
     if (roadMatch) contacts.roadAddress = roadMatch[1].trim();
 
@@ -625,7 +634,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (isCollective && !unitVal) return; // 집합건물은 호수까지 있어야만 매칭
     let query = supabase
       .from("cheongju_contacts")
-      .select("contact_owner,contact_manager,contact_broker")
+      .select("contact_owner,contact_manager,contact_broker,memo")
       .eq("dong", dongVal)
       .eq("lot_number", lotVal);
     if (isCollective && unitVal) {
@@ -638,10 +647,21 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       const owner = data.contact_owner || "";
       const manager = data.contact_manager || "";
       const broker = data.contact_broker || "";
-      if (owner || manager || broker) {
+      // memo의 EXTRA_OWNERS:[전화1,전화2] 파싱
+      let owner2 = "";
+      let extras: string[] = [];
+      const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+      if (m) {
+        const list = m[1].split(",").map((s: string) => s.trim()).filter(Boolean);
+        owner2 = list[0] || "";
+        extras = list.slice(1);
+      }
+      if (owner || owner2 || extras.length > 0 || manager || broker) {
         setForm((f) => ({
           ...f,
           contactOwner: (isCollective && unitVal) ? (owner || f.contactOwner) : (f.contactOwner || owner),
+          contactOwner2: f.contactOwner2 || owner2,
+          extraOwners: f.extraOwners.length > 0 ? f.extraOwners : extras,
           contactManager: f.contactManager || manager,
           contactBroker: f.contactBroker || broker,
         }));
@@ -820,6 +840,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
       form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
+      ...form.extraOwners.map((o, i) => o && `건물주${i + 3}: ${o}`).filter(Boolean),
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
       ...rentNotes,
@@ -855,8 +876,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       total_floors: form.total_floors ?? "",
       build_year: form.build_year ?? "",
       description: form.description ?? "",
-      building_memo: form.building_memo || null,
-      room_memo: form.room_memo || null,
+      building_memo: null,
+      room_memo: null,
       note: noteStr || null,
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
@@ -894,7 +915,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
 
       // 청주 연락처 동기화
-      const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
+      const hasAnyContact = !!(form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker);
       const isCollectiveType = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
       const unitVal = form.unit_number || null;
 
@@ -905,6 +926,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
 
+        const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
+        const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
+
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
@@ -914,6 +938,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
+          memo: extraMemo,
+          building_name: form.building_name || null,
           is_visible: true,
         };
         // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
@@ -1518,8 +1544,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 )}
               </Section>
 
-              {/* LH 전세대출 — 매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && form.tradeType !== "매매" && (
+              {/* LH 전세대출 — '전세' 임대방식 선택 시에만 표시 */}
+              {!SALE_TYPES.includes(form.type) && form.tradeType !== "매매" && form.rentModes.includes("전세") && (
               <Section label="LH (전세대출)">
                 <div className="flex gap-5">
                   {LH_TYPES.map((t) => (
@@ -1528,24 +1554,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </Section>
               )}
-
-
-
-              {/* 메모 */}
-              <Section label="메모">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
-                    <textarea rows={2} value={form.building_memo ?? ""} onChange={(e) => set("building_memo", e.target.value)}
-                      className={ic + " resize-none"} placeholder="건물 관련 메모" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모 (내 메모)</label>
-                    <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
-                      className={ic + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
-                  </div>
-                </div>
-              </Section>
 
               {/* 매물 소개 */}
               <Section label="매물 소개">
@@ -1573,13 +1581,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
-                      {!showOwner2 && (
-                        <button type="button" onClick={() => setShowOwner2(true)}
-                          className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
-                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
-                          추가
-                        </button>
-                      )}
+                      <button type="button" onClick={() => {
+                        if (!form.contactOwner2) { setShowOwner2(true); }
+                        else { set("extraOwners", [...form.extraOwners, ""]); }
+                      }}
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                        <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                        소유주 추가
+                      </button>
                     </div>
                     <ContactField
                       fieldKey="contactOwner"
@@ -1606,6 +1615,28 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       />
                     </div>
                   )}
+                  {/* 추가 소유주들 (3, 4, 5...) */}
+                  {form.extraOwners.map((owner, idx) => (
+                    <div key={idx} className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-foreground/70">소유주 연락처 {idx + 3}</label>
+                        <button type="button"
+                          onClick={() => set("extraOwners", form.extraOwners.filter((_, i) => i !== idx))}
+                          className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+                      </div>
+                      <ContactField
+                        fieldKey={`extraOwner_${idx}` as any}
+                        label=""
+                        placeholder="예) 010-0000-0000"
+                        value={owner}
+                        onChange={(v) => {
+                          const next = [...form.extraOwners];
+                          next[idx] = v;
+                          set("extraOwners", next);
+                        }}
+                      />
+                    </div>
+                  ))}
                   {/* 나머지 연락처 */}
                   {([
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
