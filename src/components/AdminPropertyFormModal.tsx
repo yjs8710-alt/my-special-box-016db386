@@ -290,7 +290,7 @@ const FLOOR_OPTIONS = [
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","신발장","전자키","복층","옥탑","테라스","주차","베란다",
+  "옷장","신발장","복층","옥탑","테라스","주차","베란다",
 ];
 // 부가 시설 옵션 (아이콘 뱃지로 표시)
 const EXTRA_FACILITY_OPTIONS: { key: string; label: string; icon: React.ReactNode; bg: string; color: string; border: string }[] = [
@@ -360,6 +360,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   brokerFee: string;
   contactOwner: string;
   contactOwner2: string;
+  extraOwners: string[];
   contactTenant: string;
   contactManager: string;
   contactBroker: string;
@@ -387,6 +388,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   brokerFee: "",
   contactOwner: "",
   contactOwner2: "",
+  extraOwners: [],
   contactTenant: "",
   contactManager: "",
   contactBroker: "",
