@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
             <p className="text-sm text-white max-w-sm leading-relaxed">
-              중개사만을 위한 청주 공실 전문 플랫폼. 검증된 실매물 정보로 빠르고 정확한 중개 서비스를 제공하세요.
+              공실 전문 플랫폼
             </p>
             <div className="flex gap-4 mt-4">
               <a href="#" className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors">
