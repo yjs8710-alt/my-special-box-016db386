@@ -429,15 +429,25 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       // 1순위: cheongju_contacts에서 동+번지+호수 정확 일치 조회
       const { data: contactData } = await supabase
         .from("cheongju_contacts")
-        .select("contact_owner,contact_manager,contact_broker")
+        .select("contact_owner,contact_manager,contact_broker,memo")
         .eq("dong", form.dong)
         .eq("lot_number", form.lotNumber)
         .eq("unit_number", form.unitNo)
         .maybeSingle();
       if (contactData) {
+        let owner2 = "";
+        let extras: string[] = [];
+        const m = (contactData.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+        if (m) {
+          const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
+          owner2 = list[0] || "";
+          extras = list.slice(1);
+        }
         setForm((prev) => ({
           ...prev,
           contactOwner: contactData.contact_owner || prev.contactOwner,
+          contactOwner2: prev.contactOwner2 || owner2,
+          extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
           contactManager: prev.contactManager || contactData.contact_manager || "",
           contactBroker: prev.contactBroker || contactData.contact_broker || "",
         }));
