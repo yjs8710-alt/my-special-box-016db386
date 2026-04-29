@@ -5089,8 +5089,31 @@ const MapSidebar = ({
                         const direction = dirMatch?.[1]?.trim();
                         const lhVal = lhMatch?.[1]?.trim();
                         const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
+                        // 퇴거 정보 (퇴거일/중도퇴거)
+                        const earlyExitM = note.includes("중도퇴거:");
+                        let vacateFutureLabel = "";
+                        if (prop.vacateDate) {
+                          const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+                          const vacateTime = new Date(vacateStr).getTime();
+                          if (!isNaN(vacateTime) && vacateTime >= Date.now()) vacateFutureLabel = prop.vacateDate;
+                        }
                         return (
                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                            {/* 퇴거 정보 행 (퇴거일/중도퇴거) */}
+                            {(vacateFutureLabel || earlyExitM) && (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {vacateFutureLabel && (
+                                  <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                    퇴거예정 {vacateFutureLabel}
+                                  </span>
+                                )}
+                                {earlyExitM && (
+                                  <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                    중도퇴거 가능
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             {/* 1행: 연락처 라벨 칩 (소유주/관리인/세입자) — 클릭 시 모달로 번호 공개 | 우측: 확인일/등록일 */}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
