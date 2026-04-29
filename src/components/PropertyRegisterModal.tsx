@@ -667,8 +667,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       total_floors: form.totalFloors || "",
       build_year: form.buildYear || "",
       description: form.description,
-      room_memo: form.myMemo || null,
-      building_memo: form.buildingMemo || null,
+      room_memo: null,
+      building_memo: null,
       building_password: form.buildingPassword || null,
       room_password: form.roomPassword || null,
       options: [
@@ -690,6 +690,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       note: [
         form.contactOwner && `건물주: ${form.contactOwner}`,
         form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
+        ...form.extraOwners.map((o, i) => o && `건물주${i + 3}: ${o}`).filter(Boolean),
         form.contactBroker && `부동산: ${form.contactBroker}`,
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
