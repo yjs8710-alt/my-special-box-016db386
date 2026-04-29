@@ -2963,6 +2963,43 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               )}
             </div>
           )}
+          {showVacateInfo && (vacateLabel || earlyExit) && (
+            <div
+              className="fixed inset-0 z-[10300] flex items-end justify-center"
+              onClick={(e) => { e.stopPropagation(); setShowVacateInfo(false); }}
+            >
+              <div className="absolute inset-0 bg-black/40" />
+              <div
+                className="relative w-full bg-white rounded-t-2xl shadow-2xl p-4 pb-6 max-w-md animate-in slide-in-from-bottom"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-extrabold text-foreground">퇴거 정보</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowVacateInfo(false)}
+                    className="text-[12px] font-bold text-muted-foreground px-2 py-1 rounded hover:bg-muted"
+                  >
+                    닫기 ✕
+                  </button>
+                </div>
+                <div className="space-y-2.5">
+                  {prop.vacateDate && !vacatePast && (
+                    <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: "hsl(0 85% 96%)", border: "1px solid hsl(0 85% 80%)" }}>
+                      <span className="text-[13px] font-bold" style={{ color: "hsl(0 85% 35%)" }}>퇴거 예정일</span>
+                      <span className="text-[14px] font-extrabold" style={{ color: "hsl(0 85% 35%)" }}>{prop.vacateDate}</span>
+                    </div>
+                  )}
+                  {earlyExit && (
+                    <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: "hsl(0 85% 96%)", border: "1px solid hsl(0 85% 80%)" }}>
+                      <span className="text-[13px] font-bold" style={{ color: "hsl(0 85% 35%)" }}>세입자 중도퇴거</span>
+                      <span className="text-[14px] font-extrabold" style={{ color: "hsl(0 85% 35%)" }}>가능</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
