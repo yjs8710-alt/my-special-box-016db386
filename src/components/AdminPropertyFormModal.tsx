@@ -1581,13 +1581,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                       <label className="text-xs font-semibold text-foreground/70">소유주 연락처</label>
-                      {!showOwner2 && (
-                        <button type="button" onClick={() => setShowOwner2(true)}
-                          className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
-                          <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
-                          추가
-                        </button>
-                      )}
+                      <button type="button" onClick={() => {
+                        if (!form.contactOwner2) { setShowOwner2(true); }
+                        else { set("extraOwners", [...form.extraOwners, ""]); }
+                      }}
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                        <span className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-black">+</span>
+                        소유주 추가
+                      </button>
                     </div>
                     <ContactField
                       fieldKey="contactOwner"
@@ -1614,6 +1615,28 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                       />
                     </div>
                   )}
+                  {/* 추가 소유주들 (3, 4, 5...) */}
+                  {form.extraOwners.map((owner, idx) => (
+                    <div key={idx} className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-foreground/70">소유주 연락처 {idx + 3}</label>
+                        <button type="button"
+                          onClick={() => set("extraOwners", form.extraOwners.filter((_, i) => i !== idx))}
+                          className="text-[10px] font-bold text-destructive hover:text-destructive/80 transition-colors">삭제</button>
+                      </div>
+                      <ContactField
+                        fieldKey={`extraOwner_${idx}` as any}
+                        label=""
+                        placeholder="예) 010-0000-0000"
+                        value={owner}
+                        onChange={(v) => {
+                          const next = [...form.extraOwners];
+                          next[idx] = v;
+                          set("extraOwners", next);
+                        }}
+                      />
+                    </div>
+                  ))}
                   {/* 나머지 연락처 */}
                   {([
                     { key: "contactTenant" as const, label: "세입자 연락처", placeholder: "예) 010-9876-5432" },
