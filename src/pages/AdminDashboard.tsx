@@ -2780,10 +2780,10 @@ const AdminDashboard = () => {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </div>
-                      {/* 관리인 (contact_owner) */}
+                      {/* 관리인 */}
                       <div className="hidden md:block text-xs">
-                        {c.contact_owner ? (
-                          <a href={`tel:${c.contact_owner}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_owner}</a>
+                        {c.contact_manager ? (
+                          <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
                       {/* 부동산 */}
