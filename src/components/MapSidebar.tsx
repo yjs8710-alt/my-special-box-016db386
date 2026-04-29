@@ -2756,9 +2756,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
       const isFull = opts.includes("풀옵션") || FULL_OPT.every((o) => opts.includes(o));
 
+      // 동(棟), 퇴거일, 중도퇴거, 거주중/공실 뱃지
+      const dongMatch = note.match(/동\(棟\)[:\s]+([^\n|]+)/);
+      const buildingDong = dongMatch?.[1]?.trim();
+      const earlyExit = note.includes("중도퇴거:");
+      const isSalePropM = prop.type?.includes("매매");
+      const vacancyM = !isSalePropM && prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null;
+      let vacatePast = false;
+      let vacateLabel = "";
+      if (prop.vacateDate) {
+        const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+        const vacateTime = new Date(vacateStr).getTime();
+        vacatePast = !isNaN(vacateTime) && vacateTime < Date.now();
+        if (!vacatePast && !isNaN(vacateTime)) vacateLabel = `퇴거 ${prop.vacateDate}`;
+      }
+
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
-          {/* 1행: 준YYYY · 건물명 · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          {/* 1행: 준YYYY · 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
           <div className="flex items-center gap-1 min-h-[22px]">
             {buildYr && (
               <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
