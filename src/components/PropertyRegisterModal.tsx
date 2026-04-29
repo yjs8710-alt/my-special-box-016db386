@@ -283,6 +283,14 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
     contactBroker: parseNote("부동산"),
     contactOwner: parseNote("건물주"),
     contactOwner2: parseNote("건물주2"),
+    extraOwners: (() => {
+      const arr: string[] = [];
+      for (let i = 3; i <= 20; i++) {
+        const m = note.match(new RegExp(`건물주${i}[:\\s]+([^\\n|]+)`));
+        if (m) arr.push(m[1].trim());
+      }
+      return arr;
+    })(),
     contactTenant: parseNote("세입자"),
     contactManager: parseNote("관리인"),
     roadAddress: roadAddr,
