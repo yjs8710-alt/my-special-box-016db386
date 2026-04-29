@@ -840,6 +840,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const noteStr = [
       form.contactOwner && `건물주: ${form.contactOwner}`,
       form.contactOwner2 && `건물주2: ${form.contactOwner2}`,
+      ...form.extraOwners.map((o, i) => o && `건물주${i + 3}: ${o}`).filter(Boolean),
       form.contactTenant && `세입자: ${form.contactTenant}`,
       form.contactManager && `관리인: ${form.contactManager}`,
       ...rentNotes,
@@ -875,8 +876,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       total_floors: form.total_floors ?? "",
       build_year: form.build_year ?? "",
       description: form.description ?? "",
-      building_memo: form.building_memo || null,
-      room_memo: form.room_memo || null,
+      building_memo: null,
+      room_memo: null,
       note: noteStr || null,
       vacate_date: form.vacate_date || null,
       building_password: form.building_password || null,
@@ -914,7 +915,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
 
       // 청주 연락처 동기화
-      const hasAnyContact = !!(form.contactOwner || form.contactManager || form.contactBroker);
+      const hasAnyContact = !!(form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker);
       const isCollectiveType = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
       const unitVal = form.unit_number || null;
 
@@ -925,6 +926,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         const contactDistrict = form.district ?? "";
         const lotNum = form.lot_number ?? "";
 
+        const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
+        const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
+
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
@@ -934,6 +938,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
+          memo: extraMemo,
+          building_name: form.building_name || null,
           is_visible: true,
         };
         // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
