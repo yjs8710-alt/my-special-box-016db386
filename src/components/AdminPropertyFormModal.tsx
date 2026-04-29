@@ -490,7 +490,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
 
     const noteStr = init.note ?? init.agent_name ?? "";
-    const ownerMatch = noteStr.match(/건물주[:\s]+([0-9\-]+)/);
+    const ownerMatch = noteStr.match(/건물주(?!2)[:\s]+([0-9\-]+)/);
     const owner2Match = noteStr.match(/건물주2[:\s]+([0-9\-]+)/);
     const managerMatch = noteStr.match(/관리인[:\s]+([0-9\-]+)/);
     const tenantMatch = noteStr.match(/세입자[:\s]+([0-9\-]+)/);
@@ -498,6 +498,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (owner2Match) contacts.contactOwner2 = owner2Match[1].trim();
     if (managerMatch) contacts.contactManager = managerMatch[1].trim();
     if (tenantMatch) contacts.contactTenant = tenantMatch[1].trim();
+    // 건물주3, 4, 5... extraOwners
+    const extras: string[] = [];
+    for (let i = 3; i <= 20; i++) {
+      const mm = noteStr.match(new RegExp(`건물주${i}[:\\s]+([0-9\\-]+)`));
+      if (mm) extras.push(mm[1].trim());
+    }
+    contacts.extraOwners = extras;
     const roadMatch = noteStr.match(/도로명[:\s]+([^\n|]+)/);
     if (roadMatch) contacts.roadAddress = roadMatch[1].trim();
 
@@ -627,7 +634,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (isCollective && !unitVal) return; // 집합건물은 호수까지 있어야만 매칭
     let query = supabase
       .from("cheongju_contacts")
-      .select("contact_owner,contact_manager,contact_broker")
+      .select("contact_owner,contact_manager,contact_broker,memo")
       .eq("dong", dongVal)
       .eq("lot_number", lotVal);
     if (isCollective && unitVal) {
@@ -640,10 +647,21 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       const owner = data.contact_owner || "";
       const manager = data.contact_manager || "";
       const broker = data.contact_broker || "";
-      if (owner || manager || broker) {
+      // memo의 EXTRA_OWNERS:[전화1,전화2] 파싱
+      let owner2 = "";
+      let extras: string[] = [];
+      const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+      if (m) {
+        const list = m[1].split(",").map((s: string) => s.trim()).filter(Boolean);
+        owner2 = list[0] || "";
+        extras = list.slice(1);
+      }
+      if (owner || owner2 || extras.length > 0 || manager || broker) {
         setForm((f) => ({
           ...f,
           contactOwner: (isCollective && unitVal) ? (owner || f.contactOwner) : (f.contactOwner || owner),
+          contactOwner2: f.contactOwner2 || owner2,
+          extraOwners: f.extraOwners.length > 0 ? f.extraOwners : extras,
           contactManager: f.contactManager || manager,
           contactBroker: f.contactBroker || broker,
         }));
