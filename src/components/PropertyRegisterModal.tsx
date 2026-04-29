@@ -350,17 +350,52 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       if (!isCollectiveBuilding) {
         const { data } = await supabase
           .from("cheongju_contacts")
-          .select("contact_owner,contact_manager,contact_broker")
+          .select("contact_owner,contact_manager,contact_broker,memo")
           .eq("dong", form.dong)
           .eq("lot_number", form.lotNumber)
           .is("unit_number", null)
           .maybeSingle();
         if (data) {
+          // memo에서 추가 소유주 파싱: EXTRA_OWNERS:[전화1,전화2,...]
+          let owner2 = "";
+          let extras: string[] = [];
+          const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
+          if (m) {
+            const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
+            owner2 = list[0] || "";
+            extras = list.slice(1);
+          }
           setForm((prev) => ({
             ...prev,
             contactOwner: prev.contactOwner || data.contact_owner || "",
+            contactOwner2: prev.contactOwner2 || owner2,
+            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
             contactManager: prev.contactManager || data.contact_manager || "",
             contactBroker: prev.contactBroker || data.contact_broker || "",
+          }));
+        }
+
+        // 같은 주소의 가장 최근 properties.note에서도 건물주2/3 정보 보완 로드
+        const { data: lastProp } = await supabase
+          .from("properties")
+          .select("note")
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lotNumber)
+          .order("registered_date", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (lastProp?.note) {
+          const noteStr = String(lastProp.note);
+          const o2 = noteStr.match(/건물주2[:\s]+([^\n|]+)/);
+          const exs: string[] = [];
+          for (let i = 3; i <= 20; i++) {
+            const mm = noteStr.match(new RegExp(`건물주${i}[:\\s]+([^\\n|]+)`));
+            if (mm) exs.push(mm[1].trim());
+          }
+          setForm((prev) => ({
+            ...prev,
+            contactOwner2: prev.contactOwner2 || (o2 ? o2[1].trim() : ""),
+            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : exs,
           }));
         }
       }
