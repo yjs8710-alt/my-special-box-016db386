@@ -719,7 +719,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     if (!error && form.dong) {
       // ── cheongju_contacts 동기화 ──
       const contactDistrict = districtVal ?? "";
-      const hasContact = form.contactOwner || form.contactManager || form.contactBroker;
+      const hasContact = form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker;
       const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
       const unitVal = form.unitNo || null;
 
@@ -727,6 +727,9 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       const canSaveContact = hasContact && (isCollective ? !!unitVal : true);
 
       if (canSaveContact) {
+        // 추가 소유주들(2번째 이후) memo에 보존
+        const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
+        const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
         const upsertPayload = {
           district: contactDistrict,
           dong: form.dong,
@@ -736,6 +739,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
+          memo: extraMemo,
+          building_name: form.buildingName || null,
           is_visible: true,
         };
         const { error: contactErr } = await supabase
