@@ -2191,6 +2191,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       setTimeout(restore, 600);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
+    const [showVacateInfo, setShowVacateInfo] = useState(false);
     const [showOptPopup, setShowOptPopup] = useState(false);
     const optBadgeRef = useRef<HTMLDivElement>(null);
     const [optPopupStyle, setOptPopupStyle] = useState<React.CSSProperties>({});
