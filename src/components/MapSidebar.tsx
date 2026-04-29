@@ -2774,29 +2774,14 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
-          {/* 1행: 준YYYY · 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
           <div className="flex items-center gap-1 min-h-[22px]">
-            {buildYr && (
-              <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
-                준{buildYr}
-              </span>
-            )}
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
             {buildingDong && (
               <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 70%)" }}>
                 {buildingDong}동
-              </span>
-            )}
-            {(vacancyM === "공실" || vacatePast) && (
-              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
-                공실
-              </span>
-            )}
-            {vacancyM === "세입자 거주중" && !vacatePast && (
-              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
-                거주중
               </span>
             )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
@@ -2921,9 +2906,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </button>
           </div>
 
-          {/* 3행: 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
-          {(facilityBadges.length > 0 || opts.length > 0) && (
+          {/* 3행: 준공년도 · 공실/거주중 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
+          {(buildYr || vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0) && (
             <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
+              {buildYr && (
+                <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
+                  준{buildYr}
+                </span>
+              )}
+              {(vacancyM === "공실" || vacatePast) && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
+                  공실
+                </span>
+              )}
+              {vacancyM === "세입자 거주중" && !vacatePast && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
+                  거주중
+                </span>
+              )}
               {facilityBadges}
               <span className="flex-1" />
               {opts.length > 0 && (
