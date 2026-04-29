@@ -5099,6 +5099,42 @@ const MapSidebar = ({
                         }
                         return (
                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                            {/* 최상단: 소유주/관리인 번호 항시 표시 (탭하면 전화) */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {!owner && !owner2 && !manager && (
+                                <span className="text-muted-foreground">소유주/관리인 번호 없음</span>
+                              )}
+                              {owner && (
+                                <a
+                                  href={`tel:${owner.replace(/[^0-9+]/g, "")}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md font-extrabold text-[11px]"
+                                  style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                >
+                                  <Phone className="w-3 h-3" /> 소유주 {owner}
+                                </a>
+                              )}
+                              {owner2 && (
+                                <a
+                                  href={`tel:${owner2.replace(/[^0-9+]/g, "")}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md font-extrabold text-[11px]"
+                                  style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                >
+                                  <Phone className="w-3 h-3" /> 소유주2 {owner2}
+                                </a>
+                              )}
+                              {manager && (
+                                <a
+                                  href={`tel:${manager.replace(/[^0-9+]/g, "")}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex items-center gap-1 px-2 py-1 rounded-md font-extrabold text-[11px]"
+                                  style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
+                                >
+                                  <Phone className="w-3 h-3" /> 관리인 {manager}
+                                </a>
+                              )}
+                            </div>
                             {/* 퇴거 정보 행 (퇴거일/중도퇴거) */}
                             {(vacateFutureLabel || earlyExitM) && (
                               <div className="flex items-center gap-1.5 flex-wrap">
@@ -5114,39 +5150,18 @@ const MapSidebar = ({
                                 )}
                               </div>
                             )}
-                            {/* 1행: 연락처 라벨 칩 (소유주/관리인/세입자) — 클릭 시 모달로 번호 공개 | 우측: 확인일/등록일 */}
+                            {/* 세입자 / 확인일·등록일 */}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
-                                {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
-                                {(owner || owner2) && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 소유주
-                                  </button>
-                                )}
-                                {manager && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 관리인
-                                  </button>
-                                )}
                                 {tenant && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                  <a
+                                    href={`tel:${tenant.replace(/[^0-9+]/g, "")}`}
+                                    onClick={(e) => e.stopPropagation()}
                                     className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
                                     style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
                                   >
-                                    <Phone className="w-3 h-3" /> 세입자
-                                  </button>
+                                    <Phone className="w-3 h-3" /> 세입자 {tenant}
+                                  </a>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
