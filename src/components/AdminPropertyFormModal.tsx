@@ -1544,8 +1544,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 )}
               </Section>
 
-              {/* LH 전세대출 — 매매 타입 제외 */}
-              {!SALE_TYPES.includes(form.type) && form.tradeType !== "매매" && (
+              {/* LH 전세대출 — '전세' 임대방식 선택 시에만 표시 */}
+              {!SALE_TYPES.includes(form.type) && form.tradeType !== "매매" && form.rentModes.includes("전세") && (
               <Section label="LH (전세대출)">
                 <div className="flex gap-5">
                   {LH_TYPES.map((t) => (
@@ -1554,24 +1554,6 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 </div>
               </Section>
               )}
-
-
-
-              {/* 메모 */}
-              <Section label="메모">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="건물메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 건물 메모</label>
-                    <textarea rows={2} value={form.building_memo ?? ""} onChange={(e) => set("building_memo", e.target.value)}
-                      className={ic + " resize-none"} placeholder="건물 관련 메모" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><img src={memoIcon} alt="방메모" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} /> 방 메모 (내 메모)</label>
-                    <textarea rows={2} value={form.room_memo ?? ""} onChange={(e) => set("room_memo", e.target.value)}
-                      className={ic + " resize-none"} placeholder="관리용 메모 (외부 비노출)" />
-                  </div>
-                </div>
-              </Section>
 
               {/* 매물 소개 */}
               <Section label="매물 소개">
