@@ -2759,7 +2759,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
       // 동(棟), 퇴거일, 중도퇴거, 거주중/공실 뱃지
       const dongMatch = note.match(/동\(棟\)[:\s]+([^\n|]+)/);
-      const buildingDong = dongMatch?.[1]?.trim();
+      const buildingDong = dongMatch?.[1]?.trim().replace(/동+\s*$/, "").trim();
       const earlyExit = note.includes("중도퇴거:");
       const isSalePropM = prop.type?.includes("매매");
       const vacancyM = !isSalePropM && prop.availableFrom && (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null;
