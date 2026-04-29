@@ -2779,11 +2779,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
-            {buildingDong && (
-              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 70%)" }}>
-                {buildingDong}동
-              </span>
-            )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             <button
               type="button"
