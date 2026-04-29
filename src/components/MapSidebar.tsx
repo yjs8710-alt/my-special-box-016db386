@@ -2799,15 +2799,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 거주중
               </span>
             )}
-            {vacateLabel && (
-              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                {vacateLabel}
-              </span>
-            )}
-            {earlyExit && (
-              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 70%)" }}>
-                중도퇴거
-              </span>
+            {(vacateLabel || earlyExit) && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowVacateInfo(true); }}
+                className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap"
+                style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}
+                title="퇴거 정보 보기"
+              >
+                {earlyExit && vacateLabel ? "퇴거정보 ▾" : earlyExit ? "중도퇴거 ▾" : "퇴거정보 ▾"}
+              </button>
             )}
             <button
               type="button"
