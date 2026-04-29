@@ -2783,6 +2783,31 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
+            {buildingDong && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 70%)" }}>
+                {buildingDong}동
+              </span>
+            )}
+            {(vacancyM === "공실" || vacatePast) && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
+                공실
+              </span>
+            )}
+            {vacancyM === "세입자 거주중" && !vacatePast && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
+                거주중
+              </span>
+            )}
+            {vacateLabel && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                {vacateLabel}
+              </span>
+            )}
+            {earlyExit && (
+              <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 70%)" }}>
+                중도퇴거
+              </span>
+            )}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}
