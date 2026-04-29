@@ -51,7 +51,7 @@ type BuildingSaleType = typeof BUILDING_SALE_TYPES[number];
 const ROOM_OPTIONS = [
   "냉장고","세탁기","드럼세탁기","건조기","스타일러","TV",
   "에어컨","가스레인지","인덕션","전자레인지","침대","책상",
-  "옷장","신발장","전자키","복층","옥탑","테라스","주차","베란다",
+  "옷장","신발장","복층","옥탑","테라스","주차","베란다",
 ] as const;
 
 type PetType = "가능" | "불가" | "";
@@ -124,6 +124,7 @@ interface FormState {
   contactBroker: string;
   contactOwner: string;
   contactOwner2: string;
+  extraOwners: string[]; // 소유주 3,4,5... 추가 소유주들
   contactTenant: string;
   contactManager: string;
   roadAddress: string;
@@ -162,7 +163,7 @@ const INITIAL: FormState = {
   lhType: "관계없음", exitCleanFee: "", brokerFee: "",
   myMemo: "",
   description: "",
-  contactBroker: "", contactOwner: "", contactOwner2: "", contactTenant: "", contactManager: "",
+  contactBroker: "", contactOwner: "", contactOwner2: "", extraOwners: [], contactTenant: "", contactManager: "",
   roadAddress: "",
   tenantOccupied: false, tenantDeposit: "", tenantMonthly: "", vacateDate: "",
   earlyExit: false,
