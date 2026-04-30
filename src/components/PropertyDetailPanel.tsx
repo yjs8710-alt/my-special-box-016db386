@@ -1076,9 +1076,10 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
   );
 
   return (
-    <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-2 sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
+        className="bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden w-[calc(100vw-16px)] sm:w-full sm:max-w-md"
+        style={{ maxHeight: "calc(100dvh - 16px)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
