@@ -3397,7 +3397,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="relative flex-shrink-0"
                   onMouseEnter={handleOptMouseEnter}
                   onMouseLeave={handleOptMouseLeave}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (showOptPopup) { setShowOptPopup(false); }
+                    else { handleOptMouseEnter(); }
+                  }}
                 >
                   {isFull ? (
                     <span
