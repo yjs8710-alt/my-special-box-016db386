@@ -2806,7 +2806,7 @@ const AdminDashboard = () => {
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[60px_90px_90px_120px_70px_130px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -2822,6 +2822,10 @@ const AdminDashboard = () => {
                             style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
                           >{c.lot_number}</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
+                      </div>
+                      {/* 건물명 */}
+                      <div className="hidden md:block text-xs text-foreground truncate" title={c.building_name ?? ""}>
+                        {c.building_name && c.building_name.trim() ? c.building_name : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 호수 */}
                       <div className="hidden md:block text-xs">
