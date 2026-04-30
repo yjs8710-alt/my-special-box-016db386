@@ -64,18 +64,14 @@ const PropertyCard = ({
               decoding="async"
               referrerPolicy="no-referrer"
               className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
-              style={{ imageRendering: "auto" }}
+              style={{ imageRendering: "auto", backgroundColor: "hsl(var(--muted))" }}
               onError={(e) => {
                 const img = e.currentTarget;
-                // 로드 실패 시 로고 플레이스홀더로 교체
-                const parent = img.parentElement;
-                if (parent) {
-                  const fallback = document.createElement("div");
-                  fallback.className = "w-full h-full flex items-center justify-center bg-muted absolute inset-0";
-                  fallback.innerHTML = `<img src="${zibdaPlaceholder}" alt="집다 로고" class="w-full h-full object-contain p-1" />`;
-                  parent.appendChild(fallback);
-                  img.style.display = "none";
-                }
+                if (img.dataset.fallback === "1") return;
+                img.dataset.fallback = "1";
+                img.src = zibdaPlaceholder;
+                img.classList.remove("object-cover");
+                img.classList.add("object-contain", "p-1");
               }}
             />
             {isRef && (
