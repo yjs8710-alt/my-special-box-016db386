@@ -2750,20 +2750,20 @@ const AdminDashboard = () => {
                  <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    총 {contacts.length}개 · 노출 {contactCounts.__visible}개 · 노출불가 {contactCounts.__hidden}개
                     {" · "}
                     {CHEONGJU_DISTRICTS.map((d, i) => (
                       <span key={d}>
                         {i > 0 && " · "}
-                        {d} {contacts.filter(c => c.district === d).length}개
+                        {d} {contactCounts[d] ?? 0}개
                       </span>
                     ))}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap">
                     {["전체", ...CHEONGJU_DISTRICTS].map((d) => {
-                      const cnt = d === "전체" ? contacts.length : contacts.filter(c => c.district === d).length;
+                      const cnt = d === "전체" ? contacts.length : (contactCounts[d] ?? 0);
                       return (
                         <button key={d} onClick={() => setContactDistrictFilter(d)}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
