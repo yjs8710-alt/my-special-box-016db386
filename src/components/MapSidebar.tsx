@@ -4834,13 +4834,11 @@ const MapSidebar = ({
                         role="button"
                         tabIndex={0}
                         onClick={() => {
-                          if (isMobile) setMobileStep(2);
                           selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            if (isMobile) setMobileStep(2);
                             selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
                           }
                         }}
