@@ -1275,7 +1275,7 @@ const AdminDashboard = () => {
   // ─── 청주 연락처 불러오기 ────────────────────────────────────────────────
   const fetchContacts = useCallback(async () => {
     setContactsLoading(true);
-    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong");
+    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong").limit(100000);
     if (!error && data) setContacts(data as CheongJuContact[]);
     setContactsLoading(false);
   }, []);
