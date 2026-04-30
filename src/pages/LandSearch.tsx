@@ -22,6 +22,7 @@ const LandSearch = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showRegister, setShowRegister] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
@@ -82,7 +83,7 @@ const LandSearch = () => {
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
-      <Header onRegisterChange={setShowRegister} />
+      <Header onRegisterChange={setShowRegister} onMenuOpenChange={setMobileMenuOpen} />
 
       <div
         className="hidden md:flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
@@ -144,7 +145,7 @@ const LandSearch = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            hideSearchBar={showRegister}
+            hideSearchBar={showRegister || mobileMenuOpen}
             showRoomTypes={false}
             showFloor={false}
             showBuildYear={false}
