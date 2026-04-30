@@ -1159,6 +1159,7 @@ const AdminDashboard = () => {
   const [memberGroupByAgency, setMemberGroupByAgency] = useState(false);
   const [collapsedAgencies, setCollapsedAgencies] = useState<Record<string, boolean>>({});
   const [propertySearch, setPropertySearch] = useState("");
+  const [propertySearchApplied, setPropertySearchApplied] = useState("");
   // 비밀번호 관리 상태
   const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({});
@@ -1179,6 +1180,7 @@ const AdminDashboard = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
+  const [contactSearchApplied, setContactSearchApplied] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
 
   // 신고/제안 state
@@ -1700,7 +1702,7 @@ const AdminDashboard = () => {
     const districtFromAddr = CHEONGJU_DISTRICTS.find(d => p.address.includes(d)) ?? "";
     const effectiveDistrict = districtVal || districtFromAddr;
     const matchDistrict = propertyDistrictFilter === "전체" || effectiveDistrict.includes(propertyDistrictFilter);
-    const matchSearch = !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch);
+    const matchSearch = !propertySearchApplied || p.title.includes(propertySearchApplied) || p.address.includes(propertySearchApplied) || p.agent_name.includes(propertySearchApplied);
     return matchDistrict && matchSearch;
   });
 
@@ -1710,14 +1712,15 @@ const AdminDashboard = () => {
 
   const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearch
-      || c.dong.includes(contactSearch)
-      || (c.lot_number ?? "").includes(contactSearch)
-      || (c.unit_number ?? "").includes(contactSearch)
-      || c.phone.includes(contactSearch)
-      || (c.contact_owner ?? "").includes(contactSearch)
-      || (c.contact_broker ?? "").includes(contactSearch)
-      || (c.memo ?? "").includes(contactSearch);
+    const matchSearch = !contactSearchApplied
+      || c.dong.includes(contactSearchApplied)
+      || (c.lot_number ?? "").includes(contactSearchApplied)
+      || (c.unit_number ?? "").includes(contactSearchApplied)
+      || c.phone.includes(contactSearchApplied)
+      || (c.contact_owner ?? "").includes(contactSearchApplied)
+      || (c.contact_broker ?? "").includes(contactSearchApplied)
+      || (c.memo ?? "").includes(contactSearchApplied)
+      || (c.building_name ?? "").includes(contactSearchApplied);
     return matchDist && matchSearch;
   });
 
@@ -2547,8 +2550,15 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="매물명·주소·중개사 검색" className="pl-7 h-8 text-xs w-52" value={propertySearch} onChange={(e) => setPropertySearch(e.target.value)} />
+                    <Input
+                      placeholder="매물명·주소·중개사 검색"
+                      className="pl-7 h-8 text-xs w-52"
+                      value={propertySearch}
+                      onChange={(e) => setPropertySearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") setPropertySearchApplied(propertySearch); }}
+                    />
                   </div>
+                  <Button size="sm" variant="outline" onClick={() => setPropertySearchApplied(propertySearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchProperties} disabled={propertiesLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${propertiesLoading ? "animate-spin" : ""}`} />
                   </button>
@@ -2711,7 +2721,7 @@ const AdminDashboard = () => {
                     총 <span className="font-bold text-foreground">{contacts.length.toLocaleString()}</span>개
                     {" · "}노출 <span className="font-bold text-primary">{contacts.filter(c => c.is_visible !== false).length.toLocaleString()}</span>개
                     {" · "}노출불가 <span className="font-bold text-muted-foreground">{contacts.filter(c => c.is_visible === false).length.toLocaleString()}</span>개
-                    {(contactDistrictFilter !== "전체" || contactSearch) && (
+                    {(contactDistrictFilter !== "전체" || contactSearchApplied) && (
                       <>{" · "}현재 표시 <span className="font-bold text-accent">{filteredContacts.length.toLocaleString()}</span>개</>
                     )}
                   </p>
@@ -2744,8 +2754,15 @@ const AdminDashboard = () => {
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                    <Input
+                      placeholder="동·번지·건물명·전화번호 검색"
+                      className="pl-7 h-8 text-xs w-52"
+                      value={contactSearch}
+                      onChange={(e) => setContactSearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") setContactSearchApplied(contactSearch); }}
+                    />
                   </div>
+                  <Button size="sm" variant="outline" onClick={() => setContactSearchApplied(contactSearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
                   </button>
