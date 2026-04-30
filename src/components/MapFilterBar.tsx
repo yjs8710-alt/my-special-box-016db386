@@ -175,6 +175,8 @@ interface MapFilterBarProps {
   onRadiusModeToggle?: () => void;
   /** 반경 정보 (활성 표시용) */
   radiusInfo?: { radius: number } | null;
+  /** 임대 그룹/거래유형/보증금/월세 섹션 숨김 (집합건물 매매 페이지용) */
+  hideRentalAndPrice?: boolean;
 }
 
 function makeFormatManwon(max: number) {
