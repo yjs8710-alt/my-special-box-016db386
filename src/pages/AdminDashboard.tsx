@@ -2777,10 +2777,7 @@ const AdminDashboard = () => {
                 )}
                 {filteredContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
-                  const sameAddressContacts = contacts.filter((x) => getContactAddressKey(x) === getContactAddressKey(c));
-                  const ownerPhones = getUniquePhones(
-                    ...sameAddressContacts.flatMap((x) => [x.phone, x.contact_owner])
-                  );
+                  const ownerPhones = getUniquePhones(c.phone, c.contact_owner);
                   return (
                     <div
                       key={c.id}
