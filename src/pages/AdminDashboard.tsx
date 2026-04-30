@@ -2789,7 +2789,7 @@ const AdminDashboard = () => {
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
                       {/* 소유주 (phone) — 같은 번지에 2명 이상이면 모두 표시 */}
-                      <div className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                      <div className="hidden md:flex flex-col items-start gap-0.5 text-xs">
                         {ownerPhones.length > 0 ? (
                           ownerPhones.map((p) => (
                             <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
