@@ -156,7 +156,11 @@ const LandSearch = () => {
           properties={sidebarProperties}
           referencePool={allProperties}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={(id) => {
+            setSuppressPan(true);
+            setSelectedId(id);
+            setTimeout(() => setSuppressPan(false), 600);
+          }}
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}
