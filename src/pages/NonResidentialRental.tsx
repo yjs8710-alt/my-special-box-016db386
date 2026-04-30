@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from "react";
+import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
@@ -63,6 +64,7 @@ interface NonResidentialRentalProps {
 }
 
 const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) => {
+  useExitConfirm();
   const isCollectiveSale = mode === "collective-sale";
   const NON_RESIDENTIAL_SUBTYPES = isCollectiveSale ? COLLECTIVE_SALE_SUBTYPES : FULL_NON_RESIDENTIAL_SUBTYPES;
   const [selectedId, setSelectedId] = useState<number | null>(null);

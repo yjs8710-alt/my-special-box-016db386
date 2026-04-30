@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from "react";
+import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
@@ -13,6 +14,7 @@ const LAND_PROPERTIES: MapProperty[] = [];
 const LAND_SUBTYPES = ["전체"];
 
 const LandSearch = () => {
+  useExitConfirm();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
