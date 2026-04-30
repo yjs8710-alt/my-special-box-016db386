@@ -64,7 +64,7 @@ interface NonResidentialRentalProps {
 }
 
 const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) => {
-  useExitConfirm();
+  const { ExitConfirmDialog } = useExitConfirm();
   const isCollectiveSale = mode === "collective-sale";
   const NON_RESIDENTIAL_SUBTYPES = isCollectiveSale ? COLLECTIVE_SALE_SUBTYPES : FULL_NON_RESIDENTIAL_SUBTYPES;
   const [selectedId, setSelectedId] = useState<number | null>(null);

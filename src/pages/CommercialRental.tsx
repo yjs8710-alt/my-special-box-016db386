@@ -13,7 +13,7 @@ const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", 
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
 
 const CommercialRental = () => {
-  useExitConfirm();
+  const { ExitConfirmDialog } = useExitConfirm();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
