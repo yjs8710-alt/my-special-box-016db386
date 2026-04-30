@@ -507,6 +507,14 @@ const MapFilterBar = ({
   ].filter(Boolean).length;
 
   return (
+    <>
+      {/* 필터 패널 외부 클릭 시 닫기 (별도 적용 버튼 없이 자동 적용됨) */}
+      {showFilter && (
+        <div
+          className="fixed inset-0 z-[999]"
+          onClick={() => setShowFilter(false)}
+        />
+      )}
     <div
       className="mfb-pos fixed z-[1000] pointer-events-none left-2 right-2 md:right-auto md:left-4 top-[50px]"
       style={{ ['--mfb-md-top' as any]: `${topOffset ?? 96}px`, maxWidth: 600 }}
