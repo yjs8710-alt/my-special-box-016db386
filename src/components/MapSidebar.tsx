@@ -2922,29 +2922,39 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {facilityBadges}
               <span className="flex-1" />
               {opts.length > 0 && (
-                <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
-                  {isFull ? (
-                    <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>
-                      풀옵션
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>
-                      옵션 ▾
-                    </span>
-                  )}
+                <>
+                  <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
+                    {isFull ? (
+                      <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>
+                        풀옵션
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>
+                        옵션 ▾
+                      </span>
+                    )}
+                  </div>
                   {showOptPopup && (
-                    <div className="absolute right-0 bottom-full mb-1 z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5" style={{ minWidth: "180px", maxWidth: "240px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}>
-                      <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
-                        {isFull ? "풀옵션 구성" : `옵션 항목 (${opts.length}개)`}
-                      </p>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {opts.map((opt) => (
-                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
-                        ))}
+                    <div
+                      className="fixed inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
+                      onClick={(e) => { e.stopPropagation(); setShowOptPopup(false); }}
+                    >
+                      <div
+                        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 w-full sm:w-auto sm:max-w-md max-h-[80dvh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <p className="text-xs font-extrabold mb-2 pb-1.5 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                          {isFull ? "풀옵션 구성" : `옵션 항목 (${opts.length}개)`}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1.5">
+                          {opts.map((opt) => (
+                            <span key={opt} className="text-[12px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           )}
