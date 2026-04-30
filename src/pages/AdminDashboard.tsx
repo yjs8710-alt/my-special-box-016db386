@@ -2550,8 +2550,15 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="매물명·주소·중개사 검색" className="pl-7 h-8 text-xs w-52" value={propertySearch} onChange={(e) => setPropertySearch(e.target.value)} />
+                    <Input
+                      placeholder="매물명·주소·중개사 검색"
+                      className="pl-7 h-8 text-xs w-52"
+                      value={propertySearch}
+                      onChange={(e) => setPropertySearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") setPropertySearchApplied(propertySearch); }}
+                    />
                   </div>
+                  <Button size="sm" variant="outline" onClick={() => setPropertySearchApplied(propertySearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchProperties} disabled={propertiesLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${propertiesLoading ? "animate-spin" : ""}`} />
                   </button>
