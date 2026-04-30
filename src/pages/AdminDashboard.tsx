@@ -1159,6 +1159,7 @@ const AdminDashboard = () => {
   const [memberGroupByAgency, setMemberGroupByAgency] = useState(false);
   const [collapsedAgencies, setCollapsedAgencies] = useState<Record<string, boolean>>({});
   const [propertySearch, setPropertySearch] = useState("");
+  const [propertySearchApplied, setPropertySearchApplied] = useState("");
   // 비밀번호 관리 상태
   const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({});
