@@ -1732,18 +1732,36 @@ const AdminDashboard = () => {
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
   );
 
-  const filteredContacts = contacts.filter((c) => {
-    const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearch
-      || c.dong.includes(contactSearch)
-      || (c.lot_number ?? "").includes(contactSearch)
-      || (c.unit_number ?? "").includes(contactSearch)
-      || c.phone.includes(contactSearch)
-      || (c.contact_owner ?? "").includes(contactSearch)
-      || (c.contact_broker ?? "").includes(contactSearch)
-      || (c.memo ?? "").includes(contactSearch);
-    return matchDist && matchSearch;
-  });
+  // 구별 카운트 메모이제이션 (1500+ 항목에서 매 렌더 filter 방지)
+  const contactCounts = useMemo(() => {
+    const m: Record<string, number> = { 전체: contacts.length };
+    let visible = 0;
+    for (const c of contacts) {
+      const d = c.district || "";
+      m[d] = (m[d] ?? 0) + 1;
+      if (c.is_visible !== false) visible++;
+    }
+    return { ...m, __visible: visible, __hidden: contacts.length - visible };
+  }, [contacts]);
+
+  const filteredContacts = useMemo(() => {
+    const q = contactSearch.trim();
+    return contacts.filter((c) => {
+      const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
+      if (!matchDist) return false;
+      if (!q) return true;
+      return (
+        c.dong.includes(q)
+        || (c.lot_number ?? "").includes(q)
+        || (c.unit_number ?? "").includes(q)
+        || c.phone.includes(q)
+        || (c.contact_owner ?? "").includes(q)
+        || (c.contact_broker ?? "").includes(q)
+        || (c.memo ?? "").includes(q)
+        || (c.building_name ?? "").includes(q)
+      );
+    });
+  }, [contacts, contactDistrictFilter, contactSearch]);
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
