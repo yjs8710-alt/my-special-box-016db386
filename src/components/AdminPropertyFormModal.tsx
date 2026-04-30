@@ -929,7 +929,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
         const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
 
-        const upsertPayload = {
+        const upsertPayload: Record<string, unknown> = {
           district: contactDistrict,
           dong: form.dong,
           lot_number: lotNum,
@@ -939,13 +939,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
           memo: extraMemo,
-          building_name: form.building_name || null,
           is_visible: true,
         };
+        // 건물명이 입력된 경우에만 저장 (빈 값으로 기존 데이터를 덮어쓰지 않도록)
+        if (form.building_name && form.building_name.trim()) {
+          upsertPayload.building_name = form.building_name.trim();
+        }
         // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
         const { error: upsertErr } = await supabase
           .from("cheongju_contacts")
-          .upsert(upsertPayload, { onConflict: "dong,lot_number,unit_number" });
+          .upsert(upsertPayload as never, { onConflict: "dong,lot_number,unit_number" });
         if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
       }
 
