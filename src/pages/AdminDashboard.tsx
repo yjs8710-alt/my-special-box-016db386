@@ -1180,6 +1180,7 @@ const AdminDashboard = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
+  const [contactSearchApplied, setContactSearchApplied] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
 
   // 신고/제안 state
