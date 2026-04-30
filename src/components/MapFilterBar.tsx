@@ -383,6 +383,7 @@ const MapFilterBar = ({
   radiusMode = false,
   onRadiusModeToggle,
   radiusInfo,
+  hideRentalAndPrice = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
