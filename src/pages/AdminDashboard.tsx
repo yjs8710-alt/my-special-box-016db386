@@ -2754,8 +2754,15 @@ const AdminDashboard = () => {
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                    <Input
+                      placeholder="동·번지·건물명·전화번호 검색"
+                      className="pl-7 h-8 text-xs w-52"
+                      value={contactSearch}
+                      onChange={(e) => setContactSearch(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") setContactSearchApplied(contactSearch); }}
+                    />
                   </div>
+                  <Button size="sm" variant="outline" onClick={() => setContactSearchApplied(contactSearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
                   </button>
