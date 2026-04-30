@@ -1200,6 +1200,7 @@ const AdminDashboard = () => {
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
+  const [contactDisplayCount, setContactDisplayCount] = useState(200);
 
   // 신고/제안 state
   const [reports, setReports] = useState<PropertyReport[]>([]);
