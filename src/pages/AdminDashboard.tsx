@@ -2714,7 +2714,7 @@ const AdminDashboard = () => {
                     총 <span className="font-bold text-foreground">{contacts.length.toLocaleString()}</span>개
                     {" · "}노출 <span className="font-bold text-primary">{contacts.filter(c => c.is_visible !== false).length.toLocaleString()}</span>개
                     {" · "}노출불가 <span className="font-bold text-muted-foreground">{contacts.filter(c => c.is_visible === false).length.toLocaleString()}</span>개
-                    {(contactDistrictFilter !== "전체" || contactSearch) && (
+                    {(contactDistrictFilter !== "전체" || contactSearchApplied) && (
                       <>{" · "}현재 표시 <span className="font-bold text-accent">{filteredContacts.length.toLocaleString()}</span>개</>
                     )}
                   </p>
