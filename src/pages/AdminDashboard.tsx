@@ -2905,7 +2905,7 @@ const AdminDashboard = () => {
           )}
 
           {/* 신고 관리 */}
-          {activeTab === "reports" && (
+          {tab === "reports" && (
             <div>
                 {/* 목록 */}
                 {reportsLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
