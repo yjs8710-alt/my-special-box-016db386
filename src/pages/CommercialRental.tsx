@@ -176,6 +176,7 @@ const CommercialRental = () => {
           ) : null;
         })()}
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };

@@ -292,6 +292,7 @@ const ResidentialRental = () => {
           onRefetch={refetch}
         />
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };

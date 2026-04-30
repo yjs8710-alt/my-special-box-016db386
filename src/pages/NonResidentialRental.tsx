@@ -328,6 +328,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           onRefetch={refetch}
         />
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };

@@ -178,6 +178,7 @@ const LandSearch = () => {
           onRefetch={refetch}
         />
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };
