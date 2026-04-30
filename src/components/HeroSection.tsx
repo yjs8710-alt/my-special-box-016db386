@@ -31,6 +31,10 @@ const HeroSection = () => {
         src={heroBg}
         alt=""
         aria-hidden="true"
+        loading="eager"
+        decoding="async"
+        // @ts-expect-error fetchpriority is valid HTML
+        fetchpriority="high"
         className="absolute inset-0 w-full h-full object-cover object-center"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
@@ -46,6 +50,12 @@ const HeroSection = () => {
         <img
           src={heroLogo}
           alt="집다 로고"
+          loading="eager"
+          decoding="async"
+          // @ts-expect-error fetchpriority is valid HTML
+          fetchpriority="high"
+          width={384}
+          height={120}
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
@@ -57,7 +67,7 @@ const HeroSection = () => {
               onClick={() => navigate(path)}
               className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <img src={icon} alt={label} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
+              <img src={icon} alt={label} loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
               <span className="text-sm font-bold leading-tight px-2">{label}</span>
             </button>
           ))}
