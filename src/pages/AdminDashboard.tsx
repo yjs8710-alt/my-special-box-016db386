@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -1159,7 +1159,6 @@ const AdminDashboard = () => {
   const [memberGroupByAgency, setMemberGroupByAgency] = useState(false);
   const [collapsedAgencies, setCollapsedAgencies] = useState<Record<string, boolean>>({});
   const [propertySearch, setPropertySearch] = useState("");
-  const [propertySearchApplied, setPropertySearchApplied] = useState("");
   // 비밀번호 관리 상태
   const [pwInputs, setPwInputs] = useState<Record<string, string>>({});
   const [pwVisible, setPwVisible] = useState<Record<string, boolean>>({});
@@ -1180,9 +1179,7 @@ const AdminDashboard = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
-  const [contactSearchApplied, setContactSearchApplied] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
-  const [contactVisibleCount, setContactVisibleCount] = useState(200);
 
   // 신고/제안 state
   const [reports, setReports] = useState<PropertyReport[]>([]);
@@ -1278,21 +1275,8 @@ const AdminDashboard = () => {
   // ─── 청주 연락처 불러오기 ────────────────────────────────────────────────
   const fetchContacts = useCallback(async () => {
     setContactsLoading(true);
-    const PAGE = 1000;
-    let from = 0;
-    const all: CheongJuContact[] = [];
-    while (true) {
-      const { data, error } = await supabase
-        .from("cheongju_contacts")
-        .select("*")
-        .order("district").order("dong")
-        .range(from, from + PAGE - 1);
-      if (error || !data) break;
-      all.push(...(data as CheongJuContact[]));
-      if (data.length < PAGE) break;
-      from += PAGE;
-    }
-    setContacts(all);
+    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong");
+    if (!error && data) setContacts(data as CheongJuContact[]);
     setContactsLoading(false);
   }, []);
 
@@ -1703,7 +1687,7 @@ const AdminDashboard = () => {
     const districtFromAddr = CHEONGJU_DISTRICTS.find(d => p.address.includes(d)) ?? "";
     const effectiveDistrict = districtVal || districtFromAddr;
     const matchDistrict = propertyDistrictFilter === "전체" || effectiveDistrict.includes(propertyDistrictFilter);
-    const matchSearch = !propertySearchApplied || p.title.includes(propertySearchApplied) || p.address.includes(propertySearchApplied) || p.agent_name.includes(propertySearchApplied);
+    const matchSearch = !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch);
     return matchDistrict && matchSearch;
   });
 
@@ -1711,29 +1695,18 @@ const AdminDashboard = () => {
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
   );
 
-  const filteredContacts = useMemo(() => contacts.filter((c) => {
+  const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearchApplied
-      || c.dong.includes(contactSearchApplied)
-      || (c.lot_number ?? "").includes(contactSearchApplied)
-      || (c.unit_number ?? "").includes(contactSearchApplied)
-      || c.phone.includes(contactSearchApplied)
-      || (c.contact_owner ?? "").includes(contactSearchApplied)
-      || (c.contact_broker ?? "").includes(contactSearchApplied)
-      || (c.memo ?? "").includes(contactSearchApplied)
-      || (c.building_name ?? "").includes(contactSearchApplied);
+    const matchSearch = !contactSearch
+      || c.dong.includes(contactSearch)
+      || (c.lot_number ?? "").includes(contactSearch)
+      || (c.unit_number ?? "").includes(contactSearch)
+      || c.phone.includes(contactSearch)
+      || (c.contact_owner ?? "").includes(contactSearch)
+      || (c.contact_broker ?? "").includes(contactSearch)
+      || (c.memo ?? "").includes(contactSearch);
     return matchDist && matchSearch;
-  }), [contacts, contactDistrictFilter, contactSearchApplied]);
-
-  const visibleContacts = useMemo(
-    () => filteredContacts.slice(0, contactVisibleCount),
-    [filteredContacts, contactVisibleCount]
-  );
-
-  // 필터 변경 시 페이지 초기화
-  useEffect(() => {
-    setContactVisibleCount(200);
-  }, [contactDistrictFilter, contactSearchApplied]);
+  });
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
@@ -2561,15 +2534,8 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input
-                      placeholder="매물명·주소·중개사 검색"
-                      className="pl-7 h-8 text-xs w-52"
-                      value={propertySearch}
-                      onChange={(e) => setPropertySearch(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") setPropertySearchApplied(propertySearch); }}
-                    />
+                    <Input placeholder="매물명·주소·중개사 검색" className="pl-7 h-8 text-xs w-52" value={propertySearch} onChange={(e) => setPropertySearch(e.target.value)} />
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => setPropertySearchApplied(propertySearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchProperties} disabled={propertiesLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${propertiesLoading ? "animate-spin" : ""}`} />
                   </button>
@@ -2729,51 +2695,24 @@ const AdminDashboard = () => {
                  <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 <span className="font-bold text-foreground">{contacts.length.toLocaleString()}</span>개
-                    {" · "}노출 <span className="font-bold text-primary">{contacts.filter(c => c.is_visible !== false).length.toLocaleString()}</span>개
-                    {" · "}노출불가 <span className="font-bold text-muted-foreground">{contacts.filter(c => c.is_visible === false).length.toLocaleString()}</span>개
-                    {(contactDistrictFilter !== "전체" || contactSearchApplied) && (
-                      <>{" · "}현재 표시 <span className="font-bold text-accent">{filteredContacts.length.toLocaleString()}</span>개</>
-                    )}
+                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
                   </p>
-                  <div className="flex flex-wrap gap-1.5 mt-1.5">
-                    {CHEONGJU_DISTRICTS.map((d) => {
-                      const total = contacts.filter(c => c.district === d).length;
-                      const visible = contacts.filter(c => c.district === d && c.is_visible !== false).length;
-                      return (
-                        <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
-                          {d} <span className="font-bold text-foreground">{total.toLocaleString()}</span>
-                          <span className="text-muted-foreground"> (노출 {visible.toLocaleString()})</span>
-                        </span>
-                      );
-                    })}
-                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex gap-1">
-                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => {
-                      const cnt = d === "전체" ? contacts.length : contacts.filter(c => c.district === d).length;
-                      return (
-                        <button key={d} onClick={() => setContactDistrictFilter(d)}
-                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                          style={contactDistrictFilter === d
-                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                          }>{d} <span className="opacity-70">{cnt.toLocaleString()}</span></button>
-                      );
-                    })}
+                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => (
+                      <button key={d} onClick={() => setContactDistrictFilter(d)}
+                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                        style={contactDistrictFilter === d
+                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                        }>{d}</button>
+                    ))}
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input
-                      placeholder="동·번지·건물명·전화번호 검색"
-                      className="pl-7 h-8 text-xs w-52"
-                      value={contactSearch}
-                      onChange={(e) => setContactSearch(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") setContactSearchApplied(contactSearch); }}
-                    />
+                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => setContactSearchApplied(contactSearch)} className="h-8 text-xs">검색</Button>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
                   </button>
@@ -2799,8 +2738,7 @@ const AdminDashboard = () => {
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                
-                {visibleContacts.map((c) => {
+                {filteredContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
                   return (
                     <div
@@ -2895,17 +2833,6 @@ const AdminDashboard = () => {
                     </div>
                   );
                 })}
-                {visibleContacts.length < filteredContacts.length && (
-                  <div className="py-4 text-center border-t border-border">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setContactVisibleCount((n) => n + 200)}
-                    >
-                      더 보기 ({(filteredContacts.length - visibleContacts.length).toLocaleString()}개 남음)
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           )}
