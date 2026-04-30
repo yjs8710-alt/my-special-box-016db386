@@ -83,19 +83,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 로고 */}
             <div
-              className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0 -ml-3 sm:-ml-4"
+              className="flex items-center cursor-pointer select-none flex-shrink-0 -ml-3 sm:-ml-4 mr-2"
               onClick={() => navigate("/")}
             >
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 object-contain object-left block mt-2" />
-              <span
-                className="text-[10px] font-medium hidden lg:block px-1.5 py-0.5 rounded"
-                style={{
-                  background: "hsl(var(--header-border))",
-                  color: "rgba(255,255,255,0.55)",
-                }}
-              >
-                공인중개사 전용
-              </span>
             </div>
 
 
