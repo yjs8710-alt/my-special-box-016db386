@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -1200,6 +1200,7 @@ const AdminDashboard = () => {
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
+  const [contactDisplayCount, setContactDisplayCount] = useState(200);
 
   // 신고/제안 state
   const [reports, setReports] = useState<PropertyReport[]>([]);
@@ -1292,11 +1293,25 @@ const AdminDashboard = () => {
     setPropertiesLoading(false);
   }, []);
 
-  // ─── 청주 연락처 불러오기 ────────────────────────────────────────────────
+  // ─── 청주 연락처 불러오기 (1000행 제한 우회: 페이지네이션) ────────────
   const fetchContacts = useCallback(async () => {
     setContactsLoading(true);
-    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong");
-    if (!error && data) setContacts(data as CheongJuContact[]);
+    const PAGE = 1000;
+    let from = 0;
+    const all: CheongJuContact[] = [];
+    // count: exact 로 총 개수 확보 후, 페이지 단위로 모두 로드
+    while (true) {
+      const { data, error } = await supabase
+        .from("cheongju_contacts")
+        .select("*")
+        .order("district").order("dong")
+        .range(from, from + PAGE - 1);
+      if (error || !data) break;
+      all.push(...(data as CheongJuContact[]));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+    setContacts(all);
     setContactsLoading(false);
   }, []);
 
@@ -1718,18 +1733,38 @@ const AdminDashboard = () => {
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
   );
 
-  const filteredContacts = contacts.filter((c) => {
-    const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearch
-      || c.dong.includes(contactSearch)
-      || (c.lot_number ?? "").includes(contactSearch)
-      || (c.unit_number ?? "").includes(contactSearch)
-      || c.phone.includes(contactSearch)
-      || (c.contact_owner ?? "").includes(contactSearch)
-      || (c.contact_broker ?? "").includes(contactSearch)
-      || (c.memo ?? "").includes(contactSearch);
-    return matchDist && matchSearch;
-  });
+  // 구별 카운트 메모이제이션 (1500+ 항목에서 매 렌더 filter 방지)
+  const contactCounts = useMemo(() => {
+    const m: Record<string, number> = { 전체: contacts.length };
+    let visible = 0;
+    for (const c of contacts) {
+      const d = c.district || "";
+      m[d] = (m[d] ?? 0) + 1;
+      if (c.is_visible !== false) visible++;
+    }
+    return { ...m, __visible: visible, __hidden: contacts.length - visible };
+  }, [contacts]);
+
+  const filteredContacts = useMemo(() => {
+    const q = contactSearch.trim();
+    return contacts.filter((c) => {
+      const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
+      if (!matchDist) return false;
+      if (!q) return true;
+      return (
+        c.dong.includes(q)
+        || (c.lot_number ?? "").includes(q)
+        || (c.unit_number ?? "").includes(q)
+        || c.phone.includes(q)
+        || (c.contact_owner ?? "").includes(q)
+        || (c.contact_broker ?? "").includes(q)
+        || (c.memo ?? "").includes(q)
+        || (c.building_name ?? "").includes(q)
+      );
+    });
+  }, [contacts, contactDistrictFilter, contactSearch]);
+
+  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, contactSearch]);
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
@@ -2230,7 +2265,7 @@ const AdminDashboard = () => {
                             {STATUS_LABEL[m.status].label}
                           </span>
                         </div>
-                        {/* 액션 버튼 */}
+                        {/* 액션 버튼 (데스크톱) */}
                         <div className="hidden md:flex justify-center items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           {m.status !== "approved" && (
                             <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
@@ -2249,6 +2284,36 @@ const AdminDashboard = () => {
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                           {expandedMember === m.id ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+                        </div>
+                        {/* 모바일 전용 상태/액션 */}
+                        <div className="md:hidden mt-2 flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
+                            {STATUS_LABEL[m.status].label}
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: mtStyle.bg, color: mtStyle.color }}>
+                            <mtStyle.Icon className="w-3 h-3" />{mtStyle.label}
+                          </span>
+                          {m.role === "admin" && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}>🛡관리자</span>
+                          )}
+                          <div className="ml-auto flex items-center gap-1">
+                            {m.status !== "approved" && (
+                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md bg-muted/30" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {m.status !== "rejected" && (
+                              <button onClick={() => updateMemberStatus(m.id, "rejected")} className="p-1.5 rounded-md bg-muted/30" title="거절" style={{ color: "hsl(var(--destructive))" }}>
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md bg-muted/30" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(var(--chart-2))" }}>
+                              {m.is_active ? <Ban className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            </button>
+                            <button onClick={() => deleteMember(m)} className="p-1.5 rounded-md bg-muted/30" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -2718,20 +2783,20 @@ const AdminDashboard = () => {
                  <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    총 {contacts.length}개 · 노출 {contactCounts.__visible}개 · 노출불가 {contactCounts.__hidden}개
                     {" · "}
                     {CHEONGJU_DISTRICTS.map((d, i) => (
                       <span key={d}>
                         {i > 0 && " · "}
-                        {d} {contacts.filter(c => c.district === d).length}개
+                        {d} {contactCounts[d] ?? 0}개
                       </span>
                     ))}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 flex-wrap">
                     {["전체", ...CHEONGJU_DISTRICTS].map((d) => {
-                      const cnt = d === "전체" ? contacts.length : contacts.filter(c => c.district === d).length;
+                      const cnt = d === "전체" ? contacts.length : (contactCounts[d] ?? 0);
                       return (
                         <button key={d} onClick={() => setContactDistrictFilter(d)}
                           className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
@@ -2771,69 +2836,128 @@ const AdminDashboard = () => {
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                {filteredContacts.map((c) => {
+                {filteredContacts.slice(0, contactDisplayCount).map((c) => {
                   const isVisible = c.is_visible !== false;
                   const ownerPhones = getUniquePhones(c.phone, c.contact_owner);
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[60px_90px_minmax(160px,1fr)_70px_180px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`md:grid md:grid-cols-[60px_90px_minmax(160px,1fr)_70px_180px_110px_110px_75px_85px] md:items-center px-4 md:px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
-                      {/* 구 */}
-                      <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
+                      {/* ── 모바일 레이아웃 ── */}
+                      <div className="md:hidden flex flex-col gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground">
+                            <MapPin className="w-3 h-3" style={{ color: "hsl(var(--accent))" }} />{c.district}
+                          </span>
+                          <span className="text-sm font-bold text-foreground">{c.dong}</span>
+                          {c.lot_number && c.lot_number.trim() && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                              style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>{c.lot_number}</span>
+                          )}
+                          {(c.building_dong || c.unit_number) && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+                              {c.building_dong && <span>{c.building_dong}</span>}
+                              {c.unit_number && <span>{c.unit_number}호</span>}
+                            </span>
+                          )}
+                        </div>
+                        {c.building_name && (
+                          <div className="text-xs font-medium text-foreground truncate">{c.building_name}</div>
+                        )}
+                        <div className="grid grid-cols-1 gap-1 text-xs">
+                          {ownerPhones.length > 0 && (
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <span className="text-muted-foreground">소유주:</span>
+                              {ownerPhones.map((p) => (
+                                <a key={p} href={`tel:${p}`} className="font-semibold" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
+                              ))}
+                            </div>
+                          )}
+                          {c.contact_manager && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-muted-foreground">관리인:</span>
+                              <a href={`tel:${c.contact_manager}`} className="font-semibold" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                            </div>
+                          )}
+                          {c.contact_broker && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-muted-foreground">부동산:</span>
+                              <a href={`tel:${c.contact_broker}`} className="font-semibold" style={{ color: "hsl(var(--chart-3))" }}>{c.contact_broker}</a>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-1">
+                          <button
+                            onClick={() => toggleContactVisible(c)}
+                            disabled={togglingContactId === c.id}
+                            className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                            style={isVisible
+                              ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                              : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                            }>
+                            {togglingContactId === c.id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : isVisible
+                                ? <><Eye className="w-3 h-3" />노출</>
+                                : <><EyeOff className="w-3 h-3" />불가</>}
+                          </button>
+                          <button
+                            onClick={() => setContactModal(c)}
+                            className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                            style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}>
+                            <Pencil className="w-3 h-3" />수정
+                          </button>
+                          <button
+                            onClick={() => deleteContact(c)}
+                            className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                            style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}>
+                            <Trash2 className="w-3 h-3" />삭제
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* ── 데스크톱 그리드 ── */}
+                      <div className="hidden md:flex items-center gap-1 text-xs font-semibold text-foreground">
                         <MapPin className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--accent))" }} />{c.district}
                       </div>
-                      {/* 동 */}
-                      <div className="text-sm font-medium text-foreground">{c.dong}</div>
-                      {/* 번지수 + 건물명 */}
+                      <div className="hidden md:block text-sm font-medium text-foreground">{c.dong}</div>
                       <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                         {c.lot_number && c.lot_number.trim() ? (
-                          <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shrink-0"
-                            style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
-                          >{c.lot_number}</span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shrink-0"
+                            style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>{c.lot_number}</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                         {c.building_name && (
-                          <span className="truncate font-medium text-foreground" title={c.building_name}>
-                            {c.building_name}
-                          </span>
+                          <span className="truncate font-medium text-foreground" title={c.building_name}>{c.building_name}</span>
                         )}
                       </div>
-                      {/* 호수 */}
                       <div className="hidden md:block text-xs">
                         {c.building_dong || c.unit_number ? (
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}
-                          >
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+                            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
                             {c.building_dong && <span>{c.building_dong}</span>}
                             {c.unit_number && <span>{c.unit_number}호</span>}
                           </span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
-                      {/* 소유주 (phone) — 같은 번지에 2명 이상이면 모두 표시 */}
                       <div className="hidden md:flex flex-col items-start gap-0.5 text-xs">
                         {ownerPhones.length > 0 ? (
                           ownerPhones.map((p) => (
                             <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
                           ))
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                        ) : <span className="text-muted-foreground">—</span>}
                       </div>
-                      {/* 관리인 */}
                       <div className="hidden md:block text-xs">
                         {c.contact_manager ? (
                           <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
-                      {/* 부동산 */}
                       <div className="hidden md:block text-xs">
                         {c.contact_broker ? (
                           <a href={`tel:${c.contact_broker}`} className="font-medium" style={{ color: "hsl(var(--chart-3))" }}>{c.contact_broker}</a>
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
-                      {/* 노출 상태 토글 */}
                       <div className="hidden md:flex justify-center">
                         <button
                           onClick={() => toggleContactVisible(c)}
@@ -2843,37 +2967,38 @@ const AdminDashboard = () => {
                             ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
                             : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                           }
-                          title={isVisible ? "클릭 시 노출불가" : "클릭 시 노출"}
-                        >
+                          title={isVisible ? "클릭 시 노출불가" : "클릭 시 노출"}>
                           {togglingContactId === c.id
                             ? <Loader2 className="w-3 h-3 animate-spin" />
                             : isVisible
                               ? <><Eye className="w-3 h-3" />노출</>
-                              : <><EyeOff className="w-3 h-3" />불가</>
-                          }
+                              : <><EyeOff className="w-3 h-3" />불가</>}
                         </button>
                       </div>
-                      {/* 수정 */}
                       <div className="hidden md:flex justify-center gap-1">
-                        <button
-                          onClick={() => setContactModal(c)}
+                        <button onClick={() => setContactModal(c)}
                           className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
-                          style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}
-                        >
+                          style={{ background: "hsl(var(--primary) / 0.10)", color: "hsl(var(--primary))" }}>
                           <Pencil className="w-3 h-3" />수정
                         </button>
-                        <button
-                          onClick={() => deleteContact(c)}
+                        <button onClick={() => deleteContact(c)}
                           className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold"
-                          style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}
-                          title="삭제"
-                        >
+                          style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }} title="삭제">
                           <Trash2 className="w-3 h-3" />삭제
                         </button>
                       </div>
                     </div>
                   );
                 })}
+                {filteredContacts.length > contactDisplayCount && (
+                  <div className="py-4 text-center">
+                    <button
+                      onClick={() => setContactDisplayCount((n) => n + 200)}
+                      className="px-4 py-2 rounded-full text-xs font-semibold border border-border hover:bg-muted/30">
+                      더 보기 ({contactDisplayCount} / {filteredContacts.length})
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

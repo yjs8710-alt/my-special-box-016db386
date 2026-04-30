@@ -27,31 +27,58 @@ export function getOrCreateDeviceId(): string {
   }
 }
 
+// IP 캐시 — 같은 세션 내 중복 외부 호출 방지
+let _ipCache: { ip: string | null; t: number } | null = null;
+let _ipInFlight: Promise<string | null> | null = null;
+const IP_CACHE_TTL = 60_000; // 1분
+
 async function fetchPublicIp(): Promise<string | null> {
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 3000);
-    const res = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
-    clearTimeout(t);
-    if (!res.ok) return null;
-    const j = await res.json();
-    return typeof j?.ip === "string" ? j.ip : null;
-  } catch {
-    return null;
-  }
+  const now = Date.now();
+  if (_ipCache && now - _ipCache.t < IP_CACHE_TTL) return _ipCache.ip;
+  if (_ipInFlight) return _ipInFlight;
+  _ipInFlight = (async () => {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 1500); // 3000 → 1500ms
+      const res = await fetch("https://api.ipify.org?format=json", { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!res.ok) { _ipCache = { ip: null, t: Date.now() }; return null; }
+      const j = await res.json();
+      const ip = typeof j?.ip === "string" ? j.ip : null;
+      _ipCache = { ip, t: Date.now() };
+      return ip;
+    } catch {
+      _ipCache = { ip: null, t: Date.now() };
+      return null;
+    } finally {
+      _ipInFlight = null;
+    }
+  })();
+  return _ipInFlight;
 }
 
-/** 로그인 직후 호출: 같은 슬롯의 기존 디바이스를 밀어내고 본 디바이스를 활성화 */
+/** 로그인 직후 호출: 같은 슬롯의 기존 디바이스를 밀어내고 본 디바이스를 활성화
+ *  - IP 조회는 비차단(fire-and-forget)으로 처리해 초기 로그인 지연 제거 */
 export async function claimDeviceSlot(): Promise<void> {
   const deviceType = getDeviceType();
   const deviceId = getOrCreateDeviceId();
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : null;
-  const ip = await fetchPublicIp();
+  // IP 없이 즉시 슬롯 클레임 (빠른 로그인)
   await supabase.rpc("claim_device_slot", {
     _device_type: deviceType,
     _device_id: deviceId,
     _user_agent: ua,
-    _ip_address: ip,
+    _ip_address: null,
+  });
+  // IP 는 백그라운드로 조회 후 갱신 (UI 차단 X)
+  fetchPublicIp().then((ip) => {
+    if (!ip) return;
+    void supabase.rpc("claim_device_slot", {
+      _device_type: deviceType,
+      _device_id: deviceId,
+      _user_agent: ua,
+      _ip_address: ip,
+    });
   });
 }
 
@@ -63,17 +90,17 @@ export async function verifyDeviceSlot(): Promise<boolean> {
     _device_type: deviceType,
     _device_id: deviceId,
   });
-  if (error) return true; // 네트워크 오류 시 강제 로그아웃 방지
+  if (error) return true;
   return data === true;
 }
 
 /** PC/모바일 공통: 관리자가 등록한 허용 IP와 현재 IP가 일치하는지 검증.
  *  - 허용 IP가 비어있으면 통과 (제한 없음)
  *  - 관리자는 RPC 내부에서 면제됨
- *  - IP 조회 자체가 실패하면 차단 (false) — 우회 방지 */
+ *  - IP 조회 자체가 실패하면 차단 안함 (false 반환 시 알림) */
 export async function verifyPcIpAllowed(): Promise<boolean> {
   const ip = await fetchPublicIp();
-  if (!ip) return true; // IP 조회 실패 시 우발적 차단 방지
+  if (!ip) return true;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase.rpc as any)("verify_pc_ip", { _ip_address: ip });
   if (error) return true;
