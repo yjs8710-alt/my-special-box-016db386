@@ -21,25 +21,29 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
-            {[
-              { title: "서비스", links: ["매물 검색", "매물 등록", "시세 조회", "경매 정보"] },
-              { title: "회사", links: ["회사소개", "채용정보", "공지사항", "파트너십"] },
-              { title: "지원", links: ["이용약관", "개인정보처리방침", "고객센터", "자주 묻는 질문"] },
-            ].map((col) => (
-              <div key={col.title}>
-                <h4 className="font-semibold text-white/80 mb-3">{col.title}</h4>
-                <ul className="flex flex-col gap-2">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-white/40 hover:text-white transition-colors text-xs">
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-8 text-sm">
+            <div>
+              <h4 className="font-semibold text-white/80 mb-3">회사</h4>
+              <ul className="flex flex-col gap-2">
+                <li>
+                  <a href="#" className="text-white hover:text-white transition-colors text-xs">
+                    회사소개
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white/80 mb-3">지원</h4>
+              <ul className="flex flex-col gap-2">
+                {["이용약관", "개인정보처리방침", "고객센터"].map((link) => (
+                  <li key={link}>
+                    <a href="#" className="text-white/40 hover:text-white transition-colors text-xs">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
