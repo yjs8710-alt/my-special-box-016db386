@@ -465,14 +465,17 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   }, [radiusMode]);
 
   // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
+  // suppressPan은 ref 패턴으로 읽어서, false로 바뀌었을 때 effect 재실행으로 panTo가 호출되는 것을 방지
+  const suppressPanRef = useRef(suppressPan);
+  useEffect(() => { suppressPanRef.current = suppressPan; }, [suppressPan]);
   useEffect(() => {
     if (!mapRef.current || selectedId === null || !window.kakao?.maps) return;
-    if (suppressPan) return;
+    if (suppressPanRef.current) return;
     const prop = properties.find((p) => p.id === selectedId);
     if (prop && prop.lat && prop.lng) {
       mapRef.current.panTo(new window.kakao.maps.LatLng(prop.lat, prop.lng));
     }
-  }, [selectedId, properties, suppressPan]);
+  }, [selectedId, properties]);
 
   // 컨테이너 크기 변경 시 지도 relayout 호출
   useEffect(() => {

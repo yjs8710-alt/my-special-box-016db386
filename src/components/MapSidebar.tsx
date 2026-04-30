@@ -132,7 +132,7 @@ function LightboxModal({
               <button
                 key={i}
                 onClick={() => handleUnitChange(i)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center leading-tight"
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-row items-center gap-1.5 leading-tight whitespace-nowrap"
                 style={
                   isCurrent
                     ? { background: "hsl(var(--primary))", color: "#fff" }
@@ -140,7 +140,7 @@ function LightboxModal({
                 }
               >
                 <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
-                {roomLabel && <span className="text-[10px] font-normal opacity-80 mt-0.5">{roomLabel}</span>}
+                {roomLabel && <span className="text-[10px] font-normal opacity-80">{roomLabel}</span>}
               </button>
             );
           })}
