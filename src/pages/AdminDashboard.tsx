@@ -1764,6 +1764,8 @@ const AdminDashboard = () => {
     });
   }, [contacts, contactDistrictFilter, contactSearch]);
 
+  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, contactSearch]);
+
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
     setTab(key);
