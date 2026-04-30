@@ -2265,7 +2265,7 @@ const AdminDashboard = () => {
                             {STATUS_LABEL[m.status].label}
                           </span>
                         </div>
-                        {/* 액션 버튼 */}
+                        {/* 액션 버튼 (데스크톱) */}
                         <div className="hidden md:flex justify-center items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           {m.status !== "approved" && (
                             <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
