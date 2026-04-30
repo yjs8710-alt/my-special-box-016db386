@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -1182,6 +1182,7 @@ const AdminDashboard = () => {
   const [contactSearch, setContactSearch] = useState("");
   const [contactSearchApplied, setContactSearchApplied] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
+  const [contactVisibleCount, setContactVisibleCount] = useState(200);
 
   // 신고/제안 state
   const [reports, setReports] = useState<PropertyReport[]>([]);
@@ -1710,7 +1711,7 @@ const AdminDashboard = () => {
     !postSearch || p.title.includes(postSearch) || p.author.includes(postSearch)
   );
 
-  const filteredContacts = contacts.filter((c) => {
+  const filteredContacts = useMemo(() => contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
     const matchSearch = !contactSearchApplied
       || c.dong.includes(contactSearchApplied)
@@ -1722,7 +1723,17 @@ const AdminDashboard = () => {
       || (c.memo ?? "").includes(contactSearchApplied)
       || (c.building_name ?? "").includes(contactSearchApplied);
     return matchDist && matchSearch;
-  });
+  }), [contacts, contactDistrictFilter, contactSearchApplied]);
+
+  const visibleContacts = useMemo(
+    () => filteredContacts.slice(0, contactVisibleCount),
+    [filteredContacts, contactVisibleCount]
+  );
+
+  // 필터 변경 시 페이지 초기화
+  useEffect(() => {
+    setContactVisibleCount(200);
+  }, [contactDistrictFilter, contactSearchApplied]);
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
@@ -2788,7 +2799,8 @@ const AdminDashboard = () => {
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                {filteredContacts.map((c) => {
+                
+                {visibleContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
                   return (
                     <div
@@ -2883,6 +2895,17 @@ const AdminDashboard = () => {
                     </div>
                   );
                 })}
+                {visibleContacts.length < filteredContacts.length && (
+                  <div className="py-4 text-center border-t border-border">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setContactVisibleCount((n) => n + 200)}
+                    >
+                      더 보기 ({(filteredContacts.length - visibleContacts.length).toLocaleString()}개 남음)
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}
