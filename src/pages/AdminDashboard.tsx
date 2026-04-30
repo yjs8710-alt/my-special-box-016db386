@@ -2799,7 +2799,7 @@ const AdminDashboard = () => {
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                {filteredContacts.length === 0 ? null : null}
+                
                 {visibleContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
                   return (
