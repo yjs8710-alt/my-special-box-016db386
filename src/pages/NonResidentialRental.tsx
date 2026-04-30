@@ -298,6 +298,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             hideSearchBar={showRegister}
             nonResidentialSubtypes={NON_RESIDENTIAL_SUBTYPES}
             showRoomTypes={false}
+            hideRentalAndPrice={isCollectiveSale}
           />
         </div>
         <MapSidebar
