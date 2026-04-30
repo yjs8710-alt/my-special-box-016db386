@@ -2723,7 +2723,7 @@ const AdminDashboard = () => {
               </div>
 
               <div className="bg-card border border-border rounded-xl overflow-hidden">
-               <div className="hidden md:grid grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
+               <div className="hidden md:grid grid-cols-[60px_90px_90px_70px_180px_110px_110px_75px_85px] text-xs font-semibold text-muted-foreground bg-muted/40 px-5 py-3 border-b border-border">
                    <span>구</span>
                    <span>동/읍/면</span>
                    <span>번지수</span>
@@ -2740,10 +2740,26 @@ const AdminDashboard = () => {
                 )}
                 {filteredContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
+                  // 같은 주소(동·번지)의 모든 소유주 번호 수집 (중복 제거)
+                  const norm = (p: string | null | undefined) => (p ?? "").replace(/[^0-9]/g, "");
+                  const ownerPhones = Array.from(
+                    new Map(
+                      contacts
+                        .filter((x) =>
+                          x.dong === c.dong &&
+                          (x.lot_number ?? "") === (c.lot_number ?? "") &&
+                          x.phone && norm(x.phone)
+                        )
+                        .map((x) => [norm(x.phone), x.phone as string])
+                    ).values()
+                  );
+                  ownerPhones.sort((a, b) =>
+                    norm(a) === norm(c.phone) ? -1 : norm(b) === norm(c.phone) ? 1 : 0
+                  );
                   return (
                     <div
                       key={c.id}
-                      className={`grid md:grid-cols-[60px_90px_90px_70px_130px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
+                      className={`grid md:grid-cols-[60px_90px_90px_70px_180px_110px_110px_75px_85px] items-center px-5 py-3 border-b border-border last:border-0 transition-colors ${!isVisible ? "opacity-50 bg-muted/10" : "hover:bg-muted/20"}`}
                     >
                       {/* 구 */}
                       <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
@@ -2772,10 +2788,17 @@ const AdminDashboard = () => {
                           </span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                       </div>
-                      {/* 소유주 (phone) */}
-                      <div className="hidden md:flex items-center gap-1 text-xs">
-                        {c.phone ? (
-                          <a href={`tel:${c.phone}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{c.phone}</a>
+                      {/* 소유주 (phone) — 같은 번지에 2명 이상이면 모두 표시 */}
+                      <div className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                        {ownerPhones.length > 0 ? (
+                          ownerPhones.map((p, i) => (
+                            <span key={p} className="inline-flex items-center gap-0.5 whitespace-nowrap">
+                              {ownerPhones.length > 1 && (
+                                <span className="text-[9px] font-bold text-muted-foreground/70">{i + 1}.</span>
+                              )}
+                              <a href={`tel:${p}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
+                            </span>
+                          ))
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
