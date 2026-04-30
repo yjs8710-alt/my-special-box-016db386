@@ -103,6 +103,40 @@ type CheongJuContact = {
   is_visible?: boolean;
 };
 
+const normalizePhoneNumber = (value: string | null | undefined) => (value ?? "").replace(/[^0-9]/g, "");
+
+const getUniquePhones = (...values: Array<string | null | undefined>) => {
+  const seen = new Set<string>();
+  const phones: string[] = [];
+
+  values.forEach((value) => {
+    const raw = value ?? "";
+    const matches = raw.match(/0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}/g) ?? raw.split(/[,/;|\n]+/);
+    matches.forEach((candidate) => {
+      const normalized = normalizePhoneNumber(candidate);
+      if (normalized.length < 7 || seen.has(normalized)) return;
+      seen.add(normalized);
+      phones.push(formatPhone(normalized));
+    });
+  });
+
+  return phones;
+};
+
+const getContactAddressKey = (contact: CheongJuContact) => [
+  contact.district,
+  contact.dong,
+  contact.lot_number,
+  contact.building_name,
+  contact.building_dong,
+  contact.unit_number,
+].map((value) => (value ?? "").trim()).join("|");
+
+const cleanExtraOwnerPhones = (extraPhones: string | null | undefined, mainPhone: string | null | undefined) => {
+  const main = normalizePhoneNumber(mainPhone);
+  return getUniquePhones(extraPhones).filter((phone) => normalizePhoneNumber(phone) !== main).join("\n");
+};
+
 type PropertyReport = {
   id: string;
   property_id: string;
