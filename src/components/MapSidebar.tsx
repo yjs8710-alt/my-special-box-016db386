@@ -121,7 +121,7 @@ function LightboxModal({
     }
   }, [unitIdx, isMobileView, showMoreUnits]);
 
-  const renderTabButton = (u: PhotoUnit, i: number) => {
+  const renderTabButton = (u: LightboxUnit, i: number) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
     const unitLabel = u.unitNumber ?? u.label ?? "";
