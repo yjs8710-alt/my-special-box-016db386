@@ -134,6 +134,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     if (activeTypes.includes("임대-전체")) return ["상가", "사무실", "공장·창고", "지식산업", "상가임대", "기타임대"];
     if (activeTypes.includes("매매-전체")) return ALL_SALE_TYPES;
     const expansionMap: Record<string, string[]> = {
+      "건물매매": ["건물매매", "단독매매", "다가구매매", "다중매매", "상가주택매매", "상가건물매매"],
       "사무실매매-그룹": ["사무실", "사무실매매"],
       "지식산업매매-그룹": ["지식산업", "지식산업매매"],
       "공장창고매매-그룹": ["공장·창고", "창고/공장매매"],
