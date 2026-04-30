@@ -782,7 +782,7 @@ const MapFilterBar = ({
                     })()}
                   </div>
                   <div className="flex flex-col gap-2">
-                    {["임대", "매매"].map((group) => (
+                    {(hideRentalAndPrice ? ["매매"] : ["임대", "매매"]).map((group) => (
                       <div key={group}>
                         <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--muted-foreground))" }}>
                           {group}
