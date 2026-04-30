@@ -2799,7 +2799,8 @@ const AdminDashboard = () => {
                 {!contactsLoading && filteredContacts.length === 0 && (
                   <div className="py-16 text-center text-sm text-muted-foreground">등록된 연락처가 없습니다.</div>
                 )}
-                {filteredContacts.map((c) => {
+                {filteredContacts.length === 0 ? null : null}
+                {visibleContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
                   return (
                     <div
@@ -2894,6 +2895,17 @@ const AdminDashboard = () => {
                     </div>
                   );
                 })}
+                {visibleContacts.length < filteredContacts.length && (
+                  <div className="py-4 text-center border-t border-border">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setContactVisibleCount((n) => n + 200)}
+                    >
+                      더 보기 ({(filteredContacts.length - visibleContacts.length).toLocaleString()}개 남음)
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}
