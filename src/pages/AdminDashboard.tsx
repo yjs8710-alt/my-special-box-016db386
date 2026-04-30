@@ -2285,6 +2285,36 @@ const AdminDashboard = () => {
                           </button>
                           {expandedMember === m.id ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                         </div>
+                        {/* 모바일 전용 상태/액션 */}
+                        <div className="md:hidden mt-2 flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: STATUS_LABEL[m.status].bg, color: STATUS_LABEL[m.status].color }}>
+                            {STATUS_LABEL[m.status].label}
+                          </span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: mtStyle.bg, color: mtStyle.color }}>
+                            <mtStyle.Icon className="w-3 h-3" />{mtStyle.label}
+                          </span>
+                          {m.role === "admin" && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}>🛡관리자</span>
+                          )}
+                          <div className="ml-auto flex items-center gap-1">
+                            {m.status !== "approved" && (
+                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md bg-muted/30" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
+                                <CheckCircle2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {m.status !== "rejected" && (
+                              <button onClick={() => updateMemberStatus(m.id, "rejected")} className="p-1.5 rounded-md bg-muted/30" title="거절" style={{ color: "hsl(var(--destructive))" }}>
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                            <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md bg-muted/30" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(var(--chart-2))" }}>
+                              {m.is_active ? <Ban className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            </button>
+                            <button onClick={() => deleteMember(m)} className="p-1.5 rounded-md bg-muted/30" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
                       {/* 확장 패널 */}
