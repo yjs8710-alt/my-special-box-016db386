@@ -2777,21 +2777,9 @@ const AdminDashboard = () => {
                 )}
                 {filteredContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
-                  // 같은 주소(동·번지)의 모든 소유주 번호 수집 (중복 제거)
-                  const norm = (p: string | null | undefined) => (p ?? "").replace(/[^0-9]/g, "");
-                  const ownerPhones = Array.from(
-                    new Map(
-                      contacts
-                        .filter((x) =>
-                          x.dong === c.dong &&
-                          (x.lot_number ?? "") === (c.lot_number ?? "") &&
-                          x.phone && norm(x.phone)
-                        )
-                        .map((x) => [norm(x.phone), x.phone as string])
-                    ).values()
-                  );
-                  ownerPhones.sort((a, b) =>
-                    norm(a) === norm(c.phone) ? -1 : norm(b) === norm(c.phone) ? 1 : 0
+                  const sameAddressContacts = contacts.filter((x) => getContactAddressKey(x) === getContactAddressKey(c));
+                  const ownerPhones = getUniquePhones(
+                    ...sameAddressContacts.flatMap((x) => [x.phone, x.contact_owner])
                   );
                   return (
                     <div
