@@ -79,11 +79,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
         <div className="w-full pl-0 pr-3 sm:pr-5">
-          <div className="flex items-center h-12 gap-2">
+          <div className="flex items-center h-12 gap-0">
 
             {/* 로고 */}
             <div
-              className="flex items-center cursor-pointer select-none flex-shrink-0 ml-3 sm:ml-5 mr-3"
+              className="flex items-center cursor-pointer select-none flex-shrink-0 ml-3 sm:ml-5 mr-0"
               onClick={() => navigate("/")}
             >
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 object-contain object-left block mt-2" />
