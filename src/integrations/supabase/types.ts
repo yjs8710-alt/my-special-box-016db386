@@ -188,6 +188,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cheongju_contacts_stage: {
+        Row: {
+          building_name: string | null
+          district: string | null
+          dong: string | null
+          lot_number: string | null
+          manager_phones: string | null
+          owner_phones: string | null
+          unit_number: string | null
+        }
+        Insert: {
+          building_name?: string | null
+          district?: string | null
+          dong?: string | null
+          lot_number?: string | null
+          manager_phones?: string | null
+          owner_phones?: string | null
+          unit_number?: string | null
+        }
+        Update: {
+          building_name?: string | null
+          district?: string | null
+          dong?: string | null
+          lot_number?: string | null
+          manager_phones?: string | null
+          owner_phones?: string | null
+          unit_number?: string | null
+        }
+        Relationships: []
+      }
       land_summary: {
         Row: {
           created_at: string
@@ -639,6 +669,7 @@ export type Database = {
         Returns: boolean
       }
       is_phone_registered: { Args: { _phone: string }; Returns: boolean }
+      merge_cheongju_contacts_from_stage: { Args: never; Returns: Json }
       update_property_images: {
         Args: { _images: string[]; _property_id: string }
         Returns: boolean
