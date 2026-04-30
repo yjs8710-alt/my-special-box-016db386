@@ -83,17 +83,9 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 로고 */}
             <div
-              className="flex items-center cursor-pointer select-none flex-shrink-0 ml-2 sm:ml-5 mr-0 gap-1.5"
+              className="flex items-center cursor-pointer select-none flex-shrink-0 ml-0 sm:ml-5 mr-0"
               onClick={() => navigate("/")}
             >
-              {/* 모바일에서만 노출되는 집모양 아이콘 — 로고 좌측에 붙임 */}
-              <span
-                className="md:hidden inline-flex items-center justify-center w-7 h-7 rounded-md flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.12)" }}
-                aria-hidden
-              >
-                <Home className="w-4 h-4 text-white" strokeWidth={2.5} />
-              </span>
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
             </div>
 
