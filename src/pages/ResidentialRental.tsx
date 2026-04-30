@@ -265,7 +265,13 @@ const ResidentialRental = () => {
           properties={sidebarProperties}
           referencePool={allProperties}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={(id) => {
+            // 사이드바/매물카드 클릭 시 지도 panTo 억제 (모바일에서 시트가 펼쳐질 때 지도가 흔들리지 않도록)
+            setSuppressPan(true);
+            setSelectedId(id);
+            // 마커 클릭 시 다시 panTo 가능하도록 짧게 후 해제
+            setTimeout(() => setSuppressPan(false), 600);
+          }}
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}

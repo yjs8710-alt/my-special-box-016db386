@@ -147,35 +147,44 @@ function LightboxModal({
         </div>
       )}
 
-      {/* ── 모바일: 세로 스크롤 나열 ── */}
+      {/* ── 모바일: 좌우 가로 스와이프 ── */}
       {isMobileView ? (
         <div
-          className="flex-1 overflow-y-auto overflow-x-hidden w-full"
-          style={{ paddingTop: hasTabs ? "72px" : "56px", paddingBottom: "32px" }}
+          className="flex-1 flex flex-col w-full overflow-hidden"
+          style={{ paddingTop: hasTabs ? "72px" : "16px", paddingBottom: "16px" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 카운터 표시 제거 — 오로지 사진만 보이도록 */}
           {units[unitIdx]?.isReference && (
-            <div className="text-center mb-3 px-4">
-              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--primary))" }}>
+            <div className="text-center mb-2 px-4 flex-shrink-0">
+              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--accent))" }}>
                 다른 매물 사진입니다. 참고용입니다.
               </span>
             </div>
           )}
-          <div className="flex flex-col gap-3 px-3">
-            {currentImages.map((src, i) => (
-              <div key={i} className="w-full flex flex-col items-center">
-                <img
-                  src={src}
-                  alt={`사진 ${i + 1}`}
-                  className="w-full h-auto object-contain rounded-lg select-none"
-                  draggable={false}
-                  loading="lazy"
-                />
-                <span className="sr-only">{`사진 ${i + 1} / ${currentImages.length}`}</span>
-              </div>
-            ))}
+          {/* 가로 스크롤 carousel */}
+          <div className="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none">
+            <div className="flex h-full">
+              {currentImages.map((src, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-screen h-full snap-center flex items-center justify-center px-3"
+                >
+                  <img
+                    src={src}
+                    alt={`사진 ${i + 1}`}
+                    className="max-w-full max-h-full object-contain rounded-lg select-none"
+                    draggable={false}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
+          {currentImages.length > 1 && (
+            <div className="text-center mt-2 flex-shrink-0">
+              <span className="text-xs text-white/70">{currentImages.length}장 — 좌우로 넘기세요</span>
+            </div>
+          )}
         </div>
       ) : (
         <>
@@ -218,7 +227,7 @@ function LightboxModal({
                 style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--primary))" }}>
+                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
                   다른 매물 사진입니다. 참고용입니다.
                 </span>
               </div>
@@ -2922,29 +2931,39 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {facilityBadges}
               <span className="flex-1" />
               {opts.length > 0 && (
-                <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
-                  {isFull ? (
-                    <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>
-                      풀옵션
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>
-                      옵션 ▾
-                    </span>
-                  )}
+                <>
+                  <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
+                    {isFull ? (
+                      <span className="flex items-center gap-0.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "linear-gradient(90deg, hsl(38 95% 88%), hsl(45 100% 82%))", color: "hsl(28 80% 35%)", border: "1.5px solid hsl(38 80% 70%)" }}>
+                        풀옵션
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap select-none" style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.65)", border: "1.5px solid hsl(var(--border))" }}>
+                        옵션 ▾
+                      </span>
+                    )}
+                  </div>
                   {showOptPopup && (
-                    <div className="absolute right-0 bottom-full mb-1 z-[9999] bg-white border border-border rounded-xl shadow-xl p-2.5" style={{ minWidth: "180px", maxWidth: "240px", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}>
-                      <p className="text-[10px] font-extrabold mb-1.5 pb-1 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
-                        {isFull ? "풀옵션 구성" : `옵션 항목 (${opts.length}개)`}
-                      </p>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {opts.map((opt) => (
-                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
-                        ))}
+                    <div
+                      className="fixed inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
+                      onClick={(e) => { e.stopPropagation(); setShowOptPopup(false); }}
+                    >
+                      <div
+                        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 w-full sm:w-auto sm:max-w-md max-h-[80dvh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <p className="text-xs font-extrabold mb-2 pb-1.5 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+                          {isFull ? "풀옵션 구성" : `옵션 항목 (${opts.length}개)`}
+                        </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1.5">
+                          {opts.map((opt) => (
+                            <span key={opt} className="text-[12px] font-semibold text-foreground whitespace-nowrap">· {opt}</span>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
-                </div>
+                </>
               )}
             </div>
           )}
@@ -3387,7 +3406,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="relative flex-shrink-0"
                   onMouseEnter={handleOptMouseEnter}
                   onMouseLeave={handleOptMouseLeave}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (showOptPopup) { setShowOptPopup(false); }
+                    else { handleOptMouseEnter(); }
+                  }}
                 >
                   {isFull ? (
                     <span

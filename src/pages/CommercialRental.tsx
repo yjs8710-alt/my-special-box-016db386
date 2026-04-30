@@ -21,6 +21,7 @@ const CommercialRental = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showRegister, setShowRegister] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
@@ -80,7 +81,7 @@ const CommercialRental = () => {
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
-      <Header onRegisterChange={setShowRegister} />
+      <Header onRegisterChange={setShowRegister} onMenuOpenChange={setMobileMenuOpen} />
 
       <div
         className="flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
@@ -134,7 +135,7 @@ const CommercialRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            hideSearchBar={showRegister}
+            hideSearchBar={showRegister || mobileMenuOpen}
             showCategoryChips={true}
             showRoomTypes={false}
           />
@@ -143,7 +144,11 @@ const CommercialRental = () => {
           properties={sidebarProperties}
           referencePool={allProperties}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={(id) => {
+            setSuppressPan(true);
+            setSelectedId(id);
+            setTimeout(() => setSuppressPan(false), 600);
+          }}
           onDeselect={() => setSelectedId(null)}
           activeType={activeType}
           onTypeChange={(t) => toggleType(t)}

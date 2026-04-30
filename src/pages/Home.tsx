@@ -42,6 +42,28 @@ const Home = () => {
     return () => mql?.removeEventListener?.("change", checkInstalled);
   }, []);
 
+  // 뒤로가기 시 종료 확인 (모바일 PWA에서 의도치 않은 종료 방지)
+  useEffect(() => {
+    // 가짜 history state를 push 해서, popstate를 가로챌 수 있게 함
+    window.history.pushState({ exitGuard: true }, "");
+
+    const onPopState = () => {
+      const ok = window.confirm("종료하겠습니까?");
+      if (ok) {
+        // 한 번 더 뒤로가서 실제로 종료/이전 페이지로
+        window.history.back();
+      } else {
+        // 사용자가 취소하면 가드 state를 다시 push
+        window.history.pushState({ exitGuard: true }, "");
+      }
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col relative">
       <Header />
