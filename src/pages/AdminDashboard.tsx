@@ -2719,18 +2719,28 @@ const AdminDashboard = () => {
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    {" · "}
+                    {CHEONGJU_DISTRICTS.map((d, i) => (
+                      <span key={d}>
+                        {i > 0 && " · "}
+                        {d} {contacts.filter(c => c.district === d).length}개
+                      </span>
+                    ))}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex gap-1">
-                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => (
-                      <button key={d} onClick={() => setContactDistrictFilter(d)}
-                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                        style={contactDistrictFilter === d
-                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                        }>{d}</button>
-                    ))}
+                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => {
+                      const cnt = d === "전체" ? contacts.length : contacts.filter(c => c.district === d).length;
+                      return (
+                        <button key={d} onClick={() => setContactDistrictFilter(d)}
+                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                          style={contactDistrictFilter === d
+                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                          }>{d} {cnt}</button>
+                      );
+                    })}
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
