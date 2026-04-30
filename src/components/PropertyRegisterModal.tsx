@@ -748,7 +748,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         }
         const { error: contactErr } = await supabase
           .from("cheongju_contacts")
-          .upsert(upsertPayload, { onConflict: "dong,lot_number,unit_number" });
+          .upsert(upsertPayload as never, { onConflict: "dong,lot_number,unit_number" });
         if (contactErr) console.error("[청주연락처] upsert 오류:", contactErr.message);
       }
     }
