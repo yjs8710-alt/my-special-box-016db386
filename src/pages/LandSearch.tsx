@@ -14,7 +14,7 @@ const LAND_PROPERTIES: MapProperty[] = [];
 const LAND_SUBTYPES = ["전체"];
 
 const LandSearch = () => {
-  useExitConfirm();
+  const { ExitConfirmDialog } = useExitConfirm();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
@@ -178,6 +178,7 @@ const LandSearch = () => {
           onRefetch={refetch}
         />
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };

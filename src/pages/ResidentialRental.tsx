@@ -16,7 +16,7 @@ const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리
 const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원", "연립", "다세대", "주상복합", "단독주택", "다가구", "포룸"];
 
 const ResidentialRental = () => {
-  useExitConfirm();
+  const { ExitConfirmDialog } = useExitConfirm();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedAddress, setPinnedAddress] = useState<string | null>(null);
@@ -292,6 +292,7 @@ const ResidentialRental = () => {
           onRefetch={refetch}
         />
       </main>
+      <ExitConfirmDialog />
     </div>
   );
 };
