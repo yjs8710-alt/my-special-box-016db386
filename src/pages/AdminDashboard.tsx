@@ -1712,14 +1712,15 @@ const AdminDashboard = () => {
 
   const filteredContacts = contacts.filter((c) => {
     const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
-    const matchSearch = !contactSearch
-      || c.dong.includes(contactSearch)
-      || (c.lot_number ?? "").includes(contactSearch)
-      || (c.unit_number ?? "").includes(contactSearch)
-      || c.phone.includes(contactSearch)
-      || (c.contact_owner ?? "").includes(contactSearch)
-      || (c.contact_broker ?? "").includes(contactSearch)
-      || (c.memo ?? "").includes(contactSearch);
+    const matchSearch = !contactSearchApplied
+      || c.dong.includes(contactSearchApplied)
+      || (c.lot_number ?? "").includes(contactSearchApplied)
+      || (c.unit_number ?? "").includes(contactSearchApplied)
+      || c.phone.includes(contactSearchApplied)
+      || (c.contact_owner ?? "").includes(contactSearchApplied)
+      || (c.contact_broker ?? "").includes(contactSearchApplied)
+      || (c.memo ?? "").includes(contactSearchApplied)
+      || (c.building_name ?? "").includes(contactSearchApplied);
     return matchDist && matchSearch;
   });
 
