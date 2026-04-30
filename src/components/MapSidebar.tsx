@@ -209,28 +209,24 @@ function LightboxModal({
               </span>
             </div>
           )}
-          {/* 가로 스크롤 carousel */}
-          <div className="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none">
-            <div className="flex h-full">
+          {/* 세로 스크롤 — 사진을 아래로 내리며 봄 */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none">
+            <div className="flex flex-col items-center gap-3 px-3 pb-4">
               {currentImages.map((src, i) => (
-                <div
+                <img
                   key={i}
-                  className="flex-shrink-0 w-screen h-full snap-center flex items-center justify-center px-3"
-                >
-                  <img
-                    src={src}
-                    alt={`사진 ${i + 1}`}
-                    className="max-w-full max-h-full object-contain rounded-lg select-none"
-                    draggable={false}
-                    loading="lazy"
-                  />
-                </div>
+                  src={src}
+                  alt={`사진 ${i + 1}`}
+                  className="w-full max-w-full object-contain rounded-lg select-none"
+                  draggable={false}
+                  loading="lazy"
+                />
               ))}
             </div>
           </div>
           {currentImages.length > 1 && (
             <div className="text-center mt-2 flex-shrink-0">
-              <span className="text-xs text-white/70">{currentImages.length}장 — 좌우로 넘기세요</span>
+              <span className="text-xs text-white/70">{currentImages.length}장 — 아래로 스크롤하세요</span>
             </div>
           )}
         </div>
