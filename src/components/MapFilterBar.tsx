@@ -883,6 +883,7 @@ const MapFilterBar = ({
               )}
 
               {/* 보증금 */}
+              {!hideRentalAndPrice && (
               <RangeInput
                 label="보증금"
                 min={0} max={50000} step={500}
@@ -893,8 +894,10 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "1억", "2억", "3억", "무제한"]}
               />
+              )}
 
               {/* 월세 */}
+              {!hideRentalAndPrice && (
               <RangeInput
                 label="월세"
                 min={0} max={1000} step={10}
@@ -905,6 +908,7 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "250만", "500만", "750만", "무제한"]}
               />
+              )}
 
               {/* 매매가 - 주거형 임대에서는 제외 */}
               {!showResidentialTypes && (
