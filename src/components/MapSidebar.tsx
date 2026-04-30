@@ -147,35 +147,44 @@ function LightboxModal({
         </div>
       )}
 
-      {/* ── 모바일: 세로 스크롤 나열 ── */}
+      {/* ── 모바일: 좌우 가로 스와이프 ── */}
       {isMobileView ? (
         <div
-          className="flex-1 overflow-y-auto overflow-x-hidden w-full"
-          style={{ paddingTop: hasTabs ? "72px" : "56px", paddingBottom: "32px" }}
+          className="flex-1 flex flex-col w-full overflow-hidden"
+          style={{ paddingTop: hasTabs ? "72px" : "16px", paddingBottom: "16px" }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 카운터 표시 제거 — 오로지 사진만 보이도록 */}
           {units[unitIdx]?.isReference && (
-            <div className="text-center mb-3 px-4">
-              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--primary))" }}>
+            <div className="text-center mb-2 px-4 flex-shrink-0">
+              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--accent))" }}>
                 다른 매물 사진입니다. 참고용입니다.
               </span>
             </div>
           )}
-          <div className="flex flex-col gap-3 px-3">
-            {currentImages.map((src, i) => (
-              <div key={i} className="w-full flex flex-col items-center">
-                <img
-                  src={src}
-                  alt={`사진 ${i + 1}`}
-                  className="w-full h-auto object-contain rounded-lg select-none"
-                  draggable={false}
-                  loading="lazy"
-                />
-                <span className="sr-only">{`사진 ${i + 1} / ${currentImages.length}`}</span>
-              </div>
-            ))}
+          {/* 가로 스크롤 carousel */}
+          <div className="flex-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-none">
+            <div className="flex h-full">
+              {currentImages.map((src, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-screen h-full snap-center flex items-center justify-center px-3"
+                >
+                  <img
+                    src={src}
+                    alt={`사진 ${i + 1}`}
+                    className="max-w-full max-h-full object-contain rounded-lg select-none"
+                    draggable={false}
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
+          {currentImages.length > 1 && (
+            <div className="text-center mt-2 flex-shrink-0">
+              <span className="text-xs text-white/70">{currentImages.length}장 — 좌우로 넘기세요</span>
+            </div>
+          )}
         </div>
       ) : (
         <>
