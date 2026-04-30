@@ -838,6 +838,7 @@ const MapFilterBar = ({
               )}
 
               {/* 거래 유형 */}
+              {!hideRentalAndPrice && (
               <div>
                 <SectionLabel>거래 유형</SectionLabel>
                 <div className="flex flex-wrap gap-1">
@@ -853,6 +854,7 @@ const MapFilterBar = ({
                   })}
                 </div>
               </div>
+              )}
 
 
               {/* 방 종류 */}
