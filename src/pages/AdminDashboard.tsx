@@ -2695,19 +2695,39 @@ const AdminDashboard = () => {
                  <div>
                   <h2 className="text-lg font-extrabold text-foreground">청주시 지역별 연락처</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    총 {contacts.length}개 · 노출 {contacts.filter(c => c.is_visible !== false).length}개 · 노출불가 {contacts.filter(c => c.is_visible === false).length}개
+                    총 <span className="font-bold text-foreground">{contacts.length.toLocaleString()}</span>개
+                    {" · "}노출 <span className="font-bold text-primary">{contacts.filter(c => c.is_visible !== false).length.toLocaleString()}</span>개
+                    {" · "}노출불가 <span className="font-bold text-muted-foreground">{contacts.filter(c => c.is_visible === false).length.toLocaleString()}</span>개
+                    {(contactDistrictFilter !== "전체" || contactSearch) && (
+                      <>{" · "}현재 표시 <span className="font-bold text-accent">{filteredContacts.length.toLocaleString()}</span>개</>
+                    )}
                   </p>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {CHEONGJU_DISTRICTS.map((d) => {
+                      const total = contacts.filter(c => c.district === d).length;
+                      const visible = contacts.filter(c => c.district === d && c.is_visible !== false).length;
+                      return (
+                        <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
+                          {d} <span className="font-bold text-foreground">{total.toLocaleString()}</span>
+                          <span className="text-muted-foreground"> (노출 {visible.toLocaleString()})</span>
+                        </span>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex gap-1">
-                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => (
-                      <button key={d} onClick={() => setContactDistrictFilter(d)}
-                        className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                        style={contactDistrictFilter === d
-                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                          : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
-                        }>{d}</button>
-                    ))}
+                    {["전체", ...CHEONGJU_DISTRICTS].map((d) => {
+                      const cnt = d === "전체" ? contacts.length : contacts.filter(c => c.district === d).length;
+                      return (
+                        <button key={d} onClick={() => setContactDistrictFilter(d)}
+                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                          style={contactDistrictFilter === d
+                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
+                          }>{d} <span className="opacity-70">{cnt.toLocaleString()}</span></button>
+                      );
+                    })}
                   </div>
                   <div className="relative">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
