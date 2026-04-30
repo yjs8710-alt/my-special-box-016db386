@@ -1702,7 +1702,7 @@ const AdminDashboard = () => {
     const districtFromAddr = CHEONGJU_DISTRICTS.find(d => p.address.includes(d)) ?? "";
     const effectiveDistrict = districtVal || districtFromAddr;
     const matchDistrict = propertyDistrictFilter === "전체" || effectiveDistrict.includes(propertyDistrictFilter);
-    const matchSearch = !propertySearch || p.title.includes(propertySearch) || p.address.includes(propertySearch) || p.agent_name.includes(propertySearch);
+    const matchSearch = !propertySearchApplied || p.title.includes(propertySearchApplied) || p.address.includes(propertySearchApplied) || p.agent_name.includes(propertySearchApplied);
     return matchDistrict && matchSearch;
   });
 
