@@ -103,6 +103,26 @@ type CheongJuContact = {
   is_visible?: boolean;
 };
 
+const normalizePhoneNumber = (value: string | null | undefined) => (value ?? "").replace(/[^0-9]/g, "");
+
+const getUniquePhones = (...values: Array<string | null | undefined>) => {
+  const seen = new Set<string>();
+  const phones: string[] = [];
+
+  values.forEach((value) => {
+    const raw = value ?? "";
+    const matches = raw.match(/0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}/g) ?? raw.split(/[,/;|\n]+/);
+    matches.forEach((candidate) => {
+      const normalized = normalizePhoneNumber(candidate);
+      if (normalized.length < 7 || seen.has(normalized)) return;
+      seen.add(normalized);
+      phones.push(formatPhone(normalized));
+    });
+  });
+
+  return phones;
+};
+
 type PropertyReport = {
   id: string;
   property_id: string;
@@ -1588,6 +1608,9 @@ const AdminDashboard = () => {
   const saveContact = async (updated: CheongJuContact) => {
     // building_dong은 DB에 추가된 컬럼이지만 types.ts 자동생성 전이므로 unknown 캐스트
     type ContactRow = Record<string, unknown>;
+    const ownerPhones = getUniquePhones(updated.phone, updated.contact_owner);
+    const mainPhone = ownerPhones[0] ?? "";
+    const extraOwnerPhones = ownerPhones.slice(1).join("\n");
 
     if (updated.id) {
       const payload: ContactRow = {
@@ -1595,10 +1618,10 @@ const AdminDashboard = () => {
         building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
-        phone: updated.phone,
-        contact_owner: updated.contact_owner ?? null,
-        contact_manager: updated.contact_manager ?? null,
-        contact_broker: updated.contact_broker ?? null,
+        phone: mainPhone,
+        contact_owner: extraOwnerPhones || null,
+        contact_manager: updated.contact_manager?.trim() || null,
+        contact_broker: updated.contact_broker?.trim() || null,
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
@@ -1613,10 +1636,10 @@ const AdminDashboard = () => {
         building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
-        phone: updated.phone,
-        contact_owner: updated.contact_owner ?? null,
-        contact_manager: updated.contact_manager ?? null,
-        contact_broker: updated.contact_broker ?? null,
+        phone: mainPhone,
+        contact_owner: extraOwnerPhones || null,
+        contact_manager: updated.contact_manager?.trim() || null,
+        contact_broker: updated.contact_broker?.trim() || null,
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
@@ -2740,22 +2763,7 @@ const AdminDashboard = () => {
                 )}
                 {filteredContacts.map((c) => {
                   const isVisible = c.is_visible !== false;
-                  // 같은 주소(동·번지)의 모든 소유주 번호 수집 (중복 제거)
-                  const norm = (p: string | null | undefined) => (p ?? "").replace(/[^0-9]/g, "");
-                  const ownerPhones = Array.from(
-                    new Map(
-                      contacts
-                        .filter((x) =>
-                          x.dong === c.dong &&
-                          (x.lot_number ?? "") === (c.lot_number ?? "") &&
-                          x.phone && norm(x.phone)
-                        )
-                        .map((x) => [norm(x.phone), x.phone as string])
-                    ).values()
-                  );
-                  ownerPhones.sort((a, b) =>
-                    norm(a) === norm(c.phone) ? -1 : norm(b) === norm(c.phone) ? 1 : 0
-                  );
+                  const ownerPhones = getUniquePhones(c.phone, c.contact_owner);
                   return (
                     <div
                       key={c.id}
