@@ -7,6 +7,48 @@ declare global {
   }
 }
 
+const KAKAO_SDK_SRC = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js";
+const KAKAO_APP_KEY = "9b1ab990830e8319b8bafb3104e5ae50";
+let kakaoSdkPromise: Promise<void> | null = null;
+
+/** 카카오 JS SDK를 필요할 때만 동적으로 로딩 (공유 등 사용 직전 호출) */
+export function ensureKakaoSdk(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.Kakao?.Share) {
+    if (!window.Kakao.isInitialized()) window.Kakao.init(KAKAO_APP_KEY);
+    return Promise.resolve();
+  }
+  if (kakaoSdkPromise) return kakaoSdkPromise;
+
+  kakaoSdkPromise = new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${KAKAO_SDK_SRC}"]`);
+    const handleReady = () => {
+      try {
+        if (window.Kakao && !window.Kakao.isInitialized()) window.Kakao.init(KAKAO_APP_KEY);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    };
+    if (existing) {
+      existing.addEventListener("load", handleReady, { once: true });
+      existing.addEventListener("error", () => reject(new Error("Kakao SDK load failed")), { once: true });
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = KAKAO_SDK_SRC;
+    s.async = true;
+    s.crossOrigin = "anonymous";
+    s.onload = handleReady;
+    s.onerror = () => {
+      kakaoSdkPromise = null;
+      reject(new Error("Kakao SDK load failed"));
+    };
+    document.head.appendChild(s);
+  });
+  return kakaoSdkPromise;
+}
+
 export interface AgencyInfo {
   userId?: string;
   agencyName?: string;
@@ -23,7 +65,13 @@ export interface AgencyInfo {
  * 전화번호, 상세 주소는 제외하고 건물명·유형·가격 등만 노출합니다.
  * agencyInfo가 전달되면 공유한 중개사무소 정보를 표시합니다.
  */
-export function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyInfo, fallbackImageUrl?: string) {
+export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyInfo, fallbackImageUrl?: string) {
+  try {
+    await ensureKakaoSdk();
+  } catch {
+    alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    return;
+  }
   if (!window.Kakao?.Share) {
     alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
     return;
@@ -114,13 +162,19 @@ function sanitizeAddress(address: string): string {
 /**
  * 선택된 매물 여러 개를 카카오톡으로 공유합니다.
  */
-export function shareMultipleToKakao(properties: MapProperty[]) {
+export async function shareMultipleToKakao(properties: MapProperty[]) {
   if (properties.length === 0) return;
   if (properties.length === 1) {
-    sharePropertyToKakao(properties[0]);
+    await sharePropertyToKakao(properties[0]);
     return;
   }
 
+  try {
+    await ensureKakaoSdk();
+  } catch {
+    alert("카카오톡 공유 기능을 불러오지 못했습니다.");
+    return;
+  }
   if (!window.Kakao?.Share) {
     alert("카카오톡 공유 기능을 불러오지 못했습니다.");
     return;

@@ -10,6 +10,12 @@
     <meta name="author" content="Lovable" />
 
     <meta name="theme-color" content="#FFFFFF" />
+
+    <!-- Performance: preconnect to external origins used early -->
+    <link rel="preconnect" href="https://dapi.kakao.com" crossorigin />
+    <link rel="preconnect" href="https://t1.kakaocdn.net" crossorigin />
+    <link rel="dns-prefetch" href="https://xhzbskeyzqekyoohnrtq.supabase.co" />
+
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-zibda-v2-20260427.png?v=20260427-v4" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icon-zibda-active-192-v5-20260427.png?v=20260427-v5" />
     <link rel="apple-touch-icon" sizes="192x192" href="/icon-zibda-active-192-v5-20260427.png?v=20260427-v5" />
@@ -37,12 +43,7 @@
 
   <body>
     <div id="root"></div>
-    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
-    <script>
-      if (window.Kakao && !window.Kakao.isInitialized()) {
-        window.Kakao.init('9b1ab990830e8319b8bafb3104e5ae50');
-      }
-    </script>
+    <!-- Kakao JS SDK는 공유 등 실제 필요 시점에 동적 로딩 (초기 진입 속도 개선) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

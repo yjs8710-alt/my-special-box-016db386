@@ -10,6 +10,15 @@ const Home = () => {
   const [hideInstallButton, setHideInstallButton] = useState(false);
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.time("Home:firstRender");
+      requestAnimationFrame(() => {
+        console.timeEnd("Home:firstRender");
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     const ua = navigator.userAgent || "";
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
 
