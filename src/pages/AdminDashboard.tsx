@@ -2898,7 +2898,15 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
+          {/* 신고 관리 */}
+          {activeTab === "reports" && (
+            <div>
                 {/* 목록 */}
                 {reportsLoading && <div className="py-16 text-center text-sm text-muted-foreground">불러오는 중...</div>}
                 {!reportsLoading && filteredReports.length === 0 && (
