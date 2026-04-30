@@ -2785,14 +2785,19 @@ const AdminDashboard = () => {
                       </div>
                       {/* 동 */}
                       <div className="text-sm font-medium text-foreground">{c.dong}</div>
-                      {/* 번지수 */}
-                      <div className="hidden md:block text-xs text-muted-foreground">
+                      {/* 번지수 + 건물명 */}
+                      <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                         {c.lot_number && c.lot_number.trim() ? (
                           <span
-                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shrink-0"
                             style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
                           >{c.lot_number}</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
+                        {c.building_name && (
+                          <span className="truncate font-medium text-foreground" title={c.building_name}>
+                            {c.building_name}
+                          </span>
+                        )}
                       </div>
                       {/* 호수 */}
                       <div className="hidden md:block text-xs">
