@@ -1292,11 +1292,25 @@ const AdminDashboard = () => {
     setPropertiesLoading(false);
   }, []);
 
-  // ─── 청주 연락처 불러오기 ────────────────────────────────────────────────
+  // ─── 청주 연락처 불러오기 (1000행 제한 우회: 페이지네이션) ────────────
   const fetchContacts = useCallback(async () => {
     setContactsLoading(true);
-    const { data, error } = await supabase.from("cheongju_contacts").select("*").order("district").order("dong");
-    if (!error && data) setContacts(data as CheongJuContact[]);
+    const PAGE = 1000;
+    let from = 0;
+    const all: CheongJuContact[] = [];
+    // count: exact 로 총 개수 확보 후, 페이지 단위로 모두 로드
+    while (true) {
+      const { data, error } = await supabase
+        .from("cheongju_contacts")
+        .select("*")
+        .order("district").order("dong")
+        .range(from, from + PAGE - 1);
+      if (error || !data) break;
+      all.push(...(data as CheongJuContact[]));
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+    setContacts(all);
     setContactsLoading(false);
   }, []);
 
