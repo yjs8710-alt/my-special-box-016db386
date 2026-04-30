@@ -175,6 +175,8 @@ interface MapFilterBarProps {
   onRadiusModeToggle?: () => void;
   /** 반경 정보 (활성 표시용) */
   radiusInfo?: { radius: number } | null;
+  /** 임대 그룹/거래유형/보증금/월세 섹션 숨김 (집합건물 매매 페이지용) */
+  hideRentalAndPrice?: boolean;
 }
 
 function makeFormatManwon(max: number) {
@@ -381,6 +383,7 @@ const MapFilterBar = ({
   radiusMode = false,
   onRadiusModeToggle,
   radiusInfo,
+  hideRentalAndPrice = false,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
@@ -779,7 +782,7 @@ const MapFilterBar = ({
                     })()}
                   </div>
                   <div className="flex flex-col gap-2">
-                    {["임대", "매매"].map((group) => (
+                    {(hideRentalAndPrice ? ["매매"] : ["임대", "매매"]).map((group) => (
                       <div key={group}>
                         <span className="text-[9px] font-semibold uppercase tracking-wider" style={{ color: "hsl(var(--muted-foreground))" }}>
                           {group}
@@ -835,6 +838,7 @@ const MapFilterBar = ({
               )}
 
               {/* 거래 유형 */}
+              {!hideRentalAndPrice && (
               <div>
                 <SectionLabel>거래 유형</SectionLabel>
                 <div className="flex flex-wrap gap-1">
@@ -850,6 +854,7 @@ const MapFilterBar = ({
                   })}
                 </div>
               </div>
+              )}
 
 
               {/* 방 종류 */}
@@ -878,6 +883,7 @@ const MapFilterBar = ({
               )}
 
               {/* 보증금 */}
+              {!hideRentalAndPrice && (
               <RangeInput
                 label="보증금"
                 min={0} max={50000} step={500}
@@ -888,8 +894,10 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "1억", "2억", "3억", "무제한"]}
               />
+              )}
 
               {/* 월세 */}
+              {!hideRentalAndPrice && (
               <RangeInput
                 label="월세"
                 min={0} max={1000} step={10}
@@ -900,6 +908,7 @@ const MapFilterBar = ({
                 parse={parseManwon}
                 ticks={["0", "250만", "500만", "750만", "무제한"]}
               />
+              )}
 
               {/* 매매가 - 주거형 임대에서는 제외 */}
               {!showResidentialTypes && (
