@@ -1126,6 +1126,7 @@ const MapFilterBar = ({
         )}
       </div>
     </div>
+    </>
   );
 };
 
