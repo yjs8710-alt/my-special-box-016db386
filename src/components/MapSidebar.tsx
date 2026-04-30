@@ -107,6 +107,41 @@ function LightboxModal({
   }, [prev, next, onClose, isMobileView]);
 
   const hasTabs = units.length > 1 || units.some((u) => u.isReference);
+  const [showMoreUnits, setShowMoreUnits] = useState(false);
+  // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
+  const MOBILE_VISIBLE_TABS = 2;
+  const visibleUnits = isMobileView && !showMoreUnits && units.length > MOBILE_VISIBLE_TABS
+    ? units.slice(0, MOBILE_VISIBLE_TABS)
+    : units;
+  const hiddenCount = units.length - visibleUnits.length;
+  // 선택된 탭이 숨겨져 있으면 자동으로 펼침
+  useEffect(() => {
+    if (isMobileView && unitIdx >= MOBILE_VISIBLE_TABS && !showMoreUnits) {
+      setShowMoreUnits(true);
+    }
+  }, [unitIdx, isMobileView, showMoreUnits]);
+
+  const renderTabButton = (u: LightboxUnit, i: number) => {
+    const isCurrent = i === unitIdx;
+    const isRef = u.isReference;
+    const unitLabel = u.unitNumber ?? u.label ?? "";
+    const roomLabel = u.roomType ?? "";
+    return (
+      <button
+        key={i}
+        onClick={() => handleUnitChange(i)}
+        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-row items-center gap-1.5 leading-tight whitespace-nowrap"
+        style={
+          isCurrent
+            ? { background: "hsl(var(--primary))", color: "#fff" }
+            : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
+        }
+      >
+        <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
+        {roomLabel && <span className="text-[10px] font-normal opacity-80">{roomLabel}</span>}
+      </button>
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
@@ -120,30 +155,43 @@ function LightboxModal({
       {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
       {hasTabs && (
         <div
-          className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
+          className={`absolute top-4 left-1/2 -translate-x-1/2 z-10 ${isMobileView ? "max-w-[92vw]" : "max-w-[80vw]"}`}
           onClick={(e) => e.stopPropagation()}
         >
-          {units.map((u, i) => {
-            const isCurrent = i === unitIdx;
-            const isRef = u.isReference;
-            const unitLabel = u.unitNumber ?? u.label ?? "";
-            const roomLabel = u.roomType ?? "";
-            return (
-              <button
-                key={i}
-                onClick={() => handleUnitChange(i)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-row items-center gap-1.5 leading-tight whitespace-nowrap"
-                style={
-                  isCurrent
-                    ? { background: "hsl(var(--primary))", color: "#fff" }
-                    : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
-                }
-              >
-                <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
-                {roomLabel && <span className="text-[10px] font-normal opacity-80">{roomLabel}</span>}
-              </button>
-            );
-          })}
+          {isMobileView ? (
+            <div className="flex flex-col items-center gap-1.5">
+              <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none">
+                {visibleUnits.map((u, i) => renderTabButton(u, i))}
+                {hiddenCount > 0 && !showMoreUnits && (
+                  <button
+                    onClick={() => setShowMoreUnits(true)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
+                    style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+                  >
+                    더보기 +{hiddenCount}
+                  </button>
+                )}
+                {showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+                  <button
+                    onClick={() => setShowMoreUnits(false)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
+                    style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+                  >
+                    접기
+                  </button>
+                )}
+              </div>
+              {showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+                <div className="flex flex-row gap-1.5 flex-wrap justify-center max-w-[92vw]">
+                  {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex gap-1.5 flex-wrap justify-center">
+              {units.map((u, i) => renderTabButton(u, i))}
+            </div>
+          )}
         </div>
       )}
 
