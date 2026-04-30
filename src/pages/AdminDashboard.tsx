@@ -1622,6 +1622,9 @@ const AdminDashboard = () => {
   const saveContact = async (updated: CheongJuContact) => {
     // building_dong은 DB에 추가된 컬럼이지만 types.ts 자동생성 전이므로 unknown 캐스트
     type ContactRow = Record<string, unknown>;
+    const ownerPhones = getUniquePhones(updated.phone, updated.contact_owner);
+    const mainPhone = ownerPhones[0] ?? "";
+    const extraOwnerPhones = ownerPhones.slice(1).join("\n");
 
     if (updated.id) {
       const payload: ContactRow = {
@@ -1629,10 +1632,10 @@ const AdminDashboard = () => {
         building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
-        phone: updated.phone,
-        contact_owner: updated.contact_owner ?? null,
-        contact_manager: updated.contact_manager ?? null,
-        contact_broker: updated.contact_broker ?? null,
+        phone: mainPhone,
+        contact_owner: extraOwnerPhones || null,
+        contact_manager: updated.contact_manager?.trim() || null,
+        contact_broker: updated.contact_broker?.trim() || null,
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
@@ -1647,10 +1650,10 @@ const AdminDashboard = () => {
         building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
         unit_number: updated.unit_number ?? null,
-        phone: updated.phone,
-        contact_owner: updated.contact_owner ?? null,
-        contact_manager: updated.contact_manager ?? null,
-        contact_broker: updated.contact_broker ?? null,
+        phone: mainPhone,
+        contact_owner: extraOwnerPhones || null,
+        contact_manager: updated.contact_manager?.trim() || null,
+        contact_broker: updated.contact_broker?.trim() || null,
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
