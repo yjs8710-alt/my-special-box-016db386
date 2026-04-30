@@ -2791,13 +2791,8 @@ const AdminDashboard = () => {
                       {/* 소유주 (phone) — 같은 번지에 2명 이상이면 모두 표시 */}
                       <div className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
                         {ownerPhones.length > 0 ? (
-                          ownerPhones.map((p, i) => (
-                            <span key={p} className="inline-flex items-center gap-0.5 whitespace-nowrap">
-                              {ownerPhones.length > 1 && (
-                                <span className="text-[9px] font-bold text-muted-foreground/70">{i + 1}.</span>
-                              )}
-                              <a href={`tel:${p}`} className="font-medium" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
-                            </span>
+                          ownerPhones.map((p) => (
+                            <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
                           ))
                         ) : (
                           <span className="text-muted-foreground">—</span>
