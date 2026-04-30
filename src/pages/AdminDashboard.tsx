@@ -123,20 +123,6 @@ const getUniquePhones = (...values: Array<string | null | undefined>) => {
   return phones;
 };
 
-const getContactAddressKey = (contact: CheongJuContact) => [
-  contact.district,
-  contact.dong,
-  contact.lot_number,
-  contact.building_name,
-  contact.building_dong,
-  contact.unit_number,
-].map((value) => (value ?? "").trim()).join("|");
-
-const cleanExtraOwnerPhones = (extraPhones: string | null | undefined, mainPhone: string | null | undefined) => {
-  const main = normalizePhoneNumber(mainPhone);
-  return getUniquePhones(extraPhones).filter((phone) => normalizePhoneNumber(phone) !== main).join("\n");
-};
-
 type PropertyReport = {
   id: string;
   property_id: string;
