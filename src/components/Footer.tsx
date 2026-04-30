@@ -23,7 +23,7 @@ const Footer = () => {
 
           <div className="grid grid-cols-2 gap-8 text-sm">
             <div>
-              <h4 className="font-semibold text-white/80 mb-3">회사</h4>
+              <h4 className="font-semibold text-white/80 mb-3 whitespace-pre-wrap">{"\n"}</h4>
               <ul className="flex flex-col gap-2">
                 <li>
                   <a href="#" className="text-white hover:text-white transition-colors text-xs">
