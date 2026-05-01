@@ -84,6 +84,14 @@ const PropertyCard = ({
                 img.classList.add("object-contain", "p-1");
               }}
             />
+            {/* 가운데 집다 로고 워터마크 */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+              <img
+                src={logoTransparent}
+                alt=""
+                className="w-1/2 max-w-[140px] opacity-30 mix-blend-luminosity drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
+              />
+            </div>
             {isRef && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <span className="text-[11px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
