@@ -121,6 +121,26 @@ function Lightbox({
         {imgIdx + 1} / {currentImages.length}
       </div>
 
+      {isMobile ? (
+        <div
+          className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-none"
+          style={{ paddingTop: units.length > 1 ? "56px" : "48px", paddingBottom: "80px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col items-center gap-3 px-3">
+            {currentImages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`사진 ${i + 1}`}
+                className="w-full max-w-full object-contain rounded-lg select-none"
+                draggable={false}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
       <div
         className="relative w-full h-full overflow-hidden"
         style={{ paddingTop: units.length > 1 ? "56px" : "0" }}
@@ -162,6 +182,7 @@ function Lightbox({
           </>
         )}
       </div>
+      )}
       {currentImages.length > 1 && (
         <div
           className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
