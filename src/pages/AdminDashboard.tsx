@@ -2863,6 +2863,7 @@ const AdminDashboard = () => {
                               {c.unit_number && <span>{c.unit_number}호</span>}
                             </span>
                           )}
+                          <JibunAddressBadge dong={c.dong} lotNumber={c.lot_number} district={c.district} />
                         </div>
                         {c.building_name && (
                           <div className="text-xs font-medium text-foreground truncate">{c.building_name}</div>
