@@ -148,12 +148,11 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
 
 function buildPropertyShareUrl(property: MapProperty, sharerUserId?: string): string {
   const propertyId = property.dbId || property.id;
-  const shareUrl = new URL(buildFreshSiteUrl(`/property/${propertyId}`));
-
+  // 공유 링크는 fresh 파라미터 없이 깔끔하게 — 카톡 인앱 브라우저 호환성 ↑
+  const shareUrl = new URL(`/property/${propertyId}`, SITE_ORIGIN);
   if (sharerUserId) {
     shareUrl.searchParams.set("sharedBy", sharerUserId);
   }
-
   return shareUrl.toString();
 }
 

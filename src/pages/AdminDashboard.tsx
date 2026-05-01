@@ -2201,14 +2201,14 @@ const AdminDashboard = () => {
                              )}
                            </div>
                          </div>
-                         <div className="hidden md:block">
-                           <div className="text-xs font-medium text-foreground flex items-center gap-1">
+                         <div className="md:block">
+                           <div className="text-xs font-medium text-foreground flex items-center gap-1 hidden md:flex">
                              <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>
                              {m.email ?? "-"}
                            </div>
-                           <div className="text-xs text-muted-foreground">{m.phone}</div>
+                           <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
                            {parentAgent && (
-                             <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: "hsl(var(--chart-2))" }}>
+                             <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold hidden md:inline-flex" style={{ color: "hsl(var(--chart-2))" }}>
                                <Building2 className="w-3 h-3" />
                                상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
                              </div>
@@ -2233,6 +2233,17 @@ const AdminDashboard = () => {
                                      {s.device_type === "mobile" ? "모바일" : "PC"}
                                      <Globe className="w-2.5 h-2.5 opacity-70" />
                                      <span className="font-mono">{s.ip_address || "IP 미확인"}</span>
+                                     {s.ip_address && (
+                                       <button
+                                         type="button"
+                                         onClick={(e) => { e.stopPropagation(); updateAllowedPcIp(m, s.ip_address!); }}
+                                         className="ml-1 px-1 rounded text-[9px] font-bold"
+                                         style={{ background: "hsl(var(--accent) / 0.15)", color: "hsl(var(--accent))" }}
+                                         title="이 IP만 허용으로 등록"
+                                       >
+                                         허용
+                                       </button>
+                                     )}
                                      {last && <span className="opacity-60 font-normal">· {last}</span>}
                                    </span>
                                  );

@@ -306,12 +306,13 @@ function LightboxModal({
           )}
         </>
       )}
-      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) */}
+      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) — 시인성 강조 */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 px-8 py-2.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold backdrop-blur-sm transition-colors z-30"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95 z-30"
+        style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
       >
-        닫기
+        ✕ 닫기
       </button>
     </div>
   );
@@ -2953,8 +2954,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </button>
           </div>
 
-          {/* 3행: 준공년도 · 공실/거주중 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
-          {(buildYr || vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0) && (
+          {/* 3행: 준공년도 · 공실/거주중 · 권리금 · 단기 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
+          {(() => {
+            const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
+            const keyMoney = keyMoneyM?.[1]?.trim();
+            const hasKeyMoney = keyMoney && keyMoney !== "0" && keyMoney !== "없음";
+            const isShortTerm = !isSaleProp && opts.includes("단기가능");
+            const showRow = buildYr || vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm;
+            if (!showRow) return null;
+            return (
             <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
               {buildYr && (
                 <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
@@ -2969,6 +2977,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {vacancyM === "세입자 거주중" && !vacatePast && (
                 <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
                   거주중
+                </span>
+              )}
+              {isShortTerm && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                  단기
+                </span>
+              )}
+              {hasKeyMoney && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(25 90% 95%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(25 90% 70%)" }}>
+                  권 {keyMoney}
                 </span>
               )}
               {facilityBadges}
@@ -3009,7 +3027,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </>
               )}
             </div>
-          )}
+            );
+          })()}
           {showVacateInfo && (vacateLabel || earlyExit) && (
             <div
               className="fixed inset-0 z-[10300] flex items-end justify-center"
