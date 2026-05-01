@@ -134,14 +134,32 @@ function Lightbox({
         >
           <div className="flex flex-col items-center gap-3 px-3">
             {currentImages.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt={`사진 ${i + 1}`}
-                className="w-full max-w-full object-contain rounded-lg select-none"
-                draggable={false}
-                loading="lazy"
-              />
+              <div key={i} className="relative w-full">
+                <img
+                  src={src}
+                  alt={`사진 ${i + 1}`}
+                  className="w-full max-w-full object-contain rounded-lg select-none"
+                  draggable={false}
+                  loading="lazy"
+                />
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      toast.loading("저장 중...", { id: `dl-${i}` });
+                      await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
+                      toast.success("저장되었습니다", { id: `dl-${i}` });
+                    } catch {
+                      toast.error("저장 실패", { id: `dl-${i}` });
+                    }
+                  }}
+                  className="absolute top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                  style={{ background: "hsl(var(--accent))", color: "white" }}
+                  aria-label="사진 저장"
+                >
+                  <Download className="w-5 h-5" />
+                </button>
+              </div>
             ))}
           </div>
         </div>
