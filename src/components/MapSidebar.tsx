@@ -49,6 +49,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
+import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
@@ -145,12 +146,7 @@ function LightboxModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-20"
-      >
-        <X className="w-5 h-5 text-white" />
-      </button>
+      {/* 닫기 버튼은 하단에 위치 */}
 
       {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
       {hasTabs && (
@@ -295,7 +291,7 @@ function LightboxModal({
           </div>
           {currentImages.length > 1 && (
             <div
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
+              className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
               onClick={(e) => e.stopPropagation()}
             >
               {currentImages.map((src, i) => (
@@ -315,6 +311,13 @@ function LightboxModal({
           )}
         </>
       )}
+      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 px-8 py-2.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold backdrop-blur-sm transition-colors z-30"
+      >
+        닫기
+      </button>
     </div>
   );
 }
@@ -2855,7 +2858,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {prop.roadAddress && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); alert(`도로명 주소\n\n${prop.roadAddress}`); }}
+                onClick={(e) => { e.stopPropagation(); showRoadAddressModal(prop.roadAddress!); }}
                 className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
                 style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
                 title={prop.roadAddress}

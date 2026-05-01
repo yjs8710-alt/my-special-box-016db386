@@ -23,11 +23,12 @@ interface PropertyCardProps {
   onDelete?: () => void;
   referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
   referenceUnit?: string;  // 참고용 사진의 호수
+  options?: string[];      // 매물 옵션 (단기가능 등)
 }
 
 const PropertyCard = ({
   image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
-  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit
+  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit, options
 }: PropertyCardProps) => {
   // 퇴거일이 오늘 이전이면 공실로 표기
   const isVacant = (() => {
@@ -88,9 +89,12 @@ const PropertyCard = ({
           </div>
         )}
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-1.5">
+        <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
           {isVacant && (
             <span className="bg-accent text-accent-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow">공실</span>
+          )}
+          {options?.includes("단기가능") && (
+            <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">단기</span>
           )}
           {isNew && (
             <span className="bg-badge-new text-white text-xs font-bold px-2 py-0.5 rounded-full">NEW</span>
