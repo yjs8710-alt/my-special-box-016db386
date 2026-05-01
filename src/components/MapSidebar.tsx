@@ -3026,7 +3026,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </>
               )}
             </div>
-          )}
+            );
+          })()}
           {showVacateInfo && (vacateLabel || earlyExit) && (
             <div
               className="fixed inset-0 z-[10300] flex items-end justify-center"
