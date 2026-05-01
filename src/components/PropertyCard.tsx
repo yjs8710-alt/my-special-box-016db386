@@ -206,6 +206,11 @@ const PropertyCard = ({
                 </span>
               )}
             </p>
+            {keyMoney && (
+              <p className="text-xs font-bold text-orange-600 mt-1">
+                권리금 {keyMoney}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <Eye className="w-3.5 h-3.5" />
