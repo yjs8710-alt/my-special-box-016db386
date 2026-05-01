@@ -146,12 +146,7 @@ function LightboxModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center backdrop-blur-sm transition-colors z-20"
-      >
-        <X className="w-5 h-5 text-white" />
-      </button>
+      {/* 닫기 버튼은 하단에 위치 */}
 
       {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
       {hasTabs && (
