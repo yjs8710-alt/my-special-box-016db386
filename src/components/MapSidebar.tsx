@@ -3357,6 +3357,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </span>
             );
           })()}
+          {/* 권리금 표시 (note에 "권리금: XXX" 저장됨) */}
+          {(() => {
+            const note = prop.note ?? "";
+            const m = note.match(/권리금:\s*([^\n|]+)/);
+            const v = m?.[1]?.trim();
+            if (!v || v === "0" || v === "없음") return null;
+            return (
+              <span className="flex-shrink-0 inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-extrabold" style={{ color: "hsl(25 90% 45%)" }}>
+                <span style={{ color: "hsl(var(--border))" }} className="mx-0.5">·</span>
+                권 {v}
+              </span>
+            );
+          })()}
           {/* ⑨ 매매 타입 — 대지·건평 명시 태그 */}
           {(() => {
             const isSale = prop.type?.includes("매매");
