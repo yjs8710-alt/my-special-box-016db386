@@ -2388,9 +2388,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       color: #fff;
       box-shadow: 0 4px 12px rgba(220,38,38,0.35);
     }
-    .content { flex: 1; display: flex; position: relative; min-height: 0; background: #0f172a; }
-    .panel { flex: 1; min-width: 0; min-height: 0; position: relative; }
+    .content { flex: 1; display: flex; flex-direction: column; position: relative; min-height: 0; background: #0f172a; }
+    .panel { flex: 1; min-width: 0; min-height: 0; width: 100%; position: relative; }
     .panel.hidden { display: none; }
+    #mapPanel:not(.hidden) { border-top: 2px solid #334155; }
     #roadview, #map { width: 100%; height: 100%; }
     #status {
       position: absolute; inset: 0;
