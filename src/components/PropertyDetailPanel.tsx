@@ -226,14 +226,35 @@ function Lightbox({
           ))}
         </div>
       )}
-      {/* 하단 닫기 버튼 — 시인성 강조 */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95 z-20"
-        style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
-      >
-        ✕ 닫기
-      </button>
+      {/* 하단 액션 — 저장 + 닫기 */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20" onClick={(e) => e.stopPropagation()}>
+        {!isMobile && currentImages[imgIdx] && (
+          <button
+            onClick={async () => {
+              const src = currentImages[imgIdx];
+              try {
+                toast.loading("저장 중...", { id: "dl-current" });
+                await downloadPropertyImage(src, `사진_${imgIdx + 1}.jpg`);
+                toast.success("저장되었습니다", { id: "dl-current" });
+              } catch {
+                toast.error("저장 실패", { id: "dl-current" });
+              }
+            }}
+            className="flex items-center gap-1.5 px-5 py-3 rounded-full text-white text-sm font-extrabold shadow-2xl transition-transform active:scale-95"
+            style={{ background: "hsl(var(--primary))", border: "2px solid rgba(255,255,255,0.5)" }}
+          >
+            <Download className="w-4 h-4" />
+            저장
+          </button>
+        )}
+        <button
+          onClick={() => onClose()}
+          className="px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95"
+          style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
+        >
+          ✕ 닫기
+        </button>
+      </div>
     </div>
   );
 }
