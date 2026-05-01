@@ -183,7 +183,7 @@ function Lightbox({
         )}
       </div>
       )}
-      {currentImages.length > 1 && (
+      {!isMobile && currentImages.length > 1 && (
         <div
           className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
           onClick={(e) => e.stopPropagation()}
