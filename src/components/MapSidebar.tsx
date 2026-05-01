@@ -2856,7 +2856,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {prop.roadAddress && (
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); alert(`도로명 주소\n\n${prop.roadAddress}`); }}
+                onClick={(e) => { e.stopPropagation(); showRoadAddressModal(prop.roadAddress!); }}
                 className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
                 style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
                 title={prop.roadAddress}
