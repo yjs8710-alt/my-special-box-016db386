@@ -2788,15 +2788,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const normalizedOpts = new Set(opts.map((o) => String(o).replace(/\s+/g, "").toLowerCase()));
       const hasOpt = (...c: string[]) => c.some((x) => normalizedOpts.has(x.replace(/\s+/g, "").toLowerCase()));
       const facilityBadges: JSX.Element[] = [];
-      const fIcon = "flex-shrink-0 flex items-center justify-center w-6 h-6 rounded";
-      const fImg = "w-5 h-5 object-contain";
+      const fIcon = "flex-shrink-0 flex items-center justify-center w-6 h-6 rounded cursor-pointer";
+      const fImg = "w-5 h-5 object-contain pointer-events-none";
       const fStyle = { imageRendering: '-webkit-optimize-contrast' as any };
+      const showLabel = (label: string) => (e: React.MouseEvent) => {
+        e.stopPropagation();
+        toast(label, { duration: 1500, position: "top-center" });
+      };
       if (prop.elevator || hasOpt("엘리베이터"))
-        facilityBadges.push(<span key="el" title="엘리베이터" className={fIcon} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<span key="el" title="엘리베이터" onClick={showLabel("엘리베이터")} className={fIcon} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="" className={fImg} style={fStyle} /></span>);
       if (hasOpt("반려동물불가", "애완동물불가"))
-        facilityBadges.push(<span key="pd" title="반려동물 불가" className={`${fIcon} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /><span className="absolute inset-0 flex items-center justify-center pointer-events-none"><svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg></span></span>);
+        facilityBadges.push(<span key="pd" title="반려동물 불가" onClick={showLabel("반려동물 불가")} className={`${fIcon} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /><span className="absolute inset-0 flex items-center justify-center pointer-events-none"><svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg></span></span>);
       else if (hasOpt("반려동물가능", "애완동물가능"))
-        facilityBadges.push(<span key="po" title="반려동물 가능" className={fIcon} style={{ background: "#fff7ed", border: "1px solid #fdba74" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<span key="po" title="반려동물 가능" onClick={showLabel("반려동물 가능")} className={fIcon} style={{ background: "#fff7ed", border: "1px solid #fdba74" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /></span>);
       ([
         ["수도", waterIcon, "#eff6ff", "#93c5fd"],
         ["인터넷", internetIcon, "#f0fdf4", "#86efac"],
@@ -2806,7 +2810,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         ["여성전용", femaleOnlyIcon, "#fdf2f8", "#f9a8d4"],
       ] as const).forEach(([opt, src, bg, br]) => {
         if (!hasOpt(opt)) return;
-        facilityBadges.push(<span key={opt} title={opt} className={fIcon} style={{ background: bg, border: `1px solid ${br}` }}><img src={src} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<span key={opt} title={opt} onClick={showLabel(opt)} className={fIcon} style={{ background: bg, border: `1px solid ${br}` }}><img src={src} alt="" className={fImg} style={fStyle} /></span>);
       });
       const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
       const isFull = opts.includes("풀옵션") || FULL_OPT.every((o) => opts.includes(o));
