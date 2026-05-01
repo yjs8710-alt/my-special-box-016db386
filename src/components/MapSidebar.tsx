@@ -306,12 +306,13 @@ function LightboxModal({
           )}
         </>
       )}
-      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) */}
+      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) — 시인성 강조 */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 px-8 py-2.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold backdrop-blur-sm transition-colors z-30"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95 z-30"
+        style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
       >
-        닫기
+        ✕ 닫기
       </button>
     </div>
   );
