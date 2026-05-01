@@ -114,12 +114,14 @@ function Lightbox({
         </div>
       )}
 
-      <div
-        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {imgIdx + 1} / {currentImages.length}
-      </div>
+      {!isMobile && (
+        <div
+          className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {imgIdx + 1} / {currentImages.length}
+        </div>
+      )}
 
       {isMobile ? (
         <div
