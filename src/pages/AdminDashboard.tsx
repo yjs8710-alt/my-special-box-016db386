@@ -13,6 +13,7 @@ import {
   Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
+import JibunAddressBadge from "@/components/JibunAddressBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -2862,6 +2863,7 @@ const AdminDashboard = () => {
                               {c.unit_number && <span>{c.unit_number}호</span>}
                             </span>
                           )}
+                          <JibunAddressBadge dong={c.dong} lotNumber={c.lot_number} district={c.district} />
                         </div>
                         {c.building_name && (
                           <div className="text-xs font-medium text-foreground truncate">{c.building_name}</div>
@@ -2931,6 +2933,7 @@ const AdminDashboard = () => {
                         {c.building_name && (
                           <span className="truncate font-medium text-foreground" title={c.building_name}>{c.building_name}</span>
                         )}
+                        <JibunAddressBadge dong={c.dong} lotNumber={c.lot_number} district={c.district} />
                       </div>
                       <div className="hidden md:block text-xs">
                         {c.building_dong || c.unit_number ? (
