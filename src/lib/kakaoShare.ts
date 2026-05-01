@@ -66,6 +66,15 @@ export interface AgencyInfo {
  * agencyInfo가 전달되면 공유한 중개사무소 정보를 표시합니다.
  */
 export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: AgencyInfo, fallbackImageUrl?: string) {
+  // 공유 링크가 실제 DB 매물을 가리키지 않으면 "매물을 찾을 수 없음" 화면이 떠서
+  // 공유받은 사람이 혼란스러우므로 사전에 차단한다.
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const dbUuid = property.dbId && uuidRegex.test(property.dbId) ? property.dbId : "";
+  if (!dbUuid) {
+    alert("이 매물은 공유 링크를 만들 수 없습니다. (저장되지 않았거나 임시 데이터)\n매물을 다시 등록한 뒤 공유해주세요.");
+    return;
+  }
+
   try {
     await ensureKakaoSdk();
   } catch {
