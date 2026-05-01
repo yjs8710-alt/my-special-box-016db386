@@ -52,6 +52,7 @@ import PublicRecordModal from "@/components/PublicRecordModal";
 import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
