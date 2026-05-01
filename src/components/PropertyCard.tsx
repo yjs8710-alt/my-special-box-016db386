@@ -24,12 +24,21 @@ interface PropertyCardProps {
   referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
   referenceUnit?: string;  // 참고용 사진의 호수
   options?: string[];      // 매물 옵션 (단기가능 등)
+  note?: string;           // 특이사항 (권리금 등 파싱)
 }
 
 const PropertyCard = ({
   image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
-  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit, options
+  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit, options, note
 }: PropertyCardProps) => {
+  // 권리금 파싱 (note 필드에 "권리금: XXX" 형태로 저장됨)
+  const keyMoney = (() => {
+    if (!note) return "";
+    const m = note.match(/권리금:\s*([^\n|]+)/);
+    const v = m?.[1]?.trim();
+    if (!v || v === "0" || v === "없음") return "";
+    return v;
+  })();
   // 퇴거일이 오늘 이전이면 공실로 표기
   const isVacant = (() => {
     if (!vacateDate) return false;
