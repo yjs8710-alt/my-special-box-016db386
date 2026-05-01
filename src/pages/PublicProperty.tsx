@@ -274,11 +274,10 @@ export default function PublicProperty() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6">
         <Building2 className="w-16 h-16 text-muted-foreground/30" />
-        <p className="text-lg font-bold text-foreground">매물을 찾을 수 없습니다</p>
-        <p className="text-sm text-muted-foreground">삭제되었거나 비공개 처리된 매물입니다.</p>
-        <a href="https://jibda.co.kr" className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary hover:opacity-90 transition-opacity">
-          집다 홈으로
-        </a>
+        <p className="text-lg font-bold text-foreground">매물 정보를 표시할 수 없습니다</p>
+        <p className="text-sm text-muted-foreground text-center">
+          공유한 중개사무소에 직접 문의해주세요.
+        </p>
       </div>
     );
   }
@@ -291,12 +290,11 @@ export default function PublicProperty() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - 로고 2배 크기 */}
+      {/* Header - 로고만 표시 (홈 링크 제거: 캐시된 옛 화면 이동 방지) */}
       <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-1 flex items-center justify-between">
-        <a href="https://jibda.co.kr" className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <img src={logoTransparent} alt="집다" className="h-14 w-auto" />
-        </a>
-        <a href="https://jibda.co.kr/login" className="text-xs font-bold text-primary hover:underline">로그인</a>
+        </div>
       </header>
 
       <div className="max-w-lg mx-auto pb-24">
