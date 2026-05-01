@@ -162,7 +162,7 @@ function Lightbox({
       </div>
       {currentImages.length > 1 && (
         <div
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
           onClick={(e) => e.stopPropagation()}
         >
           {currentImages.map((src, i) => (
@@ -180,6 +180,13 @@ function Lightbox({
           ))}
         </div>
       )}
+      {/* 하단 닫기 버튼 */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 px-8 py-2.5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-bold backdrop-blur-sm transition-colors z-20"
+      >
+        닫기
+      </button>
     </div>
   );
 }
