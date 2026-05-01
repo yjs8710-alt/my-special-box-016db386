@@ -220,11 +220,6 @@ function LightboxModal({
               ))}
             </div>
           </div>
-          {currentImages.length > 1 && (
-            <div className="text-center mt-2 flex-shrink-0">
-              <span className="text-xs text-white/70">{currentImages.length}장 — 아래로 스크롤하세요</span>
-            </div>
-          )}
         </div>
       ) : (
         <>
