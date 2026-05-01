@@ -71,7 +71,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
+    <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
       {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
       <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
