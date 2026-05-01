@@ -274,11 +274,10 @@ export default function PublicProperty() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-6">
         <Building2 className="w-16 h-16 text-muted-foreground/30" />
-        <p className="text-lg font-bold text-foreground">매물을 찾을 수 없습니다</p>
-        <p className="text-sm text-muted-foreground">삭제되었거나 비공개 처리된 매물입니다.</p>
-        <a href="https://jibda.co.kr" className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-primary hover:opacity-90 transition-opacity">
-          집다 홈으로
-        </a>
+        <p className="text-lg font-bold text-foreground">매물 정보를 표시할 수 없습니다</p>
+        <p className="text-sm text-muted-foreground text-center">
+          공유한 중개사무소에 직접 문의해주세요.
+        </p>
       </div>
     );
   }
