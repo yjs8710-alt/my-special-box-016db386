@@ -2933,6 +2933,7 @@ const AdminDashboard = () => {
                         {c.building_name && (
                           <span className="truncate font-medium text-foreground" title={c.building_name}>{c.building_name}</span>
                         )}
+                        <JibunAddressBadge dong={c.dong} lotNumber={c.lot_number} district={c.district} />
                       </div>
                       <div className="hidden md:block text-xs">
                         {c.building_dong || c.unit_number ? (
