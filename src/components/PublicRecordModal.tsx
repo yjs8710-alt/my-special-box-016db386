@@ -592,8 +592,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
   return (
     <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 p-2 sm:p-4" onClick={onClose}>
       <div
-        className="bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden w-[calc(100vw-16px)] sm:w-full"
-        style={{ maxWidth: "680px", maxHeight: "calc(100dvh - 16px)" }}
+        className="bg-background border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden w-[calc(100vw-16px)] sm:w-full max-w-[680px]"
+        style={{ maxHeight: "calc(100dvh - 16px)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
