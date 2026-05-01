@@ -23,6 +23,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
