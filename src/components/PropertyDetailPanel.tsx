@@ -62,6 +62,7 @@ function Lightbox({
   startImgIdx?: number;
   onClose: () => void;
 }) {
+  const isMobile = useIsMobile();
   const [unitIdx, setUnitIdx] = useState(startUnitIdx);
   const [imgIdx, setImgIdx] = useState(startImgIdx);
   const currentImages = units[unitIdx]?.images ?? [];
