@@ -35,12 +35,12 @@ function TRow({
 }) {
   return (
     <tr className="border-b border-border/40">
-      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
+      <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[64px] sm:w-[80px] align-top break-words border-r border-border/30">
         {l1}
       </td>
 
       <td
-        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 whitespace-nowrap ${
+        className={`py-1.5 px-2 text-[11px] font-semibold border-r border-border/30 align-top break-words ${
           highlight ? "text-red-600" : "text-foreground"
         }`}
       >
@@ -49,11 +49,11 @@ function TRow({
 
       {l2 !== undefined ? (
         <>
-          <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[80px] whitespace-nowrap border-r border-border/30">
+          <td className="py-1.5 px-2 text-[10px] text-muted-foreground font-medium bg-muted/30 w-[64px] sm:w-[80px] align-top break-words border-r border-border/30">
             {l2}
           </td>
           <td
-            className={`py-1.5 px-2 text-[11px] font-semibold whitespace-nowrap ${
+            className={`py-1.5 px-2 text-[11px] font-semibold align-top break-words ${
               highlight ? "text-red-600" : "text-foreground"
             }`}
           >
