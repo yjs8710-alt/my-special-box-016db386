@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Send,
   ClipboardList,
+  Download,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -30,6 +31,8 @@ import { formatPhone } from "@/lib/utils";
 import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAuth } from "@/hooks/useAuth";
+import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
+import { toast } from "sonner";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -131,14 +134,32 @@ function Lightbox({
         >
           <div className="flex flex-col items-center gap-3 px-3">
             {currentImages.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt={`사진 ${i + 1}`}
-                className="w-full max-w-full object-contain rounded-lg select-none"
-                draggable={false}
-                loading="lazy"
-              />
+              <div key={i} className="relative w-full">
+                <img
+                  src={src}
+                  alt={`사진 ${i + 1}`}
+                  className="w-full max-w-full object-contain rounded-lg select-none"
+                  draggable={false}
+                  loading="lazy"
+                />
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      toast.loading("저장 중...", { id: `dl-${i}` });
+                      await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
+                      toast.success("저장되었습니다", { id: `dl-${i}` });
+                    } catch {
+                      toast.error("저장 실패", { id: `dl-${i}` });
+                    }
+                  }}
+                  className="absolute top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                  style={{ background: "hsl(var(--accent))", color: "white" }}
+                  aria-label="사진 저장"
+                >
+                  <Download className="w-5 h-5" />
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -205,14 +226,35 @@ function Lightbox({
           ))}
         </div>
       )}
-      {/* 하단 닫기 버튼 — 시인성 강조 */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95 z-20"
-        style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
-      >
-        ✕ 닫기
-      </button>
+      {/* 하단 액션 — 저장 + 닫기 */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20" onClick={(e) => e.stopPropagation()}>
+        {!isMobile && currentImages[imgIdx] && (
+          <button
+            onClick={async () => {
+              const src = currentImages[imgIdx];
+              try {
+                toast.loading("저장 중...", { id: "dl-current" });
+                await downloadPropertyImage(src, `사진_${imgIdx + 1}.jpg`);
+                toast.success("저장되었습니다", { id: "dl-current" });
+              } catch {
+                toast.error("저장 실패", { id: "dl-current" });
+              }
+            }}
+            className="flex items-center gap-1.5 px-5 py-3 rounded-full text-white text-sm font-extrabold shadow-2xl transition-transform active:scale-95"
+            style={{ background: "hsl(var(--primary))", border: "2px solid rgba(255,255,255,0.5)" }}
+          >
+            <Download className="w-4 h-4" />
+            저장
+          </button>
+        )}
+        <button
+          onClick={() => onClose()}
+          className="px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95"
+          style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
+        >
+          ✕ 닫기
+        </button>
+      </div>
     </div>
   );
 }

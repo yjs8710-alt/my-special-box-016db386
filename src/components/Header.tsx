@@ -71,7 +71,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-[950] flex-shrink-0" style={{ background: "hsl(var(--header-bg))" }}>
+    <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
       {/* <AdminEditBar /> */}
       {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
       <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
@@ -210,7 +210,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
       {/* 모바일 메뉴 */}
       {menuOpen && (
-        <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3"
+        <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
           style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
           {NAV_ITEMS.map((item) => (
             <button
