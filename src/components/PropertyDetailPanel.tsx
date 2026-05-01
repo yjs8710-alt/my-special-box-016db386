@@ -23,6 +23,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
@@ -61,6 +62,7 @@ function Lightbox({
   startImgIdx?: number;
   onClose: () => void;
 }) {
+  const isMobile = useIsMobile();
   const [unitIdx, setUnitIdx] = useState(startUnitIdx);
   const [imgIdx, setImgIdx] = useState(startImgIdx);
   const currentImages = units[unitIdx]?.images ?? [];
@@ -112,13 +114,35 @@ function Lightbox({
         </div>
       )}
 
-      <div
-        className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {imgIdx + 1} / {currentImages.length}
-      </div>
+      {!isMobile && (
+        <div
+          className={`absolute bg-black/50 text-white text-sm font-bold px-3 py-1 rounded-full backdrop-blur-sm z-10 ${units.length > 1 ? "top-14 right-4" : "top-4 left-1/2 -translate-x-1/2"}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {imgIdx + 1} / {currentImages.length}
+        </div>
+      )}
 
+      {isMobile ? (
+        <div
+          className="flex-1 w-full overflow-y-auto overflow-x-hidden scrollbar-none"
+          style={{ paddingTop: units.length > 1 ? "56px" : "48px", paddingBottom: "80px" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col items-center gap-3 px-3">
+            {currentImages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`사진 ${i + 1}`}
+                className="w-full max-w-full object-contain rounded-lg select-none"
+                draggable={false}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
       <div
         className="relative w-full h-full overflow-hidden"
         style={{ paddingTop: units.length > 1 ? "56px" : "0" }}
@@ -160,7 +184,8 @@ function Lightbox({
           </>
         )}
       </div>
-      {currentImages.length > 1 && (
+      )}
+      {!isMobile && currentImages.length > 1 && (
         <div
           className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4 z-10"
           onClick={(e) => e.stopPropagation()}

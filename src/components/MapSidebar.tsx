@@ -220,11 +220,6 @@ function LightboxModal({
               ))}
             </div>
           </div>
-          {currentImages.length > 1 && (
-            <div className="text-center mt-2 flex-shrink-0">
-              <span className="text-xs text-white/70">{currentImages.length}장 — 아래로 스크롤하세요</span>
-            </div>
-          )}
         </div>
       ) : (
         <>
@@ -3354,6 +3349,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     </span>
                   </>
                 )}
+              </span>
+            );
+          })()}
+          {/* 권리금 표시 (note에 "권리금: XXX" 저장됨) */}
+          {(() => {
+            const note = prop.note ?? "";
+            const m = note.match(/권리금:\s*([^\n|]+)/);
+            const v = m?.[1]?.trim();
+            if (!v || v === "0" || v === "없음") return null;
+            return (
+              <span className="flex-shrink-0 inline-flex items-center gap-0.5 whitespace-nowrap text-[11px] font-extrabold" style={{ color: "hsl(25 90% 45%)" }}>
+                <span style={{ color: "hsl(var(--border))" }} className="mx-0.5">·</span>
+                권 {v}
               </span>
             );
           })()}
