@@ -149,6 +149,23 @@ function LightboxModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
+      {/* 우측 상단 — 모두 저장하기 버튼 */}
+      <button
+        onClick={async (e) => {
+          e.stopPropagation();
+          if (!currentImages.length) return;
+          const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
+          for (let i = 0; i < currentImages.length; i++) {
+            await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
+            await new Promise((r) => setTimeout(r, 250));
+          }
+        }}
+        className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
+        title="모두 저장하기"
+      >
+        <Download className="w-4 h-4" />
+        <span>모두 저장</span>
+      </button>
       {/* 닫기 버튼은 하단에 위치 */}
 
       {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
@@ -221,17 +238,6 @@ function LightboxModal({
                     loading="lazy"
                   />
                   <PhotoWatermark size="lg" />
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-                      await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
-                    }}
-                    className="absolute top-2 right-2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
-                    title="다운로드"
-                  >
-                    <Download className="w-4 h-4 text-white" />
-                  </button>
                 </div>
               ))}
             </div>
@@ -271,17 +277,6 @@ function LightboxModal({
                       draggable={false}
                     />
                     <PhotoWatermark size="lg" />
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-                        await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
-                      }}
-                      className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
-                      title="다운로드"
-                    >
-                      <Download className="w-5 h-5 text-white" />
-                    </button>
                   </div>
                 </div>
               ))}
