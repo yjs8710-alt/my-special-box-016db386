@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import JibunInlineAddress from "@/components/JibunInlineAddress";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type DBProperty = {
@@ -510,7 +511,13 @@ const PropertyRow = ({
           </div>
           <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
             <MapPin className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate">{prop.address}</span>
+            <JibunInlineAddress
+              address={prop.address}
+              dong={prop.dong}
+              lotNumber={prop.lot_number}
+              district={prop.district}
+              className="truncate"
+            />
             {prop.unit_number && <span className="flex-shrink-0">· {prop.unit_number}</span>}
           </div>
           {/* 등록자 정보는 카드 상단 정보 바에서 노출 */}
