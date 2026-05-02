@@ -375,6 +375,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   buildingDong: string; // 집합건물 동(棟)
   landArea: string; // 대지 면적
   pet: PetType; // 반려동물 가능 여부
+  keyMoney: string; // 권리금
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
