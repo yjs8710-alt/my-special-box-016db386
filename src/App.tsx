@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Home from "./pages/Home";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
@@ -34,6 +34,12 @@ const RouteFallback = () => (
   </div>
 );
 
+const LegacyPropertyRedirect = () => {
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  return <Navigate to={`/share/${id ?? ""}${location.search}`} replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -48,7 +54,8 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/property/:id" element={<PublicProperty />} />
+            <Route path="/property/:id" element={<LegacyPropertyRedirect />} />
+            <Route path="/share/:id" element={<PublicProperty />} />
 
             {/* 첫 화면은 eager */}
             <Route path="/" element={<Home />} />
