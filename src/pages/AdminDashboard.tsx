@@ -2819,9 +2819,37 @@ const AdminDashboard = () => {
                       );
                     })}
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                  <div className="relative flex items-center gap-1">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                      <Input
+                        placeholder="동·번지수·전화번호 검색"
+                        className="pl-7 h-8 text-xs w-52"
+                        value={contactSearch}
+                        onChange={(e) => setContactSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") setAppliedContactSearch(contactSearch);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-3 text-xs"
+                      onClick={() => setAppliedContactSearch(contactSearch)}
+                    >
+                      검색
+                    </Button>
+                    {appliedContactSearch && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-2 text-xs"
+                        onClick={() => { setContactSearch(""); setAppliedContactSearch(""); }}
+                      >
+                        초기화
+                      </Button>
+                    )}
                   </div>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
