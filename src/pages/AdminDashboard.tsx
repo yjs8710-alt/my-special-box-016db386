@@ -1747,7 +1747,7 @@ const AdminDashboard = () => {
   }, [contacts]);
 
   const filteredContacts = useMemo(() => {
-    const q = contactSearch.trim();
+    const q = appliedContactSearch.trim();
     return contacts.filter((c) => {
       const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
       if (!matchDist) return false;
@@ -1763,9 +1763,9 @@ const AdminDashboard = () => {
         || (c.building_name ?? "").includes(q)
       );
     });
-  }, [contacts, contactDistrictFilter, contactSearch]);
+  }, [contacts, contactDistrictFilter, appliedContactSearch]);
 
-  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, contactSearch]);
+  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, appliedContactSearch]);
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
