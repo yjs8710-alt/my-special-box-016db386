@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
 import JibunAddressBadge from "@/components/JibunAddressBadge";
+import JibunInlineAddress from "@/components/JibunInlineAddress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
@@ -3173,7 +3174,19 @@ const AdminDashboard = () => {
                           {/* 매물 정보 */}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate">{r.building_name || r.property_title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{r.property_address}</p>
+                            {(() => {
+                              const mp = dbProperties.find(p => p.id === r.property_id);
+                              return (
+                                <p className="text-xs text-muted-foreground truncate">
+                                  <JibunInlineAddress
+                                    address={r.property_address}
+                                    dong={mp?.dong}
+                                    lotNumber={mp?.lot_number}
+                                    district={mp?.district}
+                                  />
+                                </p>
+                              );
+                            })()}
                             {/* 신청자 표시 */}
                             {submitter && (
                               <p className="text-[10px] text-muted-foreground mt-0.5">
