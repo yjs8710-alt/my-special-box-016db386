@@ -4765,6 +4765,9 @@ const MapSidebar = ({
                                           setLightbox({ units, unitIdx: Math.max(0, currentIdx) });
                                         }}
                                       />
+                                      <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
+                                        <img src={logoTransparent} alt="" className="w-1/2 max-w-[60px] opacity-30 mix-blend-luminosity drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
+                                      </div>
                                       {isRef && (
                                         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                                           <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
