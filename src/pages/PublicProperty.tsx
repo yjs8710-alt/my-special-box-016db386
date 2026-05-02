@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import logoTransparent from "@/assets/logo-zibda-share-header-20260502-v2.png";
+import logoTransparent from "@/assets/logo-zibda-share-header-20260502-v3-cropped.png";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 interface PropertyData {
@@ -291,9 +291,9 @@ export default function PublicProperty() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header - 로고만 표시 (홈 링크 제거: 캐시된 옛 화면 이동 방지) */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-1 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-card border-b border-border px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <img src={logoTransparent} alt="집다" className="h-14 w-auto" />
+          <img src={logoTransparent} alt="집다" className="h-8 w-auto" />
         </div>
       </header>
 
