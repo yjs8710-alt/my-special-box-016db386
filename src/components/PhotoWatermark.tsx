@@ -18,11 +18,11 @@ const PhotoWatermark = ({ size = "md" }: PhotoWatermarkProps) => {
         src={logoTransparent}
         alt=""
         draggable={false}
-        className={`${widthClass} opacity-70 select-none`}
+        className={`${widthClass} opacity-25 select-none`}
         style={{
-          // 로고를 흰색으로 강제 변환
+          // 로고를 흰색으로 강제 변환 — 흐리게
           filter:
-            "brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.65)) drop-shadow(0 0 4px rgba(0,0,0,0.45))",
+            "brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,0.25))",
         }}
       />
     </div>
