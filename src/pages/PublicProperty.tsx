@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import logoTransparent from "@/assets/logo-zibda-share-header-20260502.png";
+import logoTransparent from "@/assets/logo-zibda-active-20260427-v4.png";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 interface PropertyData {
@@ -297,7 +297,7 @@ export default function PublicProperty() {
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto pb-24">
+      <div className="max-w-lg mx-auto pb-8">
         {/* Image carousel */}
         {imgs.length > 0 ? (
           <div className="relative aspect-[4/3] bg-muted overflow-hidden">
@@ -499,15 +499,6 @@ export default function PublicProperty() {
           )}
         </div>
 
-        {/* CTA */}
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 flex justify-center z-40">
-          <a
-            href="https://jibda.co.kr"
-            className="w-full max-w-lg h-12 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center hover:opacity-90 transition-opacity"
-          >
-            집다에서 더 많은 매물 보기
-          </a>
-        </div>
       </div>
     </div>
   );
