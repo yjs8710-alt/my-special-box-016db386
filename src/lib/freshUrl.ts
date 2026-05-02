@@ -7,8 +7,10 @@ export const APP_BUILD_VERSION =
 
 export const addMobileFreshParams = (input: string | URL, value = APP_BUILD_VERSION) => {
   const url = new URL(input.toString(), SITE_ORIGIN);
+  url.searchParams.set("v", value);
   url.searchParams.set("kakaoFresh", value);
   url.searchParams.set("mobileFresh", value);
+  url.searchParams.set("freshAt", `${Date.now()}`);
   return url.toString();
 };
 
