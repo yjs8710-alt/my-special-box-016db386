@@ -39,6 +39,7 @@ import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
 import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
 import checkDateIcon from "@/assets/check_date_icon-v2-20260427.png";
 import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-20260427.png";
+import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import cameraIcon from "@/assets/camera_icon-v2-20260427.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -218,9 +219,7 @@ function LightboxModal({
                     draggable={false}
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <img src={logoTransparent} alt="" className="w-1/3 max-w-[160px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" />
-                  </div>
+                  <PhotoWatermark size="lg" />
                 </div>
               ))}
             </div>
@@ -259,9 +258,7 @@ function LightboxModal({
                       className="max-w-full max-h-full object-contain rounded-lg select-none"
                       draggable={false}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <img src={logoTransparent} alt="" className="w-1/3 max-w-[200px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
-                    </div>
+                    <PhotoWatermark size="lg" />
                   </div>
                 </div>
               ))}
@@ -358,6 +355,46 @@ const TYPE_BG: Record<string, string> = {
   토지: "bg-lime-50 text-lime-700",
   건물매매: "bg-orange-100 text-orange-800",
   단독매매: "bg-yellow-50 text-yellow-700",
+};
+
+/* 모바일: 클릭하면 아이콘 자리에 라벨 텍스트로 토글되는 시설 배지 */
+const FacilityBadge = ({
+  label, iconSrc, bg, border, badge,
+}: {
+  label: string;
+  iconSrc: string;
+  bg: string;
+  border: string;
+  badge?: JSX.Element; // 추가 오버레이 (예: 반려동물 불가의 X)
+}) => {
+  const [showLabel, setShowLabel] = useState(false);
+  useEffect(() => {
+    if (!showLabel) return;
+    const t = setTimeout(() => setShowLabel(false), 1800);
+    return () => clearTimeout(t);
+  }, [showLabel]);
+  if (showLabel) {
+    return (
+      <span
+        onClick={(e) => { e.stopPropagation(); setShowLabel(false); }}
+        className="flex-shrink-0 inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-bold whitespace-nowrap cursor-pointer"
+        style={{ background: bg, border: `1px solid ${border}`, color: "#1f2937" }}
+      >
+        {label}
+      </span>
+    );
+  }
+  return (
+    <span
+      onClick={(e) => { e.stopPropagation(); setShowLabel(true); }}
+      className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded cursor-pointer relative"
+      style={{ background: bg, border: `1px solid ${border}` }}
+      title={label}
+    >
+      <img src={iconSrc} alt="" className="w-5 h-5 object-contain pointer-events-none" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
+      {badge}
+    </span>
+  );
 };
 
 /* 옵션 SVG 아이콘 컴포넌트 */
@@ -2797,19 +2834,25 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const normalizedOpts = new Set(opts.map((o) => String(o).replace(/\s+/g, "").toLowerCase()));
       const hasOpt = (...c: string[]) => c.some((x) => normalizedOpts.has(x.replace(/\s+/g, "").toLowerCase()));
       const facilityBadges: JSX.Element[] = [];
-      const fIcon = "flex-shrink-0 flex items-center justify-center w-6 h-6 rounded cursor-pointer";
-      const fImg = "w-5 h-5 object-contain pointer-events-none";
-      const fStyle = { imageRendering: '-webkit-optimize-contrast' as any };
-      const showLabel = (label: string) => (e: React.MouseEvent) => {
-        e.stopPropagation();
-        toast(label, { duration: 1500, position: "top-center" });
-      };
       if (prop.elevator || hasOpt("엘리베이터"))
-        facilityBadges.push(<span key="el" title="엘리베이터" onClick={showLabel("엘리베이터")} className={fIcon} style={{ background: "#e0f2fe", border: "1px solid #7dd3fc" }}><img src={elevatorIcon} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<FacilityBadge key="el" label="엘리베이터" iconSrc={elevatorIcon} bg="#e0f2fe" border="#7dd3fc" />);
       if (hasOpt("반려동물불가", "애완동물불가"))
-        facilityBadges.push(<span key="pd" title="반려동물 불가" onClick={showLabel("반려동물 불가")} className={`${fIcon} relative`} style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /><span className="absolute inset-0 flex items-center justify-center pointer-events-none"><svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg></span></span>);
+        facilityBadges.push(
+          <FacilityBadge
+            key="pd"
+            label="반려동물 불가"
+            iconSrc={petIcon}
+            bg="#fef2f2"
+            border="#fca5a5"
+            badge={
+              <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg>
+              </span>
+            }
+          />
+        );
       else if (hasOpt("반려동물가능", "애완동물가능"))
-        facilityBadges.push(<span key="po" title="반려동물 가능" onClick={showLabel("반려동물 가능")} className={fIcon} style={{ background: "#fff7ed", border: "1px solid #fdba74" }}><img src={petIcon} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<FacilityBadge key="po" label="반려동물 가능" iconSrc={petIcon} bg="#fff7ed" border="#fdba74" />);
       ([
         ["수도", waterIcon, "#eff6ff", "#93c5fd"],
         ["인터넷", internetIcon, "#f0fdf4", "#86efac"],
@@ -2819,7 +2862,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         ["여성전용", femaleOnlyIcon, "#fdf2f8", "#f9a8d4"],
       ] as const).forEach(([opt, src, bg, br]) => {
         if (!hasOpt(opt)) return;
-        facilityBadges.push(<span key={opt} title={opt} onClick={showLabel(opt)} className={fIcon} style={{ background: bg, border: `1px solid ${br}` }}><img src={src} alt="" className={fImg} style={fStyle} /></span>);
+        facilityBadges.push(<FacilityBadge key={opt} label={opt} iconSrc={src} bg={bg} border={br} />);
       });
       const FULL_OPT = ["냉장고", "세탁기", "에어컨", "TV", "전자레인지", "인터넷", "가스레인지", "수도"];
       const isFull = opts.includes("풀옵션") || FULL_OPT.every((o) => opts.includes(o));
@@ -4774,9 +4817,7 @@ const MapSidebar = ({
                                           setLightbox({ units, unitIdx: Math.max(0, currentIdx) });
                                         }}
                                       />
-                                      <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-                                        <img src={logoTransparent} alt="" className="w-1/2 max-w-[60px] opacity-30 mix-blend-luminosity drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-                                      </div>
+                                      <PhotoWatermark size="sm" />
                                       {isRef && (
                                         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                                           <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
@@ -4989,9 +5030,7 @@ const MapSidebar = ({
                                         parent.prepend(fallback);
                                       }}
                                     />
-                                    <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-                                      <img src={logoTransparent} alt="" className="w-1/2 max-w-[60px] opacity-30 mix-blend-luminosity drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-                                    </div>
+                                    <PhotoWatermark size="sm" />
                                     {isRef && (
                                       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                                         <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">

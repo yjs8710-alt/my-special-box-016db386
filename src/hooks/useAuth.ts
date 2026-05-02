@@ -129,6 +129,15 @@ supabase.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
     kickedOut = false;
     (async () => {
+      // 관리자 계정은 다중 디바이스/IP 제한 면제
+      const { data: adminRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (adminRow) return;
+
       try { await claimDeviceSlot(); } catch {}
       setupDeviceChannel(session.user.id);
       // 허용 IP 검증 (PC/모바일 공통)
@@ -147,6 +156,14 @@ if (typeof document !== "undefined") {
     if (document.visibilityState !== "visible") return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
+    // 관리자는 검증 스킵
+    const { data: adminRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (adminRow) return;
     const ok = await verifyDeviceSlot();
     if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
     const ipOk = await verifyPcIpAllowed();
