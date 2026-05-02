@@ -403,6 +403,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   buildingDong: "",
   landArea: "",
   pet: "",
+  keyMoney: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
