@@ -2,7 +2,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-20260427.png";
+import logoTransparent from "@/assets/logo-zibda-share-header-20260502.png";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 
 interface PropertyData {
