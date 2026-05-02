@@ -84,13 +84,18 @@ const PropertyCard = ({
                 img.classList.add("object-contain", "p-1");
               }}
             />
-            {/* 가운데 집다 로고 워터마크 */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-              <img
-                src={logoTransparent}
-                alt=""
-                className="w-1/2 max-w-[140px] opacity-30 mix-blend-luminosity drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"
-              />
+            {/* 가운데 가로 한 줄 텍스트 워터마크 */}
+            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none overflow-hidden">
+              <span
+                className="text-white/80 font-bold tracking-[0.4em] whitespace-nowrap select-none"
+                style={{
+                  fontSize: "clamp(14px, 5vw, 22px)",
+                  textShadow: "0 1px 4px rgba(0,0,0,0.6), 0 0 12px rgba(0,0,0,0.35)",
+                  mixBlendMode: "overlay",
+                }}
+              >
+                집&nbsp;다&nbsp;부&nbsp;동&nbsp;산
+              </span>
             </div>
             {isRef && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
