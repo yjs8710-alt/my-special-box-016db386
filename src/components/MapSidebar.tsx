@@ -221,17 +221,6 @@ function LightboxModal({
                     loading="lazy"
                   />
                   <PhotoWatermark size="lg" />
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-                      await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
-                    }}
-                    className="absolute top-2 right-2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
-                    title="다운로드"
-                  >
-                    <Download className="w-4 h-4 text-white" />
-                  </button>
                 </div>
               ))}
             </div>
@@ -271,17 +260,6 @@ function LightboxModal({
                       draggable={false}
                     />
                     <PhotoWatermark size="lg" />
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-                        await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
-                      }}
-                      className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
-                      title="다운로드"
-                    >
-                      <Download className="w-5 h-5 text-white" />
-                    </button>
                   </div>
                 </div>
               ))}
