@@ -59,16 +59,16 @@ const HeroSection = () => {
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        {/* 카테고리 그리드 — 모바일 전용: 배경 가리지 않도록 컴팩트하게 */}
-        <div className="grid grid-cols-4 gap-2 w-full max-w-md mt-2 md:hidden">
+        {/* 카테고리 그리드 — 모바일 전용 (배경 비치도록 투명 처리) */}
+        <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
           {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-xl border border-white/40 bg-white/15 backdrop-blur-sm text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-md"
+              className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/60 bg-transparent text-white hover:bg-white/90 hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <img src={icon} alt={label} loading="lazy" decoding="async" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.25)]" />
-              <span className="text-[11px] font-bold leading-tight text-center">{label}</span>
+              <img src={icon} alt={label} loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.45)]" />
+              <span className="text-sm font-bold leading-tight px-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">{label}</span>
             </button>
           ))}
         </div>
