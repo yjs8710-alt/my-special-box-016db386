@@ -1531,10 +1531,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   {["상가","사무실","공장·창고","지식산업","기타임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.type) && (
                     <div className="col-span-2">
-                      <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
-                        const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
-                        set("note", v ? (existing ? `${existing}\n권리금: ${v}` : `권리금: ${v}`) : existing);
-                      }} placeholder="없으면 0 또는 비워두기" />
+                      <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
                     </div>
                   )}
                   <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
