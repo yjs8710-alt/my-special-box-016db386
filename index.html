@@ -43,6 +43,28 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        try {
+          var match = window.location.pathname.match(/^\/property\/([^/]+)$/);
+          if (match) {
+            window.location.replace('/share/' + match[1] + window.location.search + window.location.hash);
+            return;
+          }
+
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+              registrations.forEach(function (registration) { registration.unregister(); });
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(function (keys) {
+              keys.forEach(function (key) { caches.delete(key); });
+            });
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!-- Kakao JS SDK는 공유 등 실제 필요 시점에 동적 로딩 (초기 진입 속도 개선) -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
