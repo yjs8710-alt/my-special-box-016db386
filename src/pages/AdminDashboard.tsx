@@ -1659,9 +1659,8 @@ const AdminDashboard = () => {
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
-      const { error } = await supabase.from("cheongju_contacts")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert(payload as any, { onConflict: "dong,lot_number,unit_number" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("cheongju_contacts").insert(payload as any);
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
