@@ -252,12 +252,17 @@ function LightboxModal({
                   className="flex-shrink-0 h-full flex items-center justify-center px-16"
                   style={{ width: "100vw" }}
                 >
-                  <img
-                    src={src}
-                    alt={`사진 ${i + 1}`}
-                    className="max-w-full max-h-full object-contain rounded-lg select-none"
-                    draggable={false}
-                  />
+                  <div className="relative max-w-full max-h-full">
+                    <img
+                      src={src}
+                      alt={`사진 ${i + 1}`}
+                      className="max-w-full max-h-full object-contain rounded-lg select-none"
+                      draggable={false}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <img src={logoTransparent} alt="" className="w-1/3 max-w-[200px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
