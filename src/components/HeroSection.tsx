@@ -37,7 +37,7 @@ const HeroSection = () => {
         fetchpriority="high"
         className="absolute inset-0 w-full h-full object-cover object-center"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/40 via-transparent to-[#071a3d]/30" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
         {isAppMode && (
@@ -59,16 +59,16 @@ const HeroSection = () => {
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        {/* 카테고리 그리드 — 모바일 전용 (배경 비치도록 투명 처리) */}
+        {/* 카테고리 그리드 — 모바일 전용 (데스크톱은 기존 빈 상태 유지) */}
         <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
           {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/60 bg-transparent text-white hover:bg-white/90 hover:text-primary transition-all duration-200 shadow-lg"
+              className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <img src={icon} alt={label} loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.45)]" />
-              <span className="text-sm font-bold leading-tight px-2 drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">{label}</span>
+              <img src={icon} alt={label} loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
+              <span className="text-sm font-bold leading-tight px-2">{label}</span>
             </button>
           ))}
         </div>
