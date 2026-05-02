@@ -1,5 +1,5 @@
 import { MapProperty } from "@/data/mapProperties";
-import { buildFreshSiteUrl, SITE_ORIGIN } from "@/lib/freshUrl";
+import { addMobileFreshParams, buildFreshSiteUrl, SITE_ORIGIN } from "@/lib/freshUrl";
 
 declare global {
   interface Window {
@@ -155,12 +155,11 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
 
 function buildPropertyShareUrl(property: MapProperty, sharerUserId?: string): string {
   const propertyId = property.dbId || property.id;
-  // 공유 링크는 fresh 파라미터 없이 깔끔하게 — 카톡 인앱 브라우저 호환성 ↑
   const shareUrl = new URL(`/property/${propertyId}`, SITE_ORIGIN);
   if (sharerUserId) {
     shareUrl.searchParams.set("sharedBy", sharerUserId);
   }
-  return shareUrl.toString();
+  return addMobileFreshParams(shareUrl);
 }
 
 /** 주소에서 동/리 까지만 남기고 번지 이하 제거 */
