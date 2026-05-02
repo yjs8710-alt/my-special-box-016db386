@@ -1,5 +1,5 @@
 import { MapPin, Eye, Heart, X } from "lucide-react";
-import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-20260427.png";
+import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import { useState } from "react";
 
@@ -84,19 +84,7 @@ const PropertyCard = ({
                 img.classList.add("object-contain", "p-1");
               }}
             />
-            {/* 가운데 가로 한 줄 텍스트 워터마크 */}
-            <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none overflow-hidden">
-              <span
-                className="text-white/80 font-bold tracking-[0.4em] whitespace-nowrap select-none"
-                style={{
-                  fontSize: "clamp(14px, 5vw, 22px)",
-                  textShadow: "0 1px 4px rgba(0,0,0,0.6), 0 0 12px rgba(0,0,0,0.35)",
-                  mixBlendMode: "overlay",
-                }}
-              >
-                집&nbsp;다&nbsp;부&nbsp;동&nbsp;산
-              </span>
-            </div>
+            <PhotoWatermark size="md" />
             {isRef && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <span className="text-[11px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
