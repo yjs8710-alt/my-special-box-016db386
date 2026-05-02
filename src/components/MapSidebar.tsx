@@ -27,6 +27,7 @@ import {
   Wifi,
   Loader2,
   FileSearch,
+  Download,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling_icon-v2-20260427.png";
@@ -220,6 +221,17 @@ function LightboxModal({
                     loading="lazy"
                   />
                   <PhotoWatermark size="lg" />
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
+                      await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
+                    }}
+                    className="absolute top-2 right-2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
+                    title="다운로드"
+                  >
+                    <Download className="w-4 h-4 text-white" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -259,6 +271,17 @@ function LightboxModal({
                       draggable={false}
                     />
                     <PhotoWatermark size="lg" />
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
+                        await downloadPropertyImage(src, `사진_${i + 1}.jpg`);
+                      }}
+                      className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center backdrop-blur-sm transition-colors"
+                      title="다운로드"
+                    >
+                      <Download className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -313,13 +336,15 @@ function LightboxModal({
           )}
         </>
       )}
-      {/* 하단 닫기 버튼 (모바일/데스크톱 공통) — 시인성 강조 */}
+      {/* 우측 하단 닫기 버튼 — 작고 깔끔하게 */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 px-10 py-3 rounded-full text-white text-base font-extrabold shadow-2xl transition-transform active:scale-95 z-30"
-        style={{ background: "hsl(var(--accent))", border: "2px solid rgba(255,255,255,0.6)" }}
+        className="absolute bottom-4 right-4 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 z-30"
+        style={{ background: "rgba(0,0,0,0.7)", border: "1.5px solid rgba(255,255,255,0.5)" }}
+        title="닫기"
+        aria-label="닫기"
       >
-        ✕ 닫기
+        <X className="w-5 h-5" strokeWidth={2.5} />
       </button>
     </div>
   );
