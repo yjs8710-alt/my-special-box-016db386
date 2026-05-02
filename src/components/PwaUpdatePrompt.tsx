@@ -66,7 +66,9 @@ export function PwaUpdatePrompt() {
 
     const moveToFreshUrl = () => {
       if (isPreviewHost || inIframe) return;
-      window.location.replace(`${window.location.pathname}?v=${Date.now()}`);
+      const freshUrl = new URL(window.location.href);
+      freshUrl.searchParams.set("v", `${Date.now()}`);
+      window.location.replace(freshUrl.toString());
     };
 
     const getServerBuildVersion = async () => {
