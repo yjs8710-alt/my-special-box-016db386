@@ -375,6 +375,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   buildingDong: string; // 집합건물 동(棟)
   landArea: string; // 대지 면적
   pet: PetType; // 반려동물 가능 여부
+  keyMoney: string; // 권리금
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -402,6 +403,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   buildingDong: "",
   landArea: "",
   pet: "",
+  keyMoney: "",
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
@@ -524,6 +526,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
     const landAreaMatch = noteStr.match(/대지[:\s]+([^\n|]+)/);
     if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
+    const keyMoneyMatch = noteStr.match(/권리금[:\s]+([^\n|]+)/);
+    if (keyMoneyMatch) contacts.keyMoney = keyMoneyMatch[1].trim();
 
     // 반려동물 가능 여부 파싱 (options 배열에서)
     const opts: string[] = Array.isArray(initial?.options) ? (initial.options as string[]) : [];
@@ -852,6 +856,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       form.buildingArea && `건평: ${form.buildingArea}`,
       form.buildingDong && `동(棟): ${form.buildingDong}`,
       form.landArea && `대지: ${form.landArea}`,
+      form.keyMoney && `권리금: ${form.keyMoney}`,
       finalRoadAddress && `도로명: ${finalRoadAddress}`,
     ].filter(Boolean).join("\n");
 
@@ -1526,10 +1531,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   {["상가","사무실","공장·창고","지식산업","기타임대","상가주택매매","상가건물매매","구분상가매매","지식산업매매"].includes(form.type) && (
                     <div className="col-span-2">
-                      <AmountInput label="권리금" value={form.note?.match(/권리금:\s*(.+)/)?.[1] ?? ""} onChange={(v) => {
-                        const existing = (form.note ?? "").replace(/\n?권리금:.*/, "");
-                        set("note", v ? (existing ? `${existing}\n권리금: ${v}` : `권리금: ${v}`) : existing);
-                      }} placeholder="없으면 0 또는 비워두기" />
+                      <AmountInput label="권리금" value={form.keyMoney} onChange={(v) => set("keyMoney", v)} placeholder="없으면 0 또는 비워두기" />
                     </div>
                   )}
                   <AmountInput label="관리비" value={form.manage_fee} onChange={(v) => set("manage_fee", v)} />
