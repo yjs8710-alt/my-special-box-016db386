@@ -84,7 +84,7 @@ const PropertyCard = ({
                 img.classList.add("object-contain", "p-1");
               }}
             />
-            <PhotoWatermark size="md" />
+            <PhotoWatermark size="lg" />
             {isRef && (
               <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <span className="text-[11px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
