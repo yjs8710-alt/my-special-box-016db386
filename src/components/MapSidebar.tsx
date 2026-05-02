@@ -357,6 +357,46 @@ const TYPE_BG: Record<string, string> = {
   단독매매: "bg-yellow-50 text-yellow-700",
 };
 
+/* 모바일: 클릭하면 아이콘 자리에 라벨 텍스트로 토글되는 시설 배지 */
+const FacilityBadge = ({
+  label, iconSrc, bg, border, badge,
+}: {
+  label: string;
+  iconSrc: string;
+  bg: string;
+  border: string;
+  badge?: JSX.Element; // 추가 오버레이 (예: 반려동물 불가의 X)
+}) => {
+  const [showLabel, setShowLabel] = useState(false);
+  useEffect(() => {
+    if (!showLabel) return;
+    const t = setTimeout(() => setShowLabel(false), 1800);
+    return () => clearTimeout(t);
+  }, [showLabel]);
+  if (showLabel) {
+    return (
+      <span
+        onClick={(e) => { e.stopPropagation(); setShowLabel(false); }}
+        className="flex-shrink-0 inline-flex items-center justify-center h-6 px-2 rounded text-[10px] font-bold whitespace-nowrap cursor-pointer"
+        style={{ background: bg, border: `1px solid ${border}`, color: "#1f2937" }}
+      >
+        {label}
+      </span>
+    );
+  }
+  return (
+    <span
+      onClick={(e) => { e.stopPropagation(); setShowLabel(true); }}
+      className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded cursor-pointer relative"
+      style={{ background: bg, border: `1px solid ${border}` }}
+      title={label}
+    >
+      <img src={iconSrc} alt="" className="w-5 h-5 object-contain pointer-events-none" style={{ imageRendering: "-webkit-optimize-contrast" as any }} />
+      {badge}
+    </span>
+  );
+};
+
 /* 옵션 SVG 아이콘 컴포넌트 */
 const OptionSvgIcon = ({ name, size = 11 }: { name: string; size?: number }) => {
   const s = size;
