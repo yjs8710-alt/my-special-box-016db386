@@ -100,8 +100,9 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
   const description = descParts.join(" · ");
   const fullDescription = safeAddress ? `${safeAddress}\n${description}` : description;
   const title = property.buildingName || property.title || "매물 정보";
+  const defaultShareLogo = `${SITE_ORIGIN}/og-share-zibda-logo-20260502.png`;
   const imageUrl =
-    property.images?.[0] || property.image || fallbackImageUrl || "https://my-special-box.lovable.app/placeholder.svg";
+    property.images?.[0] || property.image || fallbackImageUrl || defaultShareLogo;
 
   // 1) 카카오톡 SDK 시도
   let kakaoOk = false;
