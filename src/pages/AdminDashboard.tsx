@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
 import JibunAddressBadge from "@/components/JibunAddressBadge";
+import JibunInlineAddress from "@/components/JibunInlineAddress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
