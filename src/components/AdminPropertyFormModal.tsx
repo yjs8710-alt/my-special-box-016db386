@@ -526,6 +526,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (buildingDongMatch) contacts.buildingDong = buildingDongMatch[1].trim();
     const landAreaMatch = noteStr.match(/대지[:\s]+([^\n|]+)/);
     if (landAreaMatch) contacts.landArea = landAreaMatch[1].trim();
+    const keyMoneyMatch = noteStr.match(/권리금[:\s]+([^\n|]+)/);
+    if (keyMoneyMatch) contacts.keyMoney = keyMoneyMatch[1].trim();
 
     // 반려동물 가능 여부 파싱 (options 배열에서)
     const opts: string[] = Array.isArray(initial?.options) ? (initial.options as string[]) : [];
