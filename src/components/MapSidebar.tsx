@@ -210,14 +210,18 @@ function LightboxModal({
           <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none">
             <div className="flex flex-col items-center gap-3 px-3 pb-4">
               {currentImages.map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt={`사진 ${i + 1}`}
-                  className="w-full max-w-full object-contain rounded-lg select-none"
-                  draggable={false}
-                  loading="lazy"
-                />
+                <div key={i} className="relative w-full">
+                  <img
+                    src={src}
+                    alt={`사진 ${i + 1}`}
+                    className="w-full max-w-full object-contain rounded-lg select-none"
+                    draggable={false}
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <img src={logoTransparent} alt="" className="w-1/3 max-w-[160px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" />
+                  </div>
+                </div>
               ))}
             </div>
           </div>
