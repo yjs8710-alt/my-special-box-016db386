@@ -297,7 +297,7 @@ export default function PublicProperty() {
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto pb-24">
+      <div className="max-w-lg mx-auto pb-8">
         {/* Image carousel */}
         {imgs.length > 0 ? (
           <div className="relative aspect-[4/3] bg-muted overflow-hidden">
