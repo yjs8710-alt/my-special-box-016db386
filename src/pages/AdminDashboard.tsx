@@ -1200,6 +1200,7 @@ const AdminDashboard = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [contactModal, setContactModal] = useState<CheongJuContact | null | "new">(null);
   const [contactSearch, setContactSearch] = useState("");
+  const [appliedContactSearch, setAppliedContactSearch] = useState("");
   const [contactDistrictFilter, setContactDistrictFilter] = useState("전체");
   const [contactDisplayCount, setContactDisplayCount] = useState(200);
 
@@ -1659,9 +1660,8 @@ const AdminDashboard = () => {
         memo: updated.memo ?? null,
         is_visible: updated.is_visible ?? true,
       };
-      const { error } = await supabase.from("cheongju_contacts")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .upsert(payload as any, { onConflict: "dong,lot_number,unit_number" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("cheongju_contacts").insert(payload as any);
       if (error) { alert("등록 오류: " + error.message); return; }
     }
     setContactModal(null);
@@ -1747,7 +1747,7 @@ const AdminDashboard = () => {
   }, [contacts]);
 
   const filteredContacts = useMemo(() => {
-    const q = contactSearch.trim();
+    const q = appliedContactSearch.trim();
     return contacts.filter((c) => {
       const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
       if (!matchDist) return false;
@@ -1763,9 +1763,9 @@ const AdminDashboard = () => {
         || (c.building_name ?? "").includes(q)
       );
     });
-  }, [contacts, contactDistrictFilter, contactSearch]);
+  }, [contacts, contactDistrictFilter, appliedContactSearch]);
 
-  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, contactSearch]);
+  useEffect(() => { setContactDisplayCount(200); }, [contactDistrictFilter, appliedContactSearch]);
 
   // 사이드바 내비 클릭 핸들러 (모바일에서 닫기 포함)
   const handleTabChange = (key: string) => {
@@ -2819,9 +2819,37 @@ const AdminDashboard = () => {
                       );
                     })}
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
-                    <Input placeholder="동·번지수·전화번호 검색" className="pl-7 h-8 text-xs w-52" value={contactSearch} onChange={(e) => setContactSearch(e.target.value)} />
+                  <div className="relative flex items-center gap-1">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+                      <Input
+                        placeholder="동·번지수·전화번호 검색"
+                        className="pl-7 h-8 text-xs w-52"
+                        value={contactSearch}
+                        onChange={(e) => setContactSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") setAppliedContactSearch(contactSearch);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-3 text-xs"
+                      onClick={() => setAppliedContactSearch(contactSearch)}
+                    >
+                      검색
+                    </Button>
+                    {appliedContactSearch && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 px-2 text-xs"
+                        onClick={() => { setContactSearch(""); setAppliedContactSearch(""); }}
+                      >
+                        초기화
+                      </Button>
+                    )}
                   </div>
                   <button onClick={fetchContacts} disabled={contactsLoading} className="p-1.5 rounded-md hover:bg-muted/50" style={{ color: "hsl(var(--muted-foreground))" }}>
                     <RefreshCw className={`w-3.5 h-3.5 ${contactsLoading ? "animate-spin" : ""}`} />
