@@ -75,20 +75,7 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
     return;
   }
 
-  try {
-    await ensureKakaoSdk();
-  } catch {
-    alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
-    return;
-  }
-  if (!window.Kakao?.Share) {
-    alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
-    return;
-  }
-
   const shareUrl = buildPropertyShareUrl(property, agencyInfo?.userId);
-
-  // 주소에서 동 단위까지만 표시 (상세 번지 제거)
   const safeAddress = sanitizeAddress(property.address);
 
   const descParts = [
@@ -98,7 +85,6 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
     `보증금 ${property.deposit} / 월세 ${property.monthly}`,
   ].filter(Boolean);
 
-  // 중개사무소 정보 추가
   if (agencyInfo?.agencyName) {
     const agencyParts = [
       `🏢 ${agencyInfo.agencyName}`,
@@ -112,38 +98,58 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
   }
 
   const description = descParts.join(" · ");
-
+  const fullDescription = safeAddress ? `${safeAddress}\n${description}` : description;
+  const title = property.buildingName || property.title || "매물 정보";
   const imageUrl =
-    property.images?.[0] || property.image || fallbackImageUrl || "";
+    property.images?.[0] || property.image || fallbackImageUrl || "https://my-special-box.lovable.app/placeholder.svg";
 
-  const shareData: any = {
-    objectType: "feed",
-    content: {
-      title: property.buildingName || property.title || "매물 정보",
-      description,
-      imageUrl: imageUrl || "https://my-special-box.lovable.app/placeholder.svg",
-      link: {
-        mobileWebUrl: shareUrl,
-        webUrl: shareUrl,
-      },
-    },
-    buttons: [
-      {
-        title: "매물 보기",
-        link: {
-          mobileWebUrl: shareUrl,
-          webUrl: shareUrl,
+  // 1) 카카오톡 SDK 시도
+  let kakaoOk = false;
+  try {
+    await ensureKakaoSdk();
+    if (window.Kakao?.Share) {
+      window.Kakao.Share.sendDefault({
+        objectType: "feed",
+        content: {
+          title,
+          description: fullDescription,
+          imageUrl,
+          link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
         },
-      },
-    ],
-  };
-
-  // 주소 정보는 동 단위까지만
-  if (safeAddress) {
-    shareData.content.description = `${safeAddress}\n${description}`;
+        buttons: [
+          { title: "매물 보기", link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
+        ],
+      });
+      kakaoOk = true;
+      return;
+    }
+  } catch (e) {
+    console.warn("[kakaoShare] SDK 실패, 대체 공유 사용:", e);
   }
 
-  window.Kakao.Share.sendDefault(shareData);
+  if (kakaoOk) return;
+
+  // 2) Web Share API (모바일 OS 기본 공유 시트 → 카톡 선택 가능)
+  const shareText = `${title}\n${fullDescription}\n${shareUrl}`;
+  try {
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      await (navigator as any).share({ title, text: `${title}\n${fullDescription}`, url: shareUrl });
+      return;
+    }
+  } catch (e) {
+    // 사용자 취소 또는 실패 → 클립보드로 폴백
+  }
+
+  // 3) 최종 폴백: 클립보드 복사
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareText);
+      alert("매물 정보가 클립보드에 복사되었습니다.\n카카오톡 대화창에 붙여넣기 해주세요.");
+      return;
+    }
+  } catch {}
+  // 클립보드도 실패 → prompt
+  window.prompt("아래 내용을 복사해 카카오톡으로 공유하세요:", shareText);
 }
 
 function buildPropertyShareUrl(property: MapProperty, sharerUserId?: string): string {
