@@ -183,17 +183,6 @@ export async function shareMultipleToKakao(properties: MapProperty[]) {
     return;
   }
 
-  try {
-    await ensureKakaoSdk();
-  } catch {
-    alert("카카오톡 공유 기능을 불러오지 못했습니다.");
-    return;
-  }
-  if (!window.Kakao?.Share) {
-    alert("카카오톡 공유 기능을 불러오지 못했습니다.");
-    return;
-  }
-
   const text = properties
     .slice(0, 5)
     .map((p, i) => {
@@ -201,13 +190,39 @@ export async function shareMultipleToKakao(properties: MapProperty[]) {
       return `${i + 1}. ${p.buildingName || p.title} (${p.deposit}/${p.monthly})${addr ? ` - ${addr}` : ""}`;
     })
     .join("\n");
+  const fullText = `[집다] 매물 ${properties.length}건\n\n${text}${properties.length > 5 ? `\n... 외 ${properties.length - 5}건` : ""}`;
+  const url = buildFreshSiteUrl();
 
-  window.Kakao.Share.sendDefault({
-    objectType: "text",
-    text: `[집다] 매물 ${properties.length}건\n\n${text}${properties.length > 5 ? `\n... 외 ${properties.length - 5}건` : ""}`,
-    link: {
-      mobileWebUrl: buildFreshSiteUrl(),
-      webUrl: buildFreshSiteUrl(),
-    },
-  });
+  // 1) Kakao SDK
+  try {
+    await ensureKakaoSdk();
+    if (window.Kakao?.Share) {
+      window.Kakao.Share.sendDefault({
+        objectType: "text",
+        text: fullText,
+        link: { mobileWebUrl: url, webUrl: url },
+      });
+      return;
+    }
+  } catch (e) {
+    console.warn("[shareMultipleToKakao] SDK 실패:", e);
+  }
+
+  // 2) Web Share
+  try {
+    if ((navigator as any).share) {
+      await (navigator as any).share({ title: "집다 매물", text: fullText, url });
+      return;
+    }
+  } catch {}
+
+  // 3) Clipboard
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(`${fullText}\n${url}`);
+      alert("매물 정보가 클립보드에 복사되었습니다.\n카카오톡 대화창에 붙여넣기 해주세요.");
+      return;
+    }
+  } catch {}
+  window.prompt("아래 내용을 복사해 카카오톡으로 공유하세요:", `${fullText}\n${url}`);
 }
