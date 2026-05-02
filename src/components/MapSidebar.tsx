@@ -39,6 +39,7 @@ import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
 import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
 import checkDateIcon from "@/assets/check_date_icon-v2-20260427.png";
 import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-20260427.png";
+import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import cameraIcon from "@/assets/camera_icon-v2-20260427.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -218,9 +219,7 @@ function LightboxModal({
                     draggable={false}
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <img src={logoTransparent} alt="" className="w-1/3 max-w-[160px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" />
-                  </div>
+                  <PhotoWatermark size="lg" />
                 </div>
               ))}
             </div>
@@ -259,9 +258,7 @@ function LightboxModal({
                       className="max-w-full max-h-full object-contain rounded-lg select-none"
                       draggable={false}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <img src={logoTransparent} alt="" className="w-1/3 max-w-[200px] opacity-25 mix-blend-luminosity drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
-                    </div>
+                    <PhotoWatermark size="lg" />
                   </div>
                 </div>
               ))}
@@ -4774,9 +4771,7 @@ const MapSidebar = ({
                                           setLightbox({ units, unitIdx: Math.max(0, currentIdx) });
                                         }}
                                       />
-                                      <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-                                        <img src={logoTransparent} alt="" className="w-1/2 max-w-[60px] opacity-30 mix-blend-luminosity drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-                                      </div>
+                                      <PhotoWatermark size="sm" />
                                       {isRef && (
                                         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                                           <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
@@ -4989,9 +4984,7 @@ const MapSidebar = ({
                                         parent.prepend(fallback);
                                       }}
                                     />
-                                    <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-                                      <img src={logoTransparent} alt="" className="w-1/2 max-w-[60px] opacity-30 mix-blend-luminosity drop-shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-                                    </div>
+                                    <PhotoWatermark size="sm" />
                                     {isRef && (
                                       <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                                         <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
