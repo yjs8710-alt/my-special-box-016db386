@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "
 import { lazy, Suspense } from "react";
 import Home from "./pages/Home";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 
 // 첫 화면(Home)은 즉시 로딩, 나머지 라우트는 lazy 로딩으로 초기 번들 최소화
 const LoginPage = lazy(() => import("./pages/Login"));
@@ -23,8 +25,6 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const MyProperties = lazy(() => import("./pages/MyProperties"));
 const MyPage = lazy(() => import("./pages/MyPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const ProtectedAdminRoute = lazy(() => import("./components/ProtectedAdminRoute"));
-const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 
 const queryClient = new QueryClient();
 
