@@ -387,6 +387,15 @@ const MapFilterBar = ({
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
 
+  // 검색어 입력값(로컬) — 검색 버튼/Enter 클릭 시에만 commit
+  const [pendingQuery, setPendingQuery] = useState(query);
+  useEffect(() => { setPendingQuery(query); }, [query]);
+  const commitSearch = () => {
+    onQueryChange(pendingQuery);
+    onPropertyIdChange("");
+    onSearchClick?.();
+  };
+
   // 매물 등록 모달이 열리면 필터 패널을 자동으로 닫음
   useEffect(() => {
     const handleClose = () => setShowFilter(false);
@@ -558,18 +567,14 @@ const MapFilterBar = ({
               <div className="flex items-center flex-1 min-w-0 px-2 sm:px-3 gap-2 h-10">
                 <input
                   type="text"
-                  value={query}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    onQueryChange(v);
-                    // 번지수(숫자)도 주소 검색으로 처리 — propertyId 설정 안 함
-                    onPropertyIdChange("");
-                  }}
-                  placeholder="주소, 건물명, 동명, 번지수 검색"
+                  value={pendingQuery}
+                  onChange={(e) => setPendingQuery(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") commitSearch(); }}
+                  placeholder="주소, 건물명, 동명, 번지수 검색 (Enter 또는 검색 버튼)"
                   className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
-                {query && (
-                  <button onClick={() => { onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
+                {(pendingQuery || query) && (
+                  <button onClick={() => { setPendingQuery(""); onQueryChange(""); onPropertyIdChange(""); }} className="text-muted-foreground hover:text-foreground">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -645,7 +650,7 @@ const MapFilterBar = ({
                   </button>
                 )}
                 <button
-                  onClick={() => onSearchClick?.()}
+                  onClick={() => commitSearch()}
                   className="flex items-center justify-center h-10 px-3 sm:px-4 text-xs font-bold flex-shrink-0"
                   style={{
                     background: "hsl(var(--primary))",
