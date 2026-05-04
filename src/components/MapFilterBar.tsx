@@ -650,7 +650,7 @@ const MapFilterBar = ({
                   </button>
                 )}
                 <button
-                  onClick={() => onSearchClick?.()}
+                  onClick={() => commitSearch()}
                   className="flex items-center justify-center h-10 px-3 sm:px-4 text-xs font-bold flex-shrink-0"
                   style={{
                     background: "hsl(var(--primary))",
