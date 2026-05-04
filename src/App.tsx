@@ -25,8 +25,6 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const MyProperties = lazy(() => import("./pages/MyProperties"));
 const MyPage = lazy(() => import("./pages/MyPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const ProtectedAdminRoute = lazy(() => import("./components/ProtectedAdminRoute"));
-const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 
 const queryClient = new QueryClient();
 
