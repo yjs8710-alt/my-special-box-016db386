@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
-import heroBg from "@/assets/main-bg-opt.jpg";
-import heroLogo from "@/assets/logo-zibda-active-opt.png";
-import iconResidential from "@/assets/icon-residential-v2-20260427-opt.png";
-import iconCommercial from "@/assets/icon-commercial-v2-20260427-opt.png";
-import iconCollective from "@/assets/icon-collective-v2-20260427-opt.png";
-import iconLand from "@/assets/icon-land-v2-20260427-opt.png";
+import heroBgMobile from "@/assets/main-bg-mobile.webp";
+import heroBg from "@/assets/main-bg-opt.webp";
+import heroLogo from "@/assets/logo-zibda-active-opt.webp";
+import iconResidential from "@/assets/icon-residential.webp";
+import iconCommercial from "@/assets/icon-commercial.webp";
+import iconCollective from "@/assets/icon-collective.webp";
+import iconLand from "@/assets/icon-land.webp";
 
 const CATEGORIES = [
   { label: "주거·임대", path: "/residential", icon: iconResidential },
@@ -27,16 +28,19 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
-      <img
-        src={heroBg}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        // @ts-expect-error fetchpriority is valid HTML
-        fetchpriority="high"
-        className="absolute inset-0 w-full h-full object-cover object-center"
-      />
+      <picture>
+        <source media="(max-width: 768px)" srcSet={heroBgMobile} />
+        <img
+          src={heroBg}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          // @ts-expect-error fetchpriority is valid HTML
+          fetchpriority="high"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      </picture>
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
