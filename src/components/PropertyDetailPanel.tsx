@@ -90,6 +90,17 @@ function Lightbox({
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next, onClose]);
 
+  // 라이트박스 열릴 때 모든 호실 이미지 미리 가져오기 (브라우저 캐시에 적재)
+  useEffect(() => {
+    const all = units.flatMap((u) => u.images);
+    all.forEach((src) => {
+      if (!src) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.src = src;
+    });
+  }, [units]);
+
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
       {/* 닫기 버튼은 하단에 위치 */}
