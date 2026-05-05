@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home } from "lucide-react";
-import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
+import logoImg from "@/assets/logo-zibda-active-opt.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
