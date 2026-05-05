@@ -570,7 +570,7 @@ const MapFilterBar = ({
                   value={pendingQuery}
                   onChange={(e) => setPendingQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") commitSearch(); }}
-                  placeholder="주소, 건물명, 동명, 번지수 검색 (Enter 또는 검색 버튼)"
+                  placeholder="주소, 건물명, 동명, 번지수 검색"
                   className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {(pendingQuery || query) && (
