@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
-import heroBg from "@/assets/main-bg-20260427-v2-20260427.jpg";
-import heroLogo from "@/assets/logo-zibda-active-20260427-v4.png";
-import iconResidential from "@/assets/icon-residential-v2-20260427.png";
-import iconCommercial from "@/assets/icon-commercial-v2-20260427.png";
-import iconCollective from "@/assets/icon-collective-v2-20260427.png";
-import iconLand from "@/assets/icon-land-v2-20260427.png";
+import heroBg from "@/assets/main-bg-opt.jpg";
+import heroLogo from "@/assets/logo-zibda-active-opt.png";
+import iconResidential from "@/assets/icon-residential-v2-20260427-opt.png";
+import iconCommercial from "@/assets/icon-commercial-v2-20260427-opt.png";
+import iconCollective from "@/assets/icon-collective-v2-20260427-opt.png";
+import iconLand from "@/assets/icon-land-v2-20260427-opt.png";
 
 const CATEGORIES = [
   { label: "주거·임대", path: "/residential", icon: iconResidential },
