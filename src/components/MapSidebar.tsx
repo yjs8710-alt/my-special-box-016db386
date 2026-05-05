@@ -2788,10 +2788,38 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 </body>
 </html>`;
 
-      popup.document.open();
-      popup.document.write(html);
-      popup.document.close();
-      popup.focus();
+      // 인앱 풀스크린 iframe 으로 로드뷰 표시 (브라우저 주소창/about:blank 바 제거)
+      const existing = document.getElementById("kakao-roadview-overlay");
+      if (existing) existing.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "kakao-roadview-overlay";
+      overlay.style.cssText = "position:fixed;inset:0;z-index:2147483646;background:#0f172a;";
+
+      const iframe = document.createElement("iframe");
+      iframe.style.cssText = "width:100%;height:100%;border:0;display:block;";
+      iframe.setAttribute("allow", "fullscreen");
+      overlay.appendChild(iframe);
+      document.body.appendChild(overlay);
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      const closeOverlay = () => {
+        window.removeEventListener("message", onMsg);
+        document.body.style.overflow = prevOverflow;
+        overlay.remove();
+      };
+      const onMsg = (ev: MessageEvent) => {
+        if (ev?.data?.type === "close-roadview") closeOverlay();
+      };
+      window.addEventListener("message", onMsg);
+
+      const doc = iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(html);
+        doc.close();
+      }
     };
 
     // 면적에서 평수만 추출 (예: "49㎡ (15.2평)" → "15.2평", "15" → "15평", "19.2평" → "19.2평")
