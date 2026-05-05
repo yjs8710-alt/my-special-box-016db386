@@ -2369,12 +2369,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         return;
       }
 
-      const popup = window.open("", "kakao-roadview-window", "width=" + screen.width + ",height=" + screen.height + ",left=0,top=0");
-      if (!popup) {
-        alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.");
-        return;
-      }
-
       const payload = JSON.stringify({
         title: prop.buildingName ?? prop.title ?? "로드뷰",
         address: prop.address,
@@ -2527,7 +2521,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}<span class="addr">${prop.address}</span></h1>
     <button class="btn-rv active" id="btnRv" onclick="toggleView('rv')">로드뷰</button>
     <button class="btn-map" id="btnMap" onclick="toggleView('map')">지도</button>
-    <button class="btn-close" onclick="window.close()">닫기</button>
+    <button class="btn-close" onclick="window.parent.postMessage({type:'close-roadview'},'*')">닫기</button>
   </div>
   <div class="content">
     <div class="panel" id="rvPanel">
@@ -2794,10 +2788,38 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 </body>
 </html>`;
 
-      popup.document.open();
-      popup.document.write(html);
-      popup.document.close();
-      popup.focus();
+      // 인앱 풀스크린 iframe 으로 로드뷰 표시 (브라우저 주소창/about:blank 바 제거)
+      const existing = document.getElementById("kakao-roadview-overlay");
+      if (existing) existing.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "kakao-roadview-overlay";
+      overlay.style.cssText = "position:fixed;inset:0;z-index:2147483646;background:#0f172a;";
+
+      const iframe = document.createElement("iframe");
+      iframe.style.cssText = "width:100%;height:100%;border:0;display:block;";
+      iframe.setAttribute("allow", "fullscreen");
+      overlay.appendChild(iframe);
+      document.body.appendChild(overlay);
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+
+      const closeOverlay = () => {
+        window.removeEventListener("message", onMsg);
+        document.body.style.overflow = prevOverflow;
+        overlay.remove();
+      };
+      const onMsg = (ev: MessageEvent) => {
+        if (ev?.data?.type === "close-roadview") closeOverlay();
+      };
+      window.addEventListener("message", onMsg);
+
+      const doc = iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(html);
+        doc.close();
+      }
     };
 
     // 면적에서 평수만 추출 (예: "49㎡ (15.2평)" → "15.2평", "15" → "15평", "19.2평" → "19.2평")
