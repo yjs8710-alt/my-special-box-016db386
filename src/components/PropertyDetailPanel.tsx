@@ -176,7 +176,9 @@ function Lightbox({
           className="flex h-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${imgIdx * 100}vw)`, width: `${currentImages.length * 100}vw` }}
         >
-          {currentImages.map((src, i) => (
+          {currentImages.map((src, i) => {
+            const distance = Math.abs(i - imgIdx);
+            return (
             <div
               key={i}
               className="flex-shrink-0 h-full flex items-center justify-center px-16"
@@ -187,9 +189,14 @@ function Lightbox({
                 alt={`사진 ${i + 1}`}
                 className="max-w-full max-h-full object-contain rounded-lg select-none"
                 draggable={false}
+                loading={distance <= 1 ? "eager" : "lazy"}
+                decoding="async"
+                // @ts-ignore
+                fetchpriority={distance === 0 ? "high" : "auto"}
               />
             </div>
-          ))}
+            );
+          })}
         </div>
         {currentImages.length > 1 && (
           <>
