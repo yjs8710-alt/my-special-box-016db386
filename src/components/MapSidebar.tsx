@@ -2521,7 +2521,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}<span class="addr">${prop.address}</span></h1>
     <button class="btn-rv active" id="btnRv" onclick="toggleView('rv')">로드뷰</button>
     <button class="btn-map" id="btnMap" onclick="toggleView('map')">지도</button>
-    <button class="btn-close" onclick="window.close()">닫기</button>
+    <button class="btn-close" onclick="window.parent.postMessage({type:'close-roadview'},'*')">닫기</button>
   </div>
   <div class="content">
     <div class="panel" id="rvPanel">
