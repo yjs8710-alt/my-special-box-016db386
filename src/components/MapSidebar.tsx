@@ -2369,12 +2369,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         return;
       }
 
-      const popup = window.open("", "kakao-roadview-window", "width=" + screen.width + ",height=" + screen.height + ",left=0,top=0");
-      if (!popup) {
-        alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.");
-        return;
-      }
-
       const payload = JSON.stringify({
         title: prop.buildingName ?? prop.title ?? "로드뷰",
         address: prop.address,
