@@ -140,7 +140,10 @@ function Lightbox({
                   alt={`사진 ${i + 1}`}
                   className="w-full max-w-full object-contain rounded-lg select-none"
                   draggable={false}
-                  loading="lazy"
+                  loading={i < 2 ? "eager" : "lazy"}
+                  decoding="async"
+                  // @ts-ignore
+                  fetchpriority={i === 0 ? "high" : "auto"}
                 />
                 <button
                   onClick={async (e) => {
