@@ -28,16 +28,19 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
-      <img
-        src={heroBg}
-        alt=""
-        aria-hidden="true"
-        loading="eager"
-        decoding="async"
-        // @ts-expect-error fetchpriority is valid HTML
-        fetchpriority="high"
-        className="absolute inset-0 w-full h-full object-cover object-center"
-      />
+      <picture>
+        <source media="(max-width: 768px)" srcSet={heroBgMobile} />
+        <img
+          src={heroBg}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          // @ts-expect-error fetchpriority is valid HTML
+          fetchpriority="high"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      </picture>
       <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
