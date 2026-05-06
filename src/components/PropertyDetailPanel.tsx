@@ -105,10 +105,10 @@ function Lightbox({
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
       {/* 닫기 버튼은 하단에 위치 */}
 
-      {/* 호실 탭 — 2개 이상일 때만 */}
+      {/* 호실 탭 — 2개 이상일 때만. 모바일은 상단 고정 바(배경 있음)로 다운로드 버튼과 겹침 방지 */}
       {units.length > 1 && (
         <div
-          className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 max-w-[80vw] flex-wrap justify-center"
+          className={`absolute top-0 left-0 right-0 z-20 flex gap-1.5 px-3 py-2 flex-wrap justify-center ${isMobile ? "bg-black/80 backdrop-blur-sm" : "top-4 left-1/2 -translate-x-1/2 max-w-[80vw] right-auto"}`}
           onClick={(e) => e.stopPropagation()}
         >
           {units.map((u, i) => (
