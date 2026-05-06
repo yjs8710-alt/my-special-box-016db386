@@ -290,11 +290,12 @@ function LightboxModal({
                   className="flex-shrink-0 h-full flex items-center justify-center px-16"
                   style={{ width: "100vw" }}
                 >
-                  <div className="relative max-w-full max-h-full">
+                  <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={src}
                       alt={`사진 ${i + 1}`}
-                      className="max-w-full max-h-full object-contain rounded-lg select-none"
+                      className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg select-none"
+                      style={{ maxHeight: "calc(100vh - 80px)" }}
                       draggable={false}
                     />
                     <PhotoWatermark size="lg" />
