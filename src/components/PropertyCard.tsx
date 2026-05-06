@@ -86,9 +86,9 @@ const PropertyCard = ({
             />
             <PhotoWatermark size="lg" />
             {isRef && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                <span className="text-[11px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
-                  참고용 다른 호실 사진
+              <div className="absolute top-0 left-0 right-0 z-20 flex justify-center pointer-events-none pt-2">
+                <span className="text-[11px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-full drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
+                  다른 매물 사진입니다
                 </span>
               </div>
             )}
