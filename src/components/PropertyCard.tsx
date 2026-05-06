@@ -73,7 +73,7 @@ const PropertyCard = ({
               loading="lazy"
               decoding="async"
               referrerPolicy="no-referrer"
-              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
+              className={`w-full h-full object-contain bg-muted group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
               style={{ imageRendering: "auto", backgroundColor: "hsl(var(--muted))" }}
               onError={(e) => {
                 const img = e.currentTarget;
