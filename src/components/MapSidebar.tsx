@@ -155,28 +155,33 @@ function LightboxModal({
           className="absolute top-0 left-0 right-0 z-30 bg-black/85 backdrop-blur-md px-2 pt-2 pb-2 flex flex-col gap-1.5"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start gap-2">
-            <div className="flex-1 min-w-0 flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none">
-              {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i))}
-              {hasTabs && hiddenCount > 0 && !showMoreUnits && (
-                <button
-                  onClick={() => setShowMoreUnits(true)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
-                  style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
-                >
-                  더보기 +{hiddenCount}
-                </button>
-              )}
-              {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-                <button
-                  onClick={() => setShowMoreUnits(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
-                  style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
-                >
-                  접기
-                </button>
-              )}
+          <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none w-full">
+            {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i))}
+            {hasTabs && hiddenCount > 0 && !showMoreUnits && (
+              <button
+                onClick={() => setShowMoreUnits(true)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+                style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+              >
+                더보기 +{hiddenCount}
+              </button>
+            )}
+            {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+              <button
+                onClick={() => setShowMoreUnits(false)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+                style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+              >
+                접기
+              </button>
+            )}
+          </div>
+          {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+            <div className="flex flex-row gap-1.5 flex-wrap justify-center">
+              {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
             </div>
+          )}
+          <div className="flex justify-end">
             <button
               onClick={async (e) => {
                 e.stopPropagation();
@@ -187,18 +192,13 @@ function LightboxModal({
                   await new Promise((r) => setTimeout(r, 250));
                 }
               }}
-              className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold border border-white/30"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold border border-white/30"
               title="모두 저장하기"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>모두</span>
+              <span>모두 저장</span>
             </button>
           </div>
-          {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-            <div className="flex flex-row gap-1.5 flex-wrap justify-center">
-              {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
-            </div>
-          )}
         </div>
       ) : (
         <>
