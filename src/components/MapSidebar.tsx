@@ -149,73 +149,94 @@ function LightboxModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
-      {/* 우측 상단 — 모두 저장하기 버튼 */}
-      <button
-        onClick={async (e) => {
-          e.stopPropagation();
-          if (!currentImages.length) return;
-          const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-          for (let i = 0; i < currentImages.length; i++) {
-            await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
-            await new Promise((r) => setTimeout(r, 250));
-          }
-        }}
-        className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
-        title="모두 저장하기"
-      >
-        <Download className="w-4 h-4" />
-        <span>모두 저장</span>
-      </button>
-      {/* 닫기 버튼은 하단에 위치 */}
-
-      {/* 호실 탭 — 2개 이상이거나 참고용이 있을 때 표시 */}
-      {hasTabs && (
+      {/* 모바일: 상단 고정 바 (탭 + 모두저장 같은 줄에 배치, 겹침 방지) */}
+      {isMobileView ? (
         <div
-          className={`absolute top-4 left-1/2 -translate-x-1/2 z-10 ${isMobileView ? "max-w-[92vw]" : "max-w-[80vw]"}`}
+          className="absolute top-0 left-0 right-0 z-30 bg-black/85 backdrop-blur-md px-2 pt-2 pb-2 flex flex-col gap-1.5"
           onClick={(e) => e.stopPropagation()}
         >
-          {isMobileView ? (
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none">
-                {visibleUnits.map((u, i) => renderTabButton(u, i))}
-                {hiddenCount > 0 && !showMoreUnits && (
-                  <button
-                    onClick={() => setShowMoreUnits(true)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
-                    style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
-                  >
-                    더보기 +{hiddenCount}
-                  </button>
-                )}
-                {showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-                  <button
-                    onClick={() => setShowMoreUnits(false)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap"
-                    style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
-                  >
-                    접기
-                  </button>
-                )}
-              </div>
-              {showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-                <div className="flex flex-row gap-1.5 flex-wrap justify-center max-w-[92vw]">
-                  {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
-                </div>
+          <div className="flex items-start gap-2">
+            <div className="flex-1 min-w-0 flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none">
+              {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i))}
+              {hasTabs && hiddenCount > 0 && !showMoreUnits && (
+                <button
+                  onClick={() => setShowMoreUnits(true)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+                  style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+                >
+                  더보기 +{hiddenCount}
+                </button>
+              )}
+              {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+                <button
+                  onClick={() => setShowMoreUnits(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+                  style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+                >
+                  접기
+                </button>
               )}
             </div>
-          ) : (
-            <div className="flex gap-1.5 flex-wrap justify-center">
-              {units.map((u, i) => renderTabButton(u, i))}
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!currentImages.length) return;
+                const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
+                for (let i = 0; i < currentImages.length; i++) {
+                  await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
+                  await new Promise((r) => setTimeout(r, 250));
+                }
+              }}
+              className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold border border-white/30"
+              title="모두 저장하기"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>모두</span>
+            </button>
+          </div>
+          {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
+            <div className="flex flex-row gap-1.5 flex-wrap justify-center">
+              {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
             </div>
           )}
         </div>
+      ) : (
+        <>
+          {/* 데스크톱 — 우측 상단 모두저장 버튼 */}
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!currentImages.length) return;
+              const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
+              for (let i = 0; i < currentImages.length; i++) {
+                await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
+                await new Promise((r) => setTimeout(r, 250));
+              }
+            }}
+            className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
+            title="모두 저장하기"
+          >
+            <Download className="w-4 h-4" />
+            <span>모두 저장</span>
+          </button>
+          {hasTabs && (
+            <div
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-10 max-w-[80vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex gap-1.5 flex-wrap justify-center">
+                {units.map((u, i) => renderTabButton(u, i))}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── 모바일: 좌우 가로 스와이프 ── */}
       {isMobileView ? (
         <div
           className="flex-1 flex flex-col w-full overflow-hidden"
-          style={{ paddingTop: hasTabs ? "72px" : "16px", paddingBottom: "16px" }}
+          style={{ paddingTop: showMoreUnits && hasTabs ? "120px" : (hasTabs ? "64px" : "56px"), paddingBottom: "16px" }}
           onClick={(e) => e.stopPropagation()}
         >
           {units[unitIdx]?.isReference && (
