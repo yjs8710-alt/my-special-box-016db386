@@ -17,6 +17,7 @@ let deviceChannel: ReturnType<typeof supabase.channel> | null = null;
 let kickedOut = false;
 let sessionCheckPromise: Promise<void> | null = null;
 let lastAdminCheck: { userId: string; isAdmin: boolean; at: number } | null = null;
+let adminCheckPromise: { userId: string; promise: Promise<boolean> } | null = null;
 
 const ADMIN_CACHE_MS = 30_000;
 
@@ -30,15 +31,23 @@ async function getIsAdmin(userId: string) {
   if (lastAdminCheck?.userId === userId && Date.now() - lastAdminCheck.at < ADMIN_CACHE_MS) {
     return lastAdminCheck.isAdmin;
   }
-  const { data: roleData } = await supabase
+  if (adminCheckPromise?.userId === userId) return adminCheckPromise.promise;
+  const promise = supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", userId)
     .eq("role", "admin")
-    .maybeSingle();
-  const isAdmin = Boolean(roleData);
-  lastAdminCheck = { userId, isAdmin, at: Date.now() };
-  return isAdmin;
+    .maybeSingle()
+    .then(({ data: roleData }) => {
+      const isAdmin = Boolean(roleData);
+      lastAdminCheck = { userId, isAdmin, at: Date.now() };
+      return isAdmin;
+    })
+    .finally(() => {
+      if (adminCheckPromise?.userId === userId) adminCheckPromise = null;
+    });
+  adminCheckPromise = { userId, promise };
+  return promise;
 }
 
 async function forceLogoutDueToDeviceConflict() {
