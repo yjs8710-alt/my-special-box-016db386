@@ -32,20 +32,21 @@ async function getIsAdmin(userId: string) {
     return lastAdminCheck.isAdmin;
   }
   if (adminCheckPromise?.userId === userId) return adminCheckPromise.promise;
-  const promise = supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle()
-    .then(({ data: roleData }) => {
+  const promise = (async () => {
+    try {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
       const isAdmin = Boolean(roleData);
       lastAdminCheck = { userId, isAdmin, at: Date.now() };
       return isAdmin;
-    })
-    .finally(() => {
+    } finally {
       if (adminCheckPromise?.userId === userId) adminCheckPromise = null;
-    });
+    }
+  })();
   adminCheckPromise = { userId, promise };
   return promise;
 }
