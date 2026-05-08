@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
     <!-- TODO: Set the document title to the name of your application -->
     <title>집다 - 청주 공실 플랫폼</title>
     <meta name="description" content="중개사 전용 청주 공실 정보 플랫폼">
@@ -63,12 +63,9 @@
             window.location.replace('/share/' + match[1] + window.location.search + window.location.hash);
             return;
           }
-          // SW/cache 정리는 1회만 수행해 매번 메인 스레드를 점유하지 않도록 함
-          var SW_CLEAN_KEY = '__sw_cleaned_v3__';
-          if (!localStorage.getItem(SW_CLEAN_KEY)) {
-            var done = function () {
-              try { localStorage.setItem(SW_CLEAN_KEY, '1'); } catch (e) {}
-            };
+          var SW_CLEAN_KEY = '__sw_cleaned_v4_stable__';
+          var isPreview = /lovableproject\.com|id-preview--|localhost|127\.0\.0\.1/.test(window.location.hostname);
+          if (!isPreview && !localStorage.getItem(SW_CLEAN_KEY)) {
             var run = function () {
               try {
                 if ('serviceWorker' in navigator) {
@@ -82,7 +79,7 @@
                   });
                 }
               } catch (e) {}
-              done();
+              try { localStorage.setItem(SW_CLEAN_KEY, '1'); } catch (e) {}
             };
             if ('requestIdleCallback' in window) {
               requestIdleCallback(run, { timeout: 3000 });
