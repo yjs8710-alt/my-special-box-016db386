@@ -2586,18 +2586,21 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     function toggleView(mode) {
       if (mode === "rv") {
-        if (currentView === "rv") return;
         currentView = "rv";
       } else if (mode === "map") {
-        if (currentView === "map") { currentView = "rv"; }
-        else if (currentView === "rv") { currentView = "both"; }
-        else { currentView = "rv"; }
+        // 지도 클릭: rv 상태면 반반 보기, 반반/map 상태면 rv 단독으로 복귀
+        if (currentView === "rv") currentView = "both";
+        else currentView = "rv";
+      } else if (mode === "closeRv") {
+        // 로드뷰 닫기: 지도만 표시
+        currentView = "map";
       }
 
       rvPanel.classList.toggle("hidden", currentView === "map");
       mapPanel.classList.toggle("hidden", currentView === "rv");
       btnRv.classList.toggle("active", currentView === "rv" || currentView === "both");
       btnMap.classList.toggle("active", currentView === "map" || currentView === "both");
+      btnCloseRv.classList.toggle("show", currentView === "both");
 
       setTimeout(function() {
         if (currentView !== "map" && roadview) try { roadview.relayout(); } catch(e) {}
