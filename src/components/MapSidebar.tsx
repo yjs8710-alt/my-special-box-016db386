@@ -397,7 +397,6 @@ const TYPE_BG: Record<string, string> = {
   토지: "bg-lime-50 text-lime-700",
   건물매매: "bg-orange-100 text-orange-800",
   단독매매: "bg-yellow-50 text-yellow-700",
-  "원룸\n투베이\n투룸\n쓰리룸\n포룸\n주인세대\n고시원\n다가구\n단독주택\n아파트\n오피스텔\n빌라\n연립\n다세대\n주상복합            도시형": "bg-pink-50 text-pink-700",
 };
 
 /* 모바일: 클릭하면 아이콘 자리에 라벨 텍스트로 토글되는 시설 배지 */
@@ -3030,7 +3029,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
                 {prop.type && <span>{prop.type}</span>}
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
-                {prop.type === "주상복합            도시형" && <span className="opacity-90">·주상복합          도시형</span>}
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
                 {prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
               </span>
