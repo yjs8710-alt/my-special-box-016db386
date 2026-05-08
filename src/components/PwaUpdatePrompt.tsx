@@ -2,7 +2,6 @@ import { useEffect } from "react";
 
 const FRESH_CHECK_INTERVAL = 60_000;
 const BUILD_VERSION_STORAGE_KEY = "jibda_buildVersion";
-const BOOT_FIX_RELOAD_KEY = "jibda_boot_fix_SITE_BOOT_FIX_20260508_02";
 const OLD_VERSION_STORAGE_KEYS = [
   "jibda_build_id",
   "jibda_build_version",
@@ -112,19 +111,6 @@ export function PwaUpdatePrompt() {
 
     const refreshOnceForBuild = async () => {
       if (isPreviewHost || inIframe) return;
-
-      const shouldForceBootFixRefresh =
-        !sessionStorage.getItem(BOOT_FIX_RELOAD_KEY) &&
-        localStorage.getItem(BUILD_VERSION_STORAGE_KEY) !== __APP_BUILD_VERSION__;
-
-      if (shouldForceBootFixRefresh) {
-        sessionStorage.setItem(BOOT_FIX_RELOAD_KEY, "1");
-        removeOldCacheVersionStorage();
-        await clearOldAppCache();
-        localStorage.setItem(BUILD_VERSION_STORAGE_KEY, __APP_BUILD_VERSION__);
-        moveToFreshUrl();
-        return;
-      }
 
       if (isAggressiveInAppBrowser) {
         await clearOldAppCache();
