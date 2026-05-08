@@ -12,7 +12,7 @@ import {
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
   Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
 } from "lucide-react";
-import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
+import logoImg from "@/assets/logo-zibda-active-20260427-v3.webp";
 import JibunAddressBadge from "@/components/JibunAddressBadge";
 import JibunInlineAddress from "@/components/JibunInlineAddress";
 import { Button } from "@/components/ui/button";
