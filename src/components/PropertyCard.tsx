@@ -106,6 +106,9 @@ const PropertyCard = ({
           {options?.includes("단기가능") && (
             <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">단기</span>
           )}
+          {options?.includes("복층") && (
+            <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">복층</span>
+          )}
           {isNew && (
             <span className="bg-badge-new text-white text-xs font-bold px-2 py-0.5 rounded-full">NEW</span>
           )}
