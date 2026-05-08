@@ -1498,6 +1498,10 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
         setPendingFiles([]);
         setPendingPreviews([]);
         setSaved(true);
+        setSaving(false);
+        setSaveProgress("");
+        onClose();
+        return;
       }
     } else {
       // Static: dataURL을 localStorage에 저장
@@ -1507,6 +1511,10 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
       setPendingFiles([]);
       setPendingPreviews([]);
       setSaved(true);
+      setSaving(false);
+      setSaveProgress("");
+      onClose();
+      return;
     }
 
     setSaving(false);
