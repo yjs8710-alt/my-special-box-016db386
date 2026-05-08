@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Download } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
-import InstallAppModal from "@/components/InstallAppModal";
+const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 
 const Home = () => {
   const [showInstall, setShowInstall] = useState(false);

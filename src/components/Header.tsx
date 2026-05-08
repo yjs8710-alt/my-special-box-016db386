@@ -73,8 +73,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   return (
     <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
       {/* <AdminEditBar /> */}
-      {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
-      <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
+      <Suspense fallback={null}>
+        {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
+        {showInstall && <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />}
+      </Suspense>
 
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
