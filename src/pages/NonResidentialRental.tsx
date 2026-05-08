@@ -41,11 +41,12 @@ const COLLECTIVE_SALE_SUBTYPES = [
   { label: "전체", group: "전체", key: "전체" },
   { label: "단독·건물", group: "매매", key: "건물매매" },
   { label: "아파트", group: "매매", key: "아파트매매-그룹" },
-  { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
-  { label: "분양권", group: "매매", key: "분양권매매-그룹" },
   { label: "오피스텔", group: "매매", key: "오피스텔매매-그룹" },
+  { label: "도시형", group: "매매", key: "도시형매매-그룹" },
+  { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
   { label: "연립", group: "매매", key: "연립매매-그룹" },
   { label: "다세대", group: "매매", key: "다세대매매-그룹" },
+  { label: "분양권", group: "매매", key: "분양권매매-그룹" },
 ];
 
 const NON_RESIDENTIAL_DB_TYPES = [
@@ -54,9 +55,9 @@ const NON_RESIDENTIAL_DB_TYPES = [
   "상가임대", "기타임대",
   "단독매매", "상가주택매매", "상가건물매매",
   "구분상가매매", "창고/공장매매", "다가구매매", "다중매매",
-  "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매", "분양권매매",
+  "아파트매매", "오피스텔매매", "도시형매매", "연립매매", "다세대매매", "주상복합매매", "분양권매매",
   // 주거형 type이지만 매매(note에 "매매가:")인 매물 포함을 위해 fetch
-  "아파트", "오피스텔", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구", "분양권",
+  "아파트", "오피스텔", "도시형", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구", "분양권",
 ];
 
 interface NonResidentialRentalProps {
@@ -85,17 +86,17 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
 
   const { properties: dbProperties, refetch } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
   // 주거형 type은 매매(note에 "매매가:")인 경우에만 포함
-  const RESIDENTIAL_TYPES = ["아파트", "오피스텔", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구"];
+  const RESIDENTIAL_TYPES = ["아파트", "오피스텔", "도시형", "연립", "다세대", "주상복합", "빌라", "단독주택", "다가구"];
   // 집합건물.매매 페이지에 표시될 type 집합 (매매 한정)
   const COLLECTIVE_SALE_TYPE_SET = new Set([
     "건물매매", "상가건물매매", "상가주택매매", "구분상가매매",
     "단독매매", "다가구매매", "다중매매",
-    "아파트매매", "오피스텔매매", "연립매매", "다세대매매", "주상복합매매", "분양권매매",
+    "아파트매매", "오피스텔매매", "도시형매매", "연립매매", "다세대매매", "주상복합매매", "분양권매매",
   ]);
   const isCollectiveSaleProp = (p: { type?: string; note?: string | null }) => {
     const t = p.type ?? "";
     if (COLLECTIVE_SALE_TYPE_SET.has(t)) return true;
-    if (["아파트", "오피스텔", "연립", "다세대", "주상복합", "분양권", "단독주택", "다가구"].includes(t)) {
+    if (["아파트", "오피스텔", "도시형", "연립", "다세대", "주상복합", "분양권", "단독주택", "다가구"].includes(t)) {
       return (p.note ?? "").includes("매매가:");
     }
     return false;
@@ -143,6 +144,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
       "공장창고매매-그룹": ["공장·창고", "창고/공장매매"],
       "아파트매매-그룹": ["아파트", "아파트매매"],
       "오피스텔매매-그룹": ["오피스텔", "오피스텔매매"],
+      "도시형매매-그룹": ["도시형", "도시형매매"],
       "연립매매-그룹": ["연립", "연립매매"],
       "다세대매매-그룹": ["다세대", "다세대매매"],
       "주상복합매매-그룹": ["주상복합", "주상복합매매"],
