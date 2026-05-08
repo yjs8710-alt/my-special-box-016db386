@@ -779,7 +779,7 @@ const MapFilterBar = ({
               {nonResidentialSubtypes && nonResidentialSubtypes.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <SectionLabel>임대 / 매매</SectionLabel>
+                    <SectionLabel> 매매</SectionLabel>
                     {(() => {
                       const arr = activeTypes ?? [activeType];
                       const hasSelection = !arr.includes("전체") && arr.length > 0;
