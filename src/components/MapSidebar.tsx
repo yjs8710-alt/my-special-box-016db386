@@ -2467,6 +2467,17 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       color: #fff;
       box-shadow: 0 4px 12px rgba(220,38,38,0.35);
     }
+    .btn-close-rv {
+      background: #fff7ed; color: #ea580c;
+      box-shadow: inset 0 0 0 1px #fed7aa;
+      display: none;
+    }
+    .btn-close-rv.show { display: inline-block; }
+    .btn-close-rv:hover {
+      background: linear-gradient(135deg, #fb923c, #ea580c);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(234,88,12,0.35);
+    }
     .content { flex: 1; display: flex; flex-direction: column; position: relative; min-height: 0; background: #0f172a; }
     .panel { flex: 1; min-width: 0; min-height: 0; width: 100%; position: relative; }
     .panel.hidden { display: none; }
