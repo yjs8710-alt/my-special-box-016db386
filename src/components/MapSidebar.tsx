@@ -3677,39 +3677,45 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const brokerFee = brokerMatch?.[1]?.trim();
           // 공실 여부: 임대 타입만 표시 (매매 제외)
           const isSalePropCard = prop.type?.includes("매매");
-          const vacancy =
-            !isSalePropCard &&
-            prop.availableFrom &&
-            (prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중")
-              ? prop.availableFrom
-              : null;
+          const hasDuplex = (prop.options ?? []).includes("복층");
+          const hasShortTerm = !isSalePropCard && (prop.options ?? []).includes("단기가능");
+          const vacateDisplay = (() => {
+            if (!prop.vacateDate) return null;
+            const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+            const vacateTime = new Date(vacateStr).getTime();
+            if (isNaN(vacateTime)) return null;
+            return vacateTime < Date.now() ? "공실" : `퇴거 ${prop.vacateDate}`;
+          })();
+          const vacancy = !isSalePropCard
+            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateDisplay
+            : null;
 
           const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
           if (vacancy)
             chips.push({
-              label: vacancy === "공실" ? "공실" : "거주중",
+              label: vacancy === "공실" ? "공실" : vacancy === "세입자 거주중" ? "거주중" : vacancy,
               value: "",
-              bg: vacancy === "공실" ? "hsl(142 70% 93%)" : "hsl(38 95% 92%)",
-              color: vacancy === "공실" ? "hsl(142 60% 30%)" : "hsl(25 90% 40%)",
-              border: vacancy === "공실" ? "hsl(142 60% 70%)" : "hsl(38 80% 65%)",
+              bg: vacancy === "공실" ? "hsl(142 70% 93%)" : vacancy === "세입자 거주중" ? "hsl(38 95% 92%)" : "hsl(0 85% 93%)",
+              color: vacancy === "공실" ? "hsl(142 60% 30%)" : vacancy === "세입자 거주중" ? "hsl(25 90% 40%)" : "hsl(0 85% 35%)",
+              border: vacancy === "공실" ? "hsl(142 60% 70%)" : vacancy === "세입자 거주중" ? "hsl(38 80% 65%)" : "hsl(0 85% 65%)",
             });
-          // 단기가능 배지
-          if (!isSalePropCard && (prop.options ?? []).includes("단기가능"))
-            chips.push({
-              label: "단기",
-              value: "",
-              bg: "hsl(217 91% 93%)",
-              color: "hsl(217 91% 35%)",
-              border: "hsl(217 91% 65%)",
-            });
-          // 복층 배지
-          if ((prop.options ?? []).includes("복층"))
+          // 복층 배지 — 공실 바로 오른쪽에 우선 배치
+          if (hasDuplex)
             chips.push({
               label: "복층",
               value: "",
               bg: "hsl(270 80% 94%)",
               color: "hsl(270 70% 40%)",
               border: "hsl(270 70% 70%)",
+            });
+          // 단기가능 배지
+          if (hasShortTerm)
+            chips.push({
+              label: "단기",
+              value: "",
+              bg: "hsl(217 91% 93%)",
+              color: "hsl(217 91% 35%)",
+              border: "hsl(217 91% 65%)",
             });
           if (direction)
             chips.push({ label: direction + "향", value: "", bg: "#fff3e0", color: "#e65100", border: "#ffcc80" });
@@ -3756,30 +3762,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               color: "hsl(20 90% 35%)",
               border: "hsl(30 80% 65%)",
             });
-          // 퇴거 예정일 — 지났으면 공실 표시
-          if (prop.vacateDate) {
-            const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
-            const vacateTime = new Date(vacateStr).getTime();
-            const isPast = !isNaN(vacateTime) && vacateTime < Date.now();
-            if (isPast) {
-              chips.push({
-                label: "공실",
-                value: "",
-                bg: "hsl(142 50% 90%)",
-                color: "hsl(142 60% 30%)",
-                border: "hsl(142 50% 65%)",
-              });
-            } else {
-              chips.push({
-                label: `퇴거 ${prop.vacateDate}`,
-                value: "",
-                bg: "hsl(0 85% 93%)",
-                color: "hsl(0 85% 35%)",
-                border: "hsl(0 85% 65%)",
-              });
-            }
-          }
-
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
