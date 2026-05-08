@@ -15,11 +15,30 @@ let cachedUser: AuthUser | null = null;
 let listeners: Array<(s: AuthStatus, u: AuthUser | null) => void> = [];
 let deviceChannel: ReturnType<typeof supabase.channel> | null = null;
 let kickedOut = false;
+let sessionCheckPromise: Promise<void> | null = null;
+let lastAdminCheck: { userId: string; isAdmin: boolean; at: number } | null = null;
+
+const ADMIN_CACHE_MS = 30_000;
 
 function notify(s: AuthStatus, u: AuthUser | null) {
   cachedStatus = s;
   cachedUser = u;
   listeners.forEach((fn) => fn(s, u));
+}
+
+async function getIsAdmin(userId: string) {
+  if (lastAdminCheck?.userId === userId && Date.now() - lastAdminCheck.at < ADMIN_CACHE_MS) {
+    return lastAdminCheck.isAdmin;
+  }
+  const { data: roleData } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  const isAdmin = Boolean(roleData);
+  lastAdminCheck = { userId, isAdmin, at: Date.now() };
+  return isAdmin;
 }
 
 async function forceLogoutDueToDeviceConflict() {
@@ -70,6 +89,14 @@ function setupDeviceChannel(userId: string) {
 }
 
 async function checkSession() {
+  if (sessionCheckPromise) return sessionCheckPromise;
+  sessionCheckPromise = runSessionCheck().finally(() => {
+    sessionCheckPromise = null;
+  });
+  return sessionCheckPromise;
+}
+
+async function runSessionCheck() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user) {
     teardownDeviceChannel();
@@ -78,14 +105,7 @@ async function checkSession() {
   }
 
   // 관리자 여부 확인
-  const { data: roleData } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", session.user.id)
-    .eq("role", "admin")
-    .maybeSingle();
-
-  if (roleData) {
+  if (await getIsAdmin(session.user.id)) {
     notify("authorized", { userId: session.user.id, memberType: "관리자", isAdmin: true });
     return;
   }
@@ -130,13 +150,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     kickedOut = false;
     (async () => {
       // 관리자 계정은 다중 디바이스/IP 제한 면제
-      const { data: adminRow } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (adminRow) return;
+      if (await getIsAdmin(session.user.id)) return;
 
       try { await claimDeviceSlot(); } catch {}
       setupDeviceChannel(session.user.id);
@@ -157,13 +171,7 @@ if (typeof document !== "undefined") {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     // 관리자는 검증 스킵
-    const { data: adminRow } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (adminRow) return;
+    if (await getIsAdmin(session.user.id)) return;
     const ok = await verifyDeviceSlot();
     if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
     const ipOk = await verifyPcIpAllowed();
