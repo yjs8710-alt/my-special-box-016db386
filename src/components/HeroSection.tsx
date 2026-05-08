@@ -41,7 +41,10 @@ const HeroSection = () => {
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
       </picture>
-      <div className="absolute inset-0 bg-gradient-to-b from-[#071a3d]/70 via-[#0b234d]/45 to-[#071a3d]/70" />
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))" }}
+      />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
         {isAppMode && (
@@ -63,16 +66,15 @@ const HeroSection = () => {
           className="w-56 md:w-96 opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.45)]"
         />
 
-        {/* 카테고리 그리드 — 모바일 전용 (데스크톱은 기존 빈 상태 유지) */}
-        <div className="grid grid-cols-2 gap-3 w-full max-w-md mt-2 md:hidden">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-md md:max-w-5xl mt-2">
           {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-2 aspect-square rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
+              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-[1.35] rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
-              <img src={icon} alt={label} loading="lazy" decoding="async" width={56} height={56} className="w-14 h-14 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
-              <span className="text-sm font-bold leading-tight px-2">{label}</span>
+              <img src={icon} alt={label} loading="eager" decoding="async" width={56} height={56} className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
+              <span className="text-sm md:text-base font-bold leading-tight px-2">{label}</span>
             </button>
           ))}
         </div>
