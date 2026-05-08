@@ -185,11 +185,11 @@ const NAV = [
 
 const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
   {
-    group: "주거형 임대",
+    group: "주거형",
     types: ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "빌라", "고시원"],
   },
   {
-    group: "상가 임대",
+    group: "상가",
     types: ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"],
   },
   {
