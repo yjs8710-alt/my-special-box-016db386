@@ -39,7 +39,7 @@ const FULL_NON_RESIDENTIAL_SUBTYPES = [
 // 집합건물.매매 페이지 전용 서브타입
 const COLLECTIVE_SALE_SUBTYPES = [
   { label: "전체", group: "전체", key: "전체" },
-  { label: "건물", group: "매매", key: "건물매매" },
+  { label: "단독·건물", group: "매매", key: "건물매매" },
   { label: "아파트", group: "매매", key: "아파트매매-그룹" },
   { label: "주상복합", group: "매매", key: "주상복합매매-그룹" },
   { label: "분양권", group: "매매", key: "분양권매매-그룹" },
