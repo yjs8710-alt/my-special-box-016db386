@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import PropertyRegisterModal from "@/components/PropertyRegisterModal";
+const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
 import AdminEditBar from "@/components/AdminEditBar";
-import InstallAppModal from "@/components/InstallAppModal";
+const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
