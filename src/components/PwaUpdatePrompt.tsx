@@ -140,15 +140,14 @@ export function PwaUpdatePrompt() {
     };
 
     // 첫 화면 진입 속도를 위해 버전 확인은 idle 시점으로 미룸
-    const idle = (cb: () => void) => {
-      if ("requestIdleCallback" in window) {
-        (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number })
-          .requestIdleCallback(cb, { timeout: 4000 });
-      } else {
-        window.setTimeout(cb, 2500);
-      }
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
     };
-    idle(() => { refreshOnceForBuild(); });
+    if (w.requestIdleCallback) {
+      w.requestIdleCallback(() => { refreshOnceForBuild(); }, { timeout: 4000 });
+    } else {
+      window.setTimeout(() => { refreshOnceForBuild(); }, 2500);
+    }
 
     const interval = window.setInterval(refreshOnceForBuild, FRESH_CHECK_INTERVAL);
     const onPageShow = (event: PageTransitionEvent) => {
