@@ -695,6 +695,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         form.contactTenant && `세입자: ${form.contactTenant}`,
         form.contactManager && `관리인: ${form.contactManager}`,
         form.keyMoney && `권리금: ${form.keyMoney}`,
+        (form.tradeType === "매매" || isBuildingSale) && form.salePrice && `매매가: ${form.salePrice}만원`,
         isBuildingSale && form.landArea && `대지: ${form.landArea}`,
         isBuildingSale && form.buildingArea && `건평: ${form.buildingArea}`,
         form.tenantOccupied && `세입자거주: 예`,
