@@ -715,7 +715,7 @@ const MapFilterBar = ({
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {["아파트", "아파트분양권", "오피스텔", "오피스텔분양권", "연립/다세대", "빌라분양권"].map(t => (
+                      {["아파트", "오피스텔", "도시형", "아파트분양권", "오피스텔분양권", "연립/다세대", "빌라분양권"].map(t => (
                         <Chip key={t} active={apartmentActiveTypes.includes(t)} onClick={() => onApartmentTypeChange?.(t)}>{t}</Chip>
                       ))}
                     </div>
