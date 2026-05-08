@@ -2567,7 +2567,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     </div>
   </div>
   <script>
-    var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
+    var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, btnCloseRv, mapInstance, currentView, roadview;
     var sdkLoadAttempts = 0;
     var roadviewInitAttempts = 0;
     var MAX_SDK_ATTEMPTS = 4;
