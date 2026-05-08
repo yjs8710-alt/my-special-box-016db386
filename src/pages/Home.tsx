@@ -88,7 +88,11 @@ const Home = () => {
       </button>
       )}
 
-      <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
+      {showInstall && (
+        <Suspense fallback={null}>
+          <InstallAppModal open={showInstall} onClose={() => setShowInstall(false)} />
+        </Suspense>
+      )}
 
       <main className="flex-1">
         <HeroSection />
