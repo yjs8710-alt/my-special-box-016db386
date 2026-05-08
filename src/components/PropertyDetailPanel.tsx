@@ -29,7 +29,7 @@ import { MapProperty } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPhone } from "@/lib/utils";
 import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
-import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
+import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.webp";
 import { useAuth } from "@/hooks/useAuth";
 import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { toast } from "sonner";

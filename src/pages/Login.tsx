@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
+import logoImg from "@/assets/logo-zibda-active-20260427-v4.webp";
 
 type ApprovalStatus = "approved" | "pending" | "rejected" | null;
 

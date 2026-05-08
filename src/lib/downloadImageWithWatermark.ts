@@ -2,7 +2,7 @@
 // 봄날부동산(license_number === BOMNAL_LICENSE) 소속은 워터마크 없이 원본 다운로드
 
 import { supabase } from "@/integrations/supabase/client";
-import logoSrc from "@/assets/logo-zibda-active-20260427-v4.png";
+import logoSrc from "@/assets/logo-zibda-active-20260427-v4.webp";
 
 export const BOMNAL_LICENSE = "43112-2024-00034";
 

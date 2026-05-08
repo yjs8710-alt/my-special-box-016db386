@@ -1,5 +1,5 @@
 import React from "react";
-import logoTransparent from "@/assets/logo-zibda-active-20260427-v4.png";
+import logoTransparent from "@/assets/logo-zibda-active-20260427-v4.webp";
 
 /** 사진 가운데 집다 로고 워터마크 — 흰색, 가로로 길게 */
 interface PhotoWatermarkProps {
