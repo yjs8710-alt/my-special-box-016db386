@@ -2425,67 +2425,61 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     }
     body { display: flex; flex-direction: column; }
     .toolbar {
-      display: flex; align-items: center; gap: 10px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(14px);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border-bottom: 1px solid rgba(15,23,42,0.06);
       color: #0f172a; z-index: 10; flex-shrink: 0;
     }
     .toolbar h1 {
-      font-size: 15px; font-weight: 700; flex: 1;
+      font-size: 14px; font-weight: 700; flex: 1;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       color: #0f172a; letter-spacing: -0.02em;
+      display: flex; align-items: baseline; gap: 10px;
     }
     .toolbar .addr {
-      font-size: 12px; font-weight: 500; color: #64748b;
-      margin-left: 10px; letter-spacing: -0.01em;
+      font-size: 12px; font-weight: 500; color: #94a3b8;
+      letter-spacing: -0.01em;
+    }
+    .seg {
+      display: inline-flex; align-items: center;
+      padding: 3px; gap: 2px;
+      background: #f1f5f9;
+      border: 1px solid rgba(15,23,42,0.05);
+      border-radius: 999px;
     }
     .toolbar button {
-      padding: 8px 16px; border-radius: 10px; border: none;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      letter-spacing: -0.01em;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      padding: 6px 14px; border-radius: 999px; border: none;
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+      letter-spacing: -0.01em; color: #475569;
+      background: transparent;
+      transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     }
-    .toolbar button:hover { transform: translateY(-1px); }
-    .btn-rv {
-      background: #eff6ff; color: #2563eb;
-      box-shadow: inset 0 0 0 1px #dbeafe;
-    }
-    .btn-rv.active {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(37,99,235,0.35);
-    }
-    .btn-map {
-      background: #ecfdf5; color: #059669;
-      box-shadow: inset 0 0 0 1px #d1fae5;
-    }
-    .btn-map.active {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(5,150,105,0.35);
-    }
-    .btn-close {
-      background: #fef2f2; color: #dc2626;
-      box-shadow: inset 0 0 0 1px #fecaca;
-    }
-    .btn-close:hover {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(220,38,38,0.35);
+    .seg button:hover { color: #0f172a; }
+    .btn-rv.active, .btn-map.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.06), 0 4px 10px rgba(15,23,42,0.05);
     }
     .btn-close-rv {
-      background: #fff7ed; color: #ea580c;
-      box-shadow: inset 0 0 0 1px #fed7aa;
       display: none;
+      padding: 6px 12px; border-radius: 999px;
+      background: transparent; color: #ea580c;
+      border: 1px solid rgba(234,88,12,0.25);
     }
-    .btn-close-rv.show { display: inline-block; }
+    .btn-close-rv.show { display: inline-flex; align-items: center; }
     .btn-close-rv:hover {
-      background: linear-gradient(135deg, #fb923c, #ea580c);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(234,88,12,0.35);
+      background: #fff7ed;
+      border-color: rgba(234,88,12,0.45);
     }
+    .btn-close {
+      padding: 6px 14px; border-radius: 999px;
+      background: #0f172a; color: #fff;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.2);
+    }
+    .btn-close:hover { background: #1e293b; }
     .content { flex: 1; display: flex; flex-direction: column; position: relative; min-height: 0; background: #0f172a; }
     .panel { flex: 1; min-width: 0; min-height: 0; width: 100%; position: relative; }
     .panel.hidden { display: none; }
