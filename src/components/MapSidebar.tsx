@@ -2467,6 +2467,17 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       color: #fff;
       box-shadow: 0 4px 12px rgba(220,38,38,0.35);
     }
+    .btn-close-rv {
+      background: #fff7ed; color: #ea580c;
+      box-shadow: inset 0 0 0 1px #fed7aa;
+      display: none;
+    }
+    .btn-close-rv.show { display: inline-block; }
+    .btn-close-rv:hover {
+      background: linear-gradient(135deg, #fb923c, #ea580c);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(234,88,12,0.35);
+    }
     .content { flex: 1; display: flex; flex-direction: column; position: relative; min-height: 0; background: #0f172a; }
     .panel { flex: 1; min-width: 0; min-height: 0; width: 100%; position: relative; }
     .panel.hidden { display: none; }
@@ -2543,6 +2554,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     <h1>${prop.buildingName ?? prop.title ?? "로드뷰"}<span class="addr">${prop.address}</span></h1>
     <button class="btn-rv active" id="btnRv" onclick="toggleView('rv')">로드뷰</button>
     <button class="btn-map" id="btnMap" onclick="toggleView('map')">지도</button>
+    <button class="btn-close-rv" id="btnCloseRv" onclick="toggleView('closeRv')">로드뷰 닫기</button>
     <button class="btn-close" onclick="window.parent.postMessage({type:'close-roadview'},'*')">닫기</button>
   </div>
   <div class="content">
@@ -2555,7 +2567,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     </div>
   </div>
   <script>
-    var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, mapInstance, currentView, roadview;
+    var data, radii, statusEl, roadviewEl, mapEl, rvPanel, mapPanel, btnRv, btnMap, btnCloseRv, mapInstance, currentView, roadview;
     var sdkLoadAttempts = 0;
     var roadviewInitAttempts = 0;
     var MAX_SDK_ATTEMPTS = 4;
@@ -2574,18 +2586,21 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
     function toggleView(mode) {
       if (mode === "rv") {
-        if (currentView === "rv") return;
         currentView = "rv";
       } else if (mode === "map") {
-        if (currentView === "map") { currentView = "rv"; }
-        else if (currentView === "rv") { currentView = "both"; }
-        else { currentView = "rv"; }
+        // 지도 클릭: rv 상태면 반반 보기, 반반/map 상태면 rv 단독으로 복귀
+        if (currentView === "rv") currentView = "both";
+        else currentView = "rv";
+      } else if (mode === "closeRv") {
+        // 로드뷰 닫기: 지도만 표시
+        currentView = "map";
       }
 
       rvPanel.classList.toggle("hidden", currentView === "map");
       mapPanel.classList.toggle("hidden", currentView === "rv");
       btnRv.classList.toggle("active", currentView === "rv" || currentView === "both");
       btnMap.classList.toggle("active", currentView === "map" || currentView === "both");
+      btnCloseRv.classList.toggle("show", currentView === "both");
 
       setTimeout(function() {
         if (currentView !== "map" && roadview) try { roadview.relayout(); } catch(e) {}
@@ -2619,6 +2634,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       mapPanel = document.getElementById("mapPanel");
       btnRv = document.getElementById("btnRv");
       btnMap = document.getElementById("btnMap");
+      btnCloseRv = document.getElementById("btnCloseRv");
       mapInstance = null;
       currentView = "rv";
 
