@@ -2634,6 +2634,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       mapPanel = document.getElementById("mapPanel");
       btnRv = document.getElementById("btnRv");
       btnMap = document.getElementById("btnMap");
+      btnCloseRv = document.getElementById("btnCloseRv");
       mapInstance = null;
       currentView = "rv";
 
