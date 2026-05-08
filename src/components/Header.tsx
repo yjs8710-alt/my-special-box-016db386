@@ -281,7 +281,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
               >
                 <ShieldCheck className="w-4 h-4" />
-                관리자 로그인
+                로그인
               </button>
             )}
           </div>
