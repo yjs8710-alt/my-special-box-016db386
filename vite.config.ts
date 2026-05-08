@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
 
 // Build version used to detect fresh deployments. Changes on every build.
-const BUILD_VERSION = "FORCE_REFRESH_20260508_01";
+const BUILD_VERSION = "STABLE_LOAD_FIX_20260508_02";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -51,19 +51,6 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean) as Plugin[],
   build: {
     target: "es2020",
-    cssCodeSplit: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-          if (id.includes("react-dom") || id.includes("/react/") || id.includes("scheduler")) return "react-vendor";
-          if (id.includes("@radix-ui") || id.includes("lucide-react") || id.includes("class-variance-authority") || id.includes("tailwind-merge") || id.includes("clsx")) return "ui-vendor";
-          if (id.includes("@supabase") || id.includes("@tanstack")) return "data-vendor";
-          if (id.includes("react-router")) return "router-vendor";
-          return "vendor";
-        },
-      },
-    },
   },
   resolve: {
     alias: {
