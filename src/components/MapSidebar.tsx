@@ -397,6 +397,7 @@ const TYPE_BG: Record<string, string> = {
   토지: "bg-lime-50 text-lime-700",
   건물매매: "bg-orange-100 text-orange-800",
   단독매매: "bg-yellow-50 text-yellow-700",
+  "원룸\n투베이\n투룸\n쓰리룸\n포룸\n주인세대\n고시원\n다가구\n단독주택\n아파트\n오피스텔\n빌라\n연립\n다세대\n주상복합            도시형": "bg-pink-50 text-pink-700",
 };
 
 /* 모바일: 클릭하면 아이콘 자리에 라벨 텍스트로 토글되는 시설 배지 */
