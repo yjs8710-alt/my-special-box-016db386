@@ -139,7 +139,16 @@ export function PwaUpdatePrompt() {
       }
     };
 
-    refreshOnceForBuild();
+    // 첫 화면 진입 속도를 위해 버전 확인은 idle 시점으로 미룸
+    const idle = (cb: () => void) => {
+      if ("requestIdleCallback" in window) {
+        (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number })
+          .requestIdleCallback(cb, { timeout: 4000 });
+      } else {
+        window.setTimeout(cb, 2500);
+      }
+    };
+    idle(() => { refreshOnceForBuild(); });
 
     const interval = window.setInterval(refreshOnceForBuild, FRESH_CHECK_INTERVAL);
     const onPageShow = (event: PageTransitionEvent) => {
