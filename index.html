@@ -45,6 +45,51 @@
     <div id="root"></div>
     <script>
       (function () {
+        var RECOVERY_KEY = 'jibda_boot_recovery_once';
+
+        function isPreviewFrame() {
+          try {
+            return window.self !== window.top || window.location.hostname.indexOf('lovable') !== -1;
+          } catch (e) {
+            return true;
+          }
+        }
+
+        function clearAppCaches() {
+          try {
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                registrations.forEach(function (registration) { registration.unregister(); });
+              });
+            }
+            if ('caches' in window) {
+              caches.keys().then(function (keys) {
+                keys.forEach(function (key) { caches.delete(key); });
+              });
+            }
+          } catch (e) {}
+        }
+
+        function recoverBlankScreen() {
+          if (isPreviewFrame() || sessionStorage.getItem(RECOVERY_KEY)) return;
+          sessionStorage.setItem(RECOVERY_KEY, '1');
+          clearAppCaches();
+          var freshUrl = new URL(window.location.href);
+          freshUrl.searchParams.set('v', Date.now().toString());
+          freshUrl.searchParams.set('recover', '1');
+          window.location.replace(freshUrl.toString());
+        }
+
+        window.addEventListener('error', function (event) {
+          var target = event && event.target;
+          if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) recoverBlankScreen();
+        }, true);
+
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (root && root.childElementCount === 0) recoverBlankScreen();
+        }, 4500);
+
         try {
           var match = window.location.pathname.match(/^\/property\/([^/]+)$/);
           if (match) {
@@ -52,16 +97,7 @@
             return;
           }
 
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function (registrations) {
-              registrations.forEach(function (registration) { registration.unregister(); });
-            });
-          }
-          if ('caches' in window) {
-            caches.keys().then(function (keys) {
-              keys.forEach(function (key) { caches.delete(key); });
-            });
-          }
+          clearAppCaches();
         } catch (e) {}
       })();
     </script>
