@@ -761,7 +761,7 @@ const MapFilterBar = ({
                                 style={
                                   active
                                     ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                                    : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
                                 {t.label}
@@ -813,7 +813,7 @@ const MapFilterBar = ({
                                 style={
                                   active
                                     ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                                    : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                                    : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
                                 {t.label}
