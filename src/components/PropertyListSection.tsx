@@ -41,7 +41,7 @@ const PROPERTIES = [
     monthly: "1,200만원", manageFee: "80만원", isNew: true, isHot: false, views: 987,
   },
   {
-    id: 6, image: property6, title: "신촌 로데오거리 소형 상가 임대",
+    id: 6, image: property6, title: "신촌 로데오거리 소형 상가",
     address: "서울특별시 서대문구 창천동 52", type: "상가",
     area: "33㎡ (10평)", floor: "1층", deposit: "2,000만원",
     monthly: "130만원", manageFee: "10만원", isNew: false, isHot: false, views: 1456,
