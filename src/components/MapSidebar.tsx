@@ -3702,6 +3702,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               color: "hsl(217 91% 35%)",
               border: "hsl(217 91% 65%)",
             });
+          // 복층 배지
+          if ((prop.options ?? []).includes("복층"))
+            chips.push({
+              label: "복층",
+              value: "",
+              bg: "hsl(270 80% 94%)",
+              color: "hsl(270 70% 40%)",
+              border: "hsl(270 70% 70%)",
+            });
           if (direction)
             chips.push({ label: direction + "향", value: "", bg: "#fff3e0", color: "#e65100", border: "#ffcc80" });
           if (lhVal && lhVal !== "관계없음")
