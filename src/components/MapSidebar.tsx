@@ -4873,7 +4873,7 @@ const MapSidebar = ({
                                   // inactive 매물에서도 찾기
                                   if (!refImg) {
                                     const addr = item.sublabel || "";
-                                    const inactive = inactiveRefMap.get(addr);
+                                    const inactive = inactiveRefMap.get(addr)?.[0];
                                     if (inactive) {
                                       refImg = inactive.image;
                                       refImages = inactive.images;
