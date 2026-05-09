@@ -95,7 +95,6 @@ const Community = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">커뮤니티</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">공인중개사 전용 정보 교류 공간</p>
           </div>
           <Button
             className="gap-1.5 rounded-full font-semibold"
