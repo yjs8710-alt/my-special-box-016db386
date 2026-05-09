@@ -191,7 +191,7 @@ const Community = () => {
               <div
                 key={post.id}
                 onClick={() => setSelectedPost(post)}
-                className={`grid md:grid-cols-[80px_1fr_80px_70px_70px] items-center px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors ${
+                className={`grid grid-cols-[auto_1fr] md:grid-cols-[80px_1fr_80px_70px_70px] items-center px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors ${
                   i < filtered.length - 1 ? "border-b border-border" : ""
                 } ${post.pinned ? "bg-primary/[0.03]" : ""}`}
               >
@@ -201,10 +201,13 @@ const Community = () => {
                 >
                   {post.categoryLabel}
                 </span>
-                <div className="flex items-center gap-2 min-w-0">
-                  {post.pinned && <span className="text-destructive text-xs font-bold shrink-0">📌</span>}
-                  <span className="text-sm font-medium text-foreground truncate">{post.title}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 hidden md:block" />
+                <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {post.pinned && <span className="text-destructive text-xs font-bold shrink-0">📌</span>}
+                    <span className="text-sm font-medium text-foreground truncate">{post.title}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 hidden md:block" />
+                  </div>
+                  <span className="text-xs text-muted-foreground md:hidden">{post.author}</span>
                 </div>
                 <span className="hidden md:block text-xs text-muted-foreground text-center">{post.author}</span>
                 <span className="hidden md:flex items-center justify-center gap-0.5 text-xs text-muted-foreground">
