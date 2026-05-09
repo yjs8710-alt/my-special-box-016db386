@@ -1559,6 +1559,21 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
     })),
   ].filter((u) => u.images.length > 0);
 
+  // 종료된 동일주소 호실 사진 추가 (이미 active 목록에 있는 호실 제외)
+  const activeKeys = new Set<string>([
+    `${property.unitNumber || "?"}|${property.roomType || ""}`,
+    ...otherUnits.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`),
+  ]);
+  for (const u of inactiveUnits) {
+    const key = `${u.unitNumber}|${u.roomType}`;
+    if (activeKeys.has(key)) continue;
+    lightboxUnits.push({
+      label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
+      images: u.images,
+      isReference: true,
+    });
+  }
+
   return (
     <>
       {/* ── 풀스크린 라이트박스 ── */}
