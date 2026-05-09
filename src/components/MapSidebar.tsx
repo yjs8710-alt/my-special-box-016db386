@@ -158,11 +158,12 @@ function LightboxModal({
             {/* 좌측: 닫기 버튼 */}
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+              className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: "#fff", color: "hsl(var(--destructive))", border: "1.5px solid hsl(var(--destructive))" }}
               aria-label="닫기"
+              title="닫기"
             >
-              닫기
+              <X className="w-5 h-5" strokeWidth={2.5} />
             </button>
             {/* 가운데: 탭 (가로 스크롤) */}
             <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none flex-1 min-w-0">
