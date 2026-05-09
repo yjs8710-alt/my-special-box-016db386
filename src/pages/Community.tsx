@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { MessageSquare, TrendingUp, HelpCircle, Megaphone, Search, Pencil, ThumbsUp, Eye, ChevronRight } from "lucide-react";
+import { MessageSquare, TrendingUp, HelpCircle, Megaphone, Search, Pencil, ThumbsUp, Eye, ChevronRight, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const CATEGORIES = [
   { key: "all", label: "전체" },
@@ -15,104 +15,23 @@ const CATEGORIES = [
   { key: "improvement", label: "개선사항", icon: TrendingUp },
 ];
 
-const POSTS = [
-  {
-    id: 1,
-    category: "notice",
-    categoryLabel: "공지사항",
-    title: "집다 플랫폼 서비스 오픈 안내",
-    author: "관리자",
-    date: "2025.03.01",
-    views: 1240,
-    likes: 42,
-    pinned: true,
-    content: "안녕하세요. 집다 공인중개사 전용 플랫폼이 정식 오픈하였습니다. 많은 이용 부탁드립니다.",
-  },
-  {
-    id: 2,
-    category: "notice",
-    categoryLabel: "공지사항",
-    title: "매물 등록 가이드 업데이트",
-    author: "관리자",
-    date: "2025.02.25",
-    views: 870,
-    likes: 18,
-    pinned: true,
-    content: "매물 등록 시 필수 입력 항목이 추가되었습니다. 자세한 내용을 확인해주세요.",
-  },
-  {
-    id: 3,
-    category: "info",
-    categoryLabel: "정보공유",
-    title: "2025년 상가 임대 시장 동향 분석",
-    author: "김중개사",
-    date: "2025.02.28",
-    views: 532,
-    likes: 29,
-    pinned: false,
-    content: "올해 상가 임대 시장의 주요 트렌드를 분석했습니다.",
-  },
-  {
-    id: 4,
-    category: "qna",
-    categoryLabel: "Q&A",
-    title: "공동중개 수수료 정산 기준이 궁금합니다",
-    author: "이공인",
-    date: "2025.02.27",
-    views: 311,
-    likes: 11,
-    pinned: false,
-    content: "공동중개 시 수수료 정산 기준에 대해 문의드립니다.",
-  },
-  {
-    id: 5,
-    category: "free",
-    categoryLabel: "자유게시판",
-    title: "처음 가입했습니다. 잘 부탁드립니다!",
-    author: "박부동산",
-    date: "2025.02.26",
-    views: 198,
-    likes: 7,
-    pinned: false,
-    content: "안녕하세요, 처음 가입했습니다. 앞으로 잘 부탁드립니다.",
-  },
-  {
-    id: 6,
-    category: "info",
-    categoryLabel: "정보공유",
-    title: "LH 전세대출 조건 변경 내용 정리",
-    author: "최공인",
-    date: "2025.02.24",
-    views: 688,
-    likes: 35,
-    pinned: false,
-    content: "LH 전세대출 조건이 변경되었습니다. 중요 내용을 정리했습니다.",
-  },
-  {
-    id: 7,
-    category: "qna",
-    categoryLabel: "Q&A",
-    title: "매물 사진 몇 장까지 등록 가능한가요?",
-    author: "정중개",
-    date: "2025.02.23",
-    views: 143,
-    likes: 3,
-    pinned: false,
-    content: "매물 등록 시 사진 업로드 최대 개수가 궁금합니다.",
-  },
-  {
-    id: 8,
-    category: "free",
-    categoryLabel: "자유게시판",
-    title: "강남구 상가 공실 많이 나오고 있네요",
-    author: "한공인",
-    date: "2025.02.22",
-    views: 421,
-    likes: 15,
-    pinned: false,
-    content: "최근 강남구 상가 공실이 눈에 띄게 늘고 있습니다. 여러분은 어떻게 보시나요?",
-  },
-];
+// 글쓰기에서 선택 가능한 카테고리 (공지사항 제외)
+const WRITABLE_CATEGORIES = CATEGORIES.filter((c) => c.key !== "all" && c.key !== "notice");
+
+type Post = {
+  id: number;
+  category: string;
+  categoryLabel: string;
+  title: string;
+  author: string;
+  date: string;
+  views: number;
+  likes: number;
+  pinned: boolean;
+  content: string;
+};
+
+const INITIAL_POSTS: Post[] = [];
 
 const CATEGORY_COLORS: Record<string, string> = {
   notice: "hsl(218 88% 22%)",
@@ -123,16 +42,50 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const Community = () => {
-  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [selectedPost, setSelectedPost] = useState<(typeof POSTS)[0] | null>(null);
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  const filtered = POSTS.filter((p) => {
+  // 글쓰기 모달 상태
+  const [showWrite, setShowWrite] = useState(false);
+  const [writeCategory, setWriteCategory] = useState(WRITABLE_CATEGORIES[0].key);
+  const [writeTitle, setWriteTitle] = useState("");
+  const [writeContent, setWriteContent] = useState("");
+
+  const filtered = posts.filter((p) => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
     const matchSearch = !search || p.title.includes(search) || p.author.includes(search);
     return matchCat && matchSearch;
   });
+
+  const openWrite = () => {
+    setWriteCategory(WRITABLE_CATEGORIES[0].key);
+    setWriteTitle("");
+    setWriteContent("");
+    setShowWrite(true);
+  };
+
+  const submitPost = () => {
+    if (!writeTitle.trim() || !writeContent.trim()) return;
+    const cat = WRITABLE_CATEGORIES.find((c) => c.key === writeCategory)!;
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
+    const newPost: Post = {
+      id: Date.now(),
+      category: cat.key,
+      categoryLabel: cat.label,
+      title: writeTitle.trim(),
+      author: "회원",
+      date: dateStr,
+      views: 0,
+      likes: 0,
+      pinned: false,
+      content: writeContent.trim(),
+    };
+    setPosts((prev) => [newPost, ...prev]);
+    setShowWrite(false);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -147,7 +100,7 @@ const Community = () => {
           <Button
             className="gap-1.5 rounded-full font-semibold"
             style={{ background: "hsl(var(--accent))", color: "#fff" }}
-            onClick={() => navigate("/signup")}
+            onClick={openWrite}
           >
             <Pencil className="w-3.5 h-3.5" />
             글쓰기
@@ -210,7 +163,7 @@ const Community = () => {
               <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{selectedPost.views}</span>
               <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" />{selectedPost.likes}</span>
             </div>
-            <p className="text-sm text-foreground leading-relaxed">{selectedPost.content}</p>
+            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{selectedPost.content}</p>
             <div className="mt-6 flex justify-center">
               <button
                 className="flex items-center gap-1.5 px-5 py-2 rounded-full border text-sm font-medium transition-colors hover:border-primary hover:text-primary"
@@ -266,6 +219,84 @@ const Community = () => {
           </div>
         )}
       </main>
+
+      {/* 글쓰기 모달 */}
+      {showWrite && (
+        <div
+          className="fixed inset-0 z-[1300] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setShowWrite(false)}
+        >
+          <div
+            className="bg-card border border-border rounded-xl w-full max-w-xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h3 className="text-base font-bold text-foreground">게시글 작성</h3>
+              <button
+                onClick={() => setShowWrite(false)}
+                className="text-muted-foreground hover:text-foreground"
+                style={{ color: "hsl(var(--primary))" }}
+                aria-label="닫기"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">머리글(분류)</label>
+                <div className="flex gap-2 flex-wrap">
+                  {WRITABLE_CATEGORIES.map((c) => (
+                    <button
+                      key={c.key}
+                      onClick={() => setWriteCategory(c.key)}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
+                      style={
+                        writeCategory === c.key
+                          ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                          : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
+                      }
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">제목</label>
+                <Input
+                  value={writeTitle}
+                  onChange={(e) => setWriteTitle(e.target.value)}
+                  placeholder="제목을 입력하세요"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">내용</label>
+                <Textarea
+                  value={writeContent}
+                  onChange={(e) => setWriteContent(e.target.value)}
+                  placeholder="내용을 입력하세요"
+                  rows={8}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border">
+              <Button variant="outline" onClick={() => setShowWrite(false)}>
+                취소
+              </Button>
+              <Button
+                onClick={submitPost}
+                disabled={!writeTitle.trim() || !writeContent.trim()}
+                style={{ background: "hsl(var(--accent))", color: "#fff" }}
+              >
+                등록
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
