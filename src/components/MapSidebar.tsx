@@ -239,10 +239,10 @@ function LightboxModal({
               }
             }}
             className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
-            title="모두 저장하기"
+            title="사진저장"
           >
             <Download className="w-4 h-4" />
-            <span>모두 저장</span>
+            <span>사진저장</span>
           </button>
           {hasTabs && (
             <div
