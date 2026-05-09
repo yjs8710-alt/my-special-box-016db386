@@ -188,6 +188,57 @@ export type Database = {
         }
         Relationships: []
       }
+      community_posts: {
+        Row: {
+          author_agency: string
+          author_name: string
+          author_user_id: string | null
+          category: string
+          category_label: string
+          content: string
+          created_at: string
+          id: string
+          is_admin_post: boolean
+          likes: number
+          pinned: boolean
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          author_agency?: string
+          author_name?: string
+          author_user_id?: string | null
+          category: string
+          category_label: string
+          content: string
+          created_at?: string
+          id?: string
+          is_admin_post?: boolean
+          likes?: number
+          pinned?: boolean
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          author_agency?: string
+          author_name?: string
+          author_user_id?: string | null
+          category?: string
+          category_label?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_admin_post?: boolean
+          likes?: number
+          pinned?: boolean
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       land_summary: {
         Row: {
           created_at: string
