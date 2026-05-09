@@ -53,6 +53,7 @@ const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
 interface LightboxUnit {
   label: string;
   images: string[];
+  isReference?: boolean;
 }
 function Lightbox({
   units,
