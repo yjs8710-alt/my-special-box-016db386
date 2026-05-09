@@ -5183,59 +5183,50 @@ const MapSidebar = ({
                               if (!hasOwnImages && !ref) return null;
                               return (
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (!hasOwnImages && ref) {
-                                    // 참고용 사진 lightbox
-                                    setLightbox({
-                                      units: [{
-                                        unitNumber: ref.unitNumber,
-                                        roomType: ref.roomType,
-                                        label: `${ref.unitNumber}호${ref.roomType ? ` ${ref.roomType}` : ""}`,
-                                        images: ref.images,
-                                        isReference: true
-                                      }],
-                                      unitIdx: 0
-                                    });
-                                    return;
-                                  }
-                                  // 동일 주소의 매물들을 호실별로 묶어서 lightbox에 전달
-                                  const sameAddr = properties.filter(
-                                    (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
-                                  );
-                                  const activeUnits: LightboxUnit[] =
-                                    sameAddr.length > 0
-                                      ? (() => {
-                                          const current = sameAddr.find((p) => p.id === prop.id);
-                                          const others = sameAddr.filter((p) => p.id !== prop.id);
-                                          const sorted = current ? [current, ...others] : sameAddr;
-                                          return sorted.map((p) => ({
-                                            unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
-                                            roomType: p.roomType || undefined,
-                                            label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
-                                            images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
-                                            isReference: p.id !== prop.id,
-                                          }));
-                                        })()
-                                      : [
-                                          {
-                                            unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
-                                            roomType: prop.roomType || undefined,
-                                            label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
-                                            images:
-                                              prop.images && prop.images.length > 0
-                                                ? prop.images
-                                                : prop.image
-                                                  ? [prop.image]
-                                                  : [],
-                                            isReference: false,
-                                          },
-                                        ];
-                                  // 종료된(같은 주소) 호실 사진도 함께 노출
-                                  const exclude = new Set(sameAddr.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`));
-                                  const inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
-                                  setLightbox({ units: [...activeUnits, ...inactiveUnits], unitIdx: 0 });
-                                }}
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   // 동일 주소의 active 매물들 (현재 매물에 사진이 없으면 자기 자신은 포함하지 않음)
+                                   const sameAddr = properties.filter(
+                                     (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
+                                   );
+                                   const activeUnits: LightboxUnit[] =
+                                     sameAddr.length > 0
+                                       ? (() => {
+                                           const current = sameAddr.find((p) => p.id === prop.id);
+                                           const others = sameAddr.filter((p) => p.id !== prop.id);
+                                           const sorted = current ? [current, ...others] : sameAddr;
+                                           return sorted.map((p) => ({
+                                             unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
+                                             roomType: p.roomType || undefined,
+                                             label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
+                                             images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                             isReference: p.id !== prop.id,
+                                           }));
+                                         })()
+                                       : hasOwnImages
+                                         ? [{
+                                             unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
+                                             roomType: prop.roomType || undefined,
+                                             label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
+                                             images:
+                                               prop.images && prop.images.length > 0
+                                                 ? prop.images
+                                                 : prop.image
+                                                   ? [prop.image]
+                                                   : [],
+                                             isReference: false,
+                                           }]
+                                         : [];
+                                   // 종료된(같은 주소) 호실 사진도 함께 노출 — 자기 자신 호실은 제외
+                                   const exclude = new Set(sameAddr.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`));
+                                   if (!hasOwnImages) {
+                                     exclude.add(`${prop.unitNumber || "?"}|${prop.roomType || ""}`);
+                                   }
+                                   const inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
+                                   const allUnits = [...activeUnits, ...inactiveUnits];
+                                   if (allUnits.length === 0) return;
+                                   setLightbox({ units: allUnits, unitIdx: 0 });
+                                 }}
                                 className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                               >
                                 <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
