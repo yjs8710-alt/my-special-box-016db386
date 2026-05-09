@@ -5203,10 +5203,9 @@ const MapSidebar = ({
                                   const sameAddr = properties.filter(
                                     (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
                                   );
-                                  const units: LightboxUnit[] =
-                                    sameAddr.length > 1
+                                  const activeUnits: LightboxUnit[] =
+                                    sameAddr.length > 0
                                       ? (() => {
-                                          // 현재방을 첫 번째로, 나머지는 뒤에 배치
                                           const current = sameAddr.find((p) => p.id === prop.id);
                                           const others = sameAddr.filter((p) => p.id !== prop.id);
                                           const sorted = current ? [current, ...others] : sameAddr;
@@ -5232,7 +5231,10 @@ const MapSidebar = ({
                                             isReference: false,
                                           },
                                         ];
-                                  setLightbox({ units, unitIdx: 0 });
+                                  // 종료된(같은 주소) 호실 사진도 함께 노출
+                                  const exclude = new Set(sameAddr.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`));
+                                  const inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
+                                  setLightbox({ units: [...activeUnits, ...inactiveUnits], unitIdx: 0 });
                                 }}
                                 className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                               >
