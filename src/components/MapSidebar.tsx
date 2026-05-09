@@ -3144,15 +3144,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const hasKeyMoney = keyMoney && keyMoney !== "0" && keyMoney !== "없음";
             const isShortTerm = !isSaleProp && opts.includes("단기가능");
             const hasDuplexM = opts.includes("복층");
-            const showRow = buildYr || vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM;
+            const showRow = vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM;
             if (!showRow) return null;
             return (
             <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
-              {buildYr && (
-                <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)", lineHeight: 1.2 }}>
-                  준{buildYr}
-                </span>
-              )}
               {(vacancyM === "공실" || vacatePast) && (
                 <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
                   공실
