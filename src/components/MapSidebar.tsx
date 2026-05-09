@@ -4010,32 +4010,35 @@ const MapSidebar = ({
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
 
   // 동일 주소 참고용 사진 (RLS 우회 RPC 사용 — 일반 사용자도 inactive/타카테고리 사진 조회 가능)
-  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>>(new Map());
+  // 주소별 모든 호실(active 풀에 없는 종료 매물 포함)을 보관 → 사진 보기 시 함께 노출
+  type InactiveUnit = { image: string; images: string[]; unitNumber: string; roomType: string; address: string };
+  const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, InactiveUnit[]>>(new Map());
   useEffect(() => {
     let cancelled = false;
     const fetchInactiveRefs = async () => {
       const pool = referencePool && referencePool.length > 0 ? referencePool : properties;
-      const noImageAddrs = pool
-        .filter((p) => !p.image || p.image.length === 0)
+      // 사진 없는 매물뿐 아니라, 사진 있는 매물의 주소도 포함 → 같은 주소 다른 호실(종료) 사진 함께 가져오기
+      const allAddrs = pool
         .map((p) => p.address)
-        .filter((a, i, arr) => arr.indexOf(a) === i);
-      if (noImageAddrs.length === 0) return;
+        .filter((a, i, arr) => !!a && arr.indexOf(a) === i);
+      if (allAddrs.length === 0) return;
 
-      const { data } = await supabase.rpc("get_reference_images", { _addresses: noImageAddrs });
+      const { data } = await supabase.rpc("get_reference_images", { _addresses: allAddrs });
 
       if (!cancelled && data) {
-        const map = new Map<string, { image: string; images: string[]; unitNumber: string; roomType: string; address: string }>();
+        const map = new Map<string, InactiveUnit[]>();
         for (const row of data as Array<{ address: string; unit_number: string; room_type: string; images: string[] }>) {
           const imgs = row.images;
-          if (imgs && imgs.length > 0 && imgs[0] && !map.has(row.address)) {
-            map.set(row.address, {
-              image: imgs[0],
-              images: imgs,
-              unitNumber: row.unit_number || "?",
-              roomType: row.room_type || "",
-              address: row.address,
-            });
-          }
+          if (!imgs || imgs.length === 0 || !imgs[0]) continue;
+          const list = map.get(row.address) ?? [];
+          list.push({
+            image: imgs[0],
+            images: imgs,
+            unitNumber: row.unit_number || "?",
+            roomType: row.room_type || "",
+            address: row.address,
+          });
+          map.set(row.address, list);
         }
         setInactiveRefMap(map);
       }
@@ -4060,7 +4063,8 @@ const MapSidebar = ({
       };
     }
     // inactive 매물에서 찾기
-    const inactive = inactiveRefMap.get(prop.address);
+    const inactiveList = inactiveRefMap.get(prop.address);
+    const inactive = inactiveList?.[0];
     if (inactive) return {
       image: inactive.image,
       images: inactive.images,
@@ -4069,6 +4073,21 @@ const MapSidebar = ({
     };
     return null;
   }, [inactiveRefMap, referencePool]);
+
+  /** 동일 주소의 종료(inactive) 매물 호실들을 LightboxUnit 배열로 변환 — 현재 active 호실과 중복 제거 */
+  const getInactiveUnitsForAddress = useCallback((address: string, excludeUnitNumbers: Set<string>): LightboxUnit[] => {
+    const list = inactiveRefMap.get(address);
+    if (!list || list.length === 0) return [];
+    return list
+      .filter((u) => !excludeUnitNumbers.has(`${u.unitNumber}|${u.roomType}`))
+      .map((u) => ({
+        unitNumber: u.unitNumber ? `${u.unitNumber}호` : undefined,
+        roomType: u.roomType || undefined,
+        label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
+        images: u.images,
+        isReference: true,
+      }));
+  }, [inactiveRefMap]);
 
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
