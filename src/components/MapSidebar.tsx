@@ -268,7 +268,7 @@ function LightboxModal({
           {units[unitIdx]?.isReference && (
             <div className="text-center mb-2 px-4 flex-shrink-0">
               <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--accent))" }}>
-                다른 매물 사진입니다. 참고용입니다.
+                다른 호실 사진 참고용
               </span>
             </div>
           )}
@@ -336,7 +336,7 @@ function LightboxModal({
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
-                  다른 매물 사진입니다. 참고용입니다.
+                  다른 호실 사진 참고용
                 </span>
               </div>
             )}
