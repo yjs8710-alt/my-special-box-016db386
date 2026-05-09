@@ -1,10 +1,14 @@
-import { useState } from "react";
-import { MessageSquare, TrendingUp, HelpCircle, Megaphone, Search, Pencil, ThumbsUp, Eye, ChevronRight, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MessageSquare, TrendingUp, HelpCircle, Megaphone, Search, Pencil, ThumbsUp, Eye, ChevronRight, X, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const CATEGORIES = [
   { key: "all", label: "전체" },
@@ -15,23 +19,23 @@ const CATEGORIES = [
   { key: "improvement", label: "개선사항", icon: TrendingUp },
 ];
 
-// 글쓰기에서 선택 가능한 카테고리 (공지사항 제외)
 const WRITABLE_CATEGORIES = CATEGORIES.filter((c) => c.key !== "all" && c.key !== "notice");
 
 type Post = {
-  id: number;
+  id: string;
   category: string;
-  categoryLabel: string;
+  category_label: string;
   title: string;
-  author: string;
-  date: string;
+  content: string;
+  author_user_id: string | null;
+  author_name: string;
+  author_agency: string;
+  is_admin_post: boolean;
+  pinned: boolean;
   views: number;
   likes: number;
-  pinned: boolean;
-  content: string;
+  created_at: string;
 };
-
-const INITIAL_POSTS: Post[] = [];
 
 const CATEGORY_COLORS: Record<string, string> = {
   notice: "hsl(218 88% 22%)",
@@ -41,57 +45,146 @@ const CATEGORY_COLORS: Record<string, string> = {
   improvement: "hsl(262 80% 50%)",
 };
 
+const formatDate = (iso: string) => {
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+};
+
+const authorDisplay = (p: Pick<Post, "is_admin_post" | "author_name" | "author_agency">) => {
+  if (p.is_admin_post) return "관리자";
+  if (p.author_agency) return `${p.author_name} (${p.author_agency})`;
+  return p.author_name || "회원";
+};
+
 const Community = () => {
+  const navigate = useNavigate();
+  const { isAuthorized, user } = useAuth();
+  const isAdmin = Boolean(user?.isAdmin);
+
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
 
-  // 글쓰기 모달 상태
   const [showWrite, setShowWrite] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [writeCategory, setWriteCategory] = useState(WRITABLE_CATEGORIES[0].key);
   const [writeTitle, setWriteTitle] = useState("");
   const [writeContent, setWriteContent] = useState("");
 
+  const loadPosts = async () => {
+    const { data, error } = await supabase
+      .from("community_posts")
+      .select("*")
+      .order("pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error(error);
+      return;
+    }
+    setPosts((data ?? []) as Post[]);
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
   const filtered = posts.filter((p) => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
-    const matchSearch = !search || p.title.includes(search) || p.author.includes(search);
+    const matchSearch = !search || p.title.includes(search) || p.author_name.includes(search) || p.author_agency.includes(search);
     return matchCat && matchSearch;
   });
 
   const openWrite = () => {
+    if (!isAuthorized) {
+      navigate("/login");
+      return;
+    }
+    setEditingId(null);
     setWriteCategory(WRITABLE_CATEGORIES[0].key);
     setWriteTitle("");
     setWriteContent("");
     setShowWrite(true);
   };
 
-  const submitPost = () => {
-    if (!writeTitle.trim() || !writeContent.trim()) return;
-    const cat = WRITABLE_CATEGORIES.find((c) => c.key === writeCategory)!;
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
-    const newPost: Post = {
-      id: Date.now(),
-      category: cat.key,
-      categoryLabel: cat.label,
-      title: writeTitle.trim(),
-      author: "회원",
-      date: dateStr,
-      views: 0,
-      likes: 0,
-      pinned: false,
-      content: writeContent.trim(),
-    };
-    setPosts((prev) => [newPost, ...prev]);
-    setShowWrite(false);
+  const openEdit = (post: Post) => {
+    setEditingId(post.id);
+    setWriteCategory(post.category);
+    setWriteTitle(post.title);
+    setWriteContent(post.content);
+    setShowWrite(true);
   };
+
+  const submitPost = async () => {
+    if (!writeTitle.trim() || !writeContent.trim() || !user) return;
+    const cat = WRITABLE_CATEGORIES.find((c) => c.key === writeCategory)!;
+
+    if (editingId) {
+      const { error } = await supabase
+        .from("community_posts")
+        .update({
+          category: cat.key,
+          category_label: cat.label,
+          title: writeTitle.trim(),
+          content: writeContent.trim(),
+        })
+        .eq("id", editingId);
+      if (error) {
+        toast({ title: "수정 실패", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "게시글이 수정되었습니다." });
+    } else {
+      let authorName = "";
+      let authorAgency = "";
+      if (!isAdmin) {
+        const { data: profile } = await supabase
+          .from("agent_profiles")
+          .select("name, agency_name")
+          .eq("user_id", user.userId)
+          .maybeSingle();
+        authorName = profile?.name ?? "";
+        authorAgency = profile?.agency_name ?? "";
+      }
+      const { error } = await supabase.from("community_posts").insert({
+        category: cat.key,
+        category_label: cat.label,
+        title: writeTitle.trim(),
+        content: writeContent.trim(),
+        author_user_id: user.userId,
+        author_name: authorName,
+        author_agency: authorAgency,
+        is_admin_post: isAdmin,
+      });
+      if (error) {
+        toast({ title: "등록 실패", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "게시글이 등록되었습니다." });
+    }
+    setShowWrite(false);
+    setEditingId(null);
+    await loadPosts();
+  };
+
+  const deletePost = async (post: Post) => {
+    if (!confirm("이 게시글을 삭제하시겠습니까?")) return;
+    const { error } = await supabase.from("community_posts").delete().eq("id", post.id);
+    if (error) {
+      toast({ title: "삭제 실패", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "삭제되었습니다." });
+    setSelectedPost(null);
+    await loadPosts();
+  };
+
+  const canEdit = (post: Post) => isAdmin || (user && post.author_user_id === user.userId);
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 max-w-screen-lg mx-auto w-full px-4 py-8">
-        {/* Page title */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">커뮤니티</h1>
@@ -106,7 +199,6 @@ const Community = () => {
           </Button>
         </div>
 
-        {/* Category tabs */}
         <div className="flex gap-2 flex-wrap mb-4">
           {CATEGORIES.map(({ key, label }) => (
             <button
@@ -135,49 +227,47 @@ const Community = () => {
           </div>
         </div>
 
-        {/* Post detail view */}
         {selectedPost ? (
           <div className="bg-card border border-border rounded-xl p-6">
-            <button
-              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-4"
-              onClick={() => setSelectedPost(null)}
-            >
-              ← 목록으로
-            </button>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+                onClick={() => setSelectedPost(null)}
+              >
+                ← 목록으로
+              </button>
+              {canEdit(selectedPost) && (
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => openEdit(selectedPost)}>
+                    <Pencil className="w-3.5 h-3.5 mr-1" /> 수정
+                  </Button>
+                  <Button size="sm" variant="destructive" onClick={() => deletePost(selectedPost)}>
+                    <Trash2 className="w-3.5 h-3.5 mr-1" /> 삭제
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-2 mb-2">
               <span
                 className="text-xs font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: `${CATEGORY_COLORS[selectedPost.category]}18`, color: CATEGORY_COLORS[selectedPost.category] }}
               >
-                {selectedPost.categoryLabel}
+                {selectedPost.category_label}
               </span>
-              {selectedPost.pinned && (
-                <span className="text-xs font-bold text-destructive">📌 공지</span>
-              )}
+              {selectedPost.pinned && <span className="text-xs font-bold text-destructive">📌 공지</span>}
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">{selectedPost.title}</h2>
             <div className="flex items-center gap-3 text-xs text-muted-foreground mb-6 pb-4 border-b border-border">
-              <span>{selectedPost.author}</span>
-              <span>{selectedPost.date}</span>
+              <span className={selectedPost.is_admin_post ? "font-bold text-primary" : ""}>{authorDisplay(selectedPost)}</span>
+              <span>{formatDate(selectedPost.created_at)}</span>
               <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{selectedPost.views}</span>
               <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" />{selectedPost.likes}</span>
             </div>
             <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{selectedPost.content}</p>
-            <div className="mt-6 flex justify-center">
-              <button
-                className="flex items-center gap-1.5 px-5 py-2 rounded-full border text-sm font-medium transition-colors hover:border-primary hover:text-primary"
-                style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-              >
-                <ThumbsUp className="w-4 h-4" />
-                추천 {selectedPost.likes}
-              </button>
-            </div>
           </div>
         ) : (
-          /* Post list */
           <div className="bg-card border border-border rounded-xl overflow-hidden">
-            {/* Table header */}
-            <div className="hidden md:grid grid-cols-[80px_1fr_80px_70px_70px] text-xs font-semibold text-muted-foreground bg-muted/50 px-4 py-2.5 border-b border-border">
+            <div className="hidden md:grid grid-cols-[80px_1fr_160px_70px_70px] text-xs font-semibold text-muted-foreground bg-muted/50 px-4 py-2.5 border-b border-border">
               <span>분류</span>
               <span>제목</span>
               <span className="text-center">작성자</span>
@@ -191,7 +281,7 @@ const Community = () => {
               <div
                 key={post.id}
                 onClick={() => setSelectedPost(post)}
-                className={`grid grid-cols-[auto_1fr] md:grid-cols-[80px_1fr_80px_70px_70px] items-center px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors ${
+                className={`grid grid-cols-[auto_1fr] md:grid-cols-[80px_1fr_160px_70px_70px] items-center px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors ${
                   i < filtered.length - 1 ? "border-b border-border" : ""
                 } ${post.pinned ? "bg-primary/[0.03]" : ""}`}
               >
@@ -199,7 +289,7 @@ const Community = () => {
                   className="text-xs font-semibold w-fit px-2 py-0.5 rounded-full"
                   style={{ background: `${CATEGORY_COLORS[post.category]}18`, color: CATEGORY_COLORS[post.category] }}
                 >
-                  {post.categoryLabel}
+                  {post.category_label}
                 </span>
                 <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
@@ -207,9 +297,13 @@ const Community = () => {
                     <span className="text-sm font-medium text-foreground truncate">{post.title}</span>
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 hidden md:block" />
                   </div>
-                  <span className="text-xs text-muted-foreground md:hidden">{post.author}</span>
+                  <span className={`text-xs md:hidden truncate ${post.is_admin_post ? "font-bold text-primary" : "text-muted-foreground"}`}>
+                    {authorDisplay(post)}
+                  </span>
                 </div>
-                <span className="hidden md:block text-xs text-muted-foreground text-center">{post.author}</span>
+                <span className={`hidden md:block text-xs text-center truncate ${post.is_admin_post ? "font-bold text-primary" : "text-muted-foreground"}`}>
+                  {authorDisplay(post)}
+                </span>
                 <span className="hidden md:flex items-center justify-center gap-0.5 text-xs text-muted-foreground">
                   <Eye className="w-3 h-3" />{post.views}
                 </span>
@@ -222,7 +316,6 @@ const Community = () => {
         )}
       </main>
 
-      {/* 글쓰기 모달 */}
       {showWrite && (
         <div
           className="fixed inset-0 z-[1300] flex items-center justify-center p-4"
@@ -234,7 +327,7 @@ const Community = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <h3 className="text-base font-bold text-foreground">게시글 작성</h3>
+              <h3 className="text-base font-bold text-foreground">{editingId ? "게시글 수정" : "게시글 작성"}</h3>
               <button
                 onClick={() => setShowWrite(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -292,7 +385,7 @@ const Community = () => {
                 disabled={!writeTitle.trim() || !writeContent.trim()}
                 style={{ background: "hsl(var(--accent))", color: "#fff" }}
               >
-                등록
+                {editingId ? "수정" : "등록"}
               </Button>
             </div>
           </div>
