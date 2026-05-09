@@ -378,16 +378,18 @@ function LightboxModal({
           )}
         </>
       )}
-      {/* 우측 하단 닫기 버튼 — 작고 깔끔하게 */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-4 right-4 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 z-30"
-        style={{ background: "rgba(0,0,0,0.7)", border: "1.5px solid rgba(255,255,255,0.5)" }}
-        title="닫기"
-        aria-label="닫기"
-      >
-        <X className="w-5 h-5" strokeWidth={2.5} />
-      </button>
+      {/* 데스크톱 전용 우측 하단 닫기 (모바일은 상단 좌측 닫기 사용) */}
+      {!isMobileView && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute bottom-4 right-4 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 z-30"
+          style={{ background: "rgba(0,0,0,0.7)", border: "1.5px solid rgba(255,255,255,0.5)" }}
+          title="닫기"
+          aria-label="닫기"
+        >
+          <X className="w-5 h-5" strokeWidth={2.5} />
+        </button>
+      )}
     </div>
   );
 }
