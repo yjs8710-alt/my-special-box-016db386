@@ -159,7 +159,7 @@ function LightboxModal({
             <button
               onClick={(e) => { e.stopPropagation(); onClose(); }}
               className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "#fff", color: "hsl(var(--destructive))", border: "1.5px solid hsl(var(--destructive))" }}
+              style={{ background: "#fff", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary))" }}
               aria-label="닫기"
               title="닫기"
             >
