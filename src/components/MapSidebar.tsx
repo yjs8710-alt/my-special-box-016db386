@@ -236,7 +236,7 @@ function LightboxModal({
       {isMobileView ? (
         <div
           className="flex-1 flex flex-col w-full overflow-hidden"
-          style={{ paddingTop: showMoreUnits && hasTabs ? "120px" : (hasTabs ? "64px" : "56px"), paddingBottom: "16px" }}
+          style={{ paddingTop: showMoreUnits && hasTabs ? "168px" : "112px", paddingBottom: "16px" }}
           onClick={(e) => e.stopPropagation()}
         >
           {units[unitIdx]?.isReference && (
