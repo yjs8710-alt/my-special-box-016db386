@@ -53,6 +53,7 @@ const TYPE_STYLE: Record<string, { bg: string; text: string }> = {
 interface LightboxUnit {
   label: string;
   images: string[];
+  isReference?: boolean;
 }
 function Lightbox({
   units,
@@ -1507,6 +1508,22 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
   const { user: authUser } = useAuth();
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+  // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
+  const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
+  useEffect(() => {
+    if (!property?.address) { setInactiveUnits([]); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("get_reference_images", { _addresses: [property.address] });
+      if (cancelled || !data) return;
+      setInactiveUnits(
+        (data as Array<{ address: string; unit_number: string; room_type: string; images: string[] }>)
+          .filter((r) => r.images && r.images.length > 0)
+          .map((r) => ({ unitNumber: r.unit_number || "?", roomType: r.room_type || "", images: r.images }))
+      );
+    })();
+    return () => { cancelled = true; };
+  }, [property?.address]);
 
   useEffect(() => {
     if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
@@ -1542,6 +1559,21 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
       images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
     })),
   ].filter((u) => u.images.length > 0);
+
+  // 종료된 동일주소 호실 사진 추가 (이미 active 목록에 있는 호실 제외)
+  const activeKeys = new Set<string>([
+    `${property.unitNumber || "?"}|${property.roomType || ""}`,
+    ...otherUnits.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`),
+  ]);
+  for (const u of inactiveUnits) {
+    const key = `${u.unitNumber}|${u.roomType}`;
+    if (activeKeys.has(key)) continue;
+    lightboxUnits.push({
+      label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
+      images: u.images,
+      isReference: true,
+    });
+  }
 
   return (
     <>
