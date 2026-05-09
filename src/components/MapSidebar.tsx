@@ -114,34 +114,33 @@ function LightboxModal({
   const [showMoreUnits, setShowMoreUnits] = useState(false);
   // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
   const MOBILE_VISIBLE_TABS = 2;
-  const visibleUnits = isMobileView && !showMoreUnits && units.length > MOBILE_VISIBLE_TABS
+  const visibleUnits = isMobileView && units.length > MOBILE_VISIBLE_TABS
     ? units.slice(0, MOBILE_VISIBLE_TABS)
     : units;
-  const hiddenCount = units.length - visibleUnits.length;
-  // 선택된 탭이 숨겨져 있으면 자동으로 펼침
-  useEffect(() => {
-    if (isMobileView && unitIdx >= MOBILE_VISIBLE_TABS && !showMoreUnits) {
-      setShowMoreUnits(true);
-    }
-  }, [unitIdx, isMobileView, showMoreUnits]);
+  const hiddenUnits = isMobileView && units.length > MOBILE_VISIBLE_TABS
+    ? units.slice(MOBILE_VISIBLE_TABS)
+    : [];
+  const hiddenCount = hiddenUnits.length;
+  // 더보기 드롭다운이 열려있을 때 선택하면 자동으로 닫음 (선택은 handleUnitChange에서 처리)
 
-  const renderTabButton = (u: LightboxUnit, i: number) => {
+  const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
     const unitLabel = u.unitNumber ?? u.label ?? "";
     const roomLabel = u.roomType ?? "";
+    const stacked = opts?.stacked;
     return (
       <button
         key={i}
-        onClick={() => handleUnitChange(i)}
-        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-row items-center gap-1.5 leading-tight whitespace-nowrap"
+        onClick={() => { handleUnitChange(i); setShowMoreUnits(false); }}
+        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all leading-tight whitespace-nowrap ${stacked ? "flex flex-col items-center gap-0.5" : "flex flex-row items-center gap-1.5"}`}
         style={
           isCurrent
             ? { background: "hsl(var(--primary))", color: "#fff" }
             : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
         }
       >
-        <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
+        <span>[{isRef ? "다른방" : "현재방"}] {unitLabel}</span>
         {roomLabel && <span className="text-[10px] font-normal opacity-80">{roomLabel}</span>}
       </button>
     );
@@ -149,38 +148,64 @@ function LightboxModal({
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col" onClick={onClose}>
-      {/* 모바일: 상단 고정 바 (탭 + 모두저장 같은 줄에 배치, 겹침 방지) */}
+      {/* 모바일: 상단 고정 바 (닫기 + 탭 + 사진저장) */}
       {isMobileView ? (
         <div
           className="absolute top-0 left-0 right-0 z-30 bg-black/85 backdrop-blur-md px-2 pt-2 pb-2 flex flex-col gap-1.5"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none w-full">
-            {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i))}
-            {hasTabs && hiddenCount > 0 && !showMoreUnits && (
-              <button
-                onClick={() => setShowMoreUnits(true)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+          <div className="flex flex-row gap-1.5 items-start flex-nowrap w-full relative">
+            {/* 좌측: 닫기 버튼 */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onClose(); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+              style={{ background: "#fff", color: "hsl(var(--destructive))", border: "1.5px solid hsl(var(--destructive))" }}
+              aria-label="닫기"
+            >
+              닫기
+            </button>
+            {/* 가운데: 탭 (가로 스크롤) */}
+            <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none flex-1 min-w-0">
+              {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i, { stacked: true }))}
+              {hasTabs && hiddenCount > 0 && (
+                <button
+                  onClick={() => setShowMoreUnits((v) => !v)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
+                  style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
+                >
+                  더보기...
+                </button>
+              )}
+            </div>
+            {/* 더보기 드롭다운 */}
+            {showMoreUnits && hiddenCount > 0 && (
+              <div
+                className="absolute top-full right-0 mt-1 z-40 bg-white rounded-lg shadow-2xl overflow-hidden max-h-[60vh] overflow-y-auto min-w-[180px]"
+                onClick={(e) => e.stopPropagation()}
               >
-                더보기 +{hiddenCount}
-              </button>
-            )}
-            {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-              <button
-                onClick={() => setShowMoreUnits(false)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.25)", color: "#fff" }}
-              >
-                접기
-              </button>
+                {hiddenUnits.map((u, idx) => {
+                  const realIdx = MOBILE_VISIBLE_TABS + idx;
+                  const isCurrent = realIdx === unitIdx;
+                  const unitLabel = u.unitNumber ?? u.label ?? "";
+                  const roomLabel = u.roomType ?? "";
+                  return (
+                    <button
+                      key={realIdx}
+                      onClick={() => { handleUnitChange(realIdx); setShowMoreUnits(false); }}
+                      className="w-full text-left px-4 py-3 text-sm font-bold border-b last:border-b-0 transition-colors"
+                      style={{
+                        background: isCurrent ? "hsl(var(--primary))" : "#fff",
+                        color: isCurrent ? "#fff" : "#222",
+                        borderColor: "rgba(0,0,0,0.08)",
+                      }}
+                    >
+                      {unitLabel} {roomLabel}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
-          {hasTabs && showMoreUnits && units.length > MOBILE_VISIBLE_TABS && (
-            <div className="flex flex-row gap-1.5 flex-wrap justify-center">
-              {units.slice(MOBILE_VISIBLE_TABS).map((u, i) => renderTabButton(u, i + MOBILE_VISIBLE_TABS))}
-            </div>
-          )}
           <div className="flex justify-end">
             <button
               onClick={async (e) => {
@@ -193,10 +218,10 @@ function LightboxModal({
                 }
               }}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold border border-white/30"
-              title="모두 저장하기"
+              title="사진저장"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>모두 저장</span>
+              <span>사진저장</span>
             </button>
           </div>
         </div>
@@ -214,10 +239,10 @@ function LightboxModal({
               }
             }}
             className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
-            title="모두 저장하기"
+            title="사진저장"
           >
             <Download className="w-4 h-4" />
-            <span>모두 저장</span>
+            <span>사진저장</span>
           </button>
           {hasTabs && (
             <div
@@ -236,7 +261,7 @@ function LightboxModal({
       {isMobileView ? (
         <div
           className="flex-1 flex flex-col w-full overflow-hidden"
-          style={{ paddingTop: showMoreUnits && hasTabs ? "168px" : "112px", paddingBottom: "16px" }}
+          style={{ paddingTop: "112px", paddingBottom: "16px" }}
           onClick={(e) => e.stopPropagation()}
         >
           {units[unitIdx]?.isReference && (
@@ -353,16 +378,18 @@ function LightboxModal({
           )}
         </>
       )}
-      {/* 우측 하단 닫기 버튼 — 작고 깔끔하게 */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        className="absolute bottom-4 right-4 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 z-30"
-        style={{ background: "rgba(0,0,0,0.7)", border: "1.5px solid rgba(255,255,255,0.5)" }}
-        title="닫기"
-        aria-label="닫기"
-      >
-        <X className="w-5 h-5" strokeWidth={2.5} />
-      </button>
+      {/* 데스크톱 전용 우측 하단 닫기 (모바일은 상단 좌측 닫기 사용) */}
+      {!isMobileView && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute bottom-4 right-4 w-11 h-11 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 z-30"
+          style={{ background: "rgba(0,0,0,0.7)", border: "1.5px solid rgba(255,255,255,0.5)" }}
+          title="닫기"
+          aria-label="닫기"
+        >
+          <X className="w-5 h-5" strokeWidth={2.5} />
+        </button>
+      )}
     </div>
   );
 }
