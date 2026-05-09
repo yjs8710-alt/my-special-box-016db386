@@ -1507,6 +1507,22 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
   const { user: authUser } = useAuth();
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
+  // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
+  const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
+  useEffect(() => {
+    if (!property?.address) { setInactiveUnits([]); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("get_reference_images", { _addresses: [property.address] });
+      if (cancelled || !data) return;
+      setInactiveUnits(
+        (data as Array<{ address: string; unit_number: string; room_type: string; images: string[] }>)
+          .filter((r) => r.images && r.images.length > 0)
+          .map((r) => ({ unitNumber: r.unit_number || "?", roomType: r.room_type || "", images: r.images }))
+      );
+    })();
+    return () => { cancelled = true; };
+  }, [property?.address]);
 
   useEffect(() => {
     if (!authUser?.userId) { setMyAgencyInfo(undefined); return; }
