@@ -114,34 +114,33 @@ function LightboxModal({
   const [showMoreUnits, setShowMoreUnits] = useState(false);
   // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
   const MOBILE_VISIBLE_TABS = 2;
-  const visibleUnits = isMobileView && !showMoreUnits && units.length > MOBILE_VISIBLE_TABS
+  const visibleUnits = isMobileView && units.length > MOBILE_VISIBLE_TABS
     ? units.slice(0, MOBILE_VISIBLE_TABS)
     : units;
-  const hiddenCount = units.length - visibleUnits.length;
-  // 선택된 탭이 숨겨져 있으면 자동으로 펼침
-  useEffect(() => {
-    if (isMobileView && unitIdx >= MOBILE_VISIBLE_TABS && !showMoreUnits) {
-      setShowMoreUnits(true);
-    }
-  }, [unitIdx, isMobileView, showMoreUnits]);
+  const hiddenUnits = isMobileView && units.length > MOBILE_VISIBLE_TABS
+    ? units.slice(MOBILE_VISIBLE_TABS)
+    : [];
+  const hiddenCount = hiddenUnits.length;
+  // 더보기 드롭다운이 열려있을 때 선택하면 자동으로 닫음 (선택은 handleUnitChange에서 처리)
 
-  const renderTabButton = (u: LightboxUnit, i: number) => {
+  const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
     const unitLabel = u.unitNumber ?? u.label ?? "";
     const roomLabel = u.roomType ?? "";
+    const stacked = opts?.stacked;
     return (
       <button
         key={i}
-        onClick={() => handleUnitChange(i)}
-        className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-row items-center gap-1.5 leading-tight whitespace-nowrap"
+        onClick={() => { handleUnitChange(i); setShowMoreUnits(false); }}
+        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all leading-tight whitespace-nowrap ${stacked ? "flex flex-col items-center gap-0.5" : "flex flex-row items-center gap-1.5"}`}
         style={
           isCurrent
             ? { background: "hsl(var(--primary))", color: "#fff" }
             : { background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.7)" }
         }
       >
-        <span>{unitLabel}{isRef ? "(다른방)" : "(현재방)"}</span>
+        <span>[{isRef ? "다른방" : "현재방"}] {unitLabel}</span>
         {roomLabel && <span className="text-[10px] font-normal opacity-80">{roomLabel}</span>}
       </button>
     );
