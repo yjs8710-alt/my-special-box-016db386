@@ -207,9 +207,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일 햄버거 */}
+            {/* 모바일: 채팅문의 + 햄버거 */}
             <button
-              className="md:hidden text-white p-1 ml-auto"
+              className="md:hidden flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md ml-auto"
+              style={{ background: "hsl(var(--accent))", color: "white" }}
+              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+              aria-label="채팅 문의"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              채팅문의
+            </button>
+            <button
+              className="md:hidden text-white p-1 ml-1"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="메뉴"
             >
