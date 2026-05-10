@@ -2998,20 +2998,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
           <div className="flex items-center gap-1 min-h-[22px]">
-            {prop.buildYear && (
-              <span
-                className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 whitespace-nowrap rounded"
-                style={{
-                  background: "hsl(var(--primary) / 0.12)",
-                  color: "hsl(var(--primary))",
-                  border: "1px solid hsl(var(--primary) / 0.3)",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}
-              >
-                준{prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4)}
-              </span>
-            )}
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
