@@ -786,12 +786,11 @@ const MapFilterBar = ({
               {/* 비주거형 카테고리 - nonResidentialSubtypes 있을 때만 */}
               {nonResidentialSubtypes && nonResidentialSubtypes.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <SectionLabel> 매매</SectionLabel>
-                    {(() => {
-                      const arr = activeTypes ?? [activeType];
-                      const hasSelection = !arr.includes("전체") && arr.length > 0;
-                      return hasSelection ? (
+                  {(() => {
+                    const arr = activeTypes ?? [activeType];
+                    const hasSelection = !arr.includes("전체") && arr.length > 0;
+                    return hasSelection ? (
+                      <div className="flex justify-end mb-1.5">
                         <button
                           onClick={() => onTypeChange("전체")}
                           className="text-[9px] px-1.5 py-0.5 rounded border transition-colors"
@@ -799,9 +798,9 @@ const MapFilterBar = ({
                         >
                           선택 삭제
                         </button>
-                      ) : null;
-                    })()}
-                  </div>
+                      </div>
+                    ) : null;
+                  })()}
                   <div className="flex flex-col gap-2">
                     {(hideRentalAndPrice ? ["매매"] : ["임대", "매매"]).map((group) => (
                       <div key={group}>
