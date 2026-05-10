@@ -10,7 +10,7 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
-  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
+  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe, MessageCircle,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
 import JibunAddressBadge from "@/components/JibunAddressBadge";
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
+import AdminChatPanel from "@/components/AdminChatPanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
@@ -181,6 +182,7 @@ const NAV = [
   { key: "contacts",   label: "청주 연락처",  icon: Phone },
   { key: "reports",    label: "신고/제안",    icon: AlertCircle },
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
+  { key: "chat",       label: "채팅 문의",    icon: MessageCircle },
 ];
 
 const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
@@ -1170,6 +1172,12 @@ const AdminDashboard = () => {
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(() => searchParams.get("tab") ?? "dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminUserId, setAdminUserId] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setAdminUserId(session.user.id);
+    });
+  }, []);
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
@@ -3427,6 +3435,11 @@ const AdminDashboard = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* ── 채팅 문의 ── */}
+          {tab === "chat" && adminUserId && (
+            <AdminChatPanel adminUserId={adminUserId} />
           )}
 
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home } from "lucide-react";
+import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -125,6 +125,15 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 */}
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
+                onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all"
+                style={{ background: "hsl(var(--accent))", color: "white" }}
+                title="채팅 문의"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                채팅문의
+              </button>
+              <button
                 className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}
               >
@@ -198,9 +207,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일 햄버거 */}
+            {/* 모바일: 채팅문의 + 햄버거 */}
             <button
-              className="md:hidden text-white p-1 ml-auto"
+              className="md:hidden flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md ml-auto"
+              style={{ background: "hsl(var(--accent))", color: "white" }}
+              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+              aria-label="채팅 문의"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              채팅문의
+            </button>
+            <button
+              className="md:hidden text-white p-1 ml-1"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="메뉴"
             >
