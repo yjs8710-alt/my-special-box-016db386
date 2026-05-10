@@ -33,6 +33,14 @@ function ImageCarouselPreview({
     setIdx((i) => Math.min(i, images.length - 2));
   }, [onRemove, images.length]);
 
+  const moveItem = (from: number, to: number) => {
+    if (from === to) return;
+    const arr = [...images];
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    onReorder?.(arr);
+    setIdx(to);
+  };
   const handleDragStart = (e: React.DragEvent, i: number) => {
     setDragIdx(i);
     e.dataTransfer.effectAllowed = "move";
@@ -44,16 +52,31 @@ function ImageCarouselPreview({
   };
   const handleDrop = (e: React.DragEvent, dropI: number) => {
     e.preventDefault();
-    if (dragIdx === null || dragIdx === dropI) { setDragIdx(null); setOverIdx(null); return; }
-    const arr = [...images];
-    const [moved] = arr.splice(dragIdx, 1);
-    arr.splice(dropI, 0, moved);
-    onReorder?.(arr);
-    setIdx(dropI);
+    if (dragIdx !== null) moveItem(dragIdx, dropI);
     setDragIdx(null);
     setOverIdx(null);
   };
   const handleDragEnd = () => { setDragIdx(null); setOverIdx(null); };
+  // 모바일 터치 지원
+  const onPointerDown = (e: React.PointerEvent, i: number) => {
+    if (e.pointerType === "mouse") return;
+    setDragIdx(i);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (dragIdx === null || e.pointerType === "mouse") return;
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const target = el?.closest<HTMLElement>("[data-thumb-idx]");
+    if (target) {
+      const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
+      if (!isNaN(i)) setOverIdx(i);
+    }
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragIdx === null) return;
+    if (e.pointerType !== "mouse" && overIdx !== null) moveItem(dragIdx, overIdx);
+    setDragIdx(null); setOverIdx(null);
+  };
 
   if (images.length === 0) return null;
 
@@ -147,15 +170,21 @@ function ImageCarouselPreview({
           {images.map((src, i) => (
             <div
               key={src}
+              data-thumb-idx={i}
               draggable
               onDragStart={(e) => handleDragStart(e, i)}
               onDragOver={(e) => handleDragOver(e, i)}
               onDrop={(e) => handleDrop(e, i)}
               onDragEnd={handleDragEnd}
-              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing"
+              onPointerDown={(e) => onPointerDown(e, i)}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={() => { setDragIdx(null); setOverIdx(null); }}
+              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
               style={{
                 borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
                 opacity: dragIdx === i ? 0.4 : 1,
+                touchAction: "none",
               }}
             >
               <button
