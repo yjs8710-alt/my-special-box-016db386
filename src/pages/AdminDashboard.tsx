@@ -3437,8 +3437,6 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          )}
-
           {/* ── 채팅 문의 ── */}
           {tab === "chat" && adminUserId && (
             <AdminChatPanel adminUserId={adminUserId} />
