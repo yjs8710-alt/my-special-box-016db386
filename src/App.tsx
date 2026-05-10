@@ -156,6 +156,7 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ChatInquiryWidget />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>
