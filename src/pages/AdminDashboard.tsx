@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
+import AdminChatPanel from "@/components/AdminChatPanel";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
