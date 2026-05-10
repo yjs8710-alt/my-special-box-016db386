@@ -3130,7 +3130,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const hasKeyMoney = keyMoney && keyMoney !== "0" && keyMoney !== "없음";
             const isShortTerm = !isSaleProp && opts.includes("단기가능");
             const hasDuplexM = opts.includes("복층");
-            const showRow = vacancyM || vacatePast || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM;
+            const buildYearShort = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
+            const showRow = vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort;
             if (!showRow) return null;
             return (
             <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
@@ -3139,9 +3140,19 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   공실
                 </span>
               )}
+              {earlyExit && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 95%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 70%)" }}>
+                  중도퇴거
+                </span>
+              )}
               {vacancyM === "세입자 거주중" && !vacatePast && (
                 <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
                   거주중
+                </span>
+              )}
+              {buildYearShort && (
+                <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
+                  준{buildYearShort}
                 </span>
               )}
               {hasDuplexM && (
