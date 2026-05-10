@@ -1,6 +1,7 @@
 export interface MapProperty {
   id: number;
   dbId?: string;       // 실제 DB UUID (property_reports 등 연동용)
+  regNo?: string;      // 매물 등록번호 (6자리)
   title: string;
   buildingName?: string;
   address: string;

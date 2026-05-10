@@ -344,6 +344,7 @@ export type Database = {
           note: string | null
           options: string[]
           parking: string
+          reg_no: string | null
           registered_by: string | null
           registered_date: string
           room_memo: string | null
@@ -387,6 +388,7 @@ export type Database = {
           note?: string | null
           options?: string[]
           parking?: string
+          reg_no?: string | null
           registered_by?: string | null
           registered_date?: string
           room_memo?: string | null
@@ -430,6 +432,7 @@ export type Database = {
           note?: string | null
           options?: string[]
           parking?: string
+          reg_no?: string | null
           registered_by?: string | null
           registered_date?: string
           room_memo?: string | null

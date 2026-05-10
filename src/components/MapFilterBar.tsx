@@ -570,7 +570,11 @@ const MapFilterBar = ({
                   value={pendingQuery}
                   onChange={(e) => setPendingQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") commitSearch(); }}
-                  placeholder="주소, 건물명, 동명, 번지수 검색"
+                  placeholder="주소, 건물명, 등록번호 검색"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {(pendingQuery || query) && (
@@ -588,6 +592,10 @@ const MapFilterBar = ({
                   onChange={(e) => { setLandlordQuery(e.target.value); setLandlordSearched(false); }}
                   onKeyDown={(e) => e.key === "Enter" && handleLandlordSearch()}
                   placeholder="동명, 번지, 건물명, 전화번호 검색"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {landlordQuery && (

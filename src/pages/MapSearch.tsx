@@ -55,7 +55,7 @@ const MapSearch = () => {
   const filtered = allProperties.filter((p) => {
     if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
-    if (propertyId && !String(p.id).includes(propertyId)) return false;
+    if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
     // 지도 영역 필터 — "이 지역에서 검색" 클릭 후 활성화
     if (searchBounds) {
       if (!p.lat || !p.lng) return false;
@@ -78,6 +78,7 @@ const MapSearch = () => {
         addr.includes(q) ||
         p.title.toLowerCase().includes(qNorm) ||
         (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
+        (p.regNo ?? "").includes(qNorm) ||
         dongLotMatch ||
         lotOnlyMatch;
       if (!matchText) return false;

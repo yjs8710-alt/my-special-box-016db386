@@ -37,6 +37,10 @@ const MapSearchBar = ({ query, onQueryChange, activeType, onTypeChange }: MapSea
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="지역, 건물명, 역명으로 검색"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
             className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground h-12"
           />
           {query && (
