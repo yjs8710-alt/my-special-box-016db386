@@ -40,23 +40,79 @@ const LegacyPropertyRedirect = () => {
   return <Navigate to={`/share/${id ?? ""}${location.search}`} replace />;
 };
 
+const BOMNAL_LICENSE_NO = "43112-2024-00034";
+
 const useGlobalProtect = () => {
   useEffect(() => {
+    let cancelled = false;
+    let exempt = false;
+
     const isEditable = (el: EventTarget | null) => {
       if (!(el instanceof HTMLElement)) return false;
       const tag = el.tagName;
       return tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable;
     };
-    const onContext = (e: MouseEvent) => { if (!isEditable(e.target)) e.preventDefault(); };
-    const onDrag = (e: DragEvent) => { e.preventDefault(); };
-    const onCopy = (e: ClipboardEvent) => { if (!isEditable(e.target)) e.preventDefault(); };
+    const onContext = (e: MouseEvent) => { if (exempt) return; if (!isEditable(e.target)) e.preventDefault(); };
+    const onDrag = (e: DragEvent) => { if (exempt) return; e.preventDefault(); };
+    const onCopy = (e: ClipboardEvent) => { if (exempt) return; if (!isEditable(e.target)) e.preventDefault(); };
+
+    const applyProtect = (on: boolean) => {
+      exempt = !on;
+      if (typeof document !== "undefined") {
+        document.body.classList.toggle("protect-on", on);
+      }
+    };
+
+    // 기본은 보호 ON
+    applyProtect(true);
     document.addEventListener("contextmenu", onContext);
     document.addEventListener("dragstart", onDrag);
     document.addEventListener("copy", onCopy);
+
+    const checkExempt = async () => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || cancelled) return;
+        // 관리자 체크
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleData) { if (!cancelled) applyProtect(false); return; }
+        // 봄날부동산 체크
+        const { data: ap } = await supabase
+          .from("agent_profiles")
+          .select("license_number, status")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (!cancelled && ap?.license_number === BOMNAL_LICENSE_NO && ap?.status === "approved") {
+          applyProtect(false);
+        }
+      } catch { /* ignore */ }
+    };
+    checkExempt();
+
+    // 로그인/로그아웃 시 재평가
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = supabase.auth.onAuthStateChange(() => {
+        applyProtect(true);
+        checkExempt();
+      });
+      unsub = () => data.subscription.unsubscribe();
+    })();
+
     return () => {
+      cancelled = true;
       document.removeEventListener("contextmenu", onContext);
       document.removeEventListener("dragstart", onDrag);
       document.removeEventListener("copy", onCopy);
+      document.body.classList.remove("protect-on");
+      unsub?.();
     };
   }, []);
 };
