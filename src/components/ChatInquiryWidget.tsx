@@ -73,6 +73,16 @@ const ChatInquiryWidget = () => {
     return () => { mounted = false; };
   }, [isAuthorized, user]);
 
+  // Listen to global "open chat" event from header buttons
+  useEffect(() => {
+    const handler = () => {
+      if (!isAuthorized) { navigate("/login"); return; }
+      setOpen(true);
+    };
+    window.addEventListener("open-chat-inquiry", handler);
+    return () => window.removeEventListener("open-chat-inquiry", handler);
+  }, [isAuthorized, navigate]);
+
   // Realtime subscription
   useEffect(() => {
     if (!conversationId) return;
