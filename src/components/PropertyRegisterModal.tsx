@@ -830,6 +830,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
                 onImageUpload={handleImageUpload}
                 onImageRemove={removeImage}
                 onImageSetMain={setMainImage}
+                onImageReorder={(arr) => setForm((f) => ({ ...f, images: arr }))}
               />
             )}
 
@@ -1526,7 +1527,7 @@ function Step2({
 
 /* ─── Step 3 ─── */
 function Step3({
-  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove, onImageSetMain,
+  form, set, errors, uploading, fileInputRef, onImageUpload, onImageRemove, onImageSetMain, onImageReorder,
 }: {
   form: FormState;
   set: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
@@ -1536,6 +1537,7 @@ function Step3({
   onImageUpload: (files: FileList | null) => Promise<void>;
   onImageRemove: (url: string) => void;
   onImageSetMain: (url: string) => void;
+  onImageReorder?: (arr: string[]) => void;
 }) {
   const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const contacts: { key: keyof FormState; label: string; placeholder: string; required?: boolean }[] = [
@@ -1551,7 +1553,7 @@ function Step3({
       {/* 매물 사진 */}
       <Section label="매물 사진">
         {form.images.length > 0 && (
-          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} />
+          <ImagePreviewCarousel images={form.images} onRemove={onImageRemove} onSetMain={onImageSetMain} onReorder={onImageReorder} />
         )}
         <button
           type="button"
