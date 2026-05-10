@@ -149,7 +149,22 @@
   }
 }
 
-/* 모바일 이미지 길게 누르기 컨텍스트 메뉴 / 저장 / 드래그 방지 */
+/* 전역 길게 누르기/복사/드래그/저장 차단 */
+html, body {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* 입력 가능한 요소는 예외 처리 */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
 img {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -157,3 +172,7 @@ img {
   -webkit-user-drag: none;
   user-drag: none;
 }
+/* 검색창 자동완성/추천 드롭다운 숨김 */
+input::-webkit-calendar-picker-indicator { display: none !important; }
+input::-webkit-list-button { display: none !important; }
+
