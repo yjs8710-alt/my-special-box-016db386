@@ -7,6 +7,7 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
+import AdminNotificationBell from "@/components/AdminNotificationBell";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
@@ -133,12 +134,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <MessageCircle className="w-3.5 h-3.5" />
                 채팅문의
               </button>
-              <button
-                className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
-                style={{ color: "rgba(255,255,255,0.6)" }}
-              >
-                <Bell className="w-3.5 h-3.5" />
-              </button>
+              {user?.isAdmin && <AdminNotificationBell />}
 
               {isAuthorized ? (
                 <>
