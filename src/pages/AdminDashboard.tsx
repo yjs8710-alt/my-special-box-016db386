@@ -10,7 +10,7 @@ import {
   Plus, Pencil, EyeOff, Phone, MapPin, X, Save, Copy,
   ImagePlus, Loader2, ShieldAlert, UserMinus, UserCheck, Ban, Unlock,
   KeyRound, EyeOff as EyeOffIcon, Eye as EyeIcon, Menu,
-  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe,
+  Gem, BadgeCheck, UserCog, Monitor, Smartphone, Globe, MessageCircle,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-20260427-v3.png";
 import JibunAddressBadge from "@/components/JibunAddressBadge";
