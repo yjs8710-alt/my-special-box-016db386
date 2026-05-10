@@ -1172,6 +1172,12 @@ const AdminDashboard = () => {
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(() => searchParams.get("tab") ?? "dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminUserId, setAdminUserId] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setAdminUserId(session.user.id);
+    });
+  }, []);
   const [members, setMembers] = useState<AgentProfile[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [membersError, setMembersError] = useState("");
