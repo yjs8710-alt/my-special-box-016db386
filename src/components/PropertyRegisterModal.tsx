@@ -1669,18 +1669,22 @@ function Step3({
   );
 }
 
-/* ─── Image Preview Carousel ─── */
+/* ─── Image Preview Carousel (드래그/터치로 순서 변경) ─── */
 function ImagePreviewCarousel({
   images,
   onRemove,
   onSetMain,
+  onReorder,
 }: {
   images: string[];
   onRemove: (url: string) => void;
   onSetMain?: (url: string) => void;
+  onReorder?: (reordered: string[]) => void;
 }) {
   const [idx, setIdx] = useState(0);
   const safeIdx = Math.min(idx, images.length - 1);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
 
   const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
   const next = () => setIdx((i) => (i + 1) % images.length);
@@ -1691,12 +1695,41 @@ function ImagePreviewCarousel({
     onRemove(url);
   };
 
+  const moveItem = (from: number, to: number) => {
+    if (from === to) return;
+    const arr = [...images];
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    onReorder?.(arr);
+    setIdx(to);
+  };
+
+  // 터치(모바일) 지원: pointer 이벤트로 직접 처리
+  const onPointerDown = (e: React.PointerEvent, i: number) => {
+    if (e.pointerType === "mouse") return; // 마우스는 HTML5 drag 사용
+    setDragIdx(i);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (dragIdx === null || e.pointerType === "mouse") return;
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const target = el?.closest<HTMLElement>("[data-thumb-idx]");
+    if (target) {
+      const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
+      if (!isNaN(i)) setOverIdx(i);
+    }
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (dragIdx === null) return;
+    if (e.pointerType !== "mouse" && overIdx !== null) moveItem(dragIdx, overIdx);
+    setDragIdx(null); setOverIdx(null);
+  };
+
   const isMain = safeIdx === 0;
 
   return (
     <div className="flex flex-col gap-2">
       <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
-        {/* 슬라이드 */}
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
@@ -1707,105 +1740,65 @@ function ImagePreviewCarousel({
             </div>
           ))}
         </div>
-
-        {/* 그라디언트 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-
-        {/* 삭제 버튼 */}
-        <button
-          type="button"
-          onClick={() => handleRemove(images[safeIdx])}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors"
-        >
+        <button type="button" onClick={() => handleRemove(images[safeIdx])} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-destructive flex items-center justify-center transition-colors">
           <X className="w-3.5 h-3.5 text-white" />
         </button>
-
-        {/* 대표 뱃지 or 대표 설정 버튼 */}
         {isMain ? (
           <span className="absolute top-2 left-2 text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">⭐ 대표</span>
         ) : (
           onSetMain && (
-            <button
-              type="button"
-              onClick={() => { onSetMain(images[safeIdx]); setIdx(0); }}
-              className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors"
-              style={{ background: "rgba(0,0,0,0.55)", color: "#fff", border: "1px solid rgba(255,255,255,0.4)" }}
-            >
+            <button type="button" onClick={() => { onSetMain(images[safeIdx]); setIdx(0); }} className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full transition-colors" style={{ background: "rgba(0,0,0,0.55)", color: "#fff", border: "1px solid rgba(255,255,255,0.4)" }}>
               대표로 설정
             </button>
           )
         )}
-
-        {/* 이전/다음 버튼 */}
         {images.length > 1 && (
           <>
-            <button
-              type="button"
-              onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-            >
+            <button type="button" onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors">
               <ChevronLeft className="w-4 h-4 text-white" />
             </button>
-            <button
-              type="button"
-              onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors"
-            >
+            <button type="button" onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center backdrop-blur-sm transition-colors">
               <ChevronRight className="w-4 h-4 text-white" />
             </button>
-          </>
-        )}
-
-        {/* 인디케이터 + 장수 */}
-        {images.length > 1 && (
-          <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-1">
-            <div className="flex gap-1">
-              {images.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setIdx(i)}
-                  className="w-1.5 h-1.5 rounded-full transition-all"
-                  style={{ background: i === safeIdx ? "#fff" : "rgba(255,255,255,0.45)" }}
-                />
-              ))}
+            <div className="absolute bottom-2 right-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+              {safeIdx + 1} / {images.length}
             </div>
-          </div>
-        )}
-
-        {/* 장수 카운터 */}
-        {images.length > 1 && (
-          <div className="absolute bottom-2 right-3 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
-            {safeIdx + 1} / {images.length}
-          </div>
+          </>
         )}
       </div>
 
-      {/* 썸네일 스트립 */}
+      {/* 썸네일 스트립 — 데스크톱 드래그 + 모바일 길게 누르고 끌기 */}
       {images.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5 touch-pan-x">
+          <span className="text-[9px] text-muted-foreground self-center mr-1 flex-shrink-0">↔ 드래그로 순서 변경</span>
           {images.map((src, i) => (
             <div
               key={src}
-              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all"
-              style={{ borderColor: i === safeIdx ? "hsl(var(--primary))" : "transparent" }}
+              data-thumb-idx={i}
+              draggable
+              onDragStart={(e) => { setDragIdx(i); e.dataTransfer.effectAllowed = "move"; }}
+              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setOverIdx(i); }}
+              onDrop={(e) => { e.preventDefault(); if (dragIdx !== null) moveItem(dragIdx, i); setDragIdx(null); setOverIdx(null); }}
+              onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+              onPointerDown={(e) => onPointerDown(e, i)}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={() => { setDragIdx(null); setOverIdx(null); }}
+              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
+              style={{
+                borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
+                opacity: dragIdx === i ? 0.4 : 1,
+                touchAction: "none",
+              }}
             >
-              <button
-                type="button"
-                onClick={() => setIdx(i)}
-                className="w-full h-full"
-              >
-                <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
+              <button type="button" onClick={() => setIdx(i)} className="w-full h-full">
+                <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" draggable={false} />
                 {i === 0 && (
                   <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
                 )}
               </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
-                className="absolute top-0 right-0 w-4 h-4 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
-                title="사진 삭제"
-              >
+              <button type="button" onClick={(e) => { e.stopPropagation(); handleRemove(src); }} className="absolute top-0 right-0 w-4 h-4 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10" title="사진 삭제">
                 <X className="w-2.5 h-2.5 text-white" />
               </button>
             </div>
