@@ -808,6 +808,24 @@ const MapFilterBar = ({
                           {group}
                         </span>
                         <div className="flex flex-wrap gap-1 mt-1">
+                          {(() => {
+                            const arr = activeTypes ?? [activeType];
+                            const allActive = arr.includes("전체") || arr.length === 0;
+                            return (
+                              <button
+                                key="__all__"
+                                onClick={() => onTypeChange("전체")}
+                                className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
+                                style={
+                                  allActive
+                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
+                                }
+                              >
+                                전체
+                              </button>
+                            );
+                          })()}
                           {nonResidentialSubtypes.filter((t) => t.group === group).map((t) => {
                             const arr = activeTypes ?? [activeType];
                             const key = (t as any).key ?? t.label;
