@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import Home from "./pages/Home";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -40,7 +40,30 @@ const LegacyPropertyRedirect = () => {
   return <Navigate to={`/share/${id ?? ""}${location.search}`} replace />;
 };
 
-const App = () => (
+const useGlobalProtect = () => {
+  useEffect(() => {
+    const isEditable = (el: EventTarget | null) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      return tag === "INPUT" || tag === "TEXTAREA" || el.isContentEditable;
+    };
+    const onContext = (e: MouseEvent) => { if (!isEditable(e.target)) e.preventDefault(); };
+    const onDrag = (e: DragEvent) => { e.preventDefault(); };
+    const onCopy = (e: ClipboardEvent) => { if (!isEditable(e.target)) e.preventDefault(); };
+    document.addEventListener("contextmenu", onContext);
+    document.addEventListener("dragstart", onDrag);
+    document.addEventListener("copy", onCopy);
+    return () => {
+      document.removeEventListener("contextmenu", onContext);
+      document.removeEventListener("dragstart", onDrag);
+      document.removeEventListener("copy", onCopy);
+    };
+  }, []);
+};
+
+const App = () => {
+  useGlobalProtect();
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -80,6 +103,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
