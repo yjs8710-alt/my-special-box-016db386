@@ -128,14 +128,13 @@ const ChatInquiryWidget = () => {
       content: text,
     });
     if (!error) {
+      const { data: cur } = await supabase
+        .from("chat_conversations").select("unread_for_admin").eq("id", cid).single();
       await supabase.from("chat_conversations").update({
         last_message: text,
         last_message_at: new Date().toISOString(),
-        unread_for_admin: (await supabase.from("chat_conversations").select("unread_for_admin").eq("id", cid).single()).data?.unread_for_admin
-          ? undefined : 1,
+        unread_for_admin: (cur?.unread_for_admin ?? 0) + 1,
       }).eq("id", cid);
-      // Simpler: increment via RPC-less approach
-      await supabase.rpc as never; // noop placeholder
     }
     setSending(false);
   };
