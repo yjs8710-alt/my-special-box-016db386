@@ -182,6 +182,7 @@ const NAV = [
   { key: "contacts",   label: "청주 연락처",  icon: Phone },
   { key: "reports",    label: "신고/제안",    icon: AlertCircle },
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
+  { key: "chat",       label: "채팅 문의",    icon: MessageCircle },
 ];
 
 const PROPERTY_TYPE_GROUPS: { group: string; types: string[] }[] = [
