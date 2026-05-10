@@ -125,6 +125,15 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 */}
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
+                onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all"
+                style={{ background: "hsl(var(--accent))", color: "white" }}
+                title="채팅 문의"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                채팅문의
+              </button>
+              <button
                 className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
                 style={{ color: "rgba(255,255,255,0.6)" }}
               >
