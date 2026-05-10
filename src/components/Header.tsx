@@ -7,6 +7,7 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
+import AdminNotificationBell from "@/components/AdminNotificationBell";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
