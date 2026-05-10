@@ -221,7 +221,6 @@ const LoginPage = () => {
             </div>
             <div>
               <h1 className="text-xl font-extrabold text-foreground">로그인</h1>
-              <p className="text-sm text-muted-foreground mt-1">공인중개사 전용 서비스입니다</p>
             </div>
           </div>
 
@@ -317,7 +316,7 @@ const LoginPage = () => {
             className="rounded-xl p-3.5 text-xs text-center leading-relaxed"
             style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
           >
-            본 서비스는 <strong className="text-foreground">공인중개사 전용</strong>으로 운영됩니다.
+            본 서비스는 <strong className="text-foreground">중개사 전용</strong>으로 운영됩니다.
             <br />가입 신청 후 관리자 승인이 완료되어야 이용 가능합니다.
           </div>
         </div>

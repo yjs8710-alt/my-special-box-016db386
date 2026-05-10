@@ -11,9 +11,9 @@ import { RadiusCircle, isInsideRadius } from "@/lib/geoDistance";
 
 const RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
-const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "빌라", "연립", "다세대"];
+const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "연립", "다세대"];
 
-const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "빌라", "고시원", "연립", "다세대", "주상복합", "단독주택", "다가구", "포룸"];
+const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "고시원", "연립", "다세대", "주상복합", "단독주택", "다가구", "포룸"];
 
 const ResidentialRental = () => {
   const { ExitConfirmDialog } = useExitConfirm();
