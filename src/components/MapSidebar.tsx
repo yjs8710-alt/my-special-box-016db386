@@ -5420,19 +5420,12 @@ const MapSidebar = ({
                                 {regDate && <span>등록 {regDate.slice(5)}</span>}
                               </div>
                             </div>
-                            {/* 퇴거 정보 행 (퇴거일/중도퇴거) */}
-                            {(vacateFutureLabel || earlyExitM) && (
+                            {/* 퇴거 정보 행 (퇴거예정) */}
+                            {vacateFutureLabel && (
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                {vacateFutureLabel && (
-                                  <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                    퇴거예정 {vacateFutureLabel}
-                                  </span>
-                                )}
-                                {earlyExitM && (
-                                  <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                    중도퇴거
-                                  </span>
-                                )}
+                                <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                  퇴거예정 {vacateFutureLabel}
+                                </span>
                               </div>
                             )}
                             {/* 2행: 현관비번/방비번 — 진한 글씨 | 우측: 방향 */}
