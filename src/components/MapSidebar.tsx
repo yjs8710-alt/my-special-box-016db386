@@ -300,9 +300,21 @@ function LightboxModal({
             {imgIdx + 1} / {currentImages.length}
           </div>
 
+          {units[unitIdx]?.isReference && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 z-10 text-center"
+              style={{ top: hasTabs ? "88px" : "48px" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-base font-bold px-5 py-2 rounded-full bg-accent text-accent-foreground">
+                다른 호실 사진 참고용
+              </span>
+            </div>
+          )}
+
           <div
             className="relative w-full h-full overflow-hidden"
-            style={{ paddingTop: hasTabs ? "56px" : "0" }}
+            style={{ paddingTop: hasTabs ? "96px" : "48px" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* 슬라이드 트랙 */}
@@ -329,17 +341,6 @@ function LightboxModal({
                 </div>
               ))}
             </div>
-            {units[unitIdx]?.isReference && (
-              <div
-                className="absolute left-1/2 -translate-x-1/2 text-center z-10"
-                style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
-                  다른 호실 사진 참고용
-                </span>
-              </div>
-            )}
             {currentImages.length > 1 && (
               <>
                 <button
