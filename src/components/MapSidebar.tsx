@@ -5134,7 +5134,7 @@ const MapSidebar = ({
                                 return (
                                   <>
                                     <img
-                                      src={showImage}
+                                      src={thumbUrl(showImage, 200)}
                                       alt={prop.title}
                                       loading="eager"
                                       decoding="async"
@@ -5147,6 +5147,12 @@ const MapSidebar = ({
                                       }}
                                       onError={(e) => {
                                         const img = e.currentTarget;
+                                        // 1차 폴백: 변환 실패 시 원본 URL로 재시도
+                                        if (img.dataset.fallback !== "orig" && img.src.includes("/render/image/")) {
+                                          img.dataset.fallback = "orig";
+                                          img.src = originalFromThumb(showImage);
+                                          return;
+                                        }
                                         img.onerror = null;
                                         img.style.display = "none";
                                         const parent = img.parentElement;
