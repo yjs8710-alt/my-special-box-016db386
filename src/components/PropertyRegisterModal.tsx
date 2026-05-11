@@ -453,51 +453,33 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         }));
       }
 
-      // 2순위: 이전 매물에서 비밀번호 자동 로드 (이미지는 복사하지 않음)
-      let propQuery = supabase
-        .from("properties")
-        .select("building_password,room_password")
-        .eq("dong", form.dong)
-        .eq("unit_number", form.unitNo);
-      if (form.lotNumber) propQuery = propQuery.eq("lot_number", form.lotNumber);
-      const { data: propData } = await propQuery
-        .order("registered_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!propData) return;
-      setForm((prev) => ({
-        ...prev,
-        buildingPassword: prev.buildingPassword || propData.building_password || "",
-        roomPassword: prev.roomPassword || propData.room_password || "",
-      }));
+      // 방 비밀번호는 호수마다 다르므로 자동 로드하지 않음 (건물 비번은 주소 단계에서만 로드)
     };
     run();
   }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
 
-  // ── 단독건물: 호수 입력 시 이전 매물 비밀번호만 자동 로드 ──────────
+  // ── 단독건물: 주소(동+번지) 입력 시 건물 비밀번호만 자동 로드 ──────
   useEffect(() => {
-    if (!form.dong || !form.unitNo || isCollectiveBuilding) return;
+    if (!form.dong || !form.lotNumber || isCollectiveBuilding) return;
     const run = async () => {
-      let q = supabase
+      const { data } = await supabase
         .from("properties")
-        .select("building_password,room_password")
+        .select("building_password")
         .eq("dong", form.dong)
-        .eq("unit_number", form.unitNo)
-        .eq("status", "active");
-      if (form.lotNumber) q = q.eq("lot_number", form.lotNumber);
-      const { data } = await q
+        .eq("lot_number", form.lotNumber)
+        .not("building_password", "is", null)
+        .neq("building_password", "")
         .order("registered_date", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (!data) return;
+      if (!data?.building_password) return;
       setForm((prev) => ({
         ...prev,
         buildingPassword: prev.buildingPassword || data.building_password || "",
-        roomPassword: prev.roomPassword || data.room_password || "",
       }));
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
+  }, [form.dong, form.lotNumber, form.buildingType, form.detailType, isCollectiveBuilding]);
 
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
