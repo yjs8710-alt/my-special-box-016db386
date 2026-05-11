@@ -5167,9 +5167,9 @@ const MapSidebar = ({
                                     />
                                     <PhotoWatermark size="sm" />
                                     {isRef && (
-                                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-                                        <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
-                                          참고용<br/>다른 호실 사진
+                                      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-center pt-1 pointer-events-none">
+                                        <span className="text-[10px] font-bold text-white bg-accent/90 px-1.5 py-0.5 rounded text-center leading-tight">
+                                          다른 호실 사진
                                         </span>
                                       </div>
                                     )}
