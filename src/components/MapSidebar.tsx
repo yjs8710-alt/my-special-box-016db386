@@ -5372,8 +5372,6 @@ const MapSidebar = ({
                         const direction = dirMatch?.[1]?.trim();
                         const lhVal = lhMatch?.[1]?.trim();
                         const memos = [prop.buildingMemo, prop.roomMemo].filter(Boolean).join(" / ");
-                        // 퇴거 정보 (퇴거일/중도퇴거)
-                        const earlyExitM = note.includes("중도퇴거:");
                         let vacateFutureLabel = "";
                         if (prop.vacateDate) {
                           const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
