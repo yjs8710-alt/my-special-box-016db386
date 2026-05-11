@@ -332,10 +332,10 @@ function LightboxModal({
             {units[unitIdx]?.isReference && (
               <div
                 className="absolute left-1/2 -translate-x-1/2 text-center z-10"
-                style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
+                style={{ top: hasTabs ? "72px" : "16px" }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
+                <span className="text-sm font-bold px-4 py-1.5 rounded-full bg-black/60" style={{ color: "hsl(var(--accent))" }}>
                   다른 호실 사진 참고용
                 </span>
               </div>
