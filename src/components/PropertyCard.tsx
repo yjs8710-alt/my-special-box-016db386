@@ -63,6 +63,12 @@ const PropertyCard = ({
 
   return (
     <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+      {/* 다른 호실 사진 참고용 뱃지 — 사진 위 별도 영역 */}
+      {isRef && (
+        <div className="bg-orange-500 text-white text-[11px] font-bold text-center py-1 px-2">
+          다른 호실 사진 참고용
+        </div>
+      )}
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         {displayImage ? (
@@ -85,13 +91,6 @@ const PropertyCard = ({
               }}
             />
             <PhotoWatermark size="lg" />
-            {isRef && (
-              <div className="absolute top-0 left-0 right-0 z-20 flex justify-center pointer-events-none pt-2">
-                <span className="text-[11px] font-bold text-white bg-black/60 px-2 py-0.5 rounded-full drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
-                  다른 호실 사진 참고용
-                </span>
-              </div>
-            )}
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
