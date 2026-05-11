@@ -154,6 +154,8 @@ const ChatInquiryWidget = () => {
     setOpen((v) => !v);
   };
 
+  if (user?.isAdmin) return null;
+
   return (
     <>
       {/* Floating launcher */}
