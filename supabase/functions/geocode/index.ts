@@ -156,11 +156,14 @@ Deno.serve(async (req) => {
 
     console.log("[geocode] Fallback candidates:", candidates);
 
-    let first = null;
+    let first: any = null;
     for (const candidate of candidates) {
-      first = await searchKakao(candidate, kakaoApiKey);
-      if (first) {
-        console.log("[geocode] Found result with query:", candidate);
+      const docs = await searchKakao(candidate, kakaoApiKey);
+      if (docs.length > 0) {
+        // 입력 원본 주소 기준으로 가장 잘 맞는 결과 선택
+        first = pickBestMatch(docs, address) ?? docs[0];
+        console.log("[geocode] Found result with query:", candidate, "→ chosen:",
+          first?.address?.address_name ?? first?.road_address?.address_name);
         break;
       }
     }
