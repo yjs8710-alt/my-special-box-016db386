@@ -2,6 +2,7 @@ import { MapPin, Eye, Heart, X } from "lucide-react";
 import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import { useState } from "react";
+import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
 
 interface PropertyCardProps {
   image: string;
@@ -68,7 +69,7 @@ const PropertyCard = ({
         {displayImage ? (
           <>
             <img
-              src={displayImage}
+              src={thumbUrl(displayImage, 600)}
               alt={title}
               loading="lazy"
               decoding="async"
@@ -77,8 +78,14 @@ const PropertyCard = ({
               style={{ imageRendering: "auto", backgroundColor: "hsl(var(--muted))" }}
               onError={(e) => {
                 const img = e.currentTarget;
-                if (img.dataset.fallback === "1") return;
-                img.dataset.fallback = "1";
+                // 1차 폴백: 변환 실패 시 원본 public URL로 재시도
+                if (img.dataset.fallback !== "orig" && img.src.includes("/render/image/")) {
+                  img.dataset.fallback = "orig";
+                  img.src = originalFromThumb(displayImage);
+                  return;
+                }
+                if (img.dataset.fallback === "ph") return;
+                img.dataset.fallback = "ph";
                 img.src = zibdaPlaceholder;
                 img.classList.remove("object-cover");
                 img.classList.add("object-contain", "p-1");
