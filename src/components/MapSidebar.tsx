@@ -4923,7 +4923,7 @@ const MapSidebar = ({
                                   return (
                                     <>
                                       <img
-                                        src={showImg}
+                                        src={thumbUrl(showImg, 200)}
                                         alt={item.label}
                                         loading="eager"
                                         decoding="async"
@@ -4932,6 +4932,11 @@ const MapSidebar = ({
                                         style={{ imageRendering: "auto" }}
                                         onError={(e) => {
                                           const img = e.currentTarget;
+                                          if (img.dataset.fallback !== "orig" && img.src.includes("/render/image/")) {
+                                            img.dataset.fallback = "orig";
+                                            img.src = originalFromThumb(showImg);
+                                            return;
+                                          }
                                           img.style.display = "none";
                                         }}
                                         onClick={(e) => {
