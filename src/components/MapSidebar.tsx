@@ -267,7 +267,7 @@ function LightboxModal({
         >
           {units[unitIdx]?.isReference && (
             <div className="text-center mb-2 px-4 flex-shrink-0">
-              <span className="text-base font-bold px-5 py-2 rounded-full inline-block bg-accent text-accent-foreground">
+              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--accent))" }}>
                 다른 호실 사진 참고용
               </span>
             </div>
@@ -300,21 +300,9 @@ function LightboxModal({
             {imgIdx + 1} / {currentImages.length}
           </div>
 
-          {units[unitIdx]?.isReference && (
-            <div
-              className="absolute left-1/2 -translate-x-1/2 z-10 text-center"
-              style={{ top: hasTabs ? "88px" : "48px" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-base font-bold px-5 py-2 rounded-full bg-accent text-accent-foreground">
-                다른 호실 사진 참고용
-              </span>
-            </div>
-          )}
-
           <div
             className="relative w-full h-full overflow-hidden"
-            style={{ paddingTop: hasTabs ? "96px" : "48px" }}
+            style={{ paddingTop: hasTabs ? "56px" : "0" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* 슬라이드 트랙 */}
@@ -341,6 +329,17 @@ function LightboxModal({
                 </div>
               ))}
             </div>
+            {units[unitIdx]?.isReference && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 text-center z-10"
+                style={{ bottom: currentImages.length > 1 ? "90px" : "20px" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="text-sm font-bold px-4 py-1.5 rounded-full" style={{ color: "hsl(var(--accent))" }}>
+                  다른 호실 사진 참고용
+                </span>
+              </div>
+            )}
             {currentImages.length > 1 && (
               <>
                 <button
@@ -4954,9 +4953,9 @@ const MapSidebar = ({
                                       />
                                       <PhotoWatermark size="sm" />
                                       {isRef && (
-                                        <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-center pt-1 pointer-events-none">
-                                          <span className="text-[10px] font-bold text-white bg-accent/90 px-1.5 py-0.5 rounded text-center leading-tight">
-                                            다른 호실 사진
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                                          <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
+                                            참고용<br/>다른 호실 사진
                                           </span>
                                         </div>
                                       )}
@@ -5167,9 +5166,9 @@ const MapSidebar = ({
                                     />
                                     <PhotoWatermark size="sm" />
                                     {isRef && (
-                                      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-center pt-1 pointer-events-none">
-                                        <span className="text-[10px] font-bold text-white bg-accent/90 px-1.5 py-0.5 rounded text-center leading-tight">
-                                          다른 호실 사진
+                                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                                        <span className="text-[8px] font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] text-center leading-tight">
+                                          참고용<br/>다른 호실 사진
                                         </span>
                                       </div>
                                     )}
