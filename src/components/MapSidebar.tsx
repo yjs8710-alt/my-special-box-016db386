@@ -44,6 +44,7 @@ import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import cameraIcon from "@/assets/camera_icon-v2-20260427.png";
 import { supabase } from "@/integrations/supabase/client";
+import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
 import { MapProperty } from "@/data/mapProperties";
 import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
