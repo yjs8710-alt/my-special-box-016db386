@@ -4,18 +4,60 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-async function searchKakao(query: string, apiKey: string) {
-  const url = `https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(query)}`;
-  console.log("[geocode] Trying:", url);
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `KakaoAK ${apiKey}`,
-      "KA": "sdk/1.0.0 os/web origin/https://lovable.app",
-    },
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data?.documents?.length > 0 ? data.documents[0] : null;
+async function searchKakao(query: string, apiKey: string): Promise<any[]> {
+  // analyze_type=exact 우선 시도 → 결과 없으면 similar 폴백
+  for (const analyze of ["exact", "similar"]) {
+    const url = `https://dapi.kakao.com/v2/local/search/address.json?analyze_type=${analyze}&size=10&query=${encodeURIComponent(query)}`;
+    console.log("[geocode] Trying:", url);
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `KakaoAK ${apiKey}`,
+        "KA": "sdk/1.0.0 os/web origin/https://lovable.app",
+      },
+    });
+    if (!res.ok) continue;
+    const data = await res.json();
+    if (data?.documents?.length > 0) return data.documents as any[];
+  }
+  return [];
+}
+
+/** 입력 주소에서 핵심 토큰 추출 */
+function extractKeyTokens(addr: string) {
+  const dongMatch = addr.match(/([가-힣]+(?:동|읍|면))\s*([\d-]+)?/);
+  const roadMatch = addr.match(/([가-힣0-9]+(?:로|길))\s*([\d-]+)/);
+  const guMatch = addr.match(/([가-힣]+구)/);
+  return {
+    dong: dongMatch?.[1] ?? "",
+    bunji: dongMatch?.[2] ?? roadMatch?.[2] ?? "",
+    road: roadMatch?.[1] ?? "",
+    gu: guMatch?.[1] ?? "",
+  };
+}
+
+/** 후보 결과 중 입력 주소와 가장 잘 맞는 것 선택 */
+function pickBestMatch(docs: any[], inputAddr: string) {
+  if (!docs.length) return null;
+  const tokens = extractKeyTokens(inputAddr);
+  let best = docs[0];
+  let bestScore = -Infinity;
+  for (const doc of docs) {
+    const jibun = doc.address?.address_name ?? "";
+    const road = doc.road_address?.address_name ?? "";
+    const combined = `${jibun} ${road}`;
+    let score = 0;
+    if (tokens.gu && combined.includes(tokens.gu)) score += 3;
+    if (tokens.dong && combined.includes(tokens.dong)) score += 4;
+    if (tokens.bunji) {
+      const re = new RegExp(`(^|\\s|-)${tokens.bunji}(\\s|$|-|번)`);
+      if (re.test(jibun) || re.test(road)) score += 5;
+      else if (combined.includes(tokens.bunji)) score += 2;
+    }
+    if (tokens.road && combined.includes(tokens.road)) score += 2;
+    if (combined.includes("청주")) score += 1;
+    if (score > bestScore) { bestScore = score; best = doc; }
+  }
+  return best;
 }
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
