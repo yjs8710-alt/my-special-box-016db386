@@ -65,7 +65,7 @@ const PropertyCard = ({
     <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
       {/* 다른 호실 사진 참고용 뱃지 — 사진 위 별도 영역 */}
       {isRef && (
-        <div className="bg-orange-500 text-white text-[11px] font-bold text-center py-1 px-2">
+        <div className="bg-accent text-accent-foreground text-sm font-bold text-center py-1.5 px-3">
           다른 호실 사진 참고용
         </div>
       )}
