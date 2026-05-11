@@ -267,7 +267,7 @@ function LightboxModal({
         >
           {units[unitIdx]?.isReference && (
             <div className="text-center mb-2 px-4 flex-shrink-0">
-              <span className="text-sm font-bold px-4 py-1.5 rounded-full inline-block bg-white/10" style={{ color: "hsl(var(--accent))" }}>
+              <span className="text-base font-bold px-5 py-2 rounded-full inline-block bg-accent text-accent-foreground">
                 다른 호실 사진 참고용
               </span>
             </div>
