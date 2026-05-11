@@ -1729,9 +1729,8 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             const lhType = lhMatch?.[1]?.trim();
             const cleanFee = cleanMatch?.[1]?.trim();
             const brokerFee = brokerFeeMatch?.[1]?.trim();
-            const earlyExit = note.includes("중도퇴거:");
             const vacateDate = property.vacateDate;
-            // 임대 매물 여부 (매매 타입 제외: 모든 임대 유형에 중도퇴거/퇴거일 항시 표시)
+            // 임대 매물 여부 (매매 타입 제외: 모든 임대 유형에 퇴거일 항시 표시)
             const SALE_TYPES = [
               "매매",
               "단독매매",
@@ -1777,12 +1776,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 color: "hsl(var(--foreground))",
               },
               brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(0 85% 45%)" },
-              // 임대 매물은 항시 표시 (earlyExit 여부와 무관하게 세입자 중도퇴거 행 노출)
-              isRentType && {
-                label: "세입자 중도퇴거",
-                value: earlyExit ? "중도퇴거 가능" : "해당없음",
-                color: earlyExit ? "hsl(0 85% 45%)" : "hsl(var(--muted-foreground))",
-              },
+              brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(0 85% 45%)" },
               // 임대 매물은 퇴거 예정일 항시 표시 (값 없으면 "-")
               isRentType && {
                 label: "퇴거 예정일",
