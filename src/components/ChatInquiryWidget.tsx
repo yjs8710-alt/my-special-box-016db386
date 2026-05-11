@@ -22,9 +22,6 @@ const ChatInquiryWidget = () => {
   const [unread, setUnread] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Hide for admin (admin uses dashboard chat)
-  if (user?.isAdmin) return null;
-
   const ensureConversation = useCallback(async () => {
     if (!user) return null;
     const { data: existing } = await supabase
@@ -156,6 +153,8 @@ const ChatInquiryWidget = () => {
     }
     setOpen((v) => !v);
   };
+
+  if (user?.isAdmin) return null;
 
   return (
     <>
