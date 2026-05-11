@@ -1777,12 +1777,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 color: "hsl(var(--foreground))",
               },
               brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(0 85% 45%)" },
-              // 임대 매물은 항시 표시 (earlyExit 여부와 무관하게 세입자 중도퇴거 행 노출)
-              isRentType && {
-                label: "세입자 중도퇴거",
-                value: earlyExit ? "중도퇴거 가능" : "해당없음",
-                color: earlyExit ? "hsl(0 85% 45%)" : "hsl(var(--muted-foreground))",
-              },
+              brokerFee && { label: "중개수수료", value: brokerFee, color: "hsl(0 85% 45%)" },
               // 임대 매물은 퇴거 예정일 항시 표시 (값 없으면 "-")
               isRentType && {
                 label: "퇴거 예정일",
