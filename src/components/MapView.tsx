@@ -282,7 +282,16 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
         const prev = existing.get(prop.id);
 
         if (prev) {
-          // 기존 오버레이 재사용 — 콘텐츠/zIndex만 업데이트
+          // 기존 오버레이 재사용 — 위치/콘텐츠/zIndex 모두 업데이트
+          // (좌표가 변경되었을 수 있으므로 position도 반드시 갱신)
+          try {
+            const curPos = prev.getPosition?.();
+            const curLat = curPos?.getLat?.();
+            const curLng = curPos?.getLng?.();
+            if (curLat !== prop.lat || curLng !== prop.lng) {
+              prev.setPosition(new window.kakao.maps.LatLng(prop.lat, prop.lng));
+            }
+          } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
             const sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
