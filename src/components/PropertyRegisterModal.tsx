@@ -350,7 +350,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       if (!isCollectiveBuilding) {
         const { data } = await supabase
           .from("cheongju_contacts")
-          .select("contact_owner,contact_manager,contact_broker,memo")
+          .select("contact_owner,contact_manager,contact_broker,phone,memo")
           .eq("dong", form.dong)
           .eq("lot_number", form.lotNumber)
           .is("unit_number", null)
@@ -365,9 +365,11 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
             owner2 = list[0] || "";
             extras = list.slice(1);
           }
+          // phone 컬럼을 소유주 폴백으로 사용 (구 데이터 호환)
+          const ownerVal = data.contact_owner || data.phone || "";
           setForm((prev) => ({
             ...prev,
-            contactOwner: prev.contactOwner || data.contact_owner || "",
+            contactOwner: prev.contactOwner || ownerVal,
             contactOwner2: prev.contactOwner2 || owner2,
             extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
             contactManager: prev.contactManager || data.contact_manager || "",
