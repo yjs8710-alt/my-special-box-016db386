@@ -279,11 +279,19 @@ function LightboxModal({
               {currentImages.map((src, i) => (
                 <div key={i} className="relative w-full">
                   <img
-                    src={src}
+                    src={thumbUrl(src, 1080, 75)}
                     alt={`사진 ${i + 1}`}
                     className="w-full max-w-full object-contain rounded-lg select-none"
                     draggable={false}
-                    loading="lazy"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    {...(i === 0 ? { fetchpriority: "high" as any } : {})}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      const orig = originalFromThumb(thumbUrl(src, 1080, 75));
+                      if (img.src !== orig) img.src = orig;
+                    }}
                   />
                   <PhotoWatermark size="lg" />
                 </div>
