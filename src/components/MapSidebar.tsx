@@ -390,7 +390,9 @@ function LightboxModal({
                     opacity: i === imgIdx ? 1 : 0.5,
                   }}
                 >
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <img src={thumbUrl(src, 120, 60)} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                    onError={(e) => { const img = e.currentTarget; const orig = originalFromThumb(thumbUrl(src, 120, 60)); if (img.src !== orig) img.src = orig; }}
+                  />
                 </button>
               ))}
             </div>
