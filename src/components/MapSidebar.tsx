@@ -111,6 +111,22 @@ function LightboxModal({
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next, onClose, isMobileView]);
 
+  // 인접 사진 미리 받아두어 좌우 이동 시 즉시 표시
+  useEffect(() => {
+    if (isMobileView || currentImages.length <= 1) return;
+    const targets = [
+      currentImages[(imgIdx + 1) % currentImages.length],
+      currentImages[(imgIdx - 1 + currentImages.length) % currentImages.length],
+    ];
+    targets.forEach((u) => {
+      if (!u) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      img.src = thumbUrl(u, 1600, 78);
+    });
+  }, [imgIdx, currentImages, isMobileView]);
+
   const hasTabs = units.length > 1 || units.some((u) => u.isReference);
   const [showMoreUnits, setShowMoreUnits] = useState(false);
   // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
@@ -279,11 +295,19 @@ function LightboxModal({
               {currentImages.map((src, i) => (
                 <div key={i} className="relative w-full">
                   <img
-                    src={src}
+                    src={thumbUrl(src, 1080, 75)}
                     alt={`사진 ${i + 1}`}
                     className="w-full max-w-full object-contain rounded-lg select-none"
                     draggable={false}
-                    loading="lazy"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    {...(i === 0 ? { fetchpriority: "high" as any } : {})}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      const orig = originalFromThumb(thumbUrl(src, 1080, 75));
+                      if (img.src !== orig) img.src = orig;
+                    }}
                   />
                   <PhotoWatermark size="lg" />
                 </div>
@@ -319,11 +343,20 @@ function LightboxModal({
                 >
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
-                      src={src}
+                      src={thumbUrl(src, 1600, 78)}
                       alt={`사진 ${i + 1}`}
                       className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg select-none"
                       style={{ maxHeight: "calc(100vh - 80px)" }}
                       draggable={false}
+                      loading={Math.abs(i - imgIdx) <= 1 ? "eager" : "lazy"}
+                      decoding="async"
+                      {...(i === imgIdx ? { fetchpriority: "high" as any } : {})}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const orig = originalFromThumb(thumbUrl(src, 1600, 78));
+                        if (img.src !== orig) img.src = orig;
+                      }}
                     />
                     <PhotoWatermark size="lg" />
                   </div>
@@ -373,7 +406,9 @@ function LightboxModal({
                     opacity: i === imgIdx ? 1 : 0.5,
                   }}
                 >
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <img src={thumbUrl(src, 120, 60)} alt="" className="w-full h-full object-cover" loading="lazy" decoding="async" referrerPolicy="no-referrer"
+                    onError={(e) => { const img = e.currentTarget; const orig = originalFromThumb(thumbUrl(src, 120, 60)); if (img.src !== orig) img.src = orig; }}
+                  />
                 </button>
               ))}
             </div>
