@@ -111,6 +111,22 @@ function LightboxModal({
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next, onClose, isMobileView]);
 
+  // 인접 사진 미리 받아두어 좌우 이동 시 즉시 표시
+  useEffect(() => {
+    if (isMobileView || currentImages.length <= 1) return;
+    const targets = [
+      currentImages[(imgIdx + 1) % currentImages.length],
+      currentImages[(imgIdx - 1 + currentImages.length) % currentImages.length],
+    ];
+    targets.forEach((u) => {
+      if (!u) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      img.src = thumbUrl(u, 1600, 78);
+    });
+  }, [imgIdx, currentImages, isMobileView]);
+
   const hasTabs = units.length > 1 || units.some((u) => u.isReference);
   const [showMoreUnits, setShowMoreUnits] = useState(false);
   // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
