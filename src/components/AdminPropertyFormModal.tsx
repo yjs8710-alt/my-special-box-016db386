@@ -667,7 +667,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     if (isCollective && !unitVal) return; // 집합건물은 호수까지 있어야만 매칭
     let query = supabase
       .from("cheongju_contacts")
-      .select("contact_owner,contact_manager,contact_broker,memo")
+      .select("contact_owner,contact_manager,contact_broker,phone,memo")
       .eq("dong", dongVal)
       .eq("lot_number", lotVal);
     if (isCollective && unitVal) {
@@ -677,7 +677,8 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     }
     const { data } = await query.maybeSingle();
     if (data) {
-      const owner = data.contact_owner || "";
+      // phone을 소유주 연락처의 폴백으로 사용 (구 데이터 호환)
+      const owner = data.contact_owner || data.phone || "";
       const manager = data.contact_manager || "";
       const broker = data.contact_broker || "";
       // memo의 EXTRA_OWNERS:[전화1,전화2] 파싱
