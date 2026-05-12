@@ -327,11 +327,20 @@ function LightboxModal({
                 >
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
-                      src={src}
+                      src={thumbUrl(src, 1600, 78)}
                       alt={`사진 ${i + 1}`}
                       className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg select-none"
                       style={{ maxHeight: "calc(100vh - 80px)" }}
                       draggable={false}
+                      loading={Math.abs(i - imgIdx) <= 1 ? "eager" : "lazy"}
+                      decoding="async"
+                      {...(i === imgIdx ? { fetchpriority: "high" as any } : {})}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const orig = originalFromThumb(thumbUrl(src, 1600, 78));
+                        if (img.src !== orig) img.src = orig;
+                      }}
                     />
                     <PhotoWatermark size="lg" />
                   </div>
