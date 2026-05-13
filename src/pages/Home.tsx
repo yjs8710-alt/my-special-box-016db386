@@ -94,10 +94,12 @@ const Home = () => {
         </Suspense>
       )}
 
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden">
         <HeroSection />
       </main>
-      <Footer />
+      <div className="hidden md:block">
+        <Footer />
+      </div>
     </div>
   );
 };
