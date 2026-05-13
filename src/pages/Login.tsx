@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import logoImg from "@/assets/logo-zibda-active-20260427-v4.png";
+import houseIcon from "@/assets/logo-zibda-house.png";
 
 type ApprovalStatus = "approved" | "pending" | "rejected" | null;
 
@@ -213,7 +214,7 @@ const LoginPage = () => {
 
           {/* Logo area */}
           <div className="text-center flex flex-col items-center gap-3">
-            <img src={logoImg} alt="집다" className="h-16 w-auto object-contain" />
+            <img src={houseIcon} alt="집다" className="w-16 h-16 object-contain" />
             <h1 className="text-xl font-extrabold text-foreground">로그인</h1>
           </div>
 
@@ -303,14 +304,6 @@ const LoginPage = () => {
             >
               회원가입 신청
             </button>
-          </div>
-
-          <div
-            className="rounded-xl p-3.5 text-xs text-center leading-relaxed"
-            style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
-          >
-            본 서비스는 <strong className="text-foreground">중개사 전용</strong>으로 운영됩니다.
-            <br />가입 신청 후 관리자 승인이 완료되어야 이용 가능합니다.
           </div>
         </div>
       </main>

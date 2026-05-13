@@ -129,11 +129,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
                 onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg transition-all"
-                style={{ background: "hsl(var(--accent))", color: "white" }}
+                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition-all hover:bg-white/10"
+                style={{ color: "white" }}
                 title="채팅 문의"
               >
-                <MessageCircle className="w-3.5 h-3.5" />
+                <img src={iconChat} alt="" className="w-5 h-5 object-contain" />
                 채팅문의
               </button>
               {user?.isAdmin && <AdminNotificationBell />}
