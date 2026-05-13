@@ -27,7 +27,7 @@ const HeroSection = () => {
   const [isAppMode] = useState(false);
 
   return (
-    <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
+    <section className="relative h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
       <picture>
         <source media="(max-width: 768px)" srcSet={heroBgMobile} />
         <img
