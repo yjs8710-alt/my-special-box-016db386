@@ -19,7 +19,8 @@ export interface MapProperty {
   lng: number;
   image: string;
   description: string;
-  buildingMemo?: string; // 건물 메모
+ buildingMemo?: string; // 건물 메모
+ buildingMemoRaw?: string; // 건물 메모 원문 (PROPOSAL_JSON 포함)
   roomMemo?: string;     // 방 메모
   memo?: string;         // 레거시 호환
   registeredDate?: string; // 등록일

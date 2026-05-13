@@ -59,6 +59,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     buildingMemo: row.building_memo && !String(row.building_memo).startsWith("__PROPOSAL_JSON__")
       ? String(row.building_memo)
       : undefined,
+    buildingMemoRaw: row.building_memo ? String(row.building_memo) : undefined,
     roomMemo: row.room_memo ? String(row.room_memo) : undefined,
     note: row.note ? String(row.note) : undefined,
     vacateDate: row.vacate_date ? String(row.vacate_date) : undefined,
