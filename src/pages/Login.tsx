@@ -213,15 +213,8 @@ const LoginPage = () => {
 
           {/* Logo area */}
           <div className="text-center flex flex-col items-center gap-3">
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-              style={{ background: "hsl(var(--primary))" }}
-            >
-              <Home className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-foreground">로그인</h1>
-            </div>
+            <img src={logoImg} alt="집다" className="h-16 w-auto object-contain" />
+            <h1 className="text-xl font-extrabold text-foreground">로그인</h1>
           </div>
 
           {/* Card */}
