@@ -65,7 +65,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col relative overflow-hidden">
+    <div className="h-screen md:h-auto md:min-h-screen flex flex-col relative overflow-hidden md:overflow-visible">
       <Header />
 
       {/* 우측 상단 플로팅 "모바일 앱 설치" 버튼 (메인 화면 전용) */}
