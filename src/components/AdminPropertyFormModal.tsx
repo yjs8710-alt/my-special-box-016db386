@@ -214,6 +214,7 @@ function ImageCarouselPreview({
 }
 import { X, Phone, Eye, EyeOff, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts";
 
 // ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
 import { formatPhone } from "@/lib/utils";
@@ -665,39 +666,20 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const fetchContactFromDB = useCallback(async (dongVal: string, lotVal: string, unitVal?: string, isCollective?: boolean) => {
     if (!dongVal || !lotVal) return; // 번지 없으면 매칭 안 함
     if (isCollective && !unitVal) return; // 집합건물은 호수까지 있어야만 매칭
-    let query = supabase
-      .from("cheongju_contacts")
-      .select("contact_owner,contact_manager,contact_broker,phone,memo")
-      .eq("dong", dongVal)
-      .eq("lot_number", lotVal);
-    if (isCollective && unitVal) {
-      query = query.eq("unit_number", unitVal);
-    } else {
-      query = query.is("unit_number", null);
-    }
-    const { data } = await query.maybeSingle();
-    if (data) {
-      // phone을 소유주 연락처의 폴백으로 사용 (구 데이터 호환)
-      const owner = data.contact_owner || data.phone || "";
-      const manager = data.contact_manager || "";
-      const broker = data.contact_broker || "";
-      // memo의 EXTRA_OWNERS:[전화1,전화2] 파싱
-      let owner2 = "";
-      let extras: string[] = [];
-      const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
-      if (m) {
-        const list = m[1].split(",").map((s: string) => s.trim()).filter(Boolean);
-        owner2 = list[0] || "";
-        extras = list.slice(1);
-      }
-      if (owner || owner2 || extras.length > 0 || manager || broker) {
+    const contacts = await loadCheongjuContact({
+      dong: dongVal,
+      lotNumber: lotVal,
+      unitNumber: isCollective ? unitVal : null,
+    });
+    if (contacts) {
+      if (contacts.contactOwner || contacts.contactOwner2 || contacts.extraOwners.length > 0 || contacts.contactManager || contacts.contactBroker) {
         setForm((f) => ({
           ...f,
-          contactOwner: (isCollective && unitVal) ? (owner || f.contactOwner) : (f.contactOwner || owner),
-          contactOwner2: f.contactOwner2 || owner2,
-          extraOwners: f.extraOwners.length > 0 ? f.extraOwners : extras,
-          contactManager: f.contactManager || manager,
-          contactBroker: f.contactBroker || broker,
+          contactOwner: (isCollective && unitVal) ? (contacts.contactOwner || f.contactOwner) : (f.contactOwner || contacts.contactOwner),
+          contactOwner2: f.contactOwner2 || contacts.contactOwner2,
+          extraOwners: f.extraOwners.length > 0 ? f.extraOwners : contacts.extraOwners,
+          contactManager: f.contactManager || contacts.contactManager,
+          contactBroker: f.contactBroker || contacts.contactBroker,
         }));
         setContactAutoFilled(true);
         setTimeout(() => setContactAutoFilled(false), 4000);
@@ -714,9 +696,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
     if (d) geocodeAddress(fullAddress);
-    // 신규 등록 시 + 집합건물이 아닐 때만 주소 기준 연락처 자동 불러오기
+    // 등록/수정 모두 주소 기준 연락처 자동 불러오기
     const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
-    if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
+    if (d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
     // 동+번지 입력 시 기존 등록 매물에서 총층수·건축년도 자동 조회
     if (d && lot) fetchBuildingInfoFromDB(d, lot);
   };
@@ -980,10 +962,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (form.building_name && form.building_name.trim()) {
           upsertPayload.building_name = form.building_name.trim();
         }
-        // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
-        const { error: upsertErr } = await supabase
-          .from("cheongju_contacts")
-          .upsert(upsertPayload as never, { onConflict: "dong,lot_number,unit_number" });
+        const { error: upsertErr } = await saveCheongjuContact(upsertPayload as never);
         if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
       }
 
