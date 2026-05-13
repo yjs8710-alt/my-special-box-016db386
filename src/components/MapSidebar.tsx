@@ -1913,9 +1913,9 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
   const [note, setNote] = useState(initial.note);
   const [saved, setSaved] = useState(false);
 
-  // prop.buildingMemo가 변경되면(저장 후 refetch 등) 로컬 상태 동기화
+  // prop.buildingMemoRaw가 변경되면(저장 후 refetch 등) 로컬 상태 동기화
   useEffect(() => {
-    const memo = prop.buildingMemo ?? "";
+    const memo = prop.buildingMemoRaw ?? prop.buildingMemo ?? "";
     if (memo.startsWith(PROPOSAL_PREFIX)) {
       try {
         const parsed = JSON.parse(memo.slice(PROPOSAL_PREFIX.length));
@@ -1927,7 +1927,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
       } catch {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prop.buildingMemo]);
+  }, [prop.buildingMemoRaw]);
 
   // 호실 편집
   const updateUnit = (idx: number, key: keyof UnitRow, val: string) =>
