@@ -1,6 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
+import iconMyPage from "@/assets/icon-mypage.png";
+import iconChat from "@/assets/icon-chat.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
@@ -203,27 +205,25 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일: 채팅문의 + 내정보 + 햄버거 */}
+            {/* 모바일: 내정보 + 채팅문의 아이콘 + 햄버거 */}
             <button
-              className="md:hidden flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md ml-auto"
-              style={{ background: "hsl(var(--accent))", color: "white" }}
-              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-              aria-label="채팅 문의"
-            >
-              <MessageCircle className="w-3.5 h-3.5" />
-              채팅문의
-            </button>
-            <button
-              className="md:hidden flex items-center justify-center w-8 h-8 rounded-md ml-1 text-base"
-              style={{ background: "rgba(255,255,255,0.12)" }}
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-md ml-auto"
               onClick={() => {
                 if (!isAuthorized) { navigate("/login"); return; }
                 navigate("/my-page");
               }}
               aria-label="내 정보"
-              title="내 정보"
+              title="마이페이지"
             >
-              <span aria-hidden>👤</span>
+              <img src={iconMyPage} alt="마이페이지" className="w-7 h-7 object-contain" />
+            </button>
+            <button
+              className="md:hidden flex items-center justify-center w-9 h-9 rounded-md ml-1"
+              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+              aria-label="채팅 문의"
+              title="채팅문의"
+            >
+              <img src={iconChat} alt="채팅문의" className="w-7 h-7 object-contain" />
             </button>
             <button
               className="md:hidden text-white p-1 ml-1"
