@@ -35,15 +35,23 @@ function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
+    img.decoding = "async";
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
   });
 }
 
+// 로고는 한 번만 로드해 두고 재사용 (다운로드 속도 개선)
+let _logoPromise: Promise<HTMLImageElement> | null = null;
+function getLogo(): Promise<HTMLImageElement> {
+  if (!_logoPromise) _logoPromise = loadImg(logoSrc);
+  return _logoPromise;
+}
+
 async function fetchAsBlobUrl(src: string): Promise<string> {
   // Supabase 스토리지 등 CORS 가능한 URL은 fetch로 가져와 blob URL 변환
-  const res = await fetch(src, { mode: "cors" });
+  const res = await fetch(src, { mode: "cors", cache: "force-cache" });
   const blob = await res.blob();
   return URL.createObjectURL(blob);
 }
