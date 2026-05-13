@@ -42,7 +42,7 @@ const HeroSection = () => {
         />
       </picture>
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 hidden md:block"
         style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))" }}
       />
 
