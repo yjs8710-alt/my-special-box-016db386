@@ -305,14 +305,6 @@ const LoginPage = () => {
               회원가입 신청
             </button>
           </div>
-
-          <div
-            className="rounded-xl p-3.5 text-xs text-center leading-relaxed"
-            style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}
-          >
-            본 서비스는 <strong className="text-foreground">중개사 전용</strong>으로 운영됩니다.
-            <br />가입 신청 후 관리자 승인이 완료되어야 이용 가능합니다.
-          </div>
         </div>
       </main>
     </div>
