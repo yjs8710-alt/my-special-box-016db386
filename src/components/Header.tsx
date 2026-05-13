@@ -205,9 +205,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일: 내정보 + 채팅문의 아이콘 + 햄버거 */}
+            {/* 모바일: 채팅문의 + 내정보 아이콘 + 햄버거 */}
             <button
-              className="md:hidden flex items-center justify-center w-9 h-9 rounded-md ml-auto"
+              className="md:hidden flex flex-col items-center justify-center w-12 h-11 rounded-md ml-auto"
+              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+              aria-label="채팅 문의"
+              title="채팅문의"
+            >
+              <img src={iconChat} alt="" className="w-6 h-6 object-contain" />
+              <span className="text-[9px] font-bold text-white leading-tight mt-0.5">채팅문의</span>
+            </button>
+            <button
+              className="md:hidden flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
               onClick={() => {
                 if (!isAuthorized) { navigate("/login"); return; }
                 navigate("/my-page");
@@ -215,15 +224,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               aria-label="내 정보"
               title="마이페이지"
             >
-              <img src={iconMyPage} alt="마이페이지" className="w-7 h-7 object-contain" />
-            </button>
-            <button
-              className="md:hidden flex items-center justify-center w-9 h-9 rounded-md ml-1"
-              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-              aria-label="채팅 문의"
-              title="채팅문의"
-            >
-              <img src={iconChat} alt="채팅문의" className="w-7 h-7 object-contain" />
+              <img src={iconMyPage} alt="" className="w-6 h-6 object-contain" />
+              <span className="text-[9px] font-bold text-white leading-tight mt-0.5">마이페이지</span>
             </button>
             <button
               className="md:hidden text-white p-1 ml-1"
