@@ -1809,8 +1809,9 @@ interface LeaseProposalModalProps {
   allProperties: MapProperty[];
   onClose: () => void;
   isAdmin?: boolean;
+  onRefetch?: () => void;
 }
-const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin }: LeaseProposalModalProps) => {
+const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }: LeaseProposalModalProps) => {
   const todayStr = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
   const handlePrint = () => window.print();
 
