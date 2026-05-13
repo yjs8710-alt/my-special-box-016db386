@@ -203,7 +203,7 @@ const LoginPage = () => {
           >
             <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
           </div>
-          <span className="text-sm text-white/60">중개사 전용 플랫폼</span>
+          
         </div>
       </header>
 
