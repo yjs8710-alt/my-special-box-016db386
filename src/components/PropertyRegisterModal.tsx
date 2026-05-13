@@ -389,30 +389,15 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     if (!form.lotNumber) return; // 정확한 주소 일치를 위해 번지 필수
     const run = async () => {
       // 1순위: cheongju_contacts에서 동+번지+호수 정확 일치 조회
-      const { data: contactData } = await supabase
-        .from("cheongju_contacts")
-        .select("contact_owner,contact_manager,contact_broker,phone,memo")
-        .eq("dong", form.dong)
-        .eq("lot_number", form.lotNumber)
-        .eq("unit_number", form.unitNo)
-        .maybeSingle();
-      if (contactData) {
-        let owner2 = "";
-        let extras: string[] = [];
-        const m = (contactData.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
-        if (m) {
-          const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
-          owner2 = list[0] || "";
-          extras = list.slice(1);
-        }
-        const ownerVal = contactData.contact_owner || contactData.phone || "";
+      const contacts = await loadCheongjuContact({ dong: form.dong, lotNumber: form.lotNumber, unitNumber: form.unitNo });
+      if (contacts) {
         setForm((prev) => ({
           ...prev,
-          contactOwner: ownerVal || prev.contactOwner,
-          contactOwner2: prev.contactOwner2 || owner2,
-          extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
-          contactManager: prev.contactManager || contactData.contact_manager || "",
-          contactBroker: prev.contactBroker || contactData.contact_broker || "",
+          contactOwner: contacts.contactOwner || prev.contactOwner,
+          contactOwner2: prev.contactOwner2 || contacts.contactOwner2,
+          extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : contacts.extraOwners,
+          contactManager: prev.contactManager || contacts.contactManager,
+          contactBroker: prev.contactBroker || contacts.contactBroker,
         }));
       }
 
@@ -692,9 +677,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         if (form.buildingName && form.buildingName.trim()) {
           upsertPayload.building_name = form.buildingName.trim();
         }
-        const { error: contactErr } = await supabase
-          .from("cheongju_contacts")
-          .upsert(upsertPayload as never, { onConflict: "dong,lot_number,unit_number" });
+        const { error: contactErr } = await saveCheongjuContact(upsertPayload as never);
         if (contactErr) console.error("[청주연락처] upsert 오류:", contactErr.message);
       }
     }
