@@ -27,7 +27,7 @@ const HeroSection = () => {
   const [isAppMode] = useState(false);
 
   return (
-    <section className="relative h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
+    <section className="relative h-[calc(100vh-64px)] md:min-h-[calc(100vh-64px)] md:h-auto flex items-start md:items-center justify-center overflow-hidden">
       <picture>
         <source media="(max-width: 768px)" srcSet={heroBgMobile} />
         <img
@@ -38,12 +38,12 @@ const HeroSection = () => {
           decoding="async"
           // @ts-expect-error fetchpriority is valid HTML
           fetchpriority="high"
-          className="absolute inset-0 w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center md:[filter:contrast(1.35)_brightness(0.85)_saturate(1.1)]"
         />
       </picture>
       <div
         className="absolute inset-0 hidden md:block"
-        style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.92), hsl(var(--header-bg) / 0.78), hsl(var(--header-bg) / 0.92))" }}
+        style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.55), hsl(var(--header-bg) / 0.25), hsl(var(--header-bg) / 0.55))" }}
       />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
