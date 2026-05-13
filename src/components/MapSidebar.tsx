@@ -4395,6 +4395,7 @@ const MapSidebar = ({
           allProperties={properties}
           onClose={() => setLeaseProposalProp(null)}
           isAdmin={isAdmin}
+          onRefetch={onRefetch}
         />
       )}
       {/* Error Report Modal */}
