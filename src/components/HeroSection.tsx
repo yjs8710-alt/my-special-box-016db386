@@ -45,10 +45,10 @@ const HeroSection = () => {
         className="absolute inset-0 hidden md:block"
         style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.55), hsl(var(--header-bg) / 0.25), hsl(var(--header-bg) / 0.55))" }}
       />
-      {/* 모바일 하단 흰색 선 제거용 subtle 그라데이션 */}
+      {/* 모바일 하단 흰색 라인 완전 차단 */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-24 md:hidden"
-        style={{ background: "linear-gradient(to top, hsl(var(--header-bg) / 0.85), transparent)" }}
+        className="absolute bottom-0 left-0 right-0 h-56 md:hidden pointer-events-none"
+        style={{ background: "linear-gradient(to top, hsl(var(--header-bg)) 0%, hsl(var(--header-bg)) 30%, transparent 100%)" }}
       />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
