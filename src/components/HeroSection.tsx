@@ -42,13 +42,8 @@ const HeroSection = () => {
         />
       </picture>
       <div
-        className="absolute inset-0 md:!bg-gradient-to-b"
-        style={{
-          background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))",
-        }}
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-b from-[hsl(var(--header-bg)/0.7)] via-[hsl(var(--header-bg)/0.45)] to-transparent md:hidden"
+        className="absolute inset-0 hidden md:block"
+        style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))" }}
       />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
