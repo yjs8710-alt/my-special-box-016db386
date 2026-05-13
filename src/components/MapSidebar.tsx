@@ -4827,16 +4827,11 @@ const MapSidebar = ({
                   query = query.replace(/([가-힣]+동|[가-힣]+리)(\d)/g, "$1 $2");
                   console.log("[건축물조회] 입력:", query);
                   try {
-                    const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode`;
-                    const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-                    const res = await fetch(endpoint, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json", apikey: apiKey, Authorization: `Bearer ${apiKey}` },
-                      body: JSON.stringify({ address: query }),
+                    const { data, error } = await supabase.functions.invoke("geocode", {
+                      body: { address: query },
                     });
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok || !data?.success) {
-                      console.warn("[건축물조회] geocode 실패:", res.status, data);
+                    if (error || !data?.success) {
+                      console.warn("[건축물조회] geocode 실패:", error, data);
                       const notFound = data?.error === "No results found for the given address";
                       window.alert(
                         notFound
