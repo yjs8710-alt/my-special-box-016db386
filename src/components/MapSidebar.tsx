@@ -1963,6 +1963,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
       return;
     }
     setSaved(true);
+    onRefetch?.();
     setTimeout(() => setSaved(false), 2000);
   };
 
