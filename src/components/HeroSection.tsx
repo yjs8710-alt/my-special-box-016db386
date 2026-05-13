@@ -45,6 +45,11 @@ const HeroSection = () => {
         className="absolute inset-0 hidden md:block"
         style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.55), hsl(var(--header-bg) / 0.25), hsl(var(--header-bg) / 0.55))" }}
       />
+      {/* 모바일 하단 흰색 선 제거용 subtle 그라데이션 */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-24 md:hidden"
+        style={{ background: "linear-gradient(to top, hsl(var(--header-bg) / 0.85), transparent)" }}
+      />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
         {isAppMode && (
