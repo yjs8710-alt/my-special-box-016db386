@@ -196,7 +196,7 @@ const SignupPage = () => {
           <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
             <img src={logoImg} alt="집다 로고" className="h-20 object-contain block" />
           </div>
-          <span className="text-sm text-white/60">중개사 회원가입</span>
+          <span className="text-sm text-white/60">회원가입</span>
         </div>
       </header>
 
