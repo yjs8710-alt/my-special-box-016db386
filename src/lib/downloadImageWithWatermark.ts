@@ -6,18 +6,26 @@ import logoSrc from "@/assets/logo-zibda-active-20260427-v4.png";
 
 export const BOMNAL_LICENSE = "43112-2024-00034";
 
-/** 현재 로그인 사용자가 봄날부동산(워터마크 면제) 소속인지 */
+/** 현재 로그인 사용자가 봄날부동산(워터마크 면제) 소속인지 (세션 캐시) */
+let _exemptCache: { uid: string | null; value: boolean; ts: number } | null = null;
+const EXEMPT_TTL_MS = 5 * 60 * 1000;
 export async function isWatermarkExempt(): Promise<boolean> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    const uid = user?.id ?? null;
+    if (!uid) return false;
+    const now = Date.now();
+    if (_exemptCache && _exemptCache.uid === uid && now - _exemptCache.ts < EXEMPT_TTL_MS) {
+      return _exemptCache.value;
+    }
     const { data } = await supabase
       .from("agent_profiles")
       .select("license_number, status")
-      .eq("user_id", user.id)
+      .eq("user_id", uid)
       .maybeSingle();
-    if (!data) return false;
-    return data.license_number === BOMNAL_LICENSE && data.status === "approved";
+    const value = !!data && data.license_number === BOMNAL_LICENSE && data.status === "approved";
+    _exemptCache = { uid, value, ts: now };
+    return value;
   } catch {
     return false;
   }
