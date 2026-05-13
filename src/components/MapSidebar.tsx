@@ -5137,7 +5137,11 @@ const MapSidebar = ({
                       const isSaleA = a.type?.includes("매매") ? 1 : 0;
                       const isSaleB = b.type?.includes("매매") ? 1 : 0;
                       if (isSaleA !== isSaleB) return isSaleA - isSaleB;
-                      // 등록일 내림차순 (최신 등록 우선)
+                      // 1순위: 확인일 내림차순 (확인된 매물 우선, 최근 확인순)
+                      const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
+                      const chkB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
+                      if (chkA !== chkB) return chkB - chkA;
+                      // 2순위: 등록일 내림차순 (최신 등록 우선)
                       const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
                       const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
                       return regB - regA;
