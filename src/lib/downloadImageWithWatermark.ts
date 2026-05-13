@@ -76,7 +76,7 @@ export async function downloadWithJibdaWatermark(src: string, filename = "image.
     // CORS 실패 시 그대로 시도
   }
 
-  const [img, logo] = await Promise.all([loadImg(workingSrc), loadImg(logoSrc)]);
+  const [img, logo] = await Promise.all([loadImg(workingSrc), getLogo()]);
 
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
