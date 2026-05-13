@@ -696,9 +696,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     set("lot_number", lot);
     // 동이 있으면 좌표 자동 조회 (번지 없어도 동 단위로 조회)
     if (d) geocodeAddress(fullAddress);
-    // 신규 등록 시 + 집합건물이 아닐 때만 주소 기준 연락처 자동 불러오기
+    // 등록/수정 모두 주소 기준 연락처 자동 불러오기
     const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
-    if (!initial?.id && d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
+    if (d && !isCollective) fetchContactFromDB(d, lot, undefined, false);
     // 동+번지 입력 시 기존 등록 매물에서 총층수·건축년도 자동 조회
     if (d && lot) fetchBuildingInfoFromDB(d, lot);
   };
@@ -962,10 +962,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         if (form.building_name && form.building_name.trim()) {
           upsertPayload.building_name = form.building_name.trim();
         }
-        // (dong, lot_number, unit_number) unique constraint (NULLS NOT DISTINCT) 기반 upsert
-        const { error: upsertErr } = await supabase
-          .from("cheongju_contacts")
-          .upsert(upsertPayload as never, { onConflict: "dong,lot_number,unit_number" });
+        const { error: upsertErr } = await saveCheongjuContact(upsertPayload as never);
         if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
       }
 
