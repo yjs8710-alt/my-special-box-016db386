@@ -43,7 +43,17 @@ const HeroSection = () => {
       </picture>
       <div
         className="absolute inset-0 hidden md:block"
-        style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))" }}
+        style={{
+          background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7) 45%, hsl(var(--header-bg) / 0.5) 49.5%, hsl(var(--header-bg) / 0.9) 50%, hsl(var(--header-bg) / 0.6) 50.5%, hsl(var(--header-bg) / 0.75) 55%)",
+        }}
+      />
+      {/* 경계선 강조 라인 */}
+      <div
+        className="absolute top-1/2 left-0 w-full h-px hidden md:block"
+        style={{
+          background: "linear-gradient(to right, transparent, hsl(var(--accent) / 0.5), transparent)",
+          boxShadow: "0 0 20px hsl(var(--accent) / 0.3)",
+        }}
       />
 
       <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
