@@ -8,6 +8,7 @@ import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLe
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
+import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling-icon-v2-20260427.png";
 import tvIcon from "@/assets/tv_icon-v2-20260427.png";
@@ -348,56 +349,15 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     const run = async () => {
       // (1) 연락처 — 단독건물에서만, 동+번지 정확 일치 + 호수 없는 row
       if (!isCollectiveBuilding) {
-        const { data } = await supabase
-          .from("cheongju_contacts")
-          .select("contact_owner,contact_manager,contact_broker,phone,memo")
-          .eq("dong", form.dong)
-          .eq("lot_number", form.lotNumber)
-          .is("unit_number", null)
-          .maybeSingle();
-        if (data) {
-          // memo에서 추가 소유주 파싱: EXTRA_OWNERS:[전화1,전화2,...]
-          let owner2 = "";
-          let extras: string[] = [];
-          const m = (data.memo || "").match(/EXTRA_OWNERS:\[([^\]]*)\]/);
-          if (m) {
-            const list = m[1].split(",").map((s) => s.trim()).filter(Boolean);
-            owner2 = list[0] || "";
-            extras = list.slice(1);
-          }
-          // phone 컬럼을 소유주 폴백으로 사용 (구 데이터 호환)
-          const ownerVal = data.contact_owner || data.phone || "";
+        const contacts = await loadCheongjuContact({ dong: form.dong, lotNumber: form.lotNumber });
+        if (contacts) {
           setForm((prev) => ({
             ...prev,
-            contactOwner: prev.contactOwner || ownerVal,
-            contactOwner2: prev.contactOwner2 || owner2,
-            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : extras,
-            contactManager: prev.contactManager || data.contact_manager || "",
-            contactBroker: prev.contactBroker || data.contact_broker || "",
-          }));
-        }
-
-        // 같은 주소의 가장 최근 properties.note에서도 건물주2/3 정보 보완 로드
-        const { data: lastProp } = await supabase
-          .from("properties")
-          .select("note")
-          .eq("dong", form.dong)
-          .eq("lot_number", form.lotNumber)
-          .order("registered_date", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (lastProp?.note) {
-          const noteStr = String(lastProp.note);
-          const o2 = noteStr.match(/건물주2[:\s]+([^\n|]+)/);
-          const exs: string[] = [];
-          for (let i = 3; i <= 20; i++) {
-            const mm = noteStr.match(new RegExp(`건물주${i}[:\\s]+([^\\n|]+)`));
-            if (mm) exs.push(mm[1].trim());
-          }
-          setForm((prev) => ({
-            ...prev,
-            contactOwner2: prev.contactOwner2 || (o2 ? o2[1].trim() : ""),
-            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : exs,
+            contactOwner: prev.contactOwner || contacts.contactOwner,
+            contactOwner2: prev.contactOwner2 || contacts.contactOwner2,
+            extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : contacts.extraOwners,
+            contactManager: prev.contactManager || contacts.contactManager,
+            contactBroker: prev.contactBroker || contacts.contactBroker,
           }));
         }
       }
