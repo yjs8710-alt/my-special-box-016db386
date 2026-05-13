@@ -203,7 +203,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일: 채팅문의 + 햄버거 */}
+            {/* 모바일: 채팅문의 + 내정보 + 햄버거 */}
             <button
               className="md:hidden flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-md ml-auto"
               style={{ background: "hsl(var(--accent))", color: "white" }}
@@ -212,6 +212,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             >
               <MessageCircle className="w-3.5 h-3.5" />
               채팅문의
+            </button>
+            <button
+              className="md:hidden flex items-center justify-center w-8 h-8 rounded-md ml-1 text-base"
+              style={{ background: "rgba(255,255,255,0.12)" }}
+              onClick={() => {
+                if (!isAuthorized) { navigate("/login"); return; }
+                navigate("/my-page");
+              }}
+              aria-label="내 정보"
+              title="내 정보"
+            >
+              <span aria-hidden>👤</span>
             </button>
             <button
               className="md:hidden text-white p-1 ml-1"

@@ -6,18 +6,26 @@ import logoSrc from "@/assets/logo-zibda-active-20260427-v4.png";
 
 export const BOMNAL_LICENSE = "43112-2024-00034";
 
-/** 현재 로그인 사용자가 봄날부동산(워터마크 면제) 소속인지 */
+/** 현재 로그인 사용자가 봄날부동산(워터마크 면제) 소속인지 (세션 캐시) */
+let _exemptCache: { uid: string | null; value: boolean; ts: number } | null = null;
+const EXEMPT_TTL_MS = 5 * 60 * 1000;
 export async function isWatermarkExempt(): Promise<boolean> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    const uid = user?.id ?? null;
+    if (!uid) return false;
+    const now = Date.now();
+    if (_exemptCache && _exemptCache.uid === uid && now - _exemptCache.ts < EXEMPT_TTL_MS) {
+      return _exemptCache.value;
+    }
     const { data } = await supabase
       .from("agent_profiles")
       .select("license_number, status")
-      .eq("user_id", user.id)
+      .eq("user_id", uid)
       .maybeSingle();
-    if (!data) return false;
-    return data.license_number === BOMNAL_LICENSE && data.status === "approved";
+    const value = !!data && data.license_number === BOMNAL_LICENSE && data.status === "approved";
+    _exemptCache = { uid, value, ts: now };
+    return value;
   } catch {
     return false;
   }
@@ -27,15 +35,23 @@ function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
+    img.decoding = "async";
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
   });
 }
 
+// 로고는 한 번만 로드해 두고 재사용 (다운로드 속도 개선)
+let _logoPromise: Promise<HTMLImageElement> | null = null;
+function getLogo(): Promise<HTMLImageElement> {
+  if (!_logoPromise) _logoPromise = loadImg(logoSrc);
+  return _logoPromise;
+}
+
 async function fetchAsBlobUrl(src: string): Promise<string> {
   // Supabase 스토리지 등 CORS 가능한 URL은 fetch로 가져와 blob URL 변환
-  const res = await fetch(src, { mode: "cors" });
+  const res = await fetch(src, { mode: "cors", cache: "force-cache" });
   const blob = await res.blob();
   return URL.createObjectURL(blob);
 }
@@ -60,7 +76,7 @@ export async function downloadWithJibdaWatermark(src: string, filename = "image.
     // CORS 실패 시 그대로 시도
   }
 
-  const [img, logo] = await Promise.all([loadImg(workingSrc), loadImg(logoSrc)]);
+  const [img, logo] = await Promise.all([loadImg(workingSrc), getLogo()]);
 
   const canvas = document.createElement("canvas");
   canvas.width = img.naturalWidth;
