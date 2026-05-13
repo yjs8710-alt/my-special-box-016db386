@@ -1880,7 +1880,7 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
 
   // 저장된 제안서가 있으면 로드, 없으면 sameBuilding 기반 자동 생성
   const initial = (() => {
-    const memo = prop.buildingMemo ?? "";
+    const memo = prop.buildingMemoRaw ?? prop.buildingMemo ?? "";
     if (memo.startsWith(PROPOSAL_PREFIX)) {
       try {
         const parsed = JSON.parse(memo.slice(PROPOSAL_PREFIX.length));
