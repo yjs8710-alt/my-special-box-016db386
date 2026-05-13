@@ -94,7 +94,7 @@ const Home = () => {
         </Suspense>
       )}
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-hidden md:overflow-visible">
         <HeroSection />
       </main>
       <div className="hidden md:block">
