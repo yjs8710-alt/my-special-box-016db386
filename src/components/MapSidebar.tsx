@@ -983,7 +983,11 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
             e.stopPropagation();
             setOpen((v) => !v);
           }}
-          className="w-5 h-5 flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0"
+          className="w-5 h-5 flex items-center justify-center hover:scale-125 transition-transform select-none flex-shrink-0 rounded"
+          style={{
+            background: hasMemoContent ? "hsl(var(--destructive)/0.12)" : "hsl(var(--primary)/0.08)",
+            border: hasMemoContent ? "2px solid hsl(var(--destructive))" : "1px solid hsl(var(--primary)/0.2)",
+          }}
         >
           {icon}
         </button>
