@@ -27,7 +27,7 @@ const HeroSection = () => {
   const [isAppMode] = useState(false);
 
   return (
-    <section className="relative min-h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
+    <section className="relative h-[calc(100vh-64px)] flex items-start md:items-center justify-center overflow-hidden">
       <picture>
         <source media="(max-width: 768px)" srcSet={heroBgMobile} />
         <img
@@ -46,7 +46,7 @@ const HeroSection = () => {
         style={{ background: "linear-gradient(to bottom, hsl(var(--header-bg) / 0.7), hsl(var(--header-bg) / 0.45), hsl(var(--header-bg) / 0.7))" }}
       />
 
-      <div className="relative z-10 w-full flex flex-col items-center text-center gap-6 px-4 pt-6 md:pt-16 pb-16">
+      <div className="relative z-10 w-full flex flex-col items-center text-center gap-3 md:gap-6 px-4 pt-6 md:pt-16 pb-4 md:pb-16">
         {isAppMode && (
           <div className="md:hidden inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-primary/90 px-3 py-1.5 text-xs font-extrabold text-primary-foreground shadow-lg backdrop-blur-md">
             <CheckCircle2 className="h-4 w-4" />
