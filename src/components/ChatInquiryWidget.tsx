@@ -158,22 +158,9 @@ const ChatInquiryWidget = () => {
 
   return (
     <>
-      {/* Floating launcher */}
-      <button
-        onClick={handleClick}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[1100] w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-105 transition-transform"
-        style={{ background: "hsl(var(--accent))" }}
-        aria-label="채팅 문의"
-      >
-        <MessageCircle className="w-6 h-6" />
-        {unread > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
-            {unread > 9 ? "9+" : unread}
-          </span>
-        )}
-      </button>
+      {/* Floating launcher 제거됨 - 헤더의 "채팅문의" 버튼으로만 열림 */}
 
-      {/* Top header button (also accessible from header — hint) */}
+      {/* Chat panel */}
       {open && (
         <div
           className="fixed z-[1150] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden
