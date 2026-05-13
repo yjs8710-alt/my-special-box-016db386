@@ -214,7 +214,7 @@ const LoginPage = () => {
 
           {/* Logo area */}
           <div className="text-center flex flex-col items-center gap-3">
-            <img src={logoImg} alt="집다" className="h-16 w-auto object-contain" />
+            <img src={houseIcon} alt="집다" className="w-16 h-16 object-contain" />
             <h1 className="text-xl font-extrabold text-foreground">로그인</h1>
           </div>
 
