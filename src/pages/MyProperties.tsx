@@ -825,7 +825,7 @@ const MyProperties = () => {
           onSaved={async () => {
             // 저장 후 매물 새로고침
             const isAdmin = agentName === "관리자";
-            let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+            let q = supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false });
             if (!isAdmin && user?.userId) {
               q = (q as ReturnType<typeof supabase.from>).or(`registered_by.eq.${user.userId}${agentName ? `,agent_name.eq.${agentName}` : ""}`) as typeof q;
             }
