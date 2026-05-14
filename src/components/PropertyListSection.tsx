@@ -29,12 +29,14 @@ const PROPERTIES = [
     address: "서울특별시 마포구 서교동 353", type: "상가",
     area: "66㎡ (20평)", floor: "1층", deposit: "3,000만원",
     monthly: "280만원", manageFee: "20만원", isNew: false, isHot: true, views: 5610,
+    checkedDate: "2026-05-12",
   },
   {
     id: 4, image: property4, title: "이태원 세계음식거리 식당 공실",
     address: "서울특별시 용산구 이태원동 129-3", type: "식당·카페",
     area: "132㎡ (40평)", floor: "1층", deposit: "8,000만원",
     monthly: "420만원", manageFee: "40만원", isNew: false, isHot: false, views: 2103,
+    registeredDate: "2026-05-08",
   },
   {
     id: 5, image: property5, title: "판교 테크노밸리 대형 오피스",
