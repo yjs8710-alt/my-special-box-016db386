@@ -184,9 +184,11 @@ supabase.auth.onAuthStateChange((event, session) => {
 
       try { await claimDeviceSlot(); } catch {}
       setupDeviceChannel(session.user.id);
-      // 허용 IP 검증 (PC/모바일 공통)
-      const ipOk = await verifyPcIpAllowed();
-      if (!ipOk) { await forceLogoutDueToIpRestriction(); return; }
+      // 허용 IP 검증 (데스크톱 한정 — 모바일은 셀룰러/와이파이 IP 변동으로 제외)
+      if (getDeviceType() === "desktop") {
+        const ipOk = await verifyPcIpAllowed();
+        if (!ipOk) { await forceLogoutDueToIpRestriction(); return; }
+      }
       // 디바이스 슬롯 정합성 검증
       const ok = await verifyDeviceSlot();
       if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
@@ -212,8 +214,10 @@ if (typeof document !== "undefined") {
     if (await getIsAdmin(session.user.id)) return;
     const ok = await verifyDeviceSlot();
     if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
-    const ipOk = await verifyPcIpAllowed();
-    if (!ipOk) await forceLogoutDueToIpRestriction();
+    if (getDeviceType() === "desktop") {
+      const ipOk = await verifyPcIpAllowed();
+      if (!ipOk) await forceLogoutDueToIpRestriction();
+    }
   });
 }
 
