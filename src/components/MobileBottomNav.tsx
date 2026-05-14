@@ -31,7 +31,7 @@ const MobileBottomNav = () => {
       }}
       aria-label="모바일 메인 메뉴"
     >
-      <ul className="flex items-stretch justify-around px-1 py-2">
+      <ul className="flex items-stretch justify-around px-1 py-2.5">
         {ITEMS.map(({ label, path, icon, match }) => {
           const active = match(location.pathname);
           return (
@@ -44,7 +44,7 @@ const MobileBottomNav = () => {
                 <img
                   src={icon}
                   alt={label}
-                  className="w-4 h-4"
+                  className="w-5 h-5 object-contain shrink-0"
                   style={{
                     filter: active
                       ? "drop-shadow(0 0 8px rgba(168,85,247,0.7))"
