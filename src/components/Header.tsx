@@ -53,6 +53,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     return () => mql?.removeEventListener?.("change", checkInstalled);
   }, []);
 
+  useEffect(() => {
+    const idle = (cb: () => void) => (window as any).requestIdleCallback?.(cb) ?? setTimeout(cb, 300);
+    idle(() => {
+      import("@/pages/MyInfoPage").catch(() => {});
+      import("@/pages/NotificationsPage").catch(() => {});
+    });
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
