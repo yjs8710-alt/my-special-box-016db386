@@ -155,7 +155,7 @@ interface MapViewProps {
   onRadiusChange?: (c: RadiusCircle | null) => void;
 }
 
-const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
+const MapView = ({ properties, selectedId, onSelect, onBoundsChange, onZoomChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
