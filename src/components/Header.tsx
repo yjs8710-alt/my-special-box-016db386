@@ -123,6 +123,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.label}
+                  onPointerEnter={() => prefetchRoute(item.path)}
+                  onPointerDown={() => prefetchRoute(item.path)}
                   onClick={() => navigate(item.path)}
                   className="text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                   style={
@@ -135,6 +137,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 </button>
               ))}
               <button
+                onPointerEnter={() => prefetchRoute("/community")}
+                onPointerDown={() => prefetchRoute("/community")}
                 onClick={() => navigate("/community")}
                 className="flex items-center gap-1 text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                 style={
