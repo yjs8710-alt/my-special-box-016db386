@@ -43,6 +43,7 @@ import logoTransparent from "@/assets/logo-transparent-zibda-20260427-v2-2026042
 import PhotoWatermark from "./PhotoWatermark";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import cameraIcon from "@/assets/camera_icon-v2-20260427.png";
+import searchCountIcon from "@/assets/search-count-icon.png";
 import { supabase } from "@/integrations/supabase/client";
 import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
 import { MapProperty } from "@/data/mapProperties";
