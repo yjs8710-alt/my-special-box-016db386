@@ -254,12 +254,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
         <>
           {/* 배경 오버레이 — 메뉴 외부 터치 시 닫힘 */}
           <div
-            className="md:hidden fixed inset-0 z-[1195]"
+            className="md:hidden fixed inset-0 z-[9998]"
             onClick={() => setMenuOpen(false)}
             aria-hidden="true"
           />
-          <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
-            style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
+          <div
+            className="md:hidden fixed left-0 right-0 top-12 z-[9999] border-t flex flex-col gap-0.5 py-2 px-3 overflow-y-auto"
+            style={{
+              background: "hsl(var(--header-bg))",
+              borderColor: "hsl(var(--header-border))",
+              maxHeight: "calc(100vh - 48px)",
+            }}
+          >
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
