@@ -101,6 +101,7 @@ const Home = () => {
       <div className="hidden md:block">
         <Footer />
       </div>
+      <MobileBottomNav />
     </div>
   );
 };
