@@ -5144,8 +5144,18 @@ const MapSidebar = ({
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
                 {(pinnedIds && pinnedIds.length > 0
-                  ? // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
-                    [...displayProperties]
+                  ? // 핀 클릭 모드: 선택된 매물을 최상단으로
+                    (() => {
+                      const list = [...displayProperties];
+                      if (selectedId != null) {
+                        const idx = list.findIndex((p) => p.id === selectedId);
+                        if (idx > 0) {
+                          const [sel] = list.splice(idx, 1);
+                          list.unshift(sel);
+                        }
+                      }
+                      return list;
+                    })()
                   : [...displayProperties].sort((a, b) => {
                       // 확인일과 등록일 중 더 최근 날짜 기준 내림차순 (항상 위에서부터)
                       const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
