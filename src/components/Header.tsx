@@ -163,7 +163,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
                 채팅문의
               </button>
-              {user?.isAdmin && <AdminNotificationBell />}
+              {user?.isAdmin ? <AdminNotificationBell /> : isAuthorized && <NotificationBell variant="desktop" />}
 
               {isAuthorized ? (
                 <>
@@ -248,7 +248,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   className="w-7 h-7 object-contain"
                   style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
-                <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
               </button>
               <button
                 className="text-white p-1 ml-1"
