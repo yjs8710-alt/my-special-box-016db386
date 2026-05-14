@@ -77,6 +77,15 @@ const ResidentialRental = () => {
     setMapBounds(b);
   }, []);
 
+  // 줌(확대/축소) 시 핀 해제 → 지도 화면 내 매물로 전환
+  const handleZoomChange = useCallback(() => {
+    if (pinnedIds.length > 0) {
+      setPinnedIds([]);
+      setPinnedAddress(null);
+      setSelectedId(null);
+    }
+  }, [pinnedIds]);
+
   // 핀 클릭: 정확한 주소 매칭만, buildingName 제거
   const handlePinSelect = useCallback((id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
@@ -230,6 +239,7 @@ const ResidentialRental = () => {
             selectedId={selectedId}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
+            onZoomChange={handleZoomChange}
             suppressPan={suppressPan}
             radiusMode={radiusMode}
             radiusCircle={radiusCircle}
