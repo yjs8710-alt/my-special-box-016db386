@@ -22,16 +22,16 @@ const MobileBottomNav = () => {
 
   return (
     <nav
-      className="md:hidden fixed left-2 right-2 z-[900] rounded-2xl border backdrop-blur-md"
+      className="md:hidden fixed left-0 right-0 bottom-0 z-[900] rounded-t-2xl border-t backdrop-blur-md"
       style={{
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         background: "hsl(var(--header-bg) / 0.92)",
         borderColor: "hsl(var(--header-border))",
-        boxShadow: "0 0 24px hsl(var(--accent) / 0.25), 0 8px 24px rgba(0,0,0,0.4)",
+        boxShadow: "0 -4px 24px rgba(0,0,0,0.4), 0 0 24px hsl(var(--accent) / 0.25)",
       }}
       aria-label="모바일 메인 메뉴"
     >
-      <ul className="flex items-stretch justify-around px-1 py-2.5">
+      <ul className="flex items-stretch justify-around px-1 py-2">
         {ITEMS.map(({ label, path, icon, match }) => {
           const active = match(location.pathname);
           return (
@@ -44,7 +44,7 @@ const MobileBottomNav = () => {
                 <img
                   src={icon}
                   alt={label}
-                  className="w-6 h-6 object-contain shrink-0"
+                  className="w-9 h-9 object-contain shrink-0"
                   style={{
                     filter: active
                       ? "drop-shadow(0 0 8px rgba(168,85,247,0.7))"
