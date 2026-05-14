@@ -30,10 +30,12 @@ const MyInfoPage = () => {
         .eq("user_id", user.userId)
         .maybeSingle();
       setProfile(p);
+      const name = p?.name ?? "";
+      const orFilter = `registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`;
       const { count } = await supabase
         .from("properties")
         .select("id", { count: "exact", head: true })
-        .eq("agent_user_id", user.userId);
+        .or(orFilter);
       setPropertyCount(count ?? 0);
 
       try {
