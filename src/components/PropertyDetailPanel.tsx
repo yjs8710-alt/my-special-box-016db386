@@ -32,6 +32,7 @@ import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAuth } from "@/hooks/useAuth";
 import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
+import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
 
 interface PropertyDetailPanelProps {
@@ -489,6 +490,7 @@ function ErrorReportModal({ property, onClose }: { property: MapProperty; onClos
         submitted_by: session?.user?.id ?? null,
       });
       if (error) throw error;
+      await notifySelf("report", "신고 신청이 완료되었습니다.", property.title || property.address, "/notifications");
       setDone(true);
     } catch (e) {
       console.error("오류제보 저장 실패:", e);
@@ -586,6 +588,7 @@ function DealCompleteModal({ property, onClose }: { property: MapProperty; onClo
         submitted_by: session?.user?.id ?? null,
       });
       if (error) throw error;
+      await notifySelf("transaction", "거래완료 신청이 완료되었습니다.", property.title || property.address, "/notifications");
       setDone(true);
     } catch (e) {
       console.error("거래완료 저장 실패:", e);
@@ -801,6 +804,7 @@ function RentalProposalModal({ property, onClose }: { property: MapProperty; onC
         submitted_by: session?.user?.id ?? null,
       });
       if (error) throw error;
+      await notifySelf("proposal", "제안 신청이 완료되었습니다.", property.title || property.address, "/notifications");
       setDone(true);
     } catch (e) {
       console.error("임대현황 저장 실패:", e);
