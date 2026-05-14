@@ -1,0 +1,173 @@
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye } from "lucide-react";
+import Header from "@/components/Header";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+interface Notification {
+  id: string;
+  type: "report" | "proposal" | "transaction" | "view";
+  title: string;
+  body: string | null;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+const TYPE_META: Record<string, { label: string; Icon: any; color: string }> = {
+  report:      { label: "신고",     Icon: AlertCircle,  color: "#f97316" },
+  proposal:    { label: "제안",     Icon: FileText,     color: "#a78bfa" },
+  transaction: { label: "거래완료", Icon: CheckCircle2, color: "#22c55e" },
+  view:        { label: "조회",     Icon: Eye,          color: "#60a5fa" },
+};
+
+const NotificationsPage = () => {
+  const navigate = useNavigate();
+  const { isAuthorized, user, isLoading } = useAuth();
+  const [items, setItems] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user?.userId) return;
+    setLoading(true);
+    const { data } = await (supabase.from("notifications") as any)
+      .select("*")
+      .eq("user_id", user.userId)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setItems((data ?? []) as Notification[]);
+    setLoading(false);
+  }, [user?.userId]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthorized) navigate("/login");
+  }, [isLoading, isAuthorized, navigate]);
+
+  useEffect(() => {
+    if (!user?.userId) return;
+    load();
+    const ch = supabase
+      .channel("notifications-page")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "notifications",
+        filter: `user_id=eq.${user.userId}`,
+      }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.userId, load]);
+
+  const markRead = async (id: string) => {
+    await (supabase.from("notifications") as any).update({ is_read: true }).eq("id", id);
+  };
+  const markAllRead = async () => {
+    if (!user?.userId) return;
+    await (supabase.from("notifications") as any)
+      .update({ is_read: true })
+      .eq("user_id", user.userId)
+      .eq("is_read", false);
+  };
+  const remove = async (id: string) => {
+    await (supabase.from("notifications") as any).delete().eq("id", id);
+  };
+
+  const unread = items.filter(i => !i.is_read).length;
+
+  return (
+    <div className="min-h-screen pb-28 md:pb-0" style={{ background: "hsl(var(--background))" }}>
+      <Header />
+
+      <div className="max-w-2xl mx-auto px-4 py-5">
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => navigate(-1)} className="p-1 -ml-1 rounded-md hover:bg-muted">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <Bell className="w-5 h-5 text-foreground" />
+            <h1 className="text-lg font-bold">알림</h1>
+            {unread > 0 && (
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground">
+                {unread}
+              </span>
+            )}
+          </div>
+          {unread > 0 && (
+            <button
+              onClick={markAllRead}
+              className="ml-auto text-xs font-semibold text-muted-foreground hover:text-foreground flex items-center gap-1"
+            >
+              <Check className="w-3.5 h-3.5" />
+              모두 읽음
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="text-sm text-muted-foreground text-center py-12">불러오는 중…</div>
+        ) : items.length === 0 ? (
+          <div className="text-center py-16">
+            <Bell className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">알림이 없습니다.</p>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {items.map((n) => {
+              const meta = TYPE_META[n.type] ?? TYPE_META.view;
+              const Icon = meta.Icon;
+              return (
+                <li
+                  key={n.id}
+                  className="flex items-start gap-3 p-3 rounded-xl border bg-card"
+                  style={{
+                    borderColor: n.is_read ? "hsl(var(--border))" : "hsl(var(--accent) / 0.5)",
+                    background: n.is_read ? "hsl(var(--card))" : "hsl(var(--accent) / 0.06)",
+                  }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ background: `${meta.color}22`, color: meta.color }}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <button
+                    className="flex-1 text-left min-w-0"
+                    onClick={async () => {
+                      if (!n.is_read) await markRead(n.id);
+                      if (n.link) navigate(n.link);
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${meta.color}22`, color: meta.color }}>
+                        {meta.label}
+                      </span>
+                      {!n.is_read && <span className="w-1.5 h-1.5 rounded-full bg-destructive" />}
+                    </div>
+                    <p className="text-sm font-semibold mt-1 truncate">{n.title}</p>
+                    {n.body && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.body}</p>}
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {new Date(n.created_at).toLocaleString("ko-KR")}
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => remove(n.id)}
+                    className="p-1 text-muted-foreground hover:text-destructive flex-shrink-0"
+                    aria-label="삭제"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <MobileBottomNav />
+    </div>
+  );
+};
+
+export default NotificationsPage;
