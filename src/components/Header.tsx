@@ -218,7 +218,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex flex-col items-center justify-center w-14 h-12 rounded-md ml-1 active:opacity-70 transition-opacity"
+                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1 active:opacity-70 transition-opacity"
                 style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
                 onPointerDown={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
