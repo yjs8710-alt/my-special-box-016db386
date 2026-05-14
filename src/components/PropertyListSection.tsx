@@ -15,12 +15,14 @@ const PROPERTIES = [
     address: "서울특별시 강남구 역삼동 123-4", type: "상가",
     area: "85㎡ (25평)", floor: "1층", deposit: "5,000만원",
     monthly: "350만원", manageFee: "30만원", isNew: true, isHot: true, views: 3241,
+    checkedDate: "2026-05-14",
   },
   {
     id: 2, image: property2, title: "여의도 IFC몰 인근 프리미엄 사무실",
     address: "서울특별시 영등포구 여의도동 31", type: "사무실",
     area: "165㎡ (50평)", floor: "12층", deposit: "1억원",
     monthly: "680만원", manageFee: "50만원", isNew: true, isHot: false, views: 1872,
+    registeredDate: "2026-05-10",
   },
   {
     id: 3, image: property3, title: "홍대 상권 중심 1층 빈 상가",
