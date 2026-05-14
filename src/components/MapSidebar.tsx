@@ -5144,8 +5144,18 @@ const MapSidebar = ({
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
                 {(pinnedIds && pinnedIds.length > 0
-                  ? // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
-                    [...displayProperties]
+                  ? // 핀 클릭 모드: 선택된 매물을 최상단으로
+                    (() => {
+                      const list = [...displayProperties];
+                      if (selectedId != null) {
+                        const idx = list.findIndex((p) => p.id === selectedId);
+                        if (idx > 0) {
+                          const [sel] = list.splice(idx, 1);
+                          list.unshift(sel);
+                        }
+                      }
+                      return list;
+                    })()
                   : [...displayProperties].sort((a, b) => {
                       // 확인일과 등록일 중 더 최근 날짜 기준 내림차순 (항상 위에서부터)
                       const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
@@ -5344,19 +5354,14 @@ const MapSidebar = ({
                              </button>
                                );
                              })()}
-                             {/* 확인일/등록일 배지 (썸네일 상단) */}
-                             {(() => {
-                               const dateStr = chkDate ? chkDate : regDate;
-                               if (!dateStr) return null;
-                               const label = chkDate ? "확인" : "등록";
-                               return (
-                                 <span className="absolute top-1 right-1 z-10 text-[8px] font-bold text-white px-1 py-0.5 rounded-full shadow pointer-events-none"
-                                   style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
-                                 >
-                                   {dateStr.slice(5).replace(/-/g, ".")} {label}
-                                 </span>
-                               );
-                             })()}
+                              {/* 확인일 배지 (썸네일 상단) — 등록일은 표기하지 않음 */}
+                              {chkDate && (
+                                <span className="absolute top-1 right-1 z-10 text-[8px] font-bold text-white px-1 py-0.5 rounded-full shadow pointer-events-none"
+                                  style={{ background: "hsl(var(--primary))" }}
+                                >
+                                  {chkDate.slice(5).replace(/-/g, ".")} 확인
+                                </span>
+                              )}
                            </div>}
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일에서는 숨김) */}

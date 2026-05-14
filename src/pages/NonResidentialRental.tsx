@@ -83,6 +83,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
   // 주거형 type은 매매(note에 "매매가:")인 경우에만 포함
@@ -177,7 +178,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   }, [rawFiltered, groupDealMode]);
   const activeType = activeTypes[0] ?? "전체";
 
-  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; }, []);
+  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBounds(b); }, []);
 
   const handleSearchClick = useCallback(() => {
     setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(true);
@@ -204,14 +205,11 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   }, [filtered, allProperties, pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
-    if (showAllFromSearch) {
-      const b = mapBoundsRef.current;
-      if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
-      return filtered;
-    }
-    if (pinnedIds.length === 0) return filtered;
-    return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch]);
+    if (pinnedIds.length > 0) return filtered.filter(p => pinnedIds.includes(p.id));
+    const b = mapBounds;
+    if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
+    return filtered;
+  }, [filtered, pinnedIds, mapBounds]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
