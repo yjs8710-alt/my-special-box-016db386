@@ -160,7 +160,7 @@ const EditModal = ({
         </div>
 
         {/* 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 pb-24 md:pb-5">
           {/* 기본 정보 */}
           <section>
             <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wide">기본 정보</h3>
