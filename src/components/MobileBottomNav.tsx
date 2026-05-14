@@ -44,7 +44,7 @@ const MobileBottomNav = () => {
                 <img
                   src={icon}
                   alt={label}
-                  className="w-5 h-5 object-contain shrink-0"
+                  className="w-6 h-6 object-contain shrink-0"
                   style={{
                     filter: active
                       ? "drop-shadow(0 0 8px rgba(168,85,247,0.7))"
