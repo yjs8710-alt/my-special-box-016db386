@@ -4906,7 +4906,7 @@ const MapSidebar = ({
           </div>
 
           {/* List */}
-          <div ref={listScrollRef} className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20">
+          <div ref={listScrollRef} className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20 pb-24 md:pb-0">
             {/* 소유주 번호 검색 결과: 매물 카드와 동일한 레이아웃으로 표시 */}
             {landlordSearched ? (
               landlordLoading ? (
