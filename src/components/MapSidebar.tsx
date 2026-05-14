@@ -4889,6 +4889,10 @@ const MapSidebar = ({
                 <Printer className="w-3 h-3" />
                 선택인쇄
               </button>
+              {/* 웹버전: 매물 갯수 표시 (모바일은 MobileMapSheet에서 표시) */}
+              <span className="hidden md:inline-flex items-center text-[11px] font-bold text-muted-foreground ml-1 flex-shrink-0">
+                ({displayProperties.length}개)
+              </span>
             </div>
           </div>
 
