@@ -17,6 +17,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SignupPage = lazy(() => import("./pages/Signup"));
 const Community = lazy(() => import("./pages/Community"));
+const IndexPage = lazy(() => import("./pages/Index"));
 const ResidentialRental = lazy(() => import("./pages/ResidentialRental"));
 const LandSearch = lazy(() => import("./pages/LandSearch"));
 const NonResidentialRental = lazy(() => import("./pages/NonResidentialRental"));
@@ -143,6 +144,7 @@ const App = () => {
 
             {/* 첫 화면은 eager */}
             <Route path="/" element={<Home />} />
+            <Route path="/index" element={<ProtectedRoute><IndexPage /></ProtectedRoute>} />
 
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
