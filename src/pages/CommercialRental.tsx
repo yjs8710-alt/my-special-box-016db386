@@ -29,6 +29,7 @@ const CommercialRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(COMMERCIAL_DB_TYPES);
   const allProperties = useMemo(() => [...MAP_PROPERTIES, ...dbProperties], [dbProperties]);
