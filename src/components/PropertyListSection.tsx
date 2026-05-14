@@ -43,12 +43,14 @@ const PROPERTIES = [
     address: "경기도 성남시 분당구 판교역로 166", type: "사무실",
     area: "330㎡ (100평)", floor: "8층", deposit: "2억원",
     monthly: "1,200만원", manageFee: "80만원", isNew: true, isHot: false, views: 987,
+    checkedDate: "2026-05-13",
   },
   {
     id: 6, image: property6, title: "신촌 로데오거리 소형 상가",
     address: "서울특별시 서대문구 창천동 52", type: "상가",
     area: "33㎡ (10평)", floor: "1층", deposit: "2,000만원",
     monthly: "130만원", manageFee: "10만원", isNew: false, isHot: false, views: 1456,
+    registeredDate: "2026-05-06",
   },
 ];
 
