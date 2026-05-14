@@ -282,15 +282,17 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
+                onPointerDown={() => prefetchRoute(item.path)}
                 onClick={() => { navigate(item.path); setMenuOpen(false); }}
-                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
               >
                 {item.label}
               </button>
             ))}
             <button
+              onPointerDown={() => prefetchRoute("/community")}
               onClick={() => { navigate("/community"); setMenuOpen(false); }}
-              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
             >
               커뮤니티
             </button>
