@@ -38,6 +38,40 @@ export const GradientBellIcon = ({ className, size = 24 }: Props) => (
   </svg>
 );
 
+const GRADIENT_ID_LOGOUT = "lvbl-grad-logout";
+
+export const GradientLogoutIcon = ({ className, size = 24 }: Props) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id={GRADIENT_ID_LOGOUT} x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#d946ef" />
+        <stop offset="100%" stopColor="#3b82f6" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+      stroke={`url(#${GRADIENT_ID_LOGOUT})`}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M16 17l5-5-5-5M21 12H9"
+      stroke={`url(#${GRADIENT_ID_LOGOUT})`}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export const GradientUserIcon = ({ className, size = 24 }: Props) => (
   <svg
     width={size}
