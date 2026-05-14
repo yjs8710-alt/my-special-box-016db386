@@ -13,8 +13,9 @@ const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Hide on auth/admin/share routes
+  // Hide on home page, auth, admin, and share routes
   const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property"];
+  if (location.pathname === "/") return null;
   if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
 
   return (
