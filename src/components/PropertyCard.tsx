@@ -109,12 +109,6 @@ const PropertyCard = ({
         )}
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
-          {checkedDate && (
-            <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow">{checkedDate.slice(5).replace(/-/g, ".")} 확인</span>
-          )}
-          {!checkedDate && registeredDate && (
-            <span className="bg-muted-foreground text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">{registeredDate.slice(5).replace(/-/g, ".")} 등록</span>
-          )}
           {isVacant && (
             <span className="bg-accent text-accent-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow">공실</span>
           )}
