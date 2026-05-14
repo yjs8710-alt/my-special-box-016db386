@@ -819,7 +819,7 @@ const MyProperties = () => {
           <div>
             <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Building2 className="w-5 h-5 text-primary" />
-              {agentName === "관리자" ? "전체 임대·매매 관리" : "내 임대·매매 관리"}
+              {agentName === "관리자" ? "전체 매물 관리" : "내 매물 관리"}
             </h1>
             {agentName && (
               <p className="text-sm text-muted-foreground mt-1">
