@@ -53,6 +53,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     return () => mql?.removeEventListener?.("change", checkInstalled);
   }, []);
 
+  useEffect(() => {
+    const idle = (cb: () => void) => (window as any).requestIdleCallback?.(cb) ?? setTimeout(cb, 300);
+    idle(() => {
+      import("@/pages/MyInfoPage").catch(() => {});
+      import("@/pages/NotificationsPage").catch(() => {});
+    });
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
@@ -210,11 +218,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
-                onClick={() => {
+                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1 active:opacity-70 transition-opacity"
+                style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+                onPointerDown={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
                 }}
+                onTouchStart={() => { import("@/pages/MyInfoPage").catch(() => {}); }}
+                onMouseEnter={() => { import("@/pages/MyInfoPage").catch(() => {}); }}
                 aria-label="내 정보"
                 title="내 정보"
               >
