@@ -21,11 +21,13 @@ interface PropertyCardProps {
   buildYear?: string;
   elevator?: boolean;
   vacateDate?: string;
+  checkedDate?: string;
+  registeredDate?: string;
   onDelete?: () => void;
-  referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
-  referenceUnit?: string;  // 참고용 사진의 호수
-  options?: string[];      // 매물 옵션 (단기가능 등)
-  note?: string;           // 특이사항 (권리금 등 파싱)
+  referenceImage?: string;
+  referenceUnit?: string;
+  options?: string[];
+  note?: string;
 }
 
 const PropertyCard = ({
