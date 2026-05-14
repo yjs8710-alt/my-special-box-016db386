@@ -31,6 +31,7 @@ const ResidentialRental = () => {
   const [landlordResults, setLandlordResults] = useState<LandlordResult[]>([]);
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const mapBoundsRef = useRef<MapBounds | null>(null);
   const [radiusMode, setRadiusMode] = useState(false);
   const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
