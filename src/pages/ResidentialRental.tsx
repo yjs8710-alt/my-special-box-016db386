@@ -116,18 +116,20 @@ const ResidentialRental = () => {
         p.lat && p.lng && isInsideRadius(p.lat, p.lng, radiusCircle)
       );
     }
-    if (showAllFromSearch) {
-      const b = mapBoundsRef.current;
-      if (b) return filtered.filter(p =>
+    if (pinnedIds.length > 0) {
+      return filtered.filter(p => pinnedIds.includes(p.id));
+    }
+    // 검색 버튼 누름 또는 줌/이동 시: 지도 화면 내 매물만
+    const b = mapBounds;
+    if (b) {
+      return filtered.filter(p =>
         p.lat && p.lng &&
         p.lat >= b.swLat && p.lat <= b.neLat &&
         p.lng >= b.swLng && p.lng <= b.neLng
       );
-      return filtered;
     }
-    if (pinnedIds.length === 0) return filtered;
-    return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch, radiusCircle]);
+    return filtered;
+  }, [filtered, pinnedIds, mapBounds, radiusCircle]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
