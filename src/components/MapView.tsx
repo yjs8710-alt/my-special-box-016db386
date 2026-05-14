@@ -379,6 +379,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, onZoomChang
           zoomLevelRef.current = newZoom;
           renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
           fireBounds(map);
+          propsRef.current.onZoomChange?.();
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
