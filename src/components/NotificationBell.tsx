@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import iconBellNew from "@/assets/icon-bell-new.png";
-import iconBellGradient from "@/assets/notification-bell-gradient.png";
+import { GradientBellIcon } from "@/components/icons/GradientIcons";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -79,7 +79,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       title="알림"
       aria-label="알림"
     >
-      <img src={iconBellGradient} alt="" className="w-5 h-5 object-contain" />
+      <GradientBellIcon size={20} />
       {count > 0 && (
         <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}
