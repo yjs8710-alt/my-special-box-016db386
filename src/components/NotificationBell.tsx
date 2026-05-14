@@ -50,7 +50,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
         onPointerDown={() => navigate(isAuthorized ? "/notifications" : "/login")}
         onTouchStart={prefetch}
         onMouseEnter={prefetch}
-        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md active:opacity-70 transition-opacity"
+        className="relative flex flex-col items-center justify-center w-14 h-12 rounded-md active:opacity-70 transition-opacity"
         style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
         aria-label="알림"
         title="알림"
@@ -58,7 +58,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
         <img
           src={iconBellNew}
           alt=""
-          className="w-7 h-7 object-contain"
+          className="w-9 h-9 object-contain"
           style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
         />
         <span className="text-[9px] font-bold text-white leading-tight mt-0.5">알림</span>
