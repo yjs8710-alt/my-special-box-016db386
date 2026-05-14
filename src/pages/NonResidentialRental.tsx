@@ -83,6 +83,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(NON_RESIDENTIAL_DB_TYPES);
   // 주거형 type은 매매(note에 "매매가:")인 경우에만 포함
