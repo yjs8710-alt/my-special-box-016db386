@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import JibunInlineAddress from "@/components/JibunInlineAddress";
+import { thumbUrl } from "@/lib/imageThumb";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type DBProperty = {
@@ -483,7 +484,15 @@ const PropertyRow = ({
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
-          <img src={prop.images[0]} alt="" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
+          <img
+            src={thumbUrl(prop.images[0], 96)}
+            alt=""
+            width={48}
+            height={40}
+            loading="lazy"
+            decoding="async"
+            className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border bg-muted"
+          />
         ) : (
           <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
             <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -613,7 +622,16 @@ const PropertyRow = ({
           {(prop.images?.length ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 flex gap-2 flex-wrap mt-1">
               {prop.images.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-16 h-14 rounded-lg object-cover border border-border" />
+                <img
+                  key={i}
+                  src={thumbUrl(url, 128)}
+                  alt=""
+                  width={64}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-16 h-14 rounded-lg object-cover border border-border bg-muted"
+                />
               ))}
             </div>
           )}
