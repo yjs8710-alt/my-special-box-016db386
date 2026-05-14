@@ -38,11 +38,20 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     return () => { supabase.removeChannel(ch); };
   }, [isAuthorized, user?.userId, refresh]);
 
+  const prefetch = useCallback(() => {
+    import("@/pages/NotificationsPage").catch(() => {});
+  }, []);
+
+  useEffect(() => { if (variant === "mobile") prefetch(); }, [variant, prefetch]);
+
   if (variant === "mobile") {
     return (
       <button
-        onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md"
+        onPointerDown={() => navigate(isAuthorized ? "/notifications" : "/login")}
+        onTouchStart={prefetch}
+        onMouseEnter={prefetch}
+        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md active:opacity-70 transition-opacity"
+        style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
         aria-label="알림"
         title="알림"
       >
