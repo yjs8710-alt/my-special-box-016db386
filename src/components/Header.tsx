@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
-import iconMyPage from "@/assets/icon-mypage.png";
+import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconChat from "@/assets/icon-chat.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { label: "상업·임대·매매", path: "/non-residential", icon: Building },
   { label: "집합건물·건물매매", path: "/collective-sale", icon: Building },
   { label: "토지", path: "/land", icon: Building },
-  { label: "내 임대·매매 관리", path: "/my-properties", icon: ClipboardList },
+  { label: "내 매물 관리", path: "/my-properties", icon: ClipboardList },
 ];
 
 interface HeaderProps {
@@ -218,10 +218,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 aria-label="내 정보"
                 title="내 정보"
               >
-                <User
-                  className="w-6 h-6"
-                  style={{ color: "#a78bfa", filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
-                  strokeWidth={2.2}
+                <img
+                  src={iconMypageNew}
+                  alt=""
+                  className="w-7 h-7 object-contain"
+                  style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
                 <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
               </button>
