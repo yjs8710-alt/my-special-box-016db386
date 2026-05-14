@@ -4582,15 +4582,15 @@ const MapSidebar = ({
                 position: "fixed",
                 left: 0,
                 right: 0,
-                bottom: "calc(env(safe-area-inset-bottom, 0px) + 92px)",
+                bottom: "calc(env(safe-area-inset-bottom, 0px) + 70px)",
                 top: "auto",
                 height:
                   mobileStep === 0
                     ? "56px"
                     : mobileStep === 1
-                    ? "min(55vh, calc(100vh - 192px))"
-                    : "calc(100vh - 192px)",
-                maxHeight: "calc(100vh - 192px)",
+                    ? "min(55vh, calc(100vh - 170px))"
+                    : "calc(100vh - 170px)",
+                maxHeight: "calc(100vh - 170px)",
                 zIndex: 60,
                 background: "white",
                 borderTopLeftRadius: 16,
