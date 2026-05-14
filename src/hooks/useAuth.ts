@@ -43,6 +43,9 @@ async function getIsAdmin(userId: string) {
       const isAdmin = Boolean(roleData);
       lastAdminCheck = { userId, isAdmin, at: Date.now() };
       return isAdmin;
+    } catch {
+      lastAdminCheck = { userId, isAdmin: false, at: Date.now() };
+      return false;
     } finally {
       if (adminCheckPromise?.userId === userId) adminCheckPromise = null;
     }
@@ -106,8 +109,25 @@ async function checkSession() {
   return sessionCheckPromise;
 }
 
+async function clearBrokenAuthSession() {
+  try { await supabase.auth.signOut({ scope: "local" }); } catch {}
+  teardownDeviceChannel();
+  notify("unauthorized", null);
+}
+
 async function runSessionCheck() {
-  const { data: { session } } = await supabase.auth.getSession();
+  let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      await clearBrokenAuthSession();
+      return;
+    }
+    session = data.session;
+  } catch {
+    await clearBrokenAuthSession();
+    return;
+  }
   if (!session?.user) {
     teardownDeviceChannel();
     notify("unauthorized", null);
@@ -143,7 +163,7 @@ async function runSessionCheck() {
 }
 
 // 앱 시작 시 한번 체크
-checkSession();
+checkSession().catch(() => clearBrokenAuthSession());
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (!session) {
@@ -153,7 +173,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 
   // 세션 상태 즉시 갱신 (IP/디바이스 검증은 백그라운드)
-  checkSession();
+  checkSession().catch(() => clearBrokenAuthSession());
 
   // 로그인/세션 갱신 시: 디바이스 슬롯 클레임 + 검증 + 채널 구독 (비동기)
   if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
@@ -178,7 +198,15 @@ supabase.auth.onAuthStateChange((event, session) => {
 if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState !== "visible") return;
-    const { data: { session } } = await supabase.auth.getSession();
+    let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) { await clearBrokenAuthSession(); return; }
+      session = data.session;
+    } catch {
+      await clearBrokenAuthSession();
+      return;
+    }
     if (!session?.user) return;
     // 관리자는 검증 스킵
     if (await getIsAdmin(session.user.id)) return;
