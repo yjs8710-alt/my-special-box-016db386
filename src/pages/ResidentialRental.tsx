@@ -74,6 +74,7 @@ const ResidentialRental = () => {
 
   const handleBoundsChange = useCallback((b: MapBounds) => {
     mapBoundsRef.current = b;
+    setMapBounds(b);
   }, []);
 
   // 핀 클릭: 정확한 주소 매칭만, buildingName 제거
