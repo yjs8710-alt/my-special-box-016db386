@@ -31,6 +31,7 @@ const ApartmentRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(APARTMENT_DB_TYPES);
   const allProperties = useMemo(() => [...APARTMENT_PROPERTIES, ...dbProperties], [dbProperties]);
