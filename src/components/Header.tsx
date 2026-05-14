@@ -251,80 +251,88 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
       {/* 모바일 메뉴 */}
       {menuOpen && (
-        <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
-          style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
-          {NAV_ITEMS.map((item) => (
+        <>
+          {/* 배경 오버레이 — 메뉴 외부 터치 시 닫힘 */}
+          <div
+            className="md:hidden fixed inset-0 z-[1195]"
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
+            style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => { navigate(item.path); setMenuOpen(false); }}
+                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+              >
+                {item.label}
+              </button>
+            ))}
             <button
-              key={item.label}
-              onClick={() => { navigate(item.path); setMenuOpen(false); }}
+              onClick={() => { navigate("/community"); setMenuOpen(false); }}
               className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
             >
-              {item.label}
+              커뮤니티
             </button>
-          ))}
-          <button
-            onClick={() => { navigate("/community"); setMenuOpen(false); }}
-            className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
-          >
-            커뮤니티
-          </button>
-          {!hideInstallButton && (
-            <button
-              onClick={() => { setShowInstall(true); setMenuOpen(false); }}
-              className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
-            >
-              <Download className="w-4 h-4" />
-              앱 설치하기
-            </button>
-          )}
-          <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
-            {location.pathname !== "/" && (
-              <Button
-                size="sm"
-                onClick={openRegister}
-                className="w-full rounded-lg font-bold"
-                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
-              >
-                + 매물 등록
-              </Button>
-            )}
-            {isAuthorized && (
-              <>
-                <button
-                  onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
-                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
-                >
-                  마이페이지
-                </button>
-                {user?.isAdmin && (
-                  <button
-                    onClick={() => { navigate("/admin"); setMenuOpen(false); }}
-                    className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                    style={{ color: "hsl(var(--accent))" }}
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    관리자 모드
-                  </button>
-                )}
-                <button
-                  className="w-full text-sm text-white/50 font-medium py-2 mt-1"
-                  onClick={handleLogout}
-                >
-                  로그아웃
-                </button>
-              </>
-            )}
-            {!isAuthorized && (
+            {!hideInstallButton && (
               <button
-                onClick={() => { navigate("/admin/login"); setMenuOpen(false); }}
-                className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+                onClick={() => { setShowInstall(true); setMenuOpen(false); }}
+                className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
               >
-                <ShieldCheck className="w-4 h-4" />
-                로그인
+                <Download className="w-4 h-4" />
+                앱 설치하기
               </button>
             )}
+            <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
+              {location.pathname !== "/" && (
+                <Button
+                  size="sm"
+                  onClick={openRegister}
+                  className="w-full rounded-lg font-bold"
+                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                >
+                  + 매물 등록
+                </Button>
+              )}
+              {isAuthorized && (
+                <>
+                  <button
+                    onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
+                    className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                  >
+                    마이페이지
+                  </button>
+                  {user?.isAdmin && (
+                    <button
+                      onClick={() => { navigate("/admin"); setMenuOpen(false); }}
+                      className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+                      style={{ color: "hsl(var(--accent))" }}
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      관리자 모드
+                    </button>
+                  )}
+                  <button
+                    className="w-full text-sm text-white/50 font-medium py-2 mt-1"
+                    onClick={handleLogout}
+                  >
+                    로그아웃
+                  </button>
+                </>
+              )}
+              {!isAuthorized && (
+                <button
+                  onClick={() => { navigate("/admin/login"); setMenuOpen(false); }}
+                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  로그인
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
