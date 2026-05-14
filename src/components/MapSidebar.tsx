@@ -4893,7 +4893,7 @@ const MapSidebar = ({
               {/* 웹버전: 매물 갯수 표시 (우측 끝) */}
               <span className="hidden md:flex flex-1" />
               <span className="hidden md:inline-flex items-center gap-1 text-[12px] font-extrabold text-foreground flex-shrink-0 ml-auto">
-                <img src={searchCountIcon} alt="" className="w-4 h-4 object-contain" />
+                <img src={searchCountIcon} alt="" className="w-6 h-6 object-contain" />
                 <span style={{ color: "hsl(217 91% 35%)" }}>{displayProperties.length}개</span>
               </span>
             </div>
