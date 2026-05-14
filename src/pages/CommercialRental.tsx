@@ -48,6 +48,14 @@ const CommercialRental = () => {
 
   const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBounds(b); }, []);
 
+  const handleZoomChange = useCallback(() => {
+    if (pinnedIds.length > 0) {
+      setPinnedIds([]);
+      setPinnedAddress(null);
+      setSelectedId(null);
+    }
+  }, [pinnedIds]);
+
   const handleSearchClick = useCallback(() => {
     setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(true);
   }, []);
@@ -117,6 +125,7 @@ const CommercialRental = () => {
             selectedId={selectedId}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
+            onZoomChange={handleZoomChange}
             suppressPan={suppressPan}
           />
           <MapFilterBar
