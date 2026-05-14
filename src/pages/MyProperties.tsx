@@ -91,6 +91,8 @@ const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
   registered_date: new Date().toISOString().slice(0,10), checked_date:"", agent_name:"",
 };
 
+const MY_PROPERTY_COLUMNS = "id,title,building_name,address,dong,lot_number,district,type,room_type,unit_number,area,floor,deposit,monthly,manage_fee,parking,elevator,available_from,total_floors,build_year,description,building_memo,room_memo,note,vacate_date,building_password,room_password,options,images,views,lat,lng,is_new,is_hot,status,registered_date,checked_date,agent_name,registered_by,created_at";
+
 // ─── Edit Modal ───────────────────────────────────────────────────────────────
 const EditModal = ({
   initial,
@@ -681,7 +683,7 @@ const MyProperties = () => {
         // 관리자: 전체 매물 + agent_profiles 매핑 조회
         setAgentName("관리자");
         const [{ data: props }, { data: profiles }] = await Promise.all([
-          supabase.from("properties").select("*").order("registered_date", { ascending: false }),
+          supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false }),
           supabase.from("agent_profiles").select("user_id, name, agency_name"),
         ]);
         if (props) setProperties(props as DBProperty[]);
@@ -727,7 +729,7 @@ const MyProperties = () => {
       // registered_by = 본인 userId OR agent_name = 본인 이름 (둘 다 커버)
       const { data, error } = await supabase
         .from("properties")
-        .select("*")
+        .select(MY_PROPERTY_COLUMNS)
         .or(`registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`)
         .order("registered_date", { ascending: false });
 
@@ -748,7 +750,7 @@ const MyProperties = () => {
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(async () => {
           const isAdmin = agentName === "관리자";
-          let q = supabase.from("properties").select("*").order("registered_date", { ascending: false }).limit(1000);
+          let q = supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false }).limit(1000);
           if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
           const { data } = await q;
           if (data) setProperties(data as DBProperty[]);
@@ -809,7 +811,7 @@ const MyProperties = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
-      <Header onRegisterChange={setShowRegister} />
+      <Header />
       {showRegister && (
         <PropertyRegisterModal
           onClose={() => { setShowRegister(false); setReregisterPrefill(null); }}
@@ -823,7 +825,7 @@ const MyProperties = () => {
           onSaved={async () => {
             // 저장 후 매물 새로고침
             const isAdmin = agentName === "관리자";
-            let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+            let q = supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false });
             if (!isAdmin && user?.userId) {
               q = (q as ReturnType<typeof supabase.from>).or(`registered_by.eq.${user.userId}${agentName ? `,agent_name.eq.${agentName}` : ""}`) as typeof q;
             }
