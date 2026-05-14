@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import JibunInlineAddress from "@/components/JibunInlineAddress";
+import { thumbUrl } from "@/lib/imageThumb";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type DBProperty = {
@@ -483,7 +484,15 @@ const PropertyRow = ({
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
-          <img src={prop.images[0]} alt="" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
+          <img
+            src={thumbUrl(prop.images[0], 96)}
+            alt=""
+            width={48}
+            height={40}
+            loading="lazy"
+            decoding="async"
+            className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border bg-muted"
+          />
         ) : (
           <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
             <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -613,7 +622,16 @@ const PropertyRow = ({
           {(prop.images?.length ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 flex gap-2 flex-wrap mt-1">
               {prop.images.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-16 h-14 rounded-lg object-cover border border-border" />
+                <img
+                  key={i}
+                  src={thumbUrl(url, 128)}
+                  alt=""
+                  width={64}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-16 h-14 rounded-lg object-cover border border-border bg-muted"
+                />
               ))}
             </div>
           )}
@@ -720,20 +738,24 @@ const MyProperties = () => {
     load();
   }, [user, authLoading, navigate]);
 
-  // Realtime 구독
+  // Realtime 구독 (변경 다발 시 debounce로 묶어 한 번만 refetch)
   useEffect(() => {
     if (!agentName) return;
+    let timer: number | null = null;
     const channel = supabase
       .channel("my-properties-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, async () => {
-        const isAdmin = agentName === "관리자";
-        let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
-        if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
-        const { data } = await q;
-        if (data) setProperties(data as DBProperty[]);
+      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, () => {
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(async () => {
+          const isAdmin = agentName === "관리자";
+          let q = supabase.from("properties").select("*").order("registered_date", { ascending: false }).limit(1000);
+          if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
+          const { data } = await q;
+          if (data) setProperties(data as DBProperty[]);
+        }, 1000);
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { if (timer) window.clearTimeout(timer); supabase.removeChannel(channel); };
   }, [agentName]);
 
   const handleEdit = async (data: Omit<DBProperty, "id" | "created_at">) => {
