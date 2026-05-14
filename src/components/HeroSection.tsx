@@ -92,8 +92,11 @@ const HeroSection = () => {
           {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
+              onPointerDown={() => prefetchRoute(path)}
+              onMouseEnter={() => prefetchRoute(path)}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-[1.35] rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
+              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-[1.35] rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-colors duration-150 shadow-lg active:scale-[0.98]"
+              style={{ touchAction: "manipulation" }}
             >
               <img src={icon} alt={label} loading="eager" decoding="async" width={56} height={56} className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
               <span className="text-sm md:text-base font-bold leading-tight px-2">{label}</span>
