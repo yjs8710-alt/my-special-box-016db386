@@ -143,6 +143,7 @@ const ApartmentRental = () => {
             selectedId={selectedId}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
+            onZoomChange={handleZoomChange}
             suppressPan={suppressPan}
           />
           <MapFilterBar
