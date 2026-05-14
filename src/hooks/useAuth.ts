@@ -214,8 +214,10 @@ if (typeof document !== "undefined") {
     if (await getIsAdmin(session.user.id)) return;
     const ok = await verifyDeviceSlot();
     if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
-    const ipOk = await verifyPcIpAllowed();
-    if (!ipOk) await forceLogoutDueToIpRestriction();
+    if (getDeviceType() === "desktop") {
+      const ipOk = await verifyPcIpAllowed();
+      if (!ipOk) await forceLogoutDueToIpRestriction();
+    }
   });
 }
 
