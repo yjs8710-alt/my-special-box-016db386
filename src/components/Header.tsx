@@ -11,6 +11,7 @@ const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
 import AdminNotificationBell from "@/components/AdminNotificationBell";
 import NotificationBell from "@/components/NotificationBell";
+import { GradientUserIcon } from "@/components/icons/GradientIcons";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
@@ -161,7 +162,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                       {user?.memberType?.[0] ?? "U"}
                     </div>
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <User className="w-3 h-3 text-white/40" />
+                    <GradientUserIcon size={16} />
                   </button>
 
                   {user?.isAdmin && (
