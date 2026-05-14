@@ -62,6 +62,19 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     });
   }, []);
 
+  const prefetchRoute = (path: string) => {
+    if (path === "/residential" || path === "/apartment") import("@/pages/ResidentialRental").catch(() => {});
+    else if (path === "/non-residential" || path === "/collective-sale") import("@/pages/NonResidentialRental").catch(() => {});
+    else if (path === "/land") import("@/pages/LandSearch").catch(() => {});
+    else if (path === "/my-properties") import("@/pages/MyProperties").catch(() => {});
+    else if (path === "/my-page") import("@/pages/MyPage").catch(() => {});
+    else if (path === "/my-info") import("@/pages/MyInfoPage").catch(() => {});
+    else if (path === "/community") import("@/pages/Community").catch(() => {});
+    else if (path === "/chat") import("@/pages/ChatPage").catch(() => {});
+    else if (path === "/notifications") import("@/pages/NotificationsPage").catch(() => {});
+    else if (path === "/admin") import("@/pages/AdminDashboard").catch(() => {});
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
