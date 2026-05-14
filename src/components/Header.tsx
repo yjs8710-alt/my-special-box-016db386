@@ -62,6 +62,19 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     });
   }, []);
 
+  const prefetchRoute = (path: string) => {
+    if (path === "/residential" || path === "/apartment") import("@/pages/ResidentialRental").catch(() => {});
+    else if (path === "/non-residential" || path === "/collective-sale") import("@/pages/NonResidentialRental").catch(() => {});
+    else if (path === "/land") import("@/pages/LandSearch").catch(() => {});
+    else if (path === "/my-properties") import("@/pages/MyProperties").catch(() => {});
+    else if (path === "/my-page") import("@/pages/MyPage").catch(() => {});
+    else if (path === "/my-info") import("@/pages/MyInfoPage").catch(() => {});
+    else if (path === "/community") import("@/pages/Community").catch(() => {});
+    else if (path === "/chat") import("@/pages/ChatPage").catch(() => {});
+    else if (path === "/notifications") import("@/pages/NotificationsPage").catch(() => {});
+    else if (path === "/admin") import("@/pages/AdminDashboard").catch(() => {});
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
@@ -110,6 +123,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.label}
+                  onPointerEnter={() => prefetchRoute(item.path)}
+                  onPointerDown={() => prefetchRoute(item.path)}
                   onClick={() => navigate(item.path)}
                   className="text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                   style={
@@ -122,6 +137,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 </button>
               ))}
               <button
+                onPointerEnter={() => prefetchRoute("/community")}
+                onPointerDown={() => prefetchRoute("/community")}
                 onClick={() => navigate("/community")}
                 className="flex items-center gap-1 text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                 style={
@@ -265,15 +282,17 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
+                onPointerDown={() => prefetchRoute(item.path)}
                 onClick={() => { navigate(item.path); setMenuOpen(false); }}
-                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
               >
                 {item.label}
               </button>
             ))}
             <button
+              onPointerDown={() => prefetchRoute("/community")}
               onClick={() => { navigate("/community"); setMenuOpen(false); }}
-              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
             >
               커뮤니티
             </button>

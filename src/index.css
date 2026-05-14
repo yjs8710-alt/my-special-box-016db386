@@ -153,6 +153,10 @@
 html, body {
   -webkit-tap-highlight-color: transparent;
 }
+/* 모바일 300ms 클릭 지연 제거 → 즉각 반응 */
+button, a, [role="button"], input[type="button"], input[type="submit"], label {
+  touch-action: manipulation;
+}
 body.protect-on, body.protect-on {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
