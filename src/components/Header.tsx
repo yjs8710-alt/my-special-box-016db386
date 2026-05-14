@@ -11,7 +11,7 @@ const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
 import AdminNotificationBell from "@/components/AdminNotificationBell";
 import NotificationBell from "@/components/NotificationBell";
-import { GradientUserIcon } from "@/components/icons/GradientIcons";
+import { GradientUserIcon, GradientLogoutIcon } from "@/components/icons/GradientIcons";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
@@ -175,11 +175,12 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
-                    style={{ color: "rgba(255,255,255,0.55)" }}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/10"
                     onClick={handleLogout}
+                    aria-label="로그아웃"
+                    title="로그아웃"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <GradientLogoutIcon size={18} />
                   </button>
                 </>
               ) : (
@@ -201,8 +202,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <Button
                   size="sm"
                   onClick={openRegister}
-                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
-                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1 text-white border-0 hover:opacity-90 transition-opacity"
+                  style={{ background: "linear-gradient(135deg, #d946ef 0%, #3b82f6 100%)" }}
                 >
                   + 매물 등록
                 </Button>
@@ -290,8 +291,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <Button
                   size="sm"
                   onClick={openRegister}
-                  className="w-full rounded-lg font-bold"
-                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                  className="w-full rounded-lg font-bold text-white border-0 hover:opacity-90 transition-opacity"
+                  style={{ background: "linear-gradient(135deg, #d946ef 0%, #3b82f6 100%)" }}
                 >
                   + 매물 등록
                 </Button>
