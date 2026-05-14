@@ -22,9 +22,26 @@ const APP_ACTIONS = [
   { label: "마이페이지", path: "/my-page", Icon: User },
 ];
 
+const prefetchRoute = (path: string) => {
+  if (path === "/residential" || path === "/apartment") import("@/pages/ResidentialRental").catch(() => {});
+  else if (path === "/non-residential" || path === "/collective-sale") import("@/pages/NonResidentialRental").catch(() => {});
+  else if (path === "/land") import("@/pages/LandSearch").catch(() => {});
+  else if (path === "/my-properties") import("@/pages/MyProperties").catch(() => {});
+  else if (path === "/my-page") import("@/pages/MyPage").catch(() => {});
+  else if (path === "/community") import("@/pages/Community").catch(() => {});
+};
+
 const HeroSection = () => {
   const navigate = useNavigate();
   const [isAppMode] = useState(false);
+
+  useEffect(() => {
+    const idle = (cb: () => void) => (window as any).requestIdleCallback?.(cb) ?? setTimeout(cb, 600);
+    idle(() => {
+      import("@/pages/ResidentialRental").catch(() => {});
+      import("@/pages/NonResidentialRental").catch(() => {});
+    });
+  }, []);
 
   return (
     <section className="relative h-[calc(100vh-64px)] md:min-h-[calc(100vh-64px)] md:h-auto flex items-start md:items-center justify-center overflow-hidden">
