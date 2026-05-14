@@ -232,7 +232,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img
                   src={iconMypageNew}
                   alt=""
-                  className="w-7 h-7 object-contain"
+                  className="w-9 h-9 object-contain"
                   style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
                 <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
