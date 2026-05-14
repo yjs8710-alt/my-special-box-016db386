@@ -32,7 +32,7 @@ interface PropertyCardProps {
 
 const PropertyCard = ({
   image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
-  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit, options, note
+  isNew, isHot, views, buildYear, elevator, vacateDate, checkedDate, registeredDate, onDelete, referenceImage, referenceUnit, options, note
 }: PropertyCardProps) => {
   // 권리금 파싱 (note 필드에 "권리금: XXX" 형태로 저장됨)
   const keyMoney = (() => {
