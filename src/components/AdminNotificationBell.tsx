@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import iconBellGradient from "@/assets/notification-bell-gradient.png";
 
 const AdminNotificationBell = () => {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ const AdminNotificationBell = () => {
       title="관리자 알림"
       aria-label="관리자 알림"
     >
-      <Bell className="w-3.5 h-3.5" />
+      <img src={iconBellGradient} alt="" className="w-5 h-5 object-contain" />
       {count > 0 && (
         <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}
