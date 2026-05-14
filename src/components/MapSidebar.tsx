@@ -5147,16 +5147,15 @@ const MapSidebar = ({
                   ? // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
                     [...displayProperties]
                   : [...displayProperties].sort((a, b) => {
-                      const isSaleA = a.type?.includes("매매") ? 1 : 0;
-                      const isSaleB = b.type?.includes("매매") ? 1 : 0;
-                      if (isSaleA !== isSaleB) return isSaleA - isSaleB;
-                      // 1순위: 확인일 내림차순 (확인된 매물 우선, 최근 확인순)
+                      // 확인일과 등록일 중 더 최근 날짜 기준 내림차순 (항상 위에서부터)
                       const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
-                      const chkB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
-                      if (chkA !== chkB) return chkB - chkA;
-                      // 2순위: 등록일 내림차순 (최신 등록 우선)
                       const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
+                      const chkB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
                       const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
+                      const latestA = Math.max(chkA, regA);
+                      const latestB = Math.max(chkB, regB);
+                      if (latestA !== latestB) return latestB - latestA;
+                      if (chkA !== chkB) return chkB - chkA;
                       return regB - regA;
                     })
                 ).map((prop, idx) => {
