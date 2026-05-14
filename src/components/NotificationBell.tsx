@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { Bell } from "lucide-react";
 import iconBellNew from "@/assets/icon-bell-new.png";
+import iconBellGradient from "@/assets/notification-bell-gradient.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
