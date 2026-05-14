@@ -3,7 +3,6 @@ import { Download } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
-import MobileBottomNav from "@/components/MobileBottomNav";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 
 const Home = () => {
@@ -101,7 +100,6 @@ const Home = () => {
       <div className="hidden md:block">
         <Footer />
       </div>
-      <MobileBottomNav />
     </div>
   );
 };
