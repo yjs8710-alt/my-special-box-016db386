@@ -3050,8 +3050,21 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
-          {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
           <div className="flex items-center gap-1 min-h-[22px]">
+            {/* 확인일/등록일 배지 — 상단 좌측에 배치 */}
+            {(() => {
+              const dateStr = chkDate ? chkDate : regDate;
+              const label = chkDate ? "확인" : "등록";
+              if (!dateStr) return null;
+              return (
+                <span className="flex-shrink-0 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                >
+                  {dateStr.slice(5).replace(/-/g, ".")} {label}
+                </span>
+              );
+            })()}
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
