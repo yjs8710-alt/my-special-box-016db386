@@ -155,12 +155,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
                     onClick={() => navigate("/my-page")}
                   >
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white flex-shrink-0"
-                      style={{ background: "hsl(var(--accent))" }}
-                    >
-                      {user?.memberType?.[0] ?? "U"}
-                    </div>
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
                     <GradientUserIcon size={16} />
                   </button>
