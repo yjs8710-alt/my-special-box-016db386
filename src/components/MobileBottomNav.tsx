@@ -13,6 +13,10 @@ const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Hide on auth/admin/share routes
+  const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property"];
+  if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
+
   return (
     <nav
       className="md:hidden fixed left-2 right-2 z-[900] rounded-2xl border backdrop-blur-md"
