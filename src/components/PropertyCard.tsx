@@ -21,16 +21,18 @@ interface PropertyCardProps {
   buildYear?: string;
   elevator?: boolean;
   vacateDate?: string;
+  checkedDate?: string;
+  registeredDate?: string;
   onDelete?: () => void;
-  referenceImage?: string; // 사진 없을 때 다른 방 참고용 사진
-  referenceUnit?: string;  // 참고용 사진의 호수
-  options?: string[];      // 매물 옵션 (단기가능 등)
-  note?: string;           // 특이사항 (권리금 등 파싱)
+  referenceImage?: string;
+  referenceUnit?: string;
+  options?: string[];
+  note?: string;
 }
 
 const PropertyCard = ({
   image, title, address, type, roomType, area, floor, deposit, monthly, manageFee,
-  isNew, isHot, views, buildYear, elevator, vacateDate, onDelete, referenceImage, referenceUnit, options, note
+  isNew, isHot, views, buildYear, elevator, vacateDate, checkedDate, registeredDate, onDelete, referenceImage, referenceUnit, options, note
 }: PropertyCardProps) => {
   // 권리금 파싱 (note 필드에 "권리금: XXX" 형태로 저장됨)
   const keyMoney = (() => {
@@ -107,6 +109,12 @@ const PropertyCard = ({
         )}
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+          {checkedDate && (
+            <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow">{checkedDate.slice(5).replace(/-/g, ".")} 확인</span>
+          )}
+          {!checkedDate && registeredDate && (
+            <span className="bg-muted-foreground text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">{registeredDate.slice(5).replace(/-/g, ".")} 등록</span>
+          )}
           {isVacant && (
             <span className="bg-accent text-accent-foreground text-xs font-bold px-2 py-0.5 rounded-full shadow">공실</span>
           )}

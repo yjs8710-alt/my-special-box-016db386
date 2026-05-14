@@ -3050,8 +3050,21 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
-          {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모 */}
+          {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
           <div className="flex items-center gap-1 min-h-[22px]">
+            {/* 확인일/등록일 배지 — 상단 좌측에 배치 */}
+            {(() => {
+              const dateStr = chkDate ? chkDate : regDate;
+              const label = chkDate ? "확인" : "등록";
+              if (!dateStr) return null;
+              return (
+                <span className="flex-shrink-0 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                >
+                  {dateStr.slice(5).replace(/-/g, ".")} {label}
+                </span>
+              );
+            })()}
             <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
               {prop.buildingName ?? prop.title}
             </p>
@@ -5329,10 +5342,23 @@ const MapSidebar = ({
                                 className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover/thumb:bg-black/30 transition-colors"
                               >
                                 <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
-                              </button>
-                              );
-                            })()}
-                          </div>}
+                             </button>
+                               );
+                             })()}
+                             {/* 확인일/등록일 배지 (썸네일 상단) */}
+                             {(() => {
+                               const dateStr = chkDate ? chkDate : regDate;
+                               if (!dateStr) return null;
+                               const label = chkDate ? "확인" : "등록";
+                               return (
+                                 <span className="absolute top-1 right-1 z-10 text-[8px] font-bold text-white px-1 py-0.5 rounded-full shadow pointer-events-none"
+                                   style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                                 >
+                                   {dateStr.slice(5).replace(/-/g, ".")} {label}
+                                 </span>
+                               );
+                             })()}
+                           </div>}
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일에서는 숨김) */}
                           {!isMobile && <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">

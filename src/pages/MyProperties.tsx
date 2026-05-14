@@ -470,7 +470,8 @@ const PropertyRow = ({
             )}
           </div>
           <span className="inline-flex items-center gap-1 text-muted-foreground flex-shrink-0 whitespace-nowrap">
-            <Clock className="w-3.5 h-3.5" /> {prop.registered_date}
+            <Clock className="w-3.5 h-3.5" />
+            {prop.checked_date ? `${prop.checked_date} 확인` : `${prop.registered_date} 등록`}
           </span>
         </div>
       )}
