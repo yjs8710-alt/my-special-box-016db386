@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
 import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts";
+import { imageFileExtension, preparePropertyImage, runLimited } from "@/lib/imageUpload";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling-icon-v2-20260427.png";
 import tvIcon from "@/assets/tv_icon-v2-20260427.png";
@@ -443,18 +444,27 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-      if (error) { console.error("업로드 실패:", error.message); continue; }
-      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
-      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    try {
+      const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
+      const uploadResults = await runLimited(fileArray, 3, async (file, i) => {
+        const prepared = await preparePropertyImage(file);
+        const ext = imageFileExtension(prepared);
+        const path = `properties/${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage.from("property-images").upload(path, prepared, {
+          upsert: false,
+          cacheControl: "31536000",
+          contentType: prepared.type,
+        });
+        if (error) { console.error("업로드 실패:", error.message); return null; }
+        const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
+        return urlData?.publicUrl ?? null;
+      });
+      const newUrls = uploadResults.filter((url): url is string => !!url);
+      if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...f.images, ...newUrls] }));
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploading(false);
     }
-    if (newUrls.length > 0) setForm((f) => ({ ...f, images: [...f.images, ...newUrls] }));
-    setUploading(false);
   };
 
   const removeImage = (url: string) =>
