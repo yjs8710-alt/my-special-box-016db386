@@ -10,6 +10,7 @@ import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
 import AdminNotificationBell from "@/components/AdminNotificationBell";
+import NotificationBell from "@/components/NotificationBell";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
@@ -205,35 +206,33 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일: 채팅문의 + 내정보 아이콘 + 햄버거 */}
-            <button
-              className="md:hidden flex flex-col items-center justify-center w-12 h-11 rounded-md ml-auto"
-              onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-              aria-label="채팅 문의"
-              title="채팅문의"
-            >
-              <img src={iconChat} alt="" className="w-6 h-6 object-contain" />
-              <span className="text-[9px] font-bold text-white leading-tight mt-0.5">채팅문의</span>
-            </button>
-            <button
-              className="md:hidden flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
-              onClick={() => {
-                if (!isAuthorized) { navigate("/login"); return; }
-                navigate("/my-page");
-              }}
-              aria-label="내 정보"
-              title="마이페이지"
-            >
-              <img src={iconMyPage} alt="" className="w-6 h-6 object-contain" />
-              <span className="text-[9px] font-bold text-white leading-tight mt-0.5">마이페이지</span>
-            </button>
-            <button
-              className="md:hidden text-white p-1 ml-1"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="메뉴"
-            >
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            {/* 모바일: 알림 + 내정보 + 햄버거 */}
+            <div className="md:hidden flex items-center ml-auto">
+              <NotificationBell variant="mobile" />
+              <button
+                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
+                onClick={() => {
+                  if (!isAuthorized) { navigate("/login"); return; }
+                  navigate("/my-info");
+                }}
+                aria-label="내 정보"
+                title="내 정보"
+              >
+                <User
+                  className="w-6 h-6"
+                  style={{ color: "#a78bfa", filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
+                  strokeWidth={2.2}
+                />
+                <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
+              </button>
+              <button
+                className="text-white p-1 ml-1"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="메뉴"
+              >
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>

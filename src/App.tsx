@@ -25,6 +25,9 @@ const PublicProperty = lazy(() => import("./pages/PublicProperty"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const MyProperties = lazy(() => import("./pages/MyProperties"));
 const MyPage = lazy(() => import("./pages/MyPage"));
+const MyInfoPage = lazy(() => import("./pages/MyInfoPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const ChatPage = lazy(() => import("./pages/ChatPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
@@ -143,12 +146,16 @@ const App = () => {
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
             <Route path="/residential" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
+            <Route path="/residential-rent" element={<Navigate to="/residential" replace />} />
             <Route path="/land" element={<ProtectedRoute><LandSearch /></ProtectedRoute>} />
             <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
             <Route path="/collective-sale" element={<ProtectedRoute><NonResidentialRental mode="collective-sale" /></ProtectedRoute>} />
             <Route path="/commercial" element={<ProtectedRoute><CommercialRental /></ProtectedRoute>} />
             <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
             <Route path="/my-page" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+            <Route path="/my-info" element={<ProtectedRoute><MyInfoPage /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
             {/* 관리자 */}
             <Route path="/admin/login" element={<AdminLogin />} />
