@@ -46,13 +46,11 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
         aria-label="알림"
         title="알림"
       >
-        <Bell
-          className="w-6 h-6"
-          style={{
-            color: "#a78bfa",
-            filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))",
-          }}
-          strokeWidth={2.2}
+        <img
+          src={iconBellNew}
+          alt=""
+          className="w-7 h-7 object-contain"
+          style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
         />
         <span className="text-[9px] font-bold text-white leading-tight mt-0.5">알림</span>
         {count > 0 && (
