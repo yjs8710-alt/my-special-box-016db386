@@ -3252,11 +3252,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   </div>
                   {showOptPopup && (
                     <div
-                      className="fixed inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
+                      className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
                       onClick={(e) => { e.stopPropagation(); setShowOptPopup(false); }}
                     >
                       <div
-                        className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 w-full sm:w-auto sm:max-w-md max-h-[80dvh] overflow-y-auto"
+                        className="bg-white rounded-2xl shadow-2xl p-4 w-[calc(100%-16px)] sm:w-auto sm:max-w-md max-h-[calc(100dvh-130px)] sm:max-h-[80dvh] overflow-y-auto mb-2 sm:mb-0"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <p className="text-xs font-extrabold mb-2 pb-1.5 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
