@@ -11,7 +11,7 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
-import AdminNotificationBell from "@/components/AdminNotificationBell";
+
 import NotificationBell from "@/components/NotificationBell";
 
 const NAV_ITEMS = [
