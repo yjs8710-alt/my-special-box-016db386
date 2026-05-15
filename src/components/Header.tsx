@@ -281,7 +281,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="-mx-3 flex items-center justify-center gap-2 py-2 my-1 rounded-none text-white text-sm font-bold transition-transform active:scale-[0.98] shadow-lg w-[calc(100%+1.5rem)]"
+                className="w-full flex items-center justify-center gap-2 py-2 my-1 rounded-xl text-white text-sm font-bold transition-transform active:scale-[0.98] shadow-lg"
                 style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
                 aria-label="매물 등록"
               >

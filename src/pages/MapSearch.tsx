@@ -56,10 +56,11 @@ const MapSearch = () => {
     if (deletedIds.has(p.id)) return false;
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
-    // 지도 영역 필터 — "이 지역에서 검색" 클릭 후 활성화
-    if (searchBounds) {
+    // 지도 영역 필터 — 지도 줌/이동에 따라 사이드바 매물 자동 동기화
+    const activeBounds = searchBounds ?? currentBounds;
+    if (activeBounds) {
       if (!p.lat || !p.lng) return false;
-      const { swLat, swLng, neLat, neLng } = searchBounds;
+      const { swLat, swLng, neLat, neLng } = activeBounds;
       if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
     }
     if (query) {
