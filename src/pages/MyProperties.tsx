@@ -831,14 +831,13 @@ const MyProperties = () => {
               </p>
             )}
           </div>
-          <Button
+          <button
             onClick={() => setShowRegister(true)}
-            className="flex items-center gap-2 text-sm font-bold"
-            style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+            className="flex items-center transition-transform hover:scale-[1.02] active:scale-95"
+            aria-label="매물 등록"
           >
-            <Plus className="w-4 h-4" />
-            매물 등록
-          </Button>
+            <img src={btnRegisterNew} alt="매물 등록" className="h-10 w-auto object-contain" />
+          </button>
         </div>
 
         {/* 통계 카드 */}
