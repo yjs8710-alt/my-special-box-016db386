@@ -240,8 +240,15 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
       {/* 모바일 메뉴 */}
       {menuOpen && (
-        <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
-          style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
+        <>
+          <div
+            className="md:hidden fixed inset-0 z-[1205]"
+            style={{ background: "transparent" }}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
+            style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
           {NAV_ITEMS.map((item) => (
             <button
               key={item.label}
@@ -270,10 +277,12 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="w-full flex items-center justify-center py-1"
+                className="w-full flex items-center justify-center gap-2 py-3 my-1 rounded-lg text-white text-base font-bold transition-transform active:scale-[0.98]"
+                style={{ background: "hsl(var(--accent))" }}
                 aria-label="매물 등록"
               >
-                <img src={btnRegisterNew} alt="매물 등록" className="w-full h-12 object-fill rounded-lg" />
+                <span className="text-lg leading-none">+</span>
+                <span>매물 등록</span>
               </button>
             )}
             {isAuthorized && (
