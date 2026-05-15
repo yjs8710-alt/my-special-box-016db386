@@ -88,7 +88,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
       {/* 상단 바 */}
       <div className="border-b" style={{ borderColor: "hsl(var(--header-border))" }}>
-        <div className="w-full pl-0 pr-3 sm:pr-5">
+        <div className="w-full pl-0 pr-3 sm:pr-5 md:pr-0">
           <div className="flex items-center h-12 gap-0">
 
             {/* 로고 */}
@@ -201,34 +201,32 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {location.pathname !== "/" && (
                 <button
                   onClick={openRegister}
-                  className="ml-1 transition-transform hover:scale-105 active:scale-95"
+                  className="ml-1 self-stretch flex items-center transition-transform hover:scale-[1.02] active:scale-95"
                   aria-label="매물 등록"
                 >
-                  <img src={btnRegisterNew} alt="매물 등록" className="h-9 w-auto object-contain" />
+                  <img src={btnRegisterNew} alt="매물 등록" className="h-12 w-auto object-cover" />
                 </button>
               )}
             </div>
 
             {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) */}
-            <div className="md:hidden flex items-end gap-1 ml-auto">
+            <div className="md:hidden flex items-center gap-1 ml-auto">
               <button
                 onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-                className="flex flex-col items-center justify-center text-white"
+                className="flex items-center justify-center text-white"
                 aria-label="알림"
               >
-                <img src={iconBellGradient} alt="" className="w-6 h-6 object-contain" />
-                <span className="text-[10px] leading-none mt-0.5 text-white/80">알림</span>
+                <img src={iconBellGradient} alt="알림" className="w-7 h-7 object-contain" />
               </button>
               <button
-                className="flex flex-col items-center justify-center text-white"
+                className="flex items-center justify-center text-white"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserGradient} alt="" className="w-6 h-6 object-contain" />
-                <span className="text-[10px] leading-none mt-0.5 text-white/80">내정보</span>
+                <img src={iconUserGradient} alt="내 정보" className="w-7 h-7 object-contain" />
               </button>
               <button
                 className="text-white p-1 ml-1 mb-1"

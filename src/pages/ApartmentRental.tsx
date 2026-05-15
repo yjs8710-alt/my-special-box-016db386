@@ -31,6 +31,7 @@ const ApartmentRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBoundsState, setMapBoundsState] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(APARTMENT_DB_TYPES);
   const allProperties = useMemo(() => [...APARTMENT_PROPERTIES, ...dbProperties], [dbProperties]);
@@ -46,7 +47,7 @@ const ApartmentRental = () => {
   const filtered = usePropertyFilter(allProperties, mergedFilters, aptTypeFilter, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
 
-  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; }, []);
+  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBoundsState(b); }, []);
 
   const handleSearchClick = useCallback(() => {
     setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(true);
@@ -73,14 +74,12 @@ const ApartmentRental = () => {
   }, [filtered, allProperties, pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
-    if (showAllFromSearch) {
-      const b = mapBoundsRef.current;
-      if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
-      return filtered;
-    }
-    if (pinnedIds.length === 0) return filtered;
+    const b = mapBoundsState;
+    const inBounds = (p: any) => !b ? true : (p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
+    if (showAllFromSearch) return filtered.filter(inBounds);
+    if (pinnedIds.length === 0) return filtered.filter(inBounds);
     return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch]);
+  }, [filtered, pinnedIds, showAllFromSearch, mapBoundsState]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
