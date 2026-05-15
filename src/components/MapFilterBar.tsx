@@ -177,6 +177,8 @@ interface MapFilterBarProps {
   radiusInfo?: { radius: number } | null;
   /** 임대 그룹/거래유형/보증금/월세 섹션 숨김 (집합건물 매매 페이지용) */
   hideRentalAndPrice?: boolean;
+  /** 검색바 아래 표시할 매물 갯수 (지도 화면 안 매물) */
+  propertyCount?: number;
 }
 
 function makeFormatManwon(max: number) {
