@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
 
 // Build version used to detect fresh deployments. Changes on every build.
-const BUILD_VERSION = "PERF_ROLLBACK_STABLE_20260515_09";
+const BUILD_VERSION = "MAIN_ROUTE_LIGHT_20260515_11";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
