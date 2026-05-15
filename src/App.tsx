@@ -60,13 +60,13 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
     const message = `${error instanceof Error ? error.message : String(error)} ${errorInfo.componentStack}`;
     const isStaleBuildError = /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|module script/i.test(message);
 
-    if (isStaleBuildError && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       const recoveryKey = `jibda-runtime-recovery:${__APP_BUILD_ID__}`;
       if (window.sessionStorage.getItem(recoveryKey) !== "1") {
         window.sessionStorage.setItem(recoveryKey, "1");
         resetBrowserAppCache().finally(() => {
           const url = new URL(window.location.href);
-          url.searchParams.set("app-recovery", __APP_BUILD_ID__);
+          url.searchParams.set(isStaleBuildError ? "app-recovery" : "app-retry", __APP_BUILD_ID__);
           window.location.replace(url.toString());
         });
       }
@@ -79,9 +79,9 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
     return (
       <main className="min-h-screen flex items-center justify-center bg-background px-5 text-foreground">
         <section className="w-full max-w-sm text-center space-y-4">
-          <h1 className="text-xl font-extrabold">화면을 다시 불러와 주세요</h1>
+          <h1 className="text-xl font-extrabold">자동 복구 중입니다</h1>
           <p className="text-sm leading-6 text-muted-foreground">
-            이전 앱 파일이 브라우저에 남아 화면을 불러오지 못했습니다.
+            브라우저에 남은 이전 앱 파일을 정리하고 다시 연결하고 있습니다.
           </p>
           <button
             type="button"
@@ -90,7 +90,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
               resetBrowserAppCache().finally(() => window.location.reload());
             }}
           >
-            새로고침
+            다시 시도
           </button>
         </section>
       </main>
