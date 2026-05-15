@@ -208,30 +208,32 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </div>
 
             {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) */}
-            <div className="md:hidden flex items-center ml-auto">
-              <NotificationBell variant="mobile" />
+            <div className="md:hidden flex items-end gap-1 ml-auto">
               <button
-                className="flex items-center justify-center -ml-3"
+                onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
+                className="flex flex-col items-center justify-center text-white"
+                aria-label="알림"
+              >
+                <Bell className="w-6 h-6" style={{ color: "hsl(var(--accent))" }} />
+                <span className="text-[10px] leading-none mt-0.5 text-white/80">알림</span>
+              </button>
+              <button
+                className="flex flex-col items-center justify-center text-white"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
                 }}
                 aria-label="내 정보"
-                title="내 정보"
               >
-                <img
-                  src={iconMypageNew}
-                  alt=""
-                  className="object-contain"
-                  style={{ width: 88, height: 88, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
-                />
+                <User className="w-6 h-6" style={{ color: "hsl(var(--accent))" }} />
+                <span className="text-[10px] leading-none mt-0.5 text-white/80">내정보</span>
               </button>
               <button
-                className="text-white p-1 -ml-1"
+                className="text-white p-1 ml-1 mb-1"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label="메뉴"
               >
-                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
@@ -277,8 +279,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="w-full flex items-center justify-center gap-2 py-3 my-1 rounded-lg text-white text-base font-bold transition-transform active:scale-[0.98]"
-                style={{ background: "hsl(var(--accent))" }}
+                className="w-full flex items-center justify-center gap-2 py-3.5 my-1 rounded-full text-white text-base font-bold transition-transform active:scale-[0.98] shadow-lg"
+                style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
                 aria-label="매물 등록"
               >
                 <span className="text-lg leading-none">+</span>
