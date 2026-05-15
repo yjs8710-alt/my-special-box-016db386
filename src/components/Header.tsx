@@ -7,6 +7,7 @@ import btnRegisterNew from "@/assets/btn-register-new.png";
 import iconChat from "@/assets/icon-chat-gradient.png";
 import iconBellGradient from "@/assets/icon-bell-gradient.png";
 import iconUserGradient from "@/assets/icon-user-gradient.png";
+import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
