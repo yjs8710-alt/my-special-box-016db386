@@ -29,6 +29,14 @@ window.addEventListener("unhandledrejection", (event) => {
   }
 });
 
+window.addEventListener("error", (event) => {
+  const message = `${event.message || ""} ${event.filename || ""}`;
+  if (/ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|module script/i.test(message)) {
+    event.preventDefault();
+    recoverFromStaleBuild();
+  }
+}, true);
+
 if (!root) {
   recoverFromStaleBuild();
 } else {
