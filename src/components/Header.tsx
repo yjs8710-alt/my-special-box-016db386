@@ -93,7 +93,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 로고 */}
             <div
-              className="flex items-center cursor-pointer select-none flex-shrink-0 -ml-4 sm:ml-5 mr-0"
+              className="flex items-center cursor-pointer select-none flex-shrink-0 -ml-8 sm:-ml-2 mr-0"
               onClick={() => navigate("/")}
             >
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
@@ -138,7 +138,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 title="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
+                <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
