@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
-import { lazy, Suspense, useEffect } from "react";
+import { Component, lazy, Suspense, useEffect, type ErrorInfo, type ReactNode } from "react";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -38,6 +38,65 @@ const RouteFallback = () => (
     불러오는 중…
   </div>
 );
+
+const resetBrowserAppCache = async () => {
+  if (typeof window === "undefined") return;
+  await Promise.allSettled([
+    navigator.serviceWorker?.getRegistrations().then((registrations) =>
+      Promise.allSettled(registrations.map((registration) => registration.unregister()))
+    ),
+    "caches" in window ? caches.keys().then((keys) => Promise.allSettled(keys.map((key) => caches.delete(key)))) : Promise.resolve(),
+  ]);
+};
+
+class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+    const message = `${error instanceof Error ? error.message : String(error)} ${errorInfo.componentStack}`;
+    const isStaleBuildError = /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|module script/i.test(message);
+
+    if (isStaleBuildError && typeof window !== "undefined") {
+      const recoveryKey = `jibda-runtime-recovery:${__APP_BUILD_ID__}`;
+      if (window.sessionStorage.getItem(recoveryKey) !== "1") {
+        window.sessionStorage.setItem(recoveryKey, "1");
+        resetBrowserAppCache().finally(() => {
+          const url = new URL(window.location.href);
+          url.searchParams.set("app-recovery", __APP_BUILD_ID__);
+          window.location.replace(url.toString());
+        });
+      }
+    }
+  }
+
+  render() {
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-background px-5 text-foreground">
+        <section className="w-full max-w-sm text-center space-y-4">
+          <h1 className="text-xl font-extrabold">화면을 다시 불러와 주세요</h1>
+          <p className="text-sm leading-6 text-muted-foreground">
+            이전 앱 파일이 브라우저에 남아 화면을 불러오지 못했습니다.
+          </p>
+          <button
+            type="button"
+            className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-5 text-sm font-bold text-primary-foreground"
+            onClick={() => {
+              resetBrowserAppCache().finally(() => window.location.reload());
+            }}
+          >
+            새로고침
+          </button>
+        </section>
+      </main>
+    );
+  }
+}
 
 const LegacyPropertyRedirect = () => {
   const { id } = useParams<{ id: string }>();
@@ -129,6 +188,7 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AppErrorBoundary>
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -168,6 +228,7 @@ const App = () => {
           <MobileBottomNav />
         </Suspense>
       </BrowserRouter>
+      </AppErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
   );
