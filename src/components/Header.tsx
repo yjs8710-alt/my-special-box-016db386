@@ -170,7 +170,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center justify-center px-1.5 py-1 mr-2 rounded-lg transition-colors hover:bg-white/10"
+                    className="flex items-center justify-center px-1.5 py-1 -ml-2 mr-4 rounded-lg transition-colors hover:bg-white/10"
                     onClick={handleLogout}
                     aria-label="로그아웃"
                     title="로그아웃"
@@ -201,7 +201,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {location.pathname !== "/" && (
                 <button
                   onClick={openRegister}
-                  className="-ml-5 self-center flex items-center transition-transform hover:scale-[1.02] active:scale-95"
+                  className="-ml-10 self-center flex items-center transition-transform hover:scale-[1.02] active:scale-95"
                   aria-label="매물 등록"
                 >
                   <img src={btnRegisterNew} alt="매물 등록" className="h-8 w-auto object-contain" />
