@@ -27,7 +27,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     if (!isAuthorized || !user?.userId) return;
     refresh();
     const ch = supabase
-      .channel("user-notifications-bell")
+      .channel(`user-notifications-bell-${variant}-${user.userId}`)
       .on("postgres_changes", {
         event: "*",
         schema: "public",
