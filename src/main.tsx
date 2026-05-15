@@ -4,9 +4,17 @@ import "./index.css";
 
 const root = document.getElementById("root");
 
+const revealFallback = () => {
+  const fallback = document.getElementById("app-shell-fallback");
+  if (fallback) fallback.style.display = "flex";
+};
+
 const recoverFromStaleBuild = async () => {
   const recoveryKey = `jibda-entry-recovery:${__APP_BUILD_ID__}`;
-  if (sessionStorage.getItem(recoveryKey) === "1") return;
+  if (sessionStorage.getItem(recoveryKey) === "1") {
+    revealFallback();
+    return;
+  }
   sessionStorage.setItem(recoveryKey, "1");
 
   await Promise.allSettled([
@@ -41,5 +49,8 @@ if (!root) {
   recoverFromStaleBuild();
 } else {
   root.innerHTML = "";
+  window.setTimeout(() => {
+    if (!root.hasChildNodes()) revealFallback();
+  }, 5000);
   createRoot(root).render(<App />);
 }
