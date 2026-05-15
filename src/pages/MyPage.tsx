@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight,
 } from "lucide-react";
-import logoImg from "@/assets/logo-zibda-active-opt.webp";
+import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
