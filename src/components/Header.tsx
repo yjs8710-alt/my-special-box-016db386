@@ -269,14 +269,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
           )}
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
             {location.pathname !== "/" && (
-              <Button
-                size="sm"
+              <button
                 onClick={openRegister}
-                className="w-full rounded-lg font-bold"
-                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                className="w-full flex items-center justify-center py-1"
+                aria-label="매물 등록"
               >
-                + 매물 등록
-              </Button>
+                <img src={btnRegisterNew} alt="매물 등록" className="h-10 w-auto object-contain" />
+              </button>
             )}
             {isAuthorized && (
               <>
