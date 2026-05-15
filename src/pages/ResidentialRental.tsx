@@ -32,6 +32,7 @@ const ResidentialRental = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
+  const [mapBoundsState, setMapBoundsState] = useState<MapBounds | null>(null);
   const [radiusMode, setRadiusMode] = useState(false);
   const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
 
@@ -73,6 +74,7 @@ const ResidentialRental = () => {
 
   const handleBoundsChange = useCallback((b: MapBounds) => {
     mapBoundsRef.current = b;
+    setMapBoundsState(b);
   }, []);
 
   // 핀 클릭: 정확한 주소 매칭만, buildingName 제거
@@ -109,23 +111,22 @@ const ResidentialRental = () => {
 
   // 사이드바 매물: 반경 우선 → 돋보기 → 핀 선택 → 기본
   const sidebarProperties = useMemo(() => {
+    const inBounds = (p: any, b: MapBounds | null) =>
+      !b ? true : (p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
     if (radiusCircle) {
       return filtered.filter(p =>
         p.lat && p.lng && isInsideRadius(p.lat, p.lng, radiusCircle)
       );
     }
     if (showAllFromSearch) {
-      const b = mapBoundsRef.current;
-      if (b) return filtered.filter(p =>
-        p.lat && p.lng &&
-        p.lat >= b.swLat && p.lat <= b.neLat &&
-        p.lng >= b.swLng && p.lng <= b.neLng
-      );
-      return filtered;
+      return filtered.filter(p => inBounds(p, mapBoundsState));
     }
-    if (pinnedIds.length === 0) return filtered;
+    if (pinnedIds.length === 0) {
+      // 지도 줌/이동에 따라 화면 안 매물만 자동 표시
+      return filtered.filter(p => inBounds(p, mapBoundsState));
+    }
     return filtered.filter(p => pinnedIds.includes(p.id));
-  }, [filtered, pinnedIds, showAllFromSearch, radiusCircle]);
+  }, [filtered, pinnedIds, showAllFromSearch, radiusCircle, mapBoundsState]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
