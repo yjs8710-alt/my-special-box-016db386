@@ -138,7 +138,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 title="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
+                <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
