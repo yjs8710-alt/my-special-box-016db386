@@ -40,5 +40,6 @@ window.addEventListener("error", (event) => {
 if (!root) {
   recoverFromStaleBuild();
 } else {
+  root.innerHTML = "";
   createRoot(root).render(<App />);
 }
