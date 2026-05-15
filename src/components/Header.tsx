@@ -5,6 +5,8 @@ import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconLogoutNew from "@/assets/icon-logout-new.png";
 import btnRegisterNew from "@/assets/btn-register-new.png";
 import iconChat from "@/assets/icon-chat.png";
+import iconBellGradient from "@/assets/icon-bell-gradient.png";
+import iconUserGradient from "@/assets/icon-user-gradient.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
@@ -214,7 +216,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex flex-col items-center justify-center text-white"
                 aria-label="알림"
               >
-                <Bell className="w-6 h-6" style={{ color: "hsl(var(--accent))" }} />
+                <img src={iconBellGradient} alt="" className="w-6 h-6 object-contain" />
                 <span className="text-[10px] leading-none mt-0.5 text-white/80">알림</span>
               </button>
               <button
@@ -225,7 +227,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <User className="w-6 h-6" style={{ color: "hsl(var(--accent))" }} />
+                <img src={iconUserGradient} alt="" className="w-6 h-6 object-contain" />
                 <span className="text-[10px] leading-none mt-0.5 text-white/80">내정보</span>
               </button>
               <button
@@ -279,11 +281,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="w-full flex items-center justify-center gap-2 py-3.5 my-1 rounded-full text-white text-base font-bold transition-transform active:scale-[0.98] shadow-lg"
+                className="-mx-3 flex items-center justify-center gap-2 py-2 my-1 rounded-none text-white text-sm font-bold transition-transform active:scale-[0.98] shadow-lg w-[calc(100%+1.5rem)]"
                 style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
                 aria-label="매물 등록"
               >
-                <span className="text-lg leading-none">+</span>
+                <span className="text-base leading-none">+</span>
                 <span>매물 등록</span>
               </button>
             )}
