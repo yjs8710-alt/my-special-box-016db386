@@ -687,6 +687,17 @@ const MapFilterBar = ({
               </button>
             )}
           </div>
+          {/* 매물 갯수 표시 (지도 화면 안 매물, 확대/축소에 따라 갱신) */}
+          {typeof propertyCount === "number" && !hideSearchBar && (
+            <div className="hidden md:flex items-center gap-1.5 mt-1.5 px-3 py-1 bg-white rounded-full w-fit"
+              style={{ boxShadow: "0 2px 8px rgba(10,45,110,0.12)" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--primary))" }} />
+              <span className="text-[11px] font-bold" style={{ color: "hsl(var(--primary))" }}>
+                지도 매물 {propertyCount.toLocaleString()}개
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 상세 필터 패널 */}
