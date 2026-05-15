@@ -4,8 +4,6 @@ import "./index.css";
 
 const root = document.getElementById("root");
 
-const rootHasRendered = () => Boolean(root?.hasChildNodes());
-
 const cleanupStaleRuntime = async () => {
   await Promise.allSettled([
     navigator.serviceWorker?.getRegistrations().then((registrations) =>
@@ -15,21 +13,9 @@ const cleanupStaleRuntime = async () => {
   ]);
 };
 
-const revealFallback = () => {
-  if (rootHasRendered()) return;
-  const fallback = document.getElementById("app-shell-fallback");
-  if (fallback) fallback.style.display = "flex";
-};
-
 const recoverFromStaleBuild = async () => {
-  if (rootHasRendered()) {
-    cleanupStaleRuntime();
-    return;
-  }
-
   const recoveryKey = `jibda-entry-recovery:${__APP_BUILD_ID__}`;
   if (sessionStorage.getItem(recoveryKey) === "1") {
-    revealFallback();
     return;
   }
   sessionStorage.setItem(recoveryKey, "1");
@@ -61,8 +47,6 @@ if (!root) {
   recoverFromStaleBuild();
 } else {
   root.innerHTML = "";
-  window.setTimeout(() => {
-    if (!root.hasChildNodes()) revealFallback();
-  }, 5000);
+  cleanupStaleRuntime();
   createRoot(root).render(<App />);
 }
