@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => ({
       },
       transformIndexHtml(html: string) {
         return html.replace(
-          '<link rel="manifest" href="/manifest.webmanifest" />',
-          `<link rel="manifest" href="/manifest.webmanifest?v=${BUILD_VERSION}" />`
+          /href="\/manifest\.webmanifest(?:\?[^\"]*)?"/,
+          `href="/manifest.webmanifest?v=${BUILD_VERSION}"`
         ).replace(
           "</head>",
           `<meta name="app-build-version" content="${BUILD_VERSION}" /></head>`
