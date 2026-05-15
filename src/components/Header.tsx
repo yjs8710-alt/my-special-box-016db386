@@ -273,7 +273,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="w-full flex items-center justify-center py-1"
                 aria-label="매물 등록"
               >
-                <img src={btnRegisterNew} alt="매물 등록" className="h-10 w-auto object-contain" />
+                <img src={btnRegisterNew} alt="매물 등록" className="w-full h-12 object-fill rounded-lg" />
               </button>
             )}
             {isAuthorized && (
