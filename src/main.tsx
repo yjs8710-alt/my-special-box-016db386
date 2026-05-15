@@ -40,5 +40,8 @@ window.addEventListener("error", (event) => {
 if (!root) {
   recoverFromStaleBuild();
 } else {
+  root.innerHTML = "";
+  const fallback = document.getElementById("app-shell-fallback");
+  if (fallback) fallback.style.display = "none";
   createRoot(root).render(<App />);
 }
