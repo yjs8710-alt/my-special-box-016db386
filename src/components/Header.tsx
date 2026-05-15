@@ -54,14 +54,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     return () => mql?.removeEventListener?.("change", checkInstalled);
   }, []);
 
-  useEffect(() => {
-    const idle = (cb: () => void) => (window as any).requestIdleCallback?.(cb) ?? setTimeout(cb, 300);
-    idle(() => {
-      import("@/pages/MyInfoPage").catch(() => {});
-      import("@/pages/NotificationsPage").catch(() => {});
-    });
-  }, []);
-
   const prefetchRoute = (path: string) => {
     if (path === "/residential" || path === "/apartment") import("@/pages/ResidentialRental").catch(() => {});
     else if (path === "/non-residential" || path === "/collective-sale") import("@/pages/NonResidentialRental").catch(() => {});

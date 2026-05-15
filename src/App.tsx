@@ -5,22 +5,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { lazy, Suspense, useEffect } from "react";
 import Home from "./pages/Home";
-import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
-import ChatInquiryWidget from "./components/ChatInquiryWidget";
-import MobileBottomNav from "./components/MobileBottomNav";
+import ResidentialRental from "./pages/ResidentialRental";
+import NonResidentialRental from "./pages/NonResidentialRental";
+import LandSearch from "./pages/LandSearch";
 
-// 첫 화면(Home)은 즉시 로딩, 나머지 라우트는 lazy 로딩으로 초기 번들 최소화
+// 핵심 매물 경로는 즉시 로딩해 외부 도메인 첫 진입 안정성을 우선합니다.
 const LoginPage = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SignupPage = lazy(() => import("./pages/Signup"));
 const Community = lazy(() => import("./pages/Community"));
 const IndexPage = lazy(() => import("./pages/Index"));
-const ResidentialRental = lazy(() => import("./pages/ResidentialRental"));
-const LandSearch = lazy(() => import("./pages/LandSearch"));
-const NonResidentialRental = lazy(() => import("./pages/NonResidentialRental"));
 const CommercialRental = lazy(() => import("./pages/CommercialRental"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicProperty = lazy(() => import("./pages/PublicProperty"));
@@ -31,6 +28,8 @@ const MyInfoPage = lazy(() => import("./pages/MyInfoPage"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const ChatInquiryWidget = lazy(() => import("./components/ChatInquiryWidget"));
+const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
 
 const queryClient = new QueryClient();
 
@@ -130,7 +129,6 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <PwaUpdatePrompt />
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBgMobile from "@/assets/main-bg-mobile.webp";
@@ -34,14 +34,6 @@ const prefetchRoute = (path: string) => {
 const HeroSection = () => {
   const navigate = useNavigate();
   const [isAppMode] = useState(false);
-
-  useEffect(() => {
-    const idle = (cb: () => void) => (window as any).requestIdleCallback?.(cb) ?? setTimeout(cb, 600);
-    idle(() => {
-      import("@/pages/ResidentialRental").catch(() => {});
-      import("@/pages/NonResidentialRental").catch(() => {});
-    });
-  }, []);
 
   return (
     <section className="relative h-[calc(100vh-64px)] md:min-h-[calc(100vh-64px)] md:h-auto flex items-start md:items-center justify-center overflow-hidden">
