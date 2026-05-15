@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
-import { lazy, Suspense, useEffect } from "react";
+import { Component, lazy, Suspense, useEffect, type ReactNode } from "react";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -32,6 +32,39 @@ const ChatInquiryWidget = lazy(() => import("./components/ChatInquiryWidget"));
 const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
 
 const queryClient = new QueryClient();
+
+class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error("App render error", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background px-4 text-center">
+          <div className="space-y-4">
+            <p className="text-base font-semibold text-foreground">화면을 다시 불러와 주세요.</p>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="h-10 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            >
+              새로고침
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
@@ -125,6 +158,7 @@ const useGlobalProtect = () => {
 const App = () => {
   useGlobalProtect();
   return (
+  <AppErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -170,6 +204,7 @@ const App = () => {
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </AppErrorBoundary>
   );
 };
 
