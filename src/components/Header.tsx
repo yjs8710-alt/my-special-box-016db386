@@ -321,7 +321,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               </button>
             )}
           </div>
-        </div>
+          </div>
+        </>
       )}
     </header>
   );
