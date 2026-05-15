@@ -140,6 +140,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 채팅문의
               </button>
               {user?.isAdmin && <AdminNotificationBell />}
+              <NotificationBell variant="desktop" />
 
               {isAuthorized ? (
                 <>
