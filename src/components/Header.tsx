@@ -170,7 +170,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center justify-center px-1.5 py-1 -ml-2 mr-4 rounded-lg transition-colors hover:bg-white/10"
+                    className="flex items-center justify-center px-1.5 py-1 -ml-2 mr-10 rounded-lg transition-colors hover:bg-white/10"
                     onClick={handleLogout}
                     aria-label="로그아웃"
                     title="로그아웃"
