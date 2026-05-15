@@ -10,50 +10,6 @@
     <meta name="author" content="Lovable" />
 
     <meta name="theme-color" content="#FFFFFF" />
-    <script>
-      (function () {
-        var buildId = "SW_CACHE_KILL_20260515_04";
-        var stalePattern = /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|module script/i;
-        var cleanup = function () {
-          var tasks = [];
-          try {
-            if (navigator.serviceWorker) {
-              tasks.push(navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                return Promise.allSettled(registrations.map(function (registration) { return registration.unregister(); }));
-              }));
-            }
-            if (window.caches) {
-              tasks.push(caches.keys().then(function (keys) {
-                return Promise.allSettled(keys.map(function (key) { return caches.delete(key); }));
-              }));
-            }
-          } catch (e) {}
-          return Promise.allSettled(tasks);
-        };
-        cleanup();
-        var recover = function () {
-          try {
-            var key = "jibda-inline-recovery:" + buildId;
-            if (sessionStorage.getItem(key) === "1") return;
-            sessionStorage.setItem(key, "1");
-            cleanup().finally(function () {
-              var url = new URL(window.location.href);
-              url.searchParams.set("app-recovery", buildId);
-              window.location.replace(url.toString());
-            });
-          } catch (e) {}
-        };
-        window.addEventListener("error", function (event) {
-          var message = String(event.message || event.filename || "");
-          if (stalePattern.test(message)) recover();
-        }, true);
-        window.addEventListener("unhandledrejection", function (event) {
-          var reason = event.reason;
-          var message = reason && reason.message ? reason.message : String(reason || "");
-          if (stalePattern.test(message)) recover();
-        });
-      })();
-    </script>
 
     <!-- Performance: preconnect to external origins used early -->
     <link rel="preconnect" href="https://dapi.kakao.com" crossorigin />

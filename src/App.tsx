@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
-import { Component, lazy, Suspense, useEffect, type ErrorInfo, type ReactNode } from "react";
+import { Component, lazy, Suspense, useEffect, type ReactNode } from "react";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -39,62 +39,16 @@ const RouteFallback = () => (
   </div>
 );
 
-const resetBrowserAppCache = async () => {
-  if (typeof window === "undefined") return;
-  await Promise.allSettled([
-    navigator.serviceWorker?.getRegistrations().then((registrations) =>
-      Promise.allSettled(registrations.map((registration) => registration.unregister()))
-    ),
-    "caches" in window ? caches.keys().then((keys) => Promise.allSettled(keys.map((key) => caches.delete(key)))) : Promise.resolve(),
-  ]);
-};
-
-class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+class SilentWidgetBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
-    const message = `${error instanceof Error ? error.message : String(error)} ${errorInfo.componentStack}`;
-    const isStaleBuildError = /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|module script/i.test(message);
-
-    if (typeof window !== "undefined") {
-      const recoveryKey = `jibda-runtime-recovery:${__APP_BUILD_ID__}`;
-      if (window.sessionStorage.getItem(recoveryKey) !== "1") {
-        window.sessionStorage.setItem(recoveryKey, "1");
-        resetBrowserAppCache().finally(() => {
-          const url = new URL(window.location.href);
-          url.searchParams.set(isStaleBuildError ? "app-recovery" : "app-retry", __APP_BUILD_ID__);
-          window.location.replace(url.toString());
-        });
-      }
-    }
-  }
-
   render() {
     if (!this.state.hasError) return this.props.children;
-
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-background px-5 text-foreground">
-        <section className="w-full max-w-sm text-center space-y-4">
-          <h1 className="text-xl font-extrabold">자동 복구 중입니다</h1>
-          <p className="text-sm leading-6 text-muted-foreground">
-            브라우저에 남은 이전 앱 파일을 정리하고 다시 연결하고 있습니다.
-          </p>
-          <button
-            type="button"
-            className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-5 text-sm font-bold text-primary-foreground"
-            onClick={() => {
-              resetBrowserAppCache().finally(() => window.location.reload());
-            }}
-          >
-            다시 시도
-          </button>
-        </section>
-      </main>
-    );
+    return null;
   }
 }
 
@@ -188,7 +142,6 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AppErrorBoundary>
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -224,11 +177,12 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <SilentWidgetBoundary>
           <ChatInquiryWidget />
           <MobileBottomNav />
+          </SilentWidgetBoundary>
         </Suspense>
       </BrowserRouter>
-      </AppErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
   );
