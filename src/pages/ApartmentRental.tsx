@@ -154,6 +154,7 @@ const ApartmentRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
+            propertyCount={sidebarProperties.length}
             hideSearchBar={showRegister}
             showCategoryChips={false}
             showRoomTypes={false}

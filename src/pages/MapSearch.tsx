@@ -224,6 +224,7 @@ const MapSearch = () => {
             onFiltersChange={setFilters}
             onLandlordClick={() => setShowLandlord(true)}
             onSearchClick={handleSearchInArea}
+            propertyCount={mappableProperties.length}
             topOffset={92}
             hideSearchBar={mobileMenuOpen}
           />
