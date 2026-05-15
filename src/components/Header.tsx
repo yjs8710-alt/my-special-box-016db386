@@ -226,7 +226,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserGradient} alt="내 정보" className="h-7 w-auto object-contain" />
+                <img src={iconUserGradient} alt="내 정보" className="h-9 w-auto object-contain -mb-1" />
               </button>
               <button
                 className="text-white p-1 ml-1 mb-1"
