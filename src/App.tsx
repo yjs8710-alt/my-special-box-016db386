@@ -7,6 +7,7 @@ import { Component, lazy, Suspense, useEffect, type ReactNode } from "react";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import MobileBottomNav from "./components/MobileBottomNav";
 
 const LoginPage = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -28,7 +29,6 @@ const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const ChatInquiryWidget = lazy(() => import("./components/ChatInquiryWidget"));
-const MobileBottomNav = lazy(() => import("./components/MobileBottomNav"));
 
 const queryClient = new QueryClient();
 
