@@ -207,11 +207,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
             </div>
 
-            {/* 모바일: 알림 + 내정보 + 햄버거 */}
+            {/* 모바일: 햄버거 + 알림 + 내정보 */}
             <div className="md:hidden flex items-center ml-auto">
+              <button
+                className="text-white p-1 mr-1"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="메뉴"
+              >
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
               <NotificationBell variant="mobile" />
               <button
-                className="flex items-center justify-center -ml-2"
+                className="flex items-center justify-center -ml-3"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -225,13 +232,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   className="object-contain"
                   style={{ width: 88, height: 88, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
-              </button>
-              <button
-                className="text-white p-1 -ml-2"
-                onClick={() => setMenuOpen(!menuOpen)}
-                aria-label="메뉴"
-              >
-                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
