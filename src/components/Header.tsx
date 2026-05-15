@@ -168,11 +168,17 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
-                    style={{ color: "rgba(255,255,255,0.55)" }}
+                    className="flex items-center justify-center px-1.5 py-1 rounded-lg transition-colors hover:bg-white/10"
                     onClick={handleLogout}
+                    aria-label="로그아웃"
+                    title="로그아웃"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <img
+                      src={iconLogoutNew}
+                      alt=""
+                      className="w-7 h-7 object-contain"
+                      style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
+                    />
                   </button>
                 </>
               ) : (
@@ -191,14 +197,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
 
               {location.pathname !== "/" && (
-                <Button
-                  size="sm"
+                <button
                   onClick={openRegister}
-                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
-                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                  className="ml-1 transition-transform hover:scale-105 active:scale-95"
+                  aria-label="매물 등록"
                 >
-                  + 매물 등록
-                </Button>
+                  <img src={btnRegisterNew} alt="매물 등록" className="h-9 w-auto object-contain" />
+                </button>
               )}
             </div>
 
