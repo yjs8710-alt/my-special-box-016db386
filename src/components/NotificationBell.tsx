@@ -71,8 +71,8 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       <img
         src={iconBellNew}
         alt=""
-        className="w-8 h-8 object-contain"
-        style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
+        className="object-contain"
+        style={{ width: 96, height: 96, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
       />
       {count > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
