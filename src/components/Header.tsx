@@ -279,8 +279,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="w-full flex items-center justify-center gap-2 py-3 my-1 rounded-lg text-white text-base font-bold transition-transform active:scale-[0.98]"
-                style={{ background: "hsl(var(--accent))" }}
+                className="w-full flex items-center justify-center gap-2 py-3.5 my-1 rounded-full text-white text-base font-bold transition-transform active:scale-[0.98] shadow-lg"
+                style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
                 aria-label="매물 등록"
               >
                 <span className="text-lg leading-none">+</span>
