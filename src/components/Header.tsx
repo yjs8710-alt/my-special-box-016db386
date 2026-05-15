@@ -212,7 +212,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex items-center justify-center -ml-3"
+                className="flex items-center justify-center -ml-6"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -228,7 +228,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 />
               </button>
               <button
-                className="text-white p-1 -ml-1"
+                className="text-white p-1 -ml-2"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label="메뉴"
               >
