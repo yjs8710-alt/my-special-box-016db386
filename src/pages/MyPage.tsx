@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight,
 } from "lucide-react";
+import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -216,8 +217,8 @@ const MyPage = () => {
       <div className="max-w-3xl mx-auto px-4 py-6">
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "hsl(var(--accent))" }}>
-            <User className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: "hsl(var(--accent))" }}>
+            <img src={logoImg} alt="집다 로고" className="w-9 h-9 object-contain" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">마이페이지</h1>
