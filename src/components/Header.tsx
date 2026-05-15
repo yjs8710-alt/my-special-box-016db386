@@ -4,6 +4,7 @@ import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconLogoutNew from "@/assets/icon-logout-new.png";
 import btnRegisterNew from "@/assets/btn-register-new.png";
+import btnRegisterGradient from "@/assets/btn-register-gradient.png";
 import iconChat from "@/assets/icon-chat.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -129,14 +130,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </nav>
 
             {/* 우측 액션 */}
-            <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
+            <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink min-w-0">
               <button
                 onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
                 className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition-all hover:bg-white/10"
                 style={{ color: "white" }}
                 title="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
+                <img src={iconChat} alt="" className="object-contain" style={{ width: 96, height: 96 }} />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
@@ -199,10 +200,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {location.pathname !== "/" && (
                 <button
                   onClick={openRegister}
-                  className="ml-1 transition-transform hover:scale-105 active:scale-95"
+                  className="ml-1 flex-1 transition-transform hover:scale-[1.02] active:scale-95"
                   aria-label="매물 등록"
                 >
-                  <img src={btnRegisterNew} alt="매물 등록" className="h-9 w-auto object-contain" />
+                  <img src={btnRegisterNew} alt="매물 등록" className="h-12 w-full object-fill rounded-lg" />
                 </button>
               )}
             </div>
@@ -211,7 +212,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex items-center justify-center -ml-3"
+                className="flex items-center justify-center -ml-6"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -227,7 +228,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 />
               </button>
               <button
-                className="text-white p-1 -ml-1"
+                className="text-white p-1 -ml-2"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label="메뉴"
               >
@@ -277,12 +278,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {location.pathname !== "/" && (
               <button
                 onClick={openRegister}
-                className="w-full flex items-center justify-center gap-2 py-3 my-1 rounded-lg text-white text-base font-bold transition-transform active:scale-[0.98]"
-                style={{ background: "hsl(var(--accent))" }}
+                className="w-full block my-1 transition-transform active:scale-[0.98]"
                 aria-label="매물 등록"
               >
-                <span className="text-lg leading-none">+</span>
-                <span>매물 등록</span>
+                <img src={btnRegisterGradient} alt="매물 등록" className="w-full h-12 object-fill rounded-lg" />
               </button>
             )}
             {isAuthorized && (
