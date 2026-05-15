@@ -4,7 +4,7 @@ import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconLogoutNew from "@/assets/icon-logout-new.png";
 import btnRegisterNew from "@/assets/btn-register-new.png";
-import iconChat from "@/assets/icon-chat.png";
+import iconChat from "@/assets/icon-chat-gradient.png";
 import iconBellGradient from "@/assets/icon-bell-gradient.png";
 import iconUserGradient from "@/assets/icon-user-gradient.png";
 import { Button } from "@/components/ui/button";
@@ -201,10 +201,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {location.pathname !== "/" && (
                 <button
                   onClick={openRegister}
-                  className="ml-1 self-stretch flex items-center transition-transform hover:scale-[1.02] active:scale-95"
+                  className="ml-1 self-center flex items-center transition-transform hover:scale-[1.02] active:scale-95"
                   aria-label="매물 등록"
                 >
-                  <img src={btnRegisterNew} alt="매물 등록" className="h-12 w-auto object-cover" />
+                  <img src={btnRegisterNew} alt="매물 등록" className="h-8 w-auto object-contain" />
                 </button>
               )}
             </div>
