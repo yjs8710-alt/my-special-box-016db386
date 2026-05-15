@@ -201,7 +201,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {location.pathname !== "/" && (
                 <button
                   onClick={openRegister}
-                  className="-ml-2 self-center flex items-center transition-transform hover:scale-[1.02] active:scale-95"
+                  className="-ml-5 self-center flex items-center transition-transform hover:scale-[1.02] active:scale-95"
                   aria-label="매물 등록"
                 >
                   <img src={btnRegisterNew} alt="매물 등록" className="h-8 w-auto object-contain" />
