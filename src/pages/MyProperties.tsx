@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
+import btnRegisterNew from "@/assets/btn-register-new.png";
 import JibunInlineAddress from "@/components/JibunInlineAddress";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
