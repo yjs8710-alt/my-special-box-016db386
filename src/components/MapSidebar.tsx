@@ -3054,14 +3054,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           <div className="flex items-center gap-1 min-h-[22px]">
             {/* 확인일/등록일 배지 — 상단 좌측에 배치 */}
             {(() => {
-              const dateStr = chkDate ? chkDate : regDate;
-              const label = chkDate ? "확인" : "등록";
-              if (!dateStr) return null;
+              if (!chkDate) return null;
               return (
                 <span className="flex-shrink-0 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full whitespace-nowrap"
-                  style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                  style={{ background: "hsl(var(--primary))" }}
                 >
-                  {dateStr.slice(5).replace(/-/g, ".")} {label}
+                  {chkDate.slice(5).replace(/-/g, ".")} 확인
                 </span>
               );
             })()}
