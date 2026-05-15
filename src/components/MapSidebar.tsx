@@ -5333,17 +5333,7 @@ const MapSidebar = ({
                              </button>
                                );
                              })()}
-                             {/* 확인일 배지 (썸네일 상단) — 등록일은 표시하지 않음 */}
-                             {(() => {
-                               if (!chkDate) return null;
-                               return (
-                                 <span className="absolute top-1 right-1 z-10 text-[8px] font-bold text-white px-1 py-0.5 rounded-full shadow pointer-events-none"
-                                   style={{ background: "hsl(var(--primary))" }}
-                                 >
-                                   {chkDate.slice(5).replace(/-/g, ".")} 확인
-                                 </span>
-                               );
-                             })()}
+                              {/* 확인일 배지 제거 */}
                            </div>}
 
                           {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일에서는 숨김) */}
