@@ -212,7 +212,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
+                className="flex items-center justify-center w-14 h-12 rounded-md ml-1"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -223,10 +223,9 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img
                   src={iconMypageNew}
                   alt=""
-                  className="w-7 h-7 object-contain"
-                  style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
+                  className="object-contain"
+                  style={{ width: 44, height: 44, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
-                <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
               </button>
               <button
                 className="text-white p-1 ml-1"
