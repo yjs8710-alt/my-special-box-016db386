@@ -5344,16 +5344,14 @@ const MapSidebar = ({
                              </button>
                                );
                              })()}
-                             {/* 확인일/등록일 배지 (썸네일 상단) */}
+                             {/* 확인일 배지 (썸네일 상단) — 등록일은 표시하지 않음 */}
                              {(() => {
-                               const dateStr = chkDate ? chkDate : regDate;
-                               if (!dateStr) return null;
-                               const label = chkDate ? "확인" : "등록";
+                               if (!chkDate) return null;
                                return (
                                  <span className="absolute top-1 right-1 z-10 text-[8px] font-bold text-white px-1 py-0.5 rounded-full shadow pointer-events-none"
-                                   style={{ background: chkDate ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                                   style={{ background: "hsl(var(--primary))" }}
                                  >
-                                   {dateStr.slice(5).replace(/-/g, ".")} {label}
+                                   {chkDate.slice(5).replace(/-/g, ".")} 확인
                                  </span>
                                );
                              })()}

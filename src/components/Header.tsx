@@ -11,7 +11,7 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
-import AdminNotificationBell from "@/components/AdminNotificationBell";
+
 import NotificationBell from "@/components/NotificationBell";
 
 const NAV_ITEMS = [
@@ -139,7 +139,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
                 채팅문의
               </button>
-              {user?.isAdmin && <AdminNotificationBell />}
               <NotificationBell variant="desktop" />
 
               {isAuthorized ? (
@@ -212,7 +211,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex items-center justify-center w-14 h-12 rounded-md ml-1"
+                className="flex items-center justify-center px-1 ml-1"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -224,7 +223,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   src={iconMypageNew}
                   alt=""
                   className="object-contain"
-                  style={{ width: 44, height: 44, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
+                  style={{ width: 88, height: 88, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
               </button>
               <button

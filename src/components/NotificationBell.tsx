@@ -42,7 +42,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     return (
       <button
         onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-        className="relative flex items-center justify-center w-14 h-12 rounded-md"
+        className="relative flex items-center justify-center px-1"
         aria-label="알림"
         title="알림"
       >
@@ -50,10 +50,10 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
           src={iconBellNew}
           alt=""
           className="object-contain"
-          style={{ width: 44, height: 44, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
+          style={{ width: 88, height: 88, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
         />
         {count > 0 && (
-          <span className="absolute top-0 right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+          <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
             {count > 99 ? "99+" : count}
           </span>
         )}
@@ -71,8 +71,8 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       <img
         src={iconBellNew}
         alt=""
-        className="w-7 h-7 object-contain"
-        style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
+        className="object-contain"
+        style={{ width: 56, height: 56, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
       />
       {count > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
