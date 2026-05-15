@@ -63,30 +63,6 @@
             window.location.replace('/share/' + match[1] + window.location.search + window.location.hash);
             return;
           }
-          var SW_CLEAN_KEY = '__sw_cleaned_v4_stable__';
-          var isPreview = /lovableproject\.com|id-preview--|localhost|127\.0\.0\.1/.test(window.location.hostname);
-          if (!isPreview && !localStorage.getItem(SW_CLEAN_KEY)) {
-            var run = function () {
-              try {
-                if ('serviceWorker' in navigator) {
-                  navigator.serviceWorker.getRegistrations().then(function (regs) {
-                    regs.forEach(function (r) { r.unregister(); });
-                  });
-                }
-                if ('caches' in window) {
-                  caches.keys().then(function (keys) {
-                    keys.forEach(function (key) { caches.delete(key); });
-                  });
-                }
-              } catch (e) {}
-              try { localStorage.setItem(SW_CLEAN_KEY, '1'); } catch (e) {}
-            };
-            if ('requestIdleCallback' in window) {
-              requestIdleCallback(run, { timeout: 3000 });
-            } else {
-              setTimeout(run, 1500);
-            }
-          }
         } catch (e) {}
       })();
     </script>
