@@ -197,14 +197,15 @@ const LoginPage = () => {
         className="sticky top-0 z-50 border-b"
         style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}
       >
-        <div className="max-w-screen-xl mx-auto px-4 h-12 flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0"
-            onClick={() => navigate("/")}
-          >
-            <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 object-contain block mt-2" />
+        <div className="w-full pl-0 pr-3 sm:pr-5 md:pr-0">
+          <div className="flex items-center h-12">
+            <div
+              className="flex items-center cursor-pointer select-none flex-shrink-0 -ml-4 sm:-ml-2"
+              onClick={() => navigate("/")}
+            >
+              <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
+            </div>
           </div>
-          
         </div>
       </header>
 
