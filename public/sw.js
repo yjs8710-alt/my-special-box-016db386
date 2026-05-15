@@ -14,7 +14,8 @@ self.addEventListener("activate", (event) => {
       await Promise.all(
         clients.map((client) => {
           const url = new URL(client.url);
-          url.searchParams.set("sw-cleanup", Date.now().toString());
+          if (url.searchParams.get("sw-cleanup") === "1") return Promise.resolve(client);
+          url.searchParams.set("sw-cleanup", "1");
           return client.navigate(url.toString());
         })
       );
