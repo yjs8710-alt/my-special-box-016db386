@@ -186,7 +186,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 </>
               ) : (
                 <button
-                  className="flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-1.5 rounded-lg transition-all"
+                  className="flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-lg transition-all"
                   style={{
                     background: "rgba(255,255,255,0.08)",
                     color: "rgba(255,255,255,0.7)",
