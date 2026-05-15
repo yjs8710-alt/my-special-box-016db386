@@ -1,5 +1,5 @@
 // 서비스워커 제거용 kill-switch.
-// 예전 서비스워커가 빈 화면/구버전 앱을 계속 제공하는 기기를 강제로 정상 네트워크 로딩으로 되돌립니다.
+// 과거에 /service-worker.js 경로로 설치된 경우까지 함께 정리합니다.
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
@@ -22,5 +22,3 @@ self.addEventListener("activate", (event) => {
     })()
   );
 });
-
-// fetch 핸들러 없음: 모든 요청은 브라우저/서버 기본 캐시 정책을 따릅니다.
