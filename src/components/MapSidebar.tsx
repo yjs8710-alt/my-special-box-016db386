@@ -3438,15 +3438,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </button>
               );
             })()}
-          {/* 등록일 (최초 등록일자) */}
-          {regDate && (
-            <span
-              className="flex-shrink-0 text-[10px] font-bold whitespace-nowrap tabular-nums"
-              style={{ color: "#111" }}
-            >
-              {regDate.slice(2).replace(/-/g, ".")}
-            </span>
-          )}
         </div>
 
 
