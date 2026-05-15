@@ -690,7 +690,7 @@ const MapFilterBar = ({
         {showFilter && (
           <div
             className="bg-white rounded-xl border border-border flex flex-col overflow-hidden"
-            style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.15)", maxHeight: "calc(100vh - 200px)", overflowY: "auto" }}
+            style={{ boxShadow: "0 8px 32px rgba(10,45,110,0.15)", maxHeight: "calc(100dvh - 280px)", overflowY: "auto", marginBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-white z-10">
