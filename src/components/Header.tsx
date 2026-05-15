@@ -4,6 +4,7 @@ import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconLogoutNew from "@/assets/icon-logout-new.png";
 import btnRegisterNew from "@/assets/btn-register-new.png";
+import btnRegisterGradient from "@/assets/btn-register-gradient.png";
 import iconChat from "@/assets/icon-chat.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
