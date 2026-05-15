@@ -7,6 +7,7 @@ import btnRegisterNew from "@/assets/btn-register-new.png";
 import iconChat from "@/assets/icon-chat-gradient.png";
 import iconBellGradient from "@/assets/icon-bell-gradient.png";
 import iconUserGradient from "@/assets/icon-user-gradient.png";
+import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
@@ -151,7 +152,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     onClick={() => navigate("/my-page")}
                   >
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <User className="w-3 h-3 text-white/40" />
+                    <img src={iconUsersGradient} alt="" className="h-5 w-auto object-contain" />
                   </button>
 
                   {user?.isAdmin && (
