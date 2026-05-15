@@ -4,12 +4,29 @@ import "./index.css";
 
 const root = document.getElementById("root");
 
+const rootHasRendered = () => Boolean(root?.hasChildNodes());
+
+const cleanupStaleRuntime = async () => {
+  await Promise.allSettled([
+    navigator.serviceWorker?.getRegistrations().then((registrations) =>
+      Promise.allSettled(registrations.map((registration) => registration.unregister()))
+    ),
+    "caches" in window ? caches.keys().then((keys) => Promise.allSettled(keys.map((key) => caches.delete(key)))) : Promise.resolve(),
+  ]);
+};
+
 const revealFallback = () => {
+  if (rootHasRendered()) return;
   const fallback = document.getElementById("app-shell-fallback");
   if (fallback) fallback.style.display = "flex";
 };
 
 const recoverFromStaleBuild = async () => {
+  if (rootHasRendered()) {
+    cleanupStaleRuntime();
+    return;
+  }
+
   const recoveryKey = `jibda-entry-recovery:${__APP_BUILD_ID__}`;
   if (sessionStorage.getItem(recoveryKey) === "1") {
     revealFallback();
@@ -17,12 +34,7 @@ const recoverFromStaleBuild = async () => {
   }
   sessionStorage.setItem(recoveryKey, "1");
 
-  await Promise.allSettled([
-    navigator.serviceWorker?.getRegistrations().then((registrations) =>
-      Promise.allSettled(registrations.map((registration) => registration.unregister()))
-    ),
-    "caches" in window ? caches.keys().then((keys) => Promise.allSettled(keys.map((key) => caches.delete(key)))) : Promise.resolve(),
-  ]);
+  await cleanupStaleRuntime();
 
   const url = new URL(window.location.href);
   url.searchParams.set("app-recovery", __APP_BUILD_ID__);
