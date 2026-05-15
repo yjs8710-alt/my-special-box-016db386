@@ -136,6 +136,7 @@ const CommercialRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
+            propertyCount={sidebarProperties.length}
             hideSearchBar={showRegister || mobileMenuOpen}
             showCategoryChips={true}
             showRoomTypes={false}

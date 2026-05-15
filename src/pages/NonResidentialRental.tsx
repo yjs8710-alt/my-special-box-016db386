@@ -299,6 +299,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
+            propertyCount={sidebarProperties.length}
             hideSearchBar={showRegister || mobileMenuOpen}
             nonResidentialSubtypes={NON_RESIDENTIAL_SUBTYPES}
             showRoomTypes={false}
