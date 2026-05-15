@@ -65,14 +65,18 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   return (
     <button
       onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-      className="relative flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/10"
-      style={{ color: "rgba(255,255,255,0.85)" }}
+      className="relative flex items-center justify-center px-1.5 py-1 rounded-lg transition-colors hover:bg-white/10"
       title="알림"
       aria-label="알림"
     >
-      <Bell className="w-3.5 h-3.5" />
+      <img
+        src={iconBellNew}
+        alt=""
+        className="w-7 h-7 object-contain"
+        style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
+      />
       {count > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}
         </span>
       )}

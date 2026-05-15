@@ -2,6 +2,8 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconMypageNew from "@/assets/icon-mypage-new.png";
+import iconLogoutNew from "@/assets/icon-logout-new.png";
+import btnRegisterNew from "@/assets/btn-register-new.png";
 import iconChat from "@/assets/icon-chat.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -138,6 +140,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 채팅문의
               </button>
               {user?.isAdmin && <AdminNotificationBell />}
+              <NotificationBell variant="desktop" />
 
               {isAuthorized ? (
                 <>
@@ -146,12 +149,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
                     onClick={() => navigate("/my-page")}
                   >
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white flex-shrink-0"
-                      style={{ background: "hsl(var(--accent))" }}
-                    >
-                      {user?.memberType?.[0] ?? "U"}
-                    </div>
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
                     <User className="w-3 h-3 text-white/40" />
                   </button>
@@ -172,11 +169,17 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
-                    style={{ color: "rgba(255,255,255,0.55)" }}
+                    className="flex items-center justify-center px-1.5 py-1 rounded-lg transition-colors hover:bg-white/10"
                     onClick={handleLogout}
+                    aria-label="로그아웃"
+                    title="로그아웃"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <img
+                      src={iconLogoutNew}
+                      alt=""
+                      className="w-7 h-7 object-contain"
+                      style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
+                    />
                   </button>
                 </>
               ) : (
@@ -195,14 +198,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
 
               {location.pathname !== "/" && (
-                <Button
-                  size="sm"
+                <button
                   onClick={openRegister}
-                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
-                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                  className="ml-1 transition-transform hover:scale-105 active:scale-95"
+                  aria-label="매물 등록"
                 >
-                  + 매물 등록
-                </Button>
+                  <img src={btnRegisterNew} alt="매물 등록" className="h-9 w-auto object-contain" />
+                </button>
               )}
             </div>
 
@@ -268,14 +270,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
           )}
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
             {location.pathname !== "/" && (
-              <Button
-                size="sm"
+              <button
                 onClick={openRegister}
-                className="w-full rounded-lg font-bold"
-                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
+                className="w-full flex items-center justify-center py-1"
+                aria-label="매물 등록"
               >
-                + 매물 등록
-              </Button>
+                <img src={btnRegisterNew} alt="매물 등록" className="h-10 w-auto object-contain" />
+              </button>
             )}
             {isAuthorized && (
               <>
