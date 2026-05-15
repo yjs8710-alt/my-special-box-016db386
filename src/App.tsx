@@ -7,17 +7,16 @@ import { Component, lazy, Suspense, useEffect, type ReactNode } from "react";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
-import ResidentialRental from "./pages/ResidentialRental";
-import NonResidentialRental from "./pages/NonResidentialRental";
-import LandSearch from "./pages/LandSearch";
 
-// 핵심 매물 경로는 즉시 로딩해 외부 도메인 첫 진입 안정성을 우선합니다.
 const LoginPage = lazy(() => import("./pages/Login"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SignupPage = lazy(() => import("./pages/Signup"));
 const Community = lazy(() => import("./pages/Community"));
 const IndexPage = lazy(() => import("./pages/Index"));
+const ResidentialRental = lazy(() => import("./pages/ResidentialRental"));
+const NonResidentialRental = lazy(() => import("./pages/NonResidentialRental"));
+const LandSearch = lazy(() => import("./pages/LandSearch"));
 const CommercialRental = lazy(() => import("./pages/CommercialRental"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicProperty = lazy(() => import("./pages/PublicProperty"));
@@ -177,9 +176,11 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+        </Suspense>
+        <Suspense fallback={null}>
           <SilentWidgetBoundary>
-          <ChatInquiryWidget />
-          <MobileBottomNav />
+            <ChatInquiryWidget />
+            <MobileBottomNav />
           </SilentWidgetBoundary>
         </Suspense>
       </BrowserRouter>
