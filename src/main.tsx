@@ -2,8 +2,22 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// SW unregister는 index.html의 인라인 스크립트에서 1회 처리합니다.
-// 여기서 중복 실행하면 첫 렌더 직후 메인 스레드를 점유해 초기 진입이 느려집니다.
+// 운영 도메인/설치앱에 남은 예전 서비스워커·캐시가 빈 화면 빌드를 붙잡는 문제를 차단합니다.
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  const runServiceWorkerCleanup = () => {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister());
+    }).catch(() => undefined);
+    if ("caches" in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((key) => caches.delete(key));
+      }).catch(() => undefined);
+    }
+  };
+
+  runServiceWorkerCleanup();
+  navigator.serviceWorker.ready.then(() => runServiceWorkerCleanup()).catch(() => undefined);
+}
 
 // 빌드 후 오래된 청크를 참조해 동적 import가 실패하면 1회 강제 새로고침
 if (typeof window !== "undefined") {
