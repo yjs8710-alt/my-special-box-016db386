@@ -42,19 +42,18 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     return (
       <button
         onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md"
+        className="relative flex items-center justify-center w-14 h-12 rounded-md"
         aria-label="알림"
         title="알림"
       >
         <img
           src={iconBellNew}
           alt=""
-          className="w-7 h-7 object-contain"
-          style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
+          className="object-contain"
+          style={{ width: 44, height: 44, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
         />
-        <span className="text-[9px] font-bold text-white leading-tight mt-0.5">알림</span>
         {count > 0 && (
-          <span className="absolute top-0.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+          <span className="absolute top-0 right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
             {count > 99 ? "99+" : count}
           </span>
         )}
