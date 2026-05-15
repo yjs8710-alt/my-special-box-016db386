@@ -42,8 +42,6 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     import("@/pages/NotificationsPage").catch(() => {});
   }, []);
 
-  useEffect(() => { if (variant === "mobile") prefetch(); }, [variant, prefetch]);
-
   if (variant === "mobile") {
     return (
       <button
