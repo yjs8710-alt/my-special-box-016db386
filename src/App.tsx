@@ -142,7 +142,6 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AppErrorBoundary>
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -178,11 +177,12 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <SilentWidgetBoundary>
           <ChatInquiryWidget />
           <MobileBottomNav />
+          </SilentWidgetBoundary>
         </Suspense>
       </BrowserRouter>
-      </AppErrorBoundary>
     </TooltipProvider>
   </QueryClientProvider>
   );
