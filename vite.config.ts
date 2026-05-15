@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
 
 // Build version used to detect fresh deployments. Changes on every build.
-const BUILD_VERSION = "STATIC_HOME_SAFETY_20260515_14";
+const BUILD_VERSION = "NO_STATIC_FALLBACK_20260515_15";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -33,9 +33,6 @@ export default defineConfig(({ mode }) => ({
       },
       transformIndexHtml(html: string) {
         return html.replace(
-          /href="\/manifest\.webmanifest(?:\?[^\"]*)?"/,
-          `href="/manifest.webmanifest?v=${BUILD_VERSION}"`
-        ).replace(
           "</head>",
           `<meta name="app-build-version" content="${BUILD_VERSION}" /></head>`
         );
