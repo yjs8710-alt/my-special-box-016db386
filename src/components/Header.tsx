@@ -139,7 +139,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
                 채팅문의
               </button>
-              {user?.isAdmin && <AdminNotificationBell />}
               <NotificationBell variant="desktop" />
 
               {isAuthorized ? (
