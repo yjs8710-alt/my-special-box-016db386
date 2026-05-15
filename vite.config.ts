@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { writeFileSync } from "node:fs";
 
 // Build version used to detect fresh deployments. Changes on every build.
-const BUILD_VERSION = "REMOVE_RETRY_LOOP_20260515_12";
+const BUILD_VERSION = "NO_RECOVERY_NAV_20260515_13";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
