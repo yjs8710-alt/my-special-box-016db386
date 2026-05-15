@@ -144,8 +144,6 @@ interface MapViewProps {
   onSelect: (id: number) => void;
   /** 지도 이동/줌 시 현재 화면 범위 콜백 */
   onBoundsChange?: (bounds: MapBounds) => void;
-  /** 줌(확대/축소) 변경 시 콜백 */
-  onZoomChange?: () => void;
   /** true이면 selectedId 변경 시 panTo 억제 */
   suppressPan?: boolean;
   /** 반경검색 모드 활성화 — true면 지도 클릭/드래그로 원 그리기 */
@@ -155,7 +153,7 @@ interface MapViewProps {
   onRadiusChange?: (c: RadiusCircle | null) => void;
 }
 
-const MapView = ({ properties, selectedId, onSelect, onBoundsChange, onZoomChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
+const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -175,9 +173,9 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, onZoomChang
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange, onZoomChange, onRadiusChange });
+  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange, onRadiusChange });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, onSelect, onBoundsChange, onZoomChange, onRadiusChange };
+    propsRef.current = { properties, selectedId, onSelect, onBoundsChange, onRadiusChange };
   });
 
   const waitForContainerReady = useCallback(async () => {
@@ -379,7 +377,6 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, onZoomChang
           zoomLevelRef.current = newZoom;
           renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
           fireBounds(map);
-          propsRef.current.onZoomChange?.();
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {

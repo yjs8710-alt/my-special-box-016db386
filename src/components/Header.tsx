@@ -11,7 +11,6 @@ const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
 import AdminNotificationBell from "@/components/AdminNotificationBell";
 import NotificationBell from "@/components/NotificationBell";
-import { GradientUserIcon, GradientLogoutIcon } from "@/components/icons/GradientIcons";
 
 const NAV_ITEMS = [
   { label: "주거·임대", path: "/residential", icon: Building },
@@ -53,8 +52,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     mql?.addEventListener?.("change", checkInstalled);
     return () => mql?.removeEventListener?.("change", checkInstalled);
   }, []);
-
-  const prefetchRoute = (_path: string) => {};
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -104,8 +101,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.label}
-                  onPointerEnter={() => prefetchRoute(item.path)}
-                  onPointerDown={() => prefetchRoute(item.path)}
                   onClick={() => navigate(item.path)}
                   className="text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                   style={
@@ -118,8 +113,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 </button>
               ))}
               <button
-                onPointerEnter={() => prefetchRoute("/community")}
-                onPointerDown={() => prefetchRoute("/community")}
                 onClick={() => navigate("/community")}
                 className="flex items-center gap-1 text-[12px] font-medium px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
                 style={
@@ -144,7 +137,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img src={iconChat} alt="" className="w-8 h-8 object-contain" />
                 채팅문의
               </button>
-              {user?.isAdmin ? <AdminNotificationBell /> : isAuthorized && <NotificationBell variant="desktop" />}
+              {user?.isAdmin && <AdminNotificationBell />}
 
               {isAuthorized ? (
                 <>
@@ -153,8 +146,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
                     onClick={() => navigate("/my-page")}
                   >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white flex-shrink-0"
+                      style={{ background: "hsl(var(--accent))" }}
+                    >
+                      {user?.memberType?.[0] ?? "U"}
+                    </div>
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <GradientUserIcon size={16} />
+                    <User className="w-3 h-3 text-white/40" />
                   </button>
 
                   {user?.isAdmin && (
@@ -173,12 +172,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   )}
 
                   <button
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/10"
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg transition-colors"
+                    style={{ color: "rgba(255,255,255,0.55)" }}
                     onClick={handleLogout}
-                    aria-label="로그아웃"
-                    title="로그아웃"
                   >
-                    <GradientLogoutIcon size={18} />
+                    <LogOut className="w-3.5 h-3.5" />
                   </button>
                 </>
               ) : (
@@ -200,8 +198,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <Button
                   size="sm"
                   onClick={openRegister}
-                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1 text-white border-0 hover:opacity-90 transition-opacity"
-                  style={{ background: "linear-gradient(135deg, #d946ef 0%, #3b82f6 100%)" }}
+                  className="h-8 text-[12px] font-bold px-4 rounded-lg ml-1"
+                  style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
                 >
                   + 매물 등록
                 </Button>
@@ -212,14 +210,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center ml-auto">
               <NotificationBell variant="mobile" />
               <button
-                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1 active:opacity-70 transition-opacity"
-                style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-                onPointerDown={() => {
+                className="flex flex-col items-center justify-center w-12 h-11 rounded-md ml-1"
+                onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
                 }}
-                onTouchStart={() => { import("@/pages/MyInfoPage").catch(() => {}); }}
-                onMouseEnter={() => { import("@/pages/MyInfoPage").catch(() => {}); }}
                 aria-label="내 정보"
                 title="내 정보"
               >
@@ -229,6 +224,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   className="w-7 h-7 object-contain"
                   style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
                 />
+                <span className="text-[9px] font-bold text-white leading-tight mt-0.5">내정보</span>
               </button>
               <button
                 className="text-white p-1 ml-1"
@@ -244,96 +240,80 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
       {/* 모바일 메뉴 */}
       {menuOpen && (
-        <>
-          {/* 배경 오버레이 — 메뉴 외부 터치 시 닫힘 */}
-          <div
-            className="md:hidden fixed inset-0 z-[9998]"
-            onClick={() => setMenuOpen(false)}
-            aria-hidden="true"
-          />
-          <div
-            className="md:hidden fixed left-0 right-0 top-12 z-[9999] border-t flex flex-col gap-0.5 py-2 px-3 overflow-y-auto"
-            style={{
-              background: "hsl(var(--header-bg))",
-              borderColor: "hsl(var(--header-border))",
-              maxHeight: "calc(100vh - 48px)",
-            }}
-          >
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.label}
-                onPointerDown={() => prefetchRoute(item.path)}
-                onClick={() => { navigate(item.path); setMenuOpen(false); }}
-                className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
-              >
-                {item.label}
-              </button>
-            ))}
+        <div className="md:hidden border-t flex flex-col gap-0.5 py-2 px-3 relative z-[1210]"
+          style={{ background: "hsl(var(--header-bg))", borderColor: "hsl(var(--header-border))" }}>
+          {NAV_ITEMS.map((item) => (
             <button
-              onPointerDown={() => prefetchRoute("/community")}
-              onClick={() => { navigate("/community"); setMenuOpen(false); }}
-              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 active:bg-white/15"
+              key={item.label}
+              onClick={() => { navigate(item.path); setMenuOpen(false); }}
+              className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
             >
-              커뮤니티
+              {item.label}
             </button>
-            {!hideInstallButton && (
-              <button
-                onClick={() => { setShowInstall(true); setMenuOpen(false); }}
-                className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
+          ))}
+          <button
+            onClick={() => { navigate("/community"); setMenuOpen(false); }}
+            className="text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+          >
+            커뮤니티
+          </button>
+          {!hideInstallButton && (
+            <button
+              onClick={() => { setShowInstall(true); setMenuOpen(false); }}
+              className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2 text-white"
+            >
+              <Download className="w-4 h-4" />
+              앱 설치하기
+            </button>
+          )}
+          <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
+            {location.pathname !== "/" && (
+              <Button
+                size="sm"
+                onClick={openRegister}
+                className="w-full rounded-lg font-bold"
+                style={{ background: "hsl(var(--accent))", color: "white", border: "none" }}
               >
-                <Download className="w-4 h-4" />
-                앱 설치하기
+                + 매물 등록
+              </Button>
+            )}
+            {isAuthorized && (
+              <>
+                <button
+                  onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
+                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
+                >
+                  마이페이지
+                </button>
+                {user?.isAdmin && (
+                  <button
+                    onClick={() => { navigate("/admin"); setMenuOpen(false); }}
+                    className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+                    style={{ color: "hsl(var(--accent))" }}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    관리자 모드
+                  </button>
+                )}
+                <button
+                  className="w-full text-sm text-white/50 font-medium py-2 mt-1"
+                  onClick={handleLogout}
+                >
+                  로그아웃
+                </button>
+              </>
+            )}
+            {!isAuthorized && (
+              <button
+                onClick={() => { navigate("/admin/login"); setMenuOpen(false); }}
+                className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                로그인
               </button>
             )}
-            <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
-              {location.pathname !== "/" && (
-                <Button
-                  size="sm"
-                  onClick={openRegister}
-                  className="w-full rounded-lg font-bold text-white border-0 hover:opacity-90 transition-opacity"
-                  style={{ background: "linear-gradient(135deg, #d946ef 0%, #3b82f6 100%)" }}
-                >
-                  + 매물 등록
-                </Button>
-              )}
-              {isAuthorized && (
-                <>
-                  <button
-                    onClick={() => { navigate("/my-page"); setMenuOpen(false); }}
-                    className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10"
-                  >
-                    마이페이지
-                  </button>
-                  {user?.isAdmin && (
-                    <button
-                      onClick={() => { navigate("/admin"); setMenuOpen(false); }}
-                      className="w-full text-left text-sm font-bold py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                      style={{ color: "hsl(var(--accent))" }}
-                    >
-                      <ShieldCheck className="w-4 h-4" />
-                      관리자 모드
-                    </button>
-                  )}
-                  <button
-                    className="w-full text-sm text-white/50 font-medium py-2 mt-1"
-                    onClick={handleLogout}
-                  >
-                    로그아웃
-                  </button>
-                </>
-              )}
-              {!isAuthorized && (
-                <button
-                  onClick={() => { navigate("/admin/login"); setMenuOpen(false); }}
-                  className="w-full text-left text-sm font-medium text-white/70 py-2 px-3 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  로그인
-                </button>
-              )}
-            </div>
           </div>
-        </>
+        </div>
       )}
     </header>
   );

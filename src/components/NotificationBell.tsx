@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { Bell } from "lucide-react";
 import iconBellNew from "@/assets/icon-bell-new.png";
-import { GradientBellIcon } from "@/components/icons/GradientIcons";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,18 +38,11 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     return () => { supabase.removeChannel(ch); };
   }, [isAuthorized, user?.userId, refresh]);
 
-  const prefetch = useCallback(() => {
-    import("@/pages/NotificationsPage").catch(() => {});
-  }, []);
-
   if (variant === "mobile") {
     return (
       <button
-        onPointerDown={() => navigate(isAuthorized ? "/notifications" : "/login")}
-        onTouchStart={prefetch}
-        onMouseEnter={prefetch}
-        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md active:opacity-70 transition-opacity"
-        style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+        onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
+        className="relative flex flex-col items-center justify-center w-12 h-11 rounded-md"
         aria-label="알림"
         title="알림"
       >
@@ -59,6 +52,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
           className="w-7 h-7 object-contain"
           style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
         />
+        <span className="text-[9px] font-bold text-white leading-tight mt-0.5">알림</span>
         {count > 0 && (
           <span className="absolute top-0.5 right-1.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
             {count > 99 ? "99+" : count}
@@ -76,7 +70,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       title="알림"
       aria-label="알림"
     >
-      <GradientBellIcon size={20} />
+      <Bell className="w-3.5 h-3.5" />
       {count > 0 && (
         <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}

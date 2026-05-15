@@ -14,7 +14,6 @@ import Header from "@/components/Header";
 import PropertyRegisterModal from "@/components/PropertyRegisterModal";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import JibunInlineAddress from "@/components/JibunInlineAddress";
-import { thumbUrl } from "@/lib/imageThumb";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type DBProperty = {
@@ -90,8 +89,6 @@ const EMPTY_PROPERTY: Omit<DBProperty, "id" | "created_at"> = {
   views:0, lat:0, lng:0, is_new:false, is_hot:false, status:"active",
   registered_date: new Date().toISOString().slice(0,10), checked_date:"", agent_name:"",
 };
-
-const MY_PROPERTY_COLUMNS = "id,title,building_name,address,dong,lot_number,district,type,room_type,unit_number,area,floor,deposit,monthly,manage_fee,parking,elevator,available_from,total_floors,build_year,description,building_memo,room_memo,note,vacate_date,building_password,room_password,options,images,views,lat,lng,is_new,is_hot,status,registered_date,checked_date,agent_name,registered_by,created_at";
 
 // ─── Edit Modal ───────────────────────────────────────────────────────────────
 const EditModal = ({
@@ -486,15 +483,7 @@ const PropertyRow = ({
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
-          <img
-            src={thumbUrl(prop.images[0], 96)}
-            alt=""
-            width={48}
-            height={40}
-            loading="lazy"
-            decoding="async"
-            className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border bg-muted"
-          />
+          <img src={prop.images[0]} alt="" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
         ) : (
           <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
             <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -624,16 +613,7 @@ const PropertyRow = ({
           {(prop.images?.length ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 flex gap-2 flex-wrap mt-1">
               {prop.images.map((url, i) => (
-                <img
-                  key={i}
-                  src={thumbUrl(url, 128)}
-                  alt=""
-                  width={64}
-                  height={56}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-16 h-14 rounded-lg object-cover border border-border bg-muted"
-                />
+                <img key={i} src={url} alt="" className="w-16 h-14 rounded-lg object-cover border border-border" />
               ))}
             </div>
           )}
@@ -683,7 +663,7 @@ const MyProperties = () => {
         // 관리자: 전체 매물 + agent_profiles 매핑 조회
         setAgentName("관리자");
         const [{ data: props }, { data: profiles }] = await Promise.all([
-          supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false }),
+          supabase.from("properties").select("*").order("registered_date", { ascending: false }),
           supabase.from("agent_profiles").select("user_id, name, agency_name"),
         ]);
         if (props) setProperties(props as DBProperty[]);
@@ -729,7 +709,7 @@ const MyProperties = () => {
       // registered_by = 본인 userId OR agent_name = 본인 이름 (둘 다 커버)
       const { data, error } = await supabase
         .from("properties")
-        .select(MY_PROPERTY_COLUMNS)
+        .select("*")
         .or(`registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`)
         .order("registered_date", { ascending: false });
 
@@ -740,24 +720,20 @@ const MyProperties = () => {
     load();
   }, [user, authLoading, navigate]);
 
-  // Realtime 구독 (변경 다발 시 debounce로 묶어 한 번만 refetch)
+  // Realtime 구독
   useEffect(() => {
     if (!agentName) return;
-    let timer: number | null = null;
     const channel = supabase
       .channel("my-properties-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, () => {
-        if (timer) window.clearTimeout(timer);
-        timer = window.setTimeout(async () => {
-          const isAdmin = agentName === "관리자";
-          let q = supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false }).limit(1000);
-          if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
-          const { data } = await q;
-          if (data) setProperties(data as DBProperty[]);
-        }, 1000);
+      .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, async () => {
+        const isAdmin = agentName === "관리자";
+        let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
+        if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
+        const { data } = await q;
+        if (data) setProperties(data as DBProperty[]);
       })
       .subscribe();
-    return () => { if (timer) window.clearTimeout(timer); supabase.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [agentName]);
 
   const handleEdit = async (data: Omit<DBProperty, "id" | "created_at">) => {
@@ -811,7 +787,7 @@ const MyProperties = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
-      <Header />
+      <Header onRegisterChange={setShowRegister} />
       {showRegister && (
         <PropertyRegisterModal
           onClose={() => { setShowRegister(false); setReregisterPrefill(null); }}
@@ -825,7 +801,7 @@ const MyProperties = () => {
           onSaved={async () => {
             // 저장 후 매물 새로고침
             const isAdmin = agentName === "관리자";
-            let q = supabase.from("properties").select(MY_PROPERTY_COLUMNS).order("registered_date", { ascending: false });
+            let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
             if (!isAdmin && user?.userId) {
               q = (q as ReturnType<typeof supabase.from>).or(`registered_by.eq.${user.userId}${agentName ? `,agent_name.eq.${agentName}` : ""}`) as typeof q;
             }

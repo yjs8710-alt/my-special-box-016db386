@@ -215,7 +215,6 @@ function ImageCarouselPreview({
 import { X, Phone, Eye, EyeOff, ChevronDown, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts";
-import { imageFileExtension, preparePropertyImage, runLimited } from "@/lib/imageUpload";
 
 // ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
 import { formatPhone } from "@/lib/utils";
@@ -739,17 +738,18 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
+    const newUrls: string[] = [];
     const fileArray = Array.from(files).filter((f) => f.type.startsWith("image/"));
 
-    try {
-      const uploadResults = await runLimited(fileArray, 3, async (file, i) => {
-        const prepared = await preparePropertyImage(file);
-        const ext = imageFileExtension(prepared);
+    // 병렬 업로드: 각 파일에 고유 타임스탬프+인덱스로 경로 중복 방지
+    const uploadResults = await Promise.all(
+      fileArray.map(async (file, i) => {
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
         const uniqueId = `${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}`;
         const path = `properties/${uniqueId}.${ext}`;
         const { error } = await supabase.storage
           .from("property-images")
-          .upload(path, prepared, { upsert: false, cacheControl: "31536000", contentType: prepared.type });
+          .upload(path, file, { upsert: false });
         if (error) {
           console.error(`이미지 업로드 실패 (${file.name}):`, error.message);
           return null;
@@ -758,20 +758,19 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           .from("property-images")
           .getPublicUrl(path);
         return urlData?.publicUrl ?? null;
-      });
+      })
+    );
 
-      const successUrls = uploadResults.filter((url): url is string => !!url);
-      if (successUrls.length < fileArray.length) {
-        alert(`${fileArray.length}장 중 ${successUrls.length}장 업로드 성공. 일부 실패했습니다.`);
-      }
-      if (successUrls.length > 0) {
-        setForm((f) => ({ ...f, images: [...(f.images ?? []), ...successUrls] }));
-      }
-    } finally {
-      // input 초기화 (같은 파일 재선택 가능하도록)
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setUploading(false);
+    const successUrls = uploadResults.filter((url): url is string => !!url);
+    if (successUrls.length < fileArray.length) {
+      alert(`${fileArray.length}장 중 ${successUrls.length}장 업로드 성공. 일부 실패했습니다.`);
     }
+    if (successUrls.length > 0) {
+      setForm((f) => ({ ...f, images: [...(f.images ?? []), ...successUrls] }));
+    }
+    // input 초기화 (같은 파일 재선택 가능하도록)
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setUploading(false);
   };
 
   const toggleOption = (opt: string) => {

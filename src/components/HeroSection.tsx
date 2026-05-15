@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, ClipboardList, Search, User } from "lucide-react";
 import heroBgMobile from "@/assets/main-bg-mobile.webp";
@@ -21,8 +21,6 @@ const APP_ACTIONS = [
   { label: "내 매물", path: "/my-properties", Icon: ClipboardList },
   { label: "마이페이지", path: "/my-page", Icon: User },
 ];
-
-const prefetchRoute = (_path: string) => {};
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -77,11 +75,8 @@ const HeroSection = () => {
           {CATEGORIES.map(({ label, path, icon }) => (
             <button
               key={label}
-              onPointerDown={() => prefetchRoute(path)}
-              onMouseEnter={() => prefetchRoute(path)}
               onClick={() => navigate(path)}
-              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-[1.35] rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-colors duration-150 shadow-lg active:scale-[0.98]"
-              style={{ touchAction: "manipulation" }}
+              className="group flex flex-col items-center justify-center gap-2 aspect-square md:aspect-[1.35] rounded-2xl border-2 border-white/50 bg-white/10 backdrop-blur-md text-white hover:bg-white hover:text-primary transition-all duration-200 shadow-lg"
             >
               <img src={icon} alt={label} loading="eager" decoding="async" width={56} height={56} className="w-14 h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" />
               <span className="text-sm md:text-base font-bold leading-tight px-2">{label}</span>

@@ -43,9 +43,6 @@ async function getIsAdmin(userId: string) {
       const isAdmin = Boolean(roleData);
       lastAdminCheck = { userId, isAdmin, at: Date.now() };
       return isAdmin;
-    } catch {
-      lastAdminCheck = { userId, isAdmin: false, at: Date.now() };
-      return false;
     } finally {
       if (adminCheckPromise?.userId === userId) adminCheckPromise = null;
     }
@@ -109,25 +106,8 @@ async function checkSession() {
   return sessionCheckPromise;
 }
 
-async function clearBrokenAuthSession() {
-  try { await supabase.auth.signOut({ scope: "local" }); } catch {}
-  teardownDeviceChannel();
-  notify("unauthorized", null);
-}
-
 async function runSessionCheck() {
-  let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      await clearBrokenAuthSession();
-      return;
-    }
-    session = data.session;
-  } catch {
-    await clearBrokenAuthSession();
-    return;
-  }
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user) {
     teardownDeviceChannel();
     notify("unauthorized", null);
@@ -163,7 +143,7 @@ async function runSessionCheck() {
 }
 
 // 앱 시작 시 한번 체크
-checkSession().catch(() => clearBrokenAuthSession());
+checkSession();
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (!session) {
@@ -173,7 +153,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 
   // 세션 상태 즉시 갱신 (IP/디바이스 검증은 백그라운드)
-  checkSession().catch(() => clearBrokenAuthSession());
+  checkSession();
 
   // 로그인/세션 갱신 시: 디바이스 슬롯 클레임 + 검증 + 채널 구독 (비동기)
   if (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED") {
@@ -184,11 +164,9 @@ supabase.auth.onAuthStateChange((event, session) => {
 
       try { await claimDeviceSlot(); } catch {}
       setupDeviceChannel(session.user.id);
-      // 허용 IP 검증 (데스크톱 한정 — 모바일은 셀룰러/와이파이 IP 변동으로 제외)
-      if (getDeviceType() === "desktop") {
-        const ipOk = await verifyPcIpAllowed();
-        if (!ipOk) { await forceLogoutDueToIpRestriction(); return; }
-      }
+      // 허용 IP 검증 (PC/모바일 공통)
+      const ipOk = await verifyPcIpAllowed();
+      if (!ipOk) { await forceLogoutDueToIpRestriction(); return; }
       // 디바이스 슬롯 정합성 검증
       const ok = await verifyDeviceSlot();
       if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
@@ -200,24 +178,14 @@ supabase.auth.onAuthStateChange((event, session) => {
 if (typeof document !== "undefined") {
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState !== "visible") return;
-    let session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] = null;
-    try {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) { await clearBrokenAuthSession(); return; }
-      session = data.session;
-    } catch {
-      await clearBrokenAuthSession();
-      return;
-    }
+    const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     // 관리자는 검증 스킵
     if (await getIsAdmin(session.user.id)) return;
     const ok = await verifyDeviceSlot();
     if (!ok) { await forceLogoutDueToDeviceConflict(); return; }
-    if (getDeviceType() === "desktop") {
-      const ipOk = await verifyPcIpAllowed();
-      if (!ipOk) await forceLogoutDueToIpRestriction();
-    }
+    const ipOk = await verifyPcIpAllowed();
+    if (!ipOk) await forceLogoutDueToIpRestriction();
   });
 }
 

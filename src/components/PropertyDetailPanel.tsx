@@ -251,34 +251,23 @@ function Lightbox({
       )}
       {/* 하단 액션 — 저장 + 닫기 */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20" onClick={(e) => e.stopPropagation()}>
-        {!isMobile && currentImages.length > 0 && (
+        {!isMobile && currentImages[imgIdx] && (
           <button
             onClick={async () => {
-              const total = currentImages.length;
+              const src = currentImages[imgIdx];
               try {
-                toast.loading(`전체 저장 중... (0/${total})`, { id: "dl-all" });
-                let ok = 0;
-                for (let i = 0; i < total; i++) {
-                  try {
-                    await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
-                    ok++;
-                    toast.loading(`전체 저장 중... (${ok}/${total})`, { id: "dl-all" });
-                    // 브라우저가 연속 다운로드를 차단하지 않도록 약간 지연
-                    await new Promise((r) => setTimeout(r, 250));
-                  } catch {
-                    /* skip */
-                  }
-                }
-                toast.success(`${ok}/${total}장 저장되었습니다`, { id: "dl-all" });
+                toast.loading("저장 중...", { id: "dl-current" });
+                await downloadPropertyImage(src, `사진_${imgIdx + 1}.jpg`);
+                toast.success("저장되었습니다", { id: "dl-current" });
               } catch {
-                toast.error("저장 실패", { id: "dl-all" });
+                toast.error("저장 실패", { id: "dl-current" });
               }
             }}
             className="flex items-center gap-1.5 px-5 py-3 rounded-full text-white text-sm font-extrabold shadow-2xl transition-transform active:scale-95"
             style={{ background: "hsl(var(--primary))", border: "2px solid rgba(255,255,255,0.5)" }}
           >
             <Download className="w-4 h-4" />
-            전체 저장 ({currentImages.length})
+            저장
           </button>
         )}
         <button

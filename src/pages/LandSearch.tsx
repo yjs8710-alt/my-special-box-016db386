@@ -30,7 +30,6 @@ const LandSearch = () => {
   const [landlordLoading, setLandlordLoading] = useState(false);
   const [landlordSearched, setLandlordSearched] = useState(false);
   const mapBoundsRef = useRef<MapBounds | null>(null);
-  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties(["토지"]);
   const allProperties = useMemo(() => [...LAND_PROPERTIES, ...dbProperties], [dbProperties]);
@@ -48,15 +47,7 @@ const LandSearch = () => {
   const filtered = usePropertyFilter(allProperties, filters, landTypeFilter, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
 
-  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBounds(b); }, []);
-
-  const handleZoomChange = useCallback(() => {
-    if (pinnedIds.length > 0) {
-      setPinnedIds([]);
-      setPinnedAddress(null);
-      setSelectedId(null);
-    }
-  }, [pinnedIds]);
+  const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; }, []);
 
   const handleSearchClick = useCallback(() => {
     setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(true);
@@ -83,11 +74,14 @@ const LandSearch = () => {
   }, [filtered, allProperties, pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
-    if (pinnedIds.length > 0) return filtered.filter(p => pinnedIds.includes(p.id));
-    const b = mapBounds;
-    if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
-    return filtered;
-  }, [filtered, pinnedIds, mapBounds]);
+    if (showAllFromSearch) {
+      const b = mapBoundsRef.current;
+      if (b) return filtered.filter(p => p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
+      return filtered;
+    }
+    if (pinnedIds.length === 0) return filtered;
+    return filtered.filter(p => pinnedIds.includes(p.id));
+  }, [filtered, pinnedIds, showAllFromSearch]);
 
   return (
     <div className="flex flex-col" style={{ height: "100vh", overflow: "hidden" }}>
@@ -136,7 +130,6 @@ const LandSearch = () => {
             selectedId={selectedId}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
-            onZoomChange={handleZoomChange}
             suppressPan={suppressPan}
           />
           <MapFilterBar

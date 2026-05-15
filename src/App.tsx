@@ -3,31 +3,33 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
-import { Component, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import Home from "./pages/Home";
-import LoginPage from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import SignupPage from "./pages/Signup";
-import Community from "./pages/Community";
-import IndexPage from "./pages/Index";
-import ResidentialRental from "./pages/ResidentialRental";
-import NonResidentialRental from "./pages/NonResidentialRental";
-import LandSearch from "./pages/LandSearch";
-import CommercialRental from "./pages/CommercialRental";
-import NotFound from "./pages/NotFound";
-import PublicProperty from "./pages/PublicProperty";
-import AdminLogin from "./pages/AdminLogin";
-import MyProperties from "./pages/MyProperties";
-import MyPage from "./pages/MyPage";
-import MyInfoPage from "./pages/MyInfoPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import ChatPage from "./pages/ChatPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import ChatInquiryWidget from "./components/ChatInquiryWidget";
+import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import ChatInquiryWidget from "./components/ChatInquiryWidget";
 import MobileBottomNav from "./components/MobileBottomNav";
+
+// 첫 화면(Home)은 즉시 로딩, 나머지 라우트는 lazy 로딩으로 초기 번들 최소화
+const LoginPage = lazy(() => import("./pages/Login"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const SignupPage = lazy(() => import("./pages/Signup"));
+const Community = lazy(() => import("./pages/Community"));
+const ResidentialRental = lazy(() => import("./pages/ResidentialRental"));
+const LandSearch = lazy(() => import("./pages/LandSearch"));
+const NonResidentialRental = lazy(() => import("./pages/NonResidentialRental"));
+const CommercialRental = lazy(() => import("./pages/CommercialRental"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const PublicProperty = lazy(() => import("./pages/PublicProperty"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const MyProperties = lazy(() => import("./pages/MyProperties"));
+const MyPage = lazy(() => import("./pages/MyPage"));
+const MyInfoPage = lazy(() => import("./pages/MyInfoPage"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const ChatPage = lazy(() => import("./pages/ChatPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
@@ -36,19 +38,6 @@ const RouteFallback = () => (
     불러오는 중…
   </div>
 );
-
-class SilentWidgetBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  render() {
-    if (!this.state.hasError) return this.props.children;
-    return null;
-  }
-}
 
 const LegacyPropertyRedirect = () => {
   const { id } = useParams<{ id: string }>();
@@ -140,6 +129,7 @@ const App = () => {
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <PwaUpdatePrompt />
       <BrowserRouter>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
@@ -153,7 +143,6 @@ const App = () => {
 
             {/* 첫 화면은 eager */}
             <Route path="/" element={<Home />} />
-            <Route path="/index" element={<ProtectedRoute><IndexPage /></ProtectedRoute>} />
 
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
@@ -175,12 +164,8 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Suspense>
-        <Suspense fallback={null}>
-          <SilentWidgetBoundary>
-            <ChatInquiryWidget />
-            <MobileBottomNav />
-          </SilentWidgetBoundary>
+          <ChatInquiryWidget />
+          <MobileBottomNav />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>
