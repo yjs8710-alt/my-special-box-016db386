@@ -263,6 +263,19 @@ function LightboxModal({
         </>
       )}
 
+      {/* 모바일: 우측 하단 플로팅 닫기 버튼 */}
+      {isMobileView && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl"
+          style={{ background: "#fff", color: "hsl(var(--primary))", border: "2px solid hsl(var(--primary))" }}
+          aria-label="닫기"
+          title="닫기"
+        >
+          <X className="w-6 h-6" strokeWidth={2.5} />
+        </button>
+      )}
+
       {/* ── 모바일: 좌우 가로 스와이프 ── */}
       {isMobileView ? (
         <div
