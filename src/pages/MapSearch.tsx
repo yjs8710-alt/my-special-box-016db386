@@ -216,6 +216,7 @@ const MapSearch = () => {
           <MapFilterBar
             activeType={activeType}
             onTypeChange={setActiveType}
+            onClearTypeFilters={() => setActiveType("전체")}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}

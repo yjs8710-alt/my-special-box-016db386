@@ -134,6 +134,7 @@ const LandSearch = () => {
           <MapFilterBar
             activeType={activeType}
             onTypeChange={(t) => toggleType(t)}
+            onClearTypeFilters={() => setActiveTypes(["전체"])}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}

@@ -142,6 +142,7 @@ const ApartmentRental = () => {
             activeType={activeType}
             activeTypes={activeTypes}
             onTypeChange={(t) => toggleType(t)}
+            onClearTypeFilters={() => setActiveTypes([])}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}
