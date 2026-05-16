@@ -635,7 +635,7 @@ const MapFilterBar = ({
                 </button>
                 {activeFilterCount > 0 && (
                   <button
-                    onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
+                    onClick={() => setShowClearModal(true)}
                     className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors flex-shrink-0"
                     style={{ borderLeft: "1px solid hsl(var(--border))", background: "hsl(var(--destructive))", color: "#fff" }}
                   >
