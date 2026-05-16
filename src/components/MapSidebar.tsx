@@ -172,16 +172,6 @@ function LightboxModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-row gap-1.5 items-start flex-nowrap w-full relative">
-            {/* 좌측: 닫기 버튼 */}
-            <button
-              onClick={(e) => { e.stopPropagation(); onClose(); }}
-              className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "#fff", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary))" }}
-              aria-label="닫기"
-              title="닫기"
-            >
-              <X className="w-5 h-5" strokeWidth={2.5} />
-            </button>
             {/* 가운데: 탭 (가로 스크롤) */}
             <div className="flex flex-row gap-1.5 items-center flex-nowrap overflow-x-auto scrollbar-none flex-1 min-w-0">
               {hasTabs && visibleUnits.map((u, i) => renderTabButton(u, i, { stacked: true }))}
@@ -230,10 +220,9 @@ function LightboxModal({
                 e.stopPropagation();
                 if (!currentImages.length) return;
                 const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-                for (let i = 0; i < currentImages.length; i++) {
-                  await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
-                  await new Promise((r) => setTimeout(r, 250));
-                }
+                await Promise.all(
+                  currentImages.map((src, i) => downloadPropertyImage(src, `사진_${i + 1}.jpg`))
+                );
               }}
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold border border-white/30"
               title="사진저장"
@@ -251,10 +240,9 @@ function LightboxModal({
               e.stopPropagation();
               if (!currentImages.length) return;
               const { downloadPropertyImage } = await import("@/lib/downloadImageWithWatermark");
-              for (let i = 0; i < currentImages.length; i++) {
-                await downloadPropertyImage(currentImages[i], `사진_${i + 1}.jpg`);
-                await new Promise((r) => setTimeout(r, 250));
-              }
+              await Promise.all(
+                currentImages.map((src, i) => downloadPropertyImage(src, `사진_${i + 1}.jpg`))
+              );
             }}
             className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md border border-white/30 transition-colors"
             title="사진저장"
@@ -273,6 +261,19 @@ function LightboxModal({
             </div>
           )}
         </>
+      )}
+
+      {/* 모바일: 우측 하단 플로팅 닫기 버튼 */}
+      {isMobileView && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl"
+          style={{ background: "#fff", color: "hsl(var(--primary))", border: "2px solid hsl(var(--primary))" }}
+          aria-label="닫기"
+          title="닫기"
+        >
+          <X className="w-6 h-6" strokeWidth={2.5} />
+        </button>
       )}
 
       {/* ── 모바일: 좌우 가로 스와이프 ── */}

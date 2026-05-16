@@ -615,14 +615,18 @@ const MapFilterBar = ({
                 <button
                   onClick={() => setShowFilter((v) => !v)}
                   className="relative flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
-                  style={{ borderLeft: "1px solid hsl(var(--primary) / 0.3)", color: showFilter ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                  style={{
+                    borderLeft: "1px solid hsl(var(--primary) / 0.3)",
+                    background: (showFilter || activeFilterCount > 0) ? "hsl(var(--accent))" : "transparent",
+                    color: (showFilter || activeFilterCount > 0) ? "#fff" : "hsl(var(--muted-foreground))",
+                  }}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium hidden md:inline">필터</span>
+                  <span className="text-xs font-medium">필터</span>
                   {activeFilterCount > 0 && (
                     <span
                       className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white"
-                      style={{ background: "hsl(var(--accent))" }}
+                      style={{ background: "hsl(var(--destructive))" }}
                     >
                       {activeFilterCount}
                     </span>
@@ -631,11 +635,11 @@ const MapFilterBar = ({
                 {activeFilterCount > 0 && (
                   <button
                     onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
-                    className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors text-destructive hover:text-destructive/80 flex-shrink-0"
-                    style={{ borderLeft: "1px solid hsl(var(--border))" }}
+                    className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors flex-shrink-0"
+                    style={{ borderLeft: "1px solid hsl(var(--border))", background: "hsl(var(--destructive))", color: "#fff" }}
                   >
                     <X className="w-3 h-3" />
-                    <span className="text-[10px] font-bold whitespace-nowrap hidden md:inline">필터해제</span>
+                    <span className="text-[10px] font-bold whitespace-nowrap">해제</span>
                   </button>
                 )}
                 {onRadiusModeToggle && (
