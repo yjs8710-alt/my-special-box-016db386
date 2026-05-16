@@ -682,16 +682,19 @@ const MapFilterBar = ({
                 </button>
                 <button
                   type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (activeFilterCount > 0) setShowClearModal(true);
+                    if (activeFilterCount === 0) return;
+                    setShowClearModal(true);
                   }}
-                  disabled={activeFilterCount === 0}
-                  className="flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{
                     borderLeft: "1px solid hsl(var(--border))",
                     background: activeFilterCount > 0 ? "hsl(var(--destructive))" : "transparent",
                     color: activeFilterCount > 0 ? "#fff" : "hsl(var(--muted-foreground))",
+                    opacity: activeFilterCount > 0 ? 1 : 0.5,
+                    cursor: activeFilterCount > 0 ? "pointer" : "not-allowed",
                   }}
                 >
                   <X className="w-3.5 h-3.5" />
