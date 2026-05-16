@@ -389,6 +389,7 @@ const MapFilterBar = ({
   propertyCount,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // 검색어 입력값(로컬) — 검색 버튼/Enter 클릭 시에만 commit
   const [pendingQuery, setPendingQuery] = useState(query);
@@ -520,6 +521,53 @@ const MapFilterBar = ({
 
   return (
     <>
+      {/* 필터 해제 확인 모달 */}
+      {showClearModal && (
+        <div
+          className="fixed inset-0 z-[10100] bg-black/50 flex items-center justify-center px-4"
+          onClick={() => setShowClearModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 pt-5 pb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: "hsl(var(--destructive) / 0.12)", color: "hsl(var(--destructive))" }}
+                >
+                  <X className="w-5 h-5" strokeWidth={2.5} />
+                </div>
+                <h3 className="text-base font-extrabold text-foreground">필터 해제</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                현재 적용된 필터 <span className="font-bold text-foreground">{activeFilterCount}개</span>를 모두 해제하시겠습니까?
+              </p>
+            </div>
+            <div className="flex border-t border-border">
+              <button
+                onClick={() => setShowClearModal(false)}
+                className="flex-1 py-3 text-sm font-bold text-muted-foreground hover:bg-muted/40 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => {
+                  onFiltersChange({ ...DEFAULT_FILTERS });
+                  setShowFilter(false);
+                  setShowClearModal(false);
+                }}
+                className="flex-1 py-3 text-sm font-extrabold text-white transition-colors"
+                style={{ background: "hsl(var(--destructive))" }}
+              >
+                해제
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 필터 패널 외부 클릭 시 닫기 (별도 적용 버튼 없이 자동 적용됨) */}
       {showFilter && (
         <div
@@ -634,7 +682,7 @@ const MapFilterBar = ({
                 </button>
                 {activeFilterCount > 0 && (
                   <button
-                    onClick={() => { onFiltersChange({ ...DEFAULT_FILTERS }); setShowFilter(false); }}
+                    onClick={() => setShowClearModal(true)}
                     className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors flex-shrink-0"
                     style={{ borderLeft: "1px solid hsl(var(--border))", background: "hsl(var(--destructive))", color: "#fff" }}
                   >
