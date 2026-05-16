@@ -681,19 +681,21 @@ const MapFilterBar = ({
                   )}
                 </button>
                 <button
-                  onClick={() => {
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (activeFilterCount > 0) setShowClearModal(true);
                   }}
                   disabled={activeFilterCount === 0}
-                  className="flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     borderLeft: "1px solid hsl(var(--border))",
                     background: activeFilterCount > 0 ? "hsl(var(--destructive))" : "transparent",
                     color: activeFilterCount > 0 ? "#fff" : "hsl(var(--muted-foreground))",
                   }}
                 >
-                  <X className="w-3 h-3" />
-                  <span className="text-[10px] font-bold whitespace-nowrap">해제</span>
+                  <X className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">해제</span>
                 </button>
                 {onRadiusModeToggle && (
                   <button
