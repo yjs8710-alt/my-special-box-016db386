@@ -169,6 +169,7 @@ interface MapFilterBarProps {
   apartmentDealTypes?: string[];
   onApartmentDealTypeChange?: (t: string) => void;
   onClearApartmentDealTypes?: () => void;
+  onClearTypeFilters?: () => void;
   /** 반경검색 모드 활성 여부 */
   radiusMode?: boolean;
   /** 반경검색 모드 토글 */
@@ -382,6 +383,7 @@ const MapFilterBar = ({
   apartmentDealTypes = [],
   onApartmentDealTypeChange,
   onClearApartmentDealTypes,
+  onClearTypeFilters,
   radiusMode = false,
   onRadiusModeToggle,
   radiusInfo,
@@ -503,7 +505,11 @@ const MapFilterBar = ({
     f.landCategory.length === 0 &&
     f.zoneType.length === 0;
 
+  const hasTypeFilters = activeTypes ? activeTypes.some((t) => t !== "전체") : activeType !== "전체";
   const activeFilterCount = [
+    hasTypeFilters,
+    showApartmentFilters && apartmentActiveTypes.length > 0,
+    showApartmentFilters && apartmentDealTypes.length > 0,
     filters.dealType.length > 0,
     filters.roomTypes.length > 0,
     filters.depositRange[0] !== 0 || filters.depositRange[1] !== 50000,
@@ -519,8 +525,10 @@ const MapFilterBar = ({
   ].filter(Boolean).length;
 
   const clearFiltersImmediately = () => {
-    if (activeFilterCount === 0) return;
     onFiltersChange({ ...DEFAULT_FILTERS });
+    onClearTypeFilters?.();
+    onClearApartmentTypes?.();
+    onClearApartmentDealTypes?.();
     setShowFilter(false);
   };
 
