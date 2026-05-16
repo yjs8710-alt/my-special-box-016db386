@@ -236,6 +236,7 @@ const ResidentialRental = () => {
             activeType={activeType}
             activeTypes={activeTypes}
             onTypeChange={(t) => toggleType(t)}
+            onClearTypeFilters={() => setActiveTypes(["전체"])}
             query={query}
             onQueryChange={setQuery}
             propertyId={propertyId}
