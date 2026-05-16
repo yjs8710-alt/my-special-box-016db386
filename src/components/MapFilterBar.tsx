@@ -389,6 +389,7 @@ const MapFilterBar = ({
   propertyCount,
 }: MapFilterBarProps) => {
   const [showFilter, setShowFilter] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
 
   // 검색어 입력값(로컬) — 검색 버튼/Enter 클릭 시에만 commit
   const [pendingQuery, setPendingQuery] = useState(query);
