@@ -640,12 +640,8 @@ const MapFilterBar = ({
                 </button>
                 <button
                   type="button"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (activeFilterCount === 0) return;
-                    setShowClearModal(true);
-                  }}
+                  onPointerDown={clearFiltersImmediately}
+                  onClick={clearFiltersImmediately}
                   className="flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{
                     borderLeft: "1px solid hsl(var(--border))",
