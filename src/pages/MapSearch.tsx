@@ -212,6 +212,7 @@ const MapSearch = () => {
             onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
             onBoundsChange={setCurrentBounds}
             onMapMoveClear={() => setSelectedId(null)}
+          />
           {/* 필터 바 오버레이 */}
           <MapFilterBar
             activeType={activeType}
