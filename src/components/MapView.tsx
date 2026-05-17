@@ -462,7 +462,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => {
     if (!mapRef.current || !window.kakao?.maps) return;
     renderOverlays(mapRef.current, properties, selectedId, onSelect, zoomLevelRef.current);
-  }, [properties, selectedId, onSelect, renderOverlays]);
+  }, [properties, selectedId, selectedIds, onSelect, renderOverlays]);
 
   // 외부에서 radiusCircle 변경(해제 등) 동기화
   useEffect(() => {
