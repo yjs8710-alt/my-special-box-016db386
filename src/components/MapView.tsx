@@ -102,10 +102,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
       flex-direction:column;
       align-items:center;
       gap:0;
-      transform:scale(${scale});
+      transform:scale(${scale}) translateZ(0);
       transform-origin:bottom center;
       cursor:pointer;
-      filter:${shadow};
+      will-change:transform;
     ">
       <!-- 원형 배경 -->
       <div style="
@@ -118,6 +118,7 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
         align-items:center;
         justify-content:center;
         flex-shrink:0;
+        box-shadow:${shadow};
       ">
         ${houseIcon}
       </div>
