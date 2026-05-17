@@ -141,6 +141,8 @@ export interface MapBounds {
 interface MapViewProps {
   properties: MapProperty[];
   selectedId: number | null;
+  /** 다중 선택 유지 — 포함된 모든 핀을 강조 표시 */
+  selectedIds?: number[];
   onSelect: (id: number) => void;
   /** 지도 이동/줌 시 현재 화면 범위 콜백 */
   onBoundsChange?: (bounds: MapBounds) => void;
