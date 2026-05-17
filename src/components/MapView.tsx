@@ -179,9 +179,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange });
+  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange };
+    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear };
   });
 
   const waitForContainerReady = useCallback(async () => {
