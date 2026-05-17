@@ -65,9 +65,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
 
   const ringColor = isSelected ? "white" : "rgba(255,255,255,0.7)";
   const ringWidth = isSelected ? 2.5 : 1.5;
+  // box-shadow는 filter: drop-shadow 보다 훨씬 가벼움 (모바일 렉 개선)
   const shadow = isSelected
-    ? `drop-shadow(0 0 6px ${accent}cc) drop-shadow(0 3px 8px rgba(0,0,0,0.45))`
-    : `drop-shadow(0 2px 5px rgba(0,0,0,0.38))`;
+    ? `0 0 0 2px ${accent}66, 0 3px 8px rgba(0,0,0,0.4)`
+    : `0 2px 4px rgba(0,0,0,0.3)`;
   const scale = isSelected ? 1.25 : 1;
 
   // 꼬리(말풍선 삼각형) 높이 = size * 0.22
