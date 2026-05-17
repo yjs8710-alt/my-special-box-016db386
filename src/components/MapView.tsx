@@ -155,9 +155,11 @@ interface MapViewProps {
   /** 반경검색 결과 콜백 (null = 해제) */
   radiusCircle?: RadiusCircle | null;
   onRadiusChange?: (c: RadiusCircle | null) => void;
+  /** 줌/드래그 시작 시 핀 선택 해제용 콜백 */
+  onMapMoveClear?: () => void;
 }
 
-const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
