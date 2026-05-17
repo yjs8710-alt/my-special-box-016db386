@@ -189,16 +189,20 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     return Boolean(containerRef.current?.clientWidth && containerRef.current?.clientHeight);
   }, []);
 
+  const boundsTimerRef = useRef<number | null>(null);
   const fireBounds = useCallback((map: any) => {
-    try {
-      const b = map.getBounds();
-      const sw = b.getSouthWest();
-      const ne = b.getNorthEast();
-      propsRef.current.onBoundsChange?.({
-        swLat: sw.getLat(), swLng: sw.getLng(),
-        neLat: ne.getLat(), neLng: ne.getLng(),
-      });
-    } catch (_) {}
+    if (boundsTimerRef.current) window.clearTimeout(boundsTimerRef.current);
+    boundsTimerRef.current = window.setTimeout(() => {
+      try {
+        const b = map.getBounds();
+        const sw = b.getSouthWest();
+        const ne = b.getNorthEast();
+        propsRef.current.onBoundsChange?.({
+          swLat: sw.getLat(), swLng: sw.getLng(),
+          neLat: ne.getLat(), neLng: ne.getLng(),
+        });
+      } catch (_) {}
+    }, 120);
   }, []);
 
   const clearOverlays = useCallback(() => {
