@@ -141,6 +141,8 @@ export interface MapBounds {
 interface MapViewProps {
   properties: MapProperty[];
   selectedId: number | null;
+  /** 다중 선택 유지 — 포함된 모든 핀을 강조 표시 */
+  selectedIds?: number[];
   onSelect: (id: number) => void;
   /** 지도 이동/줌 시 현재 화면 범위 콜백 */
   onBoundsChange?: (bounds: MapBounds) => void;
@@ -153,7 +155,7 @@ interface MapViewProps {
   onRadiusChange?: (c: RadiusCircle | null) => void;
 }
 
-const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -173,9 +175,9 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, onSelect, onBoundsChange, onRadiusChange });
+  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, onSelect, onBoundsChange, onRadiusChange };
+    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange };
   });
 
   const waitForContainerReady = useCallback(async () => {
@@ -278,11 +280,13 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       const existing = overlaysRef.current;
       const nextIds = new Set<number>();
+      const selSet = new Set<number>(propsRef.current.selectedIds ?? []);
+      if (selId !== null && selId !== undefined) selSet.add(selId);
 
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         nextIds.add(prop.id);
-        const isSelected = prop.id === selId;
+        const isSelected = selSet.has(prop.id);
         const prev = existing.get(prop.id);
 
         if (prev) {
@@ -458,7 +462,7 @@ const MapView = ({ properties, selectedId, onSelect, onBoundsChange, suppressPan
   useEffect(() => {
     if (!mapRef.current || !window.kakao?.maps) return;
     renderOverlays(mapRef.current, properties, selectedId, onSelect, zoomLevelRef.current);
-  }, [properties, selectedId, onSelect, renderOverlays]);
+  }, [properties, selectedId, selectedIds, onSelect, renderOverlays]);
 
   // 외부에서 radiusCircle 변경(해제 등) 동기화
   useEffect(() => {
