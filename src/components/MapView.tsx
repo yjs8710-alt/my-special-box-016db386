@@ -280,11 +280,13 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       const existing = overlaysRef.current;
       const nextIds = new Set<number>();
+      const selSet = new Set<number>(propsRef.current.selectedIds ?? []);
+      if (selId !== null && selId !== undefined) selSet.add(selId);
 
       props.forEach((prop) => {
         if (!prop.lat || !prop.lng) return;
         nextIds.add(prop.id);
-        const isSelected = prop.id === selId;
+        const isSelected = selSet.has(prop.id);
         const prev = existing.get(prop.id);
 
         if (prev) {
