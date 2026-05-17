@@ -65,9 +65,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
 
   const ringColor = isSelected ? "white" : "rgba(255,255,255,0.7)";
   const ringWidth = isSelected ? 2.5 : 1.5;
+  // box-shadow는 filter: drop-shadow 보다 훨씬 가벼움 (모바일 렉 개선)
   const shadow = isSelected
-    ? `drop-shadow(0 0 6px ${accent}cc) drop-shadow(0 3px 8px rgba(0,0,0,0.45))`
-    : `drop-shadow(0 2px 5px rgba(0,0,0,0.38))`;
+    ? `0 0 0 2px ${accent}66, 0 3px 8px rgba(0,0,0,0.4)`
+    : `0 2px 4px rgba(0,0,0,0.3)`;
   const scale = isSelected ? 1.25 : 1;
 
   // 꼬리(말풍선 삼각형) 높이 = size * 0.22
@@ -101,10 +102,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
       flex-direction:column;
       align-items:center;
       gap:0;
-      transform:scale(${scale});
+      transform:scale(${scale}) translateZ(0);
       transform-origin:bottom center;
       cursor:pointer;
-      filter:${shadow};
+      will-change:transform;
     ">
       <!-- 원형 배경 -->
       <div style="
@@ -117,6 +118,7 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
         align-items:center;
         justify-content:center;
         flex-shrink:0;
+        box-shadow:${shadow};
       ">
         ${houseIcon}
       </div>
@@ -153,9 +155,11 @@ interface MapViewProps {
   /** 반경검색 결과 콜백 (null = 해제) */
   radiusCircle?: RadiusCircle | null;
   onRadiusChange?: (c: RadiusCircle | null) => void;
+  /** 줌/드래그 시작 시 핀 선택 해제용 콜백 */
+  onMapMoveClear?: () => void;
 }
 
-const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<number, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -175,9 +179,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange });
+  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange };
+    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear };
   });
 
   const waitForContainerReady = useCallback(async () => {
@@ -379,12 +383,27 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           }
         }, 900);
 
+        let zoomRenderTimer: number | null = null;
         window.kakao.maps.event.addListener(map, "zoom_changed", () => {
           if (!mountedRef.current) return;
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
-          renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
+          // 줌 시 핀 선택 해제
+          propsRef.current.onMapMoveClear?.();
+          // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
+          if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
+          zoomRenderTimer = window.setTimeout(() => {
+            if (!mountedRef.current) return;
+            renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
+          }, 80);
           fireBounds(map);
+        });
+
+        window.kakao.maps.event.addListener(map, "dragstart", () => {
+          if (!mountedRef.current) return;
+          if (radiusModeRef.current) return;
+          // 드래그 시작 시 핀 선택 해제
+          propsRef.current.onMapMoveClear?.();
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
