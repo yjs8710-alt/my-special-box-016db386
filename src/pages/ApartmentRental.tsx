@@ -134,6 +134,7 @@ const ApartmentRental = () => {
           <MapView
             properties={filtered}
             selectedId={selectedId}
+            selectedIds={pinnedIds}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
