@@ -135,6 +135,7 @@ const ApartmentRental = () => {
             properties={filtered}
             selectedId={selectedId}
             selectedIds={pinnedIds}
+            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
             onSelect={handlePinSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
