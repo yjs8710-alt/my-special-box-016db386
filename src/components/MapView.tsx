@@ -383,12 +383,27 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           }
         }, 900);
 
+        let zoomRenderTimer: number | null = null;
         window.kakao.maps.event.addListener(map, "zoom_changed", () => {
           if (!mountedRef.current) return;
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
-          renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, newZoom);
+          // 줌 시 핀 선택 해제
+          propsRef.current.onMapMoveClear?.();
+          // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
+          if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
+          zoomRenderTimer = window.setTimeout(() => {
+            if (!mountedRef.current) return;
+            renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
+          }, 80);
           fireBounds(map);
+        });
+
+        window.kakao.maps.event.addListener(map, "dragstart", () => {
+          if (!mountedRef.current) return;
+          if (radiusModeRef.current) return;
+          // 드래그 시작 시 핀 선택 해제
+          propsRef.current.onMapMoveClear?.();
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
