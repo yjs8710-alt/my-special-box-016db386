@@ -383,12 +383,12 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     run();
   }, [form.dong, form.lotNumber, isCollectiveBuilding]);
 
-  // ── 집합건물/아파트/오피스텔/빌라 등: 호수 입력 시 해당 호수 소유주 연락처 자동 로드 ──
+  // ── 집합건물/아파트/오피스텔/빌라 등: 동+번지+호수 정확 일치 시 소유주 연락처 + 이전 사진 자동 로드 ──
   useEffect(() => {
     if (!form.dong || !form.unitNo || !isCollectiveBuilding) return;
     if (!form.lotNumber) return; // 정확한 주소 일치를 위해 번지 필수
     const run = async () => {
-      // 1순위: cheongju_contacts에서 동+번지+호수 정확 일치 조회
+      // 1) cheongju_contacts에서 동+번지+호수 정확 일치 조회 (호수 일치 필수)
       const contacts = await loadCheongjuContact({ dong: form.dong, lotNumber: form.lotNumber, unitNumber: form.unitNo });
       if (contacts) {
         setForm((prev) => ({
@@ -401,10 +401,28 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         }));
       }
 
+      // 2) 같은 동+번지+호수의 이전 매물 사진이 있으면 자동 첨부 (현재 사진이 없을 때만)
+      try {
+        const { data: prevProp } = await supabase
+          .from("properties")
+          .select("images")
+          .eq("dong", form.dong)
+          .eq("lot_number", form.lotNumber)
+          .eq("unit_number", form.unitNo)
+          .not("images", "is", null)
+          .order("registered_date", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        const prevImages = Array.isArray(prevProp?.images) ? (prevProp!.images as string[]).filter(Boolean) : [];
+        if (prevImages.length > 0) {
+          setForm((prev) => prev.images.length > 0 ? prev : ({ ...prev, images: prevImages }));
+        }
+      } catch {}
+
       // 방 비밀번호는 호수마다 다르므로 자동 로드하지 않음 (건물 비번은 주소 단계에서만 로드)
     };
     run();
-  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber]);
+  }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber, isCollectiveBuilding]);
 
   // ── 단독건물: 주소(동+번지) 입력 시 건물 비밀번호만 자동 로드 ──────
   useEffect(() => {
