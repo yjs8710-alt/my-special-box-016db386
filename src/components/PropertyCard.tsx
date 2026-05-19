@@ -178,7 +178,7 @@ const PropertyCard = ({
         </div>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
           <div className="bg-muted rounded-lg px-3 py-2">
             <p className="text-xs text-muted-foreground">면적</p>
             <p className="text-sm font-semibold text-foreground">{area?.includes("평") ? area : (() => { const n = parseFloat((area || "").replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : area; })()}</p>
@@ -187,7 +187,7 @@ const PropertyCard = ({
             <p className="text-xs text-muted-foreground">층수</p>
             <p className="text-sm font-semibold text-foreground">{floor}</p>
           </div>
-          <div className="bg-muted rounded-lg px-3 py-2">
+          <div className="bg-muted rounded-lg px-3 py-2 hidden md:block">
             <p className="text-xs text-muted-foreground">퇴거예정일</p>
             <div className="flex items-center justify-between gap-1">
               {(() => {
