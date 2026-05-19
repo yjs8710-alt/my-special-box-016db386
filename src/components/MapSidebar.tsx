@@ -3211,6 +3211,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   거주중
                 </span>
               )}
+              {prop.vacateDate && !vacatePast && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 0% 96%)", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}>
+                  퇴거 {prop.vacateDate}
+                </span>
+              )}
               {hasDuplexM && (
                 <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(270 80% 94%)", color: "hsl(270 70% 40%)", border: "1px solid hsl(270 70% 70%)" }}>
                   복층
