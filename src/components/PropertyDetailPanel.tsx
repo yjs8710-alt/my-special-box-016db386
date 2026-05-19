@@ -1809,7 +1809,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 {items.map((item, i) => (
                   <div
                     key={item.label}
-                    className={`flex items-center justify-between px-3 py-2 text-xs ${i > 0 ? "border-t border-border/50" : ""}`}
+                    className={`flex items-center justify-between px-3 py-2 text-xs ${i > 0 ? "border-t border-border/50" : ""} ${item.label === "퇴거 예정일" ? "hidden md:flex" : ""}`}
                   >
                     <span className="text-muted-foreground font-medium">{item.label}</span>
                     <span className="font-bold" style={{ color: item.color }}>
