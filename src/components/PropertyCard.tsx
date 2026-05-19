@@ -176,7 +176,7 @@ const PropertyCard = ({
         </div>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
+        <div className="grid grid-cols-3 gap-2 mb-3">
           <div className="bg-muted rounded-lg px-3 py-2">
             <p className="text-xs text-muted-foreground">면적</p>
             <p className="text-sm font-semibold text-foreground">{area?.includes("평") ? area : (() => { const n = parseFloat((area || "").replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : area; })()}</p>
@@ -184,6 +184,12 @@ const PropertyCard = ({
           <div className="bg-muted rounded-lg px-3 py-2">
             <p className="text-xs text-muted-foreground">층수</p>
             <p className="text-sm font-semibold text-foreground">{floor}</p>
+          </div>
+          <div className="bg-muted rounded-lg px-3 py-2">
+            <p className="text-xs text-muted-foreground">퇴거예정일</p>
+            <p className={`text-sm font-semibold ${isVacant ? "text-accent" : "text-foreground"}`}>
+              {vacateDate ? (isVacant ? "공실" : vacateDate) : "-"}
+            </p>
           </div>
         </div>
 
@@ -207,15 +213,6 @@ const PropertyCard = ({
           </div>
         )}
 
-        {/* 퇴거일 */}
-        {vacateDate && (
-          <div className="flex items-center gap-1 mb-3">
-            <span className="text-[10px] text-muted-foreground">퇴거일</span>
-            <span className={`text-[11px] font-bold ${isVacant ? "text-accent" : "text-foreground"}`}>
-              {vacateDate}{isVacant && " (공실)"}
-            </span>
-          </div>
-        )}
 
         {/* Price */}
         <div className="border-t border-border pt-3 flex items-end justify-between">
