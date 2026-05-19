@@ -16,6 +16,7 @@ const PROPERTY_COLUMNS = [
 // 관리자 DB 매물 → MapProperty 변환
 function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
   const noteStr = String(row.note ?? row.agent_name ?? "");
+  const vacateDateFromNote = noteStr.match(/퇴거(?:\s*예정)?일[:\s]*([0-9]{4}[-./년\s]*[0-9]{1,2}[-./월\s]*[0-9]{1,2}(?:일)?)/)?.[1]?.trim();
   const parseContact = (key: string) => {
     const pattern = key === "건물주"
       ? /건물주(?!2)[:\s]+([0-9\-]+)/
@@ -62,7 +63,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
     buildingMemoRaw: row.building_memo ? String(row.building_memo) : undefined,
     roomMemo: row.room_memo ? String(row.room_memo) : undefined,
     note: row.note ? String(row.note) : undefined,
-    vacateDate: row.vacate_date ? String(row.vacate_date) : undefined,
+    vacateDate: row.vacate_date ? String(row.vacate_date) : vacateDateFromNote,
     buildingPassword: row.building_password ? String(row.building_password) : undefined,
     roomPassword: row.room_password ? String(row.room_password) : undefined,
     options: Array.isArray(row.options) ? (row.options as string[]) : [],

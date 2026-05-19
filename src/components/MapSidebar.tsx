@@ -3190,49 +3190,51 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const showRow = vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort || !!prop.vacateDate;
             if (!showRow) return null;
             return (
-            <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
-              {buildYearShort && (
-                <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
-                  준{buildYearShort}
-                </span>
-              )}
-              {(vacancyM === "공실" || vacatePast) && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
-                  공실
-                </span>
-              )}
-              {earlyExit && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 95%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 70%)" }}>
-                  중도퇴거
-                </span>
-              )}
-              {vacancyM === "세입자 거주중" && !vacatePast && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
-                  거주중
-                </span>
-              )}
-              {prop.vacateDate && !vacatePast && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 0% 96%)", color: "hsl(var(--foreground))", border: "1px solid hsl(var(--border))" }}>
+            <div className="flex items-center gap-1 min-h-[24px]">
+              <div className="flex items-center gap-1 flex-wrap min-w-0">
+                {buildYearShort && (
+                  <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
+                    준{buildYearShort}
+                  </span>
+                )}
+                {(vacancyM === "공실" || vacatePast) && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(142 70% 93%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 70%)" }}>
+                    공실
+                  </span>
+                )}
+                {earlyExit && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 95%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 70%)" }}>
+                    중도퇴거
+                  </span>
+                )}
+                {vacancyM === "세입자 거주중" && !vacatePast && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(38 95% 92%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(38 80% 65%)" }}>
+                    거주중
+                  </span>
+                )}
+                {hasDuplexM && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(270 80% 94%)", color: "hsl(270 70% 40%)", border: "1px solid hsl(270 70% 70%)" }}>
+                    복층
+                  </span>
+                )}
+                {isShortTerm && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                    단기
+                  </span>
+                )}
+                {hasKeyMoney && (
+                  <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(25 90% 95%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(25 90% 70%)" }}>
+                    권 {keyMoney}
+                  </span>
+                )}
+                {facilityBadges}
+              </div>
+              <span className="flex-1" />
+              {prop.vacateDate && (
+                <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.35)" }}>
                   퇴거 {prop.vacateDate}
                 </span>
               )}
-              {hasDuplexM && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(270 80% 94%)", color: "hsl(270 70% 40%)", border: "1px solid hsl(270 70% 70%)" }}>
-                  복층
-                </span>
-              )}
-              {isShortTerm && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
-                  단기
-                </span>
-              )}
-              {hasKeyMoney && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(25 90% 95%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(25 90% 70%)" }}>
-                  권 {keyMoney}
-                </span>
-              )}
-              {facilityBadges}
-              <span className="flex-1" />
               {opts.length > 0 && (
                 <>
                   <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
@@ -3791,15 +3793,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const isSalePropCard = prop.type?.includes("매매");
           const hasDuplex = (prop.options ?? []).includes("복층");
           const hasShortTerm = !isSalePropCard && (prop.options ?? []).includes("단기가능");
-          const vacateDisplay = (() => {
+          const vacateStatus = (() => {
             if (!prop.vacateDate) return null;
             const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
             const vacateTime = new Date(vacateStr).getTime();
-            if (isNaN(vacateTime)) return null;
-            return vacateTime < Date.now() ? "공실" : `퇴거 ${prop.vacateDate}`;
+            return !isNaN(vacateTime) && vacateTime < Date.now() ? "공실" : null;
           })();
+          const vacateDateLabel = prop.vacateDate?.trim();
           const vacancy = !isSalePropCard
-            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateDisplay
+            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateStatus
             : null;
 
           const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
@@ -3877,7 +3879,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
-          if (!hasChips && !hasDesc && !buildingPw && !roomPw) return null;
+          if (!hasChips && !hasDesc && !buildingPw && !roomPw && !vacateDateLabel) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
@@ -3911,7 +3913,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {/* 우측 정렬을 위한 스페이서 */}
               <span className="flex-1" />
 
-              {/* 오른쪽: 비밀번호 */}
+              {/* 오른쪽: 퇴거예정일 · 비밀번호 */}
+              {vacateDateLabel && (
+                <span
+                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.35)" }}
+                >
+                  퇴거 {vacateDateLabel}
+                </span>
+              )}
               {(buildingPw || roomPw) && (
                 <>
                   {buildingPw && (
