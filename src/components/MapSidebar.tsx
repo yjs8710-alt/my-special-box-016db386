@@ -3793,15 +3793,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const isSalePropCard = prop.type?.includes("매매");
           const hasDuplex = (prop.options ?? []).includes("복층");
           const hasShortTerm = !isSalePropCard && (prop.options ?? []).includes("단기가능");
-          const vacateDisplay = (() => {
+          const vacateStatus = (() => {
             if (!prop.vacateDate) return null;
             const vacateStr = prop.vacateDate.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
             const vacateTime = new Date(vacateStr).getTime();
-            if (isNaN(vacateTime)) return null;
-            return vacateTime < Date.now() ? "공실" : `퇴거 ${prop.vacateDate}`;
+            return !isNaN(vacateTime) && vacateTime < Date.now() ? "공실" : null;
           })();
+          const vacateDateLabel = prop.vacateDate?.trim();
           const vacancy = !isSalePropCard
-            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateDisplay
+            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateStatus
             : null;
 
           const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
@@ -3879,7 +3879,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
-          if (!hasChips && !hasDesc && !buildingPw && !roomPw) return null;
+          if (!hasChips && !hasDesc && !buildingPw && !roomPw && !vacateDateLabel) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
@@ -3913,7 +3913,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {/* 우측 정렬을 위한 스페이서 */}
               <span className="flex-1" />
 
-              {/* 오른쪽: 비밀번호 */}
+              {/* 오른쪽: 퇴거예정일 · 비밀번호 */}
+              {vacateDateLabel && (
+                <span
+                  className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap"
+                  style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.35)" }}
+                >
+                  퇴거 {vacateDateLabel}
+                </span>
+              )}
               {(buildingPw || roomPw) && (
                 <>
                   {buildingPw && (
