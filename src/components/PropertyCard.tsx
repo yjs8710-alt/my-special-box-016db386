@@ -188,8 +188,8 @@ const PropertyCard = ({
             <p className="text-sm font-semibold text-foreground">{floor}</p>
           </div>
           <div className="bg-muted rounded-lg px-3 py-2">
+            <p className="text-xs text-muted-foreground">퇴거예정일</p>
             <div className="flex items-center justify-between gap-1">
-              <p className="text-xs text-muted-foreground">퇴거예정일</p>
               {(() => {
                 const earlyExit = !!note && /중도퇴거/.test(note);
                 const isOccupied = availableFrom === "세입자 거주중";
@@ -200,12 +200,14 @@ const PropertyCard = ({
                 else if (isOccupied) { label = "거주중"; cls = "bg-accent/10 text-accent"; }
                 return label ? (
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${cls}`}>{label}</span>
-                ) : null;
+                ) : <span />;
               })()}
+              {vacateDate && (
+                <p className="text-sm font-semibold text-foreground text-right">
+                  {vacateDate}
+                </p>
+              )}
             </div>
-            <p className="text-sm font-semibold text-foreground">
-              {vacateDate || "-"}
-            </p>
           </div>
 
         </div>
