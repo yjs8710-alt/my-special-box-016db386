@@ -977,7 +977,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[66vh] flex flex-col rounded-2xl shadow-2xl"
+      <div className="w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col rounded-2xl shadow-2xl"
         style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}>
 
         {/* Header */}

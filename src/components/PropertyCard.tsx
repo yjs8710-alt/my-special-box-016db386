@@ -207,6 +207,16 @@ const PropertyCard = ({
           </div>
         )}
 
+        {/* 퇴거일 */}
+        {vacateDate && (
+          <div className="flex items-center gap-1 mb-3">
+            <span className="text-[10px] text-muted-foreground">퇴거일</span>
+            <span className={`text-[11px] font-bold ${isVacant ? "text-accent" : "text-foreground"}`}>
+              {vacateDate}{isVacant && " (공실)"}
+            </span>
+          </div>
+        )}
+
         {/* Price */}
         <div className="border-t border-border pt-3 flex items-end justify-between">
           <div>
