@@ -1061,33 +1061,31 @@ const ContactEditModal = ({
         </div>
 
         <div className="p-6 flex flex-col gap-4">
-          {!contact?.id && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-muted-foreground">구 *</label>
-                <select
-                  value={form.district}
-                  onChange={(e) => setForm((f) => ({ ...f, district: e.target.value, dong: "" }))}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
-                >
-                  <option value="">구 선택</option>
-                  {[...CHEONGJU_DISTRICTS].sort((a, b) => a.localeCompare(b, 'ko-KR')).map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-semibold text-muted-foreground">동/읍/면 *</label>
-                <select
-                  value={form.dong}
-                  onChange={(e) => setForm((f) => ({ ...f, dong: e.target.value }))}
-                  disabled={availableDongs.length === 0}
-                  className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none disabled:opacity-50"
-                >
-                  <option value="">{form.district ? "동 선택" : "구 먼저 선택"}</option>
-                  {[...availableDongs].sort((a, b) => a.localeCompare(b, 'ko-KR')).map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">구 *</label>
+              <select
+                value={form.district}
+                onChange={(e) => setForm((f) => ({ ...f, district: e.target.value, dong: "" }))}
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none"
+              >
+                <option value="">구 선택</option>
+                {[...CHEONGJU_DISTRICTS].sort((a, b) => a.localeCompare(b, 'ko-KR')).map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
-          )}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">동/읍/면 *</label>
+              <select
+                value={form.dong}
+                onChange={(e) => setForm((f) => ({ ...f, dong: e.target.value }))}
+                disabled={availableDongs.length === 0}
+                className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground focus:outline-none disabled:opacity-50"
+              >
+                <option value="">{form.district ? "동 선택" : "구 먼저 선택"}</option>
+                {[...availableDongs].sort((a, b) => a.localeCompare(b, 'ko-KR')).map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
           {/* 번지수 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
