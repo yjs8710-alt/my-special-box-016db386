@@ -1638,6 +1638,8 @@ const AdminDashboard = () => {
 
     if (updated.id) {
       const payload: ContactRow = {
+        district: updated.district,
+        dong: updated.dong,
         lot_number: updated.lot_number ?? "",
         building_name: updated.building_name ?? null,
         building_dong: updated.building_dong ?? null,
