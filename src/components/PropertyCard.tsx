@@ -188,11 +188,26 @@ const PropertyCard = ({
             <p className="text-sm font-semibold text-foreground">{floor}</p>
           </div>
           <div className="bg-muted rounded-lg px-3 py-2">
-            <p className="text-xs text-muted-foreground">퇴거예정일</p>
-            <p className={`text-sm font-semibold ${isVacant ? "text-accent" : "text-foreground"}`}>
-              {vacateDate ? (isVacant ? "공실" : vacateDate) : "-"}
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-xs text-muted-foreground">퇴거예정일</p>
+              {(() => {
+                const earlyExit = !!note && /중도퇴거/.test(note);
+                const isOccupied = availableFrom === "세입자 거주중";
+                const showVacant = isVacant || availableFrom === "공실";
+                let label = "", cls = "";
+                if (earlyExit) { label = "중도퇴거"; cls = "bg-destructive/10 text-destructive"; }
+                else if (showVacant) { label = "공실"; cls = "bg-primary/10 text-primary"; }
+                else if (isOccupied) { label = "거주중"; cls = "bg-accent/10 text-accent"; }
+                return label ? (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${cls}`}>{label}</span>
+                ) : null;
+              })()}
+            </div>
+            <p className="text-sm font-semibold text-foreground">
+              {vacateDate || "-"}
             </p>
           </div>
+
         </div>
 
         {/* 건축년도 + 엘리베이터 */}
