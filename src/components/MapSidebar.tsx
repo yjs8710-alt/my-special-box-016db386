@@ -3230,11 +3230,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {facilityBadges}
               </div>
               <span className="flex-1" />
-              {prop.vacateDate && (
-                <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--destructive) / 0.08)", color: "hsl(var(--destructive))", border: "1px solid hsl(var(--destructive) / 0.35)" }}>
-                  퇴거 {prop.vacateDate}
-                </span>
-              )}
+              {/* 퇴거예정일은 모바일 3행에서 제거 — 카드 선택 시 하단 액션 패널의 소유주 아래에 표시 */}
               {opts.length > 0 && (
                 <>
                   <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
