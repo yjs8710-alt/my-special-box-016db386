@@ -3187,7 +3187,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const isShortTerm = !isSaleProp && opts.includes("단기가능");
             const hasDuplexM = opts.includes("복층");
             const buildYearShort = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
-            const showRow = vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort;
+            const showRow = vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort || !!prop.vacateDate;
             if (!showRow) return null;
             return (
             <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
