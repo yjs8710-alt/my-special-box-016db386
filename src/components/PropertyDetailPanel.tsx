@@ -351,6 +351,20 @@ function ContactGroup({ property }: { property: MapProperty }) {
           activeKey={activeKey}
           onActivate={setActiveKey}
         />
+        {/* 모바일 전용: 소유주 하단 퇴거예정일 */}
+        {(() => {
+          const SALE_TYPES = ["매매","단독매매","건물매매","상가주택매매","상가건물매매","구분상가매매","창고/공장매매","다가구매매","다중매매"];
+          const isRentType = !SALE_TYPES.includes(property.type);
+          if (!isRentType) return null;
+          return (
+            <div className="md:hidden flex items-center justify-between py-2 px-3 rounded-xl border border-border bg-muted/30 -mt-1">
+              <span className="text-xs font-semibold text-muted-foreground">퇴거 예정일</span>
+              <span className="text-xs font-bold" style={{ color: property.vacateDate ? "hsl(0 85% 45%)" : "hsl(var(--muted-foreground))" }}>
+                {property.vacateDate || "-"}
+              </span>
+            </div>
+          );
+        })()}
         <RevealPhone
           label="관리인"
           phone={property.contactManager}
