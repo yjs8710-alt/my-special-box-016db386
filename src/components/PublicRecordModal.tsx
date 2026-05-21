@@ -764,6 +764,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   vlRat: s(bldg?.vlRat) ?? s(raw?.vlRat) ?? null,
                   hhldCnt: s(bldg?.hhldCnt) ?? s(raw?.hhldCnt) ?? null,
                   fmlyCnt: s(bldg?.fmlyCnt) ?? s(raw?.fmlyCnt) ?? null,
+                  hoCnt: s(bldg?.hoCnt) ?? s(raw?.hoCnt) ?? null,
                   grndFlrCnt: s(bldg?.grndFlrCnt) ?? s(topBuilding?.floors_above) ?? s(raw?.grndFlrCnt) ?? null,
                   ugrndFlrCnt: s(bldg?.ugrndFlrCnt) ?? s(topBuilding?.floors_below) ?? s(raw?.ugrndFlrCnt) ?? null,
                   pmsDay: s(bldg?.pmsDay) ?? s(raw?.pmsDay) ?? null,
