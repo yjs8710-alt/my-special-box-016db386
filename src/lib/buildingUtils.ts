@@ -154,3 +154,38 @@ export function mapBuildingFromDB(building: Record<string, unknown> | null): Bui
   console.log("🏢 [building mapped from DB cache]", JSON.stringify({ approvalDate, buildYear, elevator }));
   return { approvalDate, buildYear, elevator, elevatorDetail, elevRide: 0, elevEmg: 0, seismicAblty: null, seismicDesign: null };
 }
+
+/* ─── 세대수 / 가구수 / 호수 표시 유틸 ─── */
+
+/** 숫자(또는 "12세대" 같은 문자열) 받아 양수면 "${n}${suffix}", 아니면 "미기재" */
+export function formatUnitCount(value: unknown, suffix: string): string {
+  if (value === null || value === undefined || value === "") return "미기재";
+  const digits = String(value).replace(/[^0-9.]/g, "");
+  if (!digits) return "미기재";
+  const n = Number(digits);
+  if (!isFinite(n) || n <= 0) return "미기재";
+  return `${Math.round(n)}${suffix}`;
+}
+
+/**
+ * 주용도에 따라 세대/가구/호 중 우선 표시 키를 반환.
+ * - 다가구/원룸/상가주택 → "fmly" (가구수 우선)
+ * - 아파트/오피스텔/연립/다세대 → "hhld" (세대수 우선, 호수 보조)
+ * - 그 외는 가장 큰 값을 우선
+ */
+export function pickPrimaryCountKey(
+  mainPurpose: string | null | undefined,
+  counts: { hhld?: unknown; fmly?: unknown; ho?: unknown }
+): "hhld" | "fmly" | "ho" {
+  const p = String(mainPurpose ?? "");
+  if (/다가구|원룸|상가주택/.test(p)) return "fmly";
+  if (/아파트|오피스텔|연립|다세대|공동주택/.test(p)) return "hhld";
+  const toNum = (v: unknown) => {
+    const d = String(v ?? "").replace(/[^0-9.]/g, "");
+    return d ? Number(d) : 0;
+  };
+  const h = toNum(counts.hhld), f = toNum(counts.fmly), o = toNum(counts.ho);
+  if (h >= f && h >= o) return "hhld";
+  if (f >= h && f >= o) return "fmly";
+  return "ho";
+}
