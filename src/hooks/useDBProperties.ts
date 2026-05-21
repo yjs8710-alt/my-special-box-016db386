@@ -45,7 +45,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
       : undefined;
 
   return {
-    id: 100000 + idx,
+    id: stableNumericId(String(row.id ?? ""), idx),
     dbId: String(row.id ?? ""),
     regNo: row.reg_no ? String(row.reg_no) : undefined,
     title: String(row.title ?? ""),
