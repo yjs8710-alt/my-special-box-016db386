@@ -563,6 +563,8 @@ function enrichFloorsWithExposCounts(floorItems: any[], exposItems: any[]): any[
 
 // ── API 응답 → building_summary 매핑 ────────────────────────────────────
 function mapBuildingData(item: any, floorItems: any[]) {
+  if (!item) return null;
+
 
 
   // ── 원본 응답 디버그 로그 ─────────────────────────────────────────────
