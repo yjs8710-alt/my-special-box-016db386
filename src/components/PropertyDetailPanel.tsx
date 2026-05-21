@@ -332,17 +332,33 @@ function RevealPhone({ label, phone, itemKey, activeKey, onActivate }: RevealPho
 /* ─── 연락처 그룹 (상호 배타적 노출) ─── */
 function ContactGroup({ property }: { property: MapProperty }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const groupRef = useRef<HTMLDivElement>(null);
 
   const hasOwner = !!property.contactOwner;
   const hasManager = !!property.contactManager;
   const hasTenant = !!property.contactTenant;
+
+  useEffect(() => {
+    if (!activeKey) return;
+    const handler = (e: MouseEvent) => {
+      if (groupRef.current && !groupRef.current.contains(e.target as Node)) {
+        setActiveKey(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [activeKey]);
 
   if (!hasOwner && !hasManager && !hasTenant) return null;
 
   return (
     <>
       <div className="h-2 bg-muted/50 my-2" />
-      <div className="px-4 pb-3 flex flex-col gap-2">
+      <div ref={groupRef} className="px-4 pb-3 flex flex-col gap-2">
         <p className="text-xs font-bold text-foreground uppercase tracking-wide">연락처</p>
         <RevealPhone
           label="소유주"
