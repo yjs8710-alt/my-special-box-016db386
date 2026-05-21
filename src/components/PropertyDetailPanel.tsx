@@ -1360,25 +1360,36 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
                 Array.isArray((building._raw as Record<string, unknown>).floors) &&
                 ((building._raw as Record<string, unknown>).floors as unknown[]).length > 0 &&
                 (() => {
-                  const floors = (building._raw as Record<string, unknown>).floors as Array<Record<string, string>>;
+                  const rawBldg = building._raw as Record<string, unknown>;
+                  const floors = rawBldg.floors as Array<Record<string, unknown>>;
+                  const primary = pickPrimaryCountKey(str(rawBldg.mainPurpsCdNm), {
+                    hhld: rawBldg.hhldCnt, fmly: rawBldg.fmlyCnt, ho: rawBldg.hoCnt,
+                  });
+                  const countMeta = primary === "fmly"
+                    ? { label: "가구수", field: "fmlyCnt", suffix: "가구" }
+                    : primary === "ho"
+                      ? { label: "호수", field: "hoCnt", suffix: "호" }
+                      : { label: "세대수", field: "hhldCnt", suffix: "세대" };
                   return (
                     <>
                       <div className="h-2 bg-muted/50 my-1" />
                       <SectionTitle icon="📐" title="층별 개요" color="hsl(221 90% 97%)" />
                       <div className="px-4 py-2">
-                        <div className="grid grid-cols-3 gap-0 text-[10px] font-bold text-muted-foreground border-b border-border/40 pb-1.5 mb-1">
+                        <div className="grid grid-cols-4 gap-0 text-[10px] font-bold text-muted-foreground border-b border-border/40 pb-1.5 mb-1">
                           <span>층</span>
                           <span>면적</span>
                           <span>용도</span>
+                          <span>{countMeta.label}</span>
                         </div>
                         {floors.map((f, i) => (
                           <div
                             key={i}
-                            className="grid grid-cols-3 gap-0 text-xs py-1.5 border-b border-border/20 last:border-0"
+                            className="grid grid-cols-4 gap-0 text-xs py-1.5 border-b border-border/20 last:border-0"
                           >
-                            <span className="font-medium text-foreground">{f.flrNoNm || f.flrNo || "-"}</span>
-                            <span className="text-muted-foreground">{f.area || "-"}</span>
-                            <span className="text-muted-foreground">{f.mainPurpsCdNm || "-"}</span>
+                            <span className="font-medium text-foreground">{String(f.flrNoNm ?? f.flrNo ?? "-")}</span>
+                            <span className="text-muted-foreground">{String(f.area ?? "-")}</span>
+                            <span className="text-muted-foreground">{String(f.mainPurpsCdNm ?? "-")}</span>
+                            <span className="text-muted-foreground">{formatUnitCount(f[countMeta.field], countMeta.suffix)}</span>
                           </div>
                         ))}
                       </div>
