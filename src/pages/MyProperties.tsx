@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
   Building2, Pencil, Trash2, Eye, EyeOff, Plus,
   Search, RefreshCw, ChevronDown, ChevronUp,
