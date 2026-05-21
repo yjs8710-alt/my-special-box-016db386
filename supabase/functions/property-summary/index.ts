@@ -1000,6 +1000,7 @@ serve(async (req) => {
                 vlRat: item.vlRat ? `${Number(item.vlRat).toFixed(2)} %` : null,
                 hhldCnt: item.hhldCnt ?? null,
                 fmlyCnt: item.fmlyCnt ?? null,
+                hoCnt: item.hoCnt ?? null,
                 grndFlrCnt: item.grndFlrCnt ?? null,
                 ugrndFlrCnt: item.ugrndFlrCnt ?? null,
                 rideUseElvtCnt: item.rideUseElvtCnt ?? item.elevCnt ?? null,
