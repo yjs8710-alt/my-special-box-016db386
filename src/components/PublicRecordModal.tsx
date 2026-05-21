@@ -841,7 +841,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <TRow l1="대지면적" v1={displayBldg.platArea} l2="건축면적" v2={displayBldg.archArea} />
                           <TRow l1="연면적" v1={displayBldg.totArea} l2="용적률산정연면적" v2={displayBldg.vlRatEstmTotArea} />
                           <TRow l1="건폐율" v1={displayBldg.bcRat} l2="용적률" v2={displayBldg.vlRat} />
-                          <TRow l1="세대수" v1={displayBldg.hhldCnt ?? "0"} l2="가구수" v2={displayBldg.fmlyCnt ?? "0"} />
+                          <TRow l1="세대수" v1={formatUnitCount(displayBldg.hhldCnt, "세대")} l2="가구수" v2={formatUnitCount(displayBldg.fmlyCnt, "가구")} />
+                          <TRow l1="호수" v1={formatUnitCount(displayBldg.hoCnt, "호")} />
                           <TRow l1="지상층수" v1={displayBldg.grndFlrCnt} l2="지하층수" v2={displayBldg.ugrndFlrCnt ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
                           <TRow l1="허가일" v1={displayBldg.pmsDay} l2="착공일" v2={displayBldg.stcnsDay} />
