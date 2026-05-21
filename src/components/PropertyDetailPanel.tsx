@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
+import { formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
