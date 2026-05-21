@@ -902,8 +902,11 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                       </div>
                       <div className="px-3 pb-2">
                         {(() => {
-                          const primary = pickPrimaryCountKey(displayBldg.mainPurpsCdNm, {
-                            hhld: displayBldg.hhldCnt, fmly: displayBldg.fmlyCnt, ho: displayBldg.hoCnt,
+                          const mainPurpose = s(selectedBldg?.mainPurpsCdNm) ?? s(topBuilding?.main_purpose) ?? s(raw?.mainPurpsCdNm) ?? null;
+                          const primary = pickPrimaryCountKey(mainPurpose, {
+                            hhld: selectedBldg?.hhldCnt ?? raw?.hhldCnt,
+                            fmly: selectedBldg?.fmlyCnt ?? raw?.fmlyCnt,
+                            ho: selectedBldg?.hoCnt ?? raw?.hoCnt,
                           });
                           const countMeta = primary === "fmly"
                             ? { label: "가구수", field: "fmlyCnt", suffix: "가구" }
