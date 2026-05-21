@@ -960,7 +960,8 @@ serve(async (req) => {
             console.log(`→ 해당 번지에 건축물이 없거나, 대장 미등록 건물일 수 있습니다.`);
           }
 
-          const mappedBuilding = mapBuildingData(bestItem, floorItems);
+          const enrichedFloorItems = enrichFloorsWithExposCounts(floorItems, allExposItems);
+          const mappedBuilding = mapBuildingData(bestItem, enrichedFloorItems);
 
           // 위반건축물 정보를 _raw에 포함
           const violationSummary = violationResult.isViolation
