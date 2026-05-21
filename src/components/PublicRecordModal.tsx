@@ -585,6 +585,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           l2="엘리베이터"
           v2={mapped.elevatorDetail}
         />
+        {(() => {
+          const raw = (source?._raw && typeof source._raw === "object") ? source._raw as Record<string, unknown> : null;
+          const hhld = raw?.hhldCnt ?? firstBuildingValue("hhldCnt");
+          const fmly = raw?.fmlyCnt ?? firstBuildingValue("fmlyCnt");
+          const ho = raw?.hoCnt ?? firstBuildingValue("hoCnt");
+          const primary = pickPrimaryCountKey(str(source?.main_purpose), { hhld, fmly, ho });
+          const pairs: Array<[string, string]> = [
+            ["세대수", formatUnitCount(hhld, "세대")],
+            ["가구수", formatUnitCount(fmly, "가구")],
+            ["호수", formatUnitCount(ho, "호")],
+          ];
+          const order = primary === "fmly"
+            ? [1, 0, 2]
+            : primary === "ho"
+              ? [2, 0, 1]
+              : [0, 2, 1];
+          const sorted = order.map((i) => pairs[i]);
+          return (
+            <>
+              <TRow l1={sorted[0][0]} v1={sorted[0][1]} l2={sorted[1][0]} v2={sorted[1][1]} />
+              <TRow l1={sorted[2][0]} v1={sorted[2][1]} />
+            </>
+          );
+        })()}
       </tbody>
     </table>
   );
