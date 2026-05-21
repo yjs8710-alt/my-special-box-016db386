@@ -765,6 +765,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const [popupPos, setPopupPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const popupId = useMemo(() => `${propId}-${type}-${Math.random().toString(36).slice(2, 8)}`, [propId, type]);
 
@@ -777,6 +778,21 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
     window.addEventListener("contact-popup-open", handler);
     return () => window.removeEventListener("contact-popup-open", handler);
   }, [popupId]);
+
+  useEffect(() => {
+    if (!showPopup) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (btnRef.current?.contains(target) || popupRef.current?.contains(target)) return;
+      setShowPopup(false);
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [showPopup]);
 
   const typeColor: Record<string, string> = {
     owner: "hsl(var(--primary))",
@@ -837,6 +853,7 @@ const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ prop
 
       {showPopup && ReactDOM.createPortal(
         <div
+          ref={popupRef}
           className="fixed z-[9999] bg-white border border-border rounded-xl shadow-xl px-3 py-2 flex flex-col gap-1.5 whitespace-nowrap"
           style={{ top: popupPos.top, left: popupPos.left, transform: "translateY(-50%)", boxShadow: "0 4px 20px hsl(var(--primary)/0.15)" }}
           onClick={(e) => e.stopPropagation()}
@@ -4060,6 +4077,10 @@ const MapSidebar = ({
   const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
   const [expandedContactsId, setExpandedContactsId] = useState<number | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (lightbox) window.dispatchEvent(new CustomEvent("contact-popup-open", { detail: "close-all" }));
+  }, [lightbox]);
 
   // 기존 거래완료 제보 불러오기 — 매물이 active인 경우에만 취소선 표시
   useEffect(() => {
