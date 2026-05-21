@@ -526,9 +526,44 @@ async function fetchBuildingViolation(s: string, b: string, bun: string, ji: str
 // 브라우저 또는 이 함수에서 VWorld(api.vworld.kr) / nsdi를 직접 호출하지 않음
 // property-summary → land-proxy(POST) → 국내프록시 or nsdi fallback
 
+// ── 층별 세대수/호수 보강 (집합건물 전유부에서 집계) ─────────────────────
+// getBrFlrOulnInfo는 층별 hhldCnt/fmlyCnt/hoCnt를 반환하지 않으므로,
+// 집합건물 전유부(getBrExposPubuseAreaInfo) 응답을 층별로 집계해 보강한다.
+function enrichFloorsWithExposCounts(floorItems: any[], exposItems: any[]): any[] {
+  if (!Array.isArray(floorItems) || floorItems.length === 0) return floorItems ?? [];
+  if (!Array.isArray(exposItems) || exposItems.length === 0) return floorItems;
+
+  // 전유부만 카운트 (공용부 제외). 호수(hoNm)가 있는 레코드만 1세대로 집계.
+  const norm = (v: any) => String(v ?? "").trim();
+  const countByFloor = new Map<string, number>();
+  for (const e of exposItems) {
+    const gb = norm(e.exposPubuseGbCdNm);
+    if (gb && !gb.includes("전유")) continue;
+    const ho = norm(e.hoNm);
+    if (!ho) continue;
+    const key = norm(e.flrNoNm) || norm(e.flrNo);
+    if (!key) continue;
+    countByFloor.set(key, (countByFloor.get(key) ?? 0) + 1);
+  }
+
+  if (countByFloor.size === 0) return floorItems;
+
+  return floorItems.map((f) => {
+    const key = norm(f.flrNoNm) || norm(f.flrNo);
+    const derived = key ? countByFloor.get(key) ?? null : null;
+    const orig = (v: any) => (v !== undefined && v !== null && String(v).trim() !== "" && Number(v) !== 0 ? v : null);
+    return {
+      ...f,
+      hhldCnt: orig(f.hhldCnt) ?? derived ?? null,
+      fmlyCnt: orig(f.fmlyCnt) ?? null,
+      hoCnt:   orig(f.hoCnt)   ?? derived ?? null,
+    };
+  });
+}
+
 // ── API 응답 → building_summary 매핑 ────────────────────────────────────
 function mapBuildingData(item: any, floorItems: any[]) {
-  if (!item) return null;
+
 
   // ── 원본 응답 디버그 로그 ─────────────────────────────────────────────
   console.log("🏢 [building raw]", JSON.stringify({
