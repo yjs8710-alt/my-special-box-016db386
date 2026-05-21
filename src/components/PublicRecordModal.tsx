@@ -901,32 +901,46 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                         <h3 className="text-[13px] font-extrabold text-foreground mt-2 mb-1.5">층별내역</h3>
                       </div>
                       <div className="px-3 pb-2">
-                        <table className="w-full border-collapse border border-border/50 text-[11px]">
-                          <thead>
-                            <tr className="bg-muted/40">
-                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">층</th>
-                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
-                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">면적</th>
-                              <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-border/40">구분</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {[...floors]
-                              .sort((a, b) => {
-                                const numA = parseInt(String(a.flrNo ?? a.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
-                                const numB = parseInt(String(b.flrNo ?? b.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
-                                return numA - numB;
-                              })
-                              .map((f, i) => (
-                              <tr key={i} className="border-b border-border/30 last:border-0">
-                                <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">{f.flrNoNm || f.flrNo || "-"}</td>
-                                <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.mainPurpsCdNm || "-"}</td>
-                                <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.area || "-"}</td>
-                                <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                        {(() => {
+                          const primary = pickPrimaryCountKey(displayBldg.mainPurpsCdNm, {
+                            hhld: displayBldg.hhldCnt, fmly: displayBldg.fmlyCnt, ho: displayBldg.hoCnt,
+                          });
+                          const countMeta = primary === "fmly"
+                            ? { label: "가구수", field: "fmlyCnt", suffix: "가구" }
+                            : primary === "ho"
+                              ? { label: "호수", field: "hoCnt", suffix: "호" }
+                              : { label: "세대수", field: "hhldCnt", suffix: "세대" };
+                          return (
+                            <table className="w-full border-collapse border border-border/50 text-[11px]">
+                              <thead>
+                                <tr className="bg-muted/40">
+                                  <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">층</th>
+                                  <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">용도</th>
+                                  <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">면적</th>
+                                  <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-r border-border/40">{countMeta.label}</th>
+                                  <th className="py-1.5 px-2 text-left text-[10px] font-bold text-muted-foreground border-b border-border/40">구분</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {[...floors]
+                                  .sort((a, b) => {
+                                    const numA = parseInt(String(a.flrNo ?? a.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                                    const numB = parseInt(String(b.flrNo ?? b.flrNoNm ?? "0").replace(/[^0-9-]/g, "")) || 0;
+                                    return numA - numB;
+                                  })
+                                  .map((f, i) => (
+                                  <tr key={i} className="border-b border-border/30 last:border-0">
+                                    <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">{f.flrNoNm || f.flrNo || "-"}</td>
+                                    <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.mainPurpsCdNm || "-"}</td>
+                                    <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.area || "-"}</td>
+                                    <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{formatUnitCount((f as Record<string, unknown>)[countMeta.field], countMeta.suffix)}</td>
+                                    <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          );
+                        })()}
                       </div>
                     </>
                   );
