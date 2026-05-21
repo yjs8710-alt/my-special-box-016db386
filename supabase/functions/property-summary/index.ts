@@ -626,6 +626,7 @@ function mapBuildingData(item: any, floorItems: any[]) {
       // 기본
       hhldCnt:       item.hhldCnt       ? String(item.hhldCnt)                : null,
       fmlyCnt:       item.fmlyCnt       ? String(item.fmlyCnt)                : null,
+      hoCnt:         item.hoCnt         ? String(item.hoCnt)                  : null,
       bcRat:         item.bcRat         ? `${item.bcRat}%`                    : null,
       vlRat:         item.vlRat         ? `${item.vlRat}%`                    : null,
       vlRatEstmTotArea: item.vlRatEstmTotArea ? `${Number(item.vlRatEstmTotArea).toFixed(1)}㎡` : null,
