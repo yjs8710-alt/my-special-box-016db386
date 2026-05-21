@@ -13,6 +13,17 @@ const PROPERTY_COLUMNS = [
   "registered_date", "checked_date", "agent_name", "images", "registered_by",
 ].join(",");
 
+// UUID → 안정적인 숫자 id (정렬 순서가 바뀌어도 동일 id 유지)
+function stableNumericId(uuid: string, fallbackIdx: number): number {
+  if (!uuid) return 100000 + fallbackIdx;
+  let h = 5381;
+  for (let i = 0; i < uuid.length; i++) {
+    h = ((h << 5) + h + uuid.charCodeAt(i)) | 0;
+  }
+  // 100000 ~ 2^31-1 범위에 매핑
+  return 100000 + (Math.abs(h) % 2000000000);
+}
+
 // 관리자 DB 매물 → MapProperty 변환
 function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
   const noteStr = String(row.note ?? row.agent_name ?? "");
@@ -34,7 +45,7 @@ function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty
       : undefined;
 
   return {
-    id: 100000 + idx,
+    id: stableNumericId(String(row.id ?? ""), idx),
     dbId: String(row.id ?? ""),
     regNo: row.reg_no ? String(row.reg_no) : undefined,
     title: String(row.title ?? ""),
