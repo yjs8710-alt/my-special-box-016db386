@@ -626,6 +626,7 @@ function mapBuildingData(item: any, floorItems: any[]) {
       // 기본
       hhldCnt:       item.hhldCnt       ? String(item.hhldCnt)                : null,
       fmlyCnt:       item.fmlyCnt       ? String(item.fmlyCnt)                : null,
+      hoCnt:         item.hoCnt         ? String(item.hoCnt)                  : null,
       bcRat:         item.bcRat         ? `${item.bcRat}%`                    : null,
       vlRat:         item.vlRat         ? `${item.vlRat}%`                    : null,
       vlRatEstmTotArea: item.vlRatEstmTotArea ? `${Number(item.vlRatEstmTotArea).toFixed(1)}㎡` : null,
@@ -952,6 +953,7 @@ serve(async (req) => {
             vlRat: recapItem.vlRat ? `${Number(recapItem.vlRat).toFixed(2)} %` : null,
             hhldCnt: recapItem.hhldCnt ?? null,
             fmlyCnt: recapItem.fmlyCnt ?? null,
+            hoCnt: recapItem.hoCnt ?? null,
             grndFlrCnt: recapItem.grndFlrCnt ?? null,
             ugrndFlrCnt: recapItem.ugrndFlrCnt ?? null,
             rideUseElvtCnt: recapItem.rideUseElvtCnt ?? recapItem.elevCnt ?? null,
@@ -998,6 +1000,7 @@ serve(async (req) => {
                 vlRat: item.vlRat ? `${Number(item.vlRat).toFixed(2)} %` : null,
                 hhldCnt: item.hhldCnt ?? null,
                 fmlyCnt: item.fmlyCnt ?? null,
+                hoCnt: item.hoCnt ?? null,
                 grndFlrCnt: item.grndFlrCnt ?? null,
                 ugrndFlrCnt: item.ugrndFlrCnt ?? null,
                 rideUseElvtCnt: item.rideUseElvtCnt ?? item.elevCnt ?? null,

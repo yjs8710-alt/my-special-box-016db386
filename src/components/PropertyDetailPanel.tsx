@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
+import { formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -1330,9 +1331,20 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
                           {raw.strctCdNm && <Row label="구조" value={str(raw.strctCdNm)} />}
                           {raw.bcRat && <Row label="건폐율" value={str(raw.bcRat)} />}
                           {raw.vlRat && <Row label="용적률" value={str(raw.vlRat)} />}
-                          {raw.hhldCnt && Number(raw.hhldCnt) > 0 && (
-                            <Row label="세대수" value={`${raw.hhldCnt}세대`} />
-                          )}
+                          {(() => {
+                            const primary = pickPrimaryCountKey(str(raw.mainPurpsCdNm), {
+                              hhld: raw.hhldCnt, fmly: raw.fmlyCnt, ho: raw.hoCnt,
+                            });
+                            const rows: Array<["hhld" | "fmly" | "ho", string, string]> = [
+                              ["hhld", "세대수", formatUnitCount(raw.hhldCnt, "세대")],
+                              ["fmly", "가구수", formatUnitCount(raw.fmlyCnt, "가구")],
+                              ["ho", "호수", formatUnitCount(raw.hoCnt, "호")],
+                            ];
+                            rows.sort((a, b) => (a[0] === primary ? -1 : b[0] === primary ? 1 : 0));
+                            return rows.map(([k, label, value]) => (
+                              <Row key={k} label={label} value={value} />
+                            ));
+                          })()}
                           {raw.roofCdNm && <Row label="지붕구조" value={str(raw.roofCdNm)} />}
                         </>
                       );

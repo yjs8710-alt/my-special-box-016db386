@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { mapBuildingFromDB } from "@/lib/buildingUtils";
+import { mapBuildingFromDB, formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
 import FloorGrid from "@/components/FloorGrid";
 
 /* ── 모듈 레벨 캐시: 동일 주소 재조회 시 API 호출 방지 ── */
@@ -585,6 +585,30 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
           l2="엘리베이터"
           v2={mapped.elevatorDetail}
         />
+        {(() => {
+          const raw = (source?._raw && typeof source._raw === "object") ? source._raw as Record<string, unknown> : null;
+          const hhld = raw?.hhldCnt ?? firstBuildingValue("hhldCnt");
+          const fmly = raw?.fmlyCnt ?? firstBuildingValue("fmlyCnt");
+          const ho = raw?.hoCnt ?? firstBuildingValue("hoCnt");
+          const primary = pickPrimaryCountKey(str(source?.main_purpose), { hhld, fmly, ho });
+          const pairs: Array<[string, string]> = [
+            ["세대수", formatUnitCount(hhld, "세대")],
+            ["가구수", formatUnitCount(fmly, "가구")],
+            ["호수", formatUnitCount(ho, "호")],
+          ];
+          const order = primary === "fmly"
+            ? [1, 0, 2]
+            : primary === "ho"
+              ? [2, 0, 1]
+              : [0, 2, 1];
+          const sorted = order.map((i) => pairs[i]);
+          return (
+            <>
+              <TRow l1={sorted[0][0]} v1={sorted[0][1]} l2={sorted[1][0]} v2={sorted[1][1]} />
+              <TRow l1={sorted[2][0]} v1={sorted[2][1]} />
+            </>
+          );
+        })()}
       </tbody>
     </table>
   );
@@ -764,6 +788,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                   vlRat: s(bldg?.vlRat) ?? s(raw?.vlRat) ?? null,
                   hhldCnt: s(bldg?.hhldCnt) ?? s(raw?.hhldCnt) ?? null,
                   fmlyCnt: s(bldg?.fmlyCnt) ?? s(raw?.fmlyCnt) ?? null,
+                  hoCnt: s(bldg?.hoCnt) ?? s(raw?.hoCnt) ?? null,
                   grndFlrCnt: s(bldg?.grndFlrCnt) ?? s(topBuilding?.floors_above) ?? s(raw?.grndFlrCnt) ?? null,
                   ugrndFlrCnt: s(bldg?.ugrndFlrCnt) ?? s(topBuilding?.floors_below) ?? s(raw?.ugrndFlrCnt) ?? null,
                   pmsDay: s(bldg?.pmsDay) ?? s(raw?.pmsDay) ?? null,
@@ -840,7 +865,8 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                           <TRow l1="대지면적" v1={displayBldg.platArea} l2="건축면적" v2={displayBldg.archArea} />
                           <TRow l1="연면적" v1={displayBldg.totArea} l2="용적률산정연면적" v2={displayBldg.vlRatEstmTotArea} />
                           <TRow l1="건폐율" v1={displayBldg.bcRat} l2="용적률" v2={displayBldg.vlRat} />
-                          <TRow l1="세대수" v1={displayBldg.hhldCnt ?? "0"} l2="가구수" v2={displayBldg.fmlyCnt ?? "0"} />
+                          <TRow l1="세대수" v1={formatUnitCount(displayBldg.hhldCnt, "세대")} l2="가구수" v2={formatUnitCount(displayBldg.fmlyCnt, "가구")} />
+                          <TRow l1="호수" v1={formatUnitCount(displayBldg.hoCnt, "호")} />
                           <TRow l1="지상층수" v1={displayBldg.grndFlrCnt} l2="지하층수" v2={displayBldg.ugrndFlrCnt ?? "0"} />
                           <TRow l1="엘리베이터" v1={elevDetail} l2="주차" v2={parkDetail} />
                           <TRow l1="허가일" v1={displayBldg.pmsDay} l2="착공일" v2={displayBldg.stcnsDay} />
