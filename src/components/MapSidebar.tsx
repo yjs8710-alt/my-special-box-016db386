@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo, forwardRef } from "react";
 import ReactDOM from "react-dom";
+import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
   MapPin,
   ChevronRight,
@@ -1560,18 +1561,11 @@ const PhotoUploadModal = ({ prop, onClose, onImagesUpdated }: PhotoUploadModalPr
     setSaved(false);
 
     if (isDBProperty) {
-      const newUrls: string[] = [];
-      for (let i = 0; i < pendingFiles.length; i++) {
-        setSaveProgress(`저장 중 ${i + 1} / ${pendingFiles.length}…`);
-        const file = pendingFiles[i];
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const path = `${dbId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-        if (!error) {
-          const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
-          newUrls.push(urlData.publicUrl);
-        }
-      }
+      setSaveProgress(`저장 중 0 / ${pendingFiles.length}…`);
+      let done = 0;
+      const newUrls = await uploadPropertyImages(pendingFiles, `${dbId}/`);
+      done = pendingFiles.length;
+      setSaveProgress(`저장 중 ${done} / ${pendingFiles.length}…`);
       const merged = [...savedPhotos, ...newUrls];
       const { error: updateErr } = await supabase.rpc("update_property_images", { _property_id: dbId, _images: merged });
       if (!updateErr) {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
   Building2, Pencil, Trash2, Eye, EyeOff, Plus,
   Search, RefreshCw, ChevronDown, ChevronUp,
@@ -122,18 +123,12 @@ const EditModal = ({
   const handleImageUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    const newUrls: string[] = [];
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith("image/")) continue;
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `properties/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("property-images").upload(path, file, { upsert: false });
-      if (error) { alert("이미지 업로드 실패: " + error.message); continue; }
-      const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(path);
-      if (urlData?.publicUrl) newUrls.push(urlData.publicUrl);
+    try {
+      const newUrls = await uploadPropertyImages(files, "properties/");
+      if (newUrls.length > 0) setForm(f => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
+    } finally {
+      setUploading(false);
     }
-    if (newUrls.length > 0) setForm(f => ({ ...f, images: [...(f.images ?? []), ...newUrls] }));
-    setUploading(false);
   };
 
   const toggleOption = (opt: string) =>
