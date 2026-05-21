@@ -671,6 +671,9 @@ function mapBuildingData(item: any, floorItems: any[]) {
         flrNoNm:       f.flrNoNm,
         area:          f.area ? `${Number(f.area).toFixed(1)}㎡` : null,
         mainPurpsCdNm: f.mainPurpsCdNm,
+        hhldCnt:       f.hhldCnt ?? null,
+        fmlyCnt:       f.fmlyCnt ?? null,
+        hoCnt:         f.hoCnt   ?? null,
       })),
     },
   };
