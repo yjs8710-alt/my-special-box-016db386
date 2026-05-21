@@ -18,6 +18,7 @@ import internetIcon from "@/assets/internet_icon-v2-20260427.png";
 import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
 import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
+import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
