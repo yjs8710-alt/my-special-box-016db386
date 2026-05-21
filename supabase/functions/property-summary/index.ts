@@ -953,6 +953,7 @@ serve(async (req) => {
             vlRat: recapItem.vlRat ? `${Number(recapItem.vlRat).toFixed(2)} %` : null,
             hhldCnt: recapItem.hhldCnt ?? null,
             fmlyCnt: recapItem.fmlyCnt ?? null,
+            hoCnt: recapItem.hoCnt ?? null,
             grndFlrCnt: recapItem.grndFlrCnt ?? null,
             ugrndFlrCnt: recapItem.ugrndFlrCnt ?? null,
             rideUseElvtCnt: recapItem.rideUseElvtCnt ?? recapItem.elevCnt ?? null,
