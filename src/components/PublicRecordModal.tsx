@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Layers, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { mapBuildingFromDB } from "@/lib/buildingUtils";
+import { mapBuildingFromDB, formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
 import FloorGrid from "@/components/FloorGrid";
 
 /* ── 모듈 레벨 캐시: 동일 주소 재조회 시 API 호출 방지 ── */
