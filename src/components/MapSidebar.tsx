@@ -5341,6 +5341,16 @@ const MapSidebar = ({
                                    }
                                    const inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
                                    const allUnits = [...activeUnits, ...inactiveUnits];
+                                   // 폴백: 참고용 사진만 있는 경우에도 라이트박스를 열 수 있도록
+                                   if (allUnits.length === 0 && ref?.image) {
+                                     allUnits.push({
+                                       unitNumber: ref.unitNumber ? `${ref.unitNumber}호` : undefined,
+                                       roomType: undefined,
+                                       label: `${ref.unitNumber ? `${ref.unitNumber}호` : "참고"} (다른 호실)`,
+                                       images: [ref.image],
+                                       isReference: true,
+                                     });
+                                   }
                                    if (allUnits.length === 0) return;
                                    setLightbox({ units: allUnits, unitIdx: 0 });
                                  }}

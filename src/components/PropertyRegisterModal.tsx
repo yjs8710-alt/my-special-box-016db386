@@ -363,21 +363,21 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         }
       }
 
-      // (2) 건물 비밀번호 — 같은 건물(동+번지)의 최신 매물에서 호수와 무관하게 로드
+      // (2) 건물 비밀번호 + 건물명 — 같은 건물(동+번지)의 최신 매물에서 호수와 무관하게 로드
       const { data: propData } = await supabase
         .from("properties")
-        .select("building_password")
+        .select("building_password,building_name")
         .eq("dong", form.dong)
         .eq("lot_number", form.lotNumber)
-        .not("building_password", "is", null)
-        .neq("building_password", "")
         .order("registered_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (propData?.building_password) {
+        .limit(5);
+      const pwRow = (propData ?? []).find((r: any) => r.building_password && r.building_password.trim() !== "");
+      const nameRow = (propData ?? []).find((r: any) => r.building_name && r.building_name.trim() !== "");
+      if (pwRow || nameRow) {
         setForm((prev) => ({
           ...prev,
-          buildingPassword: prev.buildingPassword || propData.building_password || "",
+          buildingPassword: prev.buildingPassword || pwRow?.building_password || "",
+          buildingName: prev.buildingName || nameRow?.building_name || "",
         }));
       }
     };
