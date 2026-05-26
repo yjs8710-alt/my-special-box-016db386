@@ -4853,11 +4853,13 @@ const MapSidebar = ({
               <span className="flex-1 min-w-[4px]" />
               <button
                 onClick={async () => {
-                  const addr = window.prompt(
+                  const addr = await customPrompt(
                     "건축물대장을 조회할 주소를 입력하세요\n\n" +
                     "✅ 지번 주소 (권장): 개신동 41-5, 분평동 1261, 사창동 225-7\n" +
                     "✅ 도로명 주소: 사직대로 160, 충북대로 1\n" +
-                    "✅ 시/구 포함도 가능: 청주시 흥덕구 봉명동 769"
+                    "✅ 시/구 포함도 가능: 청주시 흥덕구 봉명동 769",
+                    "",
+                    "예: 사창동 225-7"
                   );
                   if (!addr?.trim()) return;
                   // 공백 정리 + "동225-7" → "동 225-7" 자동 보정
@@ -4871,7 +4873,7 @@ const MapSidebar = ({
                     if (error || !data?.success) {
                       console.warn("[건축물조회] geocode 실패:", error, data);
                       const notFound = data?.error === "No results found for the given address";
-                      window.alert(
+                      await customAlert(
                         notFound
                           ? `'${query}' 주소를 찾을 수 없습니다.\n\n💡 다음을 확인해주세요:\n• 동/리 + 지번 형식 (예: 사창동 225-7)\n• 청주시를 포함 (예: 청주시 흥덕구 봉명동 769)\n• 도로명 주소는 '시/구' 포함 권장`
                           : `주소 조회에 실패했습니다.\n${data?.error || "잠시 후 다시 시도해주세요."}`
@@ -4883,7 +4885,7 @@ const MapSidebar = ({
                     setPublicRecordAddress({ address: normalized });
                   } catch (e) {
                     console.error("[건축물조회] 네트워크 오류:", e);
-                    window.alert("주소 조회 중 네트워크 오류가 발생했습니다.\n인터넷 연결을 확인하고 다시 시도해주세요.");
+                    await customAlert("주소 조회 중 네트워크 오류가 발생했습니다.\n인터넷 연결을 확인하고 다시 시도해주세요.");
                   }
                 }}
                 className="toolbar-btn flex items-center gap-0.5 flex-shrink-0"
