@@ -57,6 +57,7 @@ import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import { customConfirm, customPrompt, customAlert } from "@/lib/customDialogs";
 
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
