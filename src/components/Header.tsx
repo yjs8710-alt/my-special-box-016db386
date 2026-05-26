@@ -217,7 +217,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center text-white"
                 aria-label="알림"
               >
-                <img src={iconBellGradient} alt="알림" className="w-14 h-14 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
+                <img src={iconBellGradient} alt="알림" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
               </button>
               <button
                 className="flex items-center justify-center text-white"
@@ -227,7 +227,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserGradient} alt="내 정보" className="w-14 h-14 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
+                <img src={iconUserGradient} alt="내 정보" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
               </button>
               <button
                 className="text-white p-1 ml-1 mb-1"
