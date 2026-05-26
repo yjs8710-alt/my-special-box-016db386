@@ -5517,12 +5517,12 @@ const MapSidebar = ({
                             {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
                                 {(prop.buildingPassword || prop.password) && (
-                                  <span className="px-1.5 py-0.5 rounded font-extrabold text-[11px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
                                     <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
                                   </span>
                                 )}
                                 {prop.roomPassword && (
-                                  <span className="px-1.5 py-0.5 rounded font-extrabold text-[11px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
                                   </span>
                                 )}
@@ -5542,8 +5542,8 @@ const MapSidebar = ({
                             )}
                             {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
                             {prop.description && prop.description.trim() && (
-                              <div className="mt-1 p-2 rounded-md border" style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 90% 75%)" }}>
-                                <div className="text-[11px] leading-snug whitespace-pre-wrap break-words text-foreground/90">{prop.description}</div>
+                              <div className="mt-1 px-1.5 py-0.5 rounded font-bold text-[12px] whitespace-pre-wrap break-words" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                {prop.description}
                               </div>
                             )}
                           </div>
