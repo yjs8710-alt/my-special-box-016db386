@@ -5510,19 +5510,18 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
-                            {/* 2행: 현관비번/방비번 — 진한 글씨 | 우측: 방향 */}
+                            {/* 2행: 현관비번/방비번 — 노란 박스 | 우측: 방향 */}
                             {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
-                              <div className="flex items-center gap-2 text-[12px] flex-wrap">
-                                {(prop.buildingPassword || prop.password || prop.roomPassword) && (
-                                  <>
-                                    <KeyRound className="w-3.5 h-3.5 text-foreground flex-shrink-0" />
-                                    {(prop.buildingPassword || prop.password) && (
-                                      <span className="font-extrabold text-foreground"><span className="text-muted-foreground font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}</span>
-                                    )}
-                                    {prop.roomPassword && (
-                                      <span className="font-extrabold text-foreground"><span className="text-muted-foreground font-bold mr-0.5">방</span>{prop.roomPassword}</span>
-                                    )}
-                                  </>
+                              <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
+                                {(prop.buildingPassword || prop.password) && (
+                                  <span className="px-1.5 py-0.5 rounded font-extrabold text-[11px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                    <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
+                                  </span>
+                                )}
+                                {prop.roomPassword && (
+                                  <span className="px-1.5 py-0.5 rounded font-extrabold text-[11px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                    <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
+                                  </span>
                                 )}
                                 <span className="flex-1" />
                                 {direction && (
@@ -5541,10 +5540,7 @@ const MapSidebar = ({
                             {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
                             {prop.description && prop.description.trim() && (
                               <div className="mt-1 p-2 rounded-md border" style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 90% 75%)" }}>
-                                <div className="flex items-start gap-1.5 text-[11px] leading-snug">
-                                  <span className="font-extrabold text-foreground flex-shrink-0">📝 메모</span>
-                                  <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.description}</span>
-                                </div>
+                                <div className="text-[11px] leading-snug whitespace-pre-wrap break-words text-foreground/90">{prop.description}</div>
                               </div>
                             )}
                           </div>
