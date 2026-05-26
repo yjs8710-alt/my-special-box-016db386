@@ -5538,21 +5538,13 @@ const MapSidebar = ({
                                 {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
                               </div>
                             )}
-                            {/* 메모 (하단 강조) */}
-                            {(prop.buildingMemo || prop.roomMemo) && (
-                              <div className="mt-1 flex flex-col gap-1 p-2 rounded-md border" style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 90% 75%)" }}>
-                                {prop.buildingMemo && (
-                                  <div className="flex items-start gap-1.5 text-[11px] leading-snug">
-                                    <span className="font-extrabold text-foreground flex-shrink-0">📝 건물</span>
-                                    <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.buildingMemo}</span>
-                                  </div>
-                                )}
-                                {prop.roomMemo && (
-                                  <div className="flex items-start gap-1.5 text-[11px] leading-snug">
-                                    <span className="font-extrabold text-foreground flex-shrink-0">📝 방</span>
-                                    <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.roomMemo}</span>
-                                  </div>
-                                )}
+                            {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
+                            {prop.description && prop.description.trim() && (
+                              <div className="mt-1 p-2 rounded-md border" style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 90% 75%)" }}>
+                                <div className="flex items-start gap-1.5 text-[11px] leading-snug">
+                                  <span className="font-extrabold text-foreground flex-shrink-0">📝 메모</span>
+                                  <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.description}</span>
+                                </div>
                               </div>
                             )}
                           </div>
