@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
+import { customConfirm, customAlert } from "@/lib/customDialogs";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -3290,12 +3291,12 @@ const AdminDashboard = () => {
                                         {matchedProp.status !== "ended" && (
                                           <button
                                             onClick={async () => {
-                                              if (!window.confirm(`"${matchedProp.title}" 매물을 종료 처리하시겠습니까?`)) return;
+                                              if (!(await customConfirm(`"${matchedProp.title}" 매물을 종료 처리하시겠습니까?`))) return;
                                               const { error } = await supabase.from("properties").update({ status: "ended" }).eq("id", matchedProp.id);
-                                              if (error) { alert("종료 처리 실패: " + error.message); return; }
+                                              if (error) { await customAlert("종료 처리 실패: " + error.message); return; }
                                               setDbProperties(prev => prev.map(p => p.id === matchedProp.id ? { ...p, status: "ended" as const } : p));
                                               updateReportStatus(r.id, "resolved");
-                                              alert("매물이 종료 처리되었습니다.");
+                                              await customAlert("매물이 종료 처리되었습니다.");
                                             }}
                                             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white mt-1 transition-colors hover:opacity-90"
                                             style={{ background: "hsl(var(--destructive))" }}>

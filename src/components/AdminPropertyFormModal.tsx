@@ -218,6 +218,7 @@ import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts
 
 // ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
 import { formatPhone } from "@/lib/utils";
+import { customConfirm, customAlert } from "@/lib/customDialogs";
 
 function ContactField({
   fieldKey, label, placeholder, required, value, onChange,
@@ -1742,11 +1743,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               type="button"
               disabled={saving}
               onClick={async () => {
-                if (!confirm("이 매물을 종료하시겠습니까?\n매물이 목록에서 숨겨지고 종료 상태로 변경됩니다.")) return;
+                if (!(await customConfirm("이 매물을 종료하시겠습니까?\n매물이 목록에서 숨겨지고 종료 상태로 변경됩니다."))) return;
                 setSaving(true);
                 try {
                   const { error } = await supabase.from("properties").update({ status: "closed" }).eq("id", initial.id!);
-                  if (error) { alert("오류: " + error.message); return; }
+                  if (error) { await customAlert("오류: " + error.message); return; }
                   // 신고/제안에 거래완료 기록 남기기
                   const { data: { user } } = await supabase.auth.getUser();
                   let pName: string | null = null, pCompany: string | null = null, pPhone: string | null = null;
