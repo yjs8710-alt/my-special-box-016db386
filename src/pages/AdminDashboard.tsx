@@ -2219,7 +2219,11 @@ const AdminDashboard = () => {
                              <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>
                              {m.email ?? "-"}
                            </div>
-                           <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
+                            <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
+                            <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: m.last_sign_in_at ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+                              <Clock className="w-3 h-3" />
+                              마지막 로그인: {m.last_sign_in_at ? new Date(m.last_sign_in_at).toLocaleString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "기록 없음"}
+                            </div>
                            {parentAgent && (
                              <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold hidden md:inline-flex" style={{ color: "hsl(var(--chart-2))" }}>
                                <Building2 className="w-3 h-3" />
