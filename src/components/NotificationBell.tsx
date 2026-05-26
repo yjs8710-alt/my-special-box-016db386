@@ -64,8 +64,8 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   return (
     <button
       onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-      className="relative inline-flex items-center justify-center"
-      aria-label="알림"
+      className="relative inline-flex items-center justify-center px-2 py-1 rounded-lg transition-colors hover:bg-white/10"
+      title="알림"
     >
       <img
         src={iconBellNew}
