@@ -762,7 +762,129 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_agent_profiles: {
+        Row: {
+          agency_address: string | null
+          agency_name: string | null
+          agency_phone: string | null
+          license_number: string | null
+          member_type: string | null
+          name: string | null
+          phone: string | null
+          representative_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agency_address?: string | null
+          agency_name?: string | null
+          agency_phone?: string | null
+          license_number?: string | null
+          member_type?: string | null
+          name?: string | null
+          phone?: string | null
+          representative_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agency_address?: string | null
+          agency_name?: string | null
+          agency_phone?: string | null
+          license_number?: string | null
+          member_type?: string | null
+          name?: string | null
+          phone?: string | null
+          representative_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      public_properties: {
+        Row: {
+          address: string | null
+          area: string | null
+          available_from: string | null
+          build_year: string | null
+          building_name: string | null
+          deposit: string | null
+          description: string | null
+          elevator: boolean | null
+          floor: string | null
+          id: string | null
+          images: string[] | null
+          is_hot: boolean | null
+          is_new: boolean | null
+          lat: number | null
+          lng: number | null
+          manage_fee: string | null
+          monthly: string | null
+          options: string[] | null
+          parking: string | null
+          registered_by: string | null
+          registered_date: string | null
+          room_type: string | null
+          status: string | null
+          title: string | null
+          total_floors: string | null
+          type: string | null
+        }
+        Insert: {
+          address?: string | null
+          area?: string | null
+          available_from?: string | null
+          build_year?: string | null
+          building_name?: string | null
+          deposit?: string | null
+          description?: string | null
+          elevator?: boolean | null
+          floor?: string | null
+          id?: string | null
+          images?: string[] | null
+          is_hot?: boolean | null
+          is_new?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          manage_fee?: string | null
+          monthly?: string | null
+          options?: string[] | null
+          parking?: string | null
+          registered_by?: string | null
+          registered_date?: string | null
+          room_type?: string | null
+          status?: string | null
+          title?: string | null
+          total_floors?: string | null
+          type?: string | null
+        }
+        Update: {
+          address?: string | null
+          area?: string | null
+          available_from?: string | null
+          build_year?: string | null
+          building_name?: string | null
+          deposit?: string | null
+          description?: string | null
+          elevator?: boolean | null
+          floor?: string | null
+          id?: string | null
+          images?: string[] | null
+          is_hot?: boolean | null
+          is_new?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          manage_fee?: string | null
+          monthly?: string | null
+          options?: string[] | null
+          parking?: string | null
+          registered_by?: string | null
+          registered_date?: string | null
+          room_type?: string | null
+          status?: string | null
+          title?: string | null
+          total_floors?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       claim_device_slot:
