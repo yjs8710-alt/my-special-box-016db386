@@ -135,9 +135,9 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
                 onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg transition-all hover:bg-white/10"
+                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
                 style={{ color: "white" }}
-                title="채팅 문의"
+                aria-label="채팅 문의"
               >
                 <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
                 채팅문의
