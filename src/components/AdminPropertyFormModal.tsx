@@ -218,6 +218,7 @@ import { loadCheongjuContact, saveCheongjuContact } from "@/lib/cheongjuContacts
 
 // ─── ContactField: 번호 입력 (기본 노출, 눈 아이콘으로 숨김 가능) ──────────────
 import { formatPhone } from "@/lib/utils";
+import { customConfirm, customAlert } from "@/lib/customDialogs";
 
 function ContactField({
   fieldKey, label, placeholder, required, value, onChange,
