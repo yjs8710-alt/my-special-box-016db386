@@ -54,7 +54,12 @@ Deno.serve(async (req) => {
     const { data: { users }, error } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders });
 
-    const result = users.map((u) => ({ user_id: u.id, email: u.email ?? "" }));
+    const result = users.map((u) => ({
+      user_id: u.id,
+      email: u.email ?? "",
+      last_sign_in_at: u.last_sign_in_at ?? null,
+      created_at: u.created_at ?? null,
+    }));
     return new Response(JSON.stringify({ users: result }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
   } catch (e) {
