@@ -40,6 +40,7 @@ type AgentProfile = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   email?: string;
+  last_sign_in_at?: string | null;
   role?: "admin" | "user";        // user_roles에서 조회
   member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
   parent_user_id?: string | null; // 대표중개사 user_id
@@ -1251,6 +1252,7 @@ const AdminDashboard = () => {
 
     // Edge Function으로 이메일(아이디) 조회
     let emailMap: Record<string, string> = {};
+    let lastSignInMap: Record<string, string | null> = {};
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -1260,6 +1262,7 @@ const AdminDashboard = () => {
         });
         if (res.data?.users) {
           emailMap = Object.fromEntries(res.data.users.map((u: { user_id: string; email: string }) => [u.user_id, u.email]));
+          lastSignInMap = Object.fromEntries(res.data.users.map((u: { user_id: string; last_sign_in_at?: string | null }) => [u.user_id, u.last_sign_in_at ?? null]));
         }
       }
     } catch (_) { /* 이메일 조회 실패시 무시 */ }
@@ -1269,6 +1272,7 @@ const AdminDashboard = () => {
       ...m,
       role: roleMap[m.user_id] ?? "user",
       email: emailMap[m.user_id] ?? m.email ?? "",
+      last_sign_in_at: lastSignInMap[m.user_id] ?? null,
     } as AgentProfile)));
 
     // 활성 디바이스 세션(IP) 로드
