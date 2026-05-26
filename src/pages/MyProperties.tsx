@@ -864,7 +864,7 @@ const MyProperties = () => {
               {agentList.map(agent => {
                 const count = agent === "전체"
                   ? properties.length
-                  : properties.filter(p => p.agent_name === agent).length;
+                  : properties.filter(p => getDisplayAgent(p) === agent).length;
                 const isActive = agentTab === agent;
                 const info = Object.values(registrantMap).find(r => r.name === agent);
                 return (
