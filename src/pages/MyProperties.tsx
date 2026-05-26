@@ -766,15 +766,22 @@ const MyProperties = () => {
 
   const isAdminView = agentName === "관리자";
 
+  // 매물의 표시용 등록자 이름: agent_name → registered_by 프로필 → "(이름없음)"
+  const getDisplayAgent = (p: DBProperty): string => {
+    if (p.agent_name && p.agent_name.trim()) return p.agent_name;
+    if (p.registered_by && registrantMap[p.registered_by]) return registrantMap[p.registered_by].name;
+    return "(이름없음)";
+  };
+
   // 등록자(개인)별 탭 목록 (관리자 전용)
   const agentList = isAdminView
-    ? ["전체", ...Array.from(new Set(properties.map(p => p.agent_name).filter(Boolean))).sort()]
+    ? ["전체", ...Array.from(new Set(properties.map(getDisplayAgent))).sort()]
     : [];
 
   const filtered = properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    const matchAgent = !isAdminView || agentTab === "전체" || p.agent_name === agentTab;
+    const matchAgent = !isAdminView || agentTab === "전체" || getDisplayAgent(p) === agentTab;
     return matchStatus && matchSearch && matchAgent;
   });
 
