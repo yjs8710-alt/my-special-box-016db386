@@ -5530,13 +5530,29 @@ const MapSidebar = ({
                                 )}
                               </div>
                             )}
-                            {/* 3행: 수수료/메모 등 부가 정보 */}
-                            {(brokerFee || cleanFee || lhVal || memos) && (
+                            {/* 3행: 수수료 등 부가 정보 */}
+                            {(brokerFee || cleanFee || lhVal) && (
                               <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
                                 {brokerFee && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>수수료 {brokerFee}</span>}
                                 {cleanFee && <span className="px-1.5 py-0.5 rounded font-bold bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>}
                                 {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
-                                {memos && <span className="text-foreground/70 truncate">📝 {memos}</span>}
+                              </div>
+                            )}
+                            {/* 메모 (하단 강조) */}
+                            {(prop.buildingMemo || prop.roomMemo) && (
+                              <div className="mt-1 flex flex-col gap-1 p-2 rounded-md border" style={{ background: "hsl(48 100% 96%)", borderColor: "hsl(48 90% 75%)" }}>
+                                {prop.buildingMemo && (
+                                  <div className="flex items-start gap-1.5 text-[11px] leading-snug">
+                                    <span className="font-extrabold text-foreground flex-shrink-0">📝 건물</span>
+                                    <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.buildingMemo}</span>
+                                  </div>
+                                )}
+                                {prop.roomMemo && (
+                                  <div className="flex items-start gap-1.5 text-[11px] leading-snug">
+                                    <span className="font-extrabold text-foreground flex-shrink-0">📝 방</span>
+                                    <span className="whitespace-pre-wrap break-words text-foreground/90">{prop.roomMemo}</span>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
