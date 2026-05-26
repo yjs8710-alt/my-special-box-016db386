@@ -724,7 +724,7 @@ const MyProperties = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "properties" }, async () => {
         const isAdmin = agentName === "관리자";
         let q = supabase.from("properties").select("*").order("registered_date", { ascending: false });
-        if (!isAdmin) q = (q as ReturnType<typeof supabase.from>).eq("agent_name", agentName) as typeof q;
+        if (!isAdmin) q = (q as unknown as { eq: (c: string, v: string) => typeof q }).eq("agent_name", agentName);
         const { data } = await q;
         if (data) setProperties(data as DBProperty[]);
       })
