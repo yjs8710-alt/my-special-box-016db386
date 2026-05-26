@@ -936,7 +936,7 @@ export default function PublicRecordModal({ address, propertyId, onClose }: Publ
                                     <td className="py-1.5 px-2 font-semibold text-foreground border-r border-border/30">{f.flrNoNm || f.flrNo || "-"}</td>
                                     <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.mainPurpsCdNm || "-"}</td>
                                     <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{f.area || "-"}</td>
-                                    <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{formatUnitCount((f as Record<string, unknown>)[countMeta.field], countMeta.suffix)}</td>
+                                    <td className="py-1.5 px-2 text-muted-foreground border-r border-border/30">{(() => { const v = formatUnitCount((f as Record<string, unknown>)[countMeta.field], countMeta.suffix); return v === "미기재" ? "" : v; })()}</td>
                                     <td className="py-1.5 px-2 text-muted-foreground">주건축물</td>
                                   </tr>
                                 ))}

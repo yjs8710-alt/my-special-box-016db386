@@ -1389,7 +1389,7 @@ function PublicRecordModal({ address, onClose }: { address: string; onClose: () 
                             <span className="font-medium text-foreground">{String(f.flrNoNm ?? f.flrNo ?? "-")}</span>
                             <span className="text-muted-foreground">{String(f.area ?? "-")}</span>
                             <span className="text-muted-foreground">{String(f.mainPurpsCdNm ?? "-")}</span>
-                            <span className="text-muted-foreground">{formatUnitCount(f[countMeta.field], countMeta.suffix)}</span>
+                            <span className="text-muted-foreground">{(() => { const v = formatUnitCount(f[countMeta.field], countMeta.suffix); return v === "미기재" ? "" : v; })()}</span>
                           </div>
                         ))}
                       </div>

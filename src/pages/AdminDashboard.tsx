@@ -40,6 +40,7 @@ type AgentProfile = {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   email?: string;
+  last_sign_in_at?: string | null;
   role?: "admin" | "user";        // user_roles에서 조회
   member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
   parent_user_id?: string | null; // 대표중개사 user_id
@@ -1251,6 +1252,7 @@ const AdminDashboard = () => {
 
     // Edge Function으로 이메일(아이디) 조회
     let emailMap: Record<string, string> = {};
+    let lastSignInMap: Record<string, string | null> = {};
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -1260,6 +1262,7 @@ const AdminDashboard = () => {
         });
         if (res.data?.users) {
           emailMap = Object.fromEntries(res.data.users.map((u: { user_id: string; email: string }) => [u.user_id, u.email]));
+          lastSignInMap = Object.fromEntries(res.data.users.map((u: { user_id: string; last_sign_in_at?: string | null }) => [u.user_id, u.last_sign_in_at ?? null]));
         }
       }
     } catch (_) { /* 이메일 조회 실패시 무시 */ }
@@ -1269,6 +1272,7 @@ const AdminDashboard = () => {
       ...m,
       role: roleMap[m.user_id] ?? "user",
       email: emailMap[m.user_id] ?? m.email ?? "",
+      last_sign_in_at: lastSignInMap[m.user_id] ?? null,
     } as AgentProfile)));
 
     // 활성 디바이스 세션(IP) 로드
@@ -2215,7 +2219,11 @@ const AdminDashboard = () => {
                              <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>ID</span>
                              {m.email ?? "-"}
                            </div>
-                           <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
+                            <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
+                            <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: m.last_sign_in_at ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+                              <Clock className="w-3 h-3" />
+                              마지막 로그인: {m.last_sign_in_at ? new Date(m.last_sign_in_at).toLocaleString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "기록 없음"}
+                            </div>
                            {parentAgent && (
                              <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold hidden md:inline-flex" style={{ color: "hsl(var(--chart-2))" }}>
                                <Building2 className="w-3 h-3" />
