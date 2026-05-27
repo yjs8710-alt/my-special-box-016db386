@@ -211,7 +211,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </div>
 
             {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) */}
-            <div className="md:hidden flex items-center gap-2 ml-auto">
+            <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
                 onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
                 className="flex items-center justify-center text-white"
