@@ -214,13 +214,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
                 onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-                className="flex items-center justify-center text-white"
+                className="flex items-center justify-center text-white -mr-3"
                 aria-label="알림"
               >
                 <img src={iconBellGradient} alt="알림" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
               </button>
               <button
-                className="flex items-center justify-center text-white"
+                className="flex items-center justify-center text-white -mr-3"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
@@ -230,7 +230,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <img src={iconUserGradient} alt="내 정보" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
               </button>
               <button
-                className="text-white p-1 ml-1 mb-1"
+                className="text-white p-1 mb-1"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-label="메뉴"
               >
