@@ -1241,7 +1241,7 @@ function Step2({
                   form.vacancy === t
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background text-foreground border-border hover:border-primary/50"
-                }`}>{t}</button>
+                }`}>{t === "세입자 거주중" ? "거주중" : t}</button>
             ))}
           </div>
 
@@ -1309,7 +1309,7 @@ function Step2({
             <label className="flex items-center gap-2 text-sm cursor-pointer w-full" style={{ color: form.earlyExit ? "hsl(0 85% 45%)" : undefined }}>
               <input type="checkbox" checked={form.earlyExit}
                 onChange={(e) => set("earlyExit", e.target.checked)} className="w-4 h-4 accent-destructive" />
-              <span className={`font-semibold ${form.earlyExit ? "text-[hsl(0_85%_45%)]" : ""}`}>세입자 중도퇴거</span>
+              <span className={`font-semibold ${form.earlyExit ? "text-[hsl(0_85%_45%)]" : ""}`}>중도퇴거</span>
               {form.earlyExit && (
                 <span className="ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded"
                   style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
