@@ -3015,7 +3015,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const facilityBadges: JSX.Element[] = [];
       if (prop.elevator || hasOpt("엘리베이터"))
         facilityBadges.push(<FacilityBadge key="el" label="엘리베이터" iconSrc={elevatorIcon} bg="#e0f2fe" border="#7dd3fc" />);
-      if (hasOpt("반려동물불가", "애완동물불가"))
+      if (hasOpt("반려동물불가", "애완동물불가", "반려동물_불가"))
         facilityBadges.push(
           <FacilityBadge
             key="pd"
@@ -3030,7 +3030,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             }
           />
         );
-      else if (hasOpt("반려동물가능", "애완동물가능"))
+      else if (hasOpt("반려동물가능", "애완동물가능", "반려동물_가능"))
         facilityBadges.push(<FacilityBadge key="po" label="반려동물 가능" iconSrc={petIcon} bg="#fff7ed" border="#fdba74" />);
       ([
         ["수도", waterIcon, "#eff6ff", "#93c5fd"],
