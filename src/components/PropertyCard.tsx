@@ -1,5 +1,6 @@
 import { MapPin, Eye, Heart, X } from "lucide-react";
 import PhotoWatermark from "./PhotoWatermark";
+import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import { useState } from "react";
 import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
