@@ -22,6 +22,7 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import AdminChatPanel from "@/components/AdminChatPanel";
+import VisitorStatsWidget from "@/components/VisitorStatsWidget";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
@@ -1932,6 +1933,11 @@ const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
+
+              {/* 실시간 접속수 */}
+              <VisitorStatsWidget />
+
+
 
               {/* 승인 대기 */}
               <div className="bg-card border border-border rounded-xl">

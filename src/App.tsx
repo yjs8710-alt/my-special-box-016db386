@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ChatInquiryWidget from "./components/ChatInquiryWidget";
 import MobileBottomNav from "./components/MobileBottomNav";
+import { usePageViewTracker } from "./hooks/usePageViewTracker";
 
 // 첫 화면(Home)은 즉시 로딩, 나머지 라우트는 lazy 로딩으로 초기 번들 최소화
 const LoginPage = lazy(() => import("./pages/Login"));
@@ -121,6 +122,10 @@ const useGlobalProtect = () => {
     };
   }, []);
 };
+const PageViewTracker = () => {
+  usePageViewTracker();
+  return null;
+};
 
 const App = () => {
   useGlobalProtect();
@@ -131,6 +136,7 @@ const App = () => {
       <Sonner />
       <PwaUpdatePrompt />
       <BrowserRouter>
+        <PageViewTracker />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* 공개 페이지 */}
