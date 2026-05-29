@@ -2165,10 +2165,10 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
                       </td>
                       <td className="px-1 py-1">
                         <input
-                          value={u.floor}
+                          value={(u.floor || "").replace(/층/g, "")}
                           onChange={(e) => updateUnit(i, "floor", e.target.value)}
                           className={ic}
-                          placeholder="층"
+                          placeholder=""
                           readOnly={!isAdmin}
                         />
                       </td>
