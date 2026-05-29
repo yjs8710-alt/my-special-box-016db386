@@ -122,6 +122,10 @@ const useGlobalProtect = () => {
     };
   }, []);
 };
+const PageViewTracker = () => {
+  usePageViewTracker();
+  return null;
+};
 
 const App = () => {
   useGlobalProtect();
@@ -132,6 +136,7 @@ const App = () => {
       <Sonner />
       <PwaUpdatePrompt />
       <BrowserRouter>
+        <PageViewTracker />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* 공개 페이지 */}
@@ -173,5 +178,7 @@ const App = () => {
   </QueryClientProvider>
   );
 };
+
+export default App;
 
 export default App;
