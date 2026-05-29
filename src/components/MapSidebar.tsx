@@ -4682,10 +4682,7 @@ const MapSidebar = ({
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setMobileStep(0);
-                      onDeselect?.();
-                      onClearPinnedIds?.();
-                      onClearPin?.();
+                      handleMobileClose();
                     }}
                     className="ml-1 p-1 rounded hover:bg-muted"
                     title="닫기"
