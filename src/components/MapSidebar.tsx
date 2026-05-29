@@ -4062,6 +4062,17 @@ const MapSidebar = ({
   // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
   // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
   const [mobileStep, setMobileStep] = useState<0 | 1 | 2>(0);
+  const [mobileClosing, setMobileClosing] = useState(false);
+  const handleMobileClose = () => {
+    setMobileClosing(true);
+    onDeselect?.();
+    onClearPinnedIds?.();
+    onClearPin?.();
+    setTimeout(() => {
+      setMobileStep(0);
+      setMobileClosing(false);
+    }, 300);
+  };
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem("sidebar_width");
