@@ -1931,8 +1931,11 @@ const AdminDashboard = () => {
                       <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>
                     </div>
                   </div>
-                ))}
               </div>
+
+              {/* 실시간 접속수 */}
+              <VisitorStatsWidget />
+
 
               {/* 승인 대기 */}
               <div className="bg-card border border-border rounded-xl">
