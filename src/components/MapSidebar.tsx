@@ -4601,17 +4601,6 @@ const MapSidebar = ({
         className={isMobile ? "" : "flex h-full"}
         style={
           isMobile
-            ? {
-                position: "fixed",
-                left: 0,
-                right: 0,
-                bottom: "calc(env(safe-area-inset-bottom, 0px) + 70px)",
-                top: "auto",
-                height:
-                  mobileStep === 0
-                    ? "56px"
-                    : mobileStep === 1
-                    ? "min(55vh, calc(100vh - 170px))"
                     : "calc(100vh - 170px)",
                 maxHeight: "calc(100vh - 170px)",
                 zIndex: 60,
@@ -4619,11 +4608,23 @@ const MapSidebar = ({
                 borderTopLeftRadius: 16,
                 borderTopRightRadius: 16,
                 boxShadow: "0 -8px 24px rgba(0,0,0,0.18)",
-                transition: "height 0.3s ease",
+                transform: mobileClosing ? "translateY(100%)" : "translateY(0)",
+                transition: "height 0.3s ease, transform 0.3s ease",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
                 flexShrink: 0,
+              }
+            : {
+                position: collapsed ? "absolute" : "relative",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: collapsed ? 50 : "auto",
+                flexShrink: 0,
+              }
+        }
+      >
               }
             : {
                 position: collapsed ? "absolute" : "relative",
