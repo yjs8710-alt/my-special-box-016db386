@@ -2165,10 +2165,10 @@ const LeaseProposalModal = ({ prop, allProperties, onClose, isAdmin, onRefetch }
                       </td>
                       <td className="px-1 py-1">
                         <input
-                          value={u.floor}
+                          value={(u.floor || "").replace(/층/g, "")}
                           onChange={(e) => updateUnit(i, "floor", e.target.value)}
                           className={ic}
-                          placeholder="층"
+                          placeholder=""
                           readOnly={!isAdmin}
                         />
                       </td>
@@ -3101,6 +3101,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             <span className="flex-1" />
+            {regDate && (
+              <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                등록 {regDate}
+              </span>
+            )}
             <MemoNotepad
               propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
               propId={prop.id}
@@ -5501,8 +5506,7 @@ const MapSidebar = ({
                                 )}
                               </div>
                               <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
-                                {chkDate && <span>확인 {chkDate.slice(5)}</span>}
-                                {regDate && <span>등록 {regDate.slice(5)}</span>}
+                                {regDate && <span>등록 {regDate}</span>}
                               </div>
                             </div>
                             {/* 퇴거 정보 행 (퇴거예정) */}
