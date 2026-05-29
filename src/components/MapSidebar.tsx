@@ -5501,8 +5501,7 @@ const MapSidebar = ({
                                 )}
                               </div>
                               <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
-                                {chkDate && <span>확인 {chkDate.slice(5)}</span>}
-                                {regDate && <span>등록 {regDate.slice(5)}</span>}
+                                {regDate && <span>등록 {regDate}</span>}
                               </div>
                             </div>
                             {/* 퇴거 정보 행 (퇴거예정) */}
