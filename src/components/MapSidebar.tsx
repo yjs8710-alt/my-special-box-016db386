@@ -3101,6 +3101,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             <span className="flex-1" />
+            {regDate && (
+              <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
+                등록 {regDate}
+              </span>
+            )}
             <MemoNotepad
               propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
               propId={prop.id}
