@@ -249,10 +249,9 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
               )}
             </div>
             <p className="text-[11px] text-muted-foreground">{item.sublabel}</p>
-            {(item.badge || item.price) && (
+            {item.badge && (
               <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                {item.badge && <span className="text-[10px] text-muted-foreground">{item.badge}</span>}
-                {item.price && <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>{item.price}</span>}
+                <span className="text-[10px] text-muted-foreground">{item.badge}</span>
               </div>
             )}
           </div>
@@ -304,15 +303,7 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
               )}
             </div>
 
-            {/* Price row */}
-            {(item.deposit || item.monthly) && (
-              <div className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2 border border-primary/10">
-                <span className="text-[10px] text-muted-foreground">보증금 / 월세</span>
-                <span className="text-sm font-bold" style={{ color: "hsl(var(--primary))" }}>
-                  {item.deposit || "–"}만 / <span style={{ color: "hsl(var(--accent))" }}>{item.monthly || "–"}만</span>
-                </span>
-              </div>
-            )}
+            {/* 가격은 소유주 검색에서 표시하지 않음 */}
 
             {/* Extra info toggle */}
             {(item.buildYear || item.availableFrom || item.note) && (
