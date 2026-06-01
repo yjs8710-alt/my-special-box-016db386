@@ -80,9 +80,9 @@ Deno.serve(async (req) => {
         .limit(30),
       adminClient
         .from("cheongju_contacts")
-        .select("id, district, dong, lot_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible, building_name")
+        .select("id, district, dong, lot_number, unit_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible, building_name")
         .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,building_name.ilike.%${keyword}%`)
-        .limit(30),
+        .limit(60),
     ]);
 
     const results: object[] = [];
