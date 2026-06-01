@@ -249,10 +249,9 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
               )}
             </div>
             <p className="text-[11px] text-muted-foreground">{item.sublabel}</p>
-            {(item.badge || item.price) && (
+            {item.badge && (
               <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                {item.badge && <span className="text-[10px] text-muted-foreground">{item.badge}</span>}
-                {item.price && <span className="text-[10px] font-bold" style={{ color: "hsl(var(--accent))" }}>{item.price}</span>}
+                <span className="text-[10px] text-muted-foreground">{item.badge}</span>
               </div>
             )}
           </div>
