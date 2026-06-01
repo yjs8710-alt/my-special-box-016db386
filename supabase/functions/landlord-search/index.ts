@@ -125,8 +125,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    const propDongLots = new Set(
-      (propRes.data ?? []).map((r) => `${r.dong}_${r.lot_number}`)
+    // 매물과 청주연락처를 (동+지번+호수) 단위로 중복 제거 — 호수가 다르면 별개 소유주로 표시
+    const propKeys = new Set(
+      (propRes.data ?? []).map((r) => `${r.dong}_${r.lot_number}_${r.unit_number ?? ""}`)
     );
 
     if (!contactRes.error && contactRes.data) {
@@ -135,8 +136,8 @@ Deno.serve(async (req) => {
         const manager = row.contact_manager ?? "";
         const broker = row.contact_broker ?? "";
         if (!owner && !manager && !broker) continue;
-        const key = `${row.dong}_${row.lot_number}`;
-        if (propDongLots.has(key)) continue;
+        const key = `${row.dong}_${row.lot_number}_${row.unit_number ?? ""}`;
+        if (propKeys.has(key)) continue;
         const addrLabel = row.lot_number ? `${row.dong} ${row.lot_number}` : row.dong;
         results.push({
           id: `contact_${row.id}`,
