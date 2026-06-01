@@ -5514,9 +5514,7 @@ const MapSidebar = ({
                                   </button>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
-                                {regDate && <span>등록 {regDate}</span>}
-                              </div>
+                              {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
                             </div>
                             {/* 퇴거 정보 행 (퇴거예정) */}
                             {vacateFutureLabel && (
