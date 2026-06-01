@@ -138,7 +138,8 @@ Deno.serve(async (req) => {
         if (!owner && !manager && !broker) continue;
         const key = `${row.dong}_${row.lot_number}_${row.unit_number ?? ""}`;
         if (propKeys.has(key)) continue;
-        const addrLabel = row.lot_number ? `${row.dong} ${row.lot_number}` : row.dong;
+        const baseAddr = row.lot_number ? `${row.dong} ${row.lot_number}` : row.dong;
+        const addrLabel = row.unit_number ? `${baseAddr} ${row.unit_number}호` : baseAddr;
         results.push({
           id: `contact_${row.id}`,
           source: "contact",
@@ -148,6 +149,7 @@ Deno.serve(async (req) => {
           contactOwner: owner,
           contactManager: manager,
           contactBroker: broker,
+          unitNumber: row.unit_number ?? undefined,
         });
       }
     }
