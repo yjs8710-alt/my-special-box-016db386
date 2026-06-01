@@ -23,7 +23,8 @@ export const usePageViewTracker = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const path = location.pathname + location.search;
+    // 쿼리스트링/해시 제거 — __lovable_sha 등으로 인한 중복 집계 방지
+    const path = location.pathname || "/";
     const sid = getSessionId();
     let cancelled = false;
     (async () => {
@@ -41,5 +42,5 @@ export const usePageViewTracker = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [location.pathname, location.search]);
+  }, [location.pathname]);
 };
