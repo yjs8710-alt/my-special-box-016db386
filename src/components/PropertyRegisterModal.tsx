@@ -604,7 +604,17 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
         : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : (form.detailType || null)),
+      room_type: isBuildingSale
+        ? form.buildingSaleType
+        : (() => {
+            const base = form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : form.detailType;
+            if (!base) return null;
+            const isCollectivePrimary = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType);
+            if (isCollectivePrimary && form.extraRoomTypes.length > 0) {
+              return [base, ...form.extraRoomTypes].join(",");
+            }
+            return base;
+          })(),
       unit_number: form.unitNo || null,
       area: isBuildingSale
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
