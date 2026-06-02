@@ -39,6 +39,8 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 
 // 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
 const COLLECTIVE_DETAIL_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
+// 집합건물 선택 후 추가로 중복 선택 가능한 주거 형태
+const ROOM_SUBTYPES = ["원룸","투베이","투룸","쓰리룸","포룸"] as const;
 const PROPERTY_TYPE_GROUPS_REG = [
   { group: "주거형", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","도시형","빌라","연립","다세대","주상복합"] },
   { group: "상가", types: ["상가","사무실","공장·창고","지식산업","기타임대"] },
@@ -143,6 +145,7 @@ interface FormState {
   isHot: boolean;
   buildingMemo: string;
   buildingDong: string; // 집합건물 동(棟)
+  extraRoomTypes: string[]; // 집합건물(아파트/오피스텔 등) 선택 시 추가 주거형태 다중 선택
 }
 
 const INITIAL: FormState = {
@@ -173,6 +176,7 @@ const INITIAL: FormState = {
   images: [],
   elevator: false, isNew: false, isHot: false, buildingMemo: "",
   buildingDong: "",
+  extraRoomTypes: [],
 };
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
@@ -199,6 +203,9 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
   const sigunguVal = districtVal ? `청주시 ${districtVal}` : "";
   const detailType = get("type");
   const roomType = get("room_type");
+  // room_type 콤마 분리 — 추가 주거형태(원룸/투룸/쓰리룸 등) 다중 저장 지원
+  const roomTypeParts = roomType.split(",").map((s) => s.trim()).filter(Boolean);
+  const extraRoomTypesFromDb = roomTypeParts.filter((rt) => (ROOM_SUBTYPES as readonly string[]).includes(rt));
   const allOptions = Array.isArray(row.options) ? (row.options as string[]) : [];
   const petOpt = allOptions.find((o) => o.startsWith("반려동물_"));
   const facilityNames = ["엘리베이터","수도","인터넷","TV","CCTV","리모델링"];
@@ -309,6 +316,7 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
     isHot: false,
     buildingMemo: get("building_memo").startsWith("__PROPOSAL_JSON__") ? "" : get("building_memo"),
     buildingDong: buildingDongM ? buildingDongM[1].trim() : "",
+    extraRoomTypes: extraRoomTypesFromDb,
   };
 }
 
@@ -596,7 +604,17 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       type: (form.detailType === "토지" || form.buildingType === "토지")
         ? "토지"
         : form.detailType || (form.brokerType === "공동중개" ? "공동중개" : form.tradeType),
-      room_type: isBuildingSale ? form.buildingSaleType : (form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : (form.detailType || null)),
+      room_type: isBuildingSale
+        ? form.buildingSaleType
+        : (() => {
+            const base = form.detailType === "원룸" && form.oneRoomLayout ? form.oneRoomLayout : form.detailType;
+            if (!base) return null;
+            const isCollectivePrimary = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType);
+            if (isCollectivePrimary && form.extraRoomTypes.length > 0) {
+              return [base, ...form.extraRoomTypes].join(",");
+            }
+            return base;
+          })(),
       unit_number: form.unitNo || null,
       area: isBuildingSale
         ? [form.landArea && `대지 ${form.landArea}`, form.buildingArea && `건평 ${form.buildingArea}`].filter(Boolean).join(" / ")
@@ -896,22 +914,39 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <div key={group} className="flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
               <div className="flex flex-wrap gap-1.5">
-                {types.map((t) => (
-                  <button key={t} type="button" onClick={() => {
-                    set("detailType", t);
-                    if (t !== "원룸") {
-                      set("oneRoomLayout", "");
-                    } else {
-                      setOneRoomModalOpen(true);
-                    }
-                  }}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                    style={form.detailType === t
-                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
-                    {t}{t === "원룸" && form.oneRoomLayout ? ` (${form.oneRoomLayout})` : ""}
-                  </button>
-                ))}
+                {types.map((t) => {
+                  const isPrimary = form.detailType === t;
+                  const primaryIsCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType);
+                  const isSubType = (ROOM_SUBTYPES as readonly string[]).includes(t);
+                  // 집합건물(아파트/오피스텔 등) 1차 선택 후, 원룸/투룸/쓰리룸 등은 추가 다중 선택 가능
+                  const canMultiSelect = primaryIsCollective && isSubType && !isPrimary;
+                  const isExtra = form.extraRoomTypes.includes(t);
+                  const isSelected = isPrimary || isExtra;
+                  return (
+                    <button key={t} type="button" onClick={() => {
+                      if (canMultiSelect) {
+                        set("extraRoomTypes", isExtra ? form.extraRoomTypes.filter((x) => x !== t) : [...form.extraRoomTypes, t]);
+                        return;
+                      }
+                      // 1차 카테고리 변경 — 기존 extraRoomTypes 초기화 (단, 새 타입도 집합건물이면 유지)
+                      const newPrimaryCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(t);
+                      if (!newPrimaryCollective) set("extraRoomTypes", []);
+                      set("detailType", t);
+                      if (t !== "원룸") {
+                        set("oneRoomLayout", "");
+                      } else {
+                        setOneRoomModalOpen(true);
+                      }
+                    }}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                      style={isSelected
+                        ? { background: isPrimary ? "hsl(var(--primary))" : "hsl(var(--primary)/0.75)", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                      {t}{t === "원룸" && form.oneRoomLayout ? ` (${form.oneRoomLayout})` : ""}
+                      {isExtra && !isPrimary ? " +" : ""}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}

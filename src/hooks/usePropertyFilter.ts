@@ -82,7 +82,8 @@ export function usePropertyFilter(
     return properties.filter((p) => {
       // 유형 필터
       if (!activeTypes.includes("전체") && activeTypes.length > 0) {
-        if (!activeTypes.includes(p.type) && !activeTypes.includes(p.roomType ?? "")) return false;
+        const roomTypeParts = (p.roomType ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+        if (!activeTypes.includes(p.type) && !roomTypeParts.some((rt) => activeTypes.includes(rt))) return false;
       }
 
       // 매물번호 / 등록번호 검색
