@@ -203,6 +203,9 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
   const sigunguVal = districtVal ? `청주시 ${districtVal}` : "";
   const detailType = get("type");
   const roomType = get("room_type");
+  // room_type 콤마 분리 — 추가 주거형태(원룸/투룸/쓰리룸 등) 다중 저장 지원
+  const roomTypeParts = roomType.split(",").map((s) => s.trim()).filter(Boolean);
+  const extraRoomTypesFromDb = roomTypeParts.filter((rt) => (ROOM_SUBTYPES as readonly string[]).includes(rt));
   const allOptions = Array.isArray(row.options) ? (row.options as string[]) : [];
   const petOpt = allOptions.find((o) => o.startsWith("반려동물_"));
   const facilityNames = ["엘리베이터","수도","인터넷","TV","CCTV","리모델링"];
