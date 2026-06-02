@@ -176,6 +176,7 @@ const INITIAL: FormState = {
   images: [],
   elevator: false, isNew: false, isHot: false, buildingMemo: "",
   buildingDong: "",
+  extraRoomTypes: [],
 };
 
 const STEP_LABELS = ["기본 설정 및 주소", "옵션 및 조건", "연락처 및 사진"];
