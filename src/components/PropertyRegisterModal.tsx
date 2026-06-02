@@ -145,6 +145,7 @@ interface FormState {
   isHot: boolean;
   buildingMemo: string;
   buildingDong: string; // 집합건물 동(棟)
+  extraRoomTypes: string[]; // 집합건물(아파트/오피스텔 등) 선택 시 추가 주거형태 다중 선택
 }
 
 const INITIAL: FormState = {
