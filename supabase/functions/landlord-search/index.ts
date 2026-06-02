@@ -125,9 +125,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 매물과 청주연락처를 (동+지번+호수) 단위로 중복 제거 — 호수가 다르면 별개 소유주로 표시
+    // 매물 결과 중 실제로 소유주/관리인/부동산 연락처가 파싱된 (동+지번+호수)만 dedupe key로 사용
+    // — 그렇지 않으면 705호처럼 매물엔 연락처가 없는데 청주연락처는 있어도 검색결과에서 사라짐
     const propKeys = new Set(
-      (propRes.data ?? []).map((r) => `${r.dong}_${r.lot_number}_${r.unit_number ?? ""}`)
+      results
+        .filter((r: any) => r.source === "property" && (r.contactOwner || r.contactManager || r.contactBroker))
+        .map((r: any) => {
+          const row = (propRes.data ?? []).find((p) => `prop_${p.id}` === r.id);
+          return row ? `${row.dong}_${row.lot_number}_${row.unit_number ?? ""}` : "";
+        })
     );
 
     if (!contactRes.error && contactRes.data) {

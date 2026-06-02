@@ -3101,7 +3101,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             <span className="flex-1" />
-            {regDate && (
+            {regDate && !isMobile && (
               <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
                 등록 {regDate}
               </span>
@@ -5477,9 +5477,44 @@ const MapSidebar = ({
                           const vacateTime = new Date(vacateStr).getTime();
                           if (!isNaN(vacateTime) && vacateTime >= Date.now()) vacateFutureLabel = prop.vacateDate;
                         }
-                        return (
-                          <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                            {/* 최상단: 소유주/관리인 라벨 칩 — 클릭 시 모달에서 번호 공개 */}
+                         const chkDaysSince = prop.checkedDate ? Math.floor((Date.now() - new Date(prop.checkedDate).getTime()) / 86400000) : null;
+                         const regDaysSince = prop.registeredDate ? Math.floor((Date.now() - new Date(prop.registeredDate).getTime()) / 86400000) : null;
+                         const checkedIcon = prop.checkedDate;
+                         const handleMobileCheckToggle = async (e: React.MouseEvent) => {
+                           e.stopPropagation();
+                           if (!isAdmin || !prop.memo) return;
+                           const newCheckedDate = prop.checkedDate ? null : new Date().toISOString().slice(0, 10);
+                           await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
+                         };
+                         return (
+                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                             {/* 모바일: 매물등록일 + 확인 아이콘 (웹과 동일) */}
+                             {isMobile && (prop.registeredDate || prop.checkedDate) && (
+                               <div className="flex items-center gap-2 flex-wrap">
+                                 {prop.registeredDate && (
+                                   <span className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap">
+                                     매물등록일 {prop.registeredDate}{regDaysSince !== null ? ` (D+${regDaysSince})` : ""}
+                                   </span>
+                                 )}
+                                 <button
+                                   type="button"
+                                   onClick={handleMobileCheckToggle}
+                                   disabled={!isAdmin}
+                                   title={checkedIcon ? `확인: ${prop.checkedDate} (D+${chkDaysSince})` : `미확인${isAdmin ? " — 클릭하여 확인" : ""}`}
+                                   className="flex-shrink-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded transition-all select-none"
+                                   style={{
+                                     background: checkedIcon ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
+                                     border: `1.5px solid ${checkedIcon ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+                                     cursor: isAdmin ? "pointer" : "default",
+                                   }}
+                                 >
+                                   <img src={checkDateIcon} alt="확인" className="w-4 h-4 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: checkedIcon ? 1 : 0.4 }} />
+                                   <span className="text-[10px] font-black tabular-nums" style={{ color: checkedIcon ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}>
+                                     {checkedIcon ? `확인 ${prop.checkedDate}` : "미확인"}
+                                   </span>
+                                 </button>
+                               </div>
+                             )}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
                                 {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
