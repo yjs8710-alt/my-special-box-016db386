@@ -3101,7 +3101,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             <span className="flex-1" />
-            {regDate && (
+            {regDate && !isMobile && (
               <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
                 등록 {regDate}
               </span>
