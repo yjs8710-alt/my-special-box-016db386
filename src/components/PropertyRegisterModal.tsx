@@ -316,6 +316,7 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
     isHot: false,
     buildingMemo: get("building_memo").startsWith("__PROPOSAL_JSON__") ? "" : get("building_memo"),
     buildingDong: buildingDongM ? buildingDongM[1].trim() : "",
+    extraRoomTypes: extraRoomTypesFromDb,
   };
 }
 
