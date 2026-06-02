@@ -904,22 +904,39 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <div key={group} className="flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
               <div className="flex flex-wrap gap-1.5">
-                {types.map((t) => (
-                  <button key={t} type="button" onClick={() => {
-                    set("detailType", t);
-                    if (t !== "원룸") {
-                      set("oneRoomLayout", "");
-                    } else {
-                      setOneRoomModalOpen(true);
-                    }
-                  }}
-                    className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                    style={form.detailType === t
-                      ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                      : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
-                    {t}{t === "원룸" && form.oneRoomLayout ? ` (${form.oneRoomLayout})` : ""}
-                  </button>
-                ))}
+                {types.map((t) => {
+                  const isPrimary = form.detailType === t;
+                  const primaryIsCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType);
+                  const isSubType = (ROOM_SUBTYPES as readonly string[]).includes(t);
+                  // 집합건물(아파트/오피스텔 등) 1차 선택 후, 원룸/투룸/쓰리룸 등은 추가 다중 선택 가능
+                  const canMultiSelect = primaryIsCollective && isSubType && !isPrimary;
+                  const isExtra = form.extraRoomTypes.includes(t);
+                  const isSelected = isPrimary || isExtra;
+                  return (
+                    <button key={t} type="button" onClick={() => {
+                      if (canMultiSelect) {
+                        set("extraRoomTypes", isExtra ? form.extraRoomTypes.filter((x) => x !== t) : [...form.extraRoomTypes, t]);
+                        return;
+                      }
+                      // 1차 카테고리 변경 — 기존 extraRoomTypes 초기화 (단, 새 타입도 집합건물이면 유지)
+                      const newPrimaryCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(t);
+                      if (!newPrimaryCollective) set("extraRoomTypes", []);
+                      set("detailType", t);
+                      if (t !== "원룸") {
+                        set("oneRoomLayout", "");
+                      } else {
+                        setOneRoomModalOpen(true);
+                      }
+                    }}
+                      className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                      style={isSelected
+                        ? { background: isPrimary ? "hsl(var(--primary))" : "hsl(var(--primary)/0.75)", color: "#fff", borderColor: "hsl(var(--primary))" }
+                        : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                      {t}{t === "원룸" && form.oneRoomLayout ? ` (${form.oneRoomLayout})` : ""}
+                      {isExtra && !isPrimary ? " +" : ""}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
