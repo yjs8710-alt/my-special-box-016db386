@@ -220,7 +220,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center text-white -mr-3"
                 aria-label="알림"
               >
-                <img src={iconBellGradient} alt="알림" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
+                <Bell className="w-8 h-8 mx-2" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
               </button>
               <button
                 className="flex items-center justify-center text-white -mr-3"
