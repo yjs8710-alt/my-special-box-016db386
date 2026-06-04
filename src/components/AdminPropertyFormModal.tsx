@@ -964,7 +964,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
 
         const upsertPayload: Record<string, unknown> = {
           district: contactDistrict,
-          dong: form.dong,
+          dong: finalDong,
           lot_number: lotNum,
           unit_number: isCollectiveType ? unitVal : null,
           phone: form.contactOwner || form.contactManager || "",
