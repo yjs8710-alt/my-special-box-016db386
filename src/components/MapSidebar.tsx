@@ -59,6 +59,19 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { customConfirm, customPrompt, customAlert } from "@/lib/customDialogs";
 
+const neonGradientTextStyle = {
+  background: "linear-gradient(90deg, hsl(187 85% 56%) 0%, hsl(272 85% 62%) 50%, hsl(328 84% 60%) 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  fontWeight: 800,
+} as const;
+
+const roomPasswordChipStyle = {
+  background: "hsl(var(--primary) / 0.10)",
+  color: "hsl(var(--primary))",
+  border: "1px solid hsl(var(--primary) / 0.35)",
+} as const;
+
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
   unitNumber?: string; // 호수 (e.g., "202호")
@@ -3239,7 +3252,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {/* 가격 */}
             {(wolseMatch || halfMatch || jeonseMatch) ? (
               <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
-                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span></span>}
+                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
                 {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
                 {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
               </span>
@@ -3248,7 +3261,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {isSaleProp ? (
                   <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
                 ) : (
-                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span></>
+                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
                 )}
               </span>
             )}
@@ -3617,7 +3630,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       style={{ color: "hsl(var(--foreground))" }}
                     >
                       <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
-                      <span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
+                      <span style={neonGradientTextStyle}>{wolseMatch[2]}</span>
                       {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
                         <span style={{ color: "hsl(var(--muted-foreground))" }}>
                           {" "}/ 관 {prop.manageFee}
@@ -3689,7 +3702,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>
                       /
                     </span>
-                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>
+                    <span className="text-[12px] font-extrabold" style={neonGradientTextStyle}>
                       {prop.monthly}
                     </span>
                     {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
@@ -5658,7 +5671,7 @@ const MapSidebar = ({
                                   </span>
                                 )}
                                 {prop.roomPassword && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
                                   </span>
                                 )}
