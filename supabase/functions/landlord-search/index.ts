@@ -173,6 +173,8 @@ Deno.serve(async (req) => {
           unitNumber: row.unit_number ?? undefined,
           lotNumber: row.lot_number ?? undefined,
           buildingName: row.building_name ?? undefined,
+          dong: row.dong ?? undefined,
+          address: row.address ?? undefined,
         });
       }
     }

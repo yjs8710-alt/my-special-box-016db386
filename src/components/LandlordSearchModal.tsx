@@ -38,6 +38,8 @@ interface SearchResult {
   lng?: number;
   lotNumber?: string;
   buildingName?: string;
+  dong?: string;
+  address?: string;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
@@ -417,7 +419,7 @@ const LandlordSearchModal = ({ onClose, onPropertiesFound }: LandlordSearchModal
       const qTokens = query.trim().replace(/번지/g, " ").split(/\s+/).map(norm).filter(Boolean);
       const matchesLotOrBuilding = (r: SearchResult) => {
         if (qTokens.length === 0) return false;
-        const hay = norm(`${r.lotNumber ?? ""} ${r.buildingName ?? ""}`);
+        const hay = norm(`${r.lotNumber ?? ""} ${r.buildingName ?? ""} ${r.dong ?? ""} ${r.address ?? ""} ${r.sublabel ?? ""} ${r.label ?? ""}`);
         return qTokens.every((t) => hay.includes(t));
       };
       onPropertiesFound?.(
