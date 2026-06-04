@@ -694,8 +694,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
         const upsertPayload: Record<string, unknown> = {
           district: contactDistrict,
-          dong: form.dong,
-          lot_number: form.lotNumber || "",
+          dong: finalDong,
+          lot_number: finalLotNumber || "",
           unit_number: isCollective ? unitVal : null,
           phone: form.contactOwner || "",
           contact_owner: form.contactOwner || null,

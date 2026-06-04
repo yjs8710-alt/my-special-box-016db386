@@ -129,6 +129,28 @@ const getUniquePhones = (...values: Array<string | null | undefined>) => {
   return phones;
 };
 
+const normalizeContactSearchText = (value: string | null | undefined) =>
+  (value ?? "").toLowerCase().replace(/\s+/g, "").replace(/번지|호/g, "");
+
+const contactMatchesSearch = (contact: CheongJuContact, query: string) => {
+  const tokens = query.replace(/번지/g, " ").split(/\s+/).map(normalizeContactSearchText).filter(Boolean);
+  if (tokens.length === 0) return true;
+  const haystack = normalizeContactSearchText([
+    contact.district,
+    contact.dong,
+    contact.lot_number,
+    contact.building_dong,
+    contact.unit_number,
+    contact.building_name,
+    contact.phone,
+    contact.contact_owner,
+    contact.contact_manager,
+    contact.contact_broker,
+    contact.memo,
+  ].filter(Boolean).join(" "));
+  return tokens.every((token) => haystack.includes(token));
+};
+
 type PropertyReport = {
   id: string;
   property_id: string;
@@ -1766,17 +1788,7 @@ const AdminDashboard = () => {
     return contacts.filter((c) => {
       const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
       if (!matchDist) return false;
-      if (!q) return true;
-      return (
-        c.dong.includes(q)
-        || (c.lot_number ?? "").includes(q)
-        || (c.unit_number ?? "").includes(q)
-        || c.phone.includes(q)
-        || (c.contact_owner ?? "").includes(q)
-        || (c.contact_broker ?? "").includes(q)
-        || (c.memo ?? "").includes(q)
-        || (c.building_name ?? "").includes(q)
-      );
+      return contactMatchesSearch(c, q);
     });
   }, [contacts, contactDistrictFilter, appliedContactSearch]);
 
