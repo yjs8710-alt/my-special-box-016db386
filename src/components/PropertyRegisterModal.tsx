@@ -943,7 +943,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
                         return;
                       }
                       // 1차 카테고리 변경 — 기존 extraRoomTypes 초기화 (단, 새 타입도 집합건물이면 유지)
-                      const newPrimaryCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(t);
+                      const newPrimaryCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(t) || t === "도시형";
                       if (!newPrimaryCollective) set("extraRoomTypes", []);
                       set("detailType", t);
                       if (t !== "원룸") {
