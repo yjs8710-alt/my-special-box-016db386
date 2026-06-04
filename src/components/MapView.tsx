@@ -361,7 +361,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           position: new window.kakao.maps.LatLng(c.lat, c.lng),
           content,
           map,
-          yAnchor: 0.5,
+          yAnchor: 1,
           xAnchor: 0.5,
           zIndex: 500,
         });
