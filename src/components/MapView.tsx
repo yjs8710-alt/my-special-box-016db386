@@ -78,7 +78,7 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         text-shadow:0 1px 2px rgba(0,0,0,0.55);
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
         pointer-events:none;
-        padding-bottom:0.08em;
+        transform:translateY(-0.12em);
       ">${count}</div>
     </div>
   `;
@@ -148,9 +148,11 @@ interface MapViewProps {
   onRadiusChange?: (c: RadiusCircle | null) => void;
   /** 줌/드래그 시작 시 핀 선택 해제용 콜백 */
   onMapMoveClear?: () => void;
+  /** 숫자 클러스터 클릭 시 포함된 매물 id 목록 */
+  onClusterSelect?: (ids: number[]) => void;
 }
 
-const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear, onClusterSelect }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<string, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -170,9 +172,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
-  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear });
+  const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect });
   useEffect(() => {
-    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear };
+    propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect };
   });
 
   const waitForContainerReady = useCallback(async () => {
@@ -280,6 +282,34 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const { clusters, singles } = buildClusters(props, zoom, selSet);
 
+      const handleClusterClick = (cluster: Cluster) => {
+        const ids = cluster.items.map((item) => item.id);
+        if (propsRef.current.onClusterSelect && ids.length > 1) {
+          propsRef.current.onClusterSelect(ids);
+          return;
+        }
+        if (ids.length === 1) {
+          propsRef.current.onSelect(ids[0]);
+          return;
+        }
+
+        try {
+          const m = mapRef.current;
+          if (!m) return;
+          const curLevel = m.getLevel();
+          const nextLevel = Math.max(1, curLevel - 2);
+          m.setLevel(nextLevel, { anchor: new window.kakao.maps.LatLng(cluster.lat, cluster.lng) });
+        } catch (_) {}
+      };
+
+      const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
+        content.onclick = (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          handleClusterClick(cluster);
+        };
+      };
+
       // 개별 핀 렌더
       singles.forEach((prop) => {
         const key = `p:${prop.id}`;
@@ -346,6 +376,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createClusterHtml(count, zoom);
               content.dataset.sig = sig;
             }
+            bindClusterClick(content, c);
           }
           return;
         }
@@ -354,29 +385,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.innerHTML = createClusterHtml(count, zoom);
         content.style.cssText = "cursor:pointer;";
         content.dataset.sig = `cluster|${count}|${zoom}`;
-        content.addEventListener("click", () => {
-          // 단일 매물이면 바로 선택 (다른 매물로 이동하는 오류 방지)
-          if (c.items.length === 1) {
-            propsRef.current.onSelect(c.items[0].id);
-            return;
-          }
-          // 동일 좌표에 모인 매물이면 zoom-in해도 분리 안 되므로 첫 매물 선택
-          const first = c.items[0];
-          const allSame = c.items.every(
-            (it) => Math.abs(it.lat - first.lat) < 1e-7 && Math.abs(it.lng - first.lng) < 1e-7
-          );
-          if (allSame) {
-            propsRef.current.onSelect(first.id);
-            return;
-          }
-          try {
-            const m = mapRef.current;
-            if (!m) return;
-            const curLevel = m.getLevel();
-            const nextLevel = Math.max(1, curLevel - 2);
-            m.setLevel(nextLevel, { anchor: new window.kakao.maps.LatLng(c.lat, c.lng) });
-          } catch (_) {}
-        });
+        bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(posLat, posLng),

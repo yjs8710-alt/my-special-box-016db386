@@ -78,6 +78,16 @@ const ApartmentRental = () => {
     setPinnedAddress(prop.address);
   }, [filtered, allProperties, pinnedIds]);
 
+  const handleClusterSelect = useCallback((ids: number[]) => {
+    if (ids.length === 0) return;
+    setShowAllFromSearch(false);
+    setPinnedAddress(null);
+    setSuppressPan(true);
+    setPinnedIds(ids);
+    setSelectedId(null);
+    setTimeout(() => setSuppressPan(false), 120);
+  }, []);
+
   const sidebarProperties = useMemo(() => {
     const b = mapBoundsState;
     const inBounds = (p: any) => !b ? true : (p.lat && p.lng && p.lat >= b.swLat && p.lat <= b.neLat && p.lng >= b.swLng && p.lng <= b.neLng);
@@ -142,6 +152,7 @@ const ApartmentRental = () => {
             selectedIds={pinnedIds}
             onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
             onSelect={handlePinSelect}
+            onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
           />
