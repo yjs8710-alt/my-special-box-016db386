@@ -5512,7 +5512,15 @@ const MapSidebar = ({
                                     const current = sameAddr.find((p) => p.id === prop.id);
                                     const others = sameAddr.filter((p) => p.id !== prop.id);
                                     const sorted = current ? [current, ...others] : sameAddr;
-                                    return sorted.map((p) => ({
+                                    // 동일 호수 중복 제거 (호수+주거형 키 기준, 첫 항목만 유지)
+                                    const seen = new Set<string>();
+                                    const deduped = sorted.filter((p) => {
+                                      const key = `${p.unitNumber || "?"}|${p.roomType || ""}`;
+                                      if (seen.has(key)) return false;
+                                      seen.add(key);
+                                      return true;
+                                    });
+                                    return deduped.map((p) => ({
                                       unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
                                       roomType: p.roomType || undefined,
                                       label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
