@@ -87,7 +87,7 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
 
 /** 클러스터: 같은 물방울 핀에 숫자만 크게 */
 function createClusterHtml(count: number) {
-  const size = count >= 100 ? 60 : count >= 10 ? 52 : 44;
+  const size = count >= 100 ? 90 : count >= 10 ? 78 : 66;
   return createPinImageHtml(count, size, false);
 }
 
