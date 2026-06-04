@@ -215,7 +215,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     setPinnedAddress(null);
     setSuppressPan(true);
     setPinnedIds(ids);
-    setSelectedId(ids[0]);
+    setSelectedId(null);
     setTimeout(() => setSuppressPan(false), 120);
   }, []);
 
