@@ -36,6 +36,8 @@ interface SearchResult {
   regNo?: string;
   lat?: number;
   lng?: number;
+  lotNumber?: string;
+  buildingName?: string;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
