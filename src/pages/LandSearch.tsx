@@ -154,7 +154,7 @@ const LandSearch = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            propertyCount={sidebarProperties.length}
+            propertyCount={landlordSearched ? mapProperties.length : sidebarProperties.length}
             hideSearchBar={showRegister || mobileMenuOpen}
             showRoomTypes={false}
             showFloor={false}

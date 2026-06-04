@@ -256,7 +256,7 @@ const ResidentialRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            propertyCount={sidebarProperties.length}
+            propertyCount={landlordSearched ? mapProperties.length : sidebarProperties.length}
             hideSearchBar={showRegister || mobileMenuOpen}
             showResidentialTypes={true}
             showBuildingOptions={true}
