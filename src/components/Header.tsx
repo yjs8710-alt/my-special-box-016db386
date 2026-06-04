@@ -72,6 +72,12 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     onRegisterChange?.(false);
   };
 
+  useEffect(() => {
+    const handler = () => openRegister();
+    window.addEventListener("open-register-modal", handler);
+    return () => window.removeEventListener("open-register-modal", handler);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
