@@ -132,6 +132,15 @@ const LandSearch = () => {
             선택 삭제
           </button>
         )}
+        <button
+          onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
+          className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
+          style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" }}
+          aria-label="매물 등록"
+        >
+          <span className="text-sm leading-none">+</span>
+          매물 등록
+        </button>
       </div>
 
       <main
