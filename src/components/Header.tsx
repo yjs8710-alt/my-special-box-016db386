@@ -87,6 +87,16 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
   return (
     <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
+      {/* 네온 그라데이션 stroke 정의 (lucide 아이콘용) */}
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <defs>
+          <linearGradient id="neonIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="50%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+        </defs>
+      </svg>
       {/* <AdminEditBar /> */}
       <Suspense fallback={null}>
         {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
