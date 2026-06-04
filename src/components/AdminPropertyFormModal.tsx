@@ -1084,7 +1084,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                               return;
                             }
                             set("type", t);
-                            const newPrimaryCollective = (COLLECTIVE_TYPES as readonly string[]).includes(t);
+                            const newPrimaryCollective = (COLLECTIVE_TYPES as readonly string[]).includes(t) || t === "도시형";
                             if (!newPrimaryCollective) set("extraRoomTypes", []);
                             if (newPrimaryCollective) set("room_type", t);
                             else if (!form.room_type || form.room_type === form.type || form.room_type.includes(",")) set("room_type", t);
