@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
     if (!contactRes.error && contactRes.data) {
       for (const row of contactRes.data) {
         if (!matchesKeyword(row.district, row.dong, row.lot_number, row.unit_number, row.building_name, row.phone, row.contact_owner, row.contact_manager, row.contact_broker, row.memo)) continue;
-        const owner = row.contact_owner ?? row.phone ?? "";
+        const owner = row.phone || row.contact_owner || "";
         const manager = row.contact_manager ?? "";
         const broker = row.contact_broker ?? "";
         if (!owner && !manager && !broker) continue;
