@@ -100,6 +100,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
             </div>
 
+            {/* 데스크톱: 매물 등록 (좌측) */}
+            {location.pathname !== "/" && (
+              <button
+                onClick={openRegister}
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white transition-transform hover:scale-[1.02] active:scale-95 mr-2"
+                style={neonChipStyle(true)}
+                aria-label="매물 등록"
+              >
+                <span className="text-sm leading-none">+</span>
+                매물 등록
+              </button>
+            )}
 
             {/* 데스크톱 Nav */}
             <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-hidden">
@@ -199,17 +211,6 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 </button>
               )}
 
-              {location.pathname !== "/" && (
-                <button
-                  onClick={openRegister}
-                  className="-ml-10 self-center flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white transition-transform hover:scale-[1.02] active:scale-95"
-                  style={neonChipStyle(true)}
-                  aria-label="매물 등록"
-                >
-                  <span className="text-sm leading-none">+</span>
-                  매물 등록
-                </button>
-              )}
             </div>
 
             {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) */}

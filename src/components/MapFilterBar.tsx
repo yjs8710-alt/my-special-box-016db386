@@ -639,7 +639,7 @@ const MapFilterBar = ({
                   className="relative flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{
                     borderLeft: "1px solid hsl(var(--primary) / 0.3)",
-                    background: (showFilter || activeFilterCount > 0) ? "hsl(var(--accent))" : "transparent",
+                    background: (showFilter || activeFilterCount > 0) ? "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" : "transparent",
                     color: (showFilter || activeFilterCount > 0) ? "#fff" : "hsl(var(--muted-foreground))",
                   }}
                 >
@@ -677,7 +677,7 @@ const MapFilterBar = ({
                     className="relative hidden md:flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-all flex-shrink-0"
                     style={{
                       borderLeft: "1px solid hsl(var(--border))",
-                      background: radiusMode ? "hsl(var(--accent))" : "transparent",
+                      background: radiusMode ? "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" : "transparent",
                       color: radiusMode ? "#fff" : "hsl(var(--muted-foreground))",
                     }}
                   >
@@ -713,7 +713,7 @@ const MapFilterBar = ({
                 onClick={handleLandlordSearch}
                 disabled={!landlordQuery.trim() || landlordLoading}
                 className="flex items-center justify-center h-10 px-4 text-xs font-bold transition-colors disabled:opacity-40"
-                style={{ background: "hsl(var(--accent))", color: "#fff", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
+                style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
               >
                 {landlordLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" strokeWidth={2.5} />}
               </button>
