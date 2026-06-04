@@ -5414,34 +5414,42 @@ const MapSidebar = ({
                                    const sameAddr = properties.filter(
                                      (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
                                    );
-                                   const activeUnits: LightboxUnit[] =
-                                     sameAddr.length > 0
-                                       ? (() => {
-                                           const current = sameAddr.find((p) => p.id === prop.id);
-                                           const others = sameAddr.filter((p) => p.id !== prop.id);
-                                           const sorted = current ? [current, ...others] : sameAddr;
-                                           return sorted.map((p) => ({
-                                             unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
-                                             roomType: p.roomType || undefined,
-                                             label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
-                                             images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
-                                             isReference: p.id !== prop.id,
-                                           }));
-                                         })()
-                                       : hasOwnImages
-                                         ? [{
-                                             unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
-                                             roomType: prop.roomType || undefined,
-                                             label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
-                                             images:
-                                               prop.images && prop.images.length > 0
-                                                 ? prop.images
-                                                 : prop.image
-                                                   ? [prop.image]
-                                                   : [],
-                                             isReference: false,
-                                           }]
-                                         : [];
+                                    const activeUnits: LightboxUnit[] =
+                                      sameAddr.length > 0
+                                        ? (() => {
+                                            const current = sameAddr.find((p) => p.id === prop.id);
+                                            const others = sameAddr.filter((p) => p.id !== prop.id);
+                                            const sorted = current ? [current, ...others] : sameAddr;
+                                            // 동일 호수 중복 제거 (호수+주거형 키 기준, 첫 항목만 유지)
+                                            const seen = new Set<string>();
+                                            const deduped = sorted.filter((p) => {
+                                              const key = `${p.unitNumber || "?"}|${p.roomType || ""}`;
+                                              if (seen.has(key)) return false;
+                                              seen.add(key);
+                                              return true;
+                                            });
+                                            return deduped.map((p) => ({
+                                              unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
+                                              roomType: p.roomType || undefined,
+                                              label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
+                                              images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
+                                              isReference: p.id !== prop.id,
+                                            }));
+                                          })()
+                                        : hasOwnImages
+                                          ? [{
+                                              unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
+                                              roomType: prop.roomType || undefined,
+                                              label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
+                                              images:
+                                                prop.images && prop.images.length > 0
+                                                  ? prop.images
+                                                  : prop.image
+                                                    ? [prop.image]
+                                                    : [],
+                                              isReference: false,
+                                            }]
+                                          : [];
                                    // 종료된(같은 주소) 호실 사진도 함께 노출 — 자기 자신 호실은 제외
                                    const exclude = new Set(sameAddr.map((p) => `${p.unitNumber || "?"}|${p.roomType || ""}`));
                                    if (!hasOwnImages) {
