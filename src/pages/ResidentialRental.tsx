@@ -181,7 +181,6 @@ const ResidentialRental = () => {
         {(["월세", "전세", "단기임대"] as const).map(dt => {
           const isActive = filters.dealType.includes(dt);
           const displayLabel = dt === "단기임대" ? "단기" : dt;
-          const PURPLE = "270 65% 55%";
           return (
             <button
               key={dt}
@@ -194,11 +193,7 @@ const ResidentialRental = () => {
                 }));
               }}
               className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: `hsl(${PURPLE})`, color: "#fff", borderColor: `hsl(${PURPLE})`, boxShadow: `0 0 0 2px hsl(${PURPLE} / 0.25)` }
-                  : { background: `hsl(${PURPLE} / 0.12)`, color: `hsl(${PURPLE})`, borderColor: `hsl(${PURPLE} / 0.5)` }
-              }
+              style={neonChipStyle(isActive)}
             >
               {displayLabel}
             </button>
@@ -207,7 +202,6 @@ const ResidentialRental = () => {
         {(() => {
           const petKey = "애완동물가능";
           const isActive = filters.buildingOptions.includes(petKey);
-          const PURPLE = "270 65% 55%";
           return (
             <button
               onClick={() => {
@@ -219,11 +213,7 @@ const ResidentialRental = () => {
                 }));
               }}
               className="px-3.5 py-1 rounded-full text-[13px] font-extrabold border-2 whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: `hsl(${PURPLE})`, color: "#fff", borderColor: `hsl(${PURPLE})`, boxShadow: `0 0 0 2px hsl(${PURPLE} / 0.25)` }
-                  : { background: `hsl(${PURPLE} / 0.12)`, color: `hsl(${PURPLE})`, borderColor: `hsl(${PURPLE} / 0.5)` }
-              }
+              style={neonChipStyle(isActive)}
             >
               반려동물
             </button>
