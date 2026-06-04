@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
         `dong.ilike.%${term}%`,
         `lot_number.ilike.%${term}%`,
         `unit_number.ilike.%${term}%`,
+        `note.ilike.%${term}%`,
       ])
       .join(",");
     const contactOr = [keyword, ...tokens]
@@ -110,6 +111,9 @@ Deno.serve(async (req) => {
         `building_name.ilike.%${term}%`,
         `phone.ilike.%${term}%`,
         `contact_owner.ilike.%${term}%`,
+        `contact_manager.ilike.%${term}%`,
+        `contact_broker.ilike.%${term}%`,
+        `memo.ilike.%${term}%`,
       ])
       .join(",");
 
