@@ -70,19 +70,61 @@ Deno.serve(async (req) => {
       });
     }
     const keyword = q.trim();
+    const normalizeSearch = (value: unknown) => String(value ?? "")
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .replace(/번지|호/g, "");
+    const safeToken = (value: string) => value.replace(/[%,()]/g, "").trim();
+    const tokens = Array.from(new Set(
+      keyword
+        .replace(/번지/g, " ")
+        .split(/\s+/)
+        .map(safeToken)
+        .filter((token) => token.length > 0)
+    ));
+    const normalizedTokens = tokens.map(normalizeSearch).filter(Boolean);
+    const matchesKeyword = (...values: unknown[]) => {
+      if (normalizedTokens.length === 0) return true;
+      const haystack = normalizeSearch(values.join(" "));
+      return normalizedTokens.every((token) => haystack.includes(token));
+    };
+    const propOr = [keyword, ...tokens]
+      .map(safeToken)
+      .filter(Boolean)
+      .flatMap((term) => [
+        `address.ilike.%${term}%`,
+        `building_name.ilike.%${term}%`,
+        `title.ilike.%${term}%`,
+        `dong.ilike.%${term}%`,
+        `lot_number.ilike.%${term}%`,
+        `unit_number.ilike.%${term}%`,
+      ])
+      .join(",");
+    const contactOr = [keyword, ...tokens]
+      .map(safeToken)
+      .filter(Boolean)
+      .flatMap((term) => [
+        `dong.ilike.%${term}%`,
+        `lot_number.ilike.%${term}%`,
+        `unit_number.ilike.%${term}%`,
+        `building_name.ilike.%${term}%`,
+        `phone.ilike.%${term}%`,
+        `contact_owner.ilike.%${term}%`,
+      ])
+      .join(",");
 
     // 모든 매물 조회 (status 무관 — 숨김/종료 포함)
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
         .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number")
-        .or(`address.ilike.%${keyword}%,building_name.ilike.%${keyword}%,title.ilike.%${keyword}%,dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%`)
-        .limit(30),
+        .or(propOr)
+        .limit(100),
       adminClient
         .from("cheongju_contacts")
         .select("id, district, dong, lot_number, unit_number, phone, contact_owner, contact_manager, contact_broker, memo, is_visible, building_name")
-        .or(`dong.ilike.%${keyword}%,lot_number.ilike.%${keyword}%,building_name.ilike.%${keyword}%`)
-        .limit(60),
+        .or(contactOr)
+        .limit(150),
     ]);
 
     const results: object[] = [];
@@ -94,19 +136,20 @@ Deno.serve(async (req) => {
 
     if (!propRes.error && propRes.data) {
       for (const row of propRes.data) {
+        if (!matchesKeyword(row.address, row.building_name, row.title, row.dong, row.lot_number, row.unit_number)) continue;
         const noteStr = row.note ?? row.agent_name ?? "";
         const owner = parseContact(noteStr, "건물주");
         const manager = parseContact(noteStr, "관리인");
         const broker = parseContact(noteStr, "부동산");
         if (!owner && !manager && !broker) continue;
+        const unitLabel = row.unit_number ? `${row.unit_number}호` : "";
         results.push({
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
-          label: row.building_name ?? row.title,
-          sublabel: row.address,
+          label: [row.building_name ?? row.title, unitLabel].filter(Boolean).join(" "),
+          sublabel: [row.address, unitLabel].filter(Boolean).join(" · "),
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),
-          price: row.monthly ? `${row.deposit ? row.deposit + "/" : ""}${row.monthly}만` : undefined,
           images: Array.isArray(row.images) ? row.images : [],
           contactOwner: owner,
           contactManager: manager,
