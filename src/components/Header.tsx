@@ -139,7 +139,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 aria-label="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
+                <img src={iconChat} alt="" className="w-10 h-10 object-contain" />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
@@ -152,7 +152,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     onClick={() => navigate("/my-page")}
                   >
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <img src={iconUsersGradient} alt="" className="h-10 w-auto object-contain" />
+                    <img src={iconUsersGradient} alt="" className="w-10 h-10 object-contain" />
                   </button>
 
                   {user?.isAdmin && (
