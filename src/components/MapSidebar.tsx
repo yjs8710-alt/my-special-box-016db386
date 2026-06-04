@@ -3913,7 +3913,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const vacateTime = new Date(vacateStr).getTime();
             return !isNaN(vacateTime) && vacateTime < Date.now() ? "공실" : null;
           })();
-          const vacateDateLabel = prop.vacateDate?.trim();
+          const vacateDateLabel = vacateStatus === "공실" ? null : prop.vacateDate?.trim();
           const vacancy = !isSalePropCard
             ? (vacateStatus ?? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null))
             : null;
