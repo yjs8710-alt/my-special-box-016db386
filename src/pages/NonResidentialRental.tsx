@@ -8,6 +8,7 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
 import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 
 const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
@@ -240,7 +241,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           return (
             <button key={t.key} onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+              style={neonChipStyle(isActive)}
             >{t.label}</button>
           );
         })}
@@ -255,7 +256,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
               return (
                 <button key={t.key} onClick={() => toggleType(t.key)}
                   className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-                  style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+                  style={neonChipStyle(isActive)}
                 >{t.label}</button>
               );
             })}
@@ -270,7 +271,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           return (
             <button key={t.key} onClick={() => toggleType(t.key)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={isActive ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" } : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }}
+              style={neonChipStyle(isActive)}
             >{t.label}</button>
           );
         })}

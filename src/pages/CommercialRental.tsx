@@ -9,6 +9,7 @@ import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/co
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
@@ -111,11 +112,7 @@ const CommercialRental = () => {
               key={t}
               onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
+              style={neonChipStyle(isActive)}
             >
               {t}
             </button>
