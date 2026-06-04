@@ -568,6 +568,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const petOpt = opts.find((o) => o.startsWith("반려동물_"));
     if (petOpt) contacts.pet = petOpt.replace("반려동물_", "") as PetType;
 
+    const roomTypeParts = (init.room_type ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    contacts.extraRoomTypes = roomTypeParts.filter((rt) => (ROOM_SUBTYPES as readonly string[]).includes(rt));
+
     // 다중 임대방식 파싱 (PropertyRegisterModal과 동일한 note 포맷)
     const modes: string[] = [];
     const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
@@ -884,7 +887,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       lot_number: finalLotNumber ?? "",
       district: form.district || null,
       type: form.type || "",
-      room_type: form.room_type || null,
+      room_type: (() => {
+        const base = form.room_type || form.type;
+        if ((COLLECTIVE_TYPES as readonly string[]).includes(form.type) && form.extraRoomTypes.length > 0) {
+          return [base, ...form.extraRoomTypes].filter(Boolean).join(",");
+        }
+        return form.room_type || null;
+      })(),
       unit_number: form.unit_number || null,
       area: (form.area && !form.area.includes("평")) ? (() => { const n = parseFloat(form.area.replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : form.area; })() : (form.area ?? ""),
       floor: form.floor ?? "",
