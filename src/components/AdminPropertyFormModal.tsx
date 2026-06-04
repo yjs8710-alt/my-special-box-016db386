@@ -342,6 +342,7 @@ const BUILDING_TYPES = ["단독건물","집합건물","토지"] as const;
 
 // 집합건물로 취급할 세부 유형 (호수별 연락처 저장/조회)
 const COLLECTIVE_TYPES = ["아파트","오피스텔","빌라","연립","다세대","주상복합"] as const;
+const ROOM_SUBTYPES = ["원룸","투베이","투룸","쓰리룸","포룸"] as const;
 const PROPERTY_TYPE_GROUPS = [
   { group: "주거형", types: ["원룸","투베이","투룸","쓰리룸","포룸","주인세대","고시원","다가구","단독주택","아파트","오피스텔","도시형","빌라","연립","다세대","주상복합"] },
   { group: "상가", types: ["상가","사무실","공장·창고","지식산업","기타임대"] },
@@ -407,6 +408,7 @@ interface AdminFormExtended extends Omit<DBPropertyForm, "id" | "created_at"> {
   landArea: string; // 대지 면적
   pet: PetType; // 반려동물 가능 여부
   keyMoney: string; // 권리금
+  extraRoomTypes: string[]; // 집합건물 선택 후 추가 주거형 다중선택
 }
 
 const EMPTY_EXTENDED: AdminFormExtended = {
@@ -435,6 +437,7 @@ const EMPTY_EXTENDED: AdminFormExtended = {
   landArea: "",
   pet: "",
   keyMoney: "",
+  extraRoomTypes: [],
 };
 
 // ─── Shared UI Helpers ────────────────────────────────────────────────────────
