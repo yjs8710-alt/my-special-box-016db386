@@ -107,7 +107,7 @@ const PropertyCard = ({
           </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
-            <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain p-1" />
+            <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain" />
           </div>
         )}
         {/* Badges */}
