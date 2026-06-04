@@ -181,6 +181,7 @@ Deno.serve(async (req) => {
 
     if (!contactRes.error && contactRes.data) {
       for (const row of contactRes.data) {
+        if (!matchesKeyword(row.district, row.dong, row.lot_number, row.unit_number, row.building_name, row.phone, row.contact_owner, row.contact_manager, row.contact_broker, row.memo)) continue;
         const owner = row.contact_owner ?? row.phone ?? "";
         const manager = row.contact_manager ?? "";
         const broker = row.contact_broker ?? "";
@@ -193,7 +194,7 @@ Deno.serve(async (req) => {
           id: `contact_${row.id}`,
           source: "contact",
           isVisible: row.is_visible,
-          label: row.building_name || addrLabel,
+          label: row.building_name ? `${row.building_name}${row.unit_number ? ` ${row.unit_number}호` : ""}` : addrLabel,
           sublabel: `청주시 ${row.district} ${addrLabel}`,
           contactOwner: owner,
           contactManager: manager,
