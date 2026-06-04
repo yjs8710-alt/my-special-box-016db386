@@ -5671,7 +5671,7 @@ const MapSidebar = ({
                                   </span>
                                 )}
                                 {prop.roomPassword && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
                                   </span>
                                 )}
