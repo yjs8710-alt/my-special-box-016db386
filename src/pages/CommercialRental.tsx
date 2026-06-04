@@ -9,6 +9,7 @@ import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/co
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
