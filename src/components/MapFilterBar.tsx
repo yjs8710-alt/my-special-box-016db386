@@ -814,7 +814,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   active
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
@@ -864,7 +864,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   allActive
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
@@ -883,7 +883,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   active
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
