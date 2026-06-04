@@ -2424,7 +2424,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
     setBusy(false);
   };
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="relative inline-flex items-center">
       <button
         type="button"
         onClick={handleIconClick}
@@ -2433,7 +2433,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
           background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
           border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
         }}
-        title={isChecked ? `확인 ${checkedDate} (D+${chkDays})` : "미확인 — 클릭하여 날짜 표시"}
+        title={isChecked ? `확인 ${checkedDate} (D+${chkDays})` : "미확인 — 탭하여 날짜 표시"}
       >
         <img
           src={checkDateIcon}
@@ -2449,35 +2449,45 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
         </span>
       </button>
       {expanded && (
-        <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-          {registeredDate && (
-            <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
-              매물등록일 {registeredDate}
-            </span>
-          )}
-          <span
-            className="px-1.5 py-0.5 rounded font-bold"
-            style={{
-              background: isChecked ? "hsl(142 70% 95%)" : "hsl(var(--muted))",
-              color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))",
-              border: `1px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
-            }}
+        <>
+          {/* 바깥 탭하면 닫기 */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
+          />
+          <div
+            className="absolute z-50 top-full left-0 mt-1 flex items-center gap-1.5 flex-wrap text-[11px] p-1.5 rounded-md shadow-lg border border-border bg-card whitespace-nowrap"
+            onClick={(e) => e.stopPropagation()}
           >
-            확인일 {checkedDate ?? "미확인"}
-          </span>
-          {isAdmin && propertyId && (
-            <button
-              type="button"
-              onClick={handleReset}
-              disabled={busy}
-              className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white disabled:opacity-50"
-              style={{ background: "hsl(var(--primary))" }}
-              title="확인일을 오늘 날짜로 갱신"
+            {registeredDate && (
+              <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
+                매물등록일 {registeredDate}
+              </span>
+            )}
+            <span
+              className="px-1.5 py-0.5 rounded font-bold"
+              style={{
+                background: isChecked ? "hsl(142 70% 95%)" : "hsl(var(--muted))",
+                color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))",
+                border: `1px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+              }}
             >
-              확인일 갱신
-            </button>
-          )}
-        </div>
+              확인일 {checkedDate ?? "미확인"}
+            </span>
+            {isAdmin && propertyId && (
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={busy}
+                className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white disabled:opacity-50"
+                style={{ background: "hsl(var(--primary))" }}
+                title="확인일을 오늘 날짜로 갱신"
+              >
+                확인일 갱신
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
