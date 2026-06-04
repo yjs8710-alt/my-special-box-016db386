@@ -3103,9 +3103,11 @@ const AdminDashboard = () => {
                           ))
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
-                      <div className="hidden md:block text-xs">
+                      <div className="hidden md:flex md:flex-col text-xs gap-0.5">
                         {c.contact_manager ? (
-                          <a href={`tel:${c.contact_manager}`} className="font-medium" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                          getUniquePhones(c.contact_manager).map((p) => (
+                            <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(var(--chart-4))" }}>{p}</a>
+                          ))
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
                       <div className="hidden md:block text-xs">
