@@ -1031,6 +1031,10 @@ const ContactEditModal = ({
   const [form, setForm] = useState<CheongJuContact>(
     contact ?? { id: "", district: "", dong: "", lot_number: "", building_name: null, building_dong: null, unit_number: null, phone: "", contact_owner: "", contact_manager: "", contact_broker: "", memo: "" }
   );
+  const [isCollective, setIsCollective] = useState<boolean>(!!(contact?.building_dong || contact?.unit_number));
+  // 관리인 연락처: 줄바꿈으로 여러개 저장 → 배열로 편집
+  const initialManagers = (contact?.contact_manager ?? "").split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  const [managers, setManagers] = useState<string[]>(initialManagers.length > 0 ? initialManagers : [""]);
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
