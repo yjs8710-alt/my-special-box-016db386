@@ -55,6 +55,9 @@ const MapSearch = () => {
 
   const filtered = allProperties.filter((p) => {
     if (deletedIds.has(p.id)) return false;
+    if (landlordHits) {
+      if (!p.regNo || !landlordHits.has(p.regNo)) return false;
+    }
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
     // 지도 영역 필터 — 지도 줌/이동에 따라 사이드바 매물 자동 동기화
