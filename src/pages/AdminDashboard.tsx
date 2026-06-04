@@ -3029,9 +3029,11 @@ const AdminDashboard = () => {
                             </div>
                           )}
                           {c.contact_manager && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 flex-wrap">
                               <span className="text-muted-foreground">관리인:</span>
-                              <a href={`tel:${c.contact_manager}`} className="font-semibold" style={{ color: "hsl(var(--chart-4))" }}>{c.contact_manager}</a>
+                              {getUniquePhones(c.contact_manager).map((p) => (
+                                <a key={p} href={`tel:${p}`} className="font-semibold" style={{ color: "hsl(var(--chart-4))" }}>{p}</a>
+                              ))}
                             </div>
                           )}
                           {c.contact_broker && (
