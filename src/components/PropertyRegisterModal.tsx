@@ -923,9 +923,9 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
               <div className="flex flex-wrap gap-1.5">
                 {types.map((t) => {
                   const isPrimary = form.detailType === t;
-                  const primaryIsCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType);
+                  const primaryIsCollective = (COLLECTIVE_DETAIL_TYPES as readonly string[]).includes(form.detailType) || form.detailType === "도시형";
                   const isSubType = (ROOM_SUBTYPES as readonly string[]).includes(t);
-                  // 집합건물(아파트/오피스텔 등) 1차 선택 후, 원룸/투룸/쓰리룸 등은 추가 다중 선택 가능
+                  // 집합건물(아파트/오피스텔 등) 또는 도시형 1차 선택 후, 원룸/투룸/쓰리룸 등은 추가 다중 선택 가능
                   const canMultiSelect = primaryIsCollective && isSubType && !isPrimary;
                   const isExtra = form.extraRoomTypes.includes(t);
                   const isSelected = isPrimary || isExtra;
