@@ -19,6 +19,13 @@ export interface LandlordResult {
   contactBroker: string;
   type?: string;
   unitNumber?: string;
+  regNo?: string;
+  lat?: number;
+  lng?: number;
+  lotNumber?: string;
+  buildingName?: string;
+  dong?: string;
+  address?: string;
   note?: string;
 }
 
@@ -616,7 +623,7 @@ const MapFilterBar = ({
                   className="flex-1 min-w-0 text-xs bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
                 />
                 {landlordQuery && (
-                  <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); }} className="text-muted-foreground hover:text-foreground">
+                  <button onClick={() => { setLandlordQuery(""); setLandlordSearched(false); setLandlordResults([]); onLandlordResults?.([], false, false); }} className="text-muted-foreground hover:text-foreground">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}

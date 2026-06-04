@@ -7,6 +7,7 @@ import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/co
 
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { MapProperty } from "@/data/mapProperties";
+import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
 
 const APARTMENT_PROPERTIES: MapProperty[] = [];
 
@@ -46,6 +47,10 @@ const ApartmentRental = () => {
   }), [filters, activeDealTypes]);
   const filtered = usePropertyFilter(allProperties, mergedFilters, aptTypeFilter, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
+  const mapProperties = useMemo(
+    () => filterLandlordMapProperties(filtered, landlordResults, landlordSearched, landlordLoading),
+    [filtered, landlordResults, landlordSearched, landlordLoading]
+  );
 
   const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBoundsState(b); }, []);
 
@@ -132,7 +137,7 @@ const ApartmentRental = () => {
       >
         <div className="flex-1 relative min-w-0">
           <MapView
-            properties={filtered}
+            properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
             onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
@@ -157,7 +162,7 @@ const ApartmentRental = () => {
               setLandlordSearched(searched);
             }}
             onSearchClick={handleSearchClick}
-            propertyCount={sidebarProperties.length}
+            propertyCount={landlordSearched ? mapProperties.length : sidebarProperties.length}
             hideSearchBar={showRegister}
             showCategoryChips={false}
             showRoomTypes={false}
