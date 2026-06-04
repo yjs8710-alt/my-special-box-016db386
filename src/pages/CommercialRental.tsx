@@ -111,11 +111,7 @@ const CommercialRental = () => {
               key={t}
               onClick={() => toggleType(t)}
               className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
+              style={neonChipStyle(isActive)}
             >
               {t}
             </button>
