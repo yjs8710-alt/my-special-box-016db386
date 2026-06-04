@@ -215,7 +215,7 @@ interface MapViewProps {
 
 const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear }: MapViewProps) => {
   const mapRef = useRef<any>(null);
-  const overlaysRef = useRef<Map<number, any>>(new Map());
+  const overlaysRef = useRef<Map<string, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
   const zoomLevelRef = useRef<number>(5);
