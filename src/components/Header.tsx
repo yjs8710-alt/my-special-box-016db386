@@ -156,7 +156,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 aria-label="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
+                <MessageCircle className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
