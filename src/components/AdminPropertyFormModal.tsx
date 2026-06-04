@@ -953,11 +953,11 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       const unitVal = form.unit_number || null;
 
       // 집합건물 타입이면 반드시 호수가 있어야 저장 (호수 없으면 단독건물 연락처 오염 방지)
-      const canSaveContact = form.dong && hasAnyContact && (isCollectiveType ? !!unitVal : true);
+      const canSaveContact = finalDong && hasAnyContact && (isCollectiveType ? !!unitVal : true);
 
       if (canSaveContact) {
         const contactDistrict = form.district ?? "";
-        const lotNum = form.lot_number ?? "";
+        const lotNum = finalLotNumber ?? "";
 
         const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
         const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
