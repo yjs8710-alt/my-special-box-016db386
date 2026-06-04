@@ -103,7 +103,7 @@ interface Cluster {
 }
 
 /** 줌 레벨 기반 격자 클러스터링. 선택된 핀과 줌 인 상태에서는 클러스터링 안 함. */
-function buildClusters(props: MapProperty[], zoom: number, selSet: Set<number>): { clusters: Cluster[]; singles: MapProperty[] } {
+function buildClusters(props: MapProperty[], zoom: number, _selSet: Set<number>): { clusters: Cluster[]; singles: MapProperty[] } {
   const singles: MapProperty[] = [];
   // 줌 인 상태(레벨 ≤ 3)에서는 클러스터링 없이 모두 개별 표시
   if (zoom <= 3) {
@@ -113,7 +113,7 @@ function buildClusters(props: MapProperty[], zoom: number, selSet: Set<number>):
   const buckets = new Map<string, MapProperty[]>();
   props.forEach(p => {
     if (!p.lat || !p.lng) return;
-    if (selSet.has(p.id)) { singles.push(p); return; }
+    // 선택 여부와 무관하게 같은 위치 매물은 항상 클러스터로 묶어서 정확한 개수 표시
     const key = `${Math.floor(p.lat / cellDeg)}|${Math.floor(p.lng / cellDeg)}`;
     const arr = buckets.get(key);
     if (arr) arr.push(p); else buckets.set(key, [p]);
