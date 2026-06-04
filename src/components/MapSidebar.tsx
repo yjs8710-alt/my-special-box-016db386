@@ -2396,6 +2396,93 @@ const ContactRevealBtn = ({ propId, label, shortLabel, number, colorStyle, borde
   );
 };
 
+/* ── MobileCheckBadge ── 모바일 매물카드 펼침 영역의 등록일/확인일 표시 (웹 확인일 아이콘 스타일) */
+interface MobileCheckBadgeProps {
+  propertyId?: string;
+  registeredDate?: string;
+  checkedDate?: string;
+  isAdmin?: boolean;
+}
+const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: MobileCheckBadgeProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const [busy, setBusy] = useState(false);
+  if (!registeredDate && !checkedDate) return null;
+  const isChecked = !!checkedDate;
+  const chkDays = checkedDate ? Math.floor((Date.now() - new Date(checkedDate).getTime()) / 86400000) : null;
+  const regDays = registeredDate ? Math.floor((Date.now() - new Date(registeredDate).getTime()) / 86400000) : null;
+  const displayDays = chkDays ?? regDays;
+  const handleIconClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpanded((v) => !v);
+  };
+  const handleReset = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAdmin || !propertyId || busy) return;
+    setBusy(true);
+    const today = new Date().toISOString().slice(0, 10);
+    await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
+    setBusy(false);
+  };
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <button
+        type="button"
+        onClick={handleIconClick}
+        className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all select-none"
+        style={{
+          background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
+          border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+        }}
+        title={isChecked ? `확인 ${checkedDate} (D+${chkDays})` : "미확인 — 클릭하여 날짜 표시"}
+      >
+        <img
+          src={checkDateIcon}
+          alt="확인"
+          className="w-5 h-5 object-contain"
+          style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.4 }}
+        />
+        <span
+          className="text-[10px] font-black whitespace-nowrap tabular-nums"
+          style={{ color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))" }}
+        >
+          {displayDays !== null ? `D+${displayDays}` : "?"}
+        </span>
+      </button>
+      {expanded && (
+        <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+          {registeredDate && (
+            <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
+              매물등록일 {registeredDate}
+            </span>
+          )}
+          <span
+            className="px-1.5 py-0.5 rounded font-bold"
+            style={{
+              background: isChecked ? "hsl(142 70% 95%)" : "hsl(var(--muted))",
+              color: isChecked ? "hsl(142 60% 30%)" : "hsl(var(--muted-foreground))",
+              border: `1px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
+            }}
+          >
+            확인일 {checkedDate ?? "미확인"}
+          </span>
+          {isAdmin && propertyId && (
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={busy}
+              className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white disabled:opacity-50"
+              style={{ background: "hsl(var(--primary))" }}
+              title="확인일을 오늘 날짜로 갱신"
+            >
+              확인일 갱신
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ── AddressToggleCard ── 매인정보 레이아웃 (이미지 참고 레이아웃) */
 interface AddressToggleCardProps {
   prop: MapProperty;
