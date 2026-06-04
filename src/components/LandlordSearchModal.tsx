@@ -38,6 +38,8 @@ interface SearchResult {
   lng?: number;
   lotNumber?: string;
   buildingName?: string;
+  dong?: string;
+  address?: string;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
