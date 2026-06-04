@@ -42,20 +42,23 @@ const TYPE_ACCENT: Record<string, string> = {
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
 function getPinSize(zoomLevel: number): number {
-  if (zoomLevel <= 2) return 84;
-  if (zoomLevel <= 3) return 75;
-  if (zoomLevel <= 4) return 66;
-  if (zoomLevel <= 5) return 60;
-  if (zoomLevel <= 6) return 54;
-  if (zoomLevel <= 7) return 48;
-  if (zoomLevel <= 8) return 42;
-  return 36;
+  if (zoomLevel <= 2) return 100;
+  if (zoomLevel <= 3) return 90;
+  if (zoomLevel <= 4) return 80;
+  if (zoomLevel <= 5) return 72;
+  if (zoomLevel <= 6) return 64;
+  if (zoomLevel <= 7) return 58;
+  if (zoomLevel <= 8) return 52;
+  return 46;
 }
 
 /** 첨부 이미지 핀(원형) + 가운데 숫자 */
 function createPinImageHtml(count: number, size: number, isSelected = false) {
   const scale = isSelected ? 1.2 : 1;
-  const fontSize = Math.max(10, Math.round(size * (count >= 100 ? 0.32 : count >= 10 ? 0.38 : 0.44)));
+  const digits = String(count).length;
+  // 자릿수 비례 폰트 크기 — 항상 원 안에 들어가도록
+  const ratio = digits >= 4 ? 0.28 : digits === 3 ? 0.34 : digits === 2 ? 0.42 : 0.48;
+  const fontSize = Math.max(11, Math.round(size * ratio));
   return `
     <div style="
       position:relative;
@@ -84,9 +87,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   return createPinImageHtml(1, getPinSize(zoomLevel), isSelected);
 }
 
-/** 클러스터: 같은 물방울 핀에 숫자만 크게 */
-function createClusterHtml(count: number) {
-  const size = count >= 100 ? 90 : count >= 10 ? 78 : 66;
+/** 클러스터: 같은 원형 핀에 숫자만 크게 */
+function createClusterHtml(count: number, zoomLevel: number) {
+  const base = getPinSize(zoomLevel);
+  const size = count >= 100 ? Math.round(base * 1.35) : count >= 10 ? Math.round(base * 1.2) : Math.round(base * 1.05);
   return createPinImageHtml(count, size, false);
 }
 
@@ -323,19 +327,22 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         nextKeys.add(key);
         const count = c.items.length;
         const prev = existing.get(key);
+        // 단일 항목 클러스터는 정확한 매물 좌표로 표시 (centroid 편차 제거)
+        const posLat = count === 1 ? c.items[0].lat : c.lat;
+        const posLng = count === 1 ? c.items[0].lng : c.lng;
 
         if (prev) {
           try {
             const curPos = prev.getPosition?.();
-            if (curPos?.getLat?.() !== c.lat || curPos?.getLng?.() !== c.lng) {
-              prev.setPosition(new window.kakao.maps.LatLng(c.lat, c.lng));
+            if (curPos?.getLat?.() !== posLat || curPos?.getLng?.() !== posLng) {
+              prev.setPosition(new window.kakao.maps.LatLng(posLat, posLng));
             }
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `cluster|${count}`;
+            const sig = `cluster|${count}|${zoom}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createClusterHtml(count);
+              content.innerHTML = createClusterHtml(count, zoom);
               content.dataset.sig = sig;
             }
           }
@@ -343,10 +350,24 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createClusterHtml(count);
+        content.innerHTML = createClusterHtml(count, zoom);
         content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `cluster|${count}`;
+        content.dataset.sig = `cluster|${count}|${zoom}`;
         content.addEventListener("click", () => {
+          // 단일 매물이면 바로 선택 (다른 매물로 이동하는 오류 방지)
+          if (c.items.length === 1) {
+            propsRef.current.onSelect(c.items[0].id);
+            return;
+          }
+          // 동일 좌표에 모인 매물이면 zoom-in해도 분리 안 되므로 첫 매물 선택
+          const first = c.items[0];
+          const allSame = c.items.every(
+            (it) => Math.abs(it.lat - first.lat) < 1e-7 && Math.abs(it.lng - first.lng) < 1e-7
+          );
+          if (allSame) {
+            propsRef.current.onSelect(first.id);
+            return;
+          }
           try {
             const m = mapRef.current;
             if (!m) return;
@@ -357,7 +378,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         });
 
         const overlay = new window.kakao.maps.CustomOverlay({
-          position: new window.kakao.maps.LatLng(c.lat, c.lng),
+          position: new window.kakao.maps.LatLng(posLat, posLng),
           content,
           map,
           yAnchor: 0.5,
