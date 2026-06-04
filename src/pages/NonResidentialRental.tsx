@@ -8,6 +8,7 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import { MapProperty } from "@/data/mapProperties";
 import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 
 const NON_RESIDENTIAL_PROPERTIES: MapProperty[] = [];
 
