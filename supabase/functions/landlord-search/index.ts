@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number")
+        .select("id, reg_no, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number, lat, lng")
         .or(propOr)
         .limit(100),
       adminClient
