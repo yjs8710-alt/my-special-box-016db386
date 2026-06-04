@@ -1071,24 +1071,6 @@ const MapFilterBar = ({
               </div>
               )}
 
-              {/* 반려동물 */}
-              {showBuildingOptions && (
-              <div>
-                <SectionLabel>반려동물</SectionLabel>
-                <div className="flex flex-wrap gap-1">
-                  {PET_OPTIONS.map(({ key, label }) => (
-                    <Chip
-                      key={key}
-                      active={filters.buildingOptions.includes(key)}
-                      onClick={() => set("buildingOptions", toggleArr(filters.buildingOptions, key))}
-                    >
-                      {label}
-                    </Chip>
-                  ))}
-                </div>
-              </div>
-              )}
-
               {/* 방향 */}
               {showBuildingOptions && (
               <div>
