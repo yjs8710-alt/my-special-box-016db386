@@ -171,6 +171,8 @@ Deno.serve(async (req) => {
           availableFrom: row.available_from ?? undefined,
           note: row.note ?? undefined,
           unitNumber: row.unit_number ?? undefined,
+          lotNumber: row.lot_number ?? undefined,
+          buildingName: row.building_name ?? undefined,
         });
       }
     }
