@@ -5156,7 +5156,7 @@ const MapSidebar = ({
                                 }
                                 return (
                                   <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
-                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none p-1" />
+                                    <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none" />
                                   </div>
     
                                 );
@@ -5378,7 +5378,7 @@ const MapSidebar = ({
                               }
                               return (
                               <div className="w-full h-full flex items-center justify-center bg-muted overflow-hidden">
-                                <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none p-1" />
+                                <img src={zibdaPlaceholder} alt="집다 로고" className="w-full h-full object-contain select-none" />
                               </div>
     
                               );
