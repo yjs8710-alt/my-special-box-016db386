@@ -1065,7 +1065,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                     <div className="flex flex-wrap gap-1.5">
                       {types.map((t) => {
                         const isPrimary = form.type === t;
-                        const primaryIsCollective = (COLLECTIVE_TYPES as readonly string[]).includes(form.type);
+                        const primaryIsCollective = (COLLECTIVE_TYPES as readonly string[]).includes(form.type) || form.type === "도시형";
                         const isSubType = (ROOM_SUBTYPES as readonly string[]).includes(t);
                         const canMultiSelect = primaryIsCollective && isSubType && !isPrimary;
                         const isExtra = form.extraRoomTypes.includes(t);
@@ -1084,7 +1084,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                               return;
                             }
                             set("type", t);
-                            const newPrimaryCollective = (COLLECTIVE_TYPES as readonly string[]).includes(t);
+                            const newPrimaryCollective = (COLLECTIVE_TYPES as readonly string[]).includes(t) || t === "도시형";
                             if (!newPrimaryCollective) set("extraRoomTypes", []);
                             if (newPrimaryCollective) set("room_type", t);
                             else if (!form.room_type || form.room_type === form.type || form.room_type.includes(",")) set("room_type", t);
