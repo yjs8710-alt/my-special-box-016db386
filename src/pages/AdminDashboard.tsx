@@ -1788,17 +1788,7 @@ const AdminDashboard = () => {
     return contacts.filter((c) => {
       const matchDist = contactDistrictFilter === "전체" || c.district === contactDistrictFilter;
       if (!matchDist) return false;
-      if (!q) return true;
-      return (
-        c.dong.includes(q)
-        || (c.lot_number ?? "").includes(q)
-        || (c.unit_number ?? "").includes(q)
-        || c.phone.includes(q)
-        || (c.contact_owner ?? "").includes(q)
-        || (c.contact_broker ?? "").includes(q)
-        || (c.memo ?? "").includes(q)
-        || (c.building_name ?? "").includes(q)
-      );
+      return contactMatchesSearch(c, q);
     });
   }, [contacts, contactDistrictFilter, appliedContactSearch]);
 
