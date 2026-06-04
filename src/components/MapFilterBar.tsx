@@ -563,8 +563,6 @@ const MapFilterBar = ({
             style={{
               boxShadow: "0 4px 20px rgba(10,45,110,0.18)",
               flexShrink: 0,
-              border: `2px solid ${searchMode === "landlord" ? "hsl(var(--accent))" : "hsl(var(--primary))"}`,
-              transition: "border-color 0.2s",
             }}
           >
             {/* 모드 탭 */}

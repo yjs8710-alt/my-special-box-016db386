@@ -1936,7 +1936,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                     <div className="relative group cursor-default">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[10px] text-muted-foreground font-medium">🏢 건물 공동현관</span>
-                        <span className="text-base font-bold text-foreground tracking-widest">
+                        <span className="text-base font-bold tracking-widest" style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                           건{property.buildingPassword}
                         </span>
                       </div>
@@ -1958,7 +1958,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                     <div className="relative group cursor-default">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[10px] text-muted-foreground font-medium">🚪 방(호실) 도어락</span>
-                        <span className="text-base font-bold text-foreground tracking-widest">
+                        <span className="text-base font-bold tracking-widest" style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                           방{property.roomPassword || property.password}
                         </span>
                       </div>
