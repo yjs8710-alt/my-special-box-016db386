@@ -3,7 +3,6 @@ import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, Use
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconMypageNew from "@/assets/icon-mypage-new.png";
 import iconLogoutNew from "@/assets/icon-logout-new.png";
-import btnRegisterNew from "@/assets/btn-register-new.png";
 import iconChat from "@/assets/icon-chat-gradient.png";
 import iconBellGradient from "@/assets/icon-bell-mobile-new.png";
 import iconUserGradient from "@/assets/icon-user-mobile-new.png";
