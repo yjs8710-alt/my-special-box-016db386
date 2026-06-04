@@ -337,30 +337,29 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   const renderOverlays = useCallback(
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       const existing = overlaysRef.current;
-      const nextIds = new Set<number>();
+      const nextKeys = new Set<string>();
       const selSet = new Set<number>(propsRef.current.selectedIds ?? []);
       if (selId !== null && selId !== undefined) selSet.add(selId);
 
-      props.forEach((prop) => {
-        if (!prop.lat || !prop.lng) return;
-        nextIds.add(prop.id);
+      const { clusters, singles } = buildClusters(props, zoom, selSet);
+
+      // 개별 핀 렌더
+      singles.forEach((prop) => {
+        const key = `p:${prop.id}`;
+        nextKeys.add(key);
         const isSelected = selSet.has(prop.id);
-        const prev = existing.get(prop.id);
+        const prev = existing.get(key);
 
         if (prev) {
-          // 기존 오버레이 재사용 — 위치/콘텐츠/zIndex 모두 업데이트
-          // (좌표가 변경되었을 수 있으므로 position도 반드시 갱신)
           try {
             const curPos = prev.getPosition?.();
-            const curLat = curPos?.getLat?.();
-            const curLng = curPos?.getLng?.();
-            if (curLat !== prop.lat || curLng !== prop.lng) {
+            if (curPos?.getLat?.() !== prop.lat || curPos?.getLng?.() !== prop.lng) {
               prev.setPosition(new window.kakao.maps.LatLng(prop.lat, prop.lng));
             }
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+            const sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
             if (content.dataset.sig !== sig) {
               content.innerHTML = createPinHtml(prop, isSelected, zoom);
               content.dataset.sig = sig;
@@ -373,7 +372,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         const content = document.createElement("div");
         content.innerHTML = createPinHtml(prop, isSelected, zoom);
         content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+        content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
         content.addEventListener("click", () => propsRef.current.onSelect(prop.id));
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -383,20 +382,71 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           yAnchor: 1,
           zIndex: isSelected ? 1000 : 0,
         });
-
-        existing.set(prop.id, overlay);
+        existing.set(key, overlay);
       });
 
-      // 사라진 핀만 제거
-      existing.forEach((overlay, id) => {
-        if (!nextIds.has(id)) {
+      // 클러스터 렌더 (숫자 원형)
+      clusters.forEach((c) => {
+        const key = `c:${c.key}`;
+        nextKeys.add(key);
+        const count = c.items.length;
+        const prev = existing.get(key);
+
+        if (prev) {
+          try {
+            const curPos = prev.getPosition?.();
+            if (curPos?.getLat?.() !== c.lat || curPos?.getLng?.() !== c.lng) {
+              prev.setPosition(new window.kakao.maps.LatLng(c.lat, c.lng));
+            }
+          } catch (_) {}
+          const content = prev.getContent() as HTMLDivElement;
+          if (content && content.dataset) {
+            const sig = `cluster|${count}`;
+            if (content.dataset.sig !== sig) {
+              content.innerHTML = createClusterHtml(count);
+              content.dataset.sig = sig;
+            }
+          }
+          return;
+        }
+
+        const content = document.createElement("div");
+        content.innerHTML = createClusterHtml(count);
+        content.style.cssText = "cursor:pointer;";
+        content.dataset.sig = `cluster|${count}`;
+        content.addEventListener("click", () => {
+          try {
+            const m = mapRef.current;
+            if (!m) return;
+            const curLevel = m.getLevel();
+            const nextLevel = Math.max(1, curLevel - 2);
+            m.setLevel(nextLevel, { anchor: new window.kakao.maps.LatLng(c.lat, c.lng) });
+          } catch (_) {}
+        });
+
+        const overlay = new window.kakao.maps.CustomOverlay({
+          position: new window.kakao.maps.LatLng(c.lat, c.lng),
+          content,
+          map,
+          yAnchor: 0.5,
+          xAnchor: 0.5,
+          zIndex: 500,
+        });
+        existing.set(key, overlay);
+      });
+
+      // 사라진 오버레이 제거
+      existing.forEach((overlay, key) => {
+        if (!nextKeys.has(key)) {
           try { overlay.setMap(null); } catch (_) {}
-          existing.delete(id);
+          existing.delete(key);
         }
       });
     },
     []
   );
+
+
 
   // 지도 초기화 + zoom_changed / drag_end 이벤트 등록
   useEffect(() => {
