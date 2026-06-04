@@ -60,9 +60,7 @@ import { toast } from "sonner";
 import { customConfirm, customPrompt, customAlert } from "@/lib/customDialogs";
 
 const neonGradientTextStyle = {
-  background: "linear-gradient(90deg, hsl(187 85% 56%) 0%, hsl(272 85% 62%) 50%, hsl(328 84% 60%) 100%)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  color: "#000",
   fontWeight: 800,
 } as const;
 
@@ -5666,7 +5664,7 @@ const MapSidebar = ({
                             {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
                                 {(prop.buildingPassword || prop.password) && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
                                   </span>
                                 )}
