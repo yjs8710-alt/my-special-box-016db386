@@ -59,6 +59,19 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { customConfirm, customPrompt, customAlert } from "@/lib/customDialogs";
 
+const neonGradientTextStyle = {
+  background: "linear-gradient(90deg, hsl(187 85% 56%) 0%, hsl(272 85% 62%) 50%, hsl(328 84% 60%) 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  fontWeight: 800,
+} as const;
+
+const roomPasswordChipStyle = {
+  background: "hsl(var(--primary) / 0.10)",
+  color: "hsl(var(--primary))",
+  border: "1px solid hsl(var(--primary) / 0.35)",
+} as const;
+
 /* ── LightboxModal: 호실별 탭 + 여러 장 사진 좌우 탐색 ── */
 interface LightboxUnit {
   unitNumber?: string; // 호수 (e.g., "202호")
