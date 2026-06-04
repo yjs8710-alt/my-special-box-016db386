@@ -696,8 +696,8 @@ const MapFilterBar = ({
                   onClick={() => commitSearch()}
                   className="flex items-center justify-center h-10 px-3 sm:px-4 text-xs font-bold flex-shrink-0"
                   style={{
-                    background: "hsl(var(--primary))",
-                    color: "hsl(var(--primary-foreground))",
+                    background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)",
+                    color: "#fff",
                     borderTopRightRadius: "12px",
                     borderBottomRightRadius: "12px",
                     margin: "-2px -2px -2px 0",
