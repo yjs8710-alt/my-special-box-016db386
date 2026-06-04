@@ -277,8 +277,11 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     (map: any, props: MapProperty[], selId: number | null, onSelectFn: (id: number) => void, zoom: number) => {
       const existing = overlaysRef.current;
       const nextKeys = new Set<string>();
-      const selSet = new Set<number>(propsRef.current.selectedIds ?? []);
-      if (selId !== null && selId !== undefined) selSet.add(selId);
+      const selSet = new Set<number>();
+      if (selId !== null && selId !== undefined) {
+        (propsRef.current.selectedIds ?? []).forEach((id) => selSet.add(id));
+        selSet.add(selId);
+      }
 
       const { clusters, singles } = buildClusters(props, zoom, selSet);
 
