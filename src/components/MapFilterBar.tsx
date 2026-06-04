@@ -713,7 +713,7 @@ const MapFilterBar = ({
                 onClick={handleLandlordSearch}
                 disabled={!landlordQuery.trim() || landlordLoading}
                 className="flex items-center justify-center h-10 px-4 text-xs font-bold transition-colors disabled:opacity-40"
-                style={{ background: "hsl(var(--accent))", color: "#fff", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
+                style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff", borderRadius: "0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0" }}
               >
                 {landlordLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" strokeWidth={2.5} />}
               </button>
