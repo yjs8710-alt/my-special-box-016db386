@@ -3252,7 +3252,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {/* 가격 */}
             {(wolseMatch || halfMatch || jeonseMatch) ? (
               <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
-                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span></span>}
+                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
                 {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
                 {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
               </span>
@@ -3261,7 +3261,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {isSaleProp ? (
                   <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
                 ) : (
-                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={{ color: "hsl(var(--accent))" }}>{prop.monthly}</span></>
+                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
                 )}
               </span>
             )}
@@ -3630,7 +3630,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       style={{ color: "hsl(var(--foreground))" }}
                     >
                       <span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/
-                      <span style={{ color: "hsl(var(--accent))" }}>{wolseMatch[2]}</span>
+                      <span style={neonGradientTextStyle}>{wolseMatch[2]}</span>
                       {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
                         <span style={{ color: "hsl(var(--muted-foreground))" }}>
                           {" "}/ 관 {prop.manageFee}
@@ -3702,7 +3702,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     <span className="text-[11px]" style={{ color: "hsl(var(--border))" }}>
                       /
                     </span>
-                    <span className="text-[12px] font-extrabold" style={{ color: "hsl(var(--accent))" }}>
+                    <span className="text-[12px] font-extrabold" style={neonGradientTextStyle}>
                       {prop.monthly}
                     </span>
                     {prop.manageFee && prop.manageFee !== "0" && prop.manageFee !== "-" && (
