@@ -136,6 +136,60 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   `;
 }
 
+/** 클러스터 원 HTML (직방 스타일 숫자 표기) */
+function createClusterHtml(count: number) {
+  const size = count >= 100 ? 56 : count >= 10 ? 48 : 40;
+  const bg = "#1e40af";
+  const fontSize = Math.round(size * 0.38);
+  return `
+    <div style="
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:${fontSize}px;line-height:1;
+      border:3px solid rgba(255,255,255,0.95);
+      box-shadow:0 0 0 6px ${bg}33, 0 3px 8px rgba(0,0,0,0.4);
+      cursor:pointer;transform:translateZ(0);will-change:transform;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    ">${count}</div>
+  `;
+}
+
+interface Cluster {
+  key: string;
+  lat: number;
+  lng: number;
+  items: MapProperty[];
+}
+
+/** 줌 레벨 기반 격자 클러스터링. 선택된 핀과 줌 인 상태에서는 클러스터링 안 함. */
+function buildClusters(props: MapProperty[], zoom: number, selSet: Set<number>): { clusters: Cluster[]; singles: MapProperty[] } {
+  const singles: MapProperty[] = [];
+  // 줌 인 상태(레벨 ≤ 3)에서는 클러스터링 없이 모두 개별 표시
+  if (zoom <= 3) {
+    return { clusters: [], singles: props.filter(p => p.lat && p.lng) };
+  }
+  const cellDeg = 0.00012 * Math.pow(2, zoom - 1);
+  const buckets = new Map<string, MapProperty[]>();
+  props.forEach(p => {
+    if (!p.lat || !p.lng) return;
+    if (selSet.has(p.id)) { singles.push(p); return; }
+    const key = `${Math.floor(p.lat / cellDeg)}|${Math.floor(p.lng / cellDeg)}`;
+    const arr = buckets.get(key);
+    if (arr) arr.push(p); else buckets.set(key, [p]);
+  });
+  const clusters: Cluster[] = [];
+  buckets.forEach((items, key) => {
+    if (items.length === 1) {
+      singles.push(items[0]);
+    } else {
+      let sLat = 0, sLng = 0;
+      items.forEach(p => { sLat += p.lat; sLng += p.lng; });
+      clusters.push({ key, lat: sLat / items.length, lng: sLng / items.length, items });
+    }
+  });
+  return { clusters, singles };
+}
+
 export interface MapBounds {
   swLat: number; swLng: number; neLat: number; neLng: number;
 }
