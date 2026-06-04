@@ -19,6 +19,13 @@ export interface LandlordResult {
   contactBroker: string;
   type?: string;
   unitNumber?: string;
+  regNo?: string;
+  lat?: number;
+  lng?: number;
+  lotNumber?: string;
+  buildingName?: string;
+  dong?: string;
+  address?: string;
   note?: string;
 }
 

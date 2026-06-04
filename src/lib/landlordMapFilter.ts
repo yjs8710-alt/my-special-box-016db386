@@ -1,5 +1,5 @@
-import { LandlordResult } from "@/components/MapFilterBar";
-import { MapProperty } from "@/data/mapProperties";
+import type { LandlordResult } from "@/components/MapFilterBar";
+import type { MapProperty } from "@/data/mapProperties";
 
 export function filterLandlordMapProperties(
   properties: MapProperty[],
