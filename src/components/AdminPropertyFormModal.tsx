@@ -603,6 +603,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       }
       // 그 외는 EMPTY_EXTENDED 기본값 "단독건물" 유지
     }
+    if (typeof merged.room_type === "string" && merged.room_type.includes(",")) {
+      merged.room_type = merged.room_type.split(",").map((s) => s.trim()).filter(Boolean)[0] ?? "";
+    }
     return merged;
   });
   const [saving, setSaving] = useState(false);
