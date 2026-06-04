@@ -639,7 +639,7 @@ const MapFilterBar = ({
                   className="relative flex items-center gap-1 px-2 sm:px-3 h-10 transition-colors flex-shrink-0"
                   style={{
                     borderLeft: "1px solid hsl(var(--primary) / 0.3)",
-                    background: (showFilter || activeFilterCount > 0) ? "hsl(var(--accent))" : "transparent",
+                    background: (showFilter || activeFilterCount > 0) ? "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" : "transparent",
                     color: (showFilter || activeFilterCount > 0) ? "#fff" : "hsl(var(--muted-foreground))",
                   }}
                 >
