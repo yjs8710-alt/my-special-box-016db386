@@ -912,7 +912,14 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
         <Section label="세부 종류" error={errors.detailType || errors.oneRoomLayout}>
           {PROPERTY_TYPE_GROUPS_REG.filter(({ group }) => !(["단독건물","집합건물"].includes(form.buildingType) && group === "토지")).map(({ group, types }) => (
             <div key={group} className="flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                {group}
+                {group === "주거형" && (
+                  <span className="ml-1.5 text-[10px] font-semibold normal-case tracking-normal" style={{ color: "hsl(var(--primary))" }}>
+                    (중복가능)
+                  </span>
+                )}
+              </span>
               <div className="flex flex-wrap gap-1.5">
                 {types.map((t) => {
                   const isPrimary = form.detailType === t;
@@ -926,6 +933,13 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
                     <button key={t} type="button" onClick={() => {
                       if (canMultiSelect) {
                         set("extraRoomTypes", isExtra ? form.extraRoomTypes.filter((x) => x !== t) : [...form.extraRoomTypes, t]);
+                        return;
+                      }
+                      // 동일 1차 카테고리 재클릭 — 해제
+                      if (isPrimary) {
+                        set("detailType", "");
+                        set("extraRoomTypes", []);
+                        set("oneRoomLayout", "");
                         return;
                       }
                       // 1차 카테고리 변경 — 기존 extraRoomTypes 초기화 (단, 새 타입도 집합건물이면 유지)
