@@ -2,6 +2,9 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
 import { RadiusCircle, haversineMeters, formatRadius } from "@/lib/geoDistance";
+import mapPinAsset from "@/assets/map-pin.png.asset.json";
+
+const MAP_PIN_URL = mapPinAsset.url;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -39,119 +42,53 @@ const TYPE_ACCENT: Record<string, string> = {
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
 function getPinSize(zoomLevel: number): number {
-  if (zoomLevel <= 2) return 52;
-  if (zoomLevel <= 3) return 46;
-  if (zoomLevel <= 4) return 40;
-  if (zoomLevel <= 5) return 34;
-  if (zoomLevel <= 6) return 28;
-  if (zoomLevel <= 7) return 22;
-  if (zoomLevel <= 8) return 17;
-  return 13;
+  if (zoomLevel <= 2) return 56;
+  if (zoomLevel <= 3) return 50;
+  if (zoomLevel <= 4) return 44;
+  if (zoomLevel <= 5) return 40;
+  if (zoomLevel <= 6) return 36;
+  if (zoomLevel <= 7) return 32;
+  if (zoomLevel <= 8) return 28;
+  return 24;
 }
 
-/**
- * 개선된 집 모양 핀 — 원형 배경 + 집 아이콘
- * 가격 라벨 완전 제거
- */
-function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number) {
-  const color = TYPE_COLORS[property.type] ?? "#0369a1";
-  const accent = TYPE_ACCENT[property.type] ?? "#3b82f6";
-  const mainColor = isSelected ? accent : color;
-  const size = getPinSize(zoomLevel);
-
-  // 원형 배경 지름 = 핀 크기, 아이콘은 55%
-  const circleDiam = size;
-  const iconSize = Math.round(size * 0.58);
-
-  const ringColor = isSelected ? "white" : "rgba(255,255,255,0.7)";
-  const ringWidth = isSelected ? 2.5 : 1.5;
-  // box-shadow는 filter: drop-shadow 보다 훨씬 가벼움 (모바일 렉 개선)
-  const shadow = isSelected
-    ? `0 0 0 2px ${accent}66, 0 3px 8px rgba(0,0,0,0.4)`
-    : `0 2px 4px rgba(0,0,0,0.3)`;
-  const scale = isSelected ? 1.25 : 1;
-
-  // 꼬리(말풍선 삼각형) 높이 = size * 0.22
-  const tailH = Math.round(size * 0.22);
-  const tailW = Math.round(size * 0.3);
-
-  // 집 모양 SVG 아이콘 (지붕+몸체+창문+문)
-  const houseIcon = `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none"
-      xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
-      <!-- 지붕 -->
-      <path d="M2 11L12 2L22 11" fill="none" stroke="white" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"/>
-      <!-- 몸체 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="white" opacity="0.25"/>
-      <!-- 몸체 테두리 -->
-      <rect x="4" y="11" width="16" height="11" rx="1" fill="none" stroke="white"
-        stroke-width="1.6" stroke-linejoin="round"/>
-      <!-- 문 -->
-      <rect x="10" y="16" width="4" height="6" rx="0.5" fill="white" opacity="0.75"/>
-      <!-- 창문 좌 -->
-      <rect x="5.5" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-      <!-- 창문 우 -->
-      <rect x="15" y="13" width="3.5" height="3" rx="0.5" fill="white" opacity="0.6"/>
-    </svg>
-  `;
-
+/** 첨부 이미지 핀(물방울) + 가운데 숫자 */
+function createPinImageHtml(count: number, size: number, isSelected = false) {
+  const scale = isSelected ? 1.2 : 1;
+  // 숫자는 핀 머리(상단 원형부분)에 위치 — 핀 높이의 약 38% 지점
+  const fontSize = Math.max(10, Math.round(size * (count >= 100 ? 0.26 : count >= 10 ? 0.3 : 0.34)));
+  const numTop = Math.round(size * 0.32);
   return `
     <div style="
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:0;
+      position:relative;
+      width:${size}px;height:${size}px;
       transform:scale(${scale}) translateZ(0);
       transform-origin:bottom center;
-      cursor:pointer;
-      will-change:transform;
+      cursor:pointer;will-change:transform;
+      filter:${isSelected ? "drop-shadow(0 4px 6px rgba(0,0,0,0.45))" : "drop-shadow(0 2px 3px rgba(0,0,0,0.35))"};
     ">
-      <!-- 원형 배경 -->
+      <img src="${MAP_PIN_URL}" alt="" draggable="false"
+        style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;" />
       <div style="
-        width:${circleDiam}px;
-        height:${circleDiam}px;
-        border-radius:50%;
-        background:${mainColor};
-        border:${ringWidth}px solid ${ringColor};
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        flex-shrink:0;
-        box-shadow:${shadow};
-      ">
-        ${houseIcon}
-      </div>
-      <!-- 말풍선 꼬리 삼각형 -->
-      <div style="
-        width:0;
-        height:0;
-        border-left:${Math.round(tailW/2)}px solid transparent;
-        border-right:${Math.round(tailW/2)}px solid transparent;
-        border-top:${tailH}px solid ${mainColor};
-        margin-top:-1px;
-        flex-shrink:0;
-      "></div>
+        position:absolute;left:0;right:0;top:${numTop}px;
+        text-align:center;color:#fff;font-weight:800;
+        font-size:${fontSize}px;line-height:1;
+        text-shadow:0 1px 2px rgba(0,0,0,0.55);
+        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        pointer-events:none;
+      ">${count}</div>
     </div>
   `;
 }
 
-/** 클러스터 원 HTML (직방 스타일 숫자 표기) */
+function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number) {
+  return createPinImageHtml(1, getPinSize(zoomLevel), isSelected);
+}
+
+/** 클러스터: 같은 물방울 핀에 숫자만 크게 */
 function createClusterHtml(count: number) {
-  const size = count >= 100 ? 56 : count >= 10 ? 48 : 40;
-  const bg = "#1e40af";
-  const fontSize = Math.round(size * 0.38);
-  return `
-    <div style="
-      width:${size}px;height:${size}px;border-radius:50%;
-      background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;
-      font-weight:800;font-size:${fontSize}px;line-height:1;
-      border:3px solid rgba(255,255,255,0.95);
-      box-shadow:0 0 0 6px ${bg}33, 0 3px 8px rgba(0,0,0,0.4);
-      cursor:pointer;transform:translateZ(0);will-change:transform;
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    ">${count}</div>
-  `;
+  const size = count >= 100 ? 60 : count >= 10 ? 52 : 44;
+  return createPinImageHtml(count, size, false);
 }
 
 interface Cluster {
@@ -424,7 +361,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           position: new window.kakao.maps.LatLng(c.lat, c.lng),
           content,
           map,
-          yAnchor: 0.5,
+          yAnchor: 1,
           xAnchor: 0.5,
           zIndex: 500,
         });
