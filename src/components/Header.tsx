@@ -193,12 +193,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     aria-label="로그아웃"
                     title="로그아웃"
                   >
-                    <img
-                      src={iconLogoutNew}
-                      alt=""
-                      className="w-7 h-7 object-contain"
-                      style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
-                    />
+                    <LogOut className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
                   </button>
                 </>
               ) : (
