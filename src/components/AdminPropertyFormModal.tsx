@@ -1054,7 +1054,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
               <Section label="세부 종류 (유형) *">
                 {PROPERTY_TYPE_GROUPS.filter(({ group }) => !(["단독건물","집합건물"].includes(form.buildingType) && group === "토지")).map(({ group, types }) => (
                   <div key={group} className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">
+                      {group}
+                      {group === "주거형" && (
+                        <span className="ml-1.5 text-[10px] font-semibold normal-case tracking-normal" style={{ color: "hsl(var(--primary))" }}>
+                          (중복가능)
+                        </span>
+                      )}
+                    </span>
                     <div className="flex flex-wrap gap-1.5">
                       {types.map((t) => {
                         const isPrimary = form.type === t;
@@ -1067,6 +1074,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                           <button key={t} type="button" onClick={() => {
                             if (canMultiSelect) {
                               set("extraRoomTypes", isExtra ? form.extraRoomTypes.filter((x) => x !== t) : [...form.extraRoomTypes, t]);
+                              return;
+                            }
+                            // 동일 1차 카테고리 재클릭 — 해제
+                            if (isPrimary) {
+                              set("type", "");
+                              set("extraRoomTypes", []);
+                              set("room_type", "");
                               return;
                             }
                             set("type", t);
