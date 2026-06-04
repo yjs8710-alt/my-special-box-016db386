@@ -250,7 +250,7 @@ const PropertyCard = ({
           <div>
             <p className="text-xs text-muted-foreground">보증금 / 월세</p>
             <p className="font-bold text-primary text-sm">
-              {deposit} / <span style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", fontWeight: 800 }}>{monthly}</span>
+              {deposit} / <span style={{ color: "#000", fontWeight: 800 }}>{monthly}</span>
               {manageFee && manageFee !== "0" && manageFee !== "" && (
                 <span className="text-xs text-muted-foreground font-normal ml-2">
                   (관리비 {manageFee})
