@@ -179,13 +179,9 @@ function buildClusters(props: MapProperty[], zoom: number, selSet: Set<number>):
   });
   const clusters: Cluster[] = [];
   buckets.forEach((items, key) => {
-    if (items.length === 1) {
-      singles.push(items[0]);
-    } else {
-      let sLat = 0, sLng = 0;
-      items.forEach(p => { sLat += p.lat; sLng += p.lng; });
-      clusters.push({ key, lat: sLat / items.length, lng: sLng / items.length, items });
-    }
+    let sLat = 0, sLng = 0;
+    items.forEach(p => { sLat += p.lat; sLng += p.lng; });
+    clusters.push({ key, lat: sLat / items.length, lng: sLng / items.length, items });
   });
   return { clusters, singles };
 }
