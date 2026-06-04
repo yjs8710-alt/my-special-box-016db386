@@ -10,6 +10,7 @@ import iconUserGradient from "@/assets/icon-user-mobile-new.png";
 import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterModal"));
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
