@@ -3915,7 +3915,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           })();
           const vacateDateLabel = prop.vacateDate?.trim();
           const vacancy = !isSalePropCard
-            ? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null) ?? vacateStatus
+            ? (vacateStatus ?? ((prop.availableFrom === "공실" || prop.availableFrom === "세입자 거주중") ? prop.availableFrom : null))
             : null;
 
           const chips: { label: string; value: string; bg: string; color: string; border: string }[] = [];
