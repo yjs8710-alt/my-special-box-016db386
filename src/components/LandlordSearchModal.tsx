@@ -33,6 +33,9 @@ interface SearchResult {
   totalFloors?: string;
   availableFrom?: string;
   note?: string;
+  regNo?: string;
+  lat?: number;
+  lng?: number;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
