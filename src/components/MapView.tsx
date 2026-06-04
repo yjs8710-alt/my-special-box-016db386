@@ -311,7 +311,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
           content,
           map,
-          yAnchor: 1,
+          yAnchor: 0.5,
           zIndex: isSelected ? 1000 : 0,
         });
         existing.set(key, overlay);
