@@ -33,6 +33,9 @@ interface SearchResult {
   totalFloors?: string;
   availableFrom?: string;
   note?: string;
+  regNo?: string;
+  lat?: number;
+  lng?: number;
 }
 
 // ── SearchResult → MapProperty 변환 ───────────────────────────────────────
@@ -367,9 +370,10 @@ const ResultCard = ({ item, show, isApproved, onReveal, onLightbox, onOpenPanel,
 // ── Main Modal ──────────────────────────────────────────────────
 interface LandlordSearchModalProps {
   onClose: () => void;
+  onPropertiesFound?: (props: { regNo?: string; lat?: number; lng?: number }[]) => void;
 }
 
-const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
+const LandlordSearchModal = ({ onClose, onPropertiesFound }: LandlordSearchModalProps) => {
   const { isAuthorized, isLoading: authLoading } = useAuth();
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
@@ -404,10 +408,18 @@ const LandlordSearchModal = ({ onClose }: LandlordSearchModalProps) => {
       });
       if (fnErr) throw fnErr;
       if (data?.error) throw new Error(data.error);
-      setResults((data?.results ?? []) as SearchResult[]);
+      const res = (data?.results ?? []) as SearchResult[];
+      setResults(res);
+      // 지도에는 매물만 노출 (lat/lng 또는 regNo 있는 항목)
+      onPropertiesFound?.(
+        res
+          .filter((r) => r.source === "property" && (r.regNo || (r.lat && r.lng)))
+          .map((r) => ({ regNo: r.regNo, lat: r.lat, lng: r.lng }))
+      );
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
       setResults([]);
+      onPropertiesFound?.([]);
     } finally {
       setLoading(false);
     }

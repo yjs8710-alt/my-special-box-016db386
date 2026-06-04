@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
     const [propRes, contactRes] = await Promise.all([
       adminClient
         .from("properties")
-        .select("id, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number")
+        .select("id, reg_no, title, building_name, address, floor, area, monthly, deposit, images, note, agent_name, dong, lot_number, status, type, build_year, total_floors, available_from, room_type, unit_number, lat, lng")
         .or(propOr)
         .limit(100),
       adminClient
@@ -151,6 +151,9 @@ Deno.serve(async (req) => {
           id: `prop_${row.id}`,
           source: "property",
           status: row.status,
+          regNo: row.reg_no ?? undefined,
+          lat: typeof row.lat === "number" ? row.lat : undefined,
+          lng: typeof row.lng === "number" ? row.lng : undefined,
           label: [row.building_name ?? row.title, unitLabel].filter(Boolean).join(" "),
           sublabel: [row.address, unitLabel].filter(Boolean).join(" · "),
           badge: [row.floor, row.area ? `${row.area}㎡` : ""].filter(Boolean).join(" · "),

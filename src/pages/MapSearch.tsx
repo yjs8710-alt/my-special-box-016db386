@@ -20,6 +20,7 @@ const MapSearch = () => {
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [showLandlord, setShowLandlord] = useState(false);
+  const [landlordHits, setLandlordHits] = useState<Set<string> | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>("map");
@@ -54,6 +55,9 @@ const MapSearch = () => {
 
   const filtered = allProperties.filter((p) => {
     if (deletedIds.has(p.id)) return false;
+    if (landlordHits) {
+      if (!p.regNo || !landlordHits.has(p.regNo)) return false;
+    }
     if (activeType !== "전체" && p.type !== activeType) return false;
     if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
     // 지도 영역 필터 — 지도 줌/이동에 따라 사이드바 매물 자동 동기화
@@ -120,7 +124,15 @@ const MapSearch = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
       <Header onMenuOpenChange={setMobileMenuOpen} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
+      {showLandlord && (
+        <LandlordSearchModal
+          onClose={() => { setShowLandlord(false); setLandlordHits(null); }}
+          onPropertiesFound={(items) => {
+            const regNos = items.map((i) => i.regNo).filter(Boolean) as string[];
+            setLandlordHits(regNos.length > 0 ? new Set(regNos) : new Set());
+          }}
+        />
+      )}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
       <div
