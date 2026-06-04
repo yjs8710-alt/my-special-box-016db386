@@ -122,12 +122,12 @@ const PropertyCard = ({
             <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">복층</span>
           )}
           {(options?.includes("반려동물가능") || options?.includes("애완동물가능") || options?.includes("반려동물_가능")) && (
-            <span title="반려동물 가능" className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow" style={{ background: "#fff7ed", border: "1px solid #fdba74" }}>
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full shadow" style={{ background: "#fff7ed", border: "1px solid #fdba74" }}>
               <img src={petIcon} alt="반려동물 가능" className="w-4 h-4 object-contain" />
             </span>
           )}
           {(options?.includes("반려동물불가") || options?.includes("애완동물불가") || options?.includes("반려동물_불가")) && (
-            <span title="반려동물 불가" className="relative inline-flex items-center justify-center w-6 h-6 rounded-full shadow" style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
+            <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full shadow" style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
               <img src={petIcon} alt="반려동물 불가" className="w-4 h-4 object-contain" />
               <span className="absolute inset-0 flex items-center justify-center text-red-600 font-extrabold text-sm leading-none">✕</span>
             </span>

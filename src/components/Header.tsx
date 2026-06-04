@@ -152,7 +152,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     onClick={() => navigate("/my-page")}
                   >
                     <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
-                    <img src={iconUsersGradient} alt="" className="h-10 w-auto object-contain" />
+                    <img src={iconUsersGradient} alt="" className="h-11 w-auto object-contain" />
                   </button>
 
                   {user?.isAdmin && (
