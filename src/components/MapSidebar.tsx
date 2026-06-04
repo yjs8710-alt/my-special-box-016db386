@@ -4069,7 +4069,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     <div className="relative group/rpw flex-shrink-0">
                       <span
                         className="text-[11px] font-bold whitespace-nowrap px-1.5 py-0.5 rounded cursor-default select-none tracking-wide"
-                        style={{ background: "hsl(var(--accent)/0.12)", color: "hsl(var(--accent))", border: "1.5px solid hsl(var(--accent)/0.4)", fontFamily: "'Pretendard', sans-serif", letterSpacing: "0.04em" }}
+                        style={{ background: "hsl(var(--primary)/0.12)", color: "hsl(var(--primary))", border: "1.5px solid hsl(var(--primary)/0.4)", fontFamily: "'Pretendard', sans-serif", letterSpacing: "0.04em" }}
                       >
                         방 {roomPw}
                       </span>
