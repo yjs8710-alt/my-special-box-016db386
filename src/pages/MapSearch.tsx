@@ -124,7 +124,15 @@ const MapSearch = () => {
   return (
     <div className="flex flex-col" style={{ height: "100vh" }}>
       <Header onMenuOpenChange={setMobileMenuOpen} />
-      {showLandlord && <LandlordSearchModal onClose={() => setShowLandlord(false)} />}
+      {showLandlord && (
+        <LandlordSearchModal
+          onClose={() => { setShowLandlord(false); setLandlordHits(null); }}
+          onPropertiesFound={(items) => {
+            const regNos = items.map((i) => i.regNo).filter(Boolean) as string[];
+            setLandlordHits(regNos.length > 0 ? new Set(regNos) : new Set());
+          }}
+        />
+      )}
 
       {/* 서브 툴바 — 필터/뷰 전환 */}
       <div
