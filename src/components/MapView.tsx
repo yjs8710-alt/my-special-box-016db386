@@ -42,20 +42,23 @@ const TYPE_ACCENT: Record<string, string> = {
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
 function getPinSize(zoomLevel: number): number {
-  if (zoomLevel <= 2) return 84;
-  if (zoomLevel <= 3) return 75;
-  if (zoomLevel <= 4) return 66;
-  if (zoomLevel <= 5) return 60;
-  if (zoomLevel <= 6) return 54;
-  if (zoomLevel <= 7) return 48;
-  if (zoomLevel <= 8) return 42;
-  return 36;
+  if (zoomLevel <= 2) return 100;
+  if (zoomLevel <= 3) return 90;
+  if (zoomLevel <= 4) return 80;
+  if (zoomLevel <= 5) return 72;
+  if (zoomLevel <= 6) return 64;
+  if (zoomLevel <= 7) return 58;
+  if (zoomLevel <= 8) return 52;
+  return 46;
 }
 
 /** 첨부 이미지 핀(원형) + 가운데 숫자 */
 function createPinImageHtml(count: number, size: number, isSelected = false) {
   const scale = isSelected ? 1.2 : 1;
-  const fontSize = Math.max(10, Math.round(size * (count >= 100 ? 0.32 : count >= 10 ? 0.38 : 0.44)));
+  const digits = String(count).length;
+  // 자릿수 비례 폰트 크기 — 항상 원 안에 들어가도록
+  const ratio = digits >= 4 ? 0.28 : digits === 3 ? 0.34 : digits === 2 ? 0.42 : 0.48;
+  const fontSize = Math.max(11, Math.round(size * ratio));
   return `
     <div style="
       position:relative;
@@ -84,9 +87,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
   return createPinImageHtml(1, getPinSize(zoomLevel), isSelected);
 }
 
-/** 클러스터: 같은 물방울 핀에 숫자만 크게 */
-function createClusterHtml(count: number) {
-  const size = count >= 100 ? 90 : count >= 10 ? 78 : 66;
+/** 클러스터: 같은 원형 핀에 숫자만 크게 */
+function createClusterHtml(count: number, zoomLevel: number) {
+  const base = getPinSize(zoomLevel);
+  const size = count >= 100 ? Math.round(base * 1.35) : count >= 10 ? Math.round(base * 1.2) : Math.round(base * 1.05);
   return createPinImageHtml(count, size, false);
 }
 
