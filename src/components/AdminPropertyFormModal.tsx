@@ -1056,29 +1056,37 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
                   <div key={group} className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{group}</span>
                     <div className="flex flex-wrap gap-1.5">
-                      {types.map((t) => (
-                        <button key={t} type="button" onClick={() => {
-                          set("type", t);
-                          // 수정 모드에서 이미 room_type이 있으면 유지, 없을 때만 자동 설정
-                          if (!form.room_type) set("room_type", t);
-                          // 집합건물 타입 선택 시 buildingType 자동 설정
-                          if (COLLECTIVE_TYPES.some(ct => ct === t)) {
-                            set("buildingType", "집합건물");
-                          }
-                          if (t === "원룸") {
-                            if (form.room_type !== "오픈형" && form.room_type !== "분리형") {
-                              set("room_type", "");
+                      {types.map((t) => {
+                        const isPrimary = form.type === t;
+                        const primaryIsCollective = (COLLECTIVE_TYPES as readonly string[]).includes(form.type);
+                        const isSubType = (ROOM_SUBTYPES as readonly string[]).includes(t);
+                        const canMultiSelect = primaryIsCollective && isSubType && !isPrimary;
+                        const isExtra = form.extraRoomTypes.includes(t);
+                        const isSelected = isPrimary || isExtra;
+                        return (
+                          <button key={t} type="button" onClick={() => {
+                            if (canMultiSelect) {
+                              set("extraRoomTypes", isExtra ? form.extraRoomTypes.filter((x) => x !== t) : [...form.extraRoomTypes, t]);
+                              return;
                             }
-                            setShowOneRoomModal(true);
-                          }
-                        }}
-                          className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
-                          style={form.type === t
-                            ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
-                            : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
-                          {t}
-                        </button>
-                      ))}
+                            set("type", t);
+                            const newPrimaryCollective = (COLLECTIVE_TYPES as readonly string[]).includes(t);
+                            if (!newPrimaryCollective) set("extraRoomTypes", []);
+                            if (!form.room_type || form.room_type === form.type || form.room_type.includes(",")) set("room_type", t);
+                            if (newPrimaryCollective) set("buildingType", "집합건물");
+                            if (t === "원룸") {
+                              if (form.room_type !== "오픈형" && form.room_type !== "분리형") set("room_type", "");
+                              setShowOneRoomModal(true);
+                            }
+                          }}
+                            className="px-2.5 py-1 rounded-full text-xs font-medium border transition-all"
+                            style={isSelected
+                              ? { background: isPrimary ? "hsl(var(--primary))" : "hsl(var(--primary) / 0.75)", color: "#fff", borderColor: "hsl(var(--primary))" }
+                              : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
+                            {t}{isExtra && !isPrimary ? " +" : ""}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
