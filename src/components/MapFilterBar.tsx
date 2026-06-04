@@ -245,7 +245,7 @@ function Chip({
       className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
       style={
         active
-          ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+          ? neonChipStyle(true)
           : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
       }
     >
