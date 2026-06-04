@@ -3566,7 +3566,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && (
                 <span className="opacity-90">·{prop.roomType}</span>
               )}
-              {prop.roomType && prop.roomType.includes(",") && prop.roomType.split(",").map((s) => s.trim()).filter((s) => s && s !== prop.type && s !== "오픈형" && s !== "분리형").map((s) => (
+              {prop.roomType && prop.roomType.includes(",") && Array.from(new Set(prop.roomType.split(",").map((s) => s.trim()).filter((s) => s && s !== prop.type && s !== "오픈형" && s !== "분리형"))).map((s) => (
                 <span key={s} className="opacity-90">·{s}</span>
               ))}
               {floorShort && <span className="opacity-80">({floorShort})</span>}
