@@ -1123,28 +1123,14 @@ const ContactEditModal = ({
             </div>
           </div>
           {/* 번지수 */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
-              <Input
-                value={form.lot_number ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
-                placeholder="예: 123-45"
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-muted-foreground">
-                동(棟)
-                <span className="ml-1 text-[10px] text-primary font-normal">공동주택용</span>
-              </label>
-              <Input
-                value={form.building_dong ?? ""}
-                onChange={(e) => setForm((f) => ({ ...f, building_dong: e.target.value || null }))}
-                placeholder="예: 101동"
-                className="h-9 text-sm"
-              />
-            </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-muted-foreground">번지수 (지번)</label>
+            <Input
+              value={form.lot_number ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, lot_number: e.target.value }))}
+              placeholder="예: 123-45"
+              className="h-9 text-sm"
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground">건물명</label>
@@ -1155,22 +1141,101 @@ const ContactEditModal = ({
               className="h-9 text-sm"
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              호수
-              <span className="ml-1 text-[10px] text-primary font-normal">공동주택용</span>
-            </label>
-            <Input
-              value={form.unit_number ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
-              placeholder="예: 301호"
-              className="h-9 text-sm"
+
+          {/* 집합건물 체크박스 */}
+          <label className="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isCollective}
+              onChange={(e) => {
+                const next = e.target.checked;
+                setIsCollective(next);
+                if (!next) setForm((f) => ({ ...f, building_dong: null, unit_number: null }));
+              }}
+              className="h-4 w-4 rounded border-input accent-primary"
             />
-          </div>
+            집합건물 (아파트·빌라 등 동/호수 입력)
+          </label>
+
+          {isCollective && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">동(棟)</label>
+                <Input
+                  value={form.building_dong ?? ""}
+                  onChange={(e) => setForm((f) => ({ ...f, building_dong: e.target.value || null }))}
+                  placeholder="예: 101동"
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-muted-foreground">호수</label>
+                <Input
+                  value={form.unit_number ?? ""}
+                  onChange={(e) => setForm((f) => ({ ...f, unit_number: e.target.value || null }))}
+                  placeholder="예: 301호"
+                  className="h-9 text-sm"
+                />
+              </div>
+            </div>
+          )}
+
           {[
             { key: "phone", label: "소유주 전화번호 (대표)", placeholder: "010-XXXX-XXXX", isPhone: true },
             { key: "contact_owner", label: "소유주 전화번호 (추가)", placeholder: "010-XXXX-XXXX", isPhone: true },
-            { key: "contact_manager", label: "관리인 전화번호", placeholder: "010-XXXX-XXXX", isPhone: true },
+          ].map(({ key, label, placeholder, isPhone }) => (
+            <div key={key} className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-muted-foreground">{label}</label>
+              <Input
+                value={(form as Record<string, unknown>)[key] as string ?? ""}
+                onChange={(e) => {
+                  const v = isPhone ? formatPhone(e.target.value) : e.target.value;
+                  setForm((f) => ({ ...f, [key]: v }));
+                }}
+                placeholder={placeholder}
+                className="h-9 text-sm"
+              />
+            </div>
+          ))}
+
+          {/* 관리인 전화번호 — 다중 추가 가능 */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-muted-foreground">관리인 전화번호</label>
+              <button
+                type="button"
+                onClick={() => setManagers((m) => [...m, ""])}
+                className="text-[11px] font-bold text-primary hover:underline"
+              >
+                + 관리인 추가
+              </button>
+            </div>
+            {managers.map((mgr, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <Input
+                  value={mgr}
+                  onChange={(e) => {
+                    const v = formatPhone(e.target.value);
+                    setManagers((arr) => arr.map((x, i) => (i === idx ? v : x)));
+                  }}
+                  placeholder="010-XXXX-XXXX"
+                  className="h-9 text-sm flex-1"
+                />
+                {managers.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setManagers((arr) => arr.filter((_, i) => i !== idx))}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    title="삭제"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {[
             { key: "contact_broker", label: "부동산 전화번호", placeholder: "043-XXXX-XXXX", isPhone: true },
             { key: "memo", label: "메모", placeholder: "비고", isPhone: false },
           ].map(({ key, label, placeholder, isPhone }) => (
@@ -1188,6 +1253,7 @@ const ContactEditModal = ({
             </div>
           ))}
         </div>
+
 
         <div className="px-6 py-4 border-t border-border flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>취소</Button>
