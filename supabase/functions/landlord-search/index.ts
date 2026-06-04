@@ -175,6 +175,7 @@ Deno.serve(async (req) => {
           buildingName: row.building_name ?? undefined,
           dong: row.dong ?? undefined,
           address: row.address ?? undefined,
+        });
       }
     }
 
