@@ -42,14 +42,14 @@ const TYPE_ACCENT: Record<string, string> = {
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
 function getPinSize(zoomLevel: number): number {
-  if (zoomLevel <= 2) return 56;
-  if (zoomLevel <= 3) return 50;
-  if (zoomLevel <= 4) return 44;
-  if (zoomLevel <= 5) return 40;
-  if (zoomLevel <= 6) return 36;
-  if (zoomLevel <= 7) return 32;
-  if (zoomLevel <= 8) return 28;
-  return 24;
+  if (zoomLevel <= 2) return 84;
+  if (zoomLevel <= 3) return 75;
+  if (zoomLevel <= 4) return 66;
+  if (zoomLevel <= 5) return 60;
+  if (zoomLevel <= 6) return 54;
+  if (zoomLevel <= 7) return 48;
+  if (zoomLevel <= 8) return 42;
+  return 36;
 }
 
 /** 첨부 이미지 핀(물방울) + 가운데 숫자 */
@@ -87,7 +87,7 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
 
 /** 클러스터: 같은 물방울 핀에 숫자만 크게 */
 function createClusterHtml(count: number) {
-  const size = count >= 100 ? 60 : count >= 10 ? 52 : 44;
+  const size = count >= 100 ? 90 : count >= 10 ? 78 : 66;
   return createPinImageHtml(count, size, false);
 }
 
