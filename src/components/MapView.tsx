@@ -327,19 +327,22 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         nextKeys.add(key);
         const count = c.items.length;
         const prev = existing.get(key);
+        // 단일 항목 클러스터는 정확한 매물 좌표로 표시 (centroid 편차 제거)
+        const posLat = count === 1 ? c.items[0].lat : c.lat;
+        const posLng = count === 1 ? c.items[0].lng : c.lng;
 
         if (prev) {
           try {
             const curPos = prev.getPosition?.();
-            if (curPos?.getLat?.() !== c.lat || curPos?.getLng?.() !== c.lng) {
-              prev.setPosition(new window.kakao.maps.LatLng(c.lat, c.lng));
+            if (curPos?.getLat?.() !== posLat || curPos?.getLng?.() !== posLng) {
+              prev.setPosition(new window.kakao.maps.LatLng(posLat, posLng));
             }
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `cluster|${count}`;
+            const sig = `cluster|${count}|${zoom}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createClusterHtml(count);
+              content.innerHTML = createClusterHtml(count, zoom);
               content.dataset.sig = sig;
             }
           }
@@ -347,10 +350,24 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createClusterHtml(count);
+        content.innerHTML = createClusterHtml(count, zoom);
         content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `cluster|${count}`;
+        content.dataset.sig = `cluster|${count}|${zoom}`;
         content.addEventListener("click", () => {
+          // 단일 매물이면 바로 선택 (다른 매물로 이동하는 오류 방지)
+          if (c.items.length === 1) {
+            propsRef.current.onSelect(c.items[0].id);
+            return;
+          }
+          // 동일 좌표에 모인 매물이면 zoom-in해도 분리 안 되므로 첫 매물 선택
+          const first = c.items[0];
+          const allSame = c.items.every(
+            (it) => Math.abs(it.lat - first.lat) < 1e-7 && Math.abs(it.lng - first.lng) < 1e-7
+          );
+          if (allSame) {
+            propsRef.current.onSelect(first.id);
+            return;
+          }
           try {
             const m = mapRef.current;
             if (!m) return;
@@ -361,7 +378,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         });
 
         const overlay = new window.kakao.maps.CustomOverlay({
-          position: new window.kakao.maps.LatLng(c.lat, c.lng),
+          position: new window.kakao.maps.LatLng(posLat, posLng),
           content,
           map,
           yAnchor: 0.5,
