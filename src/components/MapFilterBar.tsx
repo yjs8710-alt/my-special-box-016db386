@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { neonChipStyle } from "@/lib/neonChipStyle";
 import { supabase } from "@/integrations/supabase/client";
 
 // ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
@@ -244,7 +245,7 @@ function Chip({
       className="px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
       style={
         active
-          ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+          ? neonChipStyle(true)
           : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
       }
     >
@@ -813,7 +814,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   active
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
@@ -863,7 +864,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   allActive
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
@@ -882,7 +883,7 @@ const MapFilterBar = ({
                                 className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all"
                                 style={
                                   active
-                                    ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
+                                    ? neonChipStyle(true)
                                     : { background: "transparent", color: "hsl(var(--foreground))", borderColor: "hsl(var(--border))" }
                                 }
                               >
