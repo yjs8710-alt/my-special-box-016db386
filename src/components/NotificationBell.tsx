@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bell } from "lucide-react";
-import iconBellNew from "@/assets/icon-bell-new.png";
+
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,12 +46,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
         aria-label="알림"
         title="알림"
       >
-        <img
-          src={iconBellNew}
-          alt=""
-          className="object-contain"
-          style={{ width: 88, height: 88, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.7))" }}
-        />
+        <Bell className="w-8 h-8" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
         {count > 0 && (
           <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
             {count > 99 ? "99+" : count}
@@ -67,12 +62,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       className="relative inline-flex items-center justify-center"
       aria-label="알림"
     >
-      <img
-        src={iconBellNew}
-        alt=""
-        className="object-contain"
-        style={{ width: 96, height: 96, filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
-      />
+      <Bell className="w-7 h-7" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
       {count > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}

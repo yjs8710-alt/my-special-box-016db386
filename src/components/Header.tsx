@@ -1,11 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
-import iconMypageNew from "@/assets/icon-mypage-new.png";
-import iconLogoutNew from "@/assets/icon-logout-new.png";
-import iconChat from "@/assets/icon-chat-gradient.png";
-import iconBellGradient from "@/assets/icon-bell-mobile-new.png";
-import iconUserGradient from "@/assets/icon-user-mobile-new.png";
 import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -72,6 +67,12 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
     onRegisterChange?.(false);
   };
 
+  useEffect(() => {
+    const handler = () => openRegister();
+    window.addEventListener("open-register-modal", handler);
+    return () => window.removeEventListener("open-register-modal", handler);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     navigate("/login");
@@ -81,6 +82,16 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
   return (
     <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
+      {/* 네온 그라데이션 stroke 정의 (lucide 아이콘용) */}
+      <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
+        <defs>
+          <linearGradient id="neonIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="50%" stopColor="#a855f7" />
+            <stop offset="100%" stopColor="#ec4899" />
+          </linearGradient>
+        </defs>
+      </svg>
       {/* <AdminEditBar /> */}
       <Suspense fallback={null}>
         {showRegister && <PropertyRegisterModal onClose={closeRegister} />}
@@ -100,18 +111,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               <img src={logoImg} alt="집다 로고" loading="eager" decoding="async" width={200} height={80} className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
             </div>
 
-            {/* 데스크톱: 매물 등록 (좌측) */}
-            {location.pathname !== "/" && (
-              <button
-                onClick={openRegister}
-                className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white transition-transform hover:scale-[1.02] active:scale-95 mr-2"
-                style={neonChipStyle(true)}
-                aria-label="매물 등록"
-              >
-                <span className="text-sm leading-none">+</span>
-                매물 등록
-              </button>
-            )}
+            {/* 데스크톱 매물등록 버튼은 각 페이지의 2번째 줄 우측 끝으로 이동됨 */}
 
             {/* 데스크톱 Nav */}
             <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-hidden">
@@ -151,7 +151,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 aria-label="채팅 문의"
               >
-                <img src={iconChat} alt="" className="w-11 h-11 object-contain" />
+                <MessageCircle className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
@@ -188,12 +188,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                     aria-label="로그아웃"
                     title="로그아웃"
                   >
-                    <img
-                      src={iconLogoutNew}
-                      alt=""
-                      className="w-7 h-7 object-contain"
-                      style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }}
-                    />
+                    <LogOut className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
                   </button>
                 </>
               ) : (
@@ -220,7 +215,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center text-white -mr-3"
                 aria-label="알림"
               >
-                <img src={iconBellGradient} alt="알림" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
+                <Bell className="w-8 h-8 mx-2" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
               </button>
               <button
                 className="flex items-center justify-center text-white -mr-3"
@@ -230,7 +225,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserGradient} alt="내 정보" className="w-20 h-20 object-contain" style={{ filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))" }} />
+                <User className="w-8 h-8 mx-2" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
               </button>
               <button
                 className="text-white p-1 mb-1"
