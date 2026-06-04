@@ -412,10 +412,17 @@ const LandlordSearchModal = ({ onClose, onPropertiesFound }: LandlordSearchModal
       if (data?.error) throw new Error(data.error);
       const res = (data?.results ?? []) as SearchResult[];
       setResults(res);
-      // 지도에는 매물만 노출 (lat/lng 또는 regNo 있는 항목)
+      // 지도에는 검색어가 '번지수(lot_number)' 또는 '건물명(building_name)'에 매칭된 매물만 노출
+      const norm = (v: string) => v.toLowerCase().replace(/\s+/g, "").replace(/번지|호/g, "");
+      const qTokens = query.trim().replace(/번지/g, " ").split(/\s+/).map(norm).filter(Boolean);
+      const matchesLotOrBuilding = (r: SearchResult) => {
+        if (qTokens.length === 0) return false;
+        const hay = norm(`${r.lotNumber ?? ""} ${r.buildingName ?? ""}`);
+        return qTokens.every((t) => hay.includes(t));
+      };
       onPropertiesFound?.(
         res
-          .filter((r) => r.source === "property" && (r.regNo || (r.lat && r.lng)))
+          .filter((r) => r.source === "property" && matchesLotOrBuilding(r) && (r.regNo || (r.lat && r.lng)))
           .map((r) => ({ regNo: r.regNo, lat: r.lat, lng: r.lng }))
       );
     } catch (e: unknown) {
