@@ -8,6 +8,7 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
+import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
 
 const COMMERCIAL_SUBTYPES = ["전체", "상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
 const COMMERCIAL_DB_TYPES = ["상가", "식당·카페", "사무실", "공장·창고", "병원·학원", "지식산업"];
@@ -45,6 +46,10 @@ const CommercialRental = () => {
 
   const filtered = usePropertyFilter(allProperties, filters, activeTypes, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
+  const mapProperties = useMemo(
+    () => filterLandlordMapProperties(filtered, landlordResults, landlordSearched, landlordLoading),
+    [filtered, landlordResults, landlordSearched, landlordLoading]
+  );
 
   const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBoundsState(b); }, []);
 
@@ -114,7 +119,7 @@ const CommercialRental = () => {
       >
         <div className="flex-1 relative min-w-0">
           <MapView
-            properties={filtered}
+            properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
             onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}

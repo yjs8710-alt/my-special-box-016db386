@@ -8,6 +8,7 @@ import MapSidebar from "@/components/MapSidebar";
 import MapFilterBar, { FilterState, DEFAULT_FILTERS, LandlordResult } from "@/components/MapFilterBar";
 
 import { MapProperty } from "@/data/mapProperties";
+import { filterLandlordMapProperties } from "@/lib/landlordMapFilter";
 
 const LAND_PROPERTIES: MapProperty[] = [];
 
@@ -47,6 +48,10 @@ const LandSearch = () => {
   const landTypeFilter = useMemo(() => activeTypes.includes("전체") ? ["전체"] : activeTypes, [activeTypes]);
   const filtered = usePropertyFilter(allProperties, filters, landTypeFilter, query, propertyId);
   const activeType = activeTypes[0] ?? "전체";
+  const mapProperties = useMemo(
+    () => filterLandlordMapProperties(filtered, landlordResults, landlordSearched, landlordLoading),
+    [filtered, landlordResults, landlordSearched, landlordLoading]
+  );
 
   const handleBoundsChange = useCallback((b: MapBounds) => { mapBoundsRef.current = b; setMapBoundsState(b); }, []);
 
@@ -125,7 +130,7 @@ const LandSearch = () => {
       >
         <div className="flex-1 relative min-w-0">
           <MapView
-            properties={filtered}
+            properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
             onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
