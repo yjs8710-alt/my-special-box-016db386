@@ -677,7 +677,7 @@ const MapFilterBar = ({
                     className="relative hidden md:flex items-center gap-1 px-2 sm:px-2.5 h-10 transition-all flex-shrink-0"
                     style={{
                       borderLeft: "1px solid hsl(var(--border))",
-                      background: radiusMode ? "hsl(var(--accent))" : "transparent",
+                      background: radiusMode ? "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" : "transparent",
                       color: radiusMode ? "#fff" : "hsl(var(--muted-foreground))",
                     }}
                   >
