@@ -1039,7 +1039,14 @@ const ContactEditModal = ({
 
   const handleSave = async () => {
     setSaving(true);
-    await onSave(form);
+    const mergedManager = managers.map((m) => m.trim()).filter(Boolean).join("\n");
+    const payload: CheongJuContact = {
+      ...form,
+      building_dong: isCollective ? (form.building_dong ?? null) : null,
+      unit_number: isCollective ? (form.unit_number ?? null) : null,
+      contact_manager: mergedManager,
+    };
+    await onSave(payload);
     setSaving(false);
   };
 
