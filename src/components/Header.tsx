@@ -218,7 +218,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >
-                <img src={iconBellNeon} alt="알림" className="w-9 h-9 mx-2 object-contain" />
+                <img src={iconBellNeon} alt="알림" className="w-11 h-11 mx-2 object-contain" />
               </button>
               <button
                 className="flex items-center justify-center -mr-3"
