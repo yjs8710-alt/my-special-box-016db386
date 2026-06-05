@@ -154,7 +154,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 aria-label="채팅 문의"
               >
-                <img src={iconChatNeon} alt="채팅문의" className="w-8 h-8 object-contain" />
+                <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
