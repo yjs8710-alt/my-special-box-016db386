@@ -4,6 +4,7 @@ import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import iconBellNeon from "@/assets/icon-bell-neon.png";
 import iconUserNeon from "@/assets/icon-user-neon.png";
+import iconChatNeon from "@/assets/icon-chat-neon.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { neonChipStyle } from "@/lib/neonChipStyle";
@@ -153,20 +154,46 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 style={{ color: "white" }}
                 aria-label="채팅 문의"
               >
-                <MessageCircle className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
+                <img src={iconChatNeon} alt="채팅문의" className="w-8 h-8 object-contain" />
                 채팅문의
               </button>
               <NotificationBell variant="desktop" />
 
               {isAuthorized ? (
-                <button
-                  className="flex items-center justify-center px-1.5 py-1 -ml-2 mr-10 rounded-lg transition-colors hover:bg-white/10"
-                  onClick={handleLogout}
-                  aria-label="로그아웃"
-                  title="로그아웃"
-                >
-                  <LogOut className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
-                </button>
+                <>
+                  <button
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    onClick={() => navigate("/my-page")}
+                  >
+                    <span className="text-[11px] font-semibold text-white/80">{user?.memberType ?? "사용자"}</span>
+                    <img src={iconUsersGradient} alt="" className="h-11 w-auto object-contain" />
+                  </button>
+
+                  {user?.isAdmin && (
+                    <button
+                      className="flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-lg transition-all"
+                      style={{
+                        background: "rgba(255,255,255,0.08)",
+                        color: "rgba(255,255,255,0.7)",
+                        border: "1px solid rgba(255,255,255,0.12)",
+                      }}
+                      onClick={() => navigate("/admin")}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      관리자
+                    </button>
+                  )}
+
+                  <button
+                    className="flex items-center justify-center px-1.5 py-1 -ml-2 mr-10 rounded-lg transition-colors hover:bg-white/10"
+                    onClick={handleLogout}
+                    aria-label="로그아웃"
+                    title="로그아웃"
+                  >
+                    <LogOut className="w-6 h-6" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
+                  </button>
+                </>
               ) : (
                 <button
                   className="flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-lg transition-all"
@@ -191,7 +218,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >
-                <img src={iconBellNeon} alt="알림" className="w-9 h-9 mx-2 object-contain" />
+                <img src={iconBellNeon} alt="알림" className="w-11 h-11 mx-2 object-contain" />
               </button>
               <button
                 className="flex items-center justify-center -mr-3"
@@ -201,7 +228,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserNeon} alt="내 정보" className="w-9 h-9 mx-2 object-contain" />
+                <img src={iconUserNeon} alt="내 정보" className="w-11 h-11 mx-2 object-contain" />
               </button>
               <button
                 className="text-white p-1 mb-1"
