@@ -4,6 +4,7 @@ import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconUsersGradient from "@/assets/icon-users-gradient.png";
 import iconBellNeon from "@/assets/icon-bell-neon.png";
 import iconUserNeon from "@/assets/icon-user-neon.png";
+import iconChatNeon from "@/assets/icon-chat-neon.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { neonChipStyle } from "@/lib/neonChipStyle";
