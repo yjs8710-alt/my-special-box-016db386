@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bell } from "lucide-react";
+import iconBellNeon from "@/assets/icon-bell-neon.png";
 
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
