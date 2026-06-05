@@ -218,7 +218,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >
-                <img src={iconBellNeon} alt="알림" className="w-11 h-11 mx-2 object-contain" />
+                <img src={iconBellNeon} alt="알림" className="w-[88px] h-[88px] mx-2 object-contain" />
               </button>
               <button
                 className="flex items-center justify-center -mr-3"
@@ -228,7 +228,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 }}
                 aria-label="내 정보"
               >
-                <img src={iconUserNeon} alt="내 정보" className="w-11 h-11 mx-2 object-contain" />
+                <img src={iconUserNeon} alt="내 정보" className="w-[88px] h-[88px] mx-2 object-contain" />
               </button>
               <button
                 className="text-white p-1 mb-1"
