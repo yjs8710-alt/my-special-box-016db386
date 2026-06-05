@@ -188,20 +188,20 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
                 onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
-                className="flex items-center justify-center text-white -mr-3"
+                className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >
-                <Bell className="w-8 h-8 mx-2" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
+                <img src={iconBellNeon} alt="알림" className="w-9 h-9 mx-2 object-contain" />
               </button>
               <button
-                className="flex items-center justify-center text-white -mr-3"
+                className="flex items-center justify-center -mr-3"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
                   navigate("/my-info");
                 }}
                 aria-label="내 정보"
               >
-                <User className="w-8 h-8 mx-2" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
+                <img src={iconUserNeon} alt="내 정보" className="w-9 h-9 mx-2 object-contain" />
               </button>
               <button
                 className="text-white p-1 mb-1"
