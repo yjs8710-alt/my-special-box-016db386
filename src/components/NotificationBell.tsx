@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bell } from "lucide-react";
+import iconBellNeon from "@/assets/icon-bell-neon.png";
 
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +63,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
       className="relative inline-flex items-center justify-center"
       aria-label="알림"
     >
-      <Bell className="w-7 h-7" style={{ stroke: "url(#neonIconGrad)" }} strokeWidth={2.2} />
+      <img src={iconBellNeon} alt="알림" className="w-7 h-7 object-contain" />
       {count > 0 && (
         <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
           {count > 99 ? "99+" : count}
