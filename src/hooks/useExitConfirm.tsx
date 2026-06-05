@@ -65,7 +65,7 @@ export const useExitConfirm = (enabled: boolean = true) => {
               <button
                 onClick={handleConfirm}
                 className="py-3 text-sm font-semibold text-white border-l border-border transition-colors"
-                style={{ background: "hsl(var(--accent))" }}
+                style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
               >
                 종료
               </button>
