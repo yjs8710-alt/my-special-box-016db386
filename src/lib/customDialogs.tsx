@@ -82,7 +82,7 @@ const Dialog = ({ type, message, placeholder, defaultValue, onClose }: DialogPro
           <button
             onClick={handleOk}
             className={`py-3 text-sm font-semibold text-white transition-colors ${type !== "alert" ? "border-l border-border" : ""}`}
-            style={{ background: "hsl(var(--accent))" }}
+            style={{ background: "linear-gradient(90deg, #ff6ec4 0%, #a78bfa 50%, #60a5fa 100%)" }}
           >
             확인
           </button>
