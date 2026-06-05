@@ -2,6 +2,8 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Menu, X, Bell, LogOut, Users, ShieldCheck, Building, ClipboardList, User, Download, Home, MessageCircle } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-active-opt.webp";
 import iconUsersGradient from "@/assets/icon-users-gradient.png";
+import iconBellNeon from "@/assets/icon-bell-neon.png";
+import iconUserNeon from "@/assets/icon-user-neon.png";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { neonChipStyle } from "@/lib/neonChipStyle";
