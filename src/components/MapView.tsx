@@ -80,6 +80,23 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         pointer-events:none;
         transform:translateY(-0.12em);
       ">${count}</div>
+      ${isSelected ? `
+      <div style="
+        position:absolute;
+        top:-4px;right:-4px;
+        width:${Math.round(size * 0.4)}px;height:${Math.round(size * 0.4)}px;
+        background:#22c55e;
+        border:2px solid #fff;
+        border-radius:9999px;
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 2px 4px rgba(0,0,0,0.4);
+        pointer-events:none;
+        z-index:2;
+      ">
+        <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>` : ''}
     </div>
   `;
 }
