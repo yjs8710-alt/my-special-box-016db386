@@ -105,33 +105,6 @@ const LandSearch = () => {
         className="hidden md:flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
-        <span className="text-white/50 text-xs font-semibold whitespace-nowrap">토지 유형</span>
-        {LAND_SUBTYPES.map(t => {
-          const isActive = activeTypes.includes(t);
-          return (
-            <button
-              key={t}
-              onClick={() => toggleType(t)}
-              className="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap transition-all flex-shrink-0"
-              style={
-                isActive
-                  ? { background: "hsl(var(--accent))", color: "#fff", borderColor: "hsl(var(--accent))" }
-                  : { background: "transparent", color: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.2)" }
-              }
-            >
-              {t}
-            </button>
-          );
-        })}
-        {!activeTypes.includes("전체") && activeTypes.length > 1 && (
-          <button
-            onClick={() => setActiveTypes(["전체"])}
-            className="ml-1 px-2.5 py-1 rounded-full text-[10px] font-semibold border whitespace-nowrap flex-shrink-0 transition-all"
-            style={{ color: "hsl(var(--destructive))", borderColor: "hsl(var(--destructive))", background: "transparent" }}
-          >
-            선택 삭제
-          </button>
-        )}
         <button
           onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
