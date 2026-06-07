@@ -4176,10 +4176,8 @@ const MapSidebar = ({
   const [mobileStep, setMobileStep] = useState<0 | 1 | 2>(0);
   const [mobileClosing, setMobileClosing] = useState(false);
   const handleMobileClose = () => {
+    // 시트만 닫고 선택된 매물 핀은 유지 (사용자 요청)
     setMobileClosing(true);
-    onDeselect?.();
-    onClearPinnedIds?.();
-    onClearPin?.();
     setTimeout(() => {
       setMobileStep(0);
       setMobileClosing(false);

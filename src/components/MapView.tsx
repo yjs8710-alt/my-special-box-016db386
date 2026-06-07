@@ -365,9 +365,21 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
+        content.style.touchAction = "manipulation";
         content.onmousedown = stopMarkerEvent;
         content.ontouchstart = stopMarkerTouch;
-        content.onclick = (event) => handlePinClick(event, prop);
+        let touchHandled = false;
+        content.ontouchend = (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          touchHandled = true;
+          handlePinClick(event, prop);
+          setTimeout(() => { touchHandled = false; }, 500);
+        };
+        content.onclick = (event) => {
+          if (touchHandled) { event.stopPropagation(); return; }
+          handlePinClick(event, prop);
+        };
       };
 
       const handleClusterClick = (cluster: Cluster) => {
@@ -391,9 +403,19 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
+        content.style.touchAction = "manipulation";
         content.onmousedown = stopMarkerEvent;
         content.ontouchstart = stopMarkerTouch;
+        let touchHandled = false;
+        content.ontouchend = (event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          touchHandled = true;
+          handleClusterClick(cluster);
+          setTimeout(() => { touchHandled = false; }, 500);
+        };
         content.onclick = (event) => {
+          if (touchHandled) { event.stopPropagation(); return; }
           stopMarkerEvent(event);
           handleClusterClick(cluster);
         };
