@@ -52,24 +52,26 @@ function getPinSize(zoomLevel: number): number {
   return 46;
 }
 
-/** 첨부 이미지 핀(원형) + 가운데 숫자 */
+/** 첨부 이미지 핀(원형) + 가운데 숫자 — 체크 시 색상만 변경 */
 function createPinImageHtml(count: number, size: number, isSelected = false) {
-  const scale = isSelected ? 1.2 : 1;
   const digits = String(count).length;
-  // 자릿수 비례 폰트 크기 — 항상 원 안에 들어가도록
   const ratio = digits >= 4 ? 0.28 : digits === 3 ? 0.34 : digits === 2 ? 0.42 : 0.48;
   const fontSize = Math.max(11, Math.round(size * ratio));
+  // 체크 상태일 때 hue-rotate 로 색상만 변경 (크기/배지 변경 없음)
+  const imgFilter = isSelected
+    ? "hue-rotate(140deg) saturate(1.6) brightness(1.05)"
+    : "none";
   return `
     <div style="
       position:relative;
       width:${size}px;height:${size}px;
-      transform:scale(${scale}) translateZ(0);
+      transform:translateZ(0);
       transform-origin:center center;
       cursor:pointer;will-change:transform;
-      filter:${isSelected ? "drop-shadow(0 4px 6px rgba(0,0,0,0.45))" : "drop-shadow(0 2px 3px rgba(0,0,0,0.35))"};
+      filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.4))" : "drop-shadow(0 2px 3px rgba(0,0,0,0.35))"};
     ">
       <img src="${MAP_PIN_URL}" alt="" draggable="false"
-        style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;" />
+        style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
       <div style="
         position:absolute;inset:0;
         display:flex;align-items:center;justify-content:center;
@@ -80,23 +82,6 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         pointer-events:none;
         transform:translateY(-0.12em);
       ">${count}</div>
-      ${isSelected ? `
-      <div style="
-        position:absolute;
-        top:-4px;right:-4px;
-        width:${Math.round(size * 0.4)}px;height:${Math.round(size * 0.4)}px;
-        background:#22c55e;
-        border:2px solid #fff;
-        border-radius:9999px;
-        display:flex;align-items:center;justify-content:center;
-        box-shadow:0 2px 4px rgba(0,0,0,0.4);
-        pointer-events:none;
-        z-index:2;
-      ">
-        <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      </div>` : ''}
     </div>
   `;
 }
