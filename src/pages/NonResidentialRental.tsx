@@ -344,6 +344,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           onSelect={(id) => {
             setSuppressPan(true);
             setSelectedId(id);
+            setBlinkTrigger(n => n + 1);
             setTimeout(() => setSuppressPan(false), 600);
           }}
           onDeselect={() => setSelectedId(null)}
