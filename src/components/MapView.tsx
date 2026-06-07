@@ -167,9 +167,13 @@ interface MapViewProps {
   onMapMoveClear?: () => void;
   /** 숫자 클러스터 클릭 시 포함된 매물 id 목록 */
   onClusterSelect?: (ids: number[]) => void;
+  /** 깜빡일 핀 id */
+  blinkId?: number | null;
+  /** 깜빡임 트리거 (변경될 때마다 재실행) */
+  blinkTrigger?: number;
 }
 
-const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear, onClusterSelect }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear, onClusterSelect, blinkId, blinkTrigger }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<string, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
