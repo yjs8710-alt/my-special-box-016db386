@@ -235,7 +235,7 @@ const ResidentialRental = () => {
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { /* 지도 이동시 체크 유지 (사용자 명시 해제만 허용) */ }}
+            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
@@ -243,6 +243,8 @@ const ResidentialRental = () => {
             radiusMode={radiusMode}
             radiusCircle={radiusCircle}
             onRadiusChange={setRadiusCircle}
+            blinkId={selectedId}
+            blinkTrigger={blinkTrigger}
           />
           <MapFilterBar
             activeType={activeType}
