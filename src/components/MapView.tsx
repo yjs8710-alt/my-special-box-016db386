@@ -156,7 +156,7 @@ interface MapViewProps {
   onSelect: (id: number) => void;
   /** 지도 이동/줌 시 현재 화면 범위 콜백 */
   onBoundsChange?: (bounds: MapBounds) => void;
-  /** true이면 selectedId 변경 시 panTo 억제 */
+  /** 기존 호출부 호환용: 선택 시 자동 지도 이동은 하지 않음 */
   suppressPan?: boolean;
   /** 반경검색 모드 활성화 — true면 지도 클릭/드래그로 원 그리기 */
   radiusMode?: boolean;
@@ -306,6 +306,65 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const { clusters, singles } = buildClusters(props, zoom, selSet);
 
+      const stopMarkerEvent = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      const getNearbyPinIds = (target: MapProperty) => {
+        const projection = map?.getProjection?.();
+        const toPoint = (prop: MapProperty) => {
+          if (!prop.lat || !prop.lng || !projection || !window.kakao?.maps) return null;
+          const latLng = new window.kakao.maps.LatLng(prop.lat, prop.lng);
+          try {
+            return projection.containerPointFromCoords?.(latLng) ?? projection.pointFromCoords?.(latLng) ?? null;
+          } catch (_) {
+            return null;
+          }
+        };
+        const readCoord = (point: any, axis: "x" | "y") => {
+          const direct = point?.[axis];
+          if (typeof direct === "number") return direct;
+          const getter = axis === "x" ? point?.getX : point?.getY;
+          return typeof getter === "function" ? getter.call(point) : null;
+        };
+
+        const targetPoint = toPoint(target);
+        const targetX = readCoord(targetPoint, "x");
+        const targetY = readCoord(targetPoint, "y");
+        if (targetX === null || targetY === null) return [target.id];
+
+        const hitRadius = Math.max(34, getPinSize(zoom) * 0.7);
+        const ids = props
+          .filter((prop) => prop.lat && prop.lng)
+          .filter((prop) => {
+            const point = toPoint(prop);
+            const x = readCoord(point, "x");
+            const y = readCoord(point, "y");
+            if (x === null || y === null) return false;
+            return Math.hypot(x - targetX, y - targetY) <= hitRadius;
+          })
+          .map((prop) => prop.id);
+
+        return ids.includes(target.id) ? ids : [target.id, ...ids];
+      };
+
+      const handlePinClick = (event: Event, prop: MapProperty) => {
+        stopMarkerEvent(event);
+        const nearbyIds = getNearbyPinIds(prop);
+        if (nearbyIds.length > 1 && propsRef.current.onClusterSelect) {
+          propsRef.current.onClusterSelect(nearbyIds);
+          return;
+        }
+        propsRef.current.onSelect(prop.id);
+      };
+
+      const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
+        content.onmousedown = stopMarkerEvent;
+        content.ontouchstart = stopMarkerEvent;
+        content.onclick = (event) => handlePinClick(event, prop);
+      };
+
       const handleClusterClick = (cluster: Cluster) => {
         const ids = cluster.items.map((item) => item.id);
         if (propsRef.current.onClusterSelect && ids.length > 1) {
@@ -327,9 +386,10 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
+        content.onmousedown = stopMarkerEvent;
+        content.ontouchstart = stopMarkerEvent;
         content.onclick = (event) => {
-          event.preventDefault();
-          event.stopPropagation();
+          stopMarkerEvent(event);
           handleClusterClick(cluster);
         };
       };
@@ -355,6 +415,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createPinHtml(prop, isSelected, zoom);
               content.dataset.sig = sig;
             }
+            bindPinClick(content, prop);
           }
           try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
           return;
@@ -362,9 +423,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
         const content = document.createElement("div");
         content.innerHTML = createPinHtml(prop, isSelected, zoom);
-        content.style.cssText = "cursor:pointer;";
+        content.style.cssText = "cursor:pointer;touch-action:manipulation;";
         content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
-        content.addEventListener("click", () => propsRef.current.onSelect(prop.id));
+        bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
@@ -621,28 +682,14 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       content.style.animation = "none";
       void content.offsetWidth;
       content.style.animation = "pin-blink 0.5s ease-in-out 4";
-      // 지도 위치도 해당 핀으로 이동
-      try {
-        const pos = target.getPosition?.();
-        if (pos && mapRef.current) mapRef.current.panTo(pos);
-      } catch (_) {}
     };
     tryBlink();
   }, [blinkId, blinkTrigger]);
 
 
-  // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
-  // suppressPan은 ref 패턴으로 읽어서, false로 바뀌었을 때 effect 재실행으로 panTo가 호출되는 것을 방지
+  // 선택/깜빡임은 지도 위치를 자동 이동하지 않음
   const suppressPanRef = useRef(suppressPan);
   useEffect(() => { suppressPanRef.current = suppressPan; }, [suppressPan]);
-  useEffect(() => {
-    if (!mapRef.current || selectedId === null || !window.kakao?.maps) return;
-    if (suppressPanRef.current) return;
-    const prop = properties.find((p) => p.id === selectedId);
-    if (prop && prop.lat && prop.lng) {
-      mapRef.current.panTo(new window.kakao.maps.LatLng(prop.lat, prop.lng));
-    }
-  }, [selectedId, properties]);
 
   // 컨테이너 크기 변경 시 지도 relayout 호출
   useEffect(() => {
