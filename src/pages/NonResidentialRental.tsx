@@ -215,17 +215,14 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     setShowAllFromSearch(false);
     setPinnedAddress(null);
     setSuppressPan(true);
-    // 겹친 핀 클릭 시 기존 체크를 지우지 않고 새 매물만 누적합니다.
-    setPinnedIds(prev => {
-      const next = [...prev];
-      ids.forEach(id => {
-        if (!next.includes(id)) next.push(id);
-      });
-      return next;
-    });
-    setSelectedId(ids[0] ?? null);
+    const allSelected = ids.every(id => pinnedIds.includes(id));
+    const next = allSelected
+      ? pinnedIds.filter(id => !ids.includes(id))
+      : ids.reduce((acc, id) => acc.includes(id) ? acc : [...acc, id], [...pinnedIds]);
+    setPinnedIds(next);
+    setSelectedId(allSelected ? (next[next.length - 1] ?? null) : (ids[0] ?? null));
     setTimeout(() => setSuppressPan(false), 120);
-  }, []);
+  }, [pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
     const b = mapBoundsState;

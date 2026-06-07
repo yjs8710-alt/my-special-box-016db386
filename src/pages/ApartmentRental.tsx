@@ -83,10 +83,14 @@ const ApartmentRental = () => {
     setShowAllFromSearch(false);
     setPinnedAddress(null);
     setSuppressPan(true);
-    setPinnedIds(ids);
-    setSelectedId(null);
+    const allSelected = ids.every(id => pinnedIds.includes(id));
+    const next = allSelected
+      ? pinnedIds.filter(id => !ids.includes(id))
+      : ids.reduce((acc, id) => acc.includes(id) ? acc : [...acc, id], [...pinnedIds]);
+    setPinnedIds(next);
+    setSelectedId(allSelected ? (next[next.length - 1] ?? null) : (ids[0] ?? null));
     setTimeout(() => setSuppressPan(false), 120);
-  }, []);
+  }, [pinnedIds]);
 
   const sidebarProperties = useMemo(() => {
     const b = mapBoundsState;
