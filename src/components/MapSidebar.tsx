@@ -5292,22 +5292,7 @@ const MapSidebar = ({
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
-                {(pinnedIds && pinnedIds.length > 0
-                  ? // 핀 클릭 순서 모드: displayProperties가 이미 순서대로 정렬됨
-                    [...displayProperties]
-                  : [...displayProperties].sort((a, b) => {
-                      // 확인일과 등록일 중 더 최근 날짜 기준 내림차순 (항상 위에서부터)
-                      const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
-                      const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
-                      const chkB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
-                      const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
-                      const latestA = Math.max(chkA, regA);
-                      const latestB = Math.max(chkB, regB);
-                      if (latestA !== latestB) return latestB - latestA;
-                      if (chkA !== chkB) return chkB - chkA;
-                      return regB - regA;
-                    })
-                ).map((prop, idx) => {
+                {orderedDisplayProperties.map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
