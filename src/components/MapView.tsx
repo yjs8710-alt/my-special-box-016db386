@@ -503,10 +503,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           fireBounds(map);
         });
 
-        window.kakao.maps.event.addListener(map, "dragend", () => {
-          if (!mountedRef.current) return;
-          fireBounds(map);
-        });
+
+
 
         // 반경검색 — 마우스 down → 중심 설정, move → 반경 확장, up → 확정
         window.kakao.maps.event.addListener(map, "mousedown", (mouseEvent: any) => {
