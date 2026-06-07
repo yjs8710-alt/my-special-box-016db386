@@ -5306,7 +5306,10 @@ const MapSidebar = ({
                       <div
                         role="button"
                         tabIndex={0}
-                        onClick={() => {
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
                         }}
                         onKeyDown={(e) => {
