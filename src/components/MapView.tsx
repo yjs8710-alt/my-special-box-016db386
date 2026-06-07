@@ -401,6 +401,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
               content.dataset.sig = sig;
             }
+            content.dataset.ids = c.items.map(it => it.id).join(",");
             bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
@@ -411,6 +412,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
         content.style.cssText = "cursor:pointer;";
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+        content.dataset.ids = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
