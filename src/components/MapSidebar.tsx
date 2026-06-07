@@ -4326,14 +4326,30 @@ const MapSidebar = ({
   // pinnedIds 모드: 클릭 순서대로 표시
   // pinnedAddress 모드: 동일 주소 필터
   // 둘 다 없으면 전체 표시
-  const displayProperties = (() => {
+  const displayProperties = useMemo(() => {
+    if (isMobile && mobileStep === 0) return [];
     if (pinnedIds && pinnedIds.length > 0) {
       // 클릭 순서대로 정렬 (properties는 이미 부모에서 pinnedIds 기준 필터링됨)
       const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
       return [...properties].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
     }
     return properties;
-  })();
+  }, [isMobile, mobileStep, pinnedIds, properties]);
+
+  const orderedDisplayProperties = useMemo(() => {
+    if (pinnedIds && pinnedIds.length > 0) return [...displayProperties];
+    return [...displayProperties].sort((a, b) => {
+      const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
+      const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
+      const chkB = b.checkedDate ? new Date(b.checkedDate).getTime() : 0;
+      const regB = b.registeredDate ? new Date(b.registeredDate).getTime() : 0;
+      const latestA = Math.max(chkA, regA);
+      const latestB = Math.max(chkB, regB);
+      if (latestA !== latestB) return latestB - latestA;
+      if (chkA !== chkB) return chkB - chkA;
+      return regB - regA;
+    });
+  }, [displayProperties, pinnedIds]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
