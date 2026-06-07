@@ -683,12 +683,25 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
-      if (mapRef.current && window.kakao?.maps) {
+      if (resizeFrameRef.current !== null) return;
+      resizeFrameRef.current = window.requestAnimationFrame(() => {
+        resizeFrameRef.current = null;
+        const width = el.clientWidth;
+        const height = el.clientHeight;
+        if (!mapRef.current || !window.kakao?.maps || width === 0 || height === 0) return;
+        if (lastMapSizeRef.current.width === width && lastMapSizeRef.current.height === height) return;
+        lastMapSizeRef.current = { width, height };
         mapRef.current.relayout();
-      }
+      });
     });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      if (resizeFrameRef.current !== null) {
+        window.cancelAnimationFrame(resizeFrameRef.current);
+        resizeFrameRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
