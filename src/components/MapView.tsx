@@ -167,9 +167,13 @@ interface MapViewProps {
   onMapMoveClear?: () => void;
   /** 숫자 클러스터 클릭 시 포함된 매물 id 목록 */
   onClusterSelect?: (ids: number[]) => void;
+  /** 깜빡일 핀 id */
+  blinkId?: number | null;
+  /** 깜빡임 트리거 (변경될 때마다 재실행) */
+  blinkTrigger?: number;
 }
 
-const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear, onClusterSelect }: MapViewProps) => {
+const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange, suppressPan, radiusMode, radiusCircle, onRadiusChange, onMapMoveClear, onClusterSelect, blinkId, blinkTrigger }: MapViewProps) => {
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<Map<string, any>>(new Map());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -397,6 +401,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
               content.dataset.sig = sig;
             }
+            content.dataset.ids = c.items.map(it => it.id).join(",");
             bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
@@ -407,6 +412,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
         content.style.cssText = "cursor:pointer;";
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+        content.dataset.ids = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -491,14 +497,16 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         window.kakao.maps.event.addListener(map, "dragstart", () => {
           if (!mountedRef.current) return;
           if (radiusModeRef.current) return;
-          // 드래그 시작 시 핀 선택 해제
-          propsRef.current.onMapMoveClear?.();
+          // 드래그(이동)는 체크 유지 — 줌만 해제
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
           if (!mountedRef.current) return;
           fireBounds(map);
         });
+
+
+
 
         // 반경검색 — 마우스 down → 중심 설정, move → 반경 확장, up → 확정
         window.kakao.maps.event.addListener(map, "mousedown", (mouseEvent: any) => {
@@ -588,6 +596,40 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       containerRef.current.style.cursor = radiusMode ? "crosshair" : "";
     }
   }, [radiusMode]);
+
+  // 깜빡임 — 특정 핀 위치 강조
+  useEffect(() => {
+    if (blinkId == null) return;
+    const tryBlink = (attempts = 0) => {
+      const existing = overlaysRef.current;
+      let target: any = existing.get(`p:${blinkId}`);
+      if (!target) {
+        // 클러스터 내부에서 검색
+        existing.forEach((ov, key) => {
+          if (!target && key.startsWith("c:")) {
+            const content = ov.getContent?.() as HTMLElement | undefined;
+            if (content?.dataset?.ids?.split(",").includes(String(blinkId))) target = ov;
+          }
+        });
+      }
+      if (!target) {
+        if (attempts < 5) window.setTimeout(() => tryBlink(attempts + 1), 120);
+        return;
+      }
+      const content = target.getContent?.() as HTMLElement | undefined;
+      if (!content) return;
+      content.style.animation = "none";
+      void content.offsetWidth;
+      content.style.animation = "pin-blink 0.5s ease-in-out 4";
+      // 지도 위치도 해당 핀으로 이동
+      try {
+        const pos = target.getPosition?.();
+        if (pos && mapRef.current) mapRef.current.panTo(pos);
+      } catch (_) {}
+    };
+    tryBlink();
+  }, [blinkId, blinkTrigger]);
+
 
   // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
   // suppressPan은 ref 패턴으로 읽어서, false로 바뀌었을 때 effect 재실행으로 panTo가 호출되는 것을 방지

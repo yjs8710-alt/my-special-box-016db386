@@ -5315,20 +5315,12 @@ const MapSidebar = ({
                             selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
                           }
                         }}
-                        className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer relative ${
+                        className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
                           selectedId === prop.id
                             ? "ring-2 ring-primary shadow-lg"
-                            : pinnedIds?.includes(prop.id)
-                            ? "ring-2 ring-green-500 shadow-md"
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                         }`}
                       >
-                        {pinnedIds?.includes(prop.id) && (
-                          <div className="absolute top-1 right-1 z-20 px-1.5 py-0.5 rounded-full text-[9px] font-bold text-white flex items-center gap-0.5" style={{ background: "#22c55e", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }}>
-                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            체크
-                          </div>
-                        )}
                         {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
                         <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
                           {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}

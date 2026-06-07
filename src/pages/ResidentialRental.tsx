@@ -37,6 +37,8 @@ const ResidentialRental = () => {
   const [mapBoundsState, setMapBoundsState] = useState<MapBounds | null>(null);
   const [radiusMode, setRadiusMode] = useState(false);
   const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
+  const [blinkTrigger, setBlinkTrigger] = useState(0);
+
 
   const { properties: dbProperties, refetch } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
@@ -233,7 +235,7 @@ const ResidentialRental = () => {
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { /* 지도 이동시 체크 유지 (사용자 명시 해제만 허용) */ }}
+            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
@@ -241,6 +243,8 @@ const ResidentialRental = () => {
             radiusMode={radiusMode}
             radiusCircle={radiusCircle}
             onRadiusChange={setRadiusCircle}
+            blinkId={selectedId}
+            blinkTrigger={blinkTrigger}
           />
           <MapFilterBar
             activeType={activeType}
@@ -281,10 +285,9 @@ const ResidentialRental = () => {
           referencePool={allProperties}
           selectedId={selectedId}
           onSelect={(id) => {
-            // 사이드바/매물카드 클릭 시 지도 panTo 억제 (모바일에서 시트가 펼쳐질 때 지도가 흔들리지 않도록)
             setSuppressPan(true);
             setSelectedId(id);
-            // 마커 클릭 시 다시 panTo 가능하도록 짧게 후 해제
+            setBlinkTrigger(n => n + 1);
             setTimeout(() => setSuppressPan(false), 600);
           }}
           onDeselect={() => setSelectedId(null)}
