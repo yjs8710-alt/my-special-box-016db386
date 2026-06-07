@@ -571,8 +571,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (!mountedRef.current) return;
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
-          // 줌 시 핀 선택 해제
-          propsRef.current.onMapMoveClear?.();
+          // 핀 선택은 줌/이동 후에도 유지 (사용자 요청)
           // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
           if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
           zoomRenderTimer = window.setTimeout(() => {
