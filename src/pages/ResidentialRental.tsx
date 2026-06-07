@@ -37,6 +37,8 @@ const ResidentialRental = () => {
   const [mapBoundsState, setMapBoundsState] = useState<MapBounds | null>(null);
   const [radiusMode, setRadiusMode] = useState(false);
   const [radiusCircle, setRadiusCircle] = useState<RadiusCircle | null>(null);
+  const [blinkTrigger, setBlinkTrigger] = useState(0);
+
 
   const { properties: dbProperties, refetch } = useDBProperties(RESIDENTIAL_DB_TYPES);
 
