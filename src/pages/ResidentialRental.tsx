@@ -233,7 +233,7 @@ const ResidentialRental = () => {
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
+            onMapMoveClear={() => { /* 지도 이동시 체크 유지 (사용자 명시 해제만 허용) */ }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
