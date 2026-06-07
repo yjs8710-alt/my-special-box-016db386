@@ -180,3 +180,9 @@ body.protect-on img {
 input::-webkit-calendar-picker-indicator { display: none !important; }
 input::-webkit-list-button { display: none !important; }
 
+
+/* 매물카드 클릭 시 지도 핀 깜빡임 */
+@keyframes pin-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.35); }
+}
