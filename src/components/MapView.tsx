@@ -392,6 +392,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         const key = `c:${c.key}`;
         nextKeys.add(key);
         const count = c.items.length;
+        const isClusterSelected = c.items.some((it) => selSet.has(it.id));
         const prev = existing.get(key);
         // 단일 항목 클러스터는 정확한 매물 좌표로 표시 (centroid 편차 제거)
         const posLat = count === 1 ? c.items[0].lat : c.lat;
@@ -406,20 +407,21 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `cluster|${count}|${zoom}`;
+            const sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createClusterHtml(count, zoom);
+              content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
               content.dataset.sig = sig;
             }
             bindClusterClick(content, c);
           }
+          try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
           return;
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createClusterHtml(count, zoom);
+        content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
         content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `cluster|${count}|${zoom}`;
+        content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
         bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -428,7 +430,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           map,
           yAnchor: 0.5,
           xAnchor: 0.5,
-          zIndex: 500,
+          zIndex: isClusterSelected ? 1000 : 500,
         });
         existing.set(key, overlay);
       });
