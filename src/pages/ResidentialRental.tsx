@@ -114,22 +114,14 @@ const ResidentialRental = () => {
     setShowAllFromSearch(false);
     setPinnedAddress(null);
     setSuppressPan(true);
-    setPinnedIds(prev => {
-      const allSelected = ids.every(id => prev.includes(id));
-      if (allSelected) {
-        const next = prev.filter(id => !ids.includes(id));
-        setSelectedId(next.length > 0 ? next[next.length - 1] : null);
-        return next;
-      }
-      const next = [...prev];
-      ids.forEach(id => {
-        if (!next.includes(id)) next.push(id);
-      });
-      setSelectedId(ids[0] ?? null);
-      return next;
-    });
+    const allSelected = ids.every(id => pinnedIds.includes(id));
+    const next = allSelected
+      ? pinnedIds.filter(id => !ids.includes(id))
+      : ids.reduce((acc, id) => acc.includes(id) ? acc : [...acc, id], [...pinnedIds]);
+    setPinnedIds(next);
+    setSelectedId(allSelected ? (next[next.length - 1] ?? null) : (ids[0] ?? null));
     setTimeout(() => setSuppressPan(false), 120);
-  }, []);
+  }, [pinnedIds]);
 
   // 사이드바 매물: 반경 우선 → 돋보기 → 핀 선택 → 기본
   const sidebarProperties = useMemo(() => {
