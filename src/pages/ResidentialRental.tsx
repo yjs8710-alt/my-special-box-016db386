@@ -114,15 +114,20 @@ const ResidentialRental = () => {
     setShowAllFromSearch(false);
     setPinnedAddress(null);
     setSuppressPan(true);
-    // 겹친 핀 클릭 시 기존 체크를 지우지 않고 새 매물만 누적합니다.
     setPinnedIds(prev => {
+      const allSelected = ids.every(id => prev.includes(id));
+      if (allSelected) {
+        const next = prev.filter(id => !ids.includes(id));
+        setSelectedId(next.length > 0 ? next[next.length - 1] : null);
+        return next;
+      }
       const next = [...prev];
       ids.forEach(id => {
         if (!next.includes(id)) next.push(id);
       });
+      setSelectedId(ids[0] ?? null);
       return next;
     });
-    setSelectedId(ids[0] ?? null);
     setTimeout(() => setSuppressPan(false), 120);
   }, []);
 
