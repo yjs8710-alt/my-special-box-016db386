@@ -595,6 +595,40 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     }
   }, [radiusMode]);
 
+  // 깜빡임 — 특정 핀 위치 강조
+  useEffect(() => {
+    if (blinkId == null) return;
+    const tryBlink = (attempts = 0) => {
+      const existing = overlaysRef.current;
+      let target: any = existing.get(`p:${blinkId}`);
+      if (!target) {
+        // 클러스터 내부에서 검색
+        existing.forEach((ov, key) => {
+          if (!target && key.startsWith("c:")) {
+            const content = ov.getContent?.() as HTMLElement | undefined;
+            if (content?.dataset?.ids?.split(",").includes(String(blinkId))) target = ov;
+          }
+        });
+      }
+      if (!target) {
+        if (attempts < 5) window.setTimeout(() => tryBlink(attempts + 1), 120);
+        return;
+      }
+      const content = target.getContent?.() as HTMLElement | undefined;
+      if (!content) return;
+      content.style.animation = "none";
+      void content.offsetWidth;
+      content.style.animation = "pin-blink 0.5s ease-in-out 4";
+      // 지도 위치도 해당 핀으로 이동
+      try {
+        const pos = target.getPosition?.();
+        if (pos && mapRef.current) mapRef.current.panTo(pos);
+      } catch (_) {}
+    };
+    tryBlink();
+  }, [blinkId, blinkTrigger]);
+
+
   // 선택된 매물로 이동 (suppressPan=true 이면 이동 안 함)
   // suppressPan은 ref 패턴으로 읽어서, false로 바뀌었을 때 effect 재실행으로 panTo가 호출되는 것을 방지
   const suppressPanRef = useRef(suppressPan);
