@@ -156,7 +156,7 @@ interface MapViewProps {
   onSelect: (id: number) => void;
   /** 지도 이동/줌 시 현재 화면 범위 콜백 */
   onBoundsChange?: (bounds: MapBounds) => void;
-  /** true이면 selectedId 변경 시 panTo 억제 */
+  /** 기존 호출부 호환용: 선택 시 자동 지도 이동은 하지 않음 */
   suppressPan?: boolean;
   /** 반경검색 모드 활성화 — true면 지도 클릭/드래그로 원 그리기 */
   radiusMode?: boolean;
