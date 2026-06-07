@@ -183,6 +183,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   const [retryKey, setRetryKey] = useState(0);
   const retryTimeoutRef = useRef<number | null>(null);
   const autoRetryCountRef = useRef(0);
+  const resizeFrameRef = useRef<number | null>(null);
+  const lastMapSizeRef = useRef({ width: 0, height: 0 });
 
   // 반경검색 관련 ref
   const circleOverlayRef = useRef<any>(null);
@@ -316,51 +318,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         event.stopPropagation();
       };
 
-      const getNearbyPinIds = (target: MapProperty) => {
-        const projection = map?.getProjection?.();
-        const toPoint = (prop: MapProperty) => {
-          if (!prop.lat || !prop.lng || !projection || !window.kakao?.maps) return null;
-          const latLng = new window.kakao.maps.LatLng(prop.lat, prop.lng);
-          try {
-            return projection.containerPointFromCoords?.(latLng) ?? projection.pointFromCoords?.(latLng) ?? null;
-          } catch (_) {
-            return null;
-          }
-        };
-        const readCoord = (point: any, axis: "x" | "y") => {
-          const direct = point?.[axis];
-          if (typeof direct === "number") return direct;
-          const getter = axis === "x" ? point?.getX : point?.getY;
-          return typeof getter === "function" ? getter.call(point) : null;
-        };
-
-        const targetPoint = toPoint(target);
-        const targetX = readCoord(targetPoint, "x");
-        const targetY = readCoord(targetPoint, "y");
-        if (targetX === null || targetY === null) return [target.id];
-
-        const hitRadius = Math.max(34, getPinSize(zoom) * 0.7);
-        const ids = props
-          .filter((prop) => prop.lat && prop.lng)
-          .filter((prop) => {
-            const point = toPoint(prop);
-            const x = readCoord(point, "x");
-            const y = readCoord(point, "y");
-            if (x === null || y === null) return false;
-            return Math.hypot(x - targetX, y - targetY) <= hitRadius;
-          })
-          .map((prop) => prop.id);
-
-        return ids.includes(target.id) ? ids : [target.id, ...ids];
-      };
-
       const handlePinClick = (event: Event, prop: MapProperty) => {
         stopMarkerEvent(event);
-        const nearbyIds = getNearbyPinIds(prop);
-        if (nearbyIds.length > 1 && propsRef.current.onClusterSelect) {
-          propsRef.current.onClusterSelect(nearbyIds);
-          return;
-        }
         propsRef.current.onSelect(prop.id);
       };
 
