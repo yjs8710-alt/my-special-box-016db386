@@ -366,7 +366,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
         content.onmousedown = stopMarkerEvent;
-        content.ontouchstart = stopMarkerEvent;
+        content.ontouchstart = stopMarkerTouch;
         content.onclick = (event) => handlePinClick(event, prop);
       };
 
@@ -392,7 +392,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
         content.onmousedown = stopMarkerEvent;
-        content.ontouchstart = stopMarkerEvent;
+        content.ontouchstart = stopMarkerTouch;
         content.onclick = (event) => {
           stopMarkerEvent(event);
           handleClusterClick(cluster);
