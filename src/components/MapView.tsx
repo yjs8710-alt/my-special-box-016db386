@@ -310,6 +310,11 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         event.preventDefault();
         event.stopPropagation();
       };
+      // 모바일에서는 touchstart에서 preventDefault 하면 click이 발화하지 않으므로
+      // 전파만 막는다.
+      const stopMarkerTouch = (event: Event) => {
+        event.stopPropagation();
+      };
 
       const getNearbyPinIds = (target: MapProperty) => {
         const projection = map?.getProjection?.();
