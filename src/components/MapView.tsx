@@ -310,8 +310,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       const existing = overlaysRef.current;
       const nextKeys = new Set<string>();
       const selSet = new Set<number>();
+      (propsRef.current.selectedIds ?? []).forEach((id) => selSet.add(id));
       if (selId !== null && selId !== undefined) {
-        (propsRef.current.selectedIds ?? []).forEach((id) => selSet.add(id));
         selSet.add(selId);
       }
 
