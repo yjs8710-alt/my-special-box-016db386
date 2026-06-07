@@ -304,7 +304,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
+            onMapMoveClear={() => { /* 지도 이동시 체크 유지 */ }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
