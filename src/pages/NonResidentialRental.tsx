@@ -305,11 +305,13 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { /* 지도 이동시 체크 유지 */ }}
+            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
             suppressPan={suppressPan}
+            blinkId={selectedId}
+            blinkTrigger={blinkTrigger}
           />
           <MapFilterBar
             activeType={activeType}
