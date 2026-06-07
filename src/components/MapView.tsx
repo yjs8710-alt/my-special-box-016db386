@@ -495,8 +495,12 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         window.kakao.maps.event.addListener(map, "dragstart", () => {
           if (!mountedRef.current) return;
           if (radiusModeRef.current) return;
-          // 드래그 시작 시 핀 선택 해제
-          propsRef.current.onMapMoveClear?.();
+          // 드래그(이동)는 체크 유지 — 줌만 해제
+        });
+
+        window.kakao.maps.event.addListener(map, "dragend", () => {
+          if (!mountedRef.current) return;
+          fireBounds(map);
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
