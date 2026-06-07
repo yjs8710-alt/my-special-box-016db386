@@ -685,14 +685,16 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     }
   }, [radiusMode]);
 
-  // 깜빡임 — 특정 핀 위치 강조
+  // 깜빡임 — 매물카드 클릭 시에만 (blinkTrigger 변경 시) 동작
+  const blinkTriggerRef = useRef(blinkTrigger);
   useEffect(() => {
+    if (blinkTrigger === blinkTriggerRef.current) return;
+    blinkTriggerRef.current = blinkTrigger;
     if (blinkId == null) return;
     const tryBlink = (attempts = 0) => {
       const existing = overlaysRef.current;
       let target: any = existing.get(`p:${blinkId}`);
       if (!target) {
-        // 클러스터 내부에서 검색
         existing.forEach((ov, key) => {
           if (!target && key.startsWith("c:")) {
             const content = ov.getContent?.() as HTMLElement | undefined;
