@@ -106,10 +106,10 @@ function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: nu
 }
 
 /** 클러스터: 같은 원형 핀에 숫자만 크게 */
-function createClusterHtml(count: number, zoomLevel: number) {
+function createClusterHtml(count: number, zoomLevel: number, isSelected = false) {
   const base = getPinSize(zoomLevel);
   const size = count >= 100 ? Math.round(base * 1.35) : count >= 10 ? Math.round(base * 1.2) : Math.round(base * 1.05);
-  return createPinImageHtml(count, size, false);
+  return createPinImageHtml(count, size, isSelected);
 }
 
 interface Cluster {
