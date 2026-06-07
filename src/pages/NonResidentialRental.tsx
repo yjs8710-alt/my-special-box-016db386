@@ -194,21 +194,20 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) { setSelectedId(prev => prev === id ? null : id); return; }
     setShowAllFromSearch(false);
+    setSuppressPan(true);
     if (pinnedIds.includes(id)) {
-      setSuppressPan(true);
       const next = pinnedIds.filter(x => x !== id);
       setPinnedIds(next);
-      setSelectedId(null);
+      if (selectedId === id) setSelectedId(null);
       if (next.length === 0) setPinnedAddress(null);
       setTimeout(() => setSuppressPan(false), 100);
       return;
     }
-    const sameAddrIds = allProperties.filter(p => p.address === prop.address).map(p => p.id);
-    setSuppressPan(false);
-    setPinnedIds(prev => { const m = [...prev]; sameAddrIds.forEach(s => { if (!m.includes(s)) m.push(s); }); return m; });
+    setPinnedIds(prev => prev.includes(id) ? prev : [...prev, id]);
     setSelectedId(id);
     setPinnedAddress(prop.address);
-  }, [filtered, allProperties, pinnedIds]);
+    setTimeout(() => setSuppressPan(false), 100);
+  }, [filtered, allProperties, pinnedIds, selectedId]);
 
   const handleClusterSelect = useCallback((ids: number[]) => {
     if (ids.length === 0) return;
@@ -305,7 +304,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
+            onMapMoveClear={() => { /* 지도 이동시 체크 유지 */ }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}

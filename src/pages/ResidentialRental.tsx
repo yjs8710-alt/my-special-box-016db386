@@ -83,37 +83,29 @@ const ResidentialRental = () => {
     setMapBoundsState(b);
   }, []);
 
-  // 핀 클릭: 정확한 주소 매칭만, buildingName 제거
+  // 핀 클릭: 토글만 (지도 이동/자동 해제 없음, 다중 체크 누적)
   const handlePinSelect = useCallback((id: number) => {
     const prop = filtered.find(p => p.id === id) ?? allProperties.find(p => p.id === id);
     if (!prop) return;
     setShowAllFromSearch(false);
+    setSuppressPan(true);
 
-    // 이미 선택된 핀 재클릭 → 해제 (지도 이동 없음)
+    // 이미 체크된 핀 재클릭 → 해제
     if (pinnedIds.includes(id)) {
-      setSuppressPan(true);
       const next = pinnedIds.filter(x => x !== id);
       setPinnedIds(next);
-      setSelectedId(null); // next[0]으로 이동하지 않음
+      if (selectedId === id) setSelectedId(null);
       if (next.length === 0) setPinnedAddress(null);
       setTimeout(() => setSuppressPan(false), 100);
       return;
     }
 
-    // 정확한 주소 매칭만 (buildingName 제거 → 다른 동네 묶임 방지)
-    const sameAddrIds = allProperties
-      .filter(p => p.address === prop.address)
-      .map(p => p.id);
-
-    setSuppressPan(false);
-    setPinnedIds(prev => {
-      const merged = [...prev];
-      sameAddrIds.forEach(sid => { if (!merged.includes(sid)) merged.push(sid); });
-      return merged;
-    });
+    // 새 체크 추가 (다중 체크 가능, 이동 없음)
+    setPinnedIds(prev => prev.includes(id) ? prev : [...prev, id]);
     setSelectedId(id);
     setPinnedAddress(prop.address);
-  }, [filtered, allProperties, pinnedIds]);
+    setTimeout(() => setSuppressPan(false), 100);
+  }, [filtered, allProperties, pinnedIds, selectedId]);
 
   const handleClusterSelect = useCallback((ids: number[]) => {
     if (ids.length === 0) return;
@@ -241,7 +233,7 @@ const ResidentialRental = () => {
             properties={mapProperties}
             selectedId={selectedId}
             selectedIds={pinnedIds}
-            onMapMoveClear={() => { setPinnedIds([]); setPinnedAddress(null); setSelectedId(null); setShowAllFromSearch(false); }}
+            onMapMoveClear={() => { /* 지도 이동시 체크 유지 (사용자 명시 해제만 허용) */ }}
             onSelect={handlePinSelect}
             onClusterSelect={handleClusterSelect}
             onBoundsChange={handleBoundsChange}
