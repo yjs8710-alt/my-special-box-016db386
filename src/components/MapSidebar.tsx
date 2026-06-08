@@ -4820,40 +4820,6 @@ const MapSidebar = ({
           {/* Header */}
           {/* ── 사이드바 헤더 ── */}
           <div className="flex-shrink-0 border-b border-border" style={{ background: "hsl(var(--toolbar-bg))" }}>
-            {/* 핀 클릭 누적 모드 배너 */}
-            {pinnedIds && pinnedIds.length > 0 && (
-              <div
-                className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
-                style={{ background: "hsl(var(--primary)/0.08)" }}
-              >
-                <span className="text-[10px] font-bold text-primary flex-1 min-w-0">핀 선택 {pinnedIds.length}개</span>
-                <button
-                  onClick={() => onClearPinnedIds?.()}
-                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
-                  style={{ color: "hsl(var(--primary))" }}
-                >
-                  <X className="w-2.5 h-2.5" />
-                  전체보기
-                </button>
-              </div>
-            )}
-            {/* 주소 필터 모드 배너 (기존) */}
-            {pinnedAddress && (!pinnedIds || pinnedIds.length === 0) && (
-              <div
-                className="flex items-center gap-2 px-3 py-1.5 border-b border-border/60"
-                style={{ background: "hsl(var(--primary)/0.08)" }}
-              >
-                <span className="text-[10px] font-bold text-primary flex-1 min-w-0 truncate">{pinnedAddress}</span>
-                <button
-                  onClick={() => onClearPin?.()}
-                  className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold border border-primary/30 hover:bg-primary/10 transition-colors flex-shrink-0"
-                  style={{ color: "hsl(var(--primary))" }}
-                >
-                  <X className="w-2.5 h-2.5" />
-                  전체보기
-                </button>
-              </div>
-            )}
           </div>
 
           {/* List */}
