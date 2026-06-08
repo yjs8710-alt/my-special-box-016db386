@@ -233,7 +233,7 @@ export default function PublicProperty() {
               .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name")
               .eq("user_id", agentUserId)
               .eq("status", "approved")
-              .eq("is_active", true)
+              .order("is_active", { ascending: false })
               .order("created_at", { ascending: false })
               .limit(1)
               .maybeSingle()
