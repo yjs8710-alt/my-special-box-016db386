@@ -619,24 +619,31 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (!mountedRef.current) return;
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
           // 핀 선택은 줌/이동 후에도 유지 (사용자 요청)
           // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
           if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
           zoomRenderTimer = window.setTimeout(() => {
             if (!mountedRef.current) return;
             renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
-          }, 80);
+          }, isMobileRef.current ? 220 : 80);
           fireBounds(map);
         });
 
         window.kakao.maps.event.addListener(map, "dragstart", () => {
           if (!mountedRef.current) return;
           if (radiusModeRef.current) return;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
           // 드래그(이동)는 체크 유지 — 줌만 해제
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
           if (!mountedRef.current) return;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
+          window.setTimeout(() => {
+            if (!mountedRef.current) return;
+            renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
+          }, isMobileRef.current ? 120 : 0);
           fireBounds(map);
         });
 
