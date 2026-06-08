@@ -281,8 +281,55 @@ const PropertyCard = ({
             <span className="text-xs">{views.toLocaleString()}</span>
           </div>
         </div>
+
+        {/* 게스트/일반회원 액션 버튼 */}
+        {isGuest && (
+          <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border">
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+            >
+              <MessageCircle className="w-3.5 h-3.5" /> 문의하기
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
+            >
+              <Building2 className="w-3.5 h-3.5" /> 협력업체
+            </button>
+          </div>
+        )}
       </div>
     </div>
+
+    {isGuest && (
+      <>
+        <InquiryModal
+          open={showInquiry}
+          onClose={() => setShowInquiry(false)}
+          propertyTitle={title}
+          onOpenPartner={() => setShowPartner(true)}
+        />
+        <PartnerAgencyModal
+          open={showPartner}
+          onClose={() => setShowPartner(false)}
+          onChat={() => setShowInquiry(true)}
+        />
+        <GuestShareModal
+          open={showShare}
+          onClose={() => setShowShare(false)}
+          title={title}
+          address={displayAddress}
+          image={displayImage}
+          deposit={deposit}
+          monthly={monthly}
+          area={area}
+          floor={floor}
+          type={type}
+        />
+      </>
+    )}
+    </>
   );
 };
 
