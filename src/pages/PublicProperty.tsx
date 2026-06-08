@@ -200,6 +200,8 @@ export default function PublicProperty() {
   const [building, setBuilding] = useState<BuildingSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
+  const [fallbackImages, setFallbackImages] = useState<string[]>([]);
+  const [fallbackFromOtherUnit, setFallbackFromOtherUnit] = useState(false);
 
   useEffect(() => {
     if (!id) return;
