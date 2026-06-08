@@ -3195,7 +3195,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               type="button"
               onClick={(e) => { e.stopPropagation(); if (!isGuest) setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
-              style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+              style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
               title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
             >
               {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
@@ -3224,6 +3224,26 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             <span className="flex-1" />
+            {isGuest && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: {
+                      propertyDbId: prop.dbId,
+                      propertyRegNo: prop.regNo,
+                      agentUserId: prop.registeredBy,
+                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                style={{ background: "hsl(var(--primary))", color: "white" }}
+              >
+                회원업체
+              </button>
+            )}
             {regDate && !isMobile && (
               <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
                 등록 {regDate}
