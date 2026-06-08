@@ -4510,35 +4510,6 @@ const MapSidebar = ({
     w?.print();
   };
 
-  /* ── Resize drag ── */
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(DEFAULT_WIDTH);
-
-  const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = true;
-      startX.current = e.clientX;
-      startWidth.current = width;
-      const onMove = (ev: MouseEvent) => {
-        if (!dragging.current) return;
-        const delta = startX.current - ev.clientX;
-        const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
-        setWidth(newWidth);
-        localStorage.setItem("sidebar_width", String(newWidth));
-      };
-      const onUp = () => {
-        dragging.current = false;
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-      };
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
-    },
-    [width],
-  );
-
   return (
     <>
       {/* Public Record Modal */}
