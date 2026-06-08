@@ -79,8 +79,10 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
       position:relative;
       width:${size}px;height:${size}px;
       transform-origin:center center;
-        cursor:pointer;
-        filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
+      cursor:pointer;
+      pointer-events:auto;
+      background:transparent;
+      filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
     ">
       <img src="${MAP_PIN_URL}" alt="" draggable="false"
         style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
@@ -91,9 +93,16 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         font-size:${fontSize}px;line-height:1;
         text-shadow:0 1px 2px rgba(0,0,0,0.55);
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        pointer-events:none;
+        pointer-events:auto;
+        background:transparent;
         transform:translateY(-0.12em);
       ">${count}</div>
+      <div style="
+        position:absolute;inset:0;
+        pointer-events:auto;
+        background:transparent;
+        z-index:2;
+      "></div>
     </div>
   `;
 }
