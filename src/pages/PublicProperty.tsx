@@ -263,7 +263,6 @@ export default function PublicProperty() {
             .from("properties")
             .select("id,unit_number,floor,room_type,images")
             .eq("address", data.address)
-            .eq("status", "active")
             .neq("id", data.id)
             .limit(30);
           if (isMounted && siblings) {
@@ -457,13 +456,6 @@ export default function PublicProperty() {
             </div>
           )}
 
-          {/* Description */}
-          {property.description && (
-            <div>
-              <p className="text-xs font-bold text-foreground mb-2">상세 설명</p>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{property.description}</p>
-            </div>
-          )}
 
           {/* Build info */}
           <div className="rounded-xl border border-border bg-muted/30 p-3 flex items-center gap-3">
