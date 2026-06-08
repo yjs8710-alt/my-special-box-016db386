@@ -5488,7 +5488,7 @@ const MapSidebar = ({
                               </div>
                             )}
                             {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
-                            {prop.description && prop.description.trim() && (
+                            {!isGuest && prop.description && prop.description.trim() && (
                               <div className="mt-1 px-1.5 py-0.5 rounded font-bold text-[12px] whitespace-pre-wrap break-words" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
                                 {prop.description}
                               </div>
