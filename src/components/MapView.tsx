@@ -485,9 +485,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+            const sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createPinHtml(prop, isSelected, zoom);
+              content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
               content.dataset.sig = sig;
             }
             bindPinClick(content, prop);
@@ -497,9 +497,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createPinHtml(prop, isSelected, zoom);
-        content.style.cssText = "cursor:pointer;touch-action:manipulation;";
-        content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+        content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
+        content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
+        content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
         bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -532,9 +532,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+            const sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
+              content.innerHTML = createClusterHtml(count, zoom, isClusterSelected, isMobile);
               content.dataset.sig = sig;
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
@@ -545,9 +545,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
-        content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+        content.innerHTML = createClusterHtml(count, zoom, isClusterSelected, isMobile);
+        content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
+        content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
