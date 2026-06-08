@@ -5,7 +5,7 @@ import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.pn
 import { useState } from "react";
 import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
 import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
-import { InquiryModal, PartnerAgencyModal, GuestShareModal } from "@/components/guest/GuestModals";
+import { InquiryModal, PartnerAgencyModal } from "@/components/guest/GuestModals";
 
 interface PropertyCardProps {
   image: string;
