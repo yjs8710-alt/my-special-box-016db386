@@ -8,7 +8,7 @@ const MAP_PIN_URL = mapPinAsset.url;
 const MOBILE_QUERY = "(max-width: 767px)";
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_MAX_DURATION_MS = 420;
-const GESTURE_SETTLE_MS = 320;
+const GESTURE_SETTLE_MS = 80;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
