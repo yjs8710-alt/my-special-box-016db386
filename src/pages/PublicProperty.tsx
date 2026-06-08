@@ -334,14 +334,6 @@ export default function PublicProperty() {
         <div className="p-5 flex flex-col gap-5">
           {/* Badges + Title */}
           <div>
-            <div className="flex items-center gap-1.5 mb-2">
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white">{property.type}</span>
-              {property.room_type && property.room_type !== property.type && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground">{property.room_type}</span>
-              )}
-              {property.is_new && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-white">NEW</span>}
-              {property.is_hot && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-destructive text-white">HOT</span>}
-            </div>
             <h1 className="text-xl font-bold text-foreground flex items-center gap-1">
               <MapPin className="w-4 h-4" />
               {safeAddress}
