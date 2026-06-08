@@ -380,12 +380,14 @@ export default function PublicProperty() {
         )}
 
         {/* 다른 호실 선택 */}
-        {showingOtherUnit && otherUnits.length > 1 && (
+        {showingOtherUnit && otherUnits.length > 0 && (
           <div className="px-5 pt-4">
-            <p className="text-xs font-bold text-foreground mb-2">다른 호실 사진 보기</p>
+            <p className="text-xs font-bold text-foreground mb-2">
+              📷 사진이 등록되지 않아 같은 건물 다른 호실 사진을 보여드립니다.
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {otherUnits.map((u) => {
-                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}층` : "호실";
+                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실";
                 const active = u.id === selectedUnitId;
                 return (
                   <button
@@ -402,7 +404,7 @@ export default function PublicProperty() {
                     }`}
                   >
                     {label}
-                    {u.room_type ? <span className="ml-1 font-normal opacity-70">· {u.room_type}</span> : null}
+                    <span className="ml-1 font-normal opacity-70">· 사진 {u.images.length}장</span>
                   </button>
                 );
               })}
