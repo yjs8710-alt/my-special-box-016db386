@@ -206,16 +206,23 @@ const PropertyCard = ({
 
       {/* Content */}
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-semibold text-foreground text-sm line-clamp-1 flex-1">{title}</h3>
-          {/* 모바일: 1열 우측 끝 문의하기 */}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          {/* 게스트/일반회원: 모바일에서는 건물명 숨김, 데스크탑은 노출 */}
+          <h3 className={`font-semibold text-foreground text-sm line-clamp-1 flex-1 ${isGuest ? "hidden md:block" : ""}`}>{title}</h3>
           {isGuest && (
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-              className="md:hidden shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm"
-            >
-              <MessageCircle className="w-3 h-3" /> 문의하기
-            </button>
+            <>
+              {/* 데스크탑: 확인일/등록일을 문의하기 좌측에 표기 */}
+              <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
+                {checkedDate && <span>확인 {checkedDate}</span>}
+                {registeredDate && <span>등록 {registeredDate}</span>}
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
+                className="shrink-0 ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+              >
+                <MessageCircle className="w-3 h-3" /> 문의하기
+              </button>
+            </>
           )}
         </div>
         <div className="flex items-center gap-1 mb-3">
@@ -297,19 +304,9 @@ const PropertyCard = ({
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            {isGuest && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
-              >
-                <MessageCircle className="w-3 h-3" /> 문의하기
-              </button>
-            )}
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Eye className="w-3.5 h-3.5" />
-              <span className="text-xs">{views.toLocaleString()}</span>
-            </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Eye className="w-3.5 h-3.5" />
+            <span className="text-xs">{views.toLocaleString()}</span>
           </div>
         </div>
 
