@@ -4193,6 +4193,12 @@ const MapSidebar = ({
   const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
   const [expandedContactsId, setExpandedContactsId] = useState<number | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
+  // 카드를 직접 클릭했을 때만 하단(액션 버튼 등)을 펼침. 지도 핀 클릭으로 선택된 경우는 펼치지 않음.
+  const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  useEffect(() => {
+    // 외부(지도 핀)에서 selectedId가 변경되면 펼침 상태는 리셋
+    setExpandedCardId((prev) => (prev === selectedId ? prev : null));
+  }, [selectedId]);
 
   useEffect(() => {
     if (lightbox) window.dispatchEvent(new CustomEvent("contact-popup-open", { detail: "close-all" }));
