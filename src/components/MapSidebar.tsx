@@ -51,6 +51,7 @@ import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/ka
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
 import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
