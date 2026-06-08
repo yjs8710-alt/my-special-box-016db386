@@ -214,6 +214,11 @@ export default function PublicProperty() {
       setLoading(true);
       setAgent(null);
       setBuilding(null);
+      setImgIdx(0);
+      setFallbackImages([]);
+      setFallbackFromOtherUnit(false);
+      setOtherUnits([]);
+      setSelectedUnitId("");
 
       try {
         const { data, error } = await supabase
@@ -277,6 +282,11 @@ export default function PublicProperty() {
               setSelectedUnitId(units[0].id);
               setFallbackImages(units[0].images);
               setFallbackFromOtherUnit(true);
+            } else {
+              setOtherUnits([]);
+              setSelectedUnitId("");
+              setFallbackImages([]);
+              setFallbackFromOtherUnit(false);
             }
           }
         }
