@@ -93,15 +93,17 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         font-size:${fontSize}px;line-height:1;
         text-shadow:0 1px 2px rgba(0,0,0,0.55);
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        pointer-events:auto;
+        pointer-events:none;
         background:transparent;
         transform:translateY(-0.12em);
+        z-index:1;
       ">${count}</div>
       <div style="
         position:absolute;inset:0;
         pointer-events:auto;
         background:transparent;
-        z-index:2;
+        z-index:3;
+        cursor:pointer;
       "></div>
     </div>
   `;
