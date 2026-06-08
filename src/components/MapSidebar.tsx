@@ -4817,10 +4817,7 @@ const MapSidebar = ({
                 }
           }
         >
-          {/* Header */}
-          {/* ── 사이드바 헤더 ── */}
-          <div className="flex-shrink-0 border-b border-border" style={{ background: "hsl(var(--toolbar-bg))" }}>
-          </div>
+          {/* Header removed */}
 
           {/* List */}
           <div ref={listScrollRef} className="flex-1 overflow-y-auto scrollbar-thin bg-muted/20 pb-24 md:pb-0">
