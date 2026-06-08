@@ -75,6 +75,7 @@ const roomPasswordChipStyle = {
 interface LightboxUnit {
   unitNumber?: string; // 호수 (e.g., "202호")
   roomType?: string;     // 방종류 (e.g., "원룸")
+  floor?: string;        // 층수 (게스트용 라벨)
   label?: string;        // legacy fallback (단일 매물명 등)
   images: string[];
   isReference?: boolean; // 참고용 사진 여부
