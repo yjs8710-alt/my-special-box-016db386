@@ -4060,7 +4060,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   퇴거 {vacateDateLabel}
                 </span>
               )}
-              {(buildingPw || roomPw) && (
+              {!isGuest && (buildingPw || roomPw) && (
                 <>
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
