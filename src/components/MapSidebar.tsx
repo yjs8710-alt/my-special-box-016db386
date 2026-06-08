@@ -4818,17 +4818,6 @@ const MapSidebar = ({
                 }
           }
         >
-          {/* 고정 너비 표시바 — 데스크톱 전용 */}
-          {!isMobile && !collapsed && (
-            <div
-              className="absolute top-0 bottom-0 w-3 z-10 flex items-center justify-center pointer-events-none"
-              style={{ left: "0px" }}
-              title="사이드바 너비 고정"
-            >
-              <div className="w-1.5 h-16 rounded-full bg-blue-500 shadow" />
-            </div>
-          )}
-
           {/* Header */}
           {/* ── 사이드바 헤더 ── */}
           <div className="flex-shrink-0 border-b border-border" style={{ background: "hsl(var(--toolbar-bg))" }}>
