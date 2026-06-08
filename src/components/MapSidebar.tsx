@@ -5083,12 +5083,14 @@ const MapSidebar = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+                          if (selectedId !== prop.id) onSelect(prop.id);
+                          setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+                            if (selectedId !== prop.id) onSelect(prop.id);
+                            setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                           }
                         }}
                         className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
