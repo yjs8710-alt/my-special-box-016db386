@@ -4017,7 +4017,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
-          if (!hasChips && !hasDesc && !buildingPw && !roomPw && !vacateDateLabel) return null;
+          if (!hasChips && !(hasDesc && !isGuest) && !(buildingPw && !isGuest) && !(roomPw && !isGuest) && !vacateDateLabel) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
@@ -4030,7 +4030,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {chip.label}
                 </span>
               ))}
-              {hasDesc && (
+              {!isGuest && hasDesc && (
                 <>
                   {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
                   <span
