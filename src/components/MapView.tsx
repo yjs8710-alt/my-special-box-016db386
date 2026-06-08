@@ -840,11 +840,13 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (isTap) runMarkerTargetClick(event, target);
         };
 
+        document.addEventListener("mousedown", handleDocumentMouseDownCapture, true);
         document.addEventListener("click", handleDocumentClickCapture, true);
         document.addEventListener("touchstart", handleDocumentTouchStartCapture, true);
         document.addEventListener("touchmove", handleDocumentTouchMoveCapture, true);
         document.addEventListener("touchend", handleDocumentTouchEndCapture, true);
         cleanupDocumentMarkerEvents = () => {
+          document.removeEventListener("mousedown", handleDocumentMouseDownCapture, true);
           document.removeEventListener("click", handleDocumentClickCapture, true);
           document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
           document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
