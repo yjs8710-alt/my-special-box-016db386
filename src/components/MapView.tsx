@@ -695,9 +695,42 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           fireBounds(map);
         });
 
+        const getPointerPoint = (event: MouseEvent | TouchEvent) => {
+          if ("changedTouches" in event) {
+            const touch = event.changedTouches[0] ?? event.touches[0];
+            return touch ? { x: touch.clientX, y: touch.clientY } : null;
+          }
+          return { x: event.clientX, y: event.clientY };
+        };
+
         const getMarkerTarget = (event: Event) => {
           const target = event.target as HTMLElement | null;
           return target?.closest?.("[data-map-marker-ids]") as HTMLElement | null;
+        };
+
+        const findMarkerTargetAtPoint = (event: MouseEvent | TouchEvent) => {
+          const point = getPointerPoint(event);
+          const container = containerRef.current;
+          if (!point || !container) return null;
+
+          let best: { el: HTMLElement; distance: number; area: number } | null = null;
+          container.querySelectorAll<HTMLElement>("[data-map-marker-ids]").forEach((el) => {
+            const rect = el.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            const pad = Math.max(12, Math.min(rect.width, rect.height) * 0.18);
+            if (
+              point.x < rect.left - pad || point.x > rect.right + pad ||
+              point.y < rect.top - pad || point.y > rect.bottom + pad
+            ) return;
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const distance = Math.hypot(point.x - cx, point.y - cy);
+            const area = rect.width * rect.height;
+            if (!best || distance < best.distance || (distance === best.distance && area < best.area)) {
+              best = { el, distance, area };
+            }
+          });
+          return best?.el ?? null;
         };
 
         const runMarkerTargetClick = (event: Event, target: HTMLElement) => {
@@ -721,7 +754,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
             stopMarkerEvent(event);
             return;
           }
-          const target = getMarkerTarget(event);
+          const target = getMarkerTarget(event) ?? findMarkerTargetAtPoint(event);
           if (!target) return;
           if (isMobileRef.current && isGestureBlocked()) return;
           runMarkerTargetClick(event, target);
@@ -729,7 +762,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
         const handleDocumentTouchStartCapture = (event: TouchEvent) => {
           if (!containerRef.current?.contains(event.target as Node)) return;
-          const target = getMarkerTarget(event);
+          const target = getMarkerTarget(event) ?? findMarkerTargetAtPoint(event);
           if (!target) return;
           const point = getTouchPoint(event);
           if (!point) return;
@@ -751,7 +784,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           const touch = markerTouchRef.current;
           markerTouchRef.current = null;
           if (!touch || !containerRef.current?.contains(event.target as Node)) return;
-          const target = getMarkerTarget(event);
+          const target = getMarkerTarget(event) ?? findMarkerTargetAtPoint(event);
           if (!target) return;
           const point = getTouchPoint(event);
           const distance = point ? Math.hypot(point.x - touch.x, point.y - touch.y) : 999;
