@@ -202,6 +202,8 @@ export default function PublicProperty() {
   const [imgIdx, setImgIdx] = useState(0);
   const [fallbackImages, setFallbackImages] = useState<string[]>([]);
   const [fallbackFromOtherUnit, setFallbackFromOtherUnit] = useState(false);
+  const [otherUnits, setOtherUnits] = useState<{ id: string; unit_number: string | null; floor: string | null; room_type: string | null; images: string[] }[]>([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
 
   useEffect(() => {
     if (!id) return;
