@@ -5412,36 +5412,42 @@ const MapSidebar = ({
                              )}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
-                                {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
-                                {(owner || owner2) && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 소유주
-                                  </button>
-                                )}
-                                {manager && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 관리인
-                                  </button>
-                                )}
-                                {tenant && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 세입자
-                                  </button>
+                                {isGuest ? (
+                                  <span className="text-muted-foreground">로그인 후 연락처 확인</span>
+                                ) : (
+                                  <>
+                                    {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
+                                    {(owner || owner2) && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 소유주
+                                      </button>
+                                    )}
+                                    {manager && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 관리인
+                                      </button>
+                                    )}
+                                    {tenant && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 세입자
+                                      </button>
+                                    )}
+                                  </>
                                 )}
                               </div>
                               {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
@@ -5455,7 +5461,7 @@ const MapSidebar = ({
                               </div>
                             )}
                             {/* 2행: 현관비번/방비번 — 노란 박스 | 우측: 방향 */}
-                            {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
+                            {!isGuest && ((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
                                 {(prop.buildingPassword || prop.password) && (
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
