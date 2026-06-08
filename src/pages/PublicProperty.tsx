@@ -253,6 +253,32 @@ export default function PublicProperty() {
         const approved = agentList.find((a: any) => a.status === "approved");
         setAgent((approved || agentList[0] || null) as AgentData | null);
         setBuilding(buildingResult.data ?? null);
+
+        // 사진이 없을 경우 같은 주소의 다른 호실 사진 가져오기
+        const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
+        if (!hasImages && data.address) {
+          const { data: siblings } = await supabase
+            .from("properties")
+            .select("id,images")
+            .eq("address", data.address)
+            .eq("status", "active")
+            .neq("id", data.id)
+            .limit(20);
+          if (isMounted && siblings) {
+            const otherImgs: string[] = [];
+            for (const s of siblings) {
+              const arr = Array.isArray((s as any).images) ? (s as any).images.filter(Boolean) : [];
+              if (arr.length > 0) {
+                otherImgs.push(...arr);
+                if (otherImgs.length >= 10) break;
+              }
+            }
+            if (otherImgs.length > 0) {
+              setFallbackImages(otherImgs.slice(0, 10));
+              setFallbackFromOtherUnit(true);
+            }
+          }
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
