@@ -1638,9 +1638,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
     seenUnits.add(u.unitNumber);
     lightboxUnits.push({
       label: isGuest
-        ? (u.floor ? `${u.floor}` : "")
+        ? ""
         : `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
       images: u.images,
+
       isReference: true,
     });
   }
