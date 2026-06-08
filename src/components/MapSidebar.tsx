@@ -5435,9 +5435,7 @@ const MapSidebar = ({
                              )}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
-                                {isGuest ? (
-                                  <span className="text-muted-foreground">로그인 후 연락처 확인</span>
-                                ) : (
+                                {isGuest ? null : (
                                   <>
                                     {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
                                     {(owner || owner2) && (
@@ -5473,6 +5471,7 @@ const MapSidebar = ({
                                   </>
                                 )}
                               </div>
+
                               {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
                             </div>
                             {/* 퇴거 정보 행 (퇴거예정) */}
