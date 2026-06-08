@@ -949,6 +949,7 @@ interface MemoNotepadProps {
 }
 const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
   ({ propertyDbId, propId, memoKey, icon, label, initialText, userId, isAdmin }, ref) => {
+    const isGuest = useIsGuest();
     const [open, setOpen] = useState(false);
     const [myText, setMyText] = useState("");
     const [otherMemos, setOtherMemos] = useState<Array<{ user_id: string; content: string; name?: string }>>([]);
