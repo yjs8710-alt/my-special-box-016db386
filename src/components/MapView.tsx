@@ -5,6 +5,10 @@ import { RadiusCircle, haversineMeters, formatRadius } from "@/lib/geoDistance";
 import mapPinAsset from "@/assets/map-pin.png.asset.json";
 
 const MAP_PIN_URL = mapPinAsset.url;
+const MOBILE_QUERY = "(max-width: 767px)";
+const TAP_MOVE_THRESHOLD_PX = 10;
+const TAP_MAX_DURATION_MS = 420;
+const GESTURE_SETTLE_MS = 320;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -41,7 +45,16 @@ const TYPE_ACCENT: Record<string, string> = {
 };
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
-function getPinSize(zoomLevel: number): number {
+function getPinSize(zoomLevel: number, isMobile = false): number {
+  if (isMobile) {
+    if (zoomLevel <= 2) return 74;
+    if (zoomLevel <= 3) return 66;
+    if (zoomLevel <= 4) return 58;
+    if (zoomLevel <= 5) return 50;
+    if (zoomLevel <= 6) return 44;
+    if (zoomLevel <= 7) return 40;
+    return 36;
+  }
   if (zoomLevel <= 2) return 100;
   if (zoomLevel <= 3) return 90;
   if (zoomLevel <= 4) return 80;
@@ -65,10 +78,9 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
     <div style="
       position:relative;
       width:${size}px;height:${size}px;
-      transform:translateZ(0);
       transform-origin:center center;
-      cursor:pointer;will-change:transform;
-      filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.4))" : "drop-shadow(0 2px 3px rgba(0,0,0,0.35))"};
+        cursor:pointer;
+        filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
     ">
       <img src="${MAP_PIN_URL}" alt="" draggable="false"
         style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
@@ -86,13 +98,13 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
   `;
 }
 
-function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number) {
-  return createPinImageHtml(1, getPinSize(zoomLevel), isSelected);
+function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number, isMobile = false) {
+  return createPinImageHtml(1, getPinSize(zoomLevel, isMobile), isSelected);
 }
 
 /** 클러스터: 같은 원형 핀에 숫자만 크게 */
-function createClusterHtml(count: number, zoomLevel: number, isSelected = false) {
-  const base = getPinSize(zoomLevel);
+function createClusterHtml(count: number, zoomLevel: number, isSelected = false, isMobile = false) {
+  const base = getPinSize(zoomLevel, isMobile);
   const size = count >= 100 ? Math.round(base * 1.35) : count >= 10 ? Math.round(base * 1.2) : Math.round(base * 1.05);
   return createPinImageHtml(count, size, isSelected);
 }
@@ -185,6 +197,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   const autoRetryCountRef = useRef(0);
   const resizeFrameRef = useRef<number | null>(null);
   const lastMapSizeRef = useRef({ width: 0, height: 0 });
+  const isMobileRef = useRef(false);
+  const gestureBlockUntilRef = useRef(0);
 
   // 반경검색 관련 ref
   const circleOverlayRef = useRef<any>(null);
@@ -199,6 +213,15 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => {
     propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect };
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const updateMobile = () => { isMobileRef.current = mql.matches; };
+    updateMobile();
+    mql.addEventListener("change", updateMobile);
+    return () => mql.removeEventListener("change", updateMobile);
+  }, []);
 
   const waitForContainerReady = useCallback(async () => {
     for (let attempt = 0; attempt < 12; attempt += 1) {
@@ -306,33 +329,74 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         selSet.add(selId);
       }
 
-      const { clusters, singles } = buildClusters(props, zoom, selSet);
+      const isMobile = isMobileRef.current;
+      let renderProps = props;
+      try {
+        const bounds = map.getBounds?.();
+        const sw = bounds?.getSouthWest?.();
+        const ne = bounds?.getNorthEast?.();
+        if (sw && ne) {
+          const latPad = Math.max((ne.getLat() - sw.getLat()) * (isMobile ? 0.35 : 0.2), 0.002);
+          const lngPad = Math.max((ne.getLng() - sw.getLng()) * (isMobile ? 0.35 : 0.2), 0.002);
+          renderProps = props.filter((p) =>
+            selSet.has(p.id) ||
+            (p.lat && p.lng &&
+              p.lat >= sw.getLat() - latPad && p.lat <= ne.getLat() + latPad &&
+              p.lng >= sw.getLng() - lngPad && p.lng <= ne.getLng() + lngPad)
+          );
+        }
+      } catch (_) {}
+
+      const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
 
       const stopMarkerEvent = (event: Event) => {
         event.preventDefault();
         event.stopPropagation();
       };
-      // 모바일에서는 touchstart에서 preventDefault 하면 click이 발화하지 않으므로
-      // 전파만 막는다.
-      const stopMarkerTouch = (event: Event) => {
-        event.stopPropagation();
+      const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
+      const getTouchPoint = (event: TouchEvent) => {
+        const touch = event.changedTouches[0] ?? event.touches[0];
+        return touch ? { x: touch.clientX, y: touch.clientY } : null;
       };
 
       const handlePinClick = (event: Event, prop: MapProperty) => {
+        if (isMobile && isGestureBlocked()) return;
         stopMarkerEvent(event);
         propsRef.current.onSelect(prop.id);
       };
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
-        content.style.touchAction = "manipulation";
+        content.style.touchAction = isMobile ? "auto" : "manipulation";
         content.onmousedown = stopMarkerEvent;
-        content.ontouchstart = stopMarkerTouch;
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+        let startTouchCount = 0;
+        let moved = false;
         let touchHandled = false;
+        content.ontouchstart = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startX = point.x;
+          startY = point.y;
+          startTime = Date.now();
+          startTouchCount = event.touches.length;
+          moved = false;
+        };
+        content.ontouchmove = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startTouchCount = Math.max(startTouchCount, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
+            moved = true;
+          }
+        };
         content.ontouchend = (event) => {
-          event.stopPropagation();
-          event.preventDefault();
           touchHandled = true;
-          handlePinClick(event, prop);
+          const point = getTouchPoint(event);
+          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
+          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
+          if (isTap) handlePinClick(event, prop);
           setTimeout(() => { touchHandled = false; }, 500);
         };
         content.onclick = (event) => {
@@ -362,15 +426,40 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
-        content.style.touchAction = "manipulation";
+        content.style.touchAction = isMobile ? "auto" : "manipulation";
         content.onmousedown = stopMarkerEvent;
-        content.ontouchstart = stopMarkerTouch;
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+        let startTouchCount = 0;
+        let moved = false;
         let touchHandled = false;
+        content.ontouchstart = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startX = point.x;
+          startY = point.y;
+          startTime = Date.now();
+          startTouchCount = event.touches.length;
+          moved = false;
+        };
+        content.ontouchmove = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startTouchCount = Math.max(startTouchCount, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
+            moved = true;
+          }
+        };
         content.ontouchend = (event) => {
-          event.stopPropagation();
-          event.preventDefault();
           touchHandled = true;
-          handleClusterClick(cluster);
+          const point = getTouchPoint(event);
+          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
+          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
+          if (isTap) {
+            stopMarkerEvent(event);
+            handleClusterClick(cluster);
+          }
           setTimeout(() => { touchHandled = false; }, 500);
         };
         content.onclick = (event) => {
@@ -396,9 +485,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+            const sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createPinHtml(prop, isSelected, zoom);
+              content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
               content.dataset.sig = sig;
             }
             bindPinClick(content, prop);
@@ -408,9 +497,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createPinHtml(prop, isSelected, zoom);
-        content.style.cssText = "cursor:pointer;touch-action:manipulation;";
-        content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}`;
+        content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
+        content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
+        content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
         bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -443,9 +532,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           } catch (_) {}
           const content = prev.getContent() as HTMLDivElement;
           if (content && content.dataset) {
-            const sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+            const sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
             if (content.dataset.sig !== sig) {
-              content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
+              content.innerHTML = createClusterHtml(count, zoom, isClusterSelected, isMobile);
               content.dataset.sig = sig;
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
@@ -456,9 +545,9 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
 
         const content = document.createElement("div");
-        content.innerHTML = createClusterHtml(count, zoom, isClusterSelected);
-        content.style.cssText = "cursor:pointer;";
-        content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}`;
+        content.innerHTML = createClusterHtml(count, zoom, isClusterSelected, isMobile);
+        content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
+        content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
@@ -530,24 +619,31 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (!mountedRef.current) return;
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
           // 핀 선택은 줌/이동 후에도 유지 (사용자 요청)
           // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
           if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
           zoomRenderTimer = window.setTimeout(() => {
             if (!mountedRef.current) return;
             renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
-          }, 80);
+          }, isMobileRef.current ? 220 : 80);
           fireBounds(map);
         });
 
         window.kakao.maps.event.addListener(map, "dragstart", () => {
           if (!mountedRef.current) return;
           if (radiusModeRef.current) return;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
           // 드래그(이동)는 체크 유지 — 줌만 해제
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
           if (!mountedRef.current) return;
+          gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
+          window.setTimeout(() => {
+            if (!mountedRef.current) return;
+            renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
+          }, isMobileRef.current ? 120 : 0);
           fireBounds(map);
         });
 
