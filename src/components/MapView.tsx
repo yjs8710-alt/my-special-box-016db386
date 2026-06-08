@@ -626,6 +626,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     mountedRef.current = true;
 
     let cancelled = false;
+    let cleanupDocumentMarkerEvents = () => {};
     setMapError(false);
 
     (async () => {
@@ -762,6 +763,12 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         document.addEventListener("touchstart", handleDocumentTouchStartCapture, true);
         document.addEventListener("touchmove", handleDocumentTouchMoveCapture, true);
         document.addEventListener("touchend", handleDocumentTouchEndCapture, true);
+        cleanupDocumentMarkerEvents = () => {
+          document.removeEventListener("click", handleDocumentClickCapture, true);
+          document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
+          document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
+          document.removeEventListener("touchend", handleDocumentTouchEndCapture, true);
+        };
 
 
 
@@ -823,10 +830,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     return () => {
       cancelled = true;
       mountedRef.current = false;
-      document.removeEventListener("click", handleDocumentClickCapture, true);
-      document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
-      document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
-      document.removeEventListener("touchend", handleDocumentTouchEndCapture, true);
+      cleanupDocumentMarkerEvents();
       if (retryTimeoutRef.current) {
         window.clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
