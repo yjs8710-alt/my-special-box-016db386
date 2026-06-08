@@ -22,6 +22,7 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import AdminChatPanel from "@/components/AdminChatPanel";
+import AdminGuestInquiriesPanel from "@/components/AdminGuestInquiriesPanel";
 import VisitorStatsWidget from "@/components/VisitorStatsWidget";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
