@@ -4017,7 +4017,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           const hasChips = chips.length > 0;
           const hasDesc = !!prop.description?.trim();
 
-          if (!hasChips && !hasDesc && !buildingPw && !roomPw && !vacateDateLabel) return null;
+          if (!hasChips && !(hasDesc && !isGuest) && !(buildingPw && !isGuest) && !(roomPw && !isGuest) && !vacateDateLabel) return null;
           return (
             <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
@@ -4030,7 +4030,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   {chip.label}
                 </span>
               ))}
-              {hasDesc && (
+              {!isGuest && hasDesc && (
                 <>
                   {hasChips && <span className="flex-shrink-0 w-px h-3 bg-border" />}
                   <span
@@ -4060,7 +4060,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   퇴거 {vacateDateLabel}
                 </span>
               )}
-              {(buildingPw || roomPw) && (
+              {!isGuest && (buildingPw || roomPw) && (
                 <>
                   {buildingPw && (
                     <div className="relative group/bpw flex-shrink-0">
@@ -5488,7 +5488,7 @@ const MapSidebar = ({
                               </div>
                             )}
                             {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
-                            {prop.description && prop.description.trim() && (
+                            {!isGuest && prop.description && prop.description.trim() && (
                               <div className="mt-1 px-1.5 py-0.5 rounded font-bold text-[12px] whitespace-pre-wrap break-words" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
                                 {prop.description}
                               </div>
@@ -5527,80 +5527,84 @@ const MapSidebar = ({
                               </span>
                             </button>
                           )}
-                          {/* 건축/토지 열람 버튼 */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const pid = prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined);
-                              console.log(
-                                "📄 [건축/토지 클릭] property 전체 객체:",
-                                JSON.stringify({
-                                  id: prop.id,
-                                  dbId: prop.dbId,
-                                  address: prop.address,
-                                  memo: prop.memo,
-                                }),
-                              );
-                              console.log("🆔 전달 property_id:", pid ?? "(없음)");
-                              setPublicRecordAddress({ address: prop.address, propertyId: pid });
-                            }}
-                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
-                            style={{ background: "hsl(142 50% 95%)" }}
-                          >
-                            <FileSearch className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(142 60% 35%)" }} />
-                            <span className="text-[8px] font-bold leading-none" style={{ color: "hsl(142 60% 35%)" }}>
-                              건축/토지
-                            </span>
-                          </button>
-                          {/* 사진등록 */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPhotoUploadProp(prop);
-                            }}
-                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20 min-w-0"
-                          >
-                            <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
-                            <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
-                          </button>
-                          {/* 임대현황 */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLeaseProposalProp(prop);
-                            }}
-                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20 min-w-0"
-                          >
-                            <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
-                            <span className="text-[8px] font-bold text-purple-700 leading-none">임대현황</span>
-                          </button>
-                          {/* 거래완료 */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDealCompleteProp(prop);
-                            }}
-                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20 min-w-0"
-                          >
-                            <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
-                            <span className="text-[8px] font-bold text-green-700 leading-none">거래완료</span>
-                          </button>
-                          {/* 오류제보 */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setErrorReportProp(prop);
-                            }}
-                            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors min-w-0"
-                          >
-                            <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
-                            <span className="text-[8px] font-bold text-red-600 leading-none">오류제보</span>
-                          </button>
+                          {!isGuest && (
+                            <>
+                              {/* 건축/토지 열람 버튼 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const pid = prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined);
+                                  console.log(
+                                    "📄 [건축/토지 클릭] property 전체 객체:",
+                                    JSON.stringify({
+                                      id: prop.id,
+                                      dbId: prop.dbId,
+                                      address: prop.address,
+                                      memo: prop.memo,
+                                    }),
+                                  );
+                                  console.log("🆔 전달 property_id:", pid ?? "(없음)");
+                                  setPublicRecordAddress({ address: prop.address, propertyId: pid });
+                                }}
+                                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 border-r border-primary/20 transition-colors hover:opacity-80 min-w-0"
+                                style={{ background: "hsl(142 50% 95%)" }}
+                              >
+                                <FileSearch className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(142 60% 35%)" }} />
+                                <span className="text-[8px] font-bold leading-none" style={{ color: "hsl(142 60% 35%)" }}>
+                                  건축/토지
+                                </span>
+                              </button>
+                              {/* 사진등록 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPhotoUploadProp(prop);
+                                }}
+                                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-blue-50 hover:bg-blue-100 transition-colors border-r border-primary/20 min-w-0"
+                              >
+                                <Camera className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                                <span className="text-[8px] font-bold text-blue-700 leading-none">사진등록</span>
+                              </button>
+                              {/* 임대현황 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLeaseProposalProp(prop);
+                                }}
+                                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-purple-50 hover:bg-purple-100 transition-colors border-r border-primary/20 min-w-0"
+                              >
+                                <ClipboardList className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                                <span className="text-[8px] font-bold text-purple-700 leading-none">임대현황</span>
+                              </button>
+                              {/* 거래완료 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDealCompleteProp(prop);
+                                }}
+                                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-green-50 hover:bg-green-100 transition-colors border-r border-primary/20 min-w-0"
+                              >
+                                <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                                <span className="text-[8px] font-bold text-green-700 leading-none">거래완료</span>
+                              </button>
+                              {/* 오류제보 */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setErrorReportProp(prop);
+                                }}
+                                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 bg-red-50 hover:bg-red-100 transition-colors min-w-0"
+                              >
+                                <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+                                <span className="text-[8px] font-bold text-red-600 leading-none">오류제보</span>
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
