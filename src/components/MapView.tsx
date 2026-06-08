@@ -405,7 +405,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
       } catch (_) {}
 
-      const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
+      const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
 
       const handlePinClick = (event: Event, prop: MapProperty) => {
         if (isMobile && isGestureBlocked()) return;
