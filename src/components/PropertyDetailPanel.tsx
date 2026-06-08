@@ -2059,12 +2059,8 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
         </div>
 
         {/* ── CTA ── */}
-        <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-white grid grid-cols-2 gap-2">
-          {isGuest ? (
-            <div className="flex items-center justify-center h-11 rounded-lg border-2 border-dashed border-border text-xs text-muted-foreground text-center px-2">
-              로그인 후 연락처 확인 가능
-            </div>
-          ) : (
+        <div className={`flex-shrink-0 px-4 py-3 border-t border-border bg-white grid gap-2 ${isGuest ? "grid-cols-1" : "grid-cols-2"}`}>
+          {!isGuest && (
             <a
               href={`tel:${property.contactOwner ?? property.contact}`}
               className="flex items-center justify-center gap-1.5 h-11 rounded-lg border-2 border-primary text-primary text-sm font-bold hover:bg-primary hover:text-white transition-colors"
