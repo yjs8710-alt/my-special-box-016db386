@@ -330,7 +330,24 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       }
 
       const isMobile = isMobileRef.current;
-      const { clusters, singles } = buildClusters(props, zoom, selSet);
+      let renderProps = props;
+      try {
+        const bounds = map.getBounds?.();
+        const sw = bounds?.getSouthWest?.();
+        const ne = bounds?.getNorthEast?.();
+        if (sw && ne) {
+          const latPad = Math.max((ne.getLat() - sw.getLat()) * (isMobile ? 0.35 : 0.2), 0.002);
+          const lngPad = Math.max((ne.getLng() - sw.getLng()) * (isMobile ? 0.35 : 0.2), 0.002);
+          renderProps = props.filter((p) =>
+            selSet.has(p.id) ||
+            (p.lat && p.lng &&
+              p.lat >= sw.getLat() - latPad && p.lat <= ne.getLat() + latPad &&
+              p.lng >= sw.getLng() - lngPad && p.lng <= ne.getLng() + lngPad)
+          );
+        }
+      } catch (_) {}
+
+      const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
 
       const stopMarkerEvent = (event: Event) => {
         event.preventDefault();
@@ -369,7 +386,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.ontouchmove = (event) => {
           const point = getTouchPoint(event);
           if (!point) return;
-          if (Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
+          startTouchCount = Math.max(startTouchCount, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
             moved = true;
           }
         };
@@ -408,15 +426,40 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
-        content.style.touchAction = "manipulation";
+        content.style.touchAction = isMobile ? "auto" : "manipulation";
         content.onmousedown = stopMarkerEvent;
-        content.ontouchstart = stopMarkerTouch;
+        let startX = 0;
+        let startY = 0;
+        let startTime = 0;
+        let startTouchCount = 0;
+        let moved = false;
         let touchHandled = false;
+        content.ontouchstart = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startX = point.x;
+          startY = point.y;
+          startTime = Date.now();
+          startTouchCount = event.touches.length;
+          moved = false;
+        };
+        content.ontouchmove = (event) => {
+          const point = getTouchPoint(event);
+          if (!point) return;
+          startTouchCount = Math.max(startTouchCount, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
+            moved = true;
+          }
+        };
         content.ontouchend = (event) => {
-          event.stopPropagation();
-          event.preventDefault();
           touchHandled = true;
-          handleClusterClick(cluster);
+          const point = getTouchPoint(event);
+          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
+          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
+          if (isTap) {
+            stopMarkerEvent(event);
+            handleClusterClick(cluster);
+          }
           setTimeout(() => { touchHandled = false; }, 500);
         };
         content.onclick = (event) => {
