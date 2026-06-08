@@ -132,7 +132,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
         const position = new window.kakao.maps.LatLng(lat, lng);
         const map = new window.kakao.maps.Map(mapRef.current, {
           center: position,
-          level: 4,
+          level: 2,
           draggable: false,
           scrollwheel: false,
           disableDoubleClickZoom: true,
@@ -141,7 +141,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
 
         new window.kakao.maps.Circle({
           center: position,
-          radius: 150,
+          radius: 30,
           strokeWeight: 2,
           strokeColor: "#1B3A5C",
           strokeOpacity: 0.6,
