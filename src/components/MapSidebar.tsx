@@ -51,6 +51,7 @@ import { shareMultipleToKakao, sharePropertyToKakao, AgencyInfo } from "@/lib/ka
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
 import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
@@ -773,7 +774,9 @@ const ContactIcon = forwardRef<SVGSVGElement, { type: string; active?: boolean }
 ContactIcon.displayName = "ContactIcon";
 
 const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number, number2 }, ref) => {
+  const isGuest = useIsGuest();
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
+  if (isGuest) number = undefined as any;
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
@@ -946,6 +949,7 @@ interface MemoNotepadProps {
 }
 const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
   ({ propertyDbId, propId, memoKey, icon, label, initialText, userId, isAdmin }, ref) => {
+    const isGuest = useIsGuest();
     const [open, setOpen] = useState(false);
     const [myText, setMyText] = useState("");
     const [otherMemos, setOtherMemos] = useState<Array<{ user_id: string; content: string; name?: string }>>([]);
@@ -1004,6 +1008,8 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
     const fallbackText = !isDbProp ? (localStorage.getItem(storageKey) ?? initialText) : "";
 
     const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
+
+    if (isGuest) return null;
 
     return (
       <div ref={ref} className="relative inline-flex">
@@ -2369,8 +2375,10 @@ interface ContactRevealBtnProps {
   borderStyle: React.CSSProperties;
 }
 const ContactRevealBtn = ({ propId, label, shortLabel, number, colorStyle, borderStyle }: ContactRevealBtnProps) => {
+  const isGuest = useIsGuest();
   const [revealed, setRevealed] = useState(() => hasRevealedToday(propId, label));
   const [showNum, setShowNum] = useState(false);
+  if (isGuest) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -2519,6 +2527,7 @@ interface AddressToggleCardProps {
 const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean }>(
   ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
     const [checking, setChecking] = useState(false);
+    const isGuest = useIsGuest();
     const isChecked = !!chkDate;
 
     const handleCheckToggle = async (e: React.MouseEvent) => {
@@ -3180,24 +3189,26 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}
+              onClick={(e) => { e.stopPropagation(); if (!isGuest) setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
               style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
-              title="클릭하면 전체 주소 표시"
+              title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
             >
-              {showFullAddr ? prop.address : shortAddress(prop.address)}
+              {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
             </button>
-            {/* 로드뷰 버튼 */}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); handleRoadviewOpen(e); }}
-              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
-              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
-            >
-              로드뷰
-            </button>
+            {/* 로드뷰 버튼 (게스트 숨김) */}
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleRoadviewOpen(e); }}
+                className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
+                style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+              >
+                로드뷰
+              </button>
+            )}
             {/* 도로명 버튼 (탭 시 도로명주소 모달 표시) */}
-            {prop.roadAddress && (
+            {!isGuest && prop.roadAddress && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); showRoadAddressModal(prop.roadAddress!); }}
@@ -3244,7 +3255,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
                 {prop.roomType && prop.roomType.includes(",") && Array.from(new Set(prop.roomType.split(",").map((s) => s.trim()).filter((s) => s && s !== prop.type && s !== "오픈형" && s !== "분리형"))).map((s) => (<span key={s} className="opacity-90">·{s}</span>))}
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
-                {prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
+                {!isGuest && prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
               </span>
             )}
             {/* 가격 */}
@@ -3461,25 +3472,27 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setShowFullAddr((v) => !v);
+              if (!isGuest) setShowFullAddr((v) => !v);
             }}
             className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
             style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
-            title="클릭하면 전체 주소 표시"
+            title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
           >
-            {showFullAddr ? prop.address : shortAddress(prop.address)}
+            {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
-          {/* 로드뷰 버튼 */}
-          <button
-            type="button"
-            onClick={handleRoadviewOpen}
-            className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
-            style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
-          >
-            로드뷰
-          </button>
+          {/* 로드뷰 버튼 (게스트 숨김) */}
+          {!isGuest && (
+            <button
+              type="button"
+              onClick={handleRoadviewOpen}
+              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
+              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+            >
+              로드뷰
+            </button>
+          )}
           {/* 도로명 버튼 (hover 시 도로명주소 표시) */}
-          {prop.roadAddress && (
+          {!isGuest && prop.roadAddress && (
             <span
               className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap relative group/road cursor-default"
               style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
@@ -3595,7 +3608,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
                 return m ? <span className="opacity-80">{m[1].trim()}</span> : null;
               })()}
-              {prop.unitNumber && <span>{prop.unitNumber}</span>}
+              {!isGuest && prop.unitNumber && <span>{prop.unitNumber}</span>}
             </span>
           )}
           {/* 카카오톡 공유 아이콘 */}
@@ -4096,6 +4109,8 @@ AddressToggleCard.displayName = "AddressToggleCard";
 
 /* ── LandlordPhoneRow ── */
 const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
+  const isGuest = useIsGuest();
+  if (isGuest) return null;
   const colorMap: Record<string, string> = {
     소유주: "hsl(var(--primary))",
     관리인: "hsl(217 91% 60%)",
@@ -4169,6 +4184,7 @@ const MapSidebar = ({
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
+  const isGuest = useIsGuest();
   const isMobile = useIsMobile();
   // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
   // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
@@ -4639,7 +4655,7 @@ const MapSidebar = ({
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
       )}
       {/* 모바일 연락처 모달 — 입력된 연락처만 노출 */}
-      {mobileContactsProp && ReactDOM.createPortal(
+      {mobileContactsProp && !isGuest && ReactDOM.createPortal(
         <div
           className="fixed inset-0 z-[10000] bg-black/60 flex items-end md:items-center justify-center p-4"
           onClick={() => setMobileContactsProp(null)}
@@ -5396,36 +5412,42 @@ const MapSidebar = ({
                              )}
                             <div className="flex items-center justify-between gap-2 flex-wrap">
                               <div className="flex items-center gap-1 flex-wrap">
-                                {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
-                                {(owner || owner2) && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 소유주
-                                  </button>
-                                )}
-                                {manager && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 관리인
-                                  </button>
-                                )}
-                                {tenant && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                    className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                    style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
-                                  >
-                                    <Phone className="w-3 h-3" /> 세입자
-                                  </button>
+                                {isGuest ? (
+                                  <span className="text-muted-foreground">로그인 후 연락처 확인</span>
+                                ) : (
+                                  <>
+                                    {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
+                                    {(owner || owner2) && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 소유주
+                                      </button>
+                                    )}
+                                    {manager && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 관리인
+                                      </button>
+                                    )}
+                                    {tenant && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
+                                      >
+                                        <Phone className="w-3 h-3" /> 세입자
+                                      </button>
+                                    )}
+                                  </>
                                 )}
                               </div>
                               {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
@@ -5438,15 +5460,15 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
-                            {/* 2행: 현관비번/방비번 — 노란 박스 | 우측: 방향 */}
-                            {((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
+                            {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
+                            {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
-                                {(prop.buildingPassword || prop.password) && (
+                                {!isGuest && (prop.buildingPassword || prop.password) && (
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
                                   </span>
                                 )}
-                                {prop.roomPassword && (
+                                {!isGuest && prop.roomPassword && (
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
                                   </span>
