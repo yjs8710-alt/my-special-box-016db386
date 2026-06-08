@@ -70,38 +70,43 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
   const digits = String(count).length;
   const ratio = digits >= 4 ? 0.28 : digits === 3 ? 0.34 : digits === 2 ? 0.42 : 0.48;
   const fontSize = Math.max(11, Math.round(size * ratio));
+  const hitPad = Math.max(10, Math.round(size * 0.18));
   // 체크 상태일 때 hue-rotate 로 색상만 변경 (크기/배지 변경 없음)
   const imgFilter = isSelected
     ? "hue-rotate(140deg) saturate(1.6) brightness(1.05)"
     : "none";
   return `
-    <div style="
+    <div data-pin-hitbox="true" style="
       position:relative;
-      width:${size}px;height:${size}px;
+      width:${size + hitPad * 2}px;height:${size + hitPad * 2}px;
+      margin:-${hitPad}px;
+      padding:${hitPad}px;
       transform-origin:center center;
       cursor:pointer;
       pointer-events:auto;
-      background:transparent;
+      background:rgba(255,255,255,0.001);
       filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
     ">
-      <img src="${MAP_PIN_URL}" alt="" draggable="false"
-        style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
-      <div style="
-        position:absolute;inset:0;
-        display:flex;align-items:center;justify-content:center;
-        color:#fff;font-weight:800;
-        font-size:${fontSize}px;line-height:1;
-        text-shadow:0 1px 2px rgba(0,0,0,0.55);
-        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        pointer-events:none;
-        background:transparent;
-        transform:translateY(-0.12em);
-        z-index:1;
-      ">${count}</div>
+      <div style="position:relative;width:${size}px;height:${size}px;pointer-events:auto;">
+        <img src="${MAP_PIN_URL}" alt="" draggable="false"
+          style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
+        <div style="
+          position:absolute;inset:0;
+          display:flex;align-items:center;justify-content:center;
+          color:#fff;font-weight:800;
+          font-size:${fontSize}px;line-height:1;
+          text-shadow:0 1px 2px rgba(0,0,0,0.55);
+          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+          pointer-events:auto;
+          background:transparent;
+          transform:translateY(-0.12em);
+          z-index:1;
+        ">${count}</div>
+      </div>
       <div style="
         position:absolute;inset:0;
         pointer-events:auto;
-        background:transparent;
+        background:rgba(255,255,255,0.001);
         z-index:3;
         cursor:pointer;
       "></div>
