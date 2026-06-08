@@ -5,7 +5,7 @@ import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.pn
 import { useState } from "react";
 import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
 import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
-import { InquiryModal, PartnerAgencyModal, GuestShareModal } from "@/components/guest/GuestModals";
+import { InquiryModal, PartnerAgencyModal } from "@/components/guest/GuestModals";
 
 interface PropertyCardProps {
   image: string;
@@ -67,7 +67,6 @@ const PropertyCard = ({
   const isGuest = useIsGuest();
   const [showInquiry, setShowInquiry] = useState(false);
   const [showPartner, setShowPartner] = useState(false);
-  const [showShare, setShowShare] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
@@ -79,12 +78,12 @@ const PropertyCard = ({
   // 게스트에게는 동까지만 보여주기
   const displayAddress = isGuest ? addressToDong(address) : address;
 
+  // 매물번호: 숫자만 표기 (앞 0 제거)
+  const regNoNumeric = regNo ? String(parseInt(regNo.replace(/[^0-9]/g, ""), 10) || regNo) : "";
+
   return (
     <>
-    <div
-      className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
-      onClick={isGuest ? (e) => { e.stopPropagation(); setShowShare(true); } : undefined}
-    >
+    <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         {displayImage ? (
@@ -196,10 +195,10 @@ const PropertyCard = ({
           </div>
         )}
         {/* 매물번호 (게스트/일반회원만) */}
-        {isGuest && regNo && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-            <span className="bg-primary/90 text-primary-foreground text-[10px] font-extrabold px-2.5 py-0.5 rounded-full backdrop-blur-sm tracking-wider shadow">
-              NO.{regNo}
+        {isGuest && regNoNumeric && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30">
+            <span className="bg-primary text-primary-foreground text-xs font-extrabold px-3 py-1 rounded-full backdrop-blur-sm tracking-wider shadow-lg">
+              NO.{regNoNumeric}
             </span>
           </div>
         )}
@@ -207,7 +206,18 @@ const PropertyCard = ({
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">{title}</h3>
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h3 className="font-semibold text-foreground text-sm line-clamp-1 flex-1">{title}</h3>
+          {/* 모바일: 1열 우측 끝 문의하기 */}
+          {isGuest && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
+              className="md:hidden shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm"
+            >
+              <MessageCircle className="w-3 h-3" /> 문의하기
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-1 mb-3">
           <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
           <span className="text-xs text-muted-foreground line-clamp-1">{displayAddress}</span>
@@ -291,7 +301,7 @@ const PropertyCard = ({
             {isGuest && (
               <button
                 onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
               >
                 <MessageCircle className="w-3 h-3" /> 문의하기
               </button>
@@ -322,9 +332,9 @@ const PropertyCard = ({
         <InquiryModal
           open={showInquiry}
           onClose={() => setShowInquiry(false)}
-          propertyTitle={regNo ? `[NO.${regNo}] ${title}` : title}
+          propertyTitle={regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title}
           propertyDbId={dbId}
-          propertyRegNo={regNo}
+          propertyRegNo={regNoNumeric || regNo}
           agentUserId={registeredBy}
           onOpenPartner={() => setShowPartner(true)}
         />
@@ -332,18 +342,6 @@ const PropertyCard = ({
           open={showPartner}
           onClose={() => setShowPartner(false)}
           onChat={() => setShowInquiry(true)}
-        />
-        <GuestShareModal
-          open={showShare}
-          onClose={() => setShowShare(false)}
-          title={title}
-          address={displayAddress}
-          image={displayImage}
-          deposit={deposit}
-          monthly={monthly}
-          area={area}
-          floor={floor}
-          type={type}
         />
       </>
     )}
