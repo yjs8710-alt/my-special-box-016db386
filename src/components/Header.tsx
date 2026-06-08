@@ -82,6 +82,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   };
 
   const isActive = (path: string) => location.pathname === path;
+  const isHome = location.pathname === "/";
 
   return (
     <header className={`sticky top-0 flex-shrink-0 ${menuOpen ? "z-[1200]" : "z-[950]"}`} style={{ background: "hsl(var(--header-bg))" }}>
@@ -116,7 +117,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 데스크톱 매물등록 버튼은 각 페이지의 2번째 줄 우측 끝으로 이동됨 */}
 
-            {/* 데스크톱 Nav */}
+            {/* 데스크톱 Nav (홈에서는 숨김) */}
+            {!isHome && (
             <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-hidden">
               {NAV_ITEMS.map((item) => (
                 <button
@@ -145,8 +147,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 커뮤니티
               </button>
             </nav>
+            )}
 
-            {/* 우측 액션 */}
+            {/* 우측 액션 (홈에서는 숨김) */}
+            {!isHome && (
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               <button
                 onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
@@ -210,8 +214,10 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               )}
 
             </div>
+            )}
 
-            {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) */}
+            {/* 모바일: 알림 + 내정보 + 햄버거(우측끝) — 홈에서는 숨김 */}
+            {!isHome && (
             <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
                 onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
@@ -238,6 +244,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>
