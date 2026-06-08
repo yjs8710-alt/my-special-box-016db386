@@ -5,6 +5,10 @@ import { RadiusCircle, haversineMeters, formatRadius } from "@/lib/geoDistance";
 import mapPinAsset from "@/assets/map-pin.png.asset.json";
 
 const MAP_PIN_URL = mapPinAsset.url;
+const MOBILE_QUERY = "(max-width: 767px)";
+const TAP_MOVE_THRESHOLD_PX = 10;
+const TAP_MAX_DURATION_MS = 420;
+const GESTURE_SETTLE_MS = 320;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -41,7 +45,16 @@ const TYPE_ACCENT: Record<string, string> = {
 };
 
 /** 줌 레벨 → 핀 크기(px) 매핑 */
-function getPinSize(zoomLevel: number): number {
+function getPinSize(zoomLevel: number, isMobile = false): number {
+  if (isMobile) {
+    if (zoomLevel <= 2) return 74;
+    if (zoomLevel <= 3) return 66;
+    if (zoomLevel <= 4) return 58;
+    if (zoomLevel <= 5) return 50;
+    if (zoomLevel <= 6) return 44;
+    if (zoomLevel <= 7) return 40;
+    return 36;
+  }
   if (zoomLevel <= 2) return 100;
   if (zoomLevel <= 3) return 90;
   if (zoomLevel <= 4) return 80;
@@ -65,10 +78,9 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
     <div style="
       position:relative;
       width:${size}px;height:${size}px;
-      transform:translateZ(0);
       transform-origin:center center;
-      cursor:pointer;will-change:transform;
-      filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.4))" : "drop-shadow(0 2px 3px rgba(0,0,0,0.35))"};
+        cursor:pointer;
+        filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
     ">
       <img src="${MAP_PIN_URL}" alt="" draggable="false"
         style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
@@ -86,13 +98,13 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
   `;
 }
 
-function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number) {
-  return createPinImageHtml(1, getPinSize(zoomLevel), isSelected);
+function createPinHtml(property: MapProperty, isSelected: boolean, zoomLevel: number, isMobile = false) {
+  return createPinImageHtml(1, getPinSize(zoomLevel, isMobile), isSelected);
 }
 
 /** 클러스터: 같은 원형 핀에 숫자만 크게 */
-function createClusterHtml(count: number, zoomLevel: number, isSelected = false) {
-  const base = getPinSize(zoomLevel);
+function createClusterHtml(count: number, zoomLevel: number, isSelected = false, isMobile = false) {
+  const base = getPinSize(zoomLevel, isMobile);
   const size = count >= 100 ? Math.round(base * 1.35) : count >= 10 ? Math.round(base * 1.2) : Math.round(base * 1.05);
   return createPinImageHtml(count, size, isSelected);
 }
