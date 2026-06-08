@@ -61,6 +61,10 @@ const PropertyCard = ({
     return vacate.getTime() <= today.getTime();
   })();
   const [liked, setLiked] = useState(false);
+  const isGuest = useIsGuest();
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [showPartner, setShowPartner] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
@@ -69,8 +73,15 @@ const PropertyCard = ({
   const displayImage = hasOwnImage ? image : referenceImage || "";
   const isRef = !hasOwnImage && !!referenceImage;
 
+  // 게스트에게는 동까지만 보여주기
+  const displayAddress = isGuest ? addressToDong(address) : address;
+
   return (
-    <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+    <>
+    <div
+      className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
+      onClick={isGuest ? (e) => { e.stopPropagation(); setShowShare(true); } : undefined}
+    >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         {displayImage ? (
