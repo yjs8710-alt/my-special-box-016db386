@@ -322,7 +322,10 @@ const PropertyCard = ({
         <InquiryModal
           open={showInquiry}
           onClose={() => setShowInquiry(false)}
-          propertyTitle={title}
+          propertyTitle={regNo ? `[NO.${regNo}] ${title}` : title}
+          propertyDbId={dbId}
+          propertyRegNo={regNo}
+          agentUserId={registeredBy}
           onOpenPartner={() => setShowPartner(true)}
         />
         <PartnerAgencyModal
