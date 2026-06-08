@@ -200,6 +200,8 @@ export default function PublicProperty() {
   const [building, setBuilding] = useState<BuildingSummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
+  const [fallbackImages, setFallbackImages] = useState<string[]>([]);
+  const [fallbackFromOtherUnit, setFallbackFromOtherUnit] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -251,6 +253,32 @@ export default function PublicProperty() {
         const approved = agentList.find((a: any) => a.status === "approved");
         setAgent((approved || agentList[0] || null) as AgentData | null);
         setBuilding(buildingResult.data ?? null);
+
+        // 사진이 없을 경우 같은 주소의 다른 호실 사진 가져오기
+        const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
+        if (!hasImages && data.address) {
+          const { data: siblings } = await supabase
+            .from("properties")
+            .select("id,images")
+            .eq("address", data.address)
+            .eq("status", "active")
+            .neq("id", data.id)
+            .limit(20);
+          if (isMounted && siblings) {
+            const otherImgs: string[] = [];
+            for (const s of siblings) {
+              const arr = Array.isArray((s as any).images) ? (s as any).images.filter(Boolean) : [];
+              if (arr.length > 0) {
+                otherImgs.push(...arr);
+                if (otherImgs.length >= 10) break;
+              }
+            }
+            if (otherImgs.length > 0) {
+              setFallbackImages(otherImgs.slice(0, 10));
+              setFallbackFromOtherUnit(true);
+            }
+          }
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -281,7 +309,9 @@ export default function PublicProperty() {
     );
   }
 
-  const imgs = (property.images || []).filter(Boolean);
+  const ownImgs = (property.images || []).filter(Boolean);
+  const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
+  const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
   const safeAddress = sanitizeAddress(property.address);
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
@@ -309,6 +339,11 @@ export default function PublicProperty() {
                 style={{ opacity: i === imgIdx ? 1 : 0 }}
               />
             ))}
+            {showingOtherUnit && (
+              <div className="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                다른 호실 사진
+              </div>
+            )}
             {imgs.length > 1 && (
               <>
                 <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
