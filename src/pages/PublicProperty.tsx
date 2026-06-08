@@ -436,12 +436,6 @@ export default function PublicProperty() {
                 <p className="text-xs font-bold text-primary">건축물대장 정보</p>
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
-                {building.building_name && (
-                  <>
-                    <span className="text-muted-foreground">건물명</span>
-                    <span className="font-bold text-foreground">{building.building_name}</span>
-                  </>
-                )}
                 {building.main_purpose && (
                   <>
                     <span className="text-muted-foreground">주용도</span>
