@@ -1567,6 +1567,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [lightboxUnitIdx, setLightboxUnitIdx] = useState<number | null>(null);
   const [activeModal, setActiveModal] = useState<"error" | "deal" | "proposal" | null>(null);
   const { user: authUser } = useAuth();
+  const isGuest = useIsGuest();
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
   // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
   const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
