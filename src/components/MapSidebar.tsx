@@ -5244,6 +5244,14 @@ const MapSidebar = ({
                                 </svg>
                               )}
                             </button>
+                            {/* 게스트/일반회원: 매물번호 NO.### */}
+                            {isGuest && prop.regNo && (
+                              <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
+                                <span className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-full tracking-wider" style={{ background: "hsl(var(--primary))" }}>
+                                  NO.{String(parseInt(prop.regNo.replace(/[^0-9]/g, ""), 10) || prop.regNo)}
+                                </span>
+                              </div>
+                            )}
                             {(() => {
                               const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               const ref = !hasOwnImages ? findRefImage(prop, displayProperties) : null;
