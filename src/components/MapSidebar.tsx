@@ -1009,6 +1009,8 @@ const MemoNotepad = forwardRef<HTMLDivElement, MemoNotepadProps>(
 
     const hasMemoContent = !!(initialText?.trim()) || !!(myText?.trim());
 
+    if (isGuest) return null;
+
     return (
       <div ref={ref} className="relative inline-flex">
         <button
