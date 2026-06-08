@@ -3252,7 +3252,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
                 {prop.roomType && prop.roomType.includes(",") && Array.from(new Set(prop.roomType.split(",").map((s) => s.trim()).filter((s) => s && s !== prop.type && s !== "오픈형" && s !== "분리형"))).map((s) => (<span key={s} className="opacity-90">·{s}</span>))}
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
-                {prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
+                {!isGuest && prop.unitNumber && <span>{buildingDong ? `${buildingDong}-${prop.unitNumber.replace(/호$/, "")}` : prop.unitNumber}</span>}
               </span>
             )}
             {/* 가격 */}
@@ -3605,7 +3605,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 const m = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
                 return m ? <span className="opacity-80">{m[1].trim()}</span> : null;
               })()}
-              {prop.unitNumber && <span>{prop.unitNumber}</span>}
+              {!isGuest && prop.unitNumber && <span>{prop.unitNumber}</span>}
             </span>
           )}
           {/* 카카오톡 공유 아이콘 */}
