@@ -12,14 +12,18 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 import NotificationBell from "@/components/NotificationBell";
 
-const NAV_ITEMS = [
+const NAV_ITEMS_BASE = [
   { label: "주거·임대", path: "/residential", icon: Building },
   { label: "상업·임대·매매", path: "/non-residential", icon: Building },
   { label: "집합건물·건물매매", path: "/collective-sale", icon: Building },
   { label: "토지", path: "/land", icon: Building },
+];
+const NAV_ITEMS_AUTH = [
+  ...NAV_ITEMS_BASE,
   { label: "내 매물 관리", path: "/my-properties", icon: ClipboardList },
 ];
 
