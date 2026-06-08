@@ -1705,7 +1705,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             <p className="text-white font-bold text-[15px] line-clamp-1 drop-shadow-sm">{property.title}</p>
             <div className="flex items-center gap-1 mt-0.5">
               <MapPin className="w-3 h-3 text-white/70 flex-shrink-0" />
-              <p className="text-white/80 text-xs line-clamp-1">{property.address}</p>
+              <p className="text-white/80 text-xs line-clamp-1">{isGuest ? addressToDong(property.address) : property.address}</p>
             </div>
           </div>
         </div>
@@ -1930,7 +1930,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           </div>
 
           {/* ── 비밀번호 ── */}
-          {(property.buildingPassword || property.roomPassword || property.password) && (
+          {!isGuest && (property.buildingPassword || property.roomPassword || property.password) && (
             <>
               <div className="h-2 bg-muted/50 my-2" />
               <div className="px-4 pb-3 flex flex-col gap-2">
@@ -1999,7 +1999,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 <p className="text-sm font-bold text-foreground">{property.agentName}</p>
                 <p className="text-xs text-muted-foreground">공인중개사</p>
               </div>
-              {property.contact && (
+              {!isGuest && property.contact && (
                 <a
                   href={`tel:${property.contact}`}
                   className="flex items-center gap-1.5 text-xs font-bold text-accent hover:underline"
@@ -2050,13 +2050,19 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
 
         {/* ── CTA ── */}
         <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-white grid grid-cols-2 gap-2">
-          <a
-            href={`tel:${property.contactOwner ?? property.contact}`}
-            className="flex items-center justify-center gap-1.5 h-11 rounded-lg border-2 border-primary text-primary text-sm font-bold hover:bg-primary hover:text-white transition-colors"
-          >
-            <Phone className="w-4 h-4" />
-            전화 문의
-          </a>
+          {isGuest ? (
+            <div className="flex items-center justify-center h-11 rounded-lg border-2 border-dashed border-border text-xs text-muted-foreground text-center px-2">
+              로그인 후 연락처 확인 가능
+            </div>
+          ) : (
+            <a
+              href={`tel:${property.contactOwner ?? property.contact}`}
+              className="flex items-center justify-center gap-1.5 h-11 rounded-lg border-2 border-primary text-primary text-sm font-bold hover:bg-primary hover:text-white transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+              전화 문의
+            </a>
+          )}
           <button
             onClick={() => setActiveModal("proposal")}
             className="flex items-center justify-center gap-1.5 h-11 rounded-lg text-white text-sm font-bold transition-colors"
