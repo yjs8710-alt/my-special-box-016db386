@@ -309,7 +309,9 @@ export default function PublicProperty() {
     );
   }
 
-  const imgs = (property.images || []).filter(Boolean);
+  const ownImgs = (property.images || []).filter(Boolean);
+  const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
+  const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
   const safeAddress = sanitizeAddress(property.address);
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
@@ -337,6 +339,11 @@ export default function PublicProperty() {
                 style={{ opacity: i === imgIdx ? 1 : 0 }}
               />
             ))}
+            {showingOtherUnit && (
+              <div className="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                다른 호실 사진
+              </div>
+            )}
             {imgs.length > 1 && (
               <>
                 <button onClick={prev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
