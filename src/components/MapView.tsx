@@ -131,29 +131,73 @@ interface Cluster {
   items: MapProperty[];
 }
 
-/** 줌 레벨 기반 격자 클러스터링. 모든 줌에서 시각적으로 겹치는 핀들은 묶어서 표시. */
-function buildClusters(props: MapProperty[], zoom: number, _selSet: Set<number>): { clusters: Cluster[]; singles: MapProperty[] } {
-  const singles: MapProperty[] = [];
+/** 픽셀 기반 그리디 클러스터링 — 시각적으로 겹치는 핀은 모두 묶어서 표시 */
+function buildClusters(
+  props: MapProperty[],
+  zoom: number,
+  _selSet: Set<number>,
+  map?: any,
+  isMobile = false,
+): { clusters: Cluster[]; singles: MapProperty[] } {
   const valid = props.filter(p => p.lat && p.lng);
-  // 핀 직경(~40px) 기준 셀 크기. 줌이 낮을수록(가까울수록) 셀도 작게.
-  // kakao 줌 1≈0.00008°, 줌 3≈0.00032°, 줌 5≈0.00128° → 핀 겹침 방지
-  const cellDeg = 0.00008 * Math.pow(2, Math.max(0, zoom - 1));
-  const buckets = new Map<string, MapProperty[]>();
-  valid.forEach(p => {
-    const key = `${Math.floor(p.lat / cellDeg)}|${Math.floor(p.lng / cellDeg)}`;
-    const arr = buckets.get(key);
-    if (arr) arr.push(p); else buckets.set(key, [p]);
-  });
+  const pinPx = getPinSize(zoom, isMobile);
+  // 핀 직경 + 약간의 여백을 클러스터 반경으로 사용 → 절대 겹치지 않음
+  const radiusPx = pinPx * 1.05;
+
+  // 픽셀 좌표 계산
+  const proj = map?.getProjection?.();
+  type Pt = { p: MapProperty; x: number; y: number };
+  const pts: Pt[] = [];
+  if (proj?.pointFromCoords) {
+    valid.forEach(p => {
+      try {
+        const pt = proj.pointFromCoords(new window.kakao.maps.LatLng(p.lat, p.lng));
+        pts.push({ p, x: pt.x, y: pt.y });
+      } catch (_) {}
+    });
+  } else {
+    // 폴백: 위경도 → 근사 픽셀 (kakao 줌 z 에서 1px ≈ 2^(z-1) * 0.00008°)
+    const degPerPx = 0.00008 * Math.pow(2, Math.max(0, zoom - 1));
+    valid.forEach(p => {
+      pts.push({ p, x: p.lng / degPerPx, y: -p.lat / degPerPx });
+    });
+  }
+
+  // 우선순위: 선택된 핀이 클러스터 중심이 되도록 앞으로
+  pts.sort((a, b) => (_selSet.has(b.p.id) ? 1 : 0) - (_selSet.has(a.p.id) ? 1 : 0));
+
+  const singles: MapProperty[] = [];
   const clusters: Cluster[] = [];
-  buckets.forEach((items, key) => {
-    if (items.length === 1) {
-      singles.push(items[0]);
-      return;
+  const used = new Array(pts.length).fill(false);
+  const r2 = radiusPx * radiusPx;
+
+  for (let i = 0; i < pts.length; i++) {
+    if (used[i]) continue;
+    used[i] = true;
+    const group: Pt[] = [pts[i]];
+    for (let j = i + 1; j < pts.length; j++) {
+      if (used[j]) continue;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      if (dx * dx + dy * dy <= r2) {
+        used[j] = true;
+        group.push(pts[j]);
+      }
     }
-    let sLat = 0, sLng = 0;
-    items.forEach(p => { sLat += p.lat; sLng += p.lng; });
-    clusters.push({ key, lat: sLat / items.length, lng: sLng / items.length, items });
-  });
+    if (group.length === 1) {
+      singles.push(group[0].p);
+    } else {
+      let sLat = 0, sLng = 0;
+      group.forEach(g => { sLat += g.p.lat; sLng += g.p.lng; });
+      const ids = group.map(g => g.p.id).sort((a, b) => a - b).join(",");
+      clusters.push({
+        key: `g:${ids}`,
+        lat: sLat / group.length,
+        lng: sLng / group.length,
+        items: group.map(g => g.p),
+      });
+    }
+  }
   return { clusters, singles };
 }
 
@@ -361,7 +405,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
       } catch (_) {}
 
-      const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
+      const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
 
       const handlePinClick = (event: Event, prop: MapProperty) => {
         if (isMobile && isGestureBlocked()) return;
