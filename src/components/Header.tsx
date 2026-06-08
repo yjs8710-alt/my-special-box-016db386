@@ -63,6 +63,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
+  const isGuest = useIsGuest();
+  const NAV_ITEMS = isGuest ? NAV_ITEMS_BASE : NAV_ITEMS_AUTH;
 
   const openRegister = () => {
     window.dispatchEvent(new Event("close-map-filter"));
