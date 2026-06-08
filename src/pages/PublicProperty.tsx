@@ -261,22 +261,25 @@ export default function PublicProperty() {
         if (!hasImages && data.address) {
           const { data: siblings } = await supabase
             .from("properties")
-            .select("id,images")
+            .select("id,unit_number,floor,room_type,images")
             .eq("address", data.address)
             .eq("status", "active")
             .neq("id", data.id)
-            .limit(20);
+            .limit(30);
           if (isMounted && siblings) {
-            const otherImgs: string[] = [];
-            for (const s of siblings) {
-              const arr = Array.isArray((s as any).images) ? (s as any).images.filter(Boolean) : [];
-              if (arr.length > 0) {
-                otherImgs.push(...arr);
-                if (otherImgs.length >= 10) break;
-              }
-            }
-            if (otherImgs.length > 0) {
-              setFallbackImages(otherImgs.slice(0, 10));
+            const units = siblings
+              .map((s: any) => ({
+                id: s.id as string,
+                unit_number: s.unit_number ?? null,
+                floor: s.floor ?? null,
+                room_type: s.room_type ?? null,
+                images: (Array.isArray(s.images) ? s.images : []).filter(Boolean),
+              }))
+              .filter((u) => u.images.length > 0);
+            if (units.length > 0) {
+              setOtherUnits(units);
+              setSelectedUnitId(units[0].id);
+              setFallbackImages(units[0].images);
               setFallbackFromOtherUnit(true);
             }
           }
