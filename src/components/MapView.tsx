@@ -404,6 +404,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
         content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
         let startY = 0;
@@ -464,6 +465,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
         content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
         let startY = 0;
@@ -544,6 +546,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           content,
           map,
           yAnchor: 0.5,
+          xAnchor: 0.5,
           zIndex: isSelected ? 1000 : 0,
         });
         existing.set(key, overlay);
