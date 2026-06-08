@@ -217,7 +217,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   </button>
                   <button
                     className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all"
-                    style={{ background: "hsl(var(--accent))", color: "white" }}
+                    style={{ background: "hsl(var(--primary))", color: "white" }}
                     onClick={() => navigate("/signup")}
                   >
                     회원가입

@@ -22,6 +22,7 @@ import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { supabase } from "@/integrations/supabase/client";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 import AdminChatPanel from "@/components/AdminChatPanel";
+import AdminGuestInquiriesPanel from "@/components/AdminGuestInquiriesPanel";
 import VisitorStatsWidget from "@/components/VisitorStatsWidget";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -206,6 +207,7 @@ const NAV = [
   { key: "properties", label: "매물 관리",    icon: Building2 },
   { key: "contacts",   label: "청주 연락처",  icon: Phone },
   { key: "reports",    label: "신고/제안",    icon: AlertCircle },
+  { key: "inquiries",  label: "게스트 문의",  icon: MessageCircle },
   { key: "community",  label: "커뮤니티 관리", icon: MessageSquare },
   { key: "chat",       label: "채팅 문의",    icon: MessageCircle },
 ];
@@ -3542,6 +3544,9 @@ const AdminDashboard = () => {
               </div>
             </div>
           )}
+
+          {/* ── 게스트 문의 ── */}
+          {tab === "inquiries" && <AdminGuestInquiriesPanel />}
 
           {/* ── 채팅 문의 ── */}
           {tab === "chat" && adminUserId && (
