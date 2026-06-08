@@ -199,7 +199,7 @@ const PropertyCard = ({
         <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">{title}</h3>
         <div className="flex items-center gap-1 mb-3">
           <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-muted-foreground line-clamp-1">{address}</span>
+          <span className="text-xs text-muted-foreground line-clamp-1">{displayAddress}</span>
         </div>
 
         {/* Info Grid */}
