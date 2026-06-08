@@ -12,12 +12,37 @@ import ChatInquiryWidget from "./components/ChatInquiryWidget";
 import MobileBottomNav from "./components/MobileBottomNav";
 import { usePageViewTracker } from "./hooks/usePageViewTracker";
 import { useIsGuest } from "./hooks/useIsGuest";
+import { useState } from "react";
+import { InquiryModal } from "./components/guest/GuestModals";
 
 // 게스트(비로그인)는 채팅 위젯 숨김
 const AuthGatedChatInquiry = () => {
   const isGuest = useIsGuest();
   if (isGuest) return null;
   return <ChatInquiryWidget />;
+};
+
+// 게스트 문의 모달 — 어디서든 window 이벤트로 호출
+const GlobalGuestInquiry = () => {
+  const [state, setState] = useState<{ open: boolean; detail?: any }>({ open: false });
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {};
+      setState({ open: true, detail });
+    };
+    window.addEventListener("open-guest-inquiry", handler);
+    return () => window.removeEventListener("open-guest-inquiry", handler);
+  }, []);
+  return (
+    <InquiryModal
+      open={state.open}
+      onClose={() => setState({ open: false })}
+      propertyDbId={state.detail?.propertyDbId}
+      propertyRegNo={state.detail?.propertyRegNo}
+      agentUserId={state.detail?.agentUserId}
+      propertyTitle={state.detail?.propertyTitle}
+    />
+  );
 };
 
 // 첫 화면(Home)은 즉시 로딩, 나머지 라우트는 lazy 로딩으로 초기 번들 최소화
