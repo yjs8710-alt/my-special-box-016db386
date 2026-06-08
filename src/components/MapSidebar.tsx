@@ -5361,7 +5361,7 @@ const MapSidebar = ({
                       </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
-                      {selectedId === prop.id && isMobile && (() => {
+                      {expandedCardId === prop.id && isMobile && (() => {
                         const owner = prop.contactOwner?.trim();
                         const owner2 = prop.contactOwner2?.trim();
                         const manager = prop.contactManager?.trim();
