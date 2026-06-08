@@ -204,6 +204,7 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AuthGatedChatInquiry />
+          <GlobalGuestInquiry />
           <MobileBottomNav />
         </Suspense>
       </BrowserRouter>
