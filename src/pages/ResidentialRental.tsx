@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useCallback } from "react";
 import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { neonChipStyle } from "@/lib/neonChipStyle";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useIsGuest } from "@/hooks/useIsGuest";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
