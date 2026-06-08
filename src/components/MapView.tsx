@@ -163,8 +163,8 @@ function buildClusters(
     });
   }
 
-  // 우선순위: 선택된 핀이 클러스터 중심이 되도록 앞으로
-  pts.sort((a, b) => (_selSet.has(b.p.id) ? 1 : 0) - (_selSet.has(a.p.id) ? 1 : 0));
+  // 클러스터 결과가 선택 상태와 무관하게 안정적으로 유지되도록 id 기준 정렬
+  pts.sort((a, b) => a.p.id - b.p.id);
 
   const singles: MapProperty[] = [];
   const clusters: Cluster[] = [];
