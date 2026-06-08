@@ -17,6 +17,7 @@ const LAND_SUBTYPES = ["전체"];
 
 const LandSearch = () => {
   const { ExitConfirmDialog } = useExitConfirm();
+  const isGuest = useIsGuest();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
