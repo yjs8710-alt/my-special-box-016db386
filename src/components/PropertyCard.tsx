@@ -309,17 +309,6 @@ const PropertyCard = ({
           </div>
         </div>
 
-        {/* 게스트/일반회원 협력업체 버튼 */}
-        {isGuest && (
-          <div className="mt-3 pt-3 border-t border-border">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
-              className="w-full flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
-            >
-              <Building2 className="w-3.5 h-3.5" /> 협력업체
-            </button>
-          </div>
-        )}
       </div>
     </div>
 
