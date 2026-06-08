@@ -483,6 +483,27 @@ export default function PublicProperty() {
             <KakaoMapPreview lat={property.lat} lng={property.lng} address={safeAddress} />
           )}
 
+          {/* 공유 중개사무소 (하단) */}
+          {agent && (
+            <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
+              <p className="text-xs font-bold text-primary mb-1">📞 공유 중개사무소</p>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                <span className="text-muted-foreground">사무소명</span>
+                <span className="font-bold text-foreground">{agent.agency_name}</span>
+                <span className="text-muted-foreground">대표자</span>
+                <span className="font-bold text-foreground">{agent.representative_name || agent.name}</span>
+                <span className="text-muted-foreground">주소</span>
+                <span className="text-foreground">{agent.agency_address}</span>
+                <span className="text-muted-foreground">대표번호</span>
+                <a href={`tel:${agent.agency_phone || ""}`} className="font-bold text-primary">{agent.agency_phone || "-"}</a>
+                <span className="text-muted-foreground">연락처</span>
+                <a href={`tel:${agent.phone}`} className="font-bold text-primary">{agent.phone}</a>
+                <span className="text-muted-foreground">개설등록번호</span>
+                <span className="text-foreground">{agent.license_number}</span>
+              </div>
+            </div>
+          )}
+
         </div>
 
       </div>
