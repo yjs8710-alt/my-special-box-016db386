@@ -202,6 +202,8 @@ export default function PublicProperty() {
   const [imgIdx, setImgIdx] = useState(0);
   const [fallbackImages, setFallbackImages] = useState<string[]>([]);
   const [fallbackFromOtherUnit, setFallbackFromOtherUnit] = useState(false);
+  const [otherUnits, setOtherUnits] = useState<{ id: string; unit_number: string | null; floor: string | null; room_type: string | null; images: string[] }[]>([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>("");
 
   useEffect(() => {
     if (!id) return;
@@ -259,22 +261,25 @@ export default function PublicProperty() {
         if (!hasImages && data.address) {
           const { data: siblings } = await supabase
             .from("properties")
-            .select("id,images")
+            .select("id,unit_number,floor,room_type,images")
             .eq("address", data.address)
             .eq("status", "active")
             .neq("id", data.id)
-            .limit(20);
+            .limit(30);
           if (isMounted && siblings) {
-            const otherImgs: string[] = [];
-            for (const s of siblings) {
-              const arr = Array.isArray((s as any).images) ? (s as any).images.filter(Boolean) : [];
-              if (arr.length > 0) {
-                otherImgs.push(...arr);
-                if (otherImgs.length >= 10) break;
-              }
-            }
-            if (otherImgs.length > 0) {
-              setFallbackImages(otherImgs.slice(0, 10));
+            const units = siblings
+              .map((s: any) => ({
+                id: s.id as string,
+                unit_number: s.unit_number ?? null,
+                floor: s.floor ?? null,
+                room_type: s.room_type ?? null,
+                images: (Array.isArray(s.images) ? s.images : []).filter(Boolean),
+              }))
+              .filter((u) => u.images.length > 0);
+            if (units.length > 0) {
+              setOtherUnits(units);
+              setSelectedUnitId(units[0].id);
+              setFallbackImages(units[0].images);
               setFallbackFromOtherUnit(true);
             }
           }
@@ -341,7 +346,11 @@ export default function PublicProperty() {
             ))}
             {showingOtherUnit && (
               <div className="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                다른 호실 사진
+                다른 호실 사진{(() => {
+                  const u = otherUnits.find((x) => x.id === selectedUnitId);
+                  const label = u?.unit_number ? `${u.unit_number}호` : u?.floor ? `${u.floor}층` : "";
+                  return label ? ` · ${label}` : "";
+                })()}
               </div>
             )}
             {imgs.length > 1 && (
@@ -361,6 +370,37 @@ export default function PublicProperty() {
         ) : (
           <div className="aspect-[4/3] bg-muted flex items-center justify-center">
             <Building2 className="w-16 h-16 text-muted-foreground/20" />
+          </div>
+        )}
+
+        {/* 다른 호실 선택 */}
+        {showingOtherUnit && otherUnits.length > 1 && (
+          <div className="px-5 pt-4">
+            <p className="text-xs font-bold text-foreground mb-2">다른 호실 사진 보기</p>
+            <div className="flex flex-wrap gap-1.5">
+              {otherUnits.map((u) => {
+                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}층` : "호실";
+                const active = u.id === selectedUnitId;
+                return (
+                  <button
+                    key={u.id}
+                    onClick={() => {
+                      setSelectedUnitId(u.id);
+                      setFallbackImages(u.images);
+                      setImgIdx(0);
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {label}
+                    {u.room_type ? <span className="ml-1 font-normal opacity-70">· {u.room_type}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
