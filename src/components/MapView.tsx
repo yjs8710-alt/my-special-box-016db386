@@ -694,6 +694,74 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           fireBounds(map);
         });
 
+        const getMarkerTarget = (event: Event) => {
+          const target = event.target as HTMLElement | null;
+          return target?.closest?.("[data-map-marker-ids]") as HTMLElement | null;
+        };
+
+        const runMarkerTargetClick = (event: Event, target: HTMLElement) => {
+          const ids = (target.dataset.mapMarkerIds ?? "")
+            .split(",")
+            .map((id) => Number(id))
+            .filter(Number.isFinite);
+          if (ids.length === 0) return;
+          stopMarkerEvent(event);
+          markerClickLockUntilRef.current = Date.now() + 450;
+          if (ids.length > 1 && propsRef.current.onClusterSelect) {
+            propsRef.current.onClusterSelect(ids);
+          } else {
+            propsRef.current.onSelect(ids[0]);
+          }
+        };
+
+        const handleDocumentClickCapture = (event: MouseEvent) => {
+          if (!containerRef.current?.contains(event.target as Node)) return;
+          if (Date.now() < markerClickLockUntilRef.current) {
+            stopMarkerEvent(event);
+            return;
+          }
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          if (isMobileRef.current && isGestureBlocked()) return;
+          runMarkerTargetClick(event, target);
+        };
+
+        const handleDocumentTouchStartCapture = (event: TouchEvent) => {
+          if (!containerRef.current?.contains(event.target as Node)) return;
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          const point = getTouchPoint(event);
+          if (!point) return;
+          markerTouchRef.current = { x: point.x, y: point.y, time: Date.now(), moved: false, touches: event.touches.length };
+        };
+
+        const handleDocumentTouchMoveCapture = (event: TouchEvent) => {
+          const touch = markerTouchRef.current;
+          if (!touch) return;
+          const point = getTouchPoint(event);
+          if (!point) return;
+          touch.touches = Math.max(touch.touches, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - touch.x, point.y - touch.y) > TAP_MOVE_THRESHOLD_PX) {
+            touch.moved = true;
+          }
+        };
+
+        const handleDocumentTouchEndCapture = (event: TouchEvent) => {
+          const touch = markerTouchRef.current;
+          markerTouchRef.current = null;
+          if (!touch || !containerRef.current?.contains(event.target as Node)) return;
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          const point = getTouchPoint(event);
+          const distance = point ? Math.hypot(point.x - touch.x, point.y - touch.y) : 999;
+          const isTap = touch.touches === 1 && !touch.moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - touch.time <= TAP_MAX_DURATION_MS && !isGestureBlocked();
+          if (isTap) runMarkerTargetClick(event, target);
+        };
+
+        document.addEventListener("click", handleDocumentClickCapture, true);
+        document.addEventListener("touchstart", handleDocumentTouchStartCapture, true);
+        document.addEventListener("touchmove", handleDocumentTouchMoveCapture, true);
+        document.addEventListener("touchend", handleDocumentTouchEndCapture, true);
 
 
 
@@ -755,6 +823,10 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     return () => {
       cancelled = true;
       mountedRef.current = false;
+      document.removeEventListener("click", handleDocumentClickCapture, true);
+      document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
+      document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
+      document.removeEventListener("touchend", handleDocumentTouchEndCapture, true);
       if (retryTimeoutRef.current) {
         window.clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
