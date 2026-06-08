@@ -333,9 +333,9 @@ const PropertyCard = ({
         <InquiryModal
           open={showInquiry}
           onClose={() => setShowInquiry(false)}
-          propertyTitle={regNo ? `[NO.${regNo}] ${title}` : title}
+          propertyTitle={regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title}
           propertyDbId={dbId}
-          propertyRegNo={regNo}
+          propertyRegNo={regNoNumeric || regNo}
           agentUserId={registeredBy}
           onOpenPartner={() => setShowPartner(true)}
         />
@@ -343,18 +343,6 @@ const PropertyCard = ({
           open={showPartner}
           onClose={() => setShowPartner(false)}
           onChat={() => setShowInquiry(true)}
-        />
-        <GuestShareModal
-          open={showShare}
-          onClose={() => setShowShare(false)}
-          title={title}
-          address={displayAddress}
-          image={displayImage}
-          deposit={deposit}
-          monthly={monthly}
-          area={area}
-          floor={floor}
-          type={type}
         />
       </>
     )}
