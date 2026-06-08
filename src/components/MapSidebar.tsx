@@ -5273,6 +5273,7 @@ const MapSidebar = ({
                                             return deduped.map((p) => ({
                                               unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
                                               roomType: p.roomType || undefined,
+                                              floor: p.floor || undefined,
                                               label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                               images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                               isReference: p.id !== prop.id,
