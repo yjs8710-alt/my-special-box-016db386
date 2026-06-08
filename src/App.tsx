@@ -170,7 +170,7 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ChatInquiryWidget />
+          <AuthGatedChatInquiry />
           <MobileBottomNav />
         </Suspense>
       </BrowserRouter>
