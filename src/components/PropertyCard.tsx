@@ -211,23 +211,22 @@ const PropertyCard = ({
           <h3 className={`font-semibold text-foreground text-sm line-clamp-1 flex-1 ${isGuest ? "hidden md:block" : ""}`}>{title}</h3>
           {isGuest && (
             <>
-              {/* 데스크탑: 확인일/등록일을 문의하기 좌측에 표기 */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
+                className="shrink-0 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+              >
+                회원업체
+              </button>
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
                 {checkedDate && <span>확인 {checkedDate}</span>}
                 {registeredDate && <span>등록 {registeredDate}</span>}
               </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-                className="shrink-0 ml-auto px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
-              >
-                매물문의
-              </button>
             </>
           )}
         </div>
         <div className="flex items-center gap-1 mb-3">
           <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-muted-foreground line-clamp-1">{displayAddress}</span>
+          <span className="text-xs text-black line-clamp-1">{displayAddress}</span>
         </div>
 
         {/* Info Grid */}
@@ -310,17 +309,6 @@ const PropertyCard = ({
           </div>
         </div>
 
-        {/* 게스트/일반회원 협력업체 버튼 */}
-        {isGuest && (
-          <div className="mt-3 pt-3 border-t border-border">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
-              className="w-full flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
-            >
-              <Building2 className="w-3.5 h-3.5" /> 협력업체
-            </button>
-          </div>
-        )}
       </div>
     </div>
 
