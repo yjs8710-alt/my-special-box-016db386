@@ -79,7 +79,6 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
     <div data-pin-hitbox="true" style="
       position:relative;
       width:${size + hitPad * 2}px;height:${size + hitPad * 2}px;
-      margin:-${hitPad}px;
       padding:${hitPad}px;
       transform-origin:center center;
       cursor:pointer;
@@ -219,6 +218,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   // 반경검색 관련 ref
   const circleOverlayRef = useRef<any>(null);
   const radiusLabelRef = useRef<any>(null);
+  const markerClickLockUntilRef = useRef(0);
+  const markerTouchRef = useRef<{ x: number; y: number; time: number; moved: boolean; touches: number } | null>(null);
   const draggingRef = useRef(false);
   const dragCenterRef = useRef<{ lat: number; lng: number } | null>(null);
   const radiusModeRef = useRef<boolean>(!!radiusMode);
@@ -368,6 +369,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       const stopMarkerEvent = (event: Event) => {
         event.preventDefault();
         event.stopPropagation();
+        (event as any).stopImmediatePropagation?.();
       };
       const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
       const getTouchPoint = (event: TouchEvent) => {
@@ -529,6 +531,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
               content.dataset.sig = sig;
             }
+            content.dataset.mapMarkerIds = String(prop.id);
             bindPinClick(content, prop);
           }
           try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
@@ -539,6 +542,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
+        content.dataset.mapMarkerIds = String(prop.id);
         bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -578,6 +582,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.dataset.sig = sig;
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
+            content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
             bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
@@ -589,6 +594,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
+        content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
