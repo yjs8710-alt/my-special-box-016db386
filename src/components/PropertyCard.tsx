@@ -67,7 +67,6 @@ const PropertyCard = ({
   const isGuest = useIsGuest();
   const [showInquiry, setShowInquiry] = useState(false);
   const [showPartner, setShowPartner] = useState(false);
-  const [showShare, setShowShare] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
