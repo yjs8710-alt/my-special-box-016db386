@@ -207,18 +207,22 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   </button>
                 </>
               ) : (
-                <button
-                  className="flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-lg transition-all"
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.7)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                  }}
-                  onClick={() => navigate("/admin/login")}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  관리자
-                </button>
+                <div className="flex items-center gap-1.5 mr-10">
+                  <button
+                    className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:bg-white/10"
+                    style={{ color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.2)" }}
+                    onClick={() => navigate("/login")}
+                  >
+                    로그인
+                  </button>
+                  <button
+                    className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all"
+                    style={{ background: "hsl(var(--accent))", color: "white" }}
+                    onClick={() => navigate("/signup")}
+                  >
+                    회원가입
+                  </button>
+                </div>
               )}
 
             </div>
