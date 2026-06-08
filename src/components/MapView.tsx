@@ -225,6 +225,17 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   const radiusModeRef = useRef<boolean>(!!radiusMode);
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
 
+  const stopMarkerEvent = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    (event as any).stopImmediatePropagation?.();
+  };
+  const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
+  const getTouchPoint = (event: TouchEvent) => {
+    const touch = event.changedTouches[0] ?? event.touches[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
+
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
   const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect });
   useEffect(() => {
@@ -365,17 +376,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       } catch (_) {}
 
       const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
-
-      const stopMarkerEvent = (event: Event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        (event as any).stopImmediatePropagation?.();
-      };
-      const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
-      const getTouchPoint = (event: TouchEvent) => {
-        const touch = event.changedTouches[0] ?? event.touches[0];
-        return touch ? { x: touch.clientX, y: touch.clientY } : null;
-      };
 
       const handlePinClick = (event: Event, prop: MapProperty) => {
         if (isMobile && isGestureBlocked()) return;
