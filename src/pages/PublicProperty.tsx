@@ -259,12 +259,9 @@ export default function PublicProperty() {
         // 사진이 없을 경우 같은 주소의 다른 호실 사진 가져오기
         const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
         if (!hasImages && data.address) {
-          const { data: siblings } = await supabase
-            .from("properties")
-            .select("id,unit_number,floor,room_type,images")
-            .eq("address", data.address)
-            .neq("id", data.id)
-            .limit(30);
+          const { data: siblings } = await (supabase as any).rpc("get_public_property_reference_images", {
+            _property_id: data.id,
+          });
           if (isMounted && siblings) {
             const units = siblings
               .map((s: any) => ({
