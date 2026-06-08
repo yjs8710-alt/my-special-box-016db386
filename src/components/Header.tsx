@@ -12,14 +12,18 @@ const PropertyRegisterModal = lazy(() => import("@/components/PropertyRegisterMo
 import AdminEditBar from "@/components/AdminEditBar";
 const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 import NotificationBell from "@/components/NotificationBell";
 
-const NAV_ITEMS = [
+const NAV_ITEMS_BASE = [
   { label: "주거·임대", path: "/residential", icon: Building },
   { label: "상업·임대·매매", path: "/non-residential", icon: Building },
   { label: "집합건물·건물매매", path: "/collective-sale", icon: Building },
   { label: "토지", path: "/land", icon: Building },
+];
+const NAV_ITEMS_AUTH = [
+  ...NAV_ITEMS_BASE,
   { label: "내 매물 관리", path: "/my-properties", icon: ClipboardList },
 ];
 
@@ -59,6 +63,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
+  const isGuest = useIsGuest();
+  const NAV_ITEMS = isGuest ? NAV_ITEMS_BASE : NAV_ITEMS_AUTH;
 
   const openRegister = () => {
     window.dispatchEvent(new Event("close-map-filter"));
@@ -152,16 +158,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 (홈에서는 숨김) */}
             {!isHome && (
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
-              <button
-                onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
-                style={{ color: "white" }}
-                aria-label="채팅 문의"
-              >
-                <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
-                채팅문의
-              </button>
-              <NotificationBell variant="desktop" />
+              {!isGuest && (
+                <button
+                  onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+                  className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
+                  style={{ color: "white" }}
+                  aria-label="채팅 문의"
+                >
+                  <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
+                  채팅문의
+                </button>
+              )}
+              {!isGuest && <NotificationBell variant="desktop" />}
 
               {isAuthorized ? (
                 <>
@@ -285,7 +293,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </button>
           )}
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
-            {location.pathname !== "/" && (
+            {location.pathname !== "/" && !isGuest && (
               <button
                 onClick={openRegister}
                 className="w-full flex items-center justify-center gap-2 py-2 my-1 rounded-xl text-white text-sm font-bold transition-transform active:scale-[0.98] shadow-lg"

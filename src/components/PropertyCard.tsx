@@ -1,9 +1,11 @@
-import { MapPin, Eye, Heart, X } from "lucide-react";
+import { MapPin, Eye, Heart, X, MessageCircle, Building2 } from "lucide-react";
 import PhotoWatermark from "./PhotoWatermark";
 import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 import { useState } from "react";
 import { thumbUrl, originalFromThumb } from "@/lib/imageThumb";
+import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
+import { InquiryModal, PartnerAgencyModal, GuestShareModal } from "@/components/guest/GuestModals";
 
 interface PropertyCardProps {
   image: string;
@@ -59,6 +61,10 @@ const PropertyCard = ({
     return vacate.getTime() <= today.getTime();
   })();
   const [liked, setLiked] = useState(false);
+  const isGuest = useIsGuest();
+  const [showInquiry, setShowInquiry] = useState(false);
+  const [showPartner, setShowPartner] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
@@ -67,8 +73,15 @@ const PropertyCard = ({
   const displayImage = hasOwnImage ? image : referenceImage || "";
   const isRef = !hasOwnImage && !!referenceImage;
 
+  // 게스트에게는 동까지만 보여주기
+  const displayAddress = isGuest ? addressToDong(address) : address;
+
   return (
-    <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+    <>
+    <div
+      className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
+      onClick={isGuest ? (e) => { e.stopPropagation(); setShowShare(true); } : undefined}
+    >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         {displayImage ? (
@@ -186,7 +199,7 @@ const PropertyCard = ({
         <h3 className="font-semibold text-foreground text-sm mb-1 line-clamp-1">{title}</h3>
         <div className="flex items-center gap-1 mb-3">
           <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-muted-foreground line-clamp-1">{address}</span>
+          <span className="text-xs text-muted-foreground line-clamp-1">{displayAddress}</span>
         </div>
 
         {/* Info Grid */}
@@ -268,8 +281,55 @@ const PropertyCard = ({
             <span className="text-xs">{views.toLocaleString()}</span>
           </div>
         </div>
+
+        {/* 게스트/일반회원 액션 버튼 */}
+        {isGuest && (
+          <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border">
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
+            >
+              <MessageCircle className="w-3.5 h-3.5" /> 문의하기
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
+              className="flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
+            >
+              <Building2 className="w-3.5 h-3.5" /> 협력업체
+            </button>
+          </div>
+        )}
       </div>
     </div>
+
+    {isGuest && (
+      <>
+        <InquiryModal
+          open={showInquiry}
+          onClose={() => setShowInquiry(false)}
+          propertyTitle={title}
+          onOpenPartner={() => setShowPartner(true)}
+        />
+        <PartnerAgencyModal
+          open={showPartner}
+          onClose={() => setShowPartner(false)}
+          onChat={() => setShowInquiry(true)}
+        />
+        <GuestShareModal
+          open={showShare}
+          onClose={() => setShowShare(false)}
+          title={title}
+          address={displayAddress}
+          image={displayImage}
+          deposit={deposit}
+          monthly={monthly}
+          area={area}
+          floor={floor}
+          type={type}
+        />
+      </>
+    )}
+    </>
   );
 };
 

@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useCallback } from "react";
 import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { neonChipStyle } from "@/lib/neonChipStyle";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useIsGuest } from "@/hooks/useIsGuest";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
@@ -18,6 +19,7 @@ const RESIDENTIAL_SUBTYPES = ["전체", "원룸", "투베이", "투룸", "쓰리
 const RESIDENTIAL_DB_TYPES = ["원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "고시원", "연립", "다세대", "주상복합", "단독주택", "다가구", "포룸"];
 
 const ResidentialRental = () => {
+  const isGuest = useIsGuest();
   const { ExitConfirmDialog } = useExitConfirm();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
@@ -219,6 +221,7 @@ const ResidentialRental = () => {
         })()}
 
         {/* 매물 등록 버튼 (우측 끝) */}
+        {!isGuest && (
         <button
           onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
@@ -228,6 +231,7 @@ const ResidentialRental = () => {
           <span className="text-sm leading-none">+</span>
           매물 등록
         </button>
+        )}
       </div>
 
       <main

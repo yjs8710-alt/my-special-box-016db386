@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useIsGuest } from "@/hooks/useIsGuest";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
@@ -68,6 +69,7 @@ interface NonResidentialRentalProps {
 
 const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) => {
   const { ExitConfirmDialog } = useExitConfirm();
+  const isGuest = useIsGuest();
   const isCollectiveSale = mode === "collective-sale";
   const NON_RESIDENTIAL_SUBTYPES = isCollectiveSale ? COLLECTIVE_SALE_SUBTYPES : FULL_NON_RESIDENTIAL_SUBTYPES;
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -289,6 +291,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             선택 삭제
           </button>
         )}
+        {!isGuest && (
         <button
           onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
@@ -298,6 +301,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           <span className="text-sm leading-none">+</span>
           매물 등록
         </button>
+        )}
       </div>
 
       <main

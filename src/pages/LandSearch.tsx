@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { useExitConfirm } from "@/hooks/useExitConfirm";
 import { useDBProperties } from "@/hooks/useDBProperties";
+import { useIsGuest } from "@/hooks/useIsGuest";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import Header from "@/components/Header";
 import MapView, { MapBounds } from "@/components/MapView";
@@ -16,6 +17,7 @@ const LAND_SUBTYPES = ["전체"];
 
 const LandSearch = () => {
   const { ExitConfirmDialog } = useExitConfirm();
+  const isGuest = useIsGuest();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [suppressPan, setSuppressPan] = useState(false);
   const [pinnedIds, setPinnedIds] = useState<number[]>([]);
@@ -109,6 +111,7 @@ const LandSearch = () => {
         className="hidden md:flex items-center gap-2 px-4 py-2 border-b border-border overflow-x-auto flex-shrink-0 sticky top-0 z-[900]"
         style={{ background: "hsl(var(--header-bg))" }}
       >
+        {!isGuest && (
         <button
           onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
@@ -118,6 +121,7 @@ const LandSearch = () => {
           <span className="text-sm leading-none">+</span>
           매물 등록
         </button>
+        )}
       </div>
 
       <main
