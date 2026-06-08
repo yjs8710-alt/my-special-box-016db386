@@ -435,7 +435,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
-        content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.touchAction = "manipulation";
         content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
