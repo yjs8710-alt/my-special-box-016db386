@@ -158,16 +158,18 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 (홈에서는 숨김) */}
             {!isHome && (
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
-              <button
-                onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
-                className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
-                style={{ color: "white" }}
-                aria-label="채팅 문의"
-              >
-                <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
-                채팅문의
-              </button>
-              <NotificationBell variant="desktop" />
+              {!isGuest && (
+                <button
+                  onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
+                  className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
+                  style={{ color: "white" }}
+                  aria-label="채팅 문의"
+                >
+                  <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
+                  채팅문의
+                </button>
+              )}
+              {!isGuest && <NotificationBell variant="desktop" />}
 
               {isAuthorized ? (
                 <>
