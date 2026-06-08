@@ -4193,6 +4193,12 @@ const MapSidebar = ({
   const [mobileContactsProp, setMobileContactsProp] = useState<MapProperty | null>(null);
   const [expandedContactsId, setExpandedContactsId] = useState<number | null>(null);
   const [dealCompletedIds, setDealCompletedIds] = useState<Set<string>>(new Set());
+  // 카드를 직접 클릭했을 때만 하단(액션 버튼 등)을 펼침. 지도 핀 클릭으로 선택된 경우는 펼치지 않음.
+  const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  useEffect(() => {
+    // 외부(지도 핀)에서 selectedId가 변경되면 펼침 상태는 리셋
+    setExpandedCardId((prev) => (prev === selectedId ? prev : null));
+  }, [selectedId]);
 
   useEffect(() => {
     if (lightbox) window.dispatchEvent(new CustomEvent("contact-popup-open", { detail: "close-all" }));
@@ -5077,12 +5083,14 @@ const MapSidebar = ({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+                          if (selectedId !== prop.id) onSelect(prop.id);
+                          setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            selectedId === prop.id ? onDeselect?.() : onSelect(prop.id);
+                            if (selectedId !== prop.id) onSelect(prop.id);
+                            setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                           }
                         }}
                         className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
@@ -5353,7 +5361,7 @@ const MapSidebar = ({
                       </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
-                      {selectedId === prop.id && isMobile && (() => {
+                      {expandedCardId === prop.id && isMobile && (() => {
                         const owner = prop.contactOwner?.trim();
                         const owner2 = prop.contactOwner2?.trim();
                         const manager = prop.contactManager?.trim();
@@ -5466,7 +5474,7 @@ const MapSidebar = ({
                           </div>
                         );
                       })()}
-                      {selectedId === prop.id && (
+                      {expandedCardId === prop.id && (
                         <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
                           {/* 수정 버튼: 관리자 또는 본인이 등록한 매물 */}
                           {(isAdmin || (authUser?.userId && prop.registeredBy && prop.registeredBy === authUser.userId)) && (
