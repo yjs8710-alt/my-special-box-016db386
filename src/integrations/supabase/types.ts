@@ -810,6 +810,18 @@ export type Database = {
             }
             Returns: string
           }
+      get_public_property_reference_images: {
+        Args: { _property_id: string }
+        Returns: {
+          floor: string
+          id: string
+          images: string[]
+          room_type: string
+          status: string
+          unit_number: string
+          updated_at: string
+        }[]
+      }
       get_reference_images: {
         Args: { _addresses: string[] }
         Returns: {

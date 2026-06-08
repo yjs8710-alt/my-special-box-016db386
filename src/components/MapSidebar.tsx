@@ -4146,9 +4146,8 @@ interface MapSidebarProps {
   currentBounds?: { swLat: number; swLng: number; neLat: number; neLng: number } | null;
 }
 
-const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
-const DEFAULT_WIDTH = 540;
+const FIXED_WIDTH = MAX_WIDTH;
 
 const MapSidebar = ({
   properties,
@@ -4184,11 +4183,7 @@ const MapSidebar = ({
     }, 300);
   };
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
-  const [width, setWidth] = useState(() => {
-    const saved = localStorage.getItem("sidebar_width");
-    const parsed = saved ? Number(saved) : 0;
-    return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
-  });
+  const width = FIXED_WIDTH;
   const [collapsed, setCollapsed] = useState(false);
   const [lightbox, setLightbox] = useState<{ units: LightboxUnit[]; unitIdx: number } | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
@@ -4515,35 +4510,6 @@ const MapSidebar = ({
     w?.print();
   };
 
-  /* ── Resize drag ── */
-  const dragging = useRef(false);
-  const startX = useRef(0);
-  const startWidth = useRef(DEFAULT_WIDTH);
-
-  const onMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      dragging.current = true;
-      startX.current = e.clientX;
-      startWidth.current = width;
-      const onMove = (ev: MouseEvent) => {
-        if (!dragging.current) return;
-        const delta = startX.current - ev.clientX;
-        const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth.current + delta));
-        setWidth(newWidth);
-        localStorage.setItem("sidebar_width", String(newWidth));
-      };
-      const onUp = () => {
-        dragging.current = false;
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-      };
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
-    },
-    [width],
-  );
-
   return (
     <>
       {/* Public Record Modal */}
@@ -4852,15 +4818,14 @@ const MapSidebar = ({
                 }
           }
         >
-          {/* Drag handle — 데스크톱 전용 */}
+          {/* 고정 너비 표시바 — 데스크톱 전용 */}
           {!isMobile && !collapsed && (
             <div
-              onMouseDown={onMouseDown}
-              className="absolute top-0 bottom-0 w-3 cursor-col-resize z-10 flex items-center justify-center hover:bg-primary/10 transition-colors"
+              className="absolute top-0 bottom-0 w-3 z-10 flex items-center justify-center pointer-events-none"
               style={{ left: "0px" }}
-              title="드래그하여 너비 조절"
+              title="사이드바 너비 고정"
             >
-              <div className="w-1.5 h-16 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow" />
+              <div className="w-1.5 h-16 rounded-full bg-blue-500 shadow" />
             </div>
           )}
 
