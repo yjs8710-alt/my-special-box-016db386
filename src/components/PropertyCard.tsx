@@ -287,24 +287,28 @@ const PropertyCard = ({
               </p>
             )}
           </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Eye className="w-3.5 h-3.5" />
-            <span className="text-xs">{views.toLocaleString()}</span>
+          <div className="flex items-center gap-2">
+            {isGuest && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+              >
+                <MessageCircle className="w-3 h-3" /> 문의하기
+              </button>
+            )}
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Eye className="w-3.5 h-3.5" />
+              <span className="text-xs">{views.toLocaleString()}</span>
+            </div>
           </div>
         </div>
 
-        {/* 게스트/일반회원 액션 버튼 */}
+        {/* 게스트/일반회원 협력업체 버튼 */}
         {isGuest && (
-          <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border">
-            <button
-              onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-              className="flex items-center justify-center gap-1 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-bold"
-            >
-              <MessageCircle className="w-3.5 h-3.5" /> 문의하기
-            </button>
+          <div className="mt-3 pt-3 border-t border-border">
             <button
               onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
-              className="flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
+              className="w-full flex items-center justify-center gap-1 py-2 rounded-lg border-2 border-primary text-primary text-xs font-bold"
             >
               <Building2 className="w-3.5 h-3.5" /> 협력업체
             </button>
