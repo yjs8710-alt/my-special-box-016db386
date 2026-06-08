@@ -774,7 +774,9 @@ const ContactIcon = forwardRef<SVGSVGElement, { type: string; active?: boolean }
 ContactIcon.displayName = "ContactIcon";
 
 const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number, number2 }, ref) => {
+  const isGuest = useIsGuest();
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
+  if (isGuest) number = undefined as any;
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
@@ -2370,8 +2372,10 @@ interface ContactRevealBtnProps {
   borderStyle: React.CSSProperties;
 }
 const ContactRevealBtn = ({ propId, label, shortLabel, number, colorStyle, borderStyle }: ContactRevealBtnProps) => {
+  const isGuest = useIsGuest();
   const [revealed, setRevealed] = useState(() => hasRevealedToday(propId, label));
   const [showNum, setShowNum] = useState(false);
+  if (isGuest) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -4097,6 +4101,8 @@ AddressToggleCard.displayName = "AddressToggleCard";
 
 /* ── LandlordPhoneRow ── */
 const LandlordPhoneRow = ({ phone, label }: { phone: string; label: string }) => {
+  const isGuest = useIsGuest();
+  if (isGuest) return null;
   const colorMap: Record<string, string> = {
     소유주: "hsl(var(--primary))",
     관리인: "hsl(217 91% 60%)",
