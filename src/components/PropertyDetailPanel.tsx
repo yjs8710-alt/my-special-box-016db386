@@ -1920,15 +1920,15 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-2 bg-muted/50 my-2" />
-
           {/* Description */}
           {!isGuest && (
-            <div className="px-4 pb-3">
-              <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 설명</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">{property.description}</p>
-            </div>
+            <>
+              <div className="h-2 bg-muted/50 my-2" />
+              <div className="px-4 pb-3">
+                <p className="text-xs font-bold text-foreground mb-2 uppercase tracking-wide">매물 설명</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{property.description}</p>
+              </div>
+            </>
           )}
 
           {/* ── 비밀번호 ── */}
