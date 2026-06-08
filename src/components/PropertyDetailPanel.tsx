@@ -31,6 +31,7 @@ import { formatPhone } from "@/lib/utils";
 import { sharePropertyToKakao, AgencyInfo } from "@/lib/kakaoShare";
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
 import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
@@ -332,6 +333,8 @@ function RevealPhone({ label, phone, itemKey, activeKey, onActivate }: RevealPho
 
 /* ─── 연락처 그룹 (상호 배타적 노출) ─── */
 function ContactGroup({ property }: { property: MapProperty }) {
+  const isGuest = useIsGuest();
+  if (isGuest) return null;
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const groupRef = useRef<HTMLDivElement>(null);
 
