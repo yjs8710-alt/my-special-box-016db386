@@ -263,7 +263,6 @@ export default function PublicProperty() {
             .from("properties")
             .select("id,unit_number,floor,room_type,images")
             .eq("address", data.address)
-            .eq("status", "active")
             .neq("id", data.id)
             .limit(30);
           if (isMounted && siblings) {
