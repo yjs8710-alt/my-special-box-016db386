@@ -3186,24 +3186,26 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setShowFullAddr((v) => !v); }}
+              onClick={(e) => { e.stopPropagation(); if (!isGuest) setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
               style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
-              title="클릭하면 전체 주소 표시"
+              title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
             >
-              {showFullAddr ? prop.address : shortAddress(prop.address)}
+              {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
             </button>
-            {/* 로드뷰 버튼 */}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); handleRoadviewOpen(e); }}
-              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
-              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
-            >
-              로드뷰
-            </button>
+            {/* 로드뷰 버튼 (게스트 숨김) */}
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleRoadviewOpen(e); }}
+                className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap"
+                style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+              >
+                로드뷰
+              </button>
+            )}
             {/* 도로명 버튼 (탭 시 도로명주소 모달 표시) */}
-            {prop.roadAddress && (
+            {!isGuest && prop.roadAddress && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); showRoadAddressModal(prop.roadAddress!); }}
