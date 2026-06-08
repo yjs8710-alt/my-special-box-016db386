@@ -1715,7 +1715,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
               const note = property.note ?? "";
               const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
               const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
-              const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+              const jeonseMatch = note.match(/(?<!반)전세: 보증금 ([^\n]+?)만원(?!\s*\/)/);
               const hasMultiRent = wolseMatch || halfMatch || jeonseMatch;
 
               return hasMultiRent ? (
