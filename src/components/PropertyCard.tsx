@@ -304,19 +304,9 @@ const PropertyCard = ({
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            {isGuest && (
-              <button
-                onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-                className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
-              >
-                <MessageCircle className="w-3 h-3" /> 문의하기
-              </button>
-            )}
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Eye className="w-3.5 h-3.5" />
-              <span className="text-xs">{views.toLocaleString()}</span>
-            </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Eye className="w-3.5 h-3.5" />
+            <span className="text-xs">{views.toLocaleString()}</span>
           </div>
         </div>
 
