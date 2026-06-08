@@ -131,39 +131,25 @@ interface Cluster {
   items: MapProperty[];
 }
 
-/** 줌 레벨 기반 격자 클러스터링. 선택된 핀과 줌 인 상태에서는 클러스터링 안 함. */
+/** 줌 레벨 기반 격자 클러스터링. 모든 줌에서 시각적으로 겹치는 핀들은 묶어서 표시. */
 function buildClusters(props: MapProperty[], zoom: number, _selSet: Set<number>): { clusters: Cluster[]; singles: MapProperty[] } {
   const singles: MapProperty[] = [];
   const valid = props.filter(p => p.lat && p.lng);
-  // 줌 인 상태(레벨 ≤ 3)에서는 격자 클러스터링 없이 개별 표시
-  // 단, 정확히 같은 좌표를 가진 매물들은 항상 클러스터로 묶어서 개수 표시
-  if (zoom <= 3) {
-    const exactBuckets = new Map<string, MapProperty[]>();
-    valid.forEach(p => {
-      const key = `${p.lat.toFixed(7)}|${p.lng.toFixed(7)}`;
-      const arr = exactBuckets.get(key);
-      if (arr) arr.push(p); else exactBuckets.set(key, [p]);
-    });
-    const clusters: Cluster[] = [];
-    exactBuckets.forEach((items, key) => {
-      if (items.length === 1) {
-        singles.push(items[0]);
-      } else {
-        clusters.push({ key, lat: items[0].lat, lng: items[0].lng, items });
-      }
-    });
-    return { clusters, singles };
-  }
-  const cellDeg = 0.00012 * Math.pow(2, zoom - 1);
+  // 핀 직경(~40px) 기준 셀 크기. 줌이 낮을수록(가까울수록) 셀도 작게.
+  // kakao 줌 1≈0.00008°, 줌 3≈0.00032°, 줌 5≈0.00128° → 핀 겹침 방지
+  const cellDeg = 0.00008 * Math.pow(2, Math.max(0, zoom - 1));
   const buckets = new Map<string, MapProperty[]>();
   valid.forEach(p => {
-    // 선택 여부와 무관하게 같은 위치 매물은 항상 클러스터로 묶어서 정확한 개수 표시
     const key = `${Math.floor(p.lat / cellDeg)}|${Math.floor(p.lng / cellDeg)}`;
     const arr = buckets.get(key);
     if (arr) arr.push(p); else buckets.set(key, [p]);
   });
   const clusters: Cluster[] = [];
   buckets.forEach((items, key) => {
+    if (items.length === 1) {
+      singles.push(items[0]);
+      return;
+    }
     let sLat = 0, sLng = 0;
     items.forEach(p => { sLat += p.lat; sLng += p.lng; });
     clusters.push({ key, lat: sLat / items.length, lng: sLng / items.length, items });
