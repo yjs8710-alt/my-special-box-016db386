@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Phone, MessageCircle, Search, Check, Trash2 } from "lucide-react";
+import { Phone, MessageCircle, Search, Check, Trash2, User, Hash, Clock, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -53,7 +53,6 @@ const AdminGuestInquiriesPanel = () => {
 
   useEffect(() => { load(); }, []);
 
-  // Realtime
   useEffect(() => {
     const ch = supabase
       .channel("admin-inquiries")
@@ -105,19 +104,21 @@ const AdminGuestInquiriesPanel = () => {
   const totalUnread = items.filter((i) => !i.is_read).length;
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <div className="p-4 md:p-6 space-y-5 bg-background min-h-full">
+      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-lg font-bold text-white">게스트 문의 내역</h2>
-          <p className="text-xs text-white/60 mt-0.5">
-            전체 {items.length}건 · 미확인 <span className="text-red-400 font-bold">{totalUnread}</span>건
+          <h2 className="text-xl font-extrabold text-foreground">게스트 문의 내역</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            전체 <span className="font-bold text-foreground">{items.length}</span>건 · 미확인{" "}
+            <span className="text-destructive font-extrabold">{totalUnread}</span>건
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={agentFilter}
             onChange={(e) => setAgentFilter(e.target.value)}
-            className="text-xs px-2 py-1.5 rounded-md bg-white/10 text-white border border-white/20"
+            className="text-sm px-3 py-2 rounded-lg bg-card text-foreground border border-border font-medium"
           >
             <option value="all">담당자 전체</option>
             <option value="_none">담당자 미지정</option>
@@ -126,74 +127,172 @@ const AdminGuestInquiriesPanel = () => {
             ))}
           </select>
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/50" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="이름/번호/매물번호"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="text-xs pl-7 pr-2 py-1.5 rounded-md bg-white/10 text-white border border-white/20 placeholder-white/40"
+              className="text-sm pl-8 pr-3 py-2 rounded-lg bg-card text-foreground border border-border placeholder:text-muted-foreground"
             />
           </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center text-white/60 py-10 text-sm">불러오는 중...</div>
+        <div className="text-center text-muted-foreground py-16 text-sm">불러오는 중...</div>
       ) : grouped.length === 0 ? (
-        <div className="text-center text-white/60 py-10 text-sm">문의 내역이 없습니다</div>
+        <div className="text-center text-muted-foreground py-16 text-sm">문의 내역이 없습니다</div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {grouped.map(([agentId, list]) => {
             const a = agentId !== "_none" ? agents[agentId] : null;
+            const unread = list.filter((i) => !i.is_read).length;
             return (
-              <div key={agentId} className="rounded-lg border border-white/10 overflow-hidden">
-                <div className="px-4 py-2.5 bg-white/5 flex items-center justify-between">
-                  <div className="text-sm font-bold text-white">
+              <div key={agentId} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+                {/* Agent header */}
+                <div className="px-5 py-3.5 bg-primary/5 border-b border-border flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center">
+                      <User className="w-4.5 h-4.5 text-primary" />
+                    </div>
                     {a ? (
-                      <>{a.name} <span className="text-xs font-normal text-white/60">{a.company ? `· ${a.company}` : ""} {a.phone ? `· ${a.phone}` : ""}</span></>
+                      <div>
+                        <div className="text-base font-extrabold text-foreground leading-tight">
+                          {a.name}
+                          {a.company && <span className="ml-2 text-sm font-semibold text-muted-foreground">{a.company}</span>}
+                        </div>
+                        {a.phone && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3" /> {a.phone}
+                          </div>
+                        )}
+                      </div>
                     ) : (
-                      <span className="text-white/70">담당자 미지정</span>
+                      <span className="text-base font-bold text-muted-foreground">담당자 미지정</span>
                     )}
                   </div>
-                  <span className="text-xs text-white/60">{list.length}건</span>
+                  <div className="flex items-center gap-2">
+                    {unread > 0 && (
+                      <span className="text-xs font-bold px-2 py-1 rounded-full bg-destructive text-destructive-foreground">
+                        미확인 {unread}
+                      </span>
+                    )}
+                    <span className="text-xs font-semibold px-2 py-1 rounded-full bg-muted text-foreground">
+                      총 {list.length}건
+                    </span>
+                  </div>
                 </div>
-                <div className="divide-y divide-white/5">
+
+                {/* Table header (desktop) */}
+                <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-bold text-muted-foreground">
+                  <div>매물번호</div>
+                  <div>문의자</div>
+                  <div>연락처</div>
+                  <div>문의내용</div>
+                  <div>일시</div>
+                  <div className="text-right">관리</div>
+                </div>
+
+                {/* Rows */}
+                <div className="divide-y divide-border">
                   {list.map((i) => (
-                    <div key={i.id} className={`px-4 py-3 ${!i.is_read ? "bg-blue-500/5" : ""}`}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {!i.is_read && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-500 text-white">NEW</span>
-                            )}
-                            {i.property_reg_no && (
-                              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-white">NO.{i.property_reg_no}</span>
-                            )}
-                            <span className="text-sm font-bold text-white">{i.name}</span>
-                            <a href={`tel:${i.phone.replace(/[^0-9]/g, "")}`} className="text-xs text-blue-300 hover:underline flex items-center gap-1">
-                              <Phone className="w-3 h-3" /> {i.phone}
-                            </a>
-                          </div>
-                          {i.message && (
-                            <p className="text-xs text-white/80 mt-1.5 whitespace-pre-wrap flex items-start gap-1">
-                              <MessageCircle className="w-3 h-3 mt-0.5 shrink-0 text-white/40" />
-                              <span>{i.message}</span>
-                            </p>
+                    <div
+                      key={i.id}
+                      className={`px-5 py-3.5 transition-colors ${
+                        !i.is_read ? "bg-primary/[0.04] hover:bg-primary/[0.07]" : "hover:bg-muted/30"
+                      }`}
+                    >
+                      {/* Desktop row */}
+                      <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 items-center">
+                        <div className="flex items-center gap-1.5">
+                          {!i.is_read && (
+                            <span className="w-2 h-2 rounded-full bg-destructive" title="미확인" />
                           )}
-                          <p className="text-[10px] text-white/40 mt-1">{new Date(i.created_at).toLocaleString("ko-KR")}</p>
+                          {i.property_reg_no ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-mono font-extrabold px-2 py-1 rounded-md bg-primary/10 text-primary">
+                              <Hash className="w-3 h-3" />NO.{i.property_reg_no}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                        <div className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-muted-foreground" />
+                          {i.name}
+                        </div>
+                        <a
+                          href={`tel:${i.phone.replace(/[^0-9]/g, "")}`}
+                          className="text-sm font-semibold text-primary hover:underline flex items-center gap-1"
+                        >
+                          <Phone className="w-3.5 h-3.5" /> {i.phone}
+                        </a>
+                        <div className="text-sm text-foreground flex items-start gap-1.5">
+                          <MessageCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                          <span className="whitespace-pre-wrap break-words">
+                            {i.message || <span className="text-muted-foreground italic">메시지 없음</span>}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(i.created_at).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => markRead(i.id, !i.is_read)}
-                            className="p-1.5 rounded hover:bg-white/10 text-white/70"
+                            className={`p-2 rounded-lg transition-colors ${
+                              i.is_read
+                                ? "bg-muted text-muted-foreground hover:bg-muted/70"
+                                : "bg-primary text-primary-foreground hover:opacity-90"
+                            }`}
                             title={i.is_read ? "미확인으로" : "확인 처리"}
                           >
-                            <Check className={`w-3.5 h-3.5 ${i.is_read ? "text-green-400" : ""}`} />
+                            <Check className="w-4 h-4" />
                           </button>
-                          <button onClick={() => remove(i.id)} className="p-1.5 rounded hover:bg-red-500/20 text-red-300" title="삭제">
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <button
+                            onClick={() => remove(i.id)}
+                            className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
+                            title="삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
+                        </div>
+                      </div>
+
+                      {/* Mobile row */}
+                      <div className="md:hidden space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {!i.is_read && (
+                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground">NEW</span>
+                          )}
+                          {i.property_reg_no && (
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">NO.{i.property_reg_no}</span>
+                          )}
+                          <span className="text-sm font-bold text-foreground">{i.name}</span>
+                          <a href={`tel:${i.phone.replace(/[^0-9]/g, "")}`} className="text-sm font-semibold text-primary flex items-center gap-1 ml-auto">
+                            <Phone className="w-3.5 h-3.5" /> {i.phone}
+                          </a>
+                        </div>
+                        {i.message && (
+                          <p className="text-sm text-foreground bg-muted/40 rounded-lg px-3 py-2 whitespace-pre-wrap">
+                            {i.message}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-muted-foreground">
+                            {new Date(i.created_at).toLocaleString("ko-KR")}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => markRead(i.id, !i.is_read)}
+                              className={`p-1.5 rounded-lg ${i.is_read ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => remove(i.id)} className="p-1.5 rounded-lg bg-destructive/10 text-destructive">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
