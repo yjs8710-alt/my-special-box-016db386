@@ -310,6 +310,50 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_inquiries: {
+        Row: {
+          agent_user_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          name: string
+          phone: string
+          property_id: string | null
+          property_reg_no: string | null
+        }
+        Insert: {
+          agent_user_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name: string
+          phone: string
+          property_id?: string | null
+          property_reg_no?: string | null
+        }
+        Update: {
+          agent_user_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name?: string
+          phone?: string
+          property_id?: string | null
+          property_reg_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_inquiries_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       land_summary: {
         Row: {
           created_at: string
