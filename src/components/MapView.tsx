@@ -486,7 +486,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
-        content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.touchAction = "manipulation";
         content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
