@@ -2014,40 +2014,48 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
           </div>
 
           {/* ── 건축물대장·토지대장 ── */}
-          <div className="h-2 bg-muted/50 my-2" />
-          <PropertySummaryPanel address={property.address} pnu={propertyPnu} />
+          {!isGuest && (
+            <>
+              <div className="h-2 bg-muted/50 my-2" />
+              <PropertySummaryPanel address={property.address} pnu={propertyPnu} />
+            </>
+          )}
 
           {/* ── 추가 액션 버튼 ── */}
-          <div className="h-2 bg-muted/50 my-2" />
-          <div className="px-4 pb-4 flex flex-col gap-2">
-            <p className="text-xs font-bold text-foreground uppercase tracking-wide mb-1">기타 기능</p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setActiveModal("proposal")}
-                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-primary/5 transition-colors"
-                style={{ borderColor: "hsl(var(--primary) / 0.3)" }}
-              >
-                <ClipboardList className="w-4 h-4 text-primary" />
-                <span className="text-[11px] font-semibold text-foreground">임대현황</span>
-              </button>
-              <button
-                onClick={() => setActiveModal("deal")}
-                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-chart-2/5 transition-colors"
-                style={{ borderColor: "hsl(var(--chart-2) / 0.3)" }}
-              >
-                <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
-                <span className="text-[11px] font-semibold text-foreground">거래완료</span>
-              </button>
-              <button
-                onClick={() => setActiveModal("error")}
-                className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-destructive/5 transition-colors"
-                style={{ borderColor: "hsl(var(--destructive) / 0.3)" }}
-              >
-                <AlertTriangle className="w-4 h-4" style={{ color: "hsl(var(--destructive))" }} />
-                <span className="text-[11px] font-semibold text-foreground">오류제보</span>
-              </button>
-            </div>
-          </div>
+          {!isGuest && (
+            <>
+              <div className="h-2 bg-muted/50 my-2" />
+              <div className="px-4 pb-4 flex flex-col gap-2">
+                <p className="text-xs font-bold text-foreground uppercase tracking-wide mb-1">기타 기능</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setActiveModal("proposal")}
+                    className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-primary/5 transition-colors"
+                    style={{ borderColor: "hsl(var(--primary) / 0.3)" }}
+                  >
+                    <ClipboardList className="w-4 h-4 text-primary" />
+                    <span className="text-[11px] font-semibold text-foreground">임대현황</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveModal("deal")}
+                    className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-chart-2/5 transition-colors"
+                    style={{ borderColor: "hsl(var(--chart-2) / 0.3)" }}
+                  >
+                    <CheckCircle2 className="w-4 h-4" style={{ color: "hsl(var(--chart-2))" }} />
+                    <span className="text-[11px] font-semibold text-foreground">거래완료</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveModal("error")}
+                    className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-destructive/5 transition-colors"
+                    style={{ borderColor: "hsl(var(--destructive) / 0.3)" }}
+                  >
+                    <AlertTriangle className="w-4 h-4" style={{ color: "hsl(var(--destructive))" }} />
+                    <span className="text-[11px] font-semibold text-foreground">오류제보</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── CTA ── */}
