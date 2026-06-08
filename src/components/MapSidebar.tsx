@@ -4813,7 +4813,6 @@ const MapSidebar = ({
               ? { display: mobileStep === 0 ? "none" : "flex" }
               : {
                   width: collapsed ? 0 : width,
-                  boxShadow: "-2px 0 16px rgba(10,45,110,0.08)",
                   flexShrink: 0,
                 }
           }
