@@ -5474,7 +5474,7 @@ const MapSidebar = ({
                           </div>
                         );
                       })()}
-                      {selectedId === prop.id && (
+                      {expandedCardId === prop.id && (
                         <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
                           {/* 수정 버튼: 관리자 또는 본인이 등록한 매물 */}
                           {(isAdmin || (authUser?.userId && prop.registeredBy && prop.registeredBy === authUser.userId)) && (
