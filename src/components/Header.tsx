@@ -209,8 +209,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               ) : (
                 <div className="flex items-center gap-1.5 mr-10">
                   <button
-                    className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all hover:bg-white/10"
-                    style={{ color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.2)" }}
+                    className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all hover:opacity-90"
+                    style={{ background: "hsl(var(--primary))", color: "white" }}
                     onClick={() => navigate("/login")}
                   >
                     로그인
