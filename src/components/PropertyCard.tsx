@@ -79,12 +79,12 @@ const PropertyCard = ({
   // 게스트에게는 동까지만 보여주기
   const displayAddress = isGuest ? addressToDong(address) : address;
 
+  // 매물번호: 숫자만 표기 (앞 0 제거)
+  const regNoNumeric = regNo ? String(parseInt(regNo.replace(/[^0-9]/g, ""), 10) || regNo) : "";
+
   return (
     <>
-    <div
-      className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group cursor-pointer"
-      onClick={isGuest ? (e) => { e.stopPropagation(); setShowShare(true); } : undefined}
-    >
+    <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         {displayImage ? (
