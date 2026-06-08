@@ -4655,7 +4655,7 @@ const MapSidebar = ({
         <LightboxModal units={lightbox.units} startUnitIdx={lightbox.unitIdx} onClose={() => setLightbox(null)} />
       )}
       {/* 모바일 연락처 모달 — 입력된 연락처만 노출 */}
-      {mobileContactsProp && ReactDOM.createPortal(
+      {mobileContactsProp && !isGuest && ReactDOM.createPortal(
         <div
           className="fixed inset-0 z-[10000] bg-black/60 flex items-end md:items-center justify-center p-4"
           onClick={() => setMobileContactsProp(null)}
