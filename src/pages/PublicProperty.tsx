@@ -342,12 +342,32 @@ export default function PublicProperty() {
               {property.is_new && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent text-white">NEW</span>}
               {property.is_hot && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-destructive text-white">HOT</span>}
             </div>
-            <h1 className="text-xl font-bold text-foreground">{property.building_name || property.title}</h1>
-            <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5" />
+            <h1 className="text-xl font-bold text-foreground flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
               {safeAddress}
-            </div>
+            </h1>
           </div>
+
+          {/* Agent / Office info — 모바일에서 즉시 보이도록 상단 배치 */}
+          {agent && (
+            <div className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-2">
+              <p className="text-xs font-bold text-primary mb-1">공유 중개사무소</p>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+                <span className="text-muted-foreground">사무소명</span>
+                <span className="font-bold text-foreground">{agent.agency_name}</span>
+                <span className="text-muted-foreground">대표자</span>
+                <span className="font-bold text-foreground">{agent.representative_name || agent.name}</span>
+                <span className="text-muted-foreground">주소</span>
+                <span className="text-foreground">{agent.agency_address}</span>
+                <span className="text-muted-foreground">대표번호</span>
+                <a href={`tel:${agent.agency_phone || ""}`} className="font-bold text-primary">{agent.agency_phone || "-"}</a>
+                <span className="text-muted-foreground">연락처</span>
+                <a href={`tel:${agent.phone}`} className="font-bold text-primary">{agent.phone}</a>
+                <span className="text-muted-foreground">개설등록번호</span>
+                <span className="text-foreground">{agent.license_number}</span>
+              </div>
+            </div>
+          )}
 
           {/* Price */}
           <div className="rounded-2xl border border-border bg-muted/30 p-4">
