@@ -3486,25 +3486,25 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           >
             {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
-          {/* 게스트: 동 우측 문의하기 버튼 */}
+          {/* 게스트: 동 우측 협력업체 버튼 */}
           {isGuest && (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
+                window.dispatchEvent(new CustomEvent("open-guest-partner", {
                   detail: {
                     propertyDbId: prop.dbId,
-                    propertyRegNo: prop.memo,
+                    propertyRegNo: prop.regNo,
                     agentUserId: prop.registeredBy,
                     propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
                   },
                 }));
               }}
-              className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90"
+              className="flex-shrink-0 ml-auto flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90"
               style={{ background: "hsl(var(--primary))", color: "white" }}
             >
-              <Phone className="w-3 h-3" /> 문의하기
+              <Building2 className="w-3 h-3" /> 협력업체
             </button>
           )}
           {/* 로드뷰 버튼 (게스트 숨김) */}
