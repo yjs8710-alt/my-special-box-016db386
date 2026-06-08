@@ -5460,15 +5460,15 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
-                            {/* 2행: 현관비번/방비번 — 노란 박스 | 우측: 방향 */}
-                            {!isGuest && ((prop.buildingPassword || prop.password || prop.roomPassword) || direction) && (
+                            {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
+                            {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
-                                {(prop.buildingPassword || prop.password) && (
+                                {!isGuest && (prop.buildingPassword || prop.password) && (
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
                                   </span>
                                 )}
-                                {prop.roomPassword && (
+                                {!isGuest && prop.roomPassword && (
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
                                   </span>
