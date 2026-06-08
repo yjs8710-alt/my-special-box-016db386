@@ -1614,9 +1614,16 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
     (p) => p.id !== property.id && ((p.images && p.images.length > 0) || p.image),
   );
   const lightboxUnits: LightboxUnit[] = [
-    { label: property.unitNumber ? `${property.unitNumber}호` : property.title || "현재 매물", images: allImages },
+    {
+      label: isGuest
+        ? (property.floor ? `${property.floor}` : "현재 매물")
+        : (property.unitNumber ? `${property.unitNumber}호` : property.title || "현재 매물"),
+      images: allImages,
+    },
     ...otherUnits.map((p) => ({
-      label: p.unitNumber ? `${p.unitNumber}호` : p.title || p.address,
+      label: isGuest
+        ? (p.floor ? `${p.floor}` : "")
+        : (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address),
       images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
     })),
   ].filter((u) => u.images.length > 0);
@@ -1630,11 +1637,15 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
     if (seenUnits.has(u.unitNumber)) continue;
     seenUnits.add(u.unitNumber);
     lightboxUnits.push({
-      label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
+      label: isGuest
+        ? ""
+        : `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
       images: u.images,
+
       isReference: true,
     });
   }
+
 
   return (
     <>
