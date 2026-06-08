@@ -293,7 +293,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </button>
           )}
           <div className="pt-1 border-t mt-1" style={{ borderColor: "hsl(var(--header-border))" }}>
-            {location.pathname !== "/" && (
+            {location.pathname !== "/" && !isGuest && (
               <button
                 onClick={openRegister}
                 className="w-full flex items-center justify-center gap-2 py-2 my-1 rounded-xl text-white text-sm font-bold transition-transform active:scale-[0.98] shadow-lg"
