@@ -234,12 +234,12 @@ function dbRowToFormState(row: Record<string, unknown>): Partial<FormState> {
   const rentModes: RentMode[] = [];
   if (/월세[:\s]/.test(note) && !/반전세/.test(note.match(/월세[:\s][^\n]*/)?.[0] ?? "")) rentModes.push("월세");
   if (/반전세[:\s]/.test(note)) rentModes.push("반전세");
-  if (/전세[:\s]/.test(note) && !/반전세/.test(note)) rentModes.push("전세");
+  if (/(?<!반)전세[:\s]/.test(note)) rentModes.push("전세");
   if (rentModes.length === 0 && tradeType === "임대") rentModes.push("월세");
 
   const wolseM = note.match(/월세:\s*보증금\s*([0-9]+).*?월세\s*([0-9]+)/);
   const halfM = note.match(/반전세:\s*보증금\s*([0-9]+).*?월세\s*([0-9]+)/);
-  const jeonseM = note.match(/전세:\s*보증금\s*([0-9]+)/);
+  const jeonseM = note.match(/(?<!반)전세:\s*보증금\s*([0-9]+)/);
   const directionM = note.match(/방향:\s*([^\n|]+)/);
   const lhM = note.match(/LH:\s*([^\n|]+)/);
   const cleanM = note.match(/청소비:\s*([^\n|]+)/);
