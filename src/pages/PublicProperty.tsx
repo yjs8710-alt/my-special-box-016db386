@@ -373,6 +373,37 @@ export default function PublicProperty() {
           </div>
         )}
 
+        {/* 다른 호실 선택 */}
+        {showingOtherUnit && otherUnits.length > 1 && (
+          <div className="px-5 pt-4">
+            <p className="text-xs font-bold text-foreground mb-2">다른 호실 사진 보기</p>
+            <div className="flex flex-wrap gap-1.5">
+              {otherUnits.map((u) => {
+                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}층` : "호실";
+                const active = u.id === selectedUnitId;
+                return (
+                  <button
+                    key={u.id}
+                    onClick={() => {
+                      setSelectedUnitId(u.id);
+                      setFallbackImages(u.images);
+                      setImgIdx(0);
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {label}
+                    {u.room_type ? <span className="ml-1 font-normal opacity-70">· {u.room_type}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Content */}
         <div className="p-5 flex flex-col gap-5">
           {/* Badges + Title */}
