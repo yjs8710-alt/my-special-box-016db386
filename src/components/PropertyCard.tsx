@@ -195,6 +195,14 @@ const PropertyCard = ({
             </span>
           </div>
         )}
+        {/* 매물번호 (게스트/일반회원만) */}
+        {isGuest && regNo && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+            <span className="bg-primary/90 text-primary-foreground text-[10px] font-extrabold px-2.5 py-0.5 rounded-full backdrop-blur-sm tracking-wider shadow">
+              NO.{regNo}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
