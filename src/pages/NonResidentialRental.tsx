@@ -291,6 +291,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
             선택 삭제
           </button>
         )}
+        {!isGuest && (
         <button
           onClick={() => window.dispatchEvent(new Event("open-register-modal"))}
           className="ml-auto flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white whitespace-nowrap flex-shrink-0 transition-transform hover:scale-[1.02] active:scale-95"
@@ -300,6 +301,7 @@ const NonResidentialRental = ({ mode = "default" }: NonResidentialRentalProps) =
           <span className="text-sm leading-none">+</span>
           매물 등록
         </button>
+        )}
       </div>
 
       <main
