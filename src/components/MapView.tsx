@@ -362,6 +362,27 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       const handlePinClick = (event: Event, prop: MapProperty) => {
         if (isMobile && isGestureBlocked()) return;
         stopMarkerEvent(event);
+        // 겹쳐 있는(픽셀상 핀 반경 내) 매물들을 모두 함께 선택
+        try {
+          const proj = map.getProjection?.();
+          const pinPx = getPinSize(zoom, isMobile);
+          const threshold = pinPx * 0.9; // 핀 직경에 가까운 영역을 같은 위치로 간주
+          if (proj && proj.pointFromCoords) {
+            const base = proj.pointFromCoords(new window.kakao.maps.LatLng(prop.lat, prop.lng));
+            const overlapIds: number[] = [];
+            renderProps.forEach((p) => {
+              if (!p.lat || !p.lng) return;
+              const pt = proj.pointFromCoords(new window.kakao.maps.LatLng(p.lat, p.lng));
+              if (Math.hypot(pt.x - base.x, pt.y - base.y) <= threshold) {
+                overlapIds.push(p.id);
+              }
+            });
+            if (overlapIds.length > 1 && propsRef.current.onClusterSelect) {
+              propsRef.current.onClusterSelect(overlapIds);
+              return;
+            }
+          }
+        } catch (_) {}
         propsRef.current.onSelect(prop.id);
       };
 
