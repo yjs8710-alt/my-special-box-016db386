@@ -197,6 +197,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   const autoRetryCountRef = useRef(0);
   const resizeFrameRef = useRef<number | null>(null);
   const lastMapSizeRef = useRef({ width: 0, height: 0 });
+  const isMobileRef = useRef(false);
+  const gestureBlockUntilRef = useRef(0);
 
   // 반경검색 관련 ref
   const circleOverlayRef = useRef<any>(null);
@@ -211,6 +213,15 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   useEffect(() => {
     propsRef.current = { properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect };
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia(MOBILE_QUERY);
+    const updateMobile = () => { isMobileRef.current = mql.matches; };
+    updateMobile();
+    mql.addEventListener("change", updateMobile);
+    return () => mql.removeEventListener("change", updateMobile);
+  }, []);
 
   const waitForContainerReady = useCallback(async () => {
     for (let attempt = 0; attempt < 12; attempt += 1) {
