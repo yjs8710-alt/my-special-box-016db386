@@ -4146,9 +4146,8 @@ interface MapSidebarProps {
   currentBounds?: { swLat: number; swLng: number; neLat: number; neLng: number } | null;
 }
 
-const MIN_WIDTH = 260;
 const MAX_WIDTH = 700;
-const DEFAULT_WIDTH = 540;
+const FIXED_WIDTH = MAX_WIDTH;
 
 const MapSidebar = ({
   properties,
@@ -4184,11 +4183,7 @@ const MapSidebar = ({
     }, 300);
   };
   const [adminEditProp, setAdminEditProp] = useState<MapProperty | null>(null);
-  const [width, setWidth] = useState(() => {
-    const saved = localStorage.getItem("sidebar_width");
-    const parsed = saved ? Number(saved) : 0;
-    return parsed >= MIN_WIDTH ? Math.min(MAX_WIDTH, parsed) : DEFAULT_WIDTH;
-  });
+  const width = FIXED_WIDTH;
   const [collapsed, setCollapsed] = useState(false);
   const [lightbox, setLightbox] = useState<{ units: LightboxUnit[]; unitIdx: number } | null>(null);
   const [photoUploadProp, setPhotoUploadProp] = useState<MapProperty | null>(null);
