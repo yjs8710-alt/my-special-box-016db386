@@ -8,7 +8,7 @@ const MAP_PIN_URL = mapPinAsset.url;
 const MOBILE_QUERY = "(max-width: 767px)";
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_MAX_DURATION_MS = 420;
-const GESTURE_SETTLE_MS = 320;
+const GESTURE_SETTLE_MS = 80;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -93,15 +93,17 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
         font-size:${fontSize}px;line-height:1;
         text-shadow:0 1px 2px rgba(0,0,0,0.55);
         font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        pointer-events:auto;
+        pointer-events:none;
         background:transparent;
         transform:translateY(-0.12em);
+        z-index:1;
       ">${count}</div>
       <div style="
         position:absolute;inset:0;
         pointer-events:auto;
         background:transparent;
-        z-index:2;
+        z-index:3;
+        cursor:pointer;
       "></div>
     </div>
   `;
@@ -650,13 +652,13 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           const newZoom = map.getLevel();
           zoomLevelRef.current = newZoom;
           gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
-          // 핀 선택은 줌/이동 후에도 유지 (사용자 요청)
-          // 줌 중 연속 재렌더 방지 — 마지막 줌 레벨에서만 재렌더
+          // 줌 변경 시 체크된 핀들 모두 해제
+          propsRef.current.onMapMoveClear?.();
           if (zoomRenderTimer) window.clearTimeout(zoomRenderTimer);
           zoomRenderTimer = window.setTimeout(() => {
             if (!mountedRef.current) return;
             renderOverlays(map, propsRef.current.properties, propsRef.current.selectedId, propsRef.current.onSelect, zoomLevelRef.current);
-          }, isMobileRef.current ? 220 : 80);
+          }, isMobileRef.current ? 180 : 60);
           fireBounds(map);
         });
 
@@ -664,7 +666,8 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (!mountedRef.current) return;
           if (radiusModeRef.current) return;
           gestureBlockUntilRef.current = Date.now() + GESTURE_SETTLE_MS;
-          // 드래그(이동)는 체크 유지 — 줌만 해제
+          // 드래그(이동) 시작 시 체크된 핀들 모두 해제
+          propsRef.current.onMapMoveClear?.();
         });
 
         window.kakao.maps.event.addListener(map, "dragend", () => {
