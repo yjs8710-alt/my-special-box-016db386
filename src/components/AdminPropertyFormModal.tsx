@@ -575,7 +575,7 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     const modes: string[] = [];
     const wolseMatch = noteStr.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
     const halfMatch  = noteStr.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
-    const jeonseMatch = noteStr.match(/전세: 보증금 ([^\n]+)만원/);
+    const jeonseMatch = noteStr.match(/(?<!반)전세: 보증금 ([^\n]+?)만원(?!\s*\/)/);
     if (wolseMatch)  modes.push("월세");
     if (halfMatch)   { modes.push("반전세"); contacts.halfDeposit = halfMatch[1].trim(); contacts.halfMonthly = halfMatch[2].trim(); }
     if (jeonseMatch) { modes.push("전세");  contacts.jeonseDeposit = jeonseMatch[1].trim(); }
