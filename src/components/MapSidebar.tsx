@@ -4184,6 +4184,7 @@ const MapSidebar = ({
 }: MapSidebarProps) => {
   const { isAdmin } = useAdminAuth();
   const { user: authUser } = useAuth();
+  const isGuest = useIsGuest();
   const isMobile = useIsMobile();
   // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
   // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
