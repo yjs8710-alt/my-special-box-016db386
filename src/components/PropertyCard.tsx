@@ -1,4 +1,4 @@
-import { MapPin, Eye, Heart, X, MessageCircle, Building2 } from "lucide-react";
+import { MapPin, Eye, Heart, X, Building2 } from "lucide-react";
 import PhotoWatermark from "./PhotoWatermark";
 import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
@@ -218,9 +218,9 @@ const PropertyCard = ({
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setShowInquiry(true); }}
-                className="shrink-0 ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+                className="shrink-0 ml-auto px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
               >
-                <MessageCircle className="w-3 h-3" /> 문의하기
+                매물문의
               </button>
             </>
           )}

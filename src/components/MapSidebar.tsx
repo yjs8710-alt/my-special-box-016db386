@@ -75,6 +75,7 @@ const roomPasswordChipStyle = {
 interface LightboxUnit {
   unitNumber?: string; // 호수 (e.g., "202호")
   roomType?: string;     // 방종류 (e.g., "원룸")
+  floor?: string;        // 층수 (게스트용 라벨)
   label?: string;        // legacy fallback (단일 매물명 등)
   images: string[];
   isReference?: boolean; // 참고용 사진 여부
@@ -154,11 +155,14 @@ function LightboxModal({
   const hiddenCount = hiddenUnits.length;
   // 더보기 드롭다운이 열려있을 때 선택하면 자동으로 닫음 (선택은 handleUnitChange에서 처리)
 
+  const isGuestLightbox = useIsGuest();
   const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
-    const unitLabel = u.unitNumber ?? u.label ?? "";
-    const roomLabel = u.roomType ?? "";
+    const unitLabel = isGuestLightbox
+      ? (u.floor ?? "")
+      : (u.unitNumber ?? u.label ?? "");
+    const roomLabel = isGuestLightbox ? "" : (u.roomType ?? "");
     const stacked = opts?.stacked;
     return (
       <button
@@ -208,8 +212,8 @@ function LightboxModal({
                 {hiddenUnits.map((u, idx) => {
                   const realIdx = MOBILE_VISIBLE_TABS + idx;
                   const isCurrent = realIdx === unitIdx;
-                  const unitLabel = u.unitNumber ?? u.label ?? "";
-                  const roomLabel = u.roomType ?? "";
+                  const unitLabel = isGuestLightbox ? (u.floor ?? "") : (u.unitNumber ?? u.label ?? "");
+                  const roomLabel = isGuestLightbox ? "" : (u.roomType ?? "");
                   return (
                     <button
                       key={realIdx}
@@ -5269,6 +5273,7 @@ const MapSidebar = ({
                                             return deduped.map((p) => ({
                                               unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
                                               roomType: p.roomType || undefined,
+                                              floor: p.floor || undefined,
                                               label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                               images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                               isReference: p.id !== prop.id,
@@ -5278,6 +5283,7 @@ const MapSidebar = ({
                                           ? [{
                                               unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
                                               roomType: prop.roomType || undefined,
+                                              floor: prop.floor || undefined,
                                               label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
                                               images:
                                                 prop.images && prop.images.length > 0
@@ -5361,6 +5367,7 @@ const MapSidebar = ({
                                     return deduped.map((p) => ({
                                       unitNumber: p.unitNumber ? `${p.unitNumber}호` : undefined,
                                       roomType: p.roomType || undefined,
+                                      floor: p.floor || undefined,
                                       label: (p.unitNumber ? `${p.unitNumber}호` : p.title || p.address) + (p.roomType ? ` ${p.roomType}` : ""),
                                       images: p.images && p.images.length > 0 ? p.images : p.image ? [p.image] : [],
                                       isReference: p.id !== prop.id,
@@ -5370,6 +5377,7 @@ const MapSidebar = ({
                                   ? [{
                                       unitNumber: prop.unitNumber ? `${prop.unitNumber}호` : undefined,
                                       roomType: prop.roomType || undefined,
+                                      floor: prop.floor || undefined,
                                       label: (prop.unitNumber ? `${prop.unitNumber}호` : prop.title) + (prop.roomType ? ` ${prop.roomType}` : ""),
                                       images: prop.images && prop.images.length > 0 ? prop.images : prop.image ? [prop.image] : [],
                                       isReference: false,
