@@ -247,7 +247,9 @@ export default function PublicProperty() {
         if (!isMounted) return;
 
         setProperty(data as PropertyData);
-        setAgent(agentResult.data ?? null);
+        const agentList = Array.isArray(agentResult.data) ? agentResult.data : (agentResult.data ? [agentResult.data] : []);
+        const approved = agentList.find((a: any) => a.status === "approved");
+        setAgent((approved || agentList[0] || null) as AgentData | null);
         setBuilding(buildingResult.data ?? null);
       } finally {
         if (isMounted) setLoading(false);
