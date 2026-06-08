@@ -3469,25 +3469,27 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setShowFullAddr((v) => !v);
+              if (!isGuest) setShowFullAddr((v) => !v);
             }}
             className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
             style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
-            title="클릭하면 전체 주소 표시"
+            title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
           >
-            {showFullAddr ? prop.address : shortAddress(prop.address)}
+            {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
-          {/* 로드뷰 버튼 */}
-          <button
-            type="button"
-            onClick={handleRoadviewOpen}
-            className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
-            style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
-          >
-            로드뷰
-          </button>
+          {/* 로드뷰 버튼 (게스트 숨김) */}
+          {!isGuest && (
+            <button
+              type="button"
+              onClick={handleRoadviewOpen}
+              className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap"
+              style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
+            >
+              로드뷰
+            </button>
+          )}
           {/* 도로명 버튼 (hover 시 도로명주소 표시) */}
-          {prop.roadAddress && (
+          {!isGuest && prop.roadAddress && (
             <span
               className="flex-shrink-0 px-1 py-0.5 rounded text-[9px] font-bold border transition-colors hover:bg-primary/10 whitespace-nowrap relative group/road cursor-default"
               style={{ color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.3)" }}
