@@ -70,38 +70,42 @@ function createPinImageHtml(count: number, size: number, isSelected = false) {
   const digits = String(count).length;
   const ratio = digits >= 4 ? 0.28 : digits === 3 ? 0.34 : digits === 2 ? 0.42 : 0.48;
   const fontSize = Math.max(11, Math.round(size * ratio));
+  const hitPad = Math.max(10, Math.round(size * 0.18));
   // 체크 상태일 때 hue-rotate 로 색상만 변경 (크기/배지 변경 없음)
   const imgFilter = isSelected
     ? "hue-rotate(140deg) saturate(1.6) brightness(1.05)"
     : "none";
   return `
-    <div style="
+    <div data-pin-hitbox="true" style="
       position:relative;
-      width:${size}px;height:${size}px;
+      width:${size + hitPad * 2}px;height:${size + hitPad * 2}px;
+      padding:${hitPad}px;
       transform-origin:center center;
       cursor:pointer;
       pointer-events:auto;
-      background:transparent;
+      background:rgba(255,255,255,0.001);
       filter:${isSelected ? "drop-shadow(0 3px 5px rgba(0,0,0,0.35))" : "none"};
     ">
-      <img src="${MAP_PIN_URL}" alt="" draggable="false"
-        style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
-      <div style="
-        position:absolute;inset:0;
-        display:flex;align-items:center;justify-content:center;
-        color:#fff;font-weight:800;
-        font-size:${fontSize}px;line-height:1;
-        text-shadow:0 1px 2px rgba(0,0,0,0.55);
-        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-        pointer-events:none;
-        background:transparent;
-        transform:translateY(-0.12em);
-        z-index:1;
-      ">${count}</div>
+      <div style="position:relative;width:${size}px;height:${size}px;pointer-events:auto;">
+        <img src="${MAP_PIN_URL}" alt="" draggable="false"
+          style="width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none;filter:${imgFilter};" />
+        <div style="
+          position:absolute;inset:0;
+          display:flex;align-items:center;justify-content:center;
+          color:#fff;font-weight:800;
+          font-size:${fontSize}px;line-height:1;
+          text-shadow:0 1px 2px rgba(0,0,0,0.55);
+          font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+          pointer-events:auto;
+          background:transparent;
+          transform:translateY(-0.12em);
+          z-index:1;
+        ">${count}</div>
+      </div>
       <div style="
         position:absolute;inset:0;
         pointer-events:auto;
-        background:transparent;
+        background:rgba(255,255,255,0.001);
         z-index:3;
         cursor:pointer;
       "></div>
@@ -214,10 +218,23 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
   // 반경검색 관련 ref
   const circleOverlayRef = useRef<any>(null);
   const radiusLabelRef = useRef<any>(null);
+  const markerClickLockUntilRef = useRef(0);
+  const markerTouchRef = useRef<{ x: number; y: number; time: number; moved: boolean; touches: number } | null>(null);
   const draggingRef = useRef(false);
   const dragCenterRef = useRef<{ lat: number; lng: number } | null>(null);
   const radiusModeRef = useRef<boolean>(!!radiusMode);
   useEffect(() => { radiusModeRef.current = !!radiusMode; }, [radiusMode]);
+
+  const stopMarkerEvent = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    (event as any).stopImmediatePropagation?.();
+  };
+  const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
+  const getTouchPoint = (event: TouchEvent) => {
+    const touch = event.changedTouches[0] ?? event.touches[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
 
   // 최신 props를 ref로 유지 (zoom 이벤트 핸들러에서 사용)
   const propsRef = useRef({ properties, selectedId, selectedIds, onSelect, onBoundsChange, onRadiusChange, onMapMoveClear, onClusterSelect });
@@ -360,16 +377,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const { clusters, singles } = buildClusters(renderProps, zoom, selSet);
 
-      const stopMarkerEvent = (event: Event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      };
-      const isGestureBlocked = () => Date.now() < gestureBlockUntilRef.current;
-      const getTouchPoint = (event: TouchEvent) => {
-        const touch = event.changedTouches[0] ?? event.touches[0];
-        return touch ? { x: touch.clientX, y: touch.clientY } : null;
-      };
-
       const handlePinClick = (event: Event, prop: MapProperty) => {
         if (isMobile && isGestureBlocked()) return;
         stopMarkerEvent(event);
@@ -399,6 +406,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
         content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
         let startY = 0;
@@ -459,6 +467,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
         content.style.touchAction = isMobile ? "auto" : "manipulation";
+        content.style.overflow = "visible";
         content.onmousedown = stopMarkerEvent;
         let startX = 0;
         let startY = 0;
@@ -522,6 +531,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
               content.dataset.sig = sig;
             }
+            content.dataset.mapMarkerIds = String(prop.id);
             bindPinClick(content, prop);
           }
           try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
@@ -532,6 +542,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.innerHTML = createPinHtml(prop, isSelected, zoom, isMobile);
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
+        content.dataset.mapMarkerIds = String(prop.id);
         bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -539,6 +550,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           content,
           map,
           yAnchor: 0.5,
+          xAnchor: 0.5,
           zIndex: isSelected ? 1000 : 0,
         });
         existing.set(key, overlay);
@@ -570,6 +582,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.dataset.sig = sig;
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
+            content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
             bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
@@ -581,6 +594,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
+        content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
         bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
@@ -612,6 +626,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     mountedRef.current = true;
 
     let cancelled = false;
+    let cleanupDocumentMarkerEvents = () => {};
     setMapError(false);
 
     (async () => {
@@ -680,6 +695,80 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           fireBounds(map);
         });
 
+        const getMarkerTarget = (event: Event) => {
+          const target = event.target as HTMLElement | null;
+          return target?.closest?.("[data-map-marker-ids]") as HTMLElement | null;
+        };
+
+        const runMarkerTargetClick = (event: Event, target: HTMLElement) => {
+          const ids = (target.dataset.mapMarkerIds ?? "")
+            .split(",")
+            .map((id) => Number(id))
+            .filter(Number.isFinite);
+          if (ids.length === 0) return;
+          stopMarkerEvent(event);
+          markerClickLockUntilRef.current = Date.now() + 450;
+          if (ids.length > 1 && propsRef.current.onClusterSelect) {
+            propsRef.current.onClusterSelect(ids);
+          } else {
+            propsRef.current.onSelect(ids[0]);
+          }
+        };
+
+        const handleDocumentClickCapture = (event: MouseEvent) => {
+          if (!containerRef.current?.contains(event.target as Node)) return;
+          if (Date.now() < markerClickLockUntilRef.current) {
+            stopMarkerEvent(event);
+            return;
+          }
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          if (isMobileRef.current && isGestureBlocked()) return;
+          runMarkerTargetClick(event, target);
+        };
+
+        const handleDocumentTouchStartCapture = (event: TouchEvent) => {
+          if (!containerRef.current?.contains(event.target as Node)) return;
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          const point = getTouchPoint(event);
+          if (!point) return;
+          markerTouchRef.current = { x: point.x, y: point.y, time: Date.now(), moved: false, touches: event.touches.length };
+        };
+
+        const handleDocumentTouchMoveCapture = (event: TouchEvent) => {
+          const touch = markerTouchRef.current;
+          if (!touch) return;
+          const point = getTouchPoint(event);
+          if (!point) return;
+          touch.touches = Math.max(touch.touches, event.touches.length);
+          if (event.touches.length > 1 || Math.hypot(point.x - touch.x, point.y - touch.y) > TAP_MOVE_THRESHOLD_PX) {
+            touch.moved = true;
+          }
+        };
+
+        const handleDocumentTouchEndCapture = (event: TouchEvent) => {
+          const touch = markerTouchRef.current;
+          markerTouchRef.current = null;
+          if (!touch || !containerRef.current?.contains(event.target as Node)) return;
+          const target = getMarkerTarget(event);
+          if (!target) return;
+          const point = getTouchPoint(event);
+          const distance = point ? Math.hypot(point.x - touch.x, point.y - touch.y) : 999;
+          const isTap = touch.touches === 1 && !touch.moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - touch.time <= TAP_MAX_DURATION_MS && !isGestureBlocked();
+          if (isTap) runMarkerTargetClick(event, target);
+        };
+
+        document.addEventListener("click", handleDocumentClickCapture, true);
+        document.addEventListener("touchstart", handleDocumentTouchStartCapture, true);
+        document.addEventListener("touchmove", handleDocumentTouchMoveCapture, true);
+        document.addEventListener("touchend", handleDocumentTouchEndCapture, true);
+        cleanupDocumentMarkerEvents = () => {
+          document.removeEventListener("click", handleDocumentClickCapture, true);
+          document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
+          document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
+          document.removeEventListener("touchend", handleDocumentTouchEndCapture, true);
+        };
 
 
 
@@ -741,6 +830,7 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
     return () => {
       cancelled = true;
       mountedRef.current = false;
+      cleanupDocumentMarkerEvents();
       if (retryTimeoutRef.current) {
         window.clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
