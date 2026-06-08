@@ -477,22 +477,12 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
 
       const handleClusterClick = (cluster: Cluster) => {
         const ids = cluster.items.map((item) => item.id);
+        if (ids.length === 0) return;
         if (propsRef.current.onClusterSelect && ids.length > 1) {
           propsRef.current.onClusterSelect(ids);
           return;
         }
-        if (ids.length === 1) {
-          propsRef.current.onSelect(ids[0]);
-          return;
-        }
-
-        try {
-          const m = mapRef.current;
-          if (!m) return;
-          const curLevel = m.getLevel();
-          const nextLevel = Math.max(1, curLevel - 2);
-          m.setLevel(nextLevel, { anchor: new window.kakao.maps.LatLng(cluster.lat, cluster.lng) });
-        } catch (_) {}
+        propsRef.current.onSelect(ids[0]);
       };
 
       const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
