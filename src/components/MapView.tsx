@@ -778,11 +778,29 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           }
         };
 
+        const mouseDownRef = { x: 0, y: 0, time: 0, valid: false };
+        const MOUSE_DRAG_THRESHOLD_PX = 6;
+
+        const handleDocumentMouseDownCapture = (event: MouseEvent) => {
+          if (!containerRef.current?.contains(event.target as Node)) return;
+          mouseDownRef.x = event.clientX;
+          mouseDownRef.y = event.clientY;
+          mouseDownRef.time = Date.now();
+          mouseDownRef.valid = true;
+        };
+
         const handleDocumentClickCapture = (event: MouseEvent) => {
           if (!containerRef.current?.contains(event.target as Node)) return;
           if (Date.now() < markerClickLockUntilRef.current) {
             stopMarkerEvent(event);
             return;
+          }
+          // 마우스를 누른 위치에서 일정 거리 이상 이동했다면 드래그로 간주 — 클릭 무시
+          if (mouseDownRef.valid) {
+            const dx = event.clientX - mouseDownRef.x;
+            const dy = event.clientY - mouseDownRef.y;
+            mouseDownRef.valid = false;
+            if (Math.hypot(dx, dy) > MOUSE_DRAG_THRESHOLD_PX) return;
           }
           const target = getMarkerTarget(event) ?? findMarkerTargetAtPoint(event);
           if (!target) return;
@@ -822,11 +840,13 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
           if (isTap) runMarkerTargetClick(event, target);
         };
 
+        document.addEventListener("mousedown", handleDocumentMouseDownCapture, true);
         document.addEventListener("click", handleDocumentClickCapture, true);
         document.addEventListener("touchstart", handleDocumentTouchStartCapture, true);
         document.addEventListener("touchmove", handleDocumentTouchMoveCapture, true);
         document.addEventListener("touchend", handleDocumentTouchEndCapture, true);
         cleanupDocumentMarkerEvents = () => {
+          document.removeEventListener("mousedown", handleDocumentMouseDownCapture, true);
           document.removeEventListener("click", handleDocumentClickCapture, true);
           document.removeEventListener("touchstart", handleDocumentTouchStartCapture, true);
           document.removeEventListener("touchmove", handleDocumentTouchMoveCapture, true);
