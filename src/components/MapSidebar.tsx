@@ -3501,32 +3501,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               if (!isGuest) setShowFullAddr((v) => !v);
             }}
             className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
-            style={{ color: showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))" }}
+            style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
             title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
           >
             {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
-          {/* 게스트: 동 우측 협력업체 버튼 */}
-          {isGuest && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                  detail: {
-                    propertyDbId: prop.dbId,
-                    propertyRegNo: prop.regNo,
-                    agentUserId: prop.registeredBy,
-                    propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                  },
-                }));
-              }}
-              className="flex-shrink-0 ml-auto flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90"
-              style={{ background: "hsl(var(--primary))", color: "white" }}
-            >
-              <Building2 className="w-3 h-3" /> 협력업체
-            </button>
-          )}
+          {/* 게스트/일반회원 버튼은 우측 확인/등록 위치에 표시 */}
           {/* 로드뷰 버튼 (게스트 숨김) */}
           {!isGuest && (
             <button
@@ -3552,6 +3532,26 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </span>
           )}
           <span className="flex-1" />
+          {isGuest && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                  detail: {
+                    propertyDbId: prop.dbId,
+                    propertyRegNo: prop.regNo,
+                    agentUserId: prop.registeredBy,
+                    propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                  },
+                }));
+              }}
+              className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+              style={{ background: "hsl(var(--primary))", color: "white" }}
+            >
+              회원업체
+            </button>
+          )}
           <MemoNotepad
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
