@@ -230,14 +230,11 @@ export default function PublicProperty() {
         const agentRequest = agentUserId
           ? supabase
               .from("agent_profiles")
-              .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name")
+              .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name,status,is_active,created_at")
               .eq("user_id", agentUserId)
-              .eq("status", "approved")
               .order("is_active", { ascending: false })
               .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle()
-          : Promise.resolve({ data: null as AgentData | null, error: null });
+          : Promise.resolve({ data: null as any, error: null });
 
         const buildingRequest = supabase
           .from("building_summary")
