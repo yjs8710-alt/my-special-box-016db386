@@ -89,7 +89,7 @@ const PropertyCard = ({
         {displayImage ? (
           <>
             <img
-              src={thumbUrl(displayImage, 600)}
+              src={thumbUrl(displayImage, 800, 88)}
               alt={title}
               loading="lazy"
               decoding="async"

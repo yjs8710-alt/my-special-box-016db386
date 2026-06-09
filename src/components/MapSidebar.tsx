@@ -5054,7 +5054,7 @@ const MapSidebar = ({
                                   return (
                                     <>
                                       <img
-                                        src={thumbUrl(showImg, 200)}
+                                        src={thumbUrl(showImg, 320, 88)}
                                         alt={item.label}
                                         loading="eager"
                                         decoding="async"
@@ -5339,7 +5339,7 @@ const MapSidebar = ({
                                 return (
                                   <>
                                     <img
-                                      src={thumbUrl(showImage, 200)}
+                                      src={thumbUrl(showImage, 320, 88)}
                                       alt={prop.title}
                                       loading="eager"
                                       decoding="async"
