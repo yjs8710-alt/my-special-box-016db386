@@ -334,6 +334,9 @@ export default function PublicProperty() {
                 key={i}
                 src={src}
                 alt={`${property.title} ${i + 1}`}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "low" as any}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                 style={{ opacity: i === imgIdx ? 1 : 0 }}
               />
