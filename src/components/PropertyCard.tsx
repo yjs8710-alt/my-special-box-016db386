@@ -85,7 +85,7 @@ const PropertyCard = ({
     <>
     <div className="bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
-      <div className="relative overflow-hidden aspect-[4/3]">
+      <div className="relative overflow-hidden h-24">
         {displayImage ? (
           <>
             <img
