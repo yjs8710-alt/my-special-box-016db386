@@ -12,7 +12,7 @@ export const PARTNER_AGENCY = {
   representative: "김진형",
   phone: "043-275-0966",
   mobile: "010-8182-8939",
-  address: "충청북도 청주시 서원구 사창동 514-10",
+  address: "청주시 서원구 사창동 514-10",
   registration: "43112-2024-00034호",
   intro: "청주 지역 임대·매매 전문, 신뢰의 상담 파트너",
 };

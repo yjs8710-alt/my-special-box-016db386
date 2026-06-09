@@ -549,7 +549,7 @@ export default function PublicProperty() {
               <span className="text-muted-foreground">대표자</span>
               <span className="font-bold text-foreground">김진형</span>
               <span className="text-muted-foreground">주소</span>
-              <span className="text-foreground">충청북도 청주시 서원구 사창동 514-10</span>
+              <span className="text-foreground">청주시 서원구 사창동 514-10</span>
               <span className="text-muted-foreground">대표번호</span>
               <a href="tel:0432750966" className="font-bold text-primary">043-275-0966</a>
               <span className="text-muted-foreground">연락처</span>
