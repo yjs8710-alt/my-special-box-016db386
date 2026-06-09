@@ -124,6 +124,14 @@ const SignupPage = () => {
       return;
     }
 
+    // 이메일 확인이 필요한 경우 세션이 없으므로 RLS 통과를 위해 즉시 로그인 시도
+    if (!signUpData.session) {
+      await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
+    }
+
     // 2. 회원 프로필 저장 (일반회원은 자동 승인)
     const { error: profileError } = await supabase.from("agent_profiles").insert({
       user_id: userId,
