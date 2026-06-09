@@ -3553,13 +3553,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              if (!isGuest) setShowFullAddr((v) => !v);
+              if (!limitAddress) setShowFullAddr((v) => !v);
             }}
             className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
-            style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
-            title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
+            style={{ color: limitAddress ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
+            title={limitAddress ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
           >
-            {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
+            {limitAddress ? guGuDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
           {/* 게스트/일반회원 버튼은 우측 확인/등록 위치에 표시 */}
           {/* 로드뷰 버튼 (게스트 숨김) */}
