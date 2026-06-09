@@ -13,7 +13,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import { usePageViewTracker } from "./hooks/usePageViewTracker";
 import { useIsGuest } from "./hooks/useIsGuest";
 import { useState } from "react";
-import { InquiryModal, PartnerAgencyModal } from "./components/guest/GuestModals";
+import { InquiryModal, PartnerAgencyModal, GuestDetailModal, type GuestDetailInfo } from "./components/guest/GuestModals";
 
 // 게스트(비로그인)는 채팅 위젯 숨김
 const AuthGatedChatInquiry = () => {
@@ -26,6 +26,7 @@ const AuthGatedChatInquiry = () => {
 const GlobalGuestInquiry = () => {
   const [state, setState] = useState<{ open: boolean; detail?: any }>({ open: false });
   const [partner, setPartner] = useState<{ open: boolean; detail?: any }>({ open: false });
+  const [detailState, setDetailState] = useState<{ open: boolean; info?: GuestDetailInfo; partnerDetail?: any }>({ open: false });
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail || {};
@@ -35,11 +36,17 @@ const GlobalGuestInquiry = () => {
       const detail = (e as CustomEvent).detail || {};
       setPartner({ open: true, detail });
     };
+    const detailHandler = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      setDetailState({ open: true, info: d.info, partnerDetail: d.partnerDetail });
+    };
     window.addEventListener("open-guest-inquiry", handler);
     window.addEventListener("open-guest-partner", partnerHandler);
+    window.addEventListener("open-guest-detail", detailHandler);
     return () => {
       window.removeEventListener("open-guest-inquiry", handler);
       window.removeEventListener("open-guest-partner", partnerHandler);
+      window.removeEventListener("open-guest-detail", detailHandler);
     };
   }, []);
   return (
@@ -58,6 +65,14 @@ const GlobalGuestInquiry = () => {
         onChat={() => {
           setState({ open: true, detail: partner.detail });
           setPartner({ open: false });
+        }}
+      />
+      <GuestDetailModal
+        open={detailState.open}
+        onClose={() => setDetailState({ open: false })}
+        info={detailState.info}
+        onInquiry={() => {
+          setPartner({ open: true, detail: detailState.partnerDetail });
         }}
       />
     </>
