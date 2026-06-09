@@ -391,7 +391,7 @@ export const GuestDetailModal = ({
             onClick={() => { onClose(); onInquiry?.(); }}
             className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
           >
-            회원업체 문의
+            협력 공인중개사 문의
           </button>
         </div>
       </div>
