@@ -208,54 +208,62 @@ export default function PublicProperty() {
       setOtherUnits([]);
       setSelectedUnitId("");
 
-      try {
-        const { data, error } = await supabase
-          .from("properties")
-          .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
-          .eq("id", id)
-          .eq("status", "active")
-          .single();
+      const { data, error } = await supabase
+        .from("properties")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+        .eq("id", id)
+        .eq("status", "active")
+        .single();
 
-        if (error || !data) {
-          if (isMounted) setProperty(null);
-          return;
-        }
+      if (!isMounted) return;
 
-        const sharedBy = searchParams.get("sharedBy");
-        const agentUserId = sharedBy || data.registered_by;
+      if (error || !data) {
+        setProperty(null);
+        setLoading(false);
+        return;
+      }
 
-        const agentRequest = agentUserId
-          ? supabase
-              .from("agent_profiles")
-              .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name,status,is_active,created_at")
-              .eq("user_id", agentUserId)
-              .order("is_active", { ascending: false })
-              .order("created_at", { ascending: false })
-          : Promise.resolve({ data: null as any, error: null });
+      // 매물 본 데이터는 즉시 표시 (보조 데이터는 백그라운드 로드)
+      setProperty(data as PropertyData);
+      setLoading(false);
 
-        const buildingRequest = supabase
-          .from("building_summary")
-          .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
-          .eq("property_id", id)
-          .maybeSingle();
+      const sharedBy = searchParams.get("sharedBy");
+      const agentUserId = sharedBy || data.registered_by;
 
-        const [agentResult, buildingResult] = await Promise.all([agentRequest, buildingRequest]);
-
-        if (!isMounted) return;
-
-        setProperty(data as PropertyData);
-        const agentList = Array.isArray(agentResult.data) ? agentResult.data : (agentResult.data ? [agentResult.data] : []);
-        const approved = agentList.find((a: any) => a.status === "approved");
-        setAgent((approved || agentList[0] || null) as AgentData | null);
-        setBuilding(buildingResult.data ?? null);
-
-        // 사진이 없을 경우 같은 주소의 다른 호실 사진 가져오기
-        const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
-        if (!hasImages && data.address) {
-          const { data: siblings } = await (supabase as any).rpc("get_public_property_reference_images", {
-            _property_id: data.id,
+      // agent_profiles 백그라운드 로드
+      if (agentUserId) {
+        supabase
+          .from("agent_profiles")
+          .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name,status,is_active,created_at")
+          .eq("user_id", agentUserId)
+          .order("is_active", { ascending: false })
+          .order("created_at", { ascending: false })
+          .then(({ data: agentData }) => {
+            if (!isMounted) return;
+            const agentList = Array.isArray(agentData) ? agentData : agentData ? [agentData] : [];
+            const approved = agentList.find((a: any) => a.status === "approved");
+            setAgent((approved || agentList[0] || null) as AgentData | null);
           });
-          if (isMounted && siblings) {
+      }
+
+      // building_summary 백그라운드 로드
+      supabase
+        .from("building_summary")
+        .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
+        .eq("property_id", id)
+        .maybeSingle()
+        .then(({ data: buildingData }) => {
+          if (!isMounted) return;
+          setBuilding(buildingData ?? null);
+        });
+
+      // 사진이 없을 경우 같은 주소의 다른 호실 사진 (백그라운드)
+      const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
+      if (!hasImages && data.address) {
+        (supabase as any)
+          .rpc("get_public_property_reference_images", { _property_id: data.id })
+          .then(({ data: siblings }: any) => {
+            if (!isMounted || !siblings) return;
             const units = siblings
               .map((s: any) => ({
                 id: s.id as string,
@@ -264,22 +272,14 @@ export default function PublicProperty() {
                 room_type: s.room_type ?? null,
                 images: (Array.isArray(s.images) ? s.images : []).filter(Boolean),
               }))
-              .filter((u) => u.images.length > 0);
+              .filter((u: any) => u.images.length > 0);
             if (units.length > 0) {
               setOtherUnits(units);
               setSelectedUnitId(units[0].id);
               setFallbackImages(units[0].images);
               setFallbackFromOtherUnit(true);
-            } else {
-              setOtherUnits([]);
-              setSelectedUnitId("");
-              setFallbackImages([]);
-              setFallbackFromOtherUnit(false);
             }
-          }
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+          });
       }
     })();
 
