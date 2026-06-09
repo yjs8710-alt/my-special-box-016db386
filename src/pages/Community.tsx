@@ -191,7 +191,11 @@ const Community = () => {
           </div>
           <Button
             className="gap-1.5 rounded-full font-semibold"
-            style={{ background: "hsl(var(--accent))", color: "#fff" }}
+            style={{
+              background: "linear-gradient(135deg, hsl(22 100% 56%) 0%, hsl(22 100% 46%) 100%)",
+              color: "#fff",
+              border: "none",
+            }}
             onClick={openWrite}
           >
             <Pencil className="w-3.5 h-3.5" />
