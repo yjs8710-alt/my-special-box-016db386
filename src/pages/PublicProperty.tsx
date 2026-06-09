@@ -97,20 +97,29 @@ function sanitizeAddress(address: string): string {
 function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const [inView, setInView] = useState(false);
+
+  // 뷰포트에 들어올 때만 지도 SDK 로드 (초기 로딩 속도 개선)
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const el = mapRef.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!lat || !lng || !mapRef.current) return;
+    if (!inView || !lat || !lng || !mapRef.current) return;
 
     let cancelled = false;
-
-    const waitForContainerReady = async () => {
-      for (let attempt = 0; attempt < 10; attempt += 1) {
-        if (!mapRef.current) return false;
-        if (mapRef.current.clientWidth > 0 && mapRef.current.clientHeight > 0) return true;
-        await new Promise((resolve) => window.setTimeout(resolve, 120));
-      }
-      return Boolean(mapRef.current?.clientWidth && mapRef.current?.clientHeight);
-    };
 
     const relayout = () => {
       if (!mapInstanceRef.current || !window.kakao?.maps) return;
@@ -126,8 +135,6 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
       try {
         await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
         if (cancelled || !window.kakao?.maps || !mapRef.current) return;
-        const containerReady = await waitForContainerReady();
-        if (!containerReady || cancelled || !mapRef.current) return;
 
         const position = new window.kakao.maps.LatLng(lat, lng);
         const map = new window.kakao.maps.Map(mapRef.current, {
@@ -150,15 +157,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
           map,
         });
 
-        window.setTimeout(() => {
-          if (!cancelled) {
-            relayout();
-          }
-        }, 120);
-
-        window.setTimeout(() => {
-          if (!cancelled) relayout();
-        }, 700);
+        window.setTimeout(() => { if (!cancelled) relayout(); }, 200);
       } catch (_) {
         if (mapRef.current) {
           mapRef.current.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;background:hsl(220 16% 97%);color:hsl(218 14% 48%);font-size:12px;font-weight:700;">지도를 불러오지 못했습니다.</div>';
@@ -166,27 +165,16 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
       }
     })();
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") relayout();
-    };
-
-    window.addEventListener("pageshow", relayout);
-    window.addEventListener("online", relayout);
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
       cancelled = true;
       mapInstanceRef.current = null;
-      window.removeEventListener("pageshow", relayout);
-      window.removeEventListener("online", relayout);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [lat, lng]);
+  }, [inView, lat, lng]);
 
   return (
     <div>
       <p className="text-xs font-bold text-foreground mb-2">위치</p>
-      <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border" />
+      <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border bg-muted" />
       <p className="text-[10px] text-muted-foreground mt-1">정확한 위치는 중개사무소에 문의해주세요.</p>
     </div>
   );
@@ -220,54 +208,62 @@ export default function PublicProperty() {
       setOtherUnits([]);
       setSelectedUnitId("");
 
-      try {
-        const { data, error } = await supabase
-          .from("properties")
-          .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
-          .eq("id", id)
-          .eq("status", "active")
-          .single();
+      const { data, error } = await supabase
+        .from("properties")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+        .eq("id", id)
+        .eq("status", "active")
+        .single();
 
-        if (error || !data) {
-          if (isMounted) setProperty(null);
-          return;
-        }
+      if (!isMounted) return;
 
-        const sharedBy = searchParams.get("sharedBy");
-        const agentUserId = sharedBy || data.registered_by;
+      if (error || !data) {
+        setProperty(null);
+        setLoading(false);
+        return;
+      }
 
-        const agentRequest = agentUserId
-          ? supabase
-              .from("agent_profiles")
-              .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name,status,is_active,created_at")
-              .eq("user_id", agentUserId)
-              .order("is_active", { ascending: false })
-              .order("created_at", { ascending: false })
-          : Promise.resolve({ data: null as any, error: null });
+      // 매물 본 데이터는 즉시 표시 (보조 데이터는 백그라운드 로드)
+      setProperty(data as PropertyData);
+      setLoading(false);
 
-        const buildingRequest = supabase
-          .from("building_summary")
-          .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
-          .eq("property_id", id)
-          .maybeSingle();
+      const sharedBy = searchParams.get("sharedBy");
+      const agentUserId = sharedBy || data.registered_by;
 
-        const [agentResult, buildingResult] = await Promise.all([agentRequest, buildingRequest]);
-
-        if (!isMounted) return;
-
-        setProperty(data as PropertyData);
-        const agentList = Array.isArray(agentResult.data) ? agentResult.data : (agentResult.data ? [agentResult.data] : []);
-        const approved = agentList.find((a: any) => a.status === "approved");
-        setAgent((approved || agentList[0] || null) as AgentData | null);
-        setBuilding(buildingResult.data ?? null);
-
-        // 사진이 없을 경우 같은 주소의 다른 호실 사진 가져오기
-        const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
-        if (!hasImages && data.address) {
-          const { data: siblings } = await (supabase as any).rpc("get_public_property_reference_images", {
-            _property_id: data.id,
+      // agent_profiles 백그라운드 로드
+      if (agentUserId) {
+        supabase
+          .from("agent_profiles")
+          .select("name,phone,agency_name,agency_phone,agency_address,license_number,member_type,representative_name,status,is_active,created_at")
+          .eq("user_id", agentUserId)
+          .order("is_active", { ascending: false })
+          .order("created_at", { ascending: false })
+          .then(({ data: agentData }) => {
+            if (!isMounted) return;
+            const agentList = Array.isArray(agentData) ? agentData : agentData ? [agentData] : [];
+            const approved = agentList.find((a: any) => a.status === "approved");
+            setAgent((approved || agentList[0] || null) as AgentData | null);
           });
-          if (isMounted && siblings) {
+      }
+
+      // building_summary 백그라운드 로드
+      supabase
+        .from("building_summary")
+        .select("building_name,main_purpose,approval_date,land_area,building_area,total_area,floors_above,floors_below,parking_count,elevator")
+        .eq("property_id", id)
+        .maybeSingle()
+        .then(({ data: buildingData }) => {
+          if (!isMounted) return;
+          setBuilding(buildingData ?? null);
+        });
+
+      // 사진이 없을 경우 같은 주소의 다른 호실 사진 (백그라운드)
+      const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
+      if (!hasImages && data.address) {
+        (supabase as any)
+          .rpc("get_public_property_reference_images", { _property_id: data.id })
+          .then(({ data: siblings }: any) => {
+            if (!isMounted || !siblings) return;
             const units = siblings
               .map((s: any) => ({
                 id: s.id as string,
@@ -276,22 +272,14 @@ export default function PublicProperty() {
                 room_type: s.room_type ?? null,
                 images: (Array.isArray(s.images) ? s.images : []).filter(Boolean),
               }))
-              .filter((u) => u.images.length > 0);
+              .filter((u: any) => u.images.length > 0);
             if (units.length > 0) {
               setOtherUnits(units);
               setSelectedUnitId(units[0].id);
               setFallbackImages(units[0].images);
               setFallbackFromOtherUnit(true);
-            } else {
-              setOtherUnits([]);
-              setSelectedUnitId("");
-              setFallbackImages([]);
-              setFallbackFromOtherUnit(false);
             }
-          }
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+          });
       }
     })();
 
@@ -346,6 +334,9 @@ export default function PublicProperty() {
                 key={i}
                 src={src}
                 alt={`${property.title} ${i + 1}`}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+                fetchPriority={i === 0 ? "high" : "low" as any}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
                 style={{ opacity: i === imgIdx ? 1 : 0 }}
               />
