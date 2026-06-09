@@ -166,7 +166,7 @@ export const InquiryModal = ({
   );
 };
 
-// ===== 2. 협력업체(봄날부동산) 모달 =====
+// ===== 2. 협력 공인중개사 모달 =====
 export const PartnerAgencyModal = ({
   open,
   onClose,
@@ -182,25 +182,31 @@ export const PartnerAgencyModal = ({
     <Overlay onClose={onClose}>
       <div className="flex items-center justify-between px-5 py-3 border-b">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-primary" /> 협력 부동산
+          <Building2 className="w-4 h-4 text-primary" /> 협력 공인중개사
         </h3>
         <button onClick={onClose} className="p-1 rounded-full hover:bg-muted">
           <X className="w-4 h-4" />
         </button>
       </div>
       <div className="p-5 space-y-3">
-        <div className="text-center pb-2 border-b">
-          <h4 className="text-lg font-bold text-foreground">{a.name}</h4>
-          <p className="text-xs text-muted-foreground mt-1">{a.intro}</p>
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
+          <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
+          <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+            <span className="text-muted-foreground">사무소명</span>
+            <span className="font-bold text-foreground">{a.name}</span>
+            <span className="text-muted-foreground">대표자</span>
+            <span className="font-bold text-foreground">{a.representative}</span>
+            <span className="text-muted-foreground">주소</span>
+            <span className="text-foreground">{a.address}</span>
+            <span className="text-muted-foreground">대표번호</span>
+            <a href={`tel:${a.phone.replace(/[^0-9]/g, "")}`} className="font-bold text-primary">{a.phone}</a>
+            <span className="text-muted-foreground">연락처</span>
+            <a href={`tel:${a.mobile.replace(/[^0-9]/g, "")}`} className="font-bold text-primary">{a.mobile}</a>
+            <span className="text-muted-foreground">개설등록번호</span>
+            <span className="text-foreground">{a.registration}</span>
+          </div>
         </div>
-        <dl className="space-y-1.5 text-sm">
-          <div className="flex"><dt className="w-20 text-muted-foreground text-xs">대표</dt><dd className="font-medium">{a.representative}</dd></div>
-          <div className="flex"><dt className="w-20 text-muted-foreground text-xs">전화</dt><dd className="font-medium">{a.phone}</dd></div>
-          <div className="flex"><dt className="w-20 text-muted-foreground text-xs">휴대전화</dt><dd className="font-medium">{a.mobile}</dd></div>
-          <div className="flex"><dt className="w-20 text-muted-foreground text-xs">주소</dt><dd className="font-medium text-xs">{a.address}</dd></div>
-          <div className="flex"><dt className="w-20 text-muted-foreground text-xs">등록번호</dt><dd className="font-medium text-xs">{a.registration}</dd></div>
-        </dl>
-        <div className="grid grid-cols-2 gap-2 pt-2">
+        <div className="grid grid-cols-2 gap-2 pt-1">
           <a
             href={`tel:${a.mobile.replace(/[^0-9]/g, "")}`}
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
