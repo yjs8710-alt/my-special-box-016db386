@@ -887,7 +887,7 @@ const BuildingGroup = ({
             <span>매물명</span>
             <span className="text-center">보증금/월세</span>
             <span className="text-center">층/면적</span>
-            <span className="text-center">조회</span>
+            <span className="text-center">조회수</span>
             <span className="text-center">등록일</span>
             <span className="text-center">상태</span>
             <span className="text-center">액션</span>
