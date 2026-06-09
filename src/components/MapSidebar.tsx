@@ -779,8 +779,8 @@ ContactIcon.displayName = "ContactIcon";
 
 const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number, number2 }, ref) => {
   const isGuest = useIsGuest();
+  if (isGuest) return null;
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
-  if (isGuest) number = undefined as any;
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
