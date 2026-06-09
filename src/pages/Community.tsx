@@ -190,9 +190,9 @@ const Community = () => {
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">커뮤니티</h1>
           </div>
           <Button
-            className="gap-1.5 rounded-full font-semibold"
+            className="gap-1.5 rounded-full font-semibold shadow-md hover:opacity-90"
             style={{
-              background: "linear-gradient(135deg, hsl(22 100% 56%) 0%, hsl(22 100% 46%) 100%)",
+              background: "linear-gradient(135deg, #FF8A3D 0%, #FF6B1A 50%, #E04E00 100%)",
               color: "#fff",
               border: "none",
             }}
@@ -211,7 +211,7 @@ const Community = () => {
               className="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
               style={
                 activeCategory === key
-                  ? { background: "linear-gradient(135deg, hsl(220 90% 24%) 0%, hsl(220 80% 38%) 100%)", color: "#fff", borderColor: "transparent" }
+                  ? { background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)", color: "#fff", borderColor: "transparent", boxShadow: "0 2px 8px rgba(37,99,235,0.35)" }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
               }
             >
