@@ -5307,11 +5307,11 @@ const MapSidebar = ({
                         }`}
                       >
                         {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
-                          {/* ①썸네일 96px — 고화질 렌더링 + 참고용 사진 */}
+                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : (isGuest ? "144px" : "96px"), minHeight: isMobile ? "72px" : undefined }}>
+                          {/* ①썸네일 — 게스트/일반회원은 1.5배 크기(144px), 그 외 96px */}
                           {!isMobile && <div
-                            className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
-                            style={{ minHeight: "96px" }}
+                            className={`${isGuest ? "w-[144px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
+                            style={{ minHeight: isGuest ? "144px" : "96px" }}
                           >
                             {(() => {
                               const hasOwnImage = prop.image && prop.image.length > 0;
