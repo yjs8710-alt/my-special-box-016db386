@@ -97,20 +97,29 @@ function sanitizeAddress(address: string): string {
 function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; address: string }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const [inView, setInView] = useState(false);
+
+  // 뷰포트에 들어올 때만 지도 SDK 로드 (초기 로딩 속도 개선)
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const el = mapRef.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!lat || !lng || !mapRef.current) return;
+    if (!inView || !lat || !lng || !mapRef.current) return;
 
     let cancelled = false;
-
-    const waitForContainerReady = async () => {
-      for (let attempt = 0; attempt < 10; attempt += 1) {
-        if (!mapRef.current) return false;
-        if (mapRef.current.clientWidth > 0 && mapRef.current.clientHeight > 0) return true;
-        await new Promise((resolve) => window.setTimeout(resolve, 120));
-      }
-      return Boolean(mapRef.current?.clientWidth && mapRef.current?.clientHeight);
-    };
 
     const relayout = () => {
       if (!mapInstanceRef.current || !window.kakao?.maps) return;
@@ -126,8 +135,6 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
       try {
         await loadKakaoMaps({ retries: 4, timeoutMs: 10000 });
         if (cancelled || !window.kakao?.maps || !mapRef.current) return;
-        const containerReady = await waitForContainerReady();
-        if (!containerReady || cancelled || !mapRef.current) return;
 
         const position = new window.kakao.maps.LatLng(lat, lng);
         const map = new window.kakao.maps.Map(mapRef.current, {
@@ -150,15 +157,7 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
           map,
         });
 
-        window.setTimeout(() => {
-          if (!cancelled) {
-            relayout();
-          }
-        }, 120);
-
-        window.setTimeout(() => {
-          if (!cancelled) relayout();
-        }, 700);
+        window.setTimeout(() => { if (!cancelled) relayout(); }, 200);
       } catch (_) {
         if (mapRef.current) {
           mapRef.current.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;background:hsl(220 16% 97%);color:hsl(218 14% 48%);font-size:12px;font-weight:700;">지도를 불러오지 못했습니다.</div>';
@@ -166,27 +165,16 @@ function KakaoMapPreview({ lat, lng, address }: { lat: number; lng: number; addr
       }
     })();
 
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") relayout();
-    };
-
-    window.addEventListener("pageshow", relayout);
-    window.addEventListener("online", relayout);
-    document.addEventListener("visibilitychange", handleVisibility);
-
     return () => {
       cancelled = true;
       mapInstanceRef.current = null;
-      window.removeEventListener("pageshow", relayout);
-      window.removeEventListener("online", relayout);
-      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [lat, lng]);
+  }, [inView, lat, lng]);
 
   return (
     <div>
       <p className="text-xs font-bold text-foreground mb-2">위치</p>
-      <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border" />
+      <div ref={mapRef} className="w-full h-48 rounded-xl overflow-hidden border border-border bg-muted" />
       <p className="text-[10px] text-muted-foreground mt-1">정확한 위치는 중개사무소에 문의해주세요.</p>
     </div>
   );
