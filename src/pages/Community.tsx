@@ -211,7 +211,9 @@ const Community = () => {
               className="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
               style={
                 activeCategory === key
-                  ? { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
+                  ? key === "all"
+                    ? { background: "linear-gradient(135deg, hsl(220 90% 24%) 0%, hsl(220 80% 38%) 100%)", color: "#fff", borderColor: "transparent" }
+                    : { background: "hsl(var(--primary))", color: "#fff", borderColor: "hsl(var(--primary))" }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
               }
             >
