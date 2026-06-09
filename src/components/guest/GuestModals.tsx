@@ -8,10 +8,10 @@ import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.pn
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
-  name: "봄날부동산",
-  representative: "김봄날",
-  phone: "043-123-4567",
-  mobile: "010-1234-5678",
+  name: "협력 공인중개사",
+  representative: "협력 공인중개사",
+  phone: "043-275-0966",
+  mobile: "010-8182-8939",
   address: "충북 청주시 상당구 용암동 123-4",
   registration: "충북 청주 제2024-000123호",
   intro: "청주 지역 임대·매매 전문, 신뢰의 상담 파트너",
