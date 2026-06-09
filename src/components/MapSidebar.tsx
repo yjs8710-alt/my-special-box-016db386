@@ -4473,13 +4473,14 @@ const MapSidebar = ({
   // 둘 다 없으면 전체 표시
   const displayProperties = useMemo(() => {
     if (isMobile && mobileStep === 0) return [];
+    let list = properties;
+    if (favoritesOnly) list = list.filter((p) => favorites.has(p.id));
     if (pinnedIds && pinnedIds.length > 0) {
-      // 클릭 순서대로 정렬 (properties는 이미 부모에서 pinnedIds 기준 필터링됨)
       const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
-      return [...properties].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
+      return [...list].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
     }
-    return properties;
-  }, [isMobile, mobileStep, pinnedIds, properties]);
+    return list;
+  }, [isMobile, mobileStep, pinnedIds, properties, favoritesOnly, favorites]);
 
   const orderedDisplayProperties = useMemo(() => {
     if (pinnedIds && pinnedIds.length > 0) return [...displayProperties];
