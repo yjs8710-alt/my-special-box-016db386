@@ -569,7 +569,32 @@ const MapFilterBar = ({
               flexShrink: 0,
             }}
           >
-            {/* 모드 탭 */}
+            {/* 관심매물만 보기 토글 (별표) */}
+            <button
+              onClick={toggleFavoritesOnly}
+              title={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
+              aria-label={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
+              className="flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all"
+              style={{
+                borderRight: "1px solid hsl(var(--primary)/0.3)",
+                background: favoritesOnly ? "hsl(38 95% 50% / 0.10)" : "transparent",
+              }}
+            >
+              <Star
+                className="w-3.5 h-3.5"
+                style={{
+                  color: favoritesOnly ? "hsl(38 95% 45%)" : "hsl(var(--muted-foreground))",
+                  fill: favoritesOnly ? "hsl(38 95% 50%)" : "transparent",
+                }}
+                strokeWidth={2}
+              />
+              <span className="text-[10px] font-bold hidden md:block" style={{ color: favoritesOnly ? "hsl(38 95% 35%)" : "hsl(var(--muted-foreground))" }}>
+                관심매물
+              </span>
+            </button>
+
+            {/* 모드 탭 — 소유주 번호 검색 (게스트/일반회원에게는 숨김) */}
+            {!isGuest && (
             <button
               onClick={() => searchMode === "normal" ? switchToLandlord() : switchToNormal()}
               title={searchMode === "normal" ? "소유주 번호 검색으로 전환" : "일반 검색으로 전환"}
@@ -588,6 +613,7 @@ const MapFilterBar = ({
                 {searchMode === "landlord" ? "소유주" : "소유주검색"}
               </span>
             </button>
+            )}
 
             {/* 입력창 */}
             {searchMode === "normal" ? (
@@ -597,7 +623,7 @@ const MapFilterBar = ({
                   value={pendingQuery}
                   onChange={(e) => setPendingQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") commitSearch(); }}
-                  placeholder="주소, 건물명, 등록번호 검색"
+                  placeholder="주소, 등록번호 검색"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"
