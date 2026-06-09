@@ -420,6 +420,7 @@ const MapFilterBar = ({
   }, []);
 
   // ── 소유주 번호 통합 검색 상태 ──
+  const { user } = useAuth();
   const isGuest = useIsGuest();
   const { enabled: favoritesOnly, toggle: toggleFavoritesOnly } = useFavoritesOnly();
   const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
