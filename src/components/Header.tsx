@@ -158,7 +158,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 (홈에서는 숨김) */}
             {!isHome && (
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
-              {!isGuest && (
+              {!isGuest && user?.memberType === "일반회원" && (
                 <button
                   onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
                   className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
