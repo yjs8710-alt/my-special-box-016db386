@@ -550,25 +550,23 @@ export default function PublicProperty() {
 
 
           {/* 협력 공인중개사 (하단) */}
-          {agent && (
-            <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
-              <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
-              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
-                <span className="text-muted-foreground">사무소명</span>
-                <span className="font-bold text-foreground">{agent.agency_name}</span>
-                <span className="text-muted-foreground">대표자</span>
-                <span className="font-bold text-foreground">{agent.representative_name || agent.name}</span>
-                <span className="text-muted-foreground">주소</span>
-                <span className="text-foreground">{agent.agency_address}</span>
-                <span className="text-muted-foreground">대표번호</span>
-                <a href="tel:0432750966" className="font-bold text-primary">043-275-0966</a>
-                <span className="text-muted-foreground">연락처</span>
-                <a href="tel:01081828939" className="font-bold text-primary">010-8182-8939</a>
-                <span className="text-muted-foreground">개설등록번호</span>
-                <span className="text-foreground">{agent.license_number}</span>
-              </div>
+          <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
+            <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
+            <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
+              <span className="text-muted-foreground">사무소명</span>
+              <span className="font-bold text-foreground">협력 공인중개사</span>
+              <span className="text-muted-foreground">대표자</span>
+              <span className="font-bold text-foreground">협력 공인중개사</span>
+              <span className="text-muted-foreground">주소</span>
+              <span className="text-foreground">충북 청주시 상당구 용암동 123-4</span>
+              <span className="text-muted-foreground">대표번호</span>
+              <a href="tel:0432750966" className="font-bold text-primary">043-275-0966</a>
+              <span className="text-muted-foreground">연락처</span>
+              <a href="tel:01081828939" className="font-bold text-primary">010-8182-8939</a>
+              <span className="text-muted-foreground">개설등록번호</span>
+              <span className="text-foreground">충북 청주 제2024-000123호</span>
             </div>
-          )}
+          </div>
 
         </div>
 
