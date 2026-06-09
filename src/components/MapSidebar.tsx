@@ -4372,7 +4372,18 @@ const MapSidebar = ({
         if (data) setMyAgencyInfo({ userId: authUser.userId, agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
       });
   }, [authUser?.userId]);
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+  const { favorites, toggleFavorite } = useFavorites();
+  const { enabled: favoritesOnly } = useFavoritesOnly();
+  const checkedIds = favorites;
+  const setCheckedIds = (updater: (prev: Set<number>) => Set<number>) => {
+    // 호환 레이어: 인쇄/선택 로직과 별표 토글을 동일 저장소로 사용
+    const next = updater(new Set(favorites));
+    // 단일 토글 케이스만 처리 (size 차이 1)
+    const added = [...next].find((id) => !favorites.has(id));
+    const removed = [...favorites].find((id) => !next.has(id));
+    if (added !== undefined) toggleFavorite(added);
+    else if (removed !== undefined) toggleFavorite(removed);
+  };
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
