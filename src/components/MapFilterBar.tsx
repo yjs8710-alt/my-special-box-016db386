@@ -3,6 +3,7 @@ import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, T
 import { Slider } from "@/components/ui/slider";
 import { neonChipStyle } from "@/lib/neonChipStyle";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useIsGuest } from "@/hooks/useIsGuest";
 import { useFavoritesOnly } from "@/hooks/useFavorites";
 
