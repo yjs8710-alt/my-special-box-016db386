@@ -216,7 +216,7 @@ const PropertyCard = ({
                   e.stopPropagation();
                   window.dispatchEvent(new CustomEvent("open-guest-detail", {
                     detail: {
-                      info: { image: displayImage, address, type, area, floor, deposit, monthly, regNo, buildYear },
+                      info: { image: displayImage, address, type, area, floor, deposit, monthly, regNo, buildYear, dbId },
                       partnerDetail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
                     },
                   }));

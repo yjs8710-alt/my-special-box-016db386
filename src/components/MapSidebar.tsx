@@ -3242,6 +3242,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                           monthly: prop.monthly,
                           regNo: prop.regNo,
                           buildYear: prop.buildYear,
+                          dbId: prop.dbId,
                         },
                         partnerDetail: {
                           propertyDbId: prop.dbId,
@@ -3583,6 +3584,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                         monthly: prop.monthly,
                         regNo: prop.regNo,
                         buildYear: prop.buildYear,
+                          dbId: prop.dbId,
                       },
                       partnerDetail: {
                         propertyDbId: prop.dbId,
