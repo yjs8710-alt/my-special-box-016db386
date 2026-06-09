@@ -5395,6 +5395,7 @@ const MapSidebar = ({
     
                               );
                             })()}
+                            {(isGuest || authUser?.memberType === "일반회원") && (
                             <button
                               type="button"
                               onClick={(e) => {
@@ -5408,13 +5409,14 @@ const MapSidebar = ({
                               <Star
                                 className="w-5 h-5"
                                 style={{
-                                  color: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "hsl(220 10% 60%)",
-                                  fill: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "transparent",
+                                  color: "white",
+                                  fill: favorites.has(prop.id) ? "white" : "transparent",
                                   filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
                                 }}
                                 strokeWidth={2}
                               />
                             </button>
+                            )}
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
                               <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
