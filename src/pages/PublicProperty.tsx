@@ -532,10 +532,22 @@ export default function PublicProperty() {
             </div>
           )}
 
+          {/* 안내 문구 (강조) */}
+          <div className="rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
+            <p className="text-sm font-extrabold text-primary mb-2">📌 매물 안내</p>
+            <ul className="space-y-1.5 text-xs leading-relaxed text-foreground">
+              <li>• 본 매물 정보는 <span className="font-bold">현장조사 및 임대인 확인</span>을 거쳐 등록된 정보입니다.</li>
+              <li>• 상세주소는 <span className="font-bold">임대인의 요청에 따라 공개되지 않으며</span>, 개략적인 위치 정보만 제공됩니다.</li>
+              <li>• 매물 상담, 현장 안내 및 거래는 <span className="font-bold text-primary">아래 협력 공인중개사</span>를 통해 진행됩니다.</li>
+              <li>• 실제 거래 여부 및 임대 조건은 변동될 수 있으므로 <span className="font-bold">협력 공인중개사를 통해 최종 확인</span>하시기 바랍니다.</li>
+            </ul>
+          </div>
+
           {/* 대략적 위치 지도 */}
           {property.lat && property.lng && (
             <KakaoMapPreview lat={property.lat} lng={property.lng} address={safeAddress} />
           )}
+
 
           {/* 협력 공인중개사 (하단) */}
           {agent && (
