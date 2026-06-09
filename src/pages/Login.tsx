@@ -300,7 +300,7 @@ const LoginPage = () => {
             계정이 없으신가요?{" "}
             <button
               className="font-semibold hover:underline"
-              style={{ color: "hsl(var(--accent))" }}
+              style={{ color: "#000000" }}
               onClick={() => navigate("/signup")}
             >
               회원가입 신청
