@@ -4943,15 +4943,16 @@ const MapSidebar = ({
           className={`bg-white flex flex-col transition-all duration-300 ${
             isMobile
               ? "flex-1 w-full min-h-0"
-              : `border-l border-border ${collapsed ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "opacity-100"}`
+              : collapsed
+                ? "hidden"
+                : "border-l border-border opacity-100"
           }`}
           style={
             isMobile
               ? { display: mobileStep === 0 ? "none" : "flex" }
-              : {
-                  width: collapsed ? 0 : width,
-                  flexShrink: 0,
-                }
+              : collapsed
+                ? undefined
+                : { width, flexShrink: 0 }
           }
         >
           {/* Header */}
