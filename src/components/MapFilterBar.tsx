@@ -571,7 +571,8 @@ const MapFilterBar = ({
               flexShrink: 0,
             }}
           >
-            {/* 관심매물만 보기 토글 (별표) */}
+            {/* 관심매물만 보기 토글 (별표) — 게스트/일반회원만 노출 */}
+            {(isGuest || user?.memberType === "일반회원") && (
             <button
               onClick={toggleFavoritesOnly}
               title={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
@@ -594,6 +595,7 @@ const MapFilterBar = ({
                 관심매물
               </span>
             </button>
+            )}
 
             {/* 모드 탭 — 소유주 번호 검색 (게스트/일반회원에게는 숨김) */}
             {!isGuest && (
