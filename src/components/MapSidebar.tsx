@@ -5130,15 +5130,14 @@ const MapSidebar = ({
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
                 {!isGuest && (
-                  <div className="flex items-center gap-1 px-1 py-1 overflow-x-auto scrollbar-none flex-nowrap">
+                  <div className="hidden md:flex items-center gap-1 px-1 py-1 flex-wrap">
                     {[
-                      { label: "등기소", url: "http://www.iros.go.kr", bg: "hsl(220 60% 93%)", color: "hsl(220 60% 30%)", border: "hsl(220 50% 70%)" },
-                      { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)" },
-                      { label: "건축물조회", url: "https://cloud.eais.go.kr", bg: "hsl(35 80% 93%)", color: "hsl(35 80% 28%)", border: "hsl(35 70% 65%)" },
-                      { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)" },
-                      { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)" },
-                      { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 93%)", color: "hsl(270 50% 30%)", border: "hsl(270 40% 70%)" },
-                      { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)" },
+                      { label: "등기소", url: "http://www.iros.go.kr", bg: "hsl(220 60% 93%)", color: "hsl(220 60% 30%)", border: "hsl(220 50% 70%)", icon: "https://www.iros.go.kr/favicon.ico" },
+                      { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)", icon: "/images/gov24-logo.png" },
+                      { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)", icon: "https://www.google.com/s2/favicons?domain=eum.go.kr&sz=32" },
+                      { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)", icon: "https://www.zigbang.com/favicon.ico" },
+                      { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 95%)", color: "hsl(270 60% 20%)", border: "hsl(270 40% 60%)", icon: "/images/dabang-logo.png" },
+                      { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)", icon: "https://land.naver.com/favicon.ico" },
                     ].map((link) => (
                       <a
                         key={link.label}
@@ -5146,12 +5145,64 @@ const MapSidebar = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-0.5 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap"
+                        className="flex items-center gap-1 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap"
                         style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
                       >
-                        {link.label}
+                        <img
+                          src={link.icon}
+                          alt=""
+                          className="w-3.5 h-3.5 rounded-sm object-contain"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                        <span className="font-extrabold">{link.label}</span>
                       </a>
                     ))}
+                    <span className="flex-1 min-w-[4px]" />
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const addr = await customPrompt(
+                          "건축물대장을 조회할 주소를 입력하세요\n\n" +
+                          "✅ 지번 주소 (권장): 개신동 41-5, 분평동 1261, 사창동 225-7\n" +
+                          "✅ 도로명 주소: 사직대로 160, 충북대로 1\n" +
+                          "✅ 시/구 포함도 가능: 청주시 흥덕구 봉명동 769",
+                          "",
+                          "예: 사창동 225-7"
+                        );
+                        if (!addr?.trim()) return;
+                        let query = addr.trim().replace(/\s+/g, " ");
+                        query = query.replace(/([가-힣]+동|[가-힣]+리)(\d)/g, "$1 $2");
+                        try {
+                          const { data, error } = await supabase.functions.invoke("geocode", { body: { address: query } });
+                          if (error || !data?.success) {
+                            const notFound = data?.error === "No results found for the given address";
+                            await customAlert(
+                              notFound
+                                ? `'${query}' 주소를 찾을 수 없습니다.\n\n💡 다음을 확인해주세요:\n• 동/리 + 지번 형식 (예: 사창동 225-7)\n• 청주시를 포함 (예: 청주시 흥덕구 봉명동 769)\n• 도로명 주소는 '시/구' 포함 권장`
+                                : `주소 조회에 실패했습니다.\n${data?.error || "잠시 후 다시 시도해주세요."}`
+                            );
+                            return;
+                          }
+                          const normalized = data.jibunAddress || data.roadAddress || query;
+                          setPublicRecordAddress({ address: normalized });
+                        } catch {
+                          await customAlert("주소 조회 중 네트워크 오류가 발생했습니다.\n인터넷 연결을 확인하고 다시 시도해주세요.");
+                        }
+                      }}
+                      className="flex items-center gap-0.5 flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap"
+                      style={{ background: "hsl(30 80% 93%)", color: "hsl(30 70% 25%)", border: "1px solid hsl(30 60% 70%)" }}
+                    >
+                      <Building2 className="w-3 h-3" />
+                      건축물조회
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSelectPrint(); }}
+                      className="flex items-center gap-0.5 flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap"
+                      style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
+                    >
+                      <Printer className="w-3 h-3" />
+                      선택인쇄
+                    </button>
                   </div>
                 )}
                 {orderedDisplayProperties.map((prop, idx) => {
