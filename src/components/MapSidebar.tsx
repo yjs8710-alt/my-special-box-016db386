@@ -5401,19 +5401,16 @@ const MapSidebar = ({
                                 e.stopPropagation();
                                 toggleFavorite(prop.id);
                               }}
-                              className="absolute top-1 left-1 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                              style={{
-                                background: "rgba(255,255,255,0.92)",
-                                boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
-                              }}
+                              className="absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110"
                               title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                               aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
                               <Star
-                                className="w-4 h-4"
+                                className="w-5 h-5"
                                 style={{
                                   color: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "hsl(220 10% 60%)",
                                   fill: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "transparent",
+                                  filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
                                 }}
                                 strokeWidth={2}
                               />
