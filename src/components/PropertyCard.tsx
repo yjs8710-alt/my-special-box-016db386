@@ -216,7 +216,7 @@ const PropertyCard = ({
                   e.stopPropagation();
                   window.dispatchEvent(new CustomEvent("open-guest-detail", {
                     detail: {
-                      info: { image: displayImage, address, type, area, floor, deposit, monthly, regNo, buildYear },
+                      info: { image: displayImage, address, type, area, floor, deposit, monthly, regNo, buildYear, dbId },
                       partnerDetail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
                     },
                   }));
@@ -229,7 +229,7 @@ const PropertyCard = ({
                 onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
                 className="shrink-0 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
               >
-                회원업체
+                회원업체 문의
               </button>
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
                 {checkedDate && <span>확인 {checkedDate}</span>}

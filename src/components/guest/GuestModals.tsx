@@ -323,7 +323,7 @@ export const GuestShareModal = ({
   );
 };
 
-// ===== 4. 매물 상세보기 (카카오 공유 미리보기 형태) =====
+// ===== 4. 매물 상세보기 (공유페이지를 iframe으로 렌더) =====
 export interface GuestDetailInfo {
   image?: string;
   address?: string;
@@ -334,6 +334,7 @@ export interface GuestDetailInfo {
   monthly?: string;
   regNo?: string;
   buildYear?: string;
+  dbId?: string;
 }
 
 export const GuestDetailModal = ({
@@ -348,77 +349,54 @@ export const GuestDetailModal = ({
   onInquiry?: () => void;
 }) => {
   if (!open || !info) return null;
-  const dong = addressToDong(info.address);
-  const regNoNumeric = info.regNo
-    ? String(parseInt(info.regNo.replace(/[^0-9]/g, ""), 10) || info.regNo)
-    : "";
-  const priceLine = `보증금 ${info.deposit || "-"} / 월세 ${info.monthly || "-"}`;
-  const buildYearShort = info.buildYear ? info.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const canShare = !!info.dbId && uuidRegex.test(info.dbId);
+  const shareUrl = canShare ? `/share/${info.dbId}?embed=1` : "";
 
-  return (
-    <Overlay onClose={onClose}>
-      <div className="relative">
-        <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-          <img
-            src={info.image || zibdaPlaceholder}
-            alt="매물 사진"
-            className="w-full h-full object-contain bg-muted"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = zibdaPlaceholder; }}
-          />
-          {regNoNumeric && (
-            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-extrabold px-3 py-1 rounded-full shadow-lg tracking-wider">
-              NO.{regNoNumeric}
-            </span>
-          )}
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[10300] flex items-center justify-center p-3 md:p-6"
+      style={{ background: "rgba(0,0,0,0.6)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative bg-white rounded-2xl w-full max-w-2xl h-[90vh] shadow-2xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-4 py-2.5 border-b bg-white">
+          <p className="text-sm font-extrabold text-foreground">매물 상세보기</p>
           <button
             onClick={onClose}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white"
+            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+            aria-label="닫기"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-5 space-y-3">
-          <div>
-            <p className="text-[11px] text-muted-foreground mb-1">매물 위치</p>
-            <p className="text-base font-extrabold text-foreground">{dong || "-"}</p>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {info.type && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">{info.type}</span>
-            )}
-            {info.area && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">면적 {info.area}</span>
-            )}
-            {info.floor && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">{info.floor}</span>
-            )}
-            {buildYearShort && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">준공 {buildYearShort}</span>
-            )}
-          </div>
-          <div className="pt-3 border-t">
-            <p className="text-[11px] text-muted-foreground mb-1">가격</p>
-            <p className="text-sm font-extrabold text-primary">{priceLine}</p>
-          </div>
-          <div className="pt-3 border-t text-center">
-            <p className="text-[10px] text-muted-foreground mb-0.5">상세 주소·연락처는 회원업체 문의</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 pt-1">
-            <button
-              onClick={onClose}
-              className="py-2.5 rounded-lg bg-muted text-foreground text-sm font-semibold"
-            >
-              닫기
-            </button>
-            <button
-              onClick={() => { onClose(); onInquiry?.(); }}
-              className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
-            >
-              회원업체 문의
-            </button>
-          </div>
+        <div className="flex-1 overflow-hidden bg-muted">
+          {canShare ? (
+            <iframe
+              src={shareUrl}
+              title="매물 상세보기"
+              className="w-full h-full border-0"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
+              상세 정보를 불러올 수 없습니다.
+            </div>
+          )}
+        </div>
+        <div className="px-4 py-2.5 border-t bg-white">
+          <button
+            onClick={() => { onClose(); onInquiry?.(); }}
+            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
+          >
+            회원업체 문의
+          </button>
         </div>
       </div>
-    </Overlay>
+    </div>,
+    document.body
   );
 };
+

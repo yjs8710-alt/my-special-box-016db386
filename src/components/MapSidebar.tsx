@@ -779,8 +779,8 @@ ContactIcon.displayName = "ContactIcon";
 
 const ContactEmojiRow = forwardRef<HTMLDivElement, ContactEmojiRowProps>(({ propId, type, number, number2 }, ref) => {
   const isGuest = useIsGuest();
+  if (isGuest) return null;
   const label = type === "owner" ? "소유주" : type === "tenant" ? "세입자" : type === "broker" ? "부동산" : "관리인";
-  if (isGuest) number = undefined as any;
 
   const [revealed, setRevealed] = useState(() => !!number && hasRevealedToday(propId, type));
   const [showPopup, setShowPopup] = useState(false);
@@ -3242,6 +3242,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                           monthly: prop.monthly,
                           regNo: prop.regNo,
                           buildYear: prop.buildYear,
+                          dbId: prop.dbId,
                         },
                         partnerDetail: {
                           propertyDbId: prop.dbId,
@@ -3273,7 +3274,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                   style={{ background: "hsl(var(--primary))", color: "white" }}
                 >
-                  회원업체
+                  회원업체 문의
                 </button>
               </>
             )}
@@ -3583,6 +3584,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                         monthly: prop.monthly,
                         regNo: prop.regNo,
                         buildYear: prop.buildYear,
+                          dbId: prop.dbId,
                       },
                       partnerDetail: {
                         propertyDbId: prop.dbId,
@@ -3614,7 +3616,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                 style={{ background: "hsl(var(--primary))", color: "white" }}
               >
-                회원업체
+                회원업체 문의
               </button>
             </>
           )}
