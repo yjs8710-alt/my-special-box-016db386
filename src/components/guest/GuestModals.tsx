@@ -316,7 +316,7 @@ export const GuestShareModal = ({
         </div>
         <div className="pt-3 border-t text-center">
           <p className="text-[10px] text-muted-foreground mb-0.5">제공</p>
-          <p className="text-xs font-bold text-foreground">협력 부동산</p>
+          <p className="text-xs font-bold text-foreground">봄날부동산 공인중개사 사무소</p>
         </div>
         <button
           onClick={onClose}
