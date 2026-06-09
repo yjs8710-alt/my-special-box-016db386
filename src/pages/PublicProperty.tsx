@@ -554,17 +554,17 @@ export default function PublicProperty() {
             <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
             <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
               <span className="text-muted-foreground">사무소명</span>
-              <span className="font-bold text-foreground">협력 공인중개사</span>
+              <span className="font-bold text-foreground">봄날부동산 공인중개사 사무소</span>
               <span className="text-muted-foreground">대표자</span>
-              <span className="font-bold text-foreground">협력 공인중개사</span>
+              <span className="font-bold text-foreground">김진형</span>
               <span className="text-muted-foreground">주소</span>
-              <span className="text-foreground">충북 청주시 상당구 용암동 123-4</span>
+              <span className="text-foreground">충청북도 청주시 서원구 사창동 514-10</span>
               <span className="text-muted-foreground">대표번호</span>
               <a href="tel:0432750966" className="font-bold text-primary">043-275-0966</a>
               <span className="text-muted-foreground">연락처</span>
               <a href="tel:01081828939" className="font-bold text-primary">010-8182-8939</a>
               <span className="text-muted-foreground">개설등록번호</span>
-              <span className="text-foreground">충북 청주 제2024-000123호</span>
+              <span className="text-foreground">43112-2024-00034호</span>
             </div>
           </div>
 
