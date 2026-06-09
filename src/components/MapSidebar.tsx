@@ -5495,8 +5495,8 @@ const MapSidebar = ({
                               {/* 확인일 배지 제거 */}
                            </div>}
 
-                          {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일에서는 숨김) */}
-                          {!isMobile && <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
+                          {/* ②연락처 이모티콘 컬럼 — 건물주/관리인/세입자 (모바일/게스트에서는 숨김) */}
+                          {!isMobile && !isGuest && <div className="w-[28px] flex-shrink-0 flex flex-col border-l border-border/30">
                             <ContactEmojiRow propId={prop.id} type="owner" number={prop.contactOwner ?? null} number2={prop.contactOwner2 ?? null} />
                             <ContactEmojiRow propId={prop.id} type="manager" number={prop.contactManager ?? null} />
                             <ContactEmojiRow propId={prop.id} type="tenant" number={prop.contactTenant ?? null} />
