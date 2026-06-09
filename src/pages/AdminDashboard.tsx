@@ -807,6 +807,7 @@ const BuildingGroup = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const activeCount = units.filter(u => u.status === "active").length;
+  const totalViews = units.reduce((s, u) => s + (u.views || 0), 0);
   const repDate = rep.registered_date ? rep.registered_date.slice(0, 10) : "";
 
   return (
@@ -853,6 +854,9 @@ const BuildingGroup = ({
                 📷 사진 {units.reduce((s, u) => s + (u.images ?? []).length, 0)}장
               </span>
             )}
+            <span className="text-[11px] font-medium flex items-center gap-0.5" style={{ color: "hsl(var(--primary))" }}>
+              <Eye className="w-3 h-3" />조회 {totalViews.toLocaleString()}
+            </span>
           </div>
         </div>
 
