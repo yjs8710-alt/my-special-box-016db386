@@ -854,6 +854,23 @@ export type Database = {
             }
             Returns: string
           }
+      create_agent_profile_after_signup: {
+        Args: {
+          _agency_address?: string
+          _agency_name?: string
+          _agency_phone?: string
+          _agree_marketing?: boolean
+          _business_number?: string
+          _email: string
+          _license_number?: string
+          _member_type?: string
+          _name: string
+          _phone: string
+          _representative_name?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       get_public_property_reference_images: {
         Args: { _property_id: string }
         Returns: {

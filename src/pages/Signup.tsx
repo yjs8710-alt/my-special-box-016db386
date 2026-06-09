@@ -124,29 +124,20 @@ const SignupPage = () => {
       return;
     }
 
-    // 이메일 확인이 필요한 경우 세션이 없으므로 RLS 통과를 위해 즉시 로그인 시도
-    if (!signUpData.session) {
-      await supabase.auth.signInWithPassword({
-        email: form.email,
-        password: form.password,
-      });
-    }
-
-    // 2. 회원 프로필 저장 (일반회원은 자동 승인)
-    const { error: profileError } = await supabase.from("agent_profiles").insert({
-      user_id: userId,
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      agency_name: isGeneralMember ? "" : form.agencyName.trim(),
-      agency_phone: isGeneralMember ? "" : form.agencyPhone.trim(),
-      representative_name: isGeneralMember ? "" : form.representativeName.trim(),
-      license_number: isGeneralMember ? null : form.licenseNumber.trim(),
-      business_number: isGeneralMember ? null : form.businessNumber.trim(),
-      agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
-      agree_marketing: form.agreeMarketing,
-      member_type: form.memberType,
-      status: "pending",
-      is_active: true,
+    // 2. 회원 프로필 저장: 이메일 확인 전 세션이 없어도 가입 직후 사용자만 저장 가능하도록 백엔드 함수 사용
+    const { error: profileError } = await (supabase.rpc as any)("create_agent_profile_after_signup", {
+      _user_id: userId,
+      _email: form.email.trim(),
+      _name: form.name.trim(),
+      _phone: form.phone.trim(),
+      _agency_name: isGeneralMember ? "" : form.agencyName.trim(),
+      _agency_phone: isGeneralMember ? "" : form.agencyPhone.trim(),
+      _representative_name: isGeneralMember ? "" : form.representativeName.trim(),
+      _license_number: isGeneralMember ? null : form.licenseNumber.trim(),
+      _business_number: isGeneralMember ? null : form.businessNumber.trim(),
+      _agency_address: isGeneralMember ? "" : form.agencyAddress.trim(),
+      _agree_marketing: form.agreeMarketing,
+      _member_type: form.memberType,
     });
 
     setLoading(false);
