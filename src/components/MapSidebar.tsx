@@ -5129,6 +5129,31 @@ const MapSidebar = ({
               </div>
             ) : (
               <div className="pt-2 pb-2 pr-2 pl-3 flex flex-col gap-1.5">
+                {!isGuest && (
+                  <div className="flex items-center gap-1 px-1 py-1 overflow-x-auto scrollbar-none flex-nowrap">
+                    {[
+                      { label: "등기소", url: "http://www.iros.go.kr", bg: "hsl(220 60% 93%)", color: "hsl(220 60% 30%)", border: "hsl(220 50% 70%)" },
+                      { label: "정부24", url: "https://www.gov.kr", bg: "hsl(200 60% 93%)", color: "hsl(200 60% 30%)", border: "hsl(200 50% 70%)" },
+                      { label: "건축물조회", url: "https://cloud.eais.go.kr", bg: "hsl(35 80% 93%)", color: "hsl(35 80% 28%)", border: "hsl(35 70% 65%)" },
+                      { label: "토지e음", url: "https://www.eum.go.kr", bg: "hsl(140 50% 93%)", color: "hsl(140 50% 25%)", border: "hsl(140 40% 65%)" },
+                      { label: "직방", url: "https://www.zigbang.com", bg: "hsl(15 80% 93%)", color: "hsl(15 70% 30%)", border: "hsl(15 60% 70%)" },
+                      { label: "다방", url: "https://www.dabangapp.com", bg: "hsl(270 50% 93%)", color: "hsl(270 50% 30%)", border: "hsl(270 40% 70%)" },
+                      { label: "네이버부동산", url: "https://land.naver.com", bg: "hsl(145 70% 93%)", color: "hsl(145 60% 25%)", border: "hsl(145 50% 65%)" },
+                    ].map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-0.5 flex-shrink-0 no-underline text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap"
+                        style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
                 {orderedDisplayProperties.map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo;
                   const roomMemo = prop.roomMemo;
