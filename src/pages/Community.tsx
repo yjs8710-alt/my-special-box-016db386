@@ -190,11 +190,13 @@ const Community = () => {
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">커뮤니티</h1>
           </div>
           <Button
-            className="gap-1.5 rounded-full font-semibold shadow-md hover:opacity-90"
+            className="gap-1.5 rounded-full font-semibold border"
             style={{
-              background: "linear-gradient(135deg, #FF8A3D 0%, #FF6B1A 50%, #E04E00 100%)",
+              background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)",
               color: "#fff",
-              border: "none",
+              borderColor: "rgba(255,255,255,0.85)",
+              boxShadow: "0 0 0 2px rgba(168,85,247,0.35), 0 0 14px rgba(236,72,153,0.55), 0 0 22px rgba(34,211,238,0.45)",
+              textShadow: "0 0 6px rgba(255,255,255,0.6)",
             }}
             onClick={openWrite}
           >
@@ -211,13 +213,20 @@ const Community = () => {
               className="px-4 py-1.5 rounded-full text-sm font-medium transition-all border"
               style={
                 activeCategory === key
-                  ? { background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%)", color: "#fff", borderColor: "transparent", boxShadow: "0 2px 8px rgba(37,99,235,0.35)" }
+                  ? {
+                      background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)",
+                      color: "#fff",
+                      borderColor: "rgba(255,255,255,0.85)",
+                      boxShadow: "0 0 0 2px rgba(168,85,247,0.35), 0 0 14px rgba(236,72,153,0.55), 0 0 22px rgba(34,211,238,0.45)",
+                      textShadow: "0 0 6px rgba(255,255,255,0.6)",
+                    }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
               }
             >
               {label}
             </button>
           ))}
+
           <div className="ml-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
