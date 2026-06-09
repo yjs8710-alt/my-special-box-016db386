@@ -5398,30 +5398,24 @@ const MapSidebar = ({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCheckedIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.has(prop.id) ? next.delete(prop.id) : next.add(prop.id);
-                                  return next;
-                                });
+                                toggleFavorite(prop.id);
                               }}
-                              className="absolute top-1 left-1 z-10 w-4 h-4 rounded flex items-center justify-center transition-all"
+                              className="absolute top-1 left-1 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110"
                               style={{
-                                background: checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(255,255,255,0.85)",
-                                border: `1.5px solid ${checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(150,150,150,0.6)"}`,
-                                boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+                                background: "rgba(255,255,255,0.92)",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
                               }}
+                              title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
+                              aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
-                              {checkedIds.has(prop.id) && (
-                                <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                                  <path
-                                    d="M1 3.5L3.5 6L8 1"
-                                    stroke="white"
-                                    strokeWidth="1.8"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
+                              <Star
+                                className="w-4 h-4"
+                                style={{
+                                  color: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "hsl(220 10% 60%)",
+                                  fill: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "transparent",
+                                }}
+                                strokeWidth={2}
+                              />
                             </button>
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
