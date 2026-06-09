@@ -212,6 +212,20 @@ const PropertyCard = ({
           {isGuest && (
             <>
               <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                    detail: {
+                      info: { image: displayImage, address, type, area, floor, deposit, monthly, regNo, buildYear },
+                      partnerDetail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
+                    },
+                  }));
+                }}
+                className="shrink-0 px-2.5 py-1 rounded-full bg-white text-primary border border-primary/50 text-[11px] font-bold shadow-sm hover:bg-primary/5"
+              >
+                상세보기
+              </button>
+              <button
                 onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
                 className="shrink-0 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
               >

@@ -3225,24 +3225,57 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             )}
             <span className="flex-1" />
             {isGuest && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                    detail: {
-                      propertyDbId: prop.dbId,
-                      propertyRegNo: prop.regNo,
-                      agentUserId: prop.registeredBy,
-                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                    },
-                  }));
-                }}
-                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-                style={{ background: "hsl(var(--primary))", color: "white" }}
-              >
-                회원업체
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                      detail: {
+                        info: {
+                          image: prop.images?.[0] || prop.image,
+                          address: prop.address,
+                          type: prop.type,
+                          area: prop.area,
+                          floor: prop.floor,
+                          deposit: prop.deposit,
+                          monthly: prop.monthly,
+                          regNo: prop.regNo,
+                          buildYear: prop.buildYear,
+                        },
+                        partnerDetail: {
+                          propertyDbId: prop.dbId,
+                          propertyRegNo: prop.regNo,
+                          agentUserId: prop.registeredBy,
+                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                        },
+                      },
+                    }));
+                  }}
+                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap border"
+                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                >
+                  상세보기
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                      detail: {
+                        propertyDbId: prop.dbId,
+                        propertyRegNo: prop.regNo,
+                        agentUserId: prop.registeredBy,
+                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                      },
+                    }));
+                  }}
+                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                  style={{ background: "hsl(var(--primary))", color: "white" }}
+                >
+                  회원업체
+                </button>
+              </>
             )}
             {regDate && !isMobile && (
               <span className="flex-shrink-0 text-[10px] font-semibold text-muted-foreground whitespace-nowrap">
@@ -3533,24 +3566,57 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           )}
           <span className="flex-1" />
           {isGuest && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                  detail: {
-                    propertyDbId: prop.dbId,
-                    propertyRegNo: prop.regNo,
-                    agentUserId: prop.registeredBy,
-                    propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                  },
-                }));
-              }}
-              className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-              style={{ background: "hsl(var(--primary))", color: "white" }}
-            >
-              회원업체
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                    detail: {
+                      info: {
+                        image: prop.images?.[0] || prop.image,
+                        address: prop.address,
+                        type: prop.type,
+                        area: prop.area,
+                        floor: prop.floor,
+                        deposit: prop.deposit,
+                        monthly: prop.monthly,
+                        regNo: prop.regNo,
+                        buildYear: prop.buildYear,
+                      },
+                      partnerDetail: {
+                        propertyDbId: prop.dbId,
+                        propertyRegNo: prop.regNo,
+                        agentUserId: prop.registeredBy,
+                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                      },
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap border"
+                style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+              >
+                상세보기
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: {
+                      propertyDbId: prop.dbId,
+                      propertyRegNo: prop.regNo,
+                      agentUserId: prop.registeredBy,
+                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                style={{ background: "hsl(var(--primary))", color: "white" }}
+              >
+                회원업체
+              </button>
+            </>
           )}
           <MemoNotepad
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}

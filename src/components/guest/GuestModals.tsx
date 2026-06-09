@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { X, Phone, MessageCircle, Building2, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { addressToDong } from "@/hooks/useIsGuest";
+import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
@@ -316,6 +318,106 @@ export const GuestShareModal = ({
         >
           닫기
         </button>
+      </div>
+    </Overlay>
+  );
+};
+
+// ===== 4. 매물 상세보기 (카카오 공유 미리보기 형태) =====
+export interface GuestDetailInfo {
+  image?: string;
+  address?: string;
+  type?: string;
+  area?: string;
+  floor?: string;
+  deposit?: string;
+  monthly?: string;
+  regNo?: string;
+  buildYear?: string;
+}
+
+export const GuestDetailModal = ({
+  open,
+  onClose,
+  info,
+  onInquiry,
+}: {
+  open: boolean;
+  onClose: () => void;
+  info?: GuestDetailInfo;
+  onInquiry?: () => void;
+}) => {
+  if (!open || !info) return null;
+  const dong = addressToDong(info.address);
+  const regNoNumeric = info.regNo
+    ? String(parseInt(info.regNo.replace(/[^0-9]/g, ""), 10) || info.regNo)
+    : "";
+  const priceLine = `보증금 ${info.deposit || "-"} / 월세 ${info.monthly || "-"}`;
+  const buildYearShort = info.buildYear ? info.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
+
+  return (
+    <Overlay onClose={onClose}>
+      <div className="relative">
+        <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+          <img
+            src={info.image || zibdaPlaceholder}
+            alt="매물 사진"
+            className="w-full h-full object-contain bg-muted"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = zibdaPlaceholder; }}
+          />
+          {regNoNumeric && (
+            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-extrabold px-3 py-1 rounded-full shadow-lg tracking-wider">
+              NO.{regNoNumeric}
+            </span>
+          )}
+          <button
+            onClick={onClose}
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-5 space-y-3">
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1">매물 위치</p>
+            <p className="text-base font-extrabold text-foreground">{dong || "-"}</p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {info.type && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">{info.type}</span>
+            )}
+            {info.area && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">면적 {info.area}</span>
+            )}
+            {info.floor && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">{info.floor}</span>
+            )}
+            {buildYearShort && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-foreground">준공 {buildYearShort}</span>
+            )}
+          </div>
+          <div className="pt-3 border-t">
+            <p className="text-[11px] text-muted-foreground mb-1">가격</p>
+            <p className="text-sm font-extrabold text-primary">{priceLine}</p>
+          </div>
+          <div className="pt-3 border-t text-center">
+            <p className="text-[10px] text-muted-foreground mb-0.5">상세 주소·연락처는 회원업체 문의</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <button
+              onClick={onClose}
+              className="py-2.5 rounded-lg bg-muted text-foreground text-sm font-semibold"
+            >
+              닫기
+            </button>
+            <button
+              onClick={() => { onClose(); onInquiry?.(); }}
+              className="py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
+            >
+              회원업체 문의
+            </button>
+          </div>
+        </div>
       </div>
     </Overlay>
   );
