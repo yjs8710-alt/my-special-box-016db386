@@ -3273,7 +3273,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                   style={{ background: "hsl(var(--primary))", color: "white" }}
                 >
-                  회원업체
+                  회원업체 문의
                 </button>
               </>
             )}
@@ -3614,7 +3614,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                 style={{ background: "hsl(var(--primary))", color: "white" }}
               >
-                회원업체
+                회원업체 문의
               </button>
             </>
           )}
