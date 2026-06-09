@@ -210,14 +210,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 <div className="flex items-center gap-1.5 mr-10">
                   <button
                     className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all hover:opacity-90"
-                    style={{ background: "hsl(var(--primary))", color: "white" }}
+                    style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "white" }}
                     onClick={() => navigate("/login")}
                   >
                     로그인
                   </button>
                   <button
                     className="text-[12px] font-bold px-3 py-1.5 rounded-lg transition-all"
-                    style={{ background: "hsl(var(--primary))", color: "white" }}
+                    style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "white" }}
                     onClick={() => navigate("/signup")}
                   >
                     회원가입
