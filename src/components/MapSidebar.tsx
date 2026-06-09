@@ -3204,14 +3204,22 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {prop.buildingName ?? prop.title}
             </p>
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
+            {limitAddress && buildYearShortAddr && (
+              <span
+                className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap"
+                style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
+              >
+                준{buildYearShortAddr}
+              </span>
+            )}
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); if (!isGuest) setShowFullAddr((v) => !v); }}
+              onClick={(e) => { e.stopPropagation(); if (!limitAddress) setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
-              style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
-              title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
+              style={{ color: limitAddress ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
+              title={limitAddress ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
             >
-              {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
+              {limitAddress ? guGuDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
             </button>
             {/* 로드뷰 버튼 (게스트 숨김) */}
             {!isGuest && (
