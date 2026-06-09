@@ -10,7 +10,7 @@ const RENDER = "/storage/v1/render/image/public/";
  * Supabase Storage public URL을 썸네일 URL로 변환.
  * 매물 카드/사이드바 썸네일에서 수 MB 원본 이미지를 다운로드하지 않도록 한다.
  */
-export function thumbUrl(url: string | undefined, width: number, quality = 70): string {
+export function thumbUrl(url: string | undefined, width: number, quality = 85): string {
   if (!url) return "";
   if (!url.includes(OBJECT)) return url;
   const dpr = typeof window !== "undefined" ? Math.min(window.devicePixelRatio || 1, 2) : 1;
