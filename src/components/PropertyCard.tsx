@@ -232,8 +232,7 @@ const PropertyCard = ({
                 협력 공인중개사 문의
               </button>
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
-                {checkedDate && <span>확인 {checkedDate}</span>}
-                {registeredDate && <span>등록 {registeredDate}</span>}
+                {(checkedDate || registeredDate) && <span>확인 {checkedDate || registeredDate}</span>}
               </div>
             </>
           )}
