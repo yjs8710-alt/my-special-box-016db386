@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target, Star } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { neonChipStyle } from "@/lib/neonChipStyle";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsGuest } from "@/hooks/useIsGuest";
+import { useFavoritesOnly } from "@/hooks/useFavorites";
 
 // ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
 export interface LandlordResult {
