@@ -100,11 +100,15 @@ const SignupPage = () => {
   const handleSubmit = async () => {
     setError("");
     setLoading(true);
+    const email = form.email.trim().toLowerCase();
 
     // 1. Supabase 이메일/비밀번호 회원가입
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: form.email,
+      email,
       password: form.password,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
     });
 
     if (signUpError) {
@@ -114,6 +118,12 @@ const SignupPage = () => {
       } else {
         setError(signUpError.message || "회원가입에 실패했습니다. 다시 시도해 주세요.");
       }
+      return;
+    }
+
+    if (signUpData.user && Array.isArray(signUpData.user.identities) && signUpData.user.identities.length === 0) {
+      setLoading(false);
+      setError("이미 가입된 이메일입니다. 로그인 페이지에서 로그인해 주세요.");
       return;
     }
 
@@ -127,7 +137,7 @@ const SignupPage = () => {
     // 2. 회원 프로필 저장: 이메일 확인 전 세션이 없어도 가입 직후 사용자만 저장 가능하도록 백엔드 함수 사용
     const { error: profileError } = await (supabase.rpc as any)("create_agent_profile_after_signup", {
       _user_id: userId,
-      _email: form.email.trim(),
+      _email: email,
       _name: form.name.trim(),
       _phone: form.phone.trim(),
       _agency_name: isGeneralMember ? "" : form.agencyName.trim(),
@@ -196,7 +206,6 @@ const SignupPage = () => {
             <div className="flex items-center cursor-pointer select-none flex-shrink-0 -ml-4 sm:-ml-2" onClick={() => navigate("/")}>
               <img src={logoImg} alt="집다 로고" className="h-24 md:h-20 w-auto object-contain object-left block mt-2" />
             </div>
-            <span className="text-sm text-white/60">회원가입</span>
           </div>
         </div>
       </header>
