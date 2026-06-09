@@ -2534,6 +2534,17 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
   ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
     const [checking, setChecking] = useState(false);
     const isGuest = useIsGuest();
+    const { user: authUserAddr } = useAuth();
+    const isGeneralMember = authUserAddr?.memberType === "일반회원";
+    const limitAddress = isGuest || isGeneralMember;
+    // 게스트/일반회원에게는 "구 동"까지만 노출
+    const guGuDong = (addr?: string | null) => {
+      if (!addr) return "";
+      const gu = addr.match(/[가-힣]+구(?![가-힣])/)?.[0];
+      const dong = addr.match(/[가-힣]+(동|읍|면|리)(?![가-힣])/)?.[0];
+      return [gu, dong].filter(Boolean).join(" ") || addressToDong(addr);
+    };
+    const buildYearShortAddr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
     const isChecked = !!chkDate;
 
     const handleCheckToggle = async (e: React.MouseEvent) => {
@@ -3193,14 +3204,22 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {prop.buildingName ?? prop.title}
             </p>
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
+            {limitAddress && buildYearShortAddr && (
+              <span
+                className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap"
+                style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
+              >
+                준{buildYearShortAddr}
+              </span>
+            )}
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); if (!isGuest) setShowFullAddr((v) => !v); }}
+              onClick={(e) => { e.stopPropagation(); if (!limitAddress) setShowFullAddr((v) => !v); }}
               className="text-[11px] font-semibold whitespace-nowrap flex-shrink min-w-0 truncate underline decoration-dotted underline-offset-2"
-              style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
-              title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
+              style={{ color: limitAddress ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
+              title={limitAddress ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
             >
-              {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
+              {limitAddress ? guGuDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
             </button>
             {/* 로드뷰 버튼 (게스트 숨김) */}
             {!isGuest && (
@@ -3534,13 +3553,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              if (!isGuest) setShowFullAddr((v) => !v);
+              if (!limitAddress) setShowFullAddr((v) => !v);
             }}
             className="text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors underline decoration-dotted underline-offset-2"
-            style={{ color: isGuest ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
-            title={isGuest ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
+            style={{ color: limitAddress ? "#000" : (showFullAddr ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))") }}
+            title={limitAddress ? "로그인 후 상세 주소 확인" : "클릭하면 전체 주소 표시"}
           >
-            {isGuest ? addressToDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
+            {limitAddress ? guGuDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
           </button>
           {/* 게스트/일반회원 버튼은 우측 확인/등록 위치에 표시 */}
           {/* 로드뷰 버튼 (게스트 숨김) */}
