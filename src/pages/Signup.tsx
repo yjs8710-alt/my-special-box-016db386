@@ -434,13 +434,14 @@ const SignupPage = () => {
               {step < 2 ? (
                 <Button
                   className="flex-1 rounded-full font-semibold gap-1"
-                  style={{ background: "hsl(var(--accent))", color: "#fff" }}
+                  style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff" }}
                   disabled={step === 0 ? !canNext0 : !canNext1}
                   onClick={handleNext}
                 >
                   다음
                   <ChevronRight className="w-4 h-4" />
                 </Button>
+
               ) : (
                 <Button
                   className="flex-1 rounded-full font-semibold"
