@@ -221,20 +221,21 @@ const SignupPage = () => {
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                     style={
                       i < step
-                        ? { background: "hsl(var(--primary))", color: "#fff" }
+                        ? { background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff" }
                         : i === step
-                        ? { background: "hsl(var(--accent))", color: "#fff" }
-                        : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
+                        ? { background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff" }
+                        : { background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)", color: "#fff", opacity: 0.45 }
                     }
                   >
                     {i < step ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
                   </div>
                   <span
                     className="text-[10px] font-medium whitespace-nowrap"
-                    style={{ color: i === step ? "hsl(var(--accent))" : "hsl(var(--muted-foreground))" }}
+                    style={{ color: "#000" }}
                   >
                     {label}
                   </span>
+
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
