@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target } from "lucide-react";
+import { Search, X, SlidersHorizontal, RotateCcw, AlertCircle, Loader2, Phone, Target, Star } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { neonChipStyle } from "@/lib/neonChipStyle";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsGuest } from "@/hooks/useIsGuest";
+import { useFavoritesOnly } from "@/hooks/useFavorites";
 
 // ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
 export interface LandlordResult {
@@ -55,7 +57,7 @@ const CATEGORY_TYPES = [
 ];
 
 const ROOM_TYPES = ["전체", "원룸", "투룸", "쓰리룸+", "오피스텔", "투베이", "복층", "주인세대"];
-const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "빌라", "연립"];
+const RESIDENTIAL_TYPES = ["전체", "원룸", "투베이", "투룸", "쓰리룸", "주인세대", "아파트", "오피스텔", "도시형", "연립"];
 const DEAL_TYPES_RESIDENTIAL = ["전체", "월세", "전세", "단기임대"];
 const DEAL_TYPES_COMMERCIAL = ["전체", "임대", "매매"];
 const BUILD_YEARS = ["전체", "1년 이내", "3년 이내", "5년 이내", "10년 이내"];
@@ -417,6 +419,8 @@ const MapFilterBar = ({
   }, []);
 
   // ── 소유주 번호 통합 검색 상태 ──
+  const isGuest = useIsGuest();
+  const { enabled: favoritesOnly, toggle: toggleFavoritesOnly } = useFavoritesOnly();
   const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
   const [landlordQuery, setLandlordQuery] = useState("");
   const [landlordLoading, setLandlordLoading] = useState(false);
@@ -565,7 +569,32 @@ const MapFilterBar = ({
               flexShrink: 0,
             }}
           >
-            {/* 모드 탭 */}
+            {/* 관심매물만 보기 토글 (별표) */}
+            <button
+              onClick={toggleFavoritesOnly}
+              title={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
+              aria-label={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
+              className="flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all"
+              style={{
+                borderRight: "1px solid hsl(var(--primary)/0.3)",
+                background: favoritesOnly ? "hsl(38 95% 50% / 0.10)" : "transparent",
+              }}
+            >
+              <Star
+                className="w-3.5 h-3.5"
+                style={{
+                  color: favoritesOnly ? "hsl(38 95% 45%)" : "hsl(var(--muted-foreground))",
+                  fill: favoritesOnly ? "hsl(38 95% 50%)" : "transparent",
+                }}
+                strokeWidth={2}
+              />
+              <span className="text-[10px] font-bold hidden md:block" style={{ color: favoritesOnly ? "hsl(38 95% 35%)" : "hsl(var(--muted-foreground))" }}>
+                관심매물
+              </span>
+            </button>
+
+            {/* 모드 탭 — 소유주 번호 검색 (게스트/일반회원에게는 숨김) */}
+            {!isGuest && (
             <button
               onClick={() => searchMode === "normal" ? switchToLandlord() : switchToNormal()}
               title={searchMode === "normal" ? "소유주 번호 검색으로 전환" : "일반 검색으로 전환"}
@@ -584,6 +613,7 @@ const MapFilterBar = ({
                 {searchMode === "landlord" ? "소유주" : "소유주검색"}
               </span>
             </button>
+            )}
 
             {/* 입력창 */}
             {searchMode === "normal" ? (
@@ -593,7 +623,7 @@ const MapFilterBar = ({
                   value={pendingQuery}
                   onChange={(e) => setPendingQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") commitSearch(); }}
-                  placeholder="주소, 건물명, 등록번호 검색"
+                  placeholder="주소, 등록번호 검색"
                   autoComplete="off"
                   autoCorrect="off"
                   autoCapitalize="off"

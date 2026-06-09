@@ -29,6 +29,7 @@ import {
   Loader2,
   FileSearch,
   Download,
+  Star,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling_icon-v2-20260427.png";
@@ -52,6 +53,7 @@ import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsGuest, addressToDong } from "@/hooks/useIsGuest";
+import { useFavorites, useFavoritesOnly } from "@/hooks/useFavorites";
 import AdminPropertyFormModal from "@/components/AdminPropertyFormModal";
 import PublicRecordModal from "@/components/PublicRecordModal";
 import { showRoadAddressModal } from "@/lib/showRoadAddressModal";
@@ -4370,7 +4372,18 @@ const MapSidebar = ({
         if (data) setMyAgencyInfo({ userId: authUser.userId, agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
       });
   }, [authUser?.userId]);
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+  const { favorites, toggleFavorite } = useFavorites();
+  const { enabled: favoritesOnly } = useFavoritesOnly();
+  const checkedIds = favorites;
+  const setCheckedIds = (updater: (prev: Set<number>) => Set<number>) => {
+    // 호환 레이어: 인쇄/선택 로직과 별표 토글을 동일 저장소로 사용
+    const next = updater(new Set(favorites));
+    // 단일 토글 케이스만 처리 (size 차이 1)
+    const added = [...next].find((id) => !favorites.has(id));
+    const removed = [...favorites].find((id) => !next.has(id));
+    if (added !== undefined) toggleFavorite(added);
+    else if (removed !== undefined) toggleFavorite(removed);
+  };
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
   const [publicRecordAddress, setPublicRecordAddress] = useState<{ address: string; propertyId?: string } | null>(null);
@@ -4460,13 +4473,14 @@ const MapSidebar = ({
   // 둘 다 없으면 전체 표시
   const displayProperties = useMemo(() => {
     if (isMobile && mobileStep === 0) return [];
+    let list = properties;
+    if (favoritesOnly) list = list.filter((p) => favorites.has(p.id));
     if (pinnedIds && pinnedIds.length > 0) {
-      // 클릭 순서대로 정렬 (properties는 이미 부모에서 pinnedIds 기준 필터링됨)
       const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
-      return [...properties].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
+      return [...list].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
     }
-    return properties;
-  }, [isMobile, mobileStep, pinnedIds, properties]);
+    return list;
+  }, [isMobile, mobileStep, pinnedIds, properties, favoritesOnly, favorites]);
 
   const orderedDisplayProperties = useMemo(() => {
     if (pinnedIds && pinnedIds.length > 0) return [...displayProperties];
@@ -5384,30 +5398,24 @@ const MapSidebar = ({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCheckedIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.has(prop.id) ? next.delete(prop.id) : next.add(prop.id);
-                                  return next;
-                                });
+                                toggleFavorite(prop.id);
                               }}
-                              className="absolute top-1 left-1 z-10 w-4 h-4 rounded flex items-center justify-center transition-all"
+                              className="absolute top-1 left-1 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110"
                               style={{
-                                background: checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(255,255,255,0.85)",
-                                border: `1.5px solid ${checkedIds.has(prop.id) ? "hsl(var(--primary))" : "rgba(150,150,150,0.6)"}`,
-                                boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+                                background: "rgba(255,255,255,0.92)",
+                                boxShadow: "0 1px 4px rgba(0,0,0,0.22)",
                               }}
+                              title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
+                              aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
-                              {checkedIds.has(prop.id) && (
-                                <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
-                                  <path
-                                    d="M1 3.5L3.5 6L8 1"
-                                    stroke="white"
-                                    strokeWidth="1.8"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
+                              <Star
+                                className="w-4 h-4"
+                                style={{
+                                  color: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "hsl(220 10% 60%)",
+                                  fill: favorites.has(prop.id) ? "hsl(38 95% 50%)" : "transparent",
+                                }}
+                                strokeWidth={2}
+                              />
                             </button>
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
