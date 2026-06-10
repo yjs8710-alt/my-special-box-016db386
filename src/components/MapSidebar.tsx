@@ -5608,7 +5608,7 @@ const MapSidebar = ({
                         }`}
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
+                        <div className="flex items-stretch" style={{ width: "100%", height: (isMobile && (isGuest || authUser?.memberType === "일반회원")) ? "auto" : "96px", minHeight: "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
                             className="w-[96px] h-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
