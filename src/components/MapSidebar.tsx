@@ -3411,14 +3411,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 등록 {regDate}
               </span>
             )}
-            {isMobile && !isGuest && !isGeneralMember && (
-              <MobileCheckBadge
-                propertyId={prop.memo}
-                registeredDate={prop.registeredDate}
-                checkedDate={prop.checkedDate}
-                isAdmin={isAdmin}
-              />
-            )}
             <MemoNotepad
               propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
               propId={prop.id}
@@ -3439,6 +3431,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               userId={userId}
               isAdmin={isAdmin}
             />
+            {isMobile && !isGuest && !isGeneralMember && (
+              <MobileCheckBadge
+                propertyId={prop.memo}
+                registeredDate={prop.registeredDate}
+                checkedDate={prop.checkedDate}
+                isAdmin={isAdmin}
+                listScrollRef={listScrollRef}
+              />
+            )}
           </div>
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
