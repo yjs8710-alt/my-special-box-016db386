@@ -2537,11 +2537,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     const { user: authUserAddr } = useAuth();
     const isGeneralMember = authUserAddr?.memberType === "일반회원";
     const limitAddress = isGuest || isGeneralMember;
-    // 게스트/일반회원에게는 "구 동"까지만 노출
+    // 게스트/일반회원에게는 "구 동"까지만 노출 (모바일은 동만)
     const guGuDong = (addr?: string | null) => {
       if (!addr) return "";
       const gu = addr.match(/[가-힣]+구(?![가-힣])/)?.[0];
       const dong = addr.match(/[가-힣]+(동|읍|면|리)(?![가-힣])/)?.[0];
+      if (isMobile) return dong || addressToDong(addr);
       return [gu, dong].filter(Boolean).join(" ") || addressToDong(addr);
     };
     const buildYearShortAddr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
