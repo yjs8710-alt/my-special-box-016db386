@@ -5700,40 +5700,7 @@ const MapSidebar = ({
                            );
                            return (
                              <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
-                               <Row label="위치">
-                                 <button
-                                   type="button"
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     window.dispatchEvent(new CustomEvent("open-guest-detail", {
-                                       detail: {
-                                         info: {
-                                           image: prop.images?.[0] || prop.image,
-                                           address: prop.address,
-                                           type: prop.type,
-                                           area: prop.area,
-                                           floor: prop.floor,
-                                           deposit: prop.deposit,
-                                           monthly: prop.monthly,
-                                           regNo: prop.regNo,
-                                           buildYear: prop.buildYear,
-                                           dbId: prop.dbId,
-                                         },
-                                         partnerDetail: {
-                                           propertyDbId: prop.dbId,
-                                           propertyRegNo: prop.regNo,
-                                           agentUserId: prop.registeredBy,
-                                           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                                         },
-                                       },
-                                     }));
-                                   }}
-                                   className="px-2.5 py-1 rounded-md text-[11px] font-bold border"
-                                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                                 >
-                                   상세보기
-                                 </button>
-                               </Row>
+                                {/* 위치(상세보기) 행 제거 — 게스트/일반회원 요청 */}
                                <Row label="매물정보">
                                  {prop.buildYear && (
                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
