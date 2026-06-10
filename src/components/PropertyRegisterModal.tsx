@@ -392,22 +392,65 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     run();
   }, [form.dong, form.lotNumber, isCollectiveBuilding]);
 
+  // 자동 채워진 연락처 값을 추적 — 호수가 바뀌어 매칭 안 되면 이전 자동값만 제거
+  const autoFilledContactsRef = useRef<{
+    contactOwner?: string;
+    contactOwner2?: string;
+    extraOwners?: string[];
+    contactManager?: string;
+    contactBroker?: string;
+  }>({});
+
   // ── 집합건물/아파트/오피스텔/빌라 등: 동+번지+호수 정확 일치 시 소유주 연락처 + 이전 사진 자동 로드 ──
   useEffect(() => {
-    if (!form.dong || !form.unitNo || !isCollectiveBuilding) return;
-    if (!form.lotNumber) return; // 정확한 주소 일치를 위해 번지 필수
+    if (!isCollectiveBuilding) return;
+    // 동/번지/호수 중 하나라도 비면 이전에 자동 채워졌던 연락처 제거
+    if (!form.dong || !form.lotNumber || !form.unitNo) {
+      const prevAuto = autoFilledContactsRef.current;
+      if (prevAuto.contactOwner || prevAuto.contactOwner2 || (prevAuto.extraOwners?.length ?? 0) > 0 || prevAuto.contactManager || prevAuto.contactBroker) {
+        setForm((prev) => ({
+          ...prev,
+          contactOwner:   prev.contactOwner   === prevAuto.contactOwner   ? "" : prev.contactOwner,
+          contactOwner2:  prev.contactOwner2  === prevAuto.contactOwner2  ? "" : prev.contactOwner2,
+          extraOwners:    JSON.stringify(prev.extraOwners) === JSON.stringify(prevAuto.extraOwners) ? [] : prev.extraOwners,
+          contactManager: prev.contactManager === prevAuto.contactManager ? "" : prev.contactManager,
+          contactBroker:  prev.contactBroker  === prevAuto.contactBroker  ? "" : prev.contactBroker,
+        }));
+        autoFilledContactsRef.current = {};
+      }
+      return;
+    }
     const run = async () => {
-      // 1) cheongju_contacts에서 동+번지+호수 정확 일치 조회 (호수 일치 필수)
-      const contacts = await loadCheongjuContact({ dong: form.dong, lotNumber: form.lotNumber, unitNumber: form.unitNo });
+      // 1) cheongju_contacts에서 동+번지+호수 정확 일치 조회 (호수 일치 필수, 폴백 없음)
+      const contacts = await loadCheongjuContact({
+        dong: form.dong, lotNumber: form.lotNumber, unitNumber: form.unitNo,
+        fallbackFromProperties: false,
+      });
+      const prevAuto = autoFilledContactsRef.current;
       if (contacts) {
         setForm((prev) => ({
           ...prev,
-          contactOwner: contacts.contactOwner || prev.contactOwner,
-          contactOwner2: prev.contactOwner2 || contacts.contactOwner2,
-          extraOwners: prev.extraOwners.length > 0 ? prev.extraOwners : contacts.extraOwners,
-          contactManager: prev.contactManager || contacts.contactManager,
-          contactBroker: prev.contactBroker || contacts.contactBroker,
+          // 이전 자동값이거나 비어있으면 새 값으로 교체, 사용자가 직접 입력한 값은 보존
+          contactOwner:   (!prev.contactOwner   || prev.contactOwner   === prevAuto.contactOwner)   ? (contacts.contactOwner   || "") : prev.contactOwner,
+          contactOwner2:  (!prev.contactOwner2  || prev.contactOwner2  === prevAuto.contactOwner2)  ? (contacts.contactOwner2  || "") : prev.contactOwner2,
+          extraOwners:    (prev.extraOwners.length === 0 || JSON.stringify(prev.extraOwners) === JSON.stringify(prevAuto.extraOwners)) ? contacts.extraOwners : prev.extraOwners,
+          contactManager: (!prev.contactManager || prev.contactManager === prevAuto.contactManager) ? (contacts.contactManager || "") : prev.contactManager,
+          contactBroker:  (!prev.contactBroker  || prev.contactBroker  === prevAuto.contactBroker)  ? (contacts.contactBroker  || "") : prev.contactBroker,
         }));
+        autoFilledContactsRef.current = { ...contacts };
+      } else {
+        // 매칭 결과 없음 — 이전에 자동 채운 값 제거 (사용자 입력값은 보존)
+        if (prevAuto.contactOwner || prevAuto.contactOwner2 || (prevAuto.extraOwners?.length ?? 0) > 0 || prevAuto.contactManager || prevAuto.contactBroker) {
+          setForm((prev) => ({
+            ...prev,
+            contactOwner:   prev.contactOwner   === prevAuto.contactOwner   ? "" : prev.contactOwner,
+            contactOwner2:  prev.contactOwner2  === prevAuto.contactOwner2  ? "" : prev.contactOwner2,
+            extraOwners:    JSON.stringify(prev.extraOwners) === JSON.stringify(prevAuto.extraOwners) ? [] : prev.extraOwners,
+            contactManager: prev.contactManager === prevAuto.contactManager ? "" : prev.contactManager,
+            contactBroker:  prev.contactBroker  === prevAuto.contactBroker  ? "" : prev.contactBroker,
+          }));
+        }
+        autoFilledContactsRef.current = {};
       }
 
       // 2) 같은 동+번지+호수의 이전 매물 사진이 있으면 자동 첨부 (현재 사진이 없을 때만)
@@ -427,8 +470,6 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
           setForm((prev) => prev.images.length > 0 ? prev : ({ ...prev, images: prevImages }));
         }
       } catch {}
-
-      // 방 비밀번호는 호수마다 다르므로 자동 로드하지 않음 (건물 비번은 주소 단계에서만 로드)
     };
     run();
   }, [form.dong, form.unitNo, form.buildingType, form.detailType, form.lotNumber, isCollectiveBuilding]);
