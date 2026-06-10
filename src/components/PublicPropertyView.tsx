@@ -269,7 +269,16 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   const ownImgs = (property.images || []).filter(Boolean);
   const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
   const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
-  const safeAddress = sanitizeAddress(property.address);
+  // 집합건물/공동주택은 번지수까지 노출 (호수는 미포함)
+  const collective = isCollectiveBuilding(property.type);
+  const safeAddress = collective
+    ? ([property.district, property.dong, property.lot_number].filter((v) => v && String(v).trim()).join(" ").trim() || sanitizeAddress(property.address))
+    : sanitizeAddress(property.address);
+  const regNoNumeric = property.reg_no ? String(parseInt(property.reg_no.replace(/[^0-9]/g, ""), 10) || property.reg_no) : "";
+  const directionText = (() => {
+    const m = (property.note || "").match(/방향:\s*([^\n|]+)/);
+    return m ? m[1].trim() : "";
+  })();
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
   const isSale = property.type?.includes("매매");
