@@ -285,9 +285,11 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                 <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
                   <ChevronRight className="w-5 h-5 text-white" />
                 </button>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {imgIdx + 1} / {imgs.length}
-                </div>
+                {!hideDetailInfo && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    {imgIdx + 1} / {imgs.length}
+                  </div>
+                )}
               </>
             )}
           </div>
