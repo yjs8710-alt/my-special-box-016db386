@@ -2536,12 +2536,12 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
             onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
           />
           <div
-            className="absolute z-50 top-full left-0 mt-1 flex items-center gap-1.5 flex-wrap text-[11px] p-1.5 rounded-md shadow-lg border border-border bg-card whitespace-nowrap"
+            className="absolute z-50 top-full left-0 mt-1 flex items-center gap-1.5 flex-wrap text-[11px] p-1.5 rounded-md shadow-lg border border-border bg-card max-w-[85vw]"
             onClick={(e) => e.stopPropagation()}
           >
             {registeredDate && (
               <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
-                매물등록일 {registeredDate}
+                {">등록일"} {registeredDate}
               </span>
             )}
             <span
