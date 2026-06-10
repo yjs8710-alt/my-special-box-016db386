@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import logoTransparent from "@/assets/logo-zibda-share-header-20260502-v3-cropped.png";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 interface PropertyData {
   id: string;
