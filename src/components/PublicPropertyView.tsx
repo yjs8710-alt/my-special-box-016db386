@@ -368,8 +368,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             {[
               { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatAreaShort(property.area) },
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
-              { icon: <Car className="w-4 h-4" />, label: "주차", value: property.parking || "확인필요" },
-              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: property.available_from || "즉시" },
+              { icon: <Car className="w-4 h-4" />, label: "주차", value: building?.parking_count ? `${building.parking_count}대` : (property.parking || "확인필요") },
+              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : (property.available_from || "즉시") },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
