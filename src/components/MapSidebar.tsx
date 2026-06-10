@@ -5652,8 +5652,8 @@ const MapSidebar = ({
                         }
                          return (
                            <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                             {/* 모바일: 웹 확인일 아이콘 스타일 — 탭하면 등록일/확인일 표시, 확인일 갱신은 별도 버튼 */}
-                             {isMobile && (
+                             {/* 모바일: 웹 확인일 아이콘 스타일 — 게스트/일반회원에게는 숨김 */}
+                             {isMobile && !isGuest && authUser?.memberType !== "일반회원" && (
                                <MobileCheckBadge
                                  propertyId={prop.memo}
                                  registeredDate={prop.registeredDate}
