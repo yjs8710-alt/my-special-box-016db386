@@ -3482,7 +3482,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             )}
           </div>
 
-          {/* 모바일 게스트: 가격 · 평수 (좌) | 문의하기 버튼 (우) */}
+          {/* 모바일 게스트: 가격 · 평수 */}
           {isMobile && limitAddress && isGuest && (
             <div className="flex items-center gap-2 min-h-[24px]">
               <div className="flex items-center gap-1 flex-wrap min-w-0">
@@ -3512,27 +3512,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   </span>
                 )}
               </div>
-              <span className="flex-1" />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                    detail: {
-                      propertyDbId: prop.dbId,
-                      propertyRegNo: prop.regNo,
-                      agentUserId: prop.registeredBy,
-                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                    },
-                  }));
-                }}
-                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
-                style={{ background: "hsl(var(--primary))", color: "white" }}
-              >
-                문의하기
-              </button>
             </div>
           )}
+
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
           <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
