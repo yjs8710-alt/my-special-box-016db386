@@ -3339,7 +3339,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                   style={{ background: "hsl(var(--primary))", color: "white" }}
                 >
-                  협력 공인중개사 문의
+                  협력 공인중개사
                 </button>
               </>
             )}
@@ -3682,7 +3682,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                 style={{ background: "hsl(var(--primary))", color: "white" }}
               >
-                협력 공인중개사 문의
+                협력 공인중개사
               </button>
             </>
           )}
@@ -5482,19 +5482,7 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
-                            {/* 모바일 게스트/일반회원: 행정동(예: 복대동) 표시 (사진 우측 상단) */}
-                            {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
-                              const m = (prop.address ?? "").match(/[가-힣]+(동|읍|면|리)/);
-                              const label = m?.[0];
-                              if (!label) return null;
-                              return (
-                                <div className="absolute top-1 right-1 z-10 pointer-events-none">
-                                  <span className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-md tracking-tight" style={{ background: "rgba(0,0,0,0.65)" }}>
-                                    {label}
-                                  </span>
-                                </div>
-                              );
-                            })()}
+                            {/* 동 표시 제거 (게스트/일반회원 요청) */}
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
                               <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
@@ -5702,9 +5690,8 @@ const MapSidebar = ({
                            });
                            const allChips = Array.from(new Set([...facilityList, ...opts]));
                            const noteParts: string[] = [];
+                           if (vacateFutureLabel) noteParts.push(`중도퇴거 ${vacateFutureLabel}`);
                            if (direction) noteParts.push(`${direction}향`);
-                           if (vacateFutureLabel) noteParts.push(`퇴거 ${vacateFutureLabel}`);
-                           if (prop.description && prop.description.trim()) noteParts.push(prop.description.trim());
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
                                <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
@@ -5713,40 +5700,7 @@ const MapSidebar = ({
                            );
                            return (
                              <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
-                               <Row label="위치">
-                                 <button
-                                   type="button"
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     window.dispatchEvent(new CustomEvent("open-guest-detail", {
-                                       detail: {
-                                         info: {
-                                           image: prop.images?.[0] || prop.image,
-                                           address: prop.address,
-                                           type: prop.type,
-                                           area: prop.area,
-                                           floor: prop.floor,
-                                           deposit: prop.deposit,
-                                           monthly: prop.monthly,
-                                           regNo: prop.regNo,
-                                           buildYear: prop.buildYear,
-                                           dbId: prop.dbId,
-                                         },
-                                         partnerDetail: {
-                                           propertyDbId: prop.dbId,
-                                           propertyRegNo: prop.regNo,
-                                           agentUserId: prop.registeredBy,
-                                           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                                         },
-                                       },
-                                     }));
-                                   }}
-                                   className="px-2.5 py-1 rounded-md text-[11px] font-bold border"
-                                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                                 >
-                                   상세보기
-                                 </button>
-                               </Row>
+                                {/* 위치(상세보기) 행 제거 — 게스트/일반회원 요청 */}
                                <Row label="매물정보">
                                  {prop.buildYear && (
                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
