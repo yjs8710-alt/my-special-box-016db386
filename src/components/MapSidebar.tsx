@@ -3319,24 +3319,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   상세보기
                 </button>
                 )}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                      detail: {
-                        propertyDbId: prop.dbId,
-                        propertyRegNo: prop.regNo,
-                        agentUserId: prop.registeredBy,
-                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-                  style={{ background: "hsl(var(--primary))", color: "white" }}
-                >
-                  협력 공인중개사
-                </button>
               </>
             )}
             {regDate && !isMobile && (
