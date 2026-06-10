@@ -622,6 +622,14 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const bodyScrollRef = useRef<HTMLDivElement>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [contactAutoFilled, setContactAutoFilled] = useState(false);
+  // 자동 채워진 연락처 값 추적 — 호수가 바뀌어 매칭 안되면 이전 자동값만 제거
+  const autoFilledContactsRef = useRef<{
+    contactOwner?: string;
+    contactOwner2?: string;
+    extraOwners?: string[];
+    contactManager?: string;
+    contactBroker?: string;
+  }>({});
   const [showOwner2, setShowOwner2] = useState(!!form.contactOwner2);
   const [showOneRoomModal, setShowOneRoomModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
