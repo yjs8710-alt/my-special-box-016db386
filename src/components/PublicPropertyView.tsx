@@ -306,9 +306,11 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             </p>
             <div className="flex flex-wrap gap-1.5">
               {otherUnits.map((u) => {
+                const floorTxt = (u.floor ?? "").trim();
+                const floorLabel = floorTxt ? (/[층F]/.test(floorTxt) ? floorTxt : `${floorTxt}층`) : "호실";
                 const label = hideDetailInfo
-                  ? (u.floor ? `${u.floor}층` : "호실")
-                  : (u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실");
+                  ? floorLabel
+                  : (u.unit_number ? `${u.unit_number}호` : floorLabel);
                 const active = u.id === selectedUnitId;
                 return (
                   <button
