@@ -23,6 +23,7 @@ interface PropertyData {
   parking: string;
   elevator: boolean;
   available_from: string;
+  vacate_date: string;
   build_year: string;
   description: string;
   images: string[];
@@ -75,6 +76,16 @@ function sanitizeAddress(address: string): string {
     /(?:.*?(?:시|군)\s+)?(?:.*?(?:구|군)\s+)?[\uAC00-\uD7A3]+(?:동|리|읍|면)/
   );
   return match ? match[0] : address.split(" ").slice(0, -1).join(" ") || address;
+}
+
+function checkVacant(p: PropertyData): boolean {
+  if (p.vacate_date) {
+    const v = p.vacate_date.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+    const t = new Date(v).getTime();
+    if (!isNaN(t) && t < Date.now()) return true;
+  }
+  if (p.available_from === "공실") return true;
+  return false;
 }
 
 function KakaoMapPreview({ lat, lng }: { lat: number; lng: number }) {
@@ -169,7 +180,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
 
       const { data, error } = await supabase
         .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,vacate_date,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
         .eq("id", id)
         .eq("status", "active")
         .single();
@@ -357,8 +368,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             {[
               { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatAreaShort(property.area) },
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
-              { icon: <Car className="w-4 h-4" />, label: "주차", value: property.parking || "확인필요" },
-              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: property.available_from || "즉시" },
+              { icon: <Car className="w-4 h-4" />, label: "주차", value: building?.parking_count ? `${building.parking_count}대` : (property.parking || "확인필요") },
+              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : (property.available_from || "즉시") },
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
