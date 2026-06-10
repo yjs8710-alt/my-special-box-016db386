@@ -410,7 +410,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
 
           <div className="rounded-2xl border border-border bg-muted/30 p-4">
             <p className="text-xs text-muted-foreground mb-1">{isSale ? "매매가" : "보증금 / 월세"}</p>
-            <p className="text-2xl font-black text-foreground">
+            <p className="text-2xl font-black text-primary">
               {isSale ? property.deposit : `${property.deposit} / ${property.monthly}`}
             </p>
             {!isSale && property.manage_fee && (
@@ -431,7 +431,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
                 <div>
                   <p className="text-xs text-muted-foreground">{item.label}</p>
-                  <p className="text-base font-extrabold text-black">{item.value || "-"}</p>
+                  <p className="text-base font-extrabold text-primary">{item.value || "-"}</p>
                 </div>
               </div>
             ))}
