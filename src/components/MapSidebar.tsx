@@ -3692,6 +3692,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </div>
             );
           })()}
+
+          {/* 모바일 게스트: 가격 · 평수 (배지 아래로 배치) */}
+          {isMobile && limitAddress && isGuest && (
+            <div className="flex items-center gap-2 min-h-[24px]">
+              {(wolseMatch || halfMatch || jeonseMatch) ? (
+                <span className="flex-shrink-0 flex items-center gap-1 text-[13px] font-extrabold whitespace-nowrap">
+                  {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
+                  {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                  {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+                </span>
+              ) : (
+                <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[13px] font-extrabold">
+                  {isSaleProp ? (
+                    <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                  ) : (
+                    <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
+                  )}
+                </span>
+              )}
+              {prop.area && (
+                <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
+                  {(() => {
+                    const a = prop.area;
+                    if (/평/.test(a)) return a;
+                    const n = parseFloat(a.replace(/[^0-9.]/g, ""));
+                    return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
+                  })()}
+                </span>
+              )}
+            </div>
+          )}
           {showVacateInfo && (vacateLabel || earlyExit) && (
             <div
               className="fixed inset-0 z-[10300] flex items-end justify-center"
