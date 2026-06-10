@@ -2666,8 +2666,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       setChecking(true);
       // 토글: 확인일이 있으면 null로 초기화, 없으면 오늘로 설정
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
+      // 체크 시 목록이 재정렬되어도 화면(시각적 뷰포트)은 유지
+      const anchor = newCheckedDate ? captureScrollAnchor(listScrollRef?.current, prop.id) : null;
       await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
+      if (newCheckedDate) restoreScrollAnchor(listScrollRef?.current, anchor);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showVacateInfo, setShowVacateInfo] = useState(false);
