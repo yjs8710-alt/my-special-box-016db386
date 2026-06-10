@@ -270,6 +270,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             {showingOtherUnit && (
               <div className="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                 다른 호실 사진{(() => {
+                  if (hideDetailInfo) return "";
                   const u = otherUnits.find((x) => x.id === selectedUnitId);
                   const label = u?.unit_number ? `${u.unit_number}호` : u?.floor ? `${u.floor}층` : "";
                   return label ? ` · ${label}` : "";
