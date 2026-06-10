@@ -771,8 +771,24 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const handleUnitNumberChange = useCallback((unitVal: string) => {
     set("unit_number", unitVal);
     const isCollective = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
-    if (isCollective && form.dong && unitVal) {
-      fetchContactFromDB(form.dong, form.lot_number, unitVal, true);
+    if (isCollective && form.dong) {
+      if (unitVal) {
+        fetchContactFromDB(form.dong, form.lot_number, unitVal, true);
+      } else {
+        // 호수가 비워졌을 때: 이전에 자동 채운 값 제거
+        const prevAuto = autoFilledContactsRef.current;
+        if (prevAuto.contactOwner || prevAuto.contactOwner2 || (prevAuto.extraOwners?.length ?? 0) > 0 || prevAuto.contactManager || prevAuto.contactBroker) {
+          setForm((f) => ({
+            ...f,
+            contactOwner:   f.contactOwner   === prevAuto.contactOwner   ? "" : f.contactOwner,
+            contactOwner2:  f.contactOwner2  === prevAuto.contactOwner2  ? "" : f.contactOwner2,
+            extraOwners:    JSON.stringify(f.extraOwners) === JSON.stringify(prevAuto.extraOwners) ? [] : f.extraOwners,
+            contactManager: f.contactManager === prevAuto.contactManager ? "" : f.contactManager,
+            contactBroker:  f.contactBroker  === prevAuto.contactBroker  ? "" : f.contactBroker,
+          }));
+          autoFilledContactsRef.current = {};
+        }
+      }
     }
   }, [form.buildingType, form.type, form.dong, form.lot_number, fetchContactFromDB]);
 
