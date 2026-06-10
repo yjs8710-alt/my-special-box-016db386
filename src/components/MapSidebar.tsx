@@ -4161,18 +4161,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </p>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                         {(() => {
-                          const petMap: Record<string, string> = {
-                            "애완동물가능": "반려동물 가능",
-                            "애완동물불가": "반려동물 불가",
-                            "반려동물_가능": "반려동물 가능",
-                            "반려동물_불가": "반려동물 불가",
-                            "반려동물가능": "반려동물 가능",
-                            "반려동물불가": "반려동물 불가",
-                          };
                           const seen = new Set<string>();
                           const list: string[] = [];
                           prop.options!.forEach((o) => {
-                            const label = petMap[o] ?? o;
+                            const label = normalizeDisplayOption(o);
                             if (seen.has(label)) return;
                             seen.add(label);
                             list.push(label);
