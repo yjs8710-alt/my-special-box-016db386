@@ -242,7 +242,7 @@ function LightboxModal({
               </div>
             )}
           </div>
-          {!hideUnitNumber && (
+          {!hideDownload && (
           <div className="flex justify-end">
             <button
               onClick={async (e) => {
@@ -265,7 +265,7 @@ function LightboxModal({
       ) : (
         <>
           {/* 데스크톱 — 우측 상단 모두저장 버튼 */}
-          {!hideUnitNumber && (
+          {!hideDownload && (
           <button
             onClick={async (e) => {
               e.stopPropagation();
