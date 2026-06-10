@@ -354,11 +354,9 @@ export const GuestDetailModal = ({
   info?: GuestDetailInfo;
   onInquiry?: () => void;
 }) => {
-  const [iframeLoaded, setIframeLoaded] = useState(false);
   if (!open || !info) return null;
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const canShare = !!info.dbId && uuidRegex.test(info.dbId);
-  const shareUrl = canShare ? `/share/${info.dbId}?embed=1` : "";
 
   return createPortal(
     <div
@@ -380,23 +378,9 @@ export const GuestDetailModal = ({
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex-1 overflow-hidden bg-muted relative">
+        <div className="flex-1 overflow-auto bg-background">
           {canShare ? (
-            <>
-              <iframe
-                src={shareUrl}
-                title="매물 상세보기"
-                className="w-full h-full border-0"
-                loading="eager"
-                onLoad={() => setIframeLoaded(true)}
-              />
-              {!iframeLoaded && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white pointer-events-none">
-                  <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin" style={{ borderWidth: 3 }} />
-                  <p className="text-xs text-muted-foreground font-medium">매물 정보를 불러오는 중…</p>
-                </div>
-              )}
-            </>
+            <PublicPropertyView id={info.dbId!} showHeader={false} className="bg-background" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
               상세 정보를 불러올 수 없습니다.
