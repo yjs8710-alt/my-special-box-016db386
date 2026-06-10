@@ -2518,13 +2518,15 @@ const restoreScrollAnchor = (container: HTMLElement | null | undefined, anchor: 
 
 /* ── MobileCheckBadge ── 모바일 매물카드 펼침 영역의 등록일/확인일 표시 (웹 확인일 아이콘 스타일) */
 interface MobileCheckBadgeProps {
+  propId: number;
   propertyId?: string;
   registeredDate?: string;
   checkedDate?: string;
   isAdmin?: boolean;
   listScrollRef?: React.RefObject<HTMLDivElement>;
+  onCheckedDateUpdated?: (propId: number, checkedDate: string | null) => void;
 }
-const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, listScrollRef }: MobileCheckBadgeProps) => {
+const MobileCheckBadge = ({ propId, propertyId, registeredDate, checkedDate, isAdmin, listScrollRef, onCheckedDateUpdated }: MobileCheckBadgeProps) => {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -2553,10 +2555,15 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, li
     e.stopPropagation();
     if (!isAdmin || !propertyId || busy) return;
     setBusy(true);
-    const anchor = captureScrollAnchor(listScrollRef?.current, propertyId);
+    const anchor = captureScrollAnchor(listScrollRef?.current, propId);
     const today = new Date().toISOString().slice(0, 10);
-    await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
+    const { error } = await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
+    if (error) {
+      toast.error("확인일 갱신에 실패했습니다.");
+      return;
+    }
+    onCheckedDateUpdated?.(propId, today);
     setExpanded(false);
     restoreScrollAnchor(listScrollRef?.current, anchor);
   };
@@ -2639,8 +2646,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean; onCheckedDateUpdated?: (propId: number, checkedDate: string | null) => void }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos, onCheckedDateUpdated }, ref) => {
     const [checking, setChecking] = useState(false);
     const isGuest = useIsGuest();
     const { user: authUserAddr } = useAuth();
@@ -2668,8 +2675,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
       // 체크 시 목록이 재정렬되어도 화면(시각적 뷰포트)은 유지
       const anchor = newCheckedDate ? captureScrollAnchor(listScrollRef?.current, prop.id) : null;
-      await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
+      const { error } = await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
+      if (error) {
+        toast.error("확인일 변경에 실패했습니다.");
+        return;
+      }
+      onCheckedDateUpdated?.(prop.id, newCheckedDate);
       if (newCheckedDate) restoreScrollAnchor(listScrollRef?.current, anchor);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
