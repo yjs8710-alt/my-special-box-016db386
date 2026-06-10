@@ -430,8 +430,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                  <p className="text-xs font-extrabold text-primary">{item.value || "-"}</p>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className="text-base font-extrabold text-black">{item.value || "-"}</p>
                 </div>
               </div>
             ))}
