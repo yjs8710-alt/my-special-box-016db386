@@ -27,6 +27,8 @@ function ImageCarouselPreview({
   const safeIdx = Math.min(idx, images.length - 1);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
+  const pressRef = useRef<{ x: number; y: number; idx: number; moved: boolean } | null>(null);
+  const DRAG_THRESHOLD = 5;
 
   const handleRemove = useCallback((url: string) => {
     onRemove(url);
@@ -41,48 +43,44 @@ function ImageCarouselPreview({
     onReorder?.(arr);
     setIdx(to);
   };
-  const handleDragStart = (e: React.DragEvent, i: number) => {
-    setDragIdx(i);
-    e.dataTransfer.effectAllowed = "move";
-    try { e.dataTransfer.setData("text/plain", String(i)); } catch {}
-  };
-  const handleDragOver = (e: React.DragEvent, i: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setOverIdx(i);
-    // 실시간 정렬: 드래그 위치가 바뀔 때마다 즉시 이동
-    if (dragIdx !== null && dragIdx !== i) {
-      moveItem(dragIdx, i);
-      setDragIdx(i);
-    }
-  };
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragIdx(null);
-    setOverIdx(null);
-  };
-  const handleDragEnd = () => { setDragIdx(null); setOverIdx(null); };
-  // 모바일 터치 지원
+
+  // 통합 포인터 기반 DnD (마우스 + 터치 동일)
   const onPointerDown = (e: React.PointerEvent, i: number) => {
-    if (e.pointerType === "mouse") return;
-    setDragIdx(i);
+    pressRef.current = { x: e.clientX, y: e.clientY, idx: i, moved: false };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent) => {
-    if (dragIdx === null || e.pointerType === "mouse") return;
+    const p = pressRef.current;
+    if (!p) return;
+    if (!p.moved) {
+      const dx = e.clientX - p.x;
+      const dy = e.clientY - p.y;
+      if (dx * dx + dy * dy < DRAG_THRESHOLD * DRAG_THRESHOLD) return;
+      p.moved = true;
+      setDragIdx(p.idx);
+    }
+    const curDrag = dragIdx ?? p.idx;
     const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
     const target = el?.closest<HTMLElement>("[data-thumb-idx]");
     if (target) {
       const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
-      if (!isNaN(i) && i !== dragIdx) {
+      if (!isNaN(i) && i !== curDrag) {
         setOverIdx(i);
-        moveItem(dragIdx, i);
+        moveItem(curDrag, i);
         setDragIdx(i);
+        pressRef.current = { ...p, idx: i, moved: true };
       }
     }
   };
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (dragIdx === null) return;
+  const onPointerUp = (e: React.PointerEvent, i: number) => {
+    const p = pressRef.current;
+    pressRef.current = null;
+    setDragIdx(null); setOverIdx(null);
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    if (p && !p.moved) setIdx(i);
+  };
+  const onPointerCancel = () => {
+    pressRef.current = null;
     setDragIdx(null); setOverIdx(null);
   };
 
@@ -179,15 +177,10 @@ function ImageCarouselPreview({
             <div
               key={src}
               data-thumb-idx={i}
-              draggable
-              onDragStart={(e) => handleDragStart(e, i)}
-              onDragOver={(e) => handleDragOver(e, i)}
-              onDrop={handleDrop}
-              onDragEnd={handleDragEnd}
               onPointerDown={(e) => onPointerDown(e, i)}
               onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerCancel={() => { setDragIdx(null); setOverIdx(null); }}
+              onPointerUp={(e) => onPointerUp(e, i)}
+              onPointerCancel={onPointerCancel}
               className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
               style={{
                 borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
@@ -195,18 +188,13 @@ function ImageCarouselPreview({
                 touchAction: "none",
               }}
             >
+              <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" draggable={false} />
+              {i === 0 && (
+                <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4 pointer-events-none">대표</span>
+              )}
               <button
                 type="button"
-                onClick={() => setIdx(i)}
-                className="w-full h-full"
-              >
-                <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" />
-                {i === 0 && (
-                  <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4">대표</span>
-                )}
-              </button>
-              <button
-                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
                 className="absolute top-0 right-0 w-4 h-4 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
                 title="사진 삭제"

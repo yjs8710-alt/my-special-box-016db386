@@ -3201,9 +3201,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
           <div className="flex items-center gap-1 min-h-[22px]">
             {/* 확인일 배지 제거 */}
-            <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
-              {prop.buildingName ?? prop.title}
-            </p>
+            {/* 모바일 일반회원/게스트는 건물명 숨김 (좌측 사진으로 대체) */}
+            {!(isMobile && limitAddress) && (
+              <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
+                {prop.buildingName ?? prop.title}
+              </p>
+            )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             {limitAddress && buildYearShortAddr && (
               <span
@@ -3354,27 +3357,28 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </span>
             )}
-            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 */}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
-              title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
-              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
-              style={{
-                background: "transparent",
-                border: "none",
-                opacity: hasPhotos ? 1 : 0.4,
-              }}
-            >
-              <img
-                src={cameraIcon}
-                alt="사진"
-                className="w-8 h-8 object-contain"
-                style={{ imageRendering: "auto", transform: "scale(1.35)" }}
-                draggable={false}
-              />
-            </button>
-            {/* 평수 표기 */}
+            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 (모바일 일반회원/게스트는 좌측 썸네일로 대체, 카메라 숨김) */}
+            {!(isMobile && limitAddress) && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
+                title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
+                className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  opacity: hasPhotos ? 1 : 0.4,
+                }}
+              >
+                <img
+                  src={cameraIcon}
+                  alt="사진"
+                  className="w-8 h-8 object-contain"
+                  style={{ imageRendering: "auto", transform: "scale(1.35)" }}
+                  draggable={false}
+                />
+              </button>
+            )}
             {prop.area && (
               <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
                 {(() => {
@@ -5344,9 +5348,10 @@ const MapSidebar = ({
                         {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
                         <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
                           {/* ①썸네일 — 3열 비율에 맞춰 96px */}
-                          {!isMobile && <div
-                            className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
-                            style={{ minHeight: "96px" }}
+                          {/* 썸네일: 데스크톱 항상, 모바일은 일반회원/게스트에게도 좌측 사진 표시 */}
+                          {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
+                            className={`${isMobile ? "w-[80px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
+                            style={{ minHeight: isMobile ? "80px" : "96px" }}
                           >
 
                             {(() => {
