@@ -160,11 +160,16 @@ function LightboxModal({
   const isGuestLightbox = useIsGuest();
   const { user: authUserLb } = useAuth();
   const hideUnitNumber = isGuestLightbox || (isMobileView && authUserLb?.memberType === "일반회원");
+  const fmtFloor = (f?: string) => {
+    const s = (f ?? "").trim();
+    if (!s) return "";
+    return /[층F]/.test(s) ? s : `${s}층`;
+  };
   const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
     const unitLabel = hideUnitNumber
-      ? (u.floor ?? "")
+      ? fmtFloor(u.floor)
       : (u.unitNumber ?? u.label ?? "");
     const roomLabel = hideUnitNumber ? "" : (u.roomType ?? "");
     const stacked = opts?.stacked;
