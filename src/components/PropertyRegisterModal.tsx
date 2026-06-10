@@ -1796,14 +1796,14 @@ function ImagePreviewCarousel({
 
   return (
     <div className="flex flex-col gap-2">
-      <div data-main-drop className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
+      <div data-main-drop className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 280 }}>
         <div
-          className="flex h-full transition-transform duration-300 ease-in-out"
-          style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+          className="flex h-full w-full transition-transform duration-300 ease-in-out"
+          style={{ transform: `translateX(-${safeIdx * 100}%)` }}
         >
           {images.map((src, i) => (
-            <div key={src} className="h-full flex-shrink-0 relative" style={{ width: `${100 / images.length}%` }}>
-              <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover" />
+            <div key={src} className="h-full w-full flex-shrink-0 relative">
+              <img src={src} alt={`사진 ${i + 1}`} loading="eager" decoding="async" className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
@@ -1847,7 +1847,7 @@ function ImagePreviewCarousel({
               onPointerMove={onPointerMove}
               onPointerUp={(e) => onPointerUp(e, i)}
               onPointerCancel={onPointerCancel}
-              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
+              className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
               style={{
                 borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
                 opacity: dragIdx === i ? 0.4 : 1,
