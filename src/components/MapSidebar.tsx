@@ -5755,16 +5755,17 @@ const MapSidebar = ({
                              if (opts.some((o) => o.includes(k))) facilityList.push(k);
                            });
                            const allChips = Array.from(new Set([...facilityList, ...opts]));
-                           const noteParts: string[] = [];
-                           const earlyExitG = note.includes("중도퇴거:");
-                           if (earlyExitG) noteParts.push("세입자 중도퇴거 가능");
-                           if (vacateFutureLabel) noteParts.push(`퇴거예정 ${vacateFutureLabel}`);
-                           if (opts.includes("복층")) noteParts.push("복층");
-                           if (opts.includes("단기가능")) noteParts.push("단기가능");
-                           const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
-                           const keyMoneyG = keyMoneyM?.[1]?.trim();
-                           if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
-                           if (direction) noteParts.push(`${direction}향`);
+                            const noteParts: string[] = [];
+                            const earlyExitG = note.includes("중도퇴거:");
+                            if (earlyExitG) noteParts.push("중도퇴거");
+                            if (vacateFutureLabel) noteParts.push(`퇴거예정 ${vacateFutureLabel}`);
+                            if (opts.includes("복층")) noteParts.push("복층");
+                            if (opts.includes("단기가능")) noteParts.push("단기가능");
+                            const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
+                            const keyMoneyG = keyMoneyM?.[1]?.trim();
+                            if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
+                            if (direction) noteParts.push(`${direction}향`);
+                            if (petAllowed) noteParts.push("반려동물가능");
 
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
@@ -5780,14 +5781,9 @@ const MapSidebar = ({
                                       준{String(prop.buildYear).slice(0,4)}
                                     </span>
                                   )}
-                                  {elev && (
+                                  {elev && prop.regNo !== "349" && (
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                                       엘리베이터
-                                    </span>
-                                  )}
-                                  {petAllowed && (
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
-                                      반려동물가능
                                     </span>
                                   )}
                                   {petNo && (
