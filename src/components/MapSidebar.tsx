@@ -3450,26 +3450,30 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 등록 {regDate}
               </span>
             )}
-            <MemoNotepad
-              propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
-              propId={prop.id}
-              memoKey="building"
-              icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
-              label="건물메모"
-              initialText={buildingMemo ?? ""}
-              userId={userId}
-              isAdmin={isAdmin}
-            />
-            <MemoNotepad
-              propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
-              propId={prop.id}
-              memoKey="room"
-              icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
-              label="방메모"
-              initialText={roomMemo ?? ""}
-              userId={userId}
-              isAdmin={isAdmin}
-            />
+            {!(isMobile && isGuest) && (
+              <MemoNotepad
+                propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
+                propId={prop.id}
+                memoKey="building"
+                icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+                label="건물메모"
+                initialText={buildingMemo ?? ""}
+                userId={userId}
+                isAdmin={isAdmin}
+              />
+            )}
+            {!(isMobile && isGuest) && (
+              <MemoNotepad
+                propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
+                propId={prop.id}
+                memoKey="room"
+                icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+                label="방메모"
+                initialText={roomMemo ?? ""}
+                userId={userId}
+                isAdmin={isAdmin}
+              />
+            )}
             {isMobile && !isGuest && !isGeneralMember && (
               <MobileCheckBadge
                 propId={prop.id}
@@ -3715,10 +3719,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       },
                     }));
                   }}
-                  className="ml-auto flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                  className="ml-auto flex-shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap border"
                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                 >
-                  협력 공인중개사
+                  협력중개사
                 </button>
               )}
             </div>
