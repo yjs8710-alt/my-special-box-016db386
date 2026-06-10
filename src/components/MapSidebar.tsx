@@ -3408,14 +3408,18 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </span>
             )}
             <span className="flex-1" />
-            {/* 카카오톡 공유 */}
-            <button
-              onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
-              title="카카오톡 공유"
-              className="flex-shrink-0 flex items-center justify-center"
-            >
-              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
-            </button>
+            {!(isMobile && limitAddress) && (
+              <>
+                {/* 카카오톡 공유 */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
+                  title="카카오톡 공유"
+                  className="flex-shrink-0 flex items-center justify-center"
+                >
+                  <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* 3행: 준공년도 · 공실/거주중 · 권리금 · 단기 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
