@@ -3331,7 +3331,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
               </span>
             )}
-            {/* 모바일 게스트: 1행 우측 끝에 상세보기 버튼 */}
+            {/* 모바일 게스트: 1행 우측 끝에 상세보기 + 문의하기 */}
             {isMobile && limitAddress && isGuest && (
               <>
                 <span className="flex-1" />
@@ -3367,8 +3367,27 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 >
                   상세보기
                 </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                      detail: {
+                        propertyDbId: prop.dbId,
+                        propertyRegNo: prop.regNo,
+                        agentUserId: prop.registeredBy,
+                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                      },
+                    }));
+                  }}
+                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                  style={{ background: "hsl(var(--primary))", color: "white" }}
+                >
+                  문의하기
+                </button>
               </>
             )}
+
 
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             {!(isMobile && limitAddress) && (
@@ -3513,26 +3532,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </div>
               <span className="flex-1" />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                    detail: {
-                      propertyDbId: prop.dbId,
-                      propertyRegNo: prop.regNo,
-                      agentUserId: prop.registeredBy,
-                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                    },
-                  }));
-                }}
-                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
-                style={{ background: "hsl(var(--primary))", color: "white" }}
-              >
-                문의하기
-              </button>
             </div>
           )}
+
 
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
