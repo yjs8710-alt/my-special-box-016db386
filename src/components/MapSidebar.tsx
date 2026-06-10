@@ -5781,7 +5781,7 @@ const MapSidebar = ({
                                       준{String(prop.buildYear).slice(0,4)}
                                     </span>
                                   )}
-                                  {elev && prop.regNo !== "349" && (
+                                  {elev && !(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                                       엘리베이터
                                     </span>
