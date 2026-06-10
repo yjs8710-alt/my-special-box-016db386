@@ -241,10 +241,6 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
   const isSale = property.type?.includes("매매");
-  const isMobileView = useIsMobile();
-  const isGuestView = useIsGuest();
-  const { user: authUser } = useAuth();
-  const hideDetailInfo = isMobileView && (isGuestView || authUser?.memberType === "일반회원");
 
   return (
     <div className={className ?? "min-h-screen bg-background"}>
