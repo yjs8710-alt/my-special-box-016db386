@@ -2421,6 +2421,45 @@ const ContactRevealBtn = ({ propId, label, shortLabel, number, colorStyle, borde
   );
 };
 
+/* ── GuestOptionsButton ── 모바일 게스트/일반회원: 옵션·시설 버튼 (클릭 시 모달로 전체 표시) */
+const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <div className="flex items-center">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          className="text-[10px] font-extrabold px-2 py-0.5 rounded whitespace-nowrap select-none"
+          style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.75)", border: "1.5px solid hsl(var(--border))" }}
+        >
+          옵션·시설 ▾
+        </button>
+      </div>
+      {open && (
+        <div
+          className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
+          onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-4 w-[calc(100%-16px)] sm:w-auto sm:max-w-md max-h-[calc(100dvh-130px)] sm:max-h-[80dvh] overflow-y-auto mb-2 sm:mb-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs font-extrabold mb-2 pb-1.5 border-b border-border" style={{ color: "hsl(var(--primary))" }}>
+              옵션·시설 ({chips.length}개)
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1.5">
+              {chips.map((c) => (
+                <span key={c} className="text-[12px] font-semibold text-foreground whitespace-nowrap">· {c}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 /* ── MobileCheckBadge ── 모바일 매물카드 펼침 영역의 등록일/확인일 표시 (웹 확인일 아이콘 스타일) */
 interface MobileCheckBadgeProps {
   propertyId?: string;
@@ -5443,12 +5482,10 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
-                            {/* 모바일 게스트/일반회원: 동·호수 표시 (사진 우측 상단) */}
+                            {/* 모바일 게스트/일반회원: 행정동(예: 복대동) 표시 (사진 우측 상단) */}
                             {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
-                              const dongMatch = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
-                              const dong = dongMatch?.[1]?.trim().replace(/동+\s*$/, "").trim();
-                              const unit = prop.unitNumber ? prop.unitNumber.replace(/호$/, "") : "";
-                              const label = [dong ? `${dong}동` : "", unit ? `${unit}호` : ""].filter(Boolean).join(" ");
+                              const m = (prop.address ?? "").match(/[가-힣]+(동|읍|면|리)/);
+                              const label = m?.[0];
                               if (!label) return null;
                               return (
                                 <div className="absolute top-1 right-1 z-10 pointer-events-none">
@@ -5654,8 +5691,8 @@ const MapSidebar = ({
                         }
                          return (
                            <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                             {/* 모바일: 웹 확인일 아이콘 스타일 — 탭하면 등록일/확인일 표시, 확인일 갱신은 별도 버튼 */}
-                             {isMobile && (
+                             {/* 모바일: 웹 확인일 아이콘 스타일 — 게스트/일반회원에게는 숨김 */}
+                             {isMobile && !isGuest && authUser?.memberType !== "일반회원" && (
                                <MobileCheckBadge
                                  propertyId={prop.memo}
                                  registeredDate={prop.registeredDate}
@@ -5712,7 +5749,7 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
-                            {/* 게스트/일반회원: 부가시설 & 옵션 (카드에서 숨기고 펼침 시 표시) */}
+                            {/* 게스트/일반회원: 부가시설 & 옵션 — 버튼 클릭 시 모달로 전체 표시 */}
                             {(isGuest || authUser?.memberType === "일반회원") && (() => {
                               const opts = prop.options ?? [];
                               const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
@@ -5723,16 +5760,7 @@ const MapSidebar = ({
                               });
                               const allChips = Array.from(new Set([...facilityList, ...opts]));
                               if (allChips.length === 0) return null;
-                              return (
-                                <div className="flex items-center gap-1 flex-wrap">
-                                  <span className="text-[10px] font-bold text-muted-foreground mr-0.5">옵션·시설</span>
-                                  {allChips.map((opt) => (
-                                    <span key={opt} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-muted text-foreground border border-border whitespace-nowrap">
-                                      {opt}
-                                    </span>
-                                  ))}
-                                </div>
-                              );
+                              return <GuestOptionsButton chips={allChips} />;
                             })()}
                             {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
                             {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
