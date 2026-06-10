@@ -5723,9 +5723,30 @@ const MapSidebar = ({
                                <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                              </div>
                            );
-                           return (
-                             <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
-                                <Row label="위치">
+                            return (
+                              <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
+                                <Row label="매물정보">
+                                  {prop.buildYear && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
+                                      준{String(prop.buildYear).slice(0,4)}
+                                    </span>
+                                  )}
+                                  {elev && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                                      엘리베이터
+                                    </span>
+                                  )}
+                                  {petAllowed && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
+                                      반려동물가능
+                                    </span>
+                                  )}
+                                  {petNo && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                      애완동물불가
+                                    </span>
+                                  )}
+                                  <span className="flex-1" />
                                   <button
                                     type="button"
                                     onClick={(e) => {
@@ -5753,7 +5774,7 @@ const MapSidebar = ({
                                         },
                                       }));
                                     }}
-                                    className="px-2.5 py-1 rounded-md text-[11px] font-bold border"
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold border"
                                     style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                                   >
                                     상세보기
@@ -5771,37 +5792,13 @@ const MapSidebar = ({
                                         },
                                       }));
                                     }}
-                                    className="px-2.5 py-1 rounded-md text-[11px] font-bold"
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
                                     style={{ background: "hsl(var(--primary))", color: "white" }}
                                   >
                                     문의하기
                                   </button>
                                 </Row>
-                               <Row label="매물정보">
-                                 {prop.buildYear && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
-                                     준{String(prop.buildYear).slice(0,4)}
-                                   </span>
-                                 )}
-                                 {elev && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
-                                     엘리베이터
-                                   </span>
-                                 )}
-                                 {petAllowed && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
-                                     반려동물가능
-                                   </span>
-                                 )}
-                                 {petNo && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                     애완동물불가
-                                   </span>
-                                 )}
-                                 {!prop.buildYear && !elev && !petAllowed && !petNo && (
-                                   <span className="text-[11px] text-muted-foreground">-</span>
-                                 )}
-                               </Row>
+
                                <Row label="옵션">
                                  {allChips.length > 0 ? (
                                    <GuestOptionsButton chips={allChips} />
