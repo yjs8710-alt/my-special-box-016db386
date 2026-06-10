@@ -2521,6 +2521,13 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, li
     const today = new Date().toISOString().slice(0, 10);
     await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
+    setExpanded(false);
+    // 갱신 후 목록 최상단으로 이동
+    const scrollEl = listScrollRef?.current;
+    const toTop = () => { if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" }); };
+    requestAnimationFrame(toTop);
+    setTimeout(toTop, 200);
+    setTimeout(toTop, 500);
   };
   return (
     <div className="relative inline-flex items-center">
