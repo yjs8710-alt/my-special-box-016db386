@@ -2481,6 +2481,41 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
   );
 };
 
+/* 스크롤 앵커 헬퍼: 확인일 갱신 시 목록 재정렬이 일어나도 화면(시각적 뷰포트)은 그대로 유지 */
+type ScrollAnchor = { id: string; offsetFromTop: number } | null;
+const captureScrollAnchor = (container: HTMLElement | null | undefined, excludeId: string | number | null | undefined): ScrollAnchor => {
+  if (!container) return null;
+  const containerRect = container.getBoundingClientRect();
+  const cards = Array.from(container.querySelectorAll<HTMLElement>('[data-prop-id]'));
+  for (const el of cards) {
+    if (excludeId != null && el.dataset.propId === String(excludeId)) continue;
+    const r = el.getBoundingClientRect();
+    if (r.bottom <= containerRect.top + 1) continue; // 뷰포트 위쪽으로 사라진 카드 스킵
+    return { id: el.dataset.propId!, offsetFromTop: r.top - containerRect.top };
+  }
+  return null;
+};
+const restoreScrollAnchor = (container: HTMLElement | null | undefined, anchor: ScrollAnchor, maxFrames = 30) => {
+  if (!container || !anchor) return;
+  let frames = maxFrames;
+  const tick = () => {
+    if (!container) return;
+    const el = container.querySelector<HTMLElement>(`[data-prop-id="${anchor.id}"]`);
+    if (el) {
+      const containerRect = container.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      const currentOffset = r.top - containerRect.top;
+      const delta = currentOffset - anchor.offsetFromTop;
+      if (Math.abs(delta) > 0.5) {
+        container.scrollTop += delta;
+      }
+    }
+    frames -= 1;
+    if (frames > 0) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+};
+
 /* ── MobileCheckBadge ── 모바일 매물카드 펼침 영역의 등록일/확인일 표시 (웹 확인일 아이콘 스타일) */
 interface MobileCheckBadgeProps {
   propertyId?: string;
@@ -2518,10 +2553,12 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, li
     e.stopPropagation();
     if (!isAdmin || !propertyId || busy) return;
     setBusy(true);
+    const anchor = captureScrollAnchor(listScrollRef?.current, propertyId);
     const today = new Date().toISOString().slice(0, 10);
     await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
     setExpanded(false);
+    restoreScrollAnchor(listScrollRef?.current, anchor);
   };
   return (
     <div className="relative inline-flex items-center">
@@ -2629,8 +2666,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       setChecking(true);
       // 토글: 확인일이 있으면 null로 초기화, 없으면 오늘로 설정
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
+      // 체크 시 목록이 재정렬되어도 화면(시각적 뷰포트)은 유지
+      const anchor = newCheckedDate ? captureScrollAnchor(listScrollRef?.current, prop.id) : null;
       await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
+      if (newCheckedDate) restoreScrollAnchor(listScrollRef?.current, anchor);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showVacateInfo, setShowVacateInfo] = useState(false);
@@ -5458,7 +5498,7 @@ const MapSidebar = ({
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
-                    <div key={prop.id} className="flex flex-col">
+                    <div key={prop.id} data-prop-id={prop.id} className="flex flex-col">
                       <div
                         role="button"
                         tabIndex={0}
