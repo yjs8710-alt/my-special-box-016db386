@@ -23,6 +23,7 @@ interface PropertyData {
   parking: string;
   elevator: boolean;
   available_from: string;
+  vacate_date: string;
   build_year: string;
   description: string;
   images: string[];
