@@ -3367,24 +3367,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 >
                   상세보기
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                      detail: {
-                        propertyDbId: prop.dbId,
-                        propertyRegNo: prop.regNo,
-                        agentUserId: prop.registeredBy,
-                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
-                  style={{ background: "hsl(var(--primary))", color: "white" }}
-                >
-                  문의하기
-                </button>
               </>
             )}
 
@@ -3532,6 +3514,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </div>
               <span className="flex-1" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: {
+                      propertyDbId: prop.dbId,
+                      propertyRegNo: prop.regNo,
+                      agentUserId: prop.registeredBy,
+                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                style={{ background: "hsl(var(--primary))", color: "white" }}
+              >
+                문의하기
+              </button>
             </div>
           )}
 
@@ -3701,7 +3701,26 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   )}
                 </>
               )}
-              {/* 모바일 게스트: 문의하기 버튼은 2행 우측으로 이동됨 */}
+              {isMobile && limitAddress && isGuest && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                      detail: {
+                        propertyDbId: prop.dbId,
+                        propertyRegNo: prop.regNo,
+                        agentUserId: prop.registeredBy,
+                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                      },
+                    }));
+                  }}
+                  className="ml-auto flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                >
+                  협력 공인중개사
+                </button>
+              )}
             </div>
             );
           })()}
