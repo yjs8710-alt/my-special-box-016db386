@@ -207,11 +207,21 @@ const PropertyCard = ({
 
       {/* Content */}
       <div className="p-5 md:p-4">
-        <div className="flex items-center justify-between gap-2 mb-1.5">
+        <div className="flex items-start justify-between gap-2 mb-1.5">
           {/* 게스트/일반회원: 모바일에서는 건물명 숨김, 데스크탑은 노출 */}
           <h3 className={`font-semibold text-foreground text-base md:text-sm line-clamp-1 flex-1 ${isGuest ? "hidden md:block" : ""}`}>{title}</h3>
           {isGuest && (
-            <>
+            <span className="md:hidden inline-flex items-center px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[12px] font-bold flex-1 self-center">
+              {type}
+              {type === "원룸" && (roomType === "오픈형" || roomType === "분리형") && (
+                <span className={`ml-1.5 text-[11px] font-extrabold ${roomType === "오픈형" ? "text-orange-500" : "text-blue-600"}`}>
+                  · {roomType}
+                </span>
+              )}
+            </span>
+          )}
+          {isGuest && (
+            <div className="flex md:contents flex-col gap-1.5 shrink-0">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -230,12 +240,13 @@ const PropertyCard = ({
                 onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
                 className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-[13px] md:text-[11px] font-bold shadow-sm hover:opacity-90"
               >
-                협력 공인중개사 문의
+                <span className="md:hidden">문의하기</span>
+                <span className="hidden md:inline">협력 공인중개사 문의</span>
               </button>
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
                 {(checkedDate || registeredDate) && <span>확인 {checkedDate || registeredDate}</span>}
               </div>
-            </>
+            </div>
           )}
         </div>
         <div className="flex items-center gap-1 mb-3">
