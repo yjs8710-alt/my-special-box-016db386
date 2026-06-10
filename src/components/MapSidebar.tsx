@@ -3449,11 +3449,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     권 {keyMoney}
                   </span>
                 )}
-                {facilityBadges}
+                {!(isMobile && limitAddress) && facilityBadges}
               </div>
               <span className="flex-1" />
               {/* 퇴거예정일은 모바일 3행에서 제거 — 카드 선택 시 하단 액션 패널의 소유주 아래에 표시 */}
-              {opts.length > 0 && (
+              {opts.length > 0 && !(isMobile && limitAddress) && (
                 <>
                   <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
                     {isFull ? (
@@ -5443,6 +5443,21 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
+                            {/* 모바일 게스트/일반회원: 동·호수 표시 (사진 우측 상단) */}
+                            {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
+                              const dongMatch = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
+                              const dong = dongMatch?.[1]?.trim().replace(/동+\s*$/, "").trim();
+                              const unit = prop.unitNumber ? prop.unitNumber.replace(/호$/, "") : "";
+                              const label = [dong ? `${dong}동` : "", unit ? `${unit}호` : ""].filter(Boolean).join(" ");
+                              if (!label) return null;
+                              return (
+                                <div className="absolute top-1 right-1 z-10 pointer-events-none">
+                                  <span className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-md tracking-tight" style={{ background: "rgba(0,0,0,0.65)" }}>
+                                    {label}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
                               <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
@@ -5697,6 +5712,28 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
+                            {/* 게스트/일반회원: 부가시설 & 옵션 (카드에서 숨기고 펼침 시 표시) */}
+                            {(isGuest || authUser?.memberType === "일반회원") && (() => {
+                              const opts = prop.options ?? [];
+                              const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
+                              const facilityList: string[] = [];
+                              if (elev) facilityList.push("엘리베이터");
+                              ["반려동물 가능","수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
+                                if (opts.some((o) => o.includes(k))) facilityList.push(k);
+                              });
+                              const allChips = Array.from(new Set([...facilityList, ...opts]));
+                              if (allChips.length === 0) return null;
+                              return (
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <span className="text-[10px] font-bold text-muted-foreground mr-0.5">옵션·시설</span>
+                                  {allChips.map((opt) => (
+                                    <span key={opt} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-muted text-foreground border border-border whitespace-nowrap">
+                                      {opt}
+                                    </span>
+                                  ))}
+                                </div>
+                              );
+                            })()}
                             {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
                             {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
