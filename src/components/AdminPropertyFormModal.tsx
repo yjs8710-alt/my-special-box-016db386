@@ -189,7 +189,7 @@ function ImageCarouselPreview({
               onPointerMove={onPointerMove}
               onPointerUp={(e) => onPointerUp(e, i)}
               onPointerCancel={onPointerCancel}
-              className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
+              className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
               style={{
                 borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
                 opacity: dragIdx === i ? 0.4 : 1,
