@@ -3314,7 +3314,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
-          <div className="flex items-center gap-1 min-h-[22px]">
+          <div className={`flex gap-1 min-h-[22px] ${isMobile && limitAddress && isGuest ? "items-start" : "items-center"}`}>
             {/* 확인일 배지 제거 */}
             {/* 모바일 일반회원/게스트는 건물명 숨김 (좌측 사진으로 대체) */}
             {!(isMobile && limitAddress) && (
@@ -3331,42 +3331,80 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
               </span>
             )}
-            {/* 모바일 게스트: 1행 우측 끝에 상세보기 버튼 */}
+            {/* 모바일 게스트: 1행 우측에 상세보기 / 문의하기 / 협력 공인중개사 세로 스택 */}
             {isMobile && limitAddress && isGuest && (
               <>
                 <span className="flex-1" />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-detail", {
-                      detail: {
-                        info: {
-                          image: prop.images?.[0] || prop.image,
-                          address: prop.address,
-                          type: prop.type,
-                          area: prop.area,
-                          floor: prop.floor,
-                          deposit: prop.deposit,
-                          monthly: prop.monthly,
-                          regNo: prop.regNo,
-                          buildYear: prop.buildYear,
-                          dbId: prop.dbId,
+                <div className="flex-shrink-0 flex flex-col gap-1 items-stretch">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                        detail: {
+                          info: {
+                            image: prop.images?.[0] || prop.image,
+                            address: prop.address,
+                            type: prop.type,
+                            area: prop.area,
+                            floor: prop.floor,
+                            deposit: prop.deposit,
+                            monthly: prop.monthly,
+                            regNo: prop.regNo,
+                            buildYear: prop.buildYear,
+                            dbId: prop.dbId,
+                          },
+                          partnerDetail: {
+                            propertyDbId: prop.dbId,
+                            propertyRegNo: prop.regNo,
+                            agentUserId: prop.registeredBy,
+                            propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                          },
                         },
-                        partnerDetail: {
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                    style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                  >
+                    상세보기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                        detail: {
                           propertyDbId: prop.dbId,
                           propertyRegNo: prop.regNo,
                           agentUserId: prop.registeredBy,
                           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
                         },
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
-                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                >
-                  상세보기
-                </button>
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                    style={{ background: "hsl(var(--primary))", color: "white" }}
+                  >
+                    문의하기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                        detail: {
+                          propertyDbId: prop.dbId,
+                          propertyRegNo: prop.regNo,
+                          agentUserId: prop.registeredBy,
+                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                        },
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                    style={{ background: "hsl(var(--accent, 25 90% 55%))", color: "white", backgroundColor: "hsl(25 90% 50%)" }}
+                  >
+                    협력 공인중개사
+                  </button>
+                </div>
               </>
             )}
 
@@ -3482,57 +3520,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             )}
           </div>
 
-          {/* 모바일 게스트: 가격 · 평수 */}
-          {isMobile && limitAddress && isGuest && (
-            <div className="flex items-center gap-2 min-h-[24px]">
-              <div className="flex items-center gap-1 flex-wrap min-w-0">
-                {(wolseMatch || halfMatch || jeonseMatch) ? (
-                  <span className="flex-shrink-0 flex items-center gap-1 text-[13px] font-extrabold whitespace-nowrap">
-                    {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
-                    {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
-                    {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
-                  </span>
-                ) : (
-                  <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[13px] font-extrabold">
-                    {isSaleProp ? (
-                      <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
-                    ) : (
-                      <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
-                    )}
-                  </span>
-                )}
-                {prop.area && (
-                  <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
-                    {(() => {
-                      const a = prop.area;
-                      if (/평/.test(a)) return a;
-                      const n = parseFloat(a.replace(/[^0-9.]/g, ""));
-                      return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
-                    })()}
-                  </span>
-                )}
-              </div>
-              <span className="flex-1" />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                    detail: {
-                      propertyDbId: prop.dbId,
-                      propertyRegNo: prop.regNo,
-                      agentUserId: prop.registeredBy,
-                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                    },
-                  }));
-                }}
-                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
-                style={{ background: "hsl(var(--primary))", color: "white" }}
-              >
-                문의하기
-              </button>
-            </div>
-          )}
+          {/* 모바일 게스트 가격/평수 행은 3행 배지 아래로 이동됨 */}
+
 
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
@@ -3703,6 +3692,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </div>
             );
           })()}
+
+          {/* 모바일 게스트: 가격 · 평수 (배지 아래로 배치) */}
+          {isMobile && limitAddress && isGuest && (
+            <div className="flex items-center gap-2 min-h-[24px]">
+              {(wolseMatch || halfMatch || jeonseMatch) ? (
+                <span className="flex-shrink-0 flex items-center gap-1 text-[13px] font-extrabold whitespace-nowrap">
+                  {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
+                  {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                  {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+                </span>
+              ) : (
+                <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[13px] font-extrabold">
+                  {isSaleProp ? (
+                    <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                  ) : (
+                    <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
+                  )}
+                </span>
+              )}
+              {prop.area && (
+                <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
+                  {(() => {
+                    const a = prop.area;
+                    if (/평/.test(a)) return a;
+                    const n = parseFloat(a.replace(/[^0-9.]/g, ""));
+                    return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
+                  })()}
+                </span>
+              )}
+            </div>
+          )}
           {showVacateInfo && (vacateLabel || earlyExit) && (
             <div
               className="fixed inset-0 z-[10300] flex items-end justify-center"
@@ -5588,7 +5608,7 @@ const MapSidebar = ({
                         }`}
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
+                        <div className="flex items-stretch" style={{ width: "100%", height: (isMobile && (isGuest || authUser?.memberType === "일반회원")) ? "auto" : "96px", minHeight: "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
                             className="w-[96px] h-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
