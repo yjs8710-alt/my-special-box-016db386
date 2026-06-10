@@ -5443,12 +5443,10 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
-                            {/* 모바일 게스트/일반회원: 동·호수 표시 (사진 우측 상단) */}
+                            {/* 모바일 게스트/일반회원: 행정동(예: 복대동) 표시 (사진 우측 상단) */}
                             {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
-                              const dongMatch = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
-                              const dong = dongMatch?.[1]?.trim().replace(/동+\s*$/, "").trim();
-                              const unit = prop.unitNumber ? prop.unitNumber.replace(/호$/, "") : "";
-                              const label = [dong ? `${dong}동` : "", unit ? `${unit}호` : ""].filter(Boolean).join(" ");
+                              const m = (prop.address ?? "").match(/[가-힣]+(동|읍|면|리)/);
+                              const label = m?.[0];
                               if (!label) return null;
                               return (
                                 <div className="absolute top-1 right-1 z-10 pointer-events-none">
