@@ -206,10 +206,10 @@ const PropertyCard = ({
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="flex items-center justify-between gap-2 mb-1">
+      <div className="p-5 md:p-4">
+        <div className="flex items-center justify-between gap-2 mb-1.5">
           {/* 게스트/일반회원: 모바일에서는 건물명 숨김, 데스크탑은 노출 */}
-          <h3 className={`font-semibold text-foreground text-sm line-clamp-1 flex-1 ${isGuest ? "hidden md:block" : ""}`}>{title}</h3>
+          <h3 className={`font-semibold text-foreground text-base md:text-sm line-clamp-1 flex-1 ${isGuest ? "hidden md:block" : ""}`}>{title}</h3>
           {isGuest && (
             <>
               <button
@@ -222,13 +222,13 @@ const PropertyCard = ({
                     },
                   }));
                 }}
-                className="shrink-0 px-2.5 py-1 rounded-full bg-white text-primary border border-primary/50 text-[11px] font-bold shadow-sm hover:bg-primary/5"
+                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-white text-primary border border-primary/50 text-[13px] md:text-[11px] font-bold shadow-sm hover:bg-primary/5"
               >
                 상세보기
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
-                className="shrink-0 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-bold shadow-sm hover:opacity-90"
+                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-[13px] md:text-[11px] font-bold shadow-sm hover:opacity-90"
               >
                 협력 공인중개사 문의
               </button>
@@ -239,19 +239,19 @@ const PropertyCard = ({
           )}
         </div>
         <div className="flex items-center gap-1 mb-3">
-          <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-black line-clamp-1">{displayAddress}</span>
+          <MapPin className="w-4 h-4 md:w-3.5 md:h-3.5 text-muted-foreground flex-shrink-0" />
+          <span className="text-sm md:text-xs text-black line-clamp-1">{displayAddress}</span>
         </div>
 
         {/* Info Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
-          <div className="bg-muted rounded-lg px-3 py-2">
-            <p className="text-xs text-muted-foreground">면적</p>
-            <p className="text-sm font-semibold text-foreground">{area?.includes("평") ? area : (() => { const n = parseFloat((area || "").replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : area; })()}</p>
+          <div className="bg-muted rounded-lg px-3 py-2.5 md:py-2">
+            <p className="text-[11px] md:text-xs text-muted-foreground">면적</p>
+            <p className="text-base md:text-sm font-semibold text-foreground">{area?.includes("평") ? area : (() => { const n = parseFloat((area || "").replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : area; })()}</p>
           </div>
-          <div className="bg-muted rounded-lg px-3 py-2">
-            <p className="text-xs text-muted-foreground">층수</p>
-            <p className="text-sm font-semibold text-foreground">{floor}</p>
+          <div className="bg-muted rounded-lg px-3 py-2.5 md:py-2">
+            <p className="text-[11px] md:text-xs text-muted-foreground">층수</p>
+            <p className="text-base md:text-sm font-semibold text-foreground">{floor}</p>
           </div>
           <div className="bg-muted rounded-lg px-3 py-2 hidden md:block">
             <p className="text-xs text-muted-foreground">퇴거예정일</p>
