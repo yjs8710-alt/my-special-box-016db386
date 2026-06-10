@@ -2487,8 +2487,9 @@ interface MobileCheckBadgeProps {
   registeredDate?: string;
   checkedDate?: string;
   isAdmin?: boolean;
+  listScrollRef?: React.RefObject<HTMLDivElement>;
 }
-const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: MobileCheckBadgeProps) => {
+const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, listScrollRef }: MobileCheckBadgeProps) => {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -2520,6 +2521,13 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
     const today = new Date().toISOString().slice(0, 10);
     await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
+    setExpanded(false);
+    // 갱신 후 목록 최상단으로 이동
+    const scrollEl = listScrollRef?.current;
+    const toTop = () => { if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" }); };
+    requestAnimationFrame(toTop);
+    setTimeout(toTop, 200);
+    setTimeout(toTop, 500);
   };
   return (
     <div className="relative inline-flex items-center">
@@ -2624,7 +2632,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
-      // 스크롤 위치 보존
+      // 스크롤 위치 보존 (해제 시) / 최상단 이동 (체크 시)
       const scrollEl = listScrollRef.current;
       const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
@@ -2632,12 +2640,20 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
       await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
-      // 리렌더 후 스크롤 위치 복원 (realtime refetch 대기)
-      const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
-      requestAnimationFrame(restore);
-      setTimeout(restore, 100);
-      setTimeout(restore, 300);
-      setTimeout(restore, 600);
+      if (newCheckedDate) {
+        // 확인 갱신 시 → 최상단으로 이동
+        const toTop = () => { if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" }); };
+        requestAnimationFrame(toTop);
+        setTimeout(toTop, 200);
+        setTimeout(toTop, 500);
+      } else {
+        // 해제 시 스크롤 위치 복원
+        const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
+        requestAnimationFrame(restore);
+        setTimeout(restore, 100);
+        setTimeout(restore, 300);
+        setTimeout(restore, 600);
+      }
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showVacateInfo, setShowVacateInfo] = useState(false);
@@ -3395,14 +3411,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 등록 {regDate}
               </span>
             )}
-            {isMobile && !isGuest && !isGeneralMember && (
-              <MobileCheckBadge
-                propertyId={prop.memo}
-                registeredDate={prop.registeredDate}
-                checkedDate={prop.checkedDate}
-                isAdmin={isAdmin}
-              />
-            )}
             <MemoNotepad
               propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
               propId={prop.id}
@@ -3423,6 +3431,15 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               userId={userId}
               isAdmin={isAdmin}
             />
+            {isMobile && !isGuest && !isGeneralMember && (
+              <MobileCheckBadge
+                propertyId={prop.memo}
+                registeredDate={prop.registeredDate}
+                checkedDate={prop.checkedDate}
+                isAdmin={isAdmin}
+                listScrollRef={listScrollRef}
+              />
+            )}
           </div>
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
