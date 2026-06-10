@@ -170,7 +170,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
 
       const { data, error } = await supabase
         .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,vacate_date,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
         .eq("id", id)
         .eq("status", "active")
         .single();
