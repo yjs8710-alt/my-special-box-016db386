@@ -3462,11 +3462,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             />
             {isMobile && !isGuest && !isGeneralMember && (
               <MobileCheckBadge
+                propId={prop.id}
                 propertyId={prop.memo}
                 registeredDate={prop.registeredDate}
                 checkedDate={prop.checkedDate}
                 isAdmin={isAdmin}
                 listScrollRef={listScrollRef}
+                onCheckedDateUpdated={onCheckedDateUpdated}
               />
             )}
           </div>
