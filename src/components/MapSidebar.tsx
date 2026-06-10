@@ -5482,7 +5482,19 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
-                            {/* 동 표시 제거 (게스트/일반회원 요청) */}
+                            {/* 모바일 게스트/일반회원: 행정동(예: 복대동) 표시 (사진 우측 상단) */}
+                            {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
+                              const m = (prop.address ?? "").match(/[가-힣]+(동|읍|면|리)/);
+                              const label = m?.[0];
+                              if (!label) return null;
+                              return (
+                                <div className="absolute top-1 right-1 z-10 pointer-events-none">
+                                  <span className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-md tracking-tight" style={{ background: "rgba(0,0,0,0.65)" }}>
+                                    {label}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
                               <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
