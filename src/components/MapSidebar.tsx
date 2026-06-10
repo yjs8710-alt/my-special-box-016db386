@@ -3413,7 +3413,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             return (
             <div className="flex items-center gap-1 min-h-[24px]">
               <div className="flex items-center gap-1 flex-wrap min-w-0">
-                {buildYearShort && (
+                {buildYearShort && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
                     준{buildYearShort}
                   </span>
