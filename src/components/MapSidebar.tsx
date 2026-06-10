@@ -264,6 +264,7 @@ function LightboxModal({
       ) : (
         <>
           {/* 데스크톱 — 우측 상단 모두저장 버튼 */}
+          {!hideUnitNumber && (
           <button
             onClick={async (e) => {
               e.stopPropagation();
@@ -279,6 +280,7 @@ function LightboxModal({
             <Download className="w-4 h-4" />
             <span>사진저장</span>
           </button>
+          )}
           {hasTabs && (
             <div
               className="absolute top-4 left-1/2 -translate-x-1/2 z-10 max-w-[80vw]"
