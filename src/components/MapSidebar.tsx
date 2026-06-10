@@ -3256,6 +3256,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 준{buildYearShortAddr}
               </span>
             )}
+            {!(isMobile && limitAddress) && (
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); if (!limitAddress) setShowFullAddr((v) => !v); }}
@@ -3265,6 +3266,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             >
               {limitAddress ? guGuDong(prop.address) : (showFullAddr ? prop.address : shortAddress(prop.address))}
             </button>
+            )}
             {/* 로드뷰 버튼 (게스트 숨김) */}
             {!isGuest && (
               <button
