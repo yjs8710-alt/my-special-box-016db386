@@ -151,6 +151,10 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   const [fallbackImages, setFallbackImages] = useState<string[]>([]);
   const [otherUnits, setOtherUnits] = useState<{ id: string; unit_number: string | null; floor: string | null; room_type: string | null; images: string[] }[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState<string>("");
+  const isMobileView = useIsMobile();
+  const isGuestView = useIsGuest();
+  const { user: authUser } = useAuth();
+  const hideDetailInfo = isMobileView && (isGuestView || authUser?.memberType === "일반회원");
 
   useEffect(() => {
     if (!id) return;
