@@ -167,8 +167,9 @@ const PropertyCard = ({
           <button
             onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
             className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white transition-colors"
+            style={liked ? { background: "linear-gradient(135deg, #ff6a88, #ff99ac, #ffc3a0)" } : undefined}
           >
-            <Heart className={`w-4 h-4 ${liked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+            <Heart className={`w-4 h-4 ${liked ? "fill-white text-white drop-shadow" : "text-muted-foreground"}`} />
           </button>
         </div>
         {/* Type badge */}
