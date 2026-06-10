@@ -2487,8 +2487,9 @@ interface MobileCheckBadgeProps {
   registeredDate?: string;
   checkedDate?: string;
   isAdmin?: boolean;
+  listScrollRef?: React.RefObject<HTMLDivElement>;
 }
-const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: MobileCheckBadgeProps) => {
+const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, listScrollRef }: MobileCheckBadgeProps) => {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
