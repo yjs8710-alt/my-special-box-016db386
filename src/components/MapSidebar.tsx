@@ -4151,11 +4151,29 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                         {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
                       </p>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {prop.options!.map((opt) => (
-                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">
-                            · {opt}
-                          </span>
-                        ))}
+                        {(() => {
+                          const petMap: Record<string, string> = {
+                            "애완동물가능": "반려동물 가능",
+                            "애완동물불가": "반려동물 불가",
+                            "반려동물_가능": "반려동물 가능",
+                            "반려동물_불가": "반려동물 불가",
+                            "반려동물가능": "반려동물 가능",
+                            "반려동물불가": "반려동물 불가",
+                          };
+                          const seen = new Set<string>();
+                          const list: string[] = [];
+                          prop.options!.forEach((o) => {
+                            const label = petMap[o] ?? o;
+                            if (seen.has(label)) return;
+                            seen.add(label);
+                            list.push(label);
+                          });
+                          return list.map((opt) => (
+                            <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">
+                              · {opt}
+                            </span>
+                          ));
+                        })()}
                       </div>
                     </div>
                   )}
@@ -5760,14 +5778,23 @@ const MapSidebar = ({
                          if (isGuest || authUser?.memberType === "일반회원") {
                            const opts = prop.options ?? [];
                            const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
-                           const petAllowed = opts.some((o) => o.includes("반려동물") && !o.includes("불가"));
-                           const petNo = opts.some((o) => o.includes("애완") || (o.includes("반려동물") && o.includes("불가")));
+                           const petAllowed = opts.some((o) => (o.includes("반려동물") || o.includes("애완")) && !o.includes("불가"));
+                           const petNo = opts.some((o) => (o.includes("반려동물") || o.includes("애완")) && o.includes("불가"));
                            const facilityList: string[] = [];
                            if (elev) facilityList.push("엘리베이터");
                            ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
                              if (opts.some((o) => o.includes(k))) facilityList.push(k);
                            });
-                           const allChips = Array.from(new Set([...facilityList, ...opts]));
+                           const petMap: Record<string, string> = {
+                             "애완동물가능": "반려동물 가능",
+                             "애완동물불가": "반려동물 불가",
+                             "반려동물_가능": "반려동물 가능",
+                             "반려동물_불가": "반려동물 불가",
+                             "반려동물가능": "반려동물 가능",
+                             "반려동물불가": "반려동물 불가",
+                           };
+                           const mappedOpts = opts.map((o) => petMap[o] ?? o);
+                           const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
                             const noteParts: string[] = [];
                             const earlyExitG = note.includes("중도퇴거:");
                             if (earlyExitG) noteParts.push("중도퇴거");
@@ -5778,8 +5805,8 @@ const MapSidebar = ({
                             const keyMoneyG = keyMoneyM?.[1]?.trim();
                             if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
                             if (direction) noteParts.push(`${direction}향`);
-                            if (petAllowed) noteParts.push("반려동물가능");
-                            if (petNo) noteParts.push("반려동물불가");
+                            if (petAllowed) noteParts.push("반려동물 가능");
+                            if (petNo && !petAllowed) noteParts.push("반려동물 불가");
 
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
