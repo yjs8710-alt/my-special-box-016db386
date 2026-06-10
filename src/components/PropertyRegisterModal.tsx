@@ -1718,6 +1718,9 @@ function ImagePreviewCarousel({
   const safeIdx = Math.min(idx, images.length - 1);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
+  // 클릭/드래그 구분용
+  const pressRef = useRef<{ x: number; y: number; idx: number; moved: boolean } | null>(null);
+  const DRAG_THRESHOLD = 5; // px
 
   const prev = () => setIdx((i) => (i - 1 + images.length) % images.length);
   const next = () => setIdx((i) => (i + 1) % images.length);
@@ -1737,27 +1740,46 @@ function ImagePreviewCarousel({
     setIdx(to);
   };
 
-  // 터치(모바일) 지원: pointer 이벤트로 직접 처리
+  // 통합 포인터 기반 DnD (마우스 + 터치 동일 처리)
   const onPointerDown = (e: React.PointerEvent, i: number) => {
-    if (e.pointerType === "mouse") return; // 마우스는 HTML5 drag 사용
-    setDragIdx(i);
+    pressRef.current = { x: e.clientX, y: e.clientY, idx: i, moved: false };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent) => {
-    if (dragIdx === null || e.pointerType === "mouse") return;
+    const p = pressRef.current;
+    if (!p) return;
+    if (!p.moved) {
+      const dx = e.clientX - p.x;
+      const dy = e.clientY - p.y;
+      if (dx * dx + dy * dy < DRAG_THRESHOLD * DRAG_THRESHOLD) return;
+      p.moved = true;
+      setDragIdx(p.idx);
+    }
+    if (dragIdx === null && p.moved) setDragIdx(p.idx);
+    const curDrag = dragIdx ?? p.idx;
     const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
     const target = el?.closest<HTMLElement>("[data-thumb-idx]");
     if (target) {
       const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
-      if (!isNaN(i) && i !== dragIdx) {
+      if (!isNaN(i) && i !== curDrag) {
         setOverIdx(i);
-        moveItem(dragIdx, i);
+        moveItem(curDrag, i);
         setDragIdx(i);
+        pressRef.current = { ...p, idx: i, moved: true };
       }
     }
   };
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (dragIdx === null) return;
+  const onPointerUp = (e: React.PointerEvent, i: number) => {
+    const p = pressRef.current;
+    pressRef.current = null;
+    setDragIdx(null);
+    setOverIdx(null);
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    // 이동 없으면 클릭으로 처리 → 메인 이미지 선택
+    if (p && !p.moved) setIdx(i);
+  };
+  const onPointerCancel = () => {
+    pressRef.current = null;
     setDragIdx(null); setOverIdx(null);
   };
 
