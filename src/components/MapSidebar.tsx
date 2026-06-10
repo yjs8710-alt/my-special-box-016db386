@@ -5710,7 +5710,7 @@ const MapSidebar = ({
                                 </span>
                               </div>
                             )}
-                            {/* 게스트/일반회원: 부가시설 & 옵션 (카드에서 숨기고 펼침 시 표시) */}
+                            {/* 게스트/일반회원: 부가시설 & 옵션 — 버튼 클릭 시 모달로 전체 표시 */}
                             {(isGuest || authUser?.memberType === "일반회원") && (() => {
                               const opts = prop.options ?? [];
                               const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
@@ -5721,16 +5721,7 @@ const MapSidebar = ({
                               });
                               const allChips = Array.from(new Set([...facilityList, ...opts]));
                               if (allChips.length === 0) return null;
-                              return (
-                                <div className="flex items-center gap-1 flex-wrap">
-                                  <span className="text-[10px] font-bold text-muted-foreground mr-0.5">옵션·시설</span>
-                                  {allChips.map((opt) => (
-                                    <span key={opt} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-muted text-foreground border border-border whitespace-nowrap">
-                                      {opt}
-                                    </span>
-                                  ))}
-                                </div>
-                              );
+                              return <GuestOptionsButton chips={allChips} />;
                             })()}
                             {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
                             {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
