@@ -158,13 +158,15 @@ function LightboxModal({
   // 더보기 드롭다운이 열려있을 때 선택하면 자동으로 닫음 (선택은 handleUnitChange에서 처리)
 
   const isGuestLightbox = useIsGuest();
+  const { user: authUserLb } = useAuth();
+  const hideUnitNumber = isGuestLightbox || (isMobileView && authUserLb?.memberType === "일반회원");
   const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
-    const unitLabel = isGuestLightbox
+    const unitLabel = hideUnitNumber
       ? (u.floor ?? "")
       : (u.unitNumber ?? u.label ?? "");
-    const roomLabel = isGuestLightbox ? "" : (u.roomType ?? "");
+    const roomLabel = hideUnitNumber ? "" : (u.roomType ?? "");
     const stacked = opts?.stacked;
     return (
       <button
