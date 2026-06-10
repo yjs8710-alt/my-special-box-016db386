@@ -1796,7 +1796,7 @@ function ImagePreviewCarousel({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
+      <div data-main-drop className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
