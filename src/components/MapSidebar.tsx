@@ -2541,7 +2541,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
           >
             {registeredDate && (
               <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
-                매물등록일 {registeredDate}
+                >등록일 {registeredDate}
               </span>
             )}
             <span
