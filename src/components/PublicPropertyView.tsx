@@ -396,7 +396,12 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
         )}
 
         <div className="p-5 flex flex-col gap-5">
-          <div>
+          <div className="flex flex-col gap-1.5">
+            {regNoNumeric && (
+              <span className="self-start inline-flex items-center px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-extrabold tracking-wider shadow-sm">
+                매물번호 NO.{regNoNumeric}
+              </span>
+            )}
             <h1 className="text-xl font-bold text-foreground flex items-center gap-1">
               <MapPin className="w-4 h-4" />
               {safeAddress}
@@ -419,16 +424,19 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: building?.parking_count ? `${building.parking_count}대` : (property.parking || "확인필요") },
               { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : (property.available_from || "즉시") },
+              ...(directionText ? [{ icon: <Building2 className="w-4 h-4" />, label: "방향", value: directionText }] : []),
+              ...(property.vacate_date ? [{ icon: <Calendar className="w-4 h-4" />, label: "퇴거예정일", value: property.vacate_date }] : []),
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
                 <div>
                   <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                  <p className="text-xs font-bold text-foreground">{item.value || "-"}</p>
+                  <p className="text-xs font-extrabold text-primary">{item.value || "-"}</p>
                 </div>
               </div>
             ))}
           </div>
+
 
           {property.options && property.options.length > 0 && (
             <div>
