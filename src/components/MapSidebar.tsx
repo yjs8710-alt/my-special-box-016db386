@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo, forwardRef } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM, { createPortal } from "react-dom";
 import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
   MapPin,
@@ -2491,15 +2491,27 @@ interface MobileCheckBadgeProps {
 const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: MobileCheckBadgeProps) => {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   if (!registeredDate && !checkedDate) return null;
   const effectiveCheckedDate = checkedDate || registeredDate;
   const isChecked = !!effectiveCheckedDate;
   const chkDays = effectiveCheckedDate ? Math.floor((Date.now() - new Date(effectiveCheckedDate).getTime()) / 86400000) : null;
-  const regDays = registeredDate ? Math.floor((Date.now() - new Date(registeredDate).getTime()) / 86400000) : null;
-  const displayDays = chkDays ?? regDays;
   const handleIconClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setExpanded((v) => !v);
+    setExpanded((v) => {
+      const next = !v;
+      if (next && btnRef.current) {
+        const r = btnRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const popupW = Math.min(vw - 16, 320);
+        let left = r.left;
+        if (left + popupW > vw - 8) left = vw - popupW - 8;
+        if (left < 8) left = 8;
+        setPos({ top: r.bottom + 4, left });
+      }
+      return next;
+    });
   };
   const handleReset = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -2512,6 +2524,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
   return (
     <div className="relative inline-flex items-center">
       <button
+        ref={btnRef}
         type="button"
         onClick={handleIconClick}
         className="flex-shrink-0 flex items-center gap-0.5 px-1 py-0.5 rounded transition-all select-none"
@@ -2528,20 +2541,21 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
           style={{ imageRendering: '-webkit-optimize-contrast' as any, opacity: isChecked ? 1 : 0.4 }}
         />
       </button>
-      {expanded && (
+      {expanded && pos && createPortal(
         <>
           {/* 바깥 탭하면 닫기 */}
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[10000]"
             onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
           />
           <div
-            className="absolute z-50 top-full left-0 mt-1 flex items-center gap-1.5 flex-wrap text-[11px] p-1.5 rounded-md shadow-lg border border-border bg-card max-w-[85vw]"
+            className="fixed z-[10001] flex items-center gap-1.5 flex-wrap text-[11px] p-1.5 rounded-md shadow-lg border border-border bg-card"
+            style={{ top: pos.top, left: pos.left, maxWidth: 'min(320px, calc(100vw - 16px))' }}
             onClick={(e) => e.stopPropagation()}
           >
             {registeredDate && (
               <span className="px-1.5 py-0.5 rounded border border-border bg-card text-muted-foreground font-semibold">
-                {">등록일"} {registeredDate}
+                등록일 {registeredDate}
               </span>
             )}
             <span
@@ -2567,7 +2581,8 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
               </button>
             )}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
