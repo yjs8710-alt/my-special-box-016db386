@@ -3293,6 +3293,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             <span className="flex-1" />
             {isGuest && (
               <>
+                {!isMobile && (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -3325,6 +3326,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 >
                   상세보기
                 </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
