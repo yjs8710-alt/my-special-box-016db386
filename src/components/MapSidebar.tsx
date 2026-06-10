@@ -3248,14 +3248,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </p>
             )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
-            {limitAddress && buildYearShortAddr && (
-              <span
-                className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap"
-                style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
-              >
-                준{buildYearShortAddr}
-              </span>
-            )}
             {!(isMobile && limitAddress) && (
             <button
               type="button"
