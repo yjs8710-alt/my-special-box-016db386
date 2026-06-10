@@ -4708,7 +4708,6 @@ const MapSidebar = ({
   }, [isMobile, mobileStep, pinnedIds, propertiesWithCheckedDates, favoritesOnly, favorites]);
 
   const orderedDisplayProperties = useMemo(() => {
-    if (pinnedIds && pinnedIds.length > 0) return [...displayProperties];
     return [...displayProperties].sort((a, b) => {
       const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
       const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
@@ -4720,7 +4719,7 @@ const MapSidebar = ({
       if (chkA !== chkB) return chkB - chkA;
       return regB - regA;
     });
-  }, [displayProperties, pinnedIds]);
+  }, [displayProperties]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
