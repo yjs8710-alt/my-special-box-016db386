@@ -5348,9 +5348,10 @@ const MapSidebar = ({
                         {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
                         <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
                           {/* ①썸네일 — 3열 비율에 맞춰 96px */}
-                          {!isMobile && <div
-                            className="w-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
-                            style={{ minHeight: "96px" }}
+                          {/* 썸네일: 데스크톱 항상, 모바일은 일반회원/게스트에게도 좌측 사진 표시 */}
+                          {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
+                            className={`${isMobile ? "w-[80px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
+                            style={{ minHeight: isMobile ? "80px" : "96px" }}
                           >
 
                             {(() => {
