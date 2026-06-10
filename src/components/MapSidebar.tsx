@@ -3331,10 +3331,9 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
               </span>
             )}
-            {/* 모바일 게스트: 1행 우측 끝에 상세보기 + 문의하기 */}
-            {isMobile && limitAddress && isGuest && (
+            {/* 모바일 일반회원/게스트: 1행 우측 끝에 상세보기 */}
+            {isMobile && limitAddress && (
               <>
-                <span className="flex-1" />
                 <button
                   type="button"
                   onClick={(e) => {
@@ -3362,7 +3361,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       },
                     }));
                   }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                  className="ml-auto flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                 >
                   상세보기
@@ -3406,7 +3405,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 도로명
               </button>
             )}
-            <span className="flex-1" />
+            {!(isMobile && limitAddress) && <span className="flex-1" />}
             {isGuest && (
               <>
                 {!isMobile && (
@@ -3450,7 +3449,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 등록 {regDate}
               </span>
             )}
-            {!(isMobile && isGuest) && (
+            {!(isMobile && limitAddress) && (
               <MemoNotepad
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
@@ -3462,7 +3461,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 isAdmin={isAdmin}
               />
             )}
-            {!(isMobile && isGuest) && (
+            {!(isMobile && limitAddress) && (
               <MemoNotepad
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
@@ -3487,8 +3486,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             )}
           </div>
 
-          {/* 모바일 게스트: 가격 · 평수 */}
-          {isMobile && limitAddress && isGuest && (
+          {/* 모바일 일반회원/게스트: 가격 · 평수 | 우측 문의하기 */}
+          {isMobile && limitAddress && (
             <div className="flex items-center gap-2 min-h-[24px]">
               <div className="flex items-center gap-1 flex-wrap min-w-0">
                 {(wolseMatch || halfMatch || jeonseMatch) ? (
@@ -3542,7 +3541,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
-          <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
+          {!(isMobile && limitAddress) && <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
             {(prop.type || floorShort || prop.unitNumber) && !(isMobile && limitAddress) && (
               <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
                 {prop.type && <span>{prop.type}</span>}
@@ -3615,7 +3614,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </button>
               </>
             )}
-          </div>
+          </div>}
 
           {/* 3행: 준공년도 · 공실/거주중 · 권리금 · 단기 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
           {(() => {
@@ -3625,7 +3624,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const isShortTerm = !isSaleProp && opts.includes("단기가능");
             const hasDuplexM = opts.includes("복층");
             const buildYearShort = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
-            const showRow = vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort || !!prop.vacateDate;
+            const showRow = (isMobile && limitAddress) || vacancyM || vacatePast || earlyExit || facilityBadges.length > 0 || opts.length > 0 || hasKeyMoney || isShortTerm || hasDuplexM || !!buildYearShort || !!prop.vacateDate;
             if (!showRow) return null;
             return (
             <div className="flex items-center gap-1 min-h-[24px]">
@@ -3705,7 +3704,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   )}
                 </>
               )}
-              {isMobile && limitAddress && isGuest && (
+              {isMobile && limitAddress && (
                 <button
                   type="button"
                   onClick={(e) => {
@@ -3719,10 +3718,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       },
                     }));
                   }}
-                  className="ml-auto flex-shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap border"
+                  className="ml-auto flex-shrink-0 px-1 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap border"
                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                 >
-                  협력중개사
+                  협력 공인중개사
                 </button>
               )}
             </div>
