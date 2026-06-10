@@ -373,13 +373,37 @@ export const GuestDetailModal = ({
       >
         <div className="flex items-center justify-between px-4 py-2.5 border-b bg-white">
           <p className="text-sm font-extrabold text-foreground">매물 상세보기</p>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
-            aria-label="닫기"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            {canShare && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sharePropertyToKakao({
+                    id: info.dbId!,
+                    dbId: info.dbId!,
+                    address: info.address || "",
+                    type: info.type || "",
+                    area: info.area || "",
+                    floor: info.floor || "",
+                    deposit: info.deposit || "",
+                    monthly: info.monthly || "",
+                    image: info.image || "",
+                  } as any);
+                }}
+                title="카카오톡 공유"
+                className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center"
+              >
+                <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-7 h-7 object-contain" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+              aria-label="닫기"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="flex-1 overflow-auto bg-background">
           {canShare ? (
