@@ -2626,28 +2626,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       if (!isAdmin) return; // 관리자만 체크 가능
       if (!prop.memo) return; // DB 매물만 가능
       if (checking) return;
-      // 스크롤 위치 보존 (해제 시) / 최상단 이동 (체크 시)
-      const scrollEl = listScrollRef.current;
-      const savedScroll = scrollEl?.scrollTop ?? 0;
       setChecking(true);
       // 토글: 확인일이 있으면 null로 초기화, 없으면 오늘로 설정
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
       await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
-      if (newCheckedDate) {
-        // 확인 갱신 시 → 최상단으로 이동
-        const toTop = () => { if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" }); };
-        requestAnimationFrame(toTop);
-        setTimeout(toTop, 200);
-        setTimeout(toTop, 500);
-      } else {
-        // 해제 시 스크롤 위치 복원
-        const restore = () => { if (scrollEl) scrollEl.scrollTop = savedScroll; };
-        requestAnimationFrame(restore);
-        setTimeout(restore, 100);
-        setTimeout(restore, 300);
-        setTimeout(restore, 600);
-      }
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
     const [showVacateInfo, setShowVacateInfo] = useState(false);
