@@ -5786,15 +5786,7 @@ const MapSidebar = ({
                            ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
                              if (opts.some((o) => o.includes(k))) facilityList.push(k);
                            });
-                           const petMap: Record<string, string> = {
-                             "애완동물가능": "반려동물 가능",
-                             "애완동물불가": "반려동물 불가",
-                             "반려동물_가능": "반려동물 가능",
-                             "반려동물_불가": "반려동물 불가",
-                             "반려동물가능": "반려동물 가능",
-                             "반려동물불가": "반려동물 불가",
-                           };
-                           const mappedOpts = opts.map((o) => petMap[o] ?? o);
+                            const mappedOpts = opts.map(normalizeDisplayOption);
                            const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
                             const noteParts: string[] = [];
                             const earlyExitG = note.includes("중도퇴거:");
@@ -5969,15 +5961,7 @@ const MapSidebar = ({
                               ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
                                 if (opts.some((o) => o.includes(k))) facilityList.push(k);
                               });
-                              const petMap: Record<string, string> = {
-                                "애완동물가능": "반려동물 가능",
-                                "애완동물불가": "반려동물 불가",
-                                "반려동물_가능": "반려동물 가능",
-                                "반려동물_불가": "반려동물 불가",
-                                "반려동물가능": "반려동물 가능",
-                                "반려동물불가": "반려동물 불가",
-                              };
-                              const mappedOpts = opts.map((o) => petMap[o] ?? o);
+                              const mappedOpts = opts.map(normalizeDisplayOption);
                               const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
                               if (allChips.length === 0) return null;
                               return <GuestOptionsButton chips={allChips} />;
