@@ -241,6 +241,7 @@ function LightboxModal({
               </div>
             )}
           </div>
+          {!hideUnitNumber && (
           <div className="flex justify-end">
             <button
               onClick={async (e) => {
@@ -258,6 +259,7 @@ function LightboxModal({
               <span>사진저장</span>
             </button>
           </div>
+          )}
         </div>
       ) : (
         <>
