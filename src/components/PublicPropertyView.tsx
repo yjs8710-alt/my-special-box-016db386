@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building2, MapPin, Layers, Car, Calendar, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import logoTransparent from "@/assets/logo-zibda-share-header-20260502-v3-cropped.png";
 import { loadKakaoMaps } from "@/lib/kakaoMapsLoader";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 interface PropertyData {
   id: string;
@@ -234,6 +237,10 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
   const isSale = property.type?.includes("매매");
+  const isMobileView = useIsMobile();
+  const isGuestView = useIsGuest();
+  const { user: authUser } = useAuth();
+  const hideDetailInfo = isMobileView && (isGuestView || authUser?.memberType === "일반회원");
 
   return (
     <div className={className ?? "min-h-screen bg-background"}>
@@ -263,6 +270,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             {showingOtherUnit && (
               <div className="absolute top-3 left-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                 다른 호실 사진{(() => {
+                  if (hideDetailInfo) return "";
                   const u = otherUnits.find((x) => x.id === selectedUnitId);
                   const label = u?.unit_number ? `${u.unit_number}호` : u?.floor ? `${u.floor}층` : "";
                   return label ? ` · ${label}` : "";
@@ -277,9 +285,11 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                 <button onClick={next} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center">
                   <ChevronRight className="w-5 h-5 text-white" />
                 </button>
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-                  {imgIdx + 1} / {imgs.length}
-                </div>
+                {!hideDetailInfo && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                    {imgIdx + 1} / {imgs.length}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -296,7 +306,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             </p>
             <div className="flex flex-wrap gap-1.5">
               {otherUnits.map((u) => {
-                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실";
+                const label = hideDetailInfo
+                  ? (u.floor ? `${u.floor}층` : "호실")
+                  : (u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실");
                 const active = u.id === selectedUnitId;
                 return (
                   <button
@@ -311,7 +323,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                     }`}
                   >
                     {label}
-                    <span className="ml-1 font-normal opacity-70">· 사진 {u.images.length}장</span>
+                    {!hideDetailInfo && (
+                      <span className="ml-1 font-normal opacity-70">· 사진 {u.images.length}장</span>
+                    )}
                   </button>
                 );
               })}
