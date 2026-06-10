@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { addressToDong } from "@/hooks/useIsGuest";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
+import PublicPropertyView from "@/components/PublicPropertyView";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
