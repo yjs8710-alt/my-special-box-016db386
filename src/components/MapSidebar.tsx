@@ -4151,11 +4151,29 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                         {isFull ? "풀옵션 구성" : `옵션 항목 (${prop.options!.length}개)`}
                       </p>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {prop.options!.map((opt) => (
-                          <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">
-                            · {opt}
-                          </span>
-                        ))}
+                        {(() => {
+                          const petMap: Record<string, string> = {
+                            "애완동물가능": "반려동물 가능",
+                            "애완동물불가": "반려동물 불가",
+                            "반려동물_가능": "반려동물 가능",
+                            "반려동물_불가": "반려동물 불가",
+                            "반려동물가능": "반려동물 가능",
+                            "반려동물불가": "반려동물 불가",
+                          };
+                          const seen = new Set<string>();
+                          const list: string[] = [];
+                          prop.options!.forEach((o) => {
+                            const label = petMap[o] ?? o;
+                            if (seen.has(label)) return;
+                            seen.add(label);
+                            list.push(label);
+                          });
+                          return list.map((opt) => (
+                            <span key={opt} className="text-[11px] font-semibold text-foreground whitespace-nowrap">
+                              · {opt}
+                            </span>
+                          ));
+                        })()}
                       </div>
                     </div>
                   )}
