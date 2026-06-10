@@ -497,6 +497,57 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     run();
   }, [form.dong, form.lotNumber, form.buildingType, form.detailType, isCollectiveBuilding]);
 
+  // ── 집합건물: 동+번지+호수 입력 시 건축물대장(전유부)에서 해당 호실 면적 자동 기입 ──
+  const autoFilledAreaRef = useRef<string>("");
+  useEffect(() => {
+    if (!isCollectiveBuilding) return;
+    if (!form.dong || !form.lotNumber || !form.unitNo) return;
+    // 사용자가 직접 입력한 면적은 보존 (이전 자동값이거나 비어있을 때만 채움)
+    const currentArea = form.area?.trim() ?? "";
+    if (currentArea && currentArea !== autoFilledAreaRef.current) return;
+
+    const sigunguClean = (form.sigungu || "").replace(/^청주시\s*/, "");
+    const address = ["충북 청주시", sigunguClean, form.dong, form.lotNumber].filter(Boolean).join(" ").trim();
+    const unitDigits = form.unitNo.replace(/[^0-9]/g, "");
+    if (!address || !unitDigits) return;
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("property-summary", {
+          body: { address },
+        });
+        if (cancelled || error || !data) return;
+        const raws: any[] = Array.isArray(data?.building_summary?._raw) ? data.building_summary._raw : [];
+        const dongFilter = (form.buildingDong || "").replace(/동$/, "").trim();
+        // 모든 _raw 항목의 exposFloors를 평탄화 후 hoNm 일치 검색
+        const candidates: any[] = [];
+        for (const r of raws) {
+          if (dongFilter && r.bldNm && !String(r.bldNm).includes(dongFilter)) continue;
+          if (Array.isArray(r.exposFloors)) candidates.push(...r.exposFloors);
+        }
+        // 전유부만 (공용부 제외), hoNm 숫자 일치
+        const match = candidates.find((e) => {
+          const ho = (e?.hoNm ?? "").toString().replace(/[^0-9]/g, "");
+          const gb = (e?.exposPubuseGbCdNm ?? "").toString();
+          const isExpos = !gb || gb.includes("전유");
+          return isExpos && ho && ho === unitDigits && e?.area;
+        });
+        if (!match || cancelled) return;
+        const areaStr = String(match.area).trim();
+        autoFilledAreaRef.current = areaStr;
+        setForm((prev) => {
+          const cur = prev.area?.trim() ?? "";
+          if (cur && cur !== autoFilledAreaRef.current) return prev;
+          return { ...prev, area: areaStr };
+        });
+      } catch {}
+    };
+    const t = setTimeout(run, 600);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.dong, form.lotNumber, form.unitNo, form.buildingDong, form.sigungu, isCollectiveBuilding]);
+
+
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
     setErrors((p) => { const n = { ...p }; delete n[key]; return n; });
@@ -1172,7 +1223,12 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
               )}
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-foreground/70">면적</label>
+              <label className="text-xs font-semibold text-foreground/70">
+                면적
+                {(form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
+                  <span className="ml-1 text-[10px] text-primary font-normal">건축물대장 자동 기입</span>
+                )}
+              </label>
               <input type="text" placeholder="예) 59.94㎡ 또는 18평" value={form.area} onChange={(e) => set("area", e.target.value)} className={ic(false)} />
               {form.area && !form.area.includes("평") && (() => { const n = parseFloat(form.area.replace(/[^0-9.]/g, "")); return !isNaN(n) && n > 0 ? <p className="text-[10px] text-primary/70">→ 약 {(n / 3.3058).toFixed(1)}평</p> : null; })()}
             </div>

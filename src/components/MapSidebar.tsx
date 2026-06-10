@@ -158,13 +158,20 @@ function LightboxModal({
   // 더보기 드롭다운이 열려있을 때 선택하면 자동으로 닫음 (선택은 handleUnitChange에서 처리)
 
   const isGuestLightbox = useIsGuest();
+  const { user: authUserLb } = useAuth();
+  const hideUnitNumber = isGuestLightbox || (isMobileView && authUserLb?.memberType === "일반회원");
+  const fmtFloor = (f?: string) => {
+    const s = (f ?? "").trim();
+    if (!s) return "";
+    return /[층F]/.test(s) ? s : `${s}층`;
+  };
   const renderTabButton = (u: LightboxUnit, i: number, opts?: { stacked?: boolean }) => {
     const isCurrent = i === unitIdx;
     const isRef = u.isReference;
-    const unitLabel = isGuestLightbox
-      ? (u.floor ?? "")
+    const unitLabel = hideUnitNumber
+      ? fmtFloor(u.floor)
       : (u.unitNumber ?? u.label ?? "");
-    const roomLabel = isGuestLightbox ? "" : (u.roomType ?? "");
+    const roomLabel = hideUnitNumber ? "" : (u.roomType ?? "");
     const stacked = opts?.stacked;
     return (
       <button
@@ -214,8 +221,8 @@ function LightboxModal({
                 {hiddenUnits.map((u, idx) => {
                   const realIdx = MOBILE_VISIBLE_TABS + idx;
                   const isCurrent = realIdx === unitIdx;
-                  const unitLabel = isGuestLightbox ? (u.floor ?? "") : (u.unitNumber ?? u.label ?? "");
-                  const roomLabel = isGuestLightbox ? "" : (u.roomType ?? "");
+                  const unitLabel = hideUnitNumber ? fmtFloor(u.floor) : (u.unitNumber ?? u.label ?? "");
+                  const roomLabel = hideUnitNumber ? "" : (u.roomType ?? "");
                   return (
                     <button
                       key={realIdx}
