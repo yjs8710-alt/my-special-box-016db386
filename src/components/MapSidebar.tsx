@@ -2518,13 +2518,15 @@ const restoreScrollAnchor = (container: HTMLElement | null | undefined, anchor: 
 
 /* ── MobileCheckBadge ── 모바일 매물카드 펼침 영역의 등록일/확인일 표시 (웹 확인일 아이콘 스타일) */
 interface MobileCheckBadgeProps {
+  propId: number;
   propertyId?: string;
   registeredDate?: string;
   checkedDate?: string;
   isAdmin?: boolean;
   listScrollRef?: React.RefObject<HTMLDivElement>;
+  onCheckedDateUpdated?: (propId: number, checkedDate: string | null) => void;
 }
-const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, listScrollRef }: MobileCheckBadgeProps) => {
+const MobileCheckBadge = ({ propId, propertyId, registeredDate, checkedDate, isAdmin, listScrollRef, onCheckedDateUpdated }: MobileCheckBadgeProps) => {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -2553,10 +2555,15 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, li
     e.stopPropagation();
     if (!isAdmin || !propertyId || busy) return;
     setBusy(true);
-    const anchor = captureScrollAnchor(listScrollRef?.current, propertyId);
+    const anchor = captureScrollAnchor(listScrollRef?.current, propId);
     const today = new Date().toISOString().slice(0, 10);
-    await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
+    const { error } = await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
+    if (error) {
+      toast.error("확인일 갱신에 실패했습니다.");
+      return;
+    }
+    onCheckedDateUpdated?.(propId, today);
     setExpanded(false);
     restoreScrollAnchor(listScrollRef?.current, anchor);
   };
@@ -2639,8 +2646,8 @@ interface AddressToggleCardProps {
   chkDate: string | undefined;
   isDealCompleted?: boolean;
 }
-const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean }>(
-  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos }, ref) => {
+const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { isAdmin?: boolean; userId?: string; listScrollRef?: React.RefObject<HTMLDivElement>; agencyInfo?: AgencyInfo; fallbackImage?: string; isMobile?: boolean; onOpenPhotos?: () => void; onOpenContacts?: () => void; hasReferencePhotos?: boolean; onCheckedDateUpdated?: (propId: number, checkedDate: string | null) => void }>(
+  ({ prop, idx, buildingMemo, roomMemo, buildingPw, roomPw, regDate, chkDate, isAdmin, userId, isDealCompleted, listScrollRef, agencyInfo, fallbackImage, isMobile, onOpenPhotos, onOpenContacts, hasReferencePhotos, onCheckedDateUpdated }, ref) => {
     const [checking, setChecking] = useState(false);
     const isGuest = useIsGuest();
     const { user: authUserAddr } = useAuth();
@@ -2668,8 +2675,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const newCheckedDate = isChecked ? null : new Date().toISOString().slice(0, 10);
       // 체크 시 목록이 재정렬되어도 화면(시각적 뷰포트)은 유지
       const anchor = newCheckedDate ? captureScrollAnchor(listScrollRef?.current, prop.id) : null;
-      await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
+      const { error } = await supabase.from("properties").update({ checked_date: newCheckedDate }).eq("id", prop.memo);
       setChecking(false);
+      if (error) {
+        toast.error("확인일 변경에 실패했습니다.");
+        return;
+      }
+      onCheckedDateUpdated?.(prop.id, newCheckedDate);
       if (newCheckedDate) restoreScrollAnchor(listScrollRef?.current, anchor);
     };
     const [showFullAddr, setShowFullAddr] = useState(false);
@@ -3450,11 +3462,13 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             />
             {isMobile && !isGuest && !isGeneralMember && (
               <MobileCheckBadge
+                propId={prop.id}
                 propertyId={prop.memo}
                 registeredDate={prop.registeredDate}
                 checkedDate={prop.checkedDate}
                 isAdmin={isAdmin}
                 listScrollRef={listScrollRef}
+                onCheckedDateUpdated={onCheckedDateUpdated}
               />
             )}
           </div>
@@ -4560,6 +4574,23 @@ const MapSidebar = ({
   // 모바일: 매물 핀 선택만으로는 시트를 자동으로 펼치지 않음
   // (사용자가 매물 정보를 클릭하면 시트를 위로 올림 — 카드 onClick에서 처리)
   const listScrollRef = useRef<HTMLDivElement>(null);
+  const [checkedDateOverrides, setCheckedDateOverrides] = useState<Record<number, string | null>>({});
+  const [checkedDateBoosts, setCheckedDateBoosts] = useState<Record<number, number>>({});
+  const handleCheckedDateUpdated = useCallback((propId: number, checkedDate: string | null) => {
+    setCheckedDateOverrides((prev) => ({ ...prev, [propId]: checkedDate }));
+    setCheckedDateBoosts((prev) => {
+      const next = { ...prev };
+      if (checkedDate) next[propId] = Date.now();
+      else delete next[propId];
+      return next;
+    });
+    onRefetch?.();
+  }, [onRefetch]);
+  const propertiesWithCheckedDates = useMemo(() => properties.map((p) => (
+    Object.prototype.hasOwnProperty.call(checkedDateOverrides, p.id)
+      ? { ...p, checkedDate: checkedDateOverrides[p.id] ?? undefined }
+      : p
+  )), [properties, checkedDateOverrides]);
   // 공유 시 사용할 중개사무소 정보
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
   useEffect(() => {
@@ -4674,17 +4705,16 @@ const MapSidebar = ({
   // 둘 다 없으면 전체 표시
   const displayProperties = useMemo(() => {
     if (isMobile && mobileStep === 0) return [];
-    let list = properties;
+    let list = propertiesWithCheckedDates;
     if (favoritesOnly) list = list.filter((p) => favorites.has(p.id));
     if (pinnedIds && pinnedIds.length > 0) {
       const idxMap = new Map(pinnedIds.map((id, i) => [id, i]));
       return [...list].sort((a, b) => (idxMap.get(a.id) ?? 999) - (idxMap.get(b.id) ?? 999));
     }
     return list;
-  }, [isMobile, mobileStep, pinnedIds, properties, favoritesOnly, favorites]);
+  }, [isMobile, mobileStep, pinnedIds, propertiesWithCheckedDates, favoritesOnly, favorites]);
 
   const orderedDisplayProperties = useMemo(() => {
-    if (pinnedIds && pinnedIds.length > 0) return [...displayProperties];
     return [...displayProperties].sort((a, b) => {
       const chkA = a.checkedDate ? new Date(a.checkedDate).getTime() : 0;
       const regA = a.registeredDate ? new Date(a.registeredDate).getTime() : 0;
@@ -4693,10 +4723,13 @@ const MapSidebar = ({
       const latestA = Math.max(chkA, regA);
       const latestB = Math.max(chkB, regB);
       if (latestA !== latestB) return latestB - latestA;
+      const boostA = checkedDateBoosts[a.id] ?? 0;
+      const boostB = checkedDateBoosts[b.id] ?? 0;
+      if (boostA !== boostB) return boostB - boostA;
       if (chkA !== chkB) return chkB - chkA;
       return regB - regA;
     });
-  }, [displayProperties, pinnedIds]);
+  }, [displayProperties, checkedDateBoosts]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
@@ -5740,6 +5773,7 @@ const MapSidebar = ({
                             userId={authUser?.userId}
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
+                            onCheckedDateUpdated={handleCheckedDateUpdated}
                             agencyInfo={myAgencyInfo}
                             isMobile={isMobile}
                             onOpenPhotos={() => {
