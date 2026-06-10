@@ -1767,6 +1767,15 @@ function ImagePreviewCarousel({
         setDragIdx(i);
         pressRef.current = { ...p, idx: i, moved: true };
       }
+      return;
+    }
+    // 메인 프리뷰 위에 드롭하면 대표(인덱스 0)로 이동
+    const mainTarget = el?.closest<HTMLElement>("[data-main-drop]");
+    if (mainTarget && curDrag !== 0) {
+      setOverIdx(0);
+      moveItem(curDrag, 0);
+      setDragIdx(0);
+      pressRef.current = { ...p, idx: 0, moved: true };
     }
   };
   const onPointerUp = (e: React.PointerEvent, i: number) => {
@@ -1787,7 +1796,7 @@ function ImagePreviewCarousel({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
+      <div data-main-drop className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 200 }}>
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
