@@ -5805,8 +5805,8 @@ const MapSidebar = ({
                             const keyMoneyG = keyMoneyM?.[1]?.trim();
                             if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
                             if (direction) noteParts.push(`${direction}향`);
-                            if (petAllowed) noteParts.push("반려동물가능");
-                            if (petNo) noteParts.push("반려동물불가");
+                            if (petAllowed) noteParts.push("반려동물 가능");
+                            if (petNo && !petAllowed) noteParts.push("반려동물 불가");
 
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
