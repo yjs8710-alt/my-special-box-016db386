@@ -99,15 +99,15 @@ function ImageCarouselPreview({
 
   return (
     <div className="flex flex-col gap-2">
-      <div data-main-drop className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
+      <div data-main-drop className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 280 }}>
         {/* 슬라이드 */}
         <div
-          className="flex h-full transition-transform duration-300"
-          style={{ transform: `translateX(-${safeIdx * 100}%)`, width: `${images.length * 100}%` }}
+          className="flex h-full w-full transition-transform duration-300"
+          style={{ transform: `translateX(-${safeIdx * 100}%)` }}
         >
           {images.map((src) => (
-            <div key={src} className="h-full flex-shrink-0" style={{ width: `${100 / images.length}%` }}>
-              <img src={src} alt="매물 사진" className="w-full h-full object-cover" />
+            <div key={src} className="h-full w-full flex-shrink-0">
+              <img src={src} alt="매물 사진" loading="eager" decoding="async" className="w-full h-full object-cover" />
             </div>
           ))}
         </div>
