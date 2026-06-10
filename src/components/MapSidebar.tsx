@@ -2432,8 +2432,9 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
   if (!registeredDate && !checkedDate) return null;
-  const isChecked = !!checkedDate;
-  const chkDays = checkedDate ? Math.floor((Date.now() - new Date(checkedDate).getTime()) / 86400000) : null;
+  const effectiveCheckedDate = checkedDate || registeredDate;
+  const isChecked = !!effectiveCheckedDate;
+  const chkDays = effectiveCheckedDate ? Math.floor((Date.now() - new Date(effectiveCheckedDate).getTime()) / 86400000) : null;
   const regDays = registeredDate ? Math.floor((Date.now() - new Date(registeredDate).getTime()) / 86400000) : null;
   const displayDays = chkDays ?? regDays;
   const handleIconClick = (e: React.MouseEvent) => {
@@ -2458,7 +2459,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
           background: isChecked ? "hsl(142 70% 93%)" : "hsl(var(--muted))",
           border: `1.5px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
         }}
-        title={isChecked ? `확인 ${checkedDate} (D+${chkDays})` : "미확인 — 탭하여 날짜 표시"}
+        title={`확인 ${effectiveCheckedDate} (D+${chkDays})`}
       >
         <img
           src={checkDateIcon}
@@ -2497,7 +2498,7 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin }: 
                 border: `1px solid ${isChecked ? "hsl(142 60% 65%)" : "hsl(var(--border))"}`,
               }}
             >
-              확인일 {checkedDate ?? "미확인"}
+              확인일 {effectiveCheckedDate}
             </span>
             {isAdmin && propertyId && (
               <button
@@ -3413,7 +3414,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             return (
             <div className="flex items-center gap-1 min-h-[24px]">
               <div className="flex items-center gap-1 flex-wrap min-w-0">
-                {buildYearShort && (
+                {buildYearShort && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}>
                     준{buildYearShort}
                   </span>
