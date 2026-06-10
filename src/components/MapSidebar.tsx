@@ -3248,14 +3248,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </p>
             )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
-            {limitAddress && buildYearShortAddr && (
-              <span
-                className="flex-shrink-0 text-[10px] font-black px-1 py-0.5 rounded whitespace-nowrap"
-                style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary) / 0.3)" }}
-              >
-                준{buildYearShortAddr}
-              </span>
-            )}
             {!(isMobile && limitAddress) && (
             <button
               type="button"
@@ -3327,24 +3319,6 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   상세보기
                 </button>
                 )}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                      detail: {
-                        propertyDbId: prop.dbId,
-                        propertyRegNo: prop.regNo,
-                        agentUserId: prop.registeredBy,
-                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-                  style={{ background: "hsl(var(--primary))", color: "white" }}
-                >
-                  협력 공인중개사
-                </button>
               </>
             )}
             {regDate && !isMobile && (
@@ -3434,14 +3408,18 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </span>
             )}
             <span className="flex-1" />
-            {/* 카카오톡 공유 */}
-            <button
-              onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
-              title="카카오톡 공유"
-              className="flex-shrink-0 flex items-center justify-center"
-            >
-              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
-            </button>
+            {!(isMobile && limitAddress) && (
+              <>
+                {/* 카카오톡 공유 */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
+                  title="카카오톡 공유"
+                  className="flex-shrink-0 flex items-center justify-center"
+                >
+                  <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* 3행: 준공년도 · 공실/거주중 · 권리금 · 단기 · 부가시설 이모티콘 | 우측: 옵션(클릭 시 펼침) */}
@@ -3529,6 +3507,37 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </div>
                     </div>
                   )}
+                </>
+              )}
+              {isMobile && limitAddress && (
+                <>
+                  <span className="flex-1" />
+                  {/* 카카오톡 공유 */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); sharePropertyToKakao(prop, agencyInfo, fallbackImage); }}
+                    title="카카오톡 공유"
+                    className="flex-shrink-0 flex items-center justify-center"
+                  >
+                    <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                        detail: {
+                          propertyDbId: prop.dbId,
+                          propertyRegNo: prop.regNo,
+                          agentUserId: prop.registeredBy,
+                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                        },
+                      }));
+                    }}
+                    className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                    style={{ background: "hsl(var(--primary))", color: "white" }}
+                  >
+                    협력 공인중개사
+                  </button>
                 </>
               )}
             </div>
