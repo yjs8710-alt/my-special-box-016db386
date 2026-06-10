@@ -3449,11 +3449,11 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     권 {keyMoney}
                   </span>
                 )}
-                {facilityBadges}
+                {!(isMobile && limitAddress) && facilityBadges}
               </div>
               <span className="flex-1" />
               {/* 퇴거예정일은 모바일 3행에서 제거 — 카드 선택 시 하단 액션 패널의 소유주 아래에 표시 */}
-              {opts.length > 0 && (
+              {opts.length > 0 && !(isMobile && limitAddress) && (
                 <>
                   <div className="relative flex-shrink-0" onClick={(e) => { e.stopPropagation(); setShowOptPopup((v) => !v); }}>
                     {isFull ? (
