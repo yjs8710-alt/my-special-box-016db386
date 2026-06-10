@@ -1708,12 +1708,15 @@ function ImagePreviewCarousel({
     const target = el?.closest<HTMLElement>("[data-thumb-idx]");
     if (target) {
       const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
-      if (!isNaN(i)) setOverIdx(i);
+      if (!isNaN(i) && i !== dragIdx) {
+        setOverIdx(i);
+        moveItem(dragIdx, i);
+        setDragIdx(i);
+      }
     }
   };
   const onPointerUp = (e: React.PointerEvent) => {
     if (dragIdx === null) return;
-    if (e.pointerType !== "mouse" && overIdx !== null) moveItem(dragIdx, overIdx);
     setDragIdx(null); setOverIdx(null);
   };
 
