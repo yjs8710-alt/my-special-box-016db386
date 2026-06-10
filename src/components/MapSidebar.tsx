@@ -5351,8 +5351,8 @@ const MapSidebar = ({
                           {/* ①썸네일 — 3열 비율에 맞춰 96px */}
                           {/* 썸네일: 데스크톱 항상, 모바일은 일반회원/게스트에게도 좌측 사진 표시 */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
-                            className={`${isMobile ? "w-[80px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
-                            style={{ minHeight: isMobile ? "80px" : "96px" }}
+                            className={`${isMobile ? "w-[120px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
+                            style={{ minHeight: isMobile ? "110px" : "96px" }}
                           >
 
                             {(() => {
