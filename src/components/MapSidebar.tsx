@@ -734,6 +734,15 @@ const OPTION_ICONS: Record<string, string> = {
   반려동물_가능: "반려동물_가능",
 };
 
+const normalizeDisplayOption = (option: string): string => {
+  const compact = option.replace(/\s+/g, "");
+  if (compact.includes("애완동물") || compact.includes("반려동물")) {
+    if (compact.includes("불가")) return "반려동물 불가";
+    if (compact.includes("가능")) return "반려동물 가능";
+  }
+  return option;
+};
+
 /* Daily-limit helpers */
 const today = () => new Date().toISOString().slice(0, 10);
 const revealKey = (id: number, type: string) => `contact_reveal_${id}_${type}`;
@@ -4152,18 +4161,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </p>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1">
                         {(() => {
-                          const petMap: Record<string, string> = {
-                            "애완동물가능": "반려동물 가능",
-                            "애완동물불가": "반려동물 불가",
-                            "반려동물_가능": "반려동물 가능",
-                            "반려동물_불가": "반려동물 불가",
-                            "반려동물가능": "반려동물 가능",
-                            "반려동물불가": "반려동물 불가",
-                          };
                           const seen = new Set<string>();
                           const list: string[] = [];
                           prop.options!.forEach((o) => {
-                            const label = petMap[o] ?? o;
+                            const label = normalizeDisplayOption(o);
                             if (seen.has(label)) return;
                             seen.add(label);
                             list.push(label);
@@ -5785,15 +5786,7 @@ const MapSidebar = ({
                            ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
                              if (opts.some((o) => o.includes(k))) facilityList.push(k);
                            });
-                           const petMap: Record<string, string> = {
-                             "애완동물가능": "반려동물 가능",
-                             "애완동물불가": "반려동물 불가",
-                             "반려동물_가능": "반려동물 가능",
-                             "반려동물_불가": "반려동물 불가",
-                             "반려동물가능": "반려동물 가능",
-                             "반려동물불가": "반려동물 불가",
-                           };
-                           const mappedOpts = opts.map((o) => petMap[o] ?? o);
+                            const mappedOpts = opts.map(normalizeDisplayOption);
                            const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
                             const noteParts: string[] = [];
                             const earlyExitG = note.includes("중도퇴거:");
@@ -5968,15 +5961,7 @@ const MapSidebar = ({
                               ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
                                 if (opts.some((o) => o.includes(k))) facilityList.push(k);
                               });
-                              const petMap: Record<string, string> = {
-                                "애완동물가능": "반려동물 가능",
-                                "애완동물불가": "반려동물 불가",
-                                "반려동물_가능": "반려동물 가능",
-                                "반려동물_불가": "반려동물 불가",
-                                "반려동물가능": "반려동물 가능",
-                                "반려동물불가": "반려동물 불가",
-                              };
-                              const mappedOpts = opts.map((o) => petMap[o] ?? o);
+                              const mappedOpts = opts.map(normalizeDisplayOption);
                               const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
                               if (allChips.length === 0) return null;
                               return <GuestOptionsButton chips={allChips} />;

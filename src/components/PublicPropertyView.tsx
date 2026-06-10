@@ -70,6 +70,15 @@ function formatAreaShort(value: string | null | undefined): string {
   return pyeong ? `${pyeong}평` : value;
 }
 
+function normalizeDisplayOption(option: string): string {
+  const compact = option.replace(/\s+/g, "");
+  if (compact.includes("애완동물") || compact.includes("반려동물")) {
+    if (compact.includes("불가")) return "반려동물 불가";
+    if (compact.includes("가능")) return "반려동물 가능";
+  }
+  return option;
+}
+
 function sanitizeAddress(address: string): string {
   if (!address) return "";
   const match = address.match(
@@ -385,8 +394,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             <div>
               <p className="text-xs font-bold text-foreground mb-2">옵션</p>
               <div className="flex flex-wrap gap-1.5">
-                {property.options.map((opt, i) => (
-                  <span key={i} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground border border-border">
+                {property.options.map(normalizeDisplayOption).map((opt, i) => (
+                  <span key={`${opt}-${i}`} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground border border-border">
                     {opt}
                   </span>
                 ))}
