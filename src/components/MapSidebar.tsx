@@ -221,7 +221,7 @@ function LightboxModal({
                 {hiddenUnits.map((u, idx) => {
                   const realIdx = MOBILE_VISIBLE_TABS + idx;
                   const isCurrent = realIdx === unitIdx;
-                  const unitLabel = hideUnitNumber ? (u.floor ?? "") : (u.unitNumber ?? u.label ?? "");
+                  const unitLabel = hideUnitNumber ? fmtFloor(u.floor) : (u.unitNumber ?? u.label ?? "");
                   const roomLabel = hideUnitNumber ? "" : (u.roomType ?? "");
                   return (
                     <button
