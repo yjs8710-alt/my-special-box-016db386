@@ -12,6 +12,9 @@ interface PropertyData {
   title: string;
   building_name: string | null;
   address: string;
+  district: string | null;
+  dong: string | null;
+  lot_number: string | null;
   type: string;
   room_type: string | null;
   area: string;
@@ -32,9 +35,18 @@ interface PropertyData {
   is_hot: boolean;
   registered_date: string;
   registered_by: string | null;
+  reg_no: string | null;
+  note: string | null;
   lat: number;
   lng: number;
 }
+
+// 집합건물/공동주택 여부 (번지수까지 표기)
+function isCollectiveBuilding(type: string | null | undefined): boolean {
+  if (!type) return false;
+  return /아파트|오피스텔|빌라|다세대|연립|도시형생활주택|주상복합|타운하우스/.test(type);
+}
+
 
 interface BuildingSummaryData {
   building_name: string | null;
