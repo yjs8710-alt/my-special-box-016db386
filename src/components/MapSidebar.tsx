@@ -734,6 +734,15 @@ const OPTION_ICONS: Record<string, string> = {
   반려동물_가능: "반려동물_가능",
 };
 
+const normalizeDisplayOption = (option: string): string => {
+  const compact = option.replace(/\s+/g, "");
+  if (compact.includes("애완동물") || compact.includes("반려동물")) {
+    if (compact.includes("불가")) return "반려동물 불가";
+    if (compact.includes("가능")) return "반려동물 가능";
+  }
+  return option;
+};
+
 /* Daily-limit helpers */
 const today = () => new Date().toISOString().slice(0, 10);
 const revealKey = (id: number, type: string) => `contact_reveal_${id}_${type}`;
