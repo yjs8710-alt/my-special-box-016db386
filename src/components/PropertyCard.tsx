@@ -316,7 +316,7 @@ const PropertyCard = ({
 
 
         {/* Price */}
-        <div className="border-t border-border pt-3 flex items-end justify-between">
+        <div className={`border-t border-border pt-3 flex items-end justify-between ${isGuest ? "hidden md:flex" : ""}`}>
           <div>
             <p className="text-[11px] md:text-xs text-muted-foreground">보증금 / 월세</p>
             <p className="font-bold text-primary text-base md:text-sm">
