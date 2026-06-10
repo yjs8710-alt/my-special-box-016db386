@@ -3201,9 +3201,12 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
           <div className="flex items-center gap-1 min-h-[22px]">
             {/* 확인일 배지 제거 */}
-            <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
-              {prop.buildingName ?? prop.title}
-            </p>
+            {/* 모바일 일반회원/게스트는 건물명 숨김 (좌측 사진으로 대체) */}
+            {!(isMobile && limitAddress) && (
+              <p className="text-[13px] font-extrabold text-foreground truncate leading-none flex-shrink min-w-0">
+                {prop.buildingName ?? prop.title}
+              </p>
+            )}
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             {limitAddress && buildYearShortAddr && (
               <span
