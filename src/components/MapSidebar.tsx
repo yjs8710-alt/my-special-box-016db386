@@ -3357,27 +3357,28 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 )}
               </span>
             )}
-            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 */}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
-              title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
-              className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
-              style={{
-                background: "transparent",
-                border: "none",
-                opacity: hasPhotos ? 1 : 0.4,
-              }}
-            >
-              <img
-                src={cameraIcon}
-                alt="사진"
-                className="w-8 h-8 object-contain"
-                style={{ imageRendering: "auto", transform: "scale(1.35)" }}
-                draggable={false}
-              />
-            </button>
-            {/* 평수 표기 */}
+            {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 (모바일 일반회원/게스트는 좌측 썸네일로 대체, 카메라 숨김) */}
+            {!(isMobile && limitAddress) && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onOpenPhotos?.(); }}
+                title={hasOwnPhotos ? "사진 보기" : hasReferencePhotos ? "다른 방 사진 보기" : "사진 없음"}
+                className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded overflow-hidden transition-transform active:scale-95"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  opacity: hasPhotos ? 1 : 0.4,
+                }}
+              >
+                <img
+                  src={cameraIcon}
+                  alt="사진"
+                  className="w-8 h-8 object-contain"
+                  style={{ imageRendering: "auto", transform: "scale(1.35)" }}
+                  draggable={false}
+                />
+              </button>
+            )}
             {prop.area && (
               <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
                 {(() => {
