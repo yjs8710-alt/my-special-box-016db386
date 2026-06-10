@@ -2553,10 +2553,12 @@ const MobileCheckBadge = ({ propertyId, registeredDate, checkedDate, isAdmin, li
     e.stopPropagation();
     if (!isAdmin || !propertyId || busy) return;
     setBusy(true);
+    const anchor = captureScrollAnchor(listScrollRef?.current, propertyId);
     const today = new Date().toISOString().slice(0, 10);
     await supabase.from("properties").update({ checked_date: today }).eq("id", propertyId);
     setBusy(false);
     setExpanded(false);
+    restoreScrollAnchor(listScrollRef?.current, anchor);
   };
   return (
     <div className="relative inline-flex items-center">
