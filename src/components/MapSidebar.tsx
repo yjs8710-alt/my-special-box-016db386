@@ -160,6 +160,7 @@ function LightboxModal({
   const isGuestLightbox = useIsGuest();
   const { user: authUserLb } = useAuth();
   const hideUnitNumber = isGuestLightbox || (isMobileView && authUserLb?.memberType === "일반회원");
+  const hideDownload = isGuestLightbox || authUserLb?.memberType === "일반회원";
   const fmtFloor = (f?: string) => {
     const s = (f ?? "").trim();
     if (!s) return "";
