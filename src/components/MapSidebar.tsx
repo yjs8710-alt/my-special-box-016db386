@@ -5689,6 +5689,108 @@ const MapSidebar = ({
                           const vacateTime = new Date(vacateStr).getTime();
                           if (!isNaN(vacateTime) && vacateTime >= Date.now()) vacateFutureLabel = prop.vacateDate;
                         }
+                         // 게스트/일반회원 모바일: 라벨형 단순 레이아웃 (위치/매물정보/옵션/특이사항)
+                         if (isGuest || authUser?.memberType === "일반회원") {
+                           const opts = prop.options ?? [];
+                           const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
+                           const petAllowed = opts.some((o) => o.includes("반려동물") && !o.includes("불가"));
+                           const petNo = opts.some((o) => o.includes("애완") || (o.includes("반려동물") && o.includes("불가")));
+                           const facilityList: string[] = [];
+                           if (elev) facilityList.push("엘리베이터");
+                           ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
+                             if (opts.some((o) => o.includes(k))) facilityList.push(k);
+                           });
+                           const allChips = Array.from(new Set([...facilityList, ...opts]));
+                           const noteParts: string[] = [];
+                           if (direction) noteParts.push(`${direction}향`);
+                           if (vacateFutureLabel) noteParts.push(`퇴거 ${vacateFutureLabel}`);
+                           if (prop.description && prop.description.trim()) noteParts.push(prop.description.trim());
+                           const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+                             <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
+                               <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
+                               <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
+                             </div>
+                           );
+                           return (
+                             <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
+                               <Row label="위치">
+                                 <button
+                                   type="button"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                                       detail: {
+                                         info: {
+                                           image: prop.images?.[0] || prop.image,
+                                           address: prop.address,
+                                           type: prop.type,
+                                           area: prop.area,
+                                           floor: prop.floor,
+                                           deposit: prop.deposit,
+                                           monthly: prop.monthly,
+                                           regNo: prop.regNo,
+                                           buildYear: prop.buildYear,
+                                           dbId: prop.dbId,
+                                         },
+                                         partnerDetail: {
+                                           propertyDbId: prop.dbId,
+                                           propertyRegNo: prop.regNo,
+                                           agentUserId: prop.registeredBy,
+                                           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                                         },
+                                       },
+                                     }));
+                                   }}
+                                   className="px-2.5 py-1 rounded-md text-[11px] font-bold border"
+                                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                                 >
+                                   상세보기
+                                 </button>
+                               </Row>
+                               <Row label="매물정보">
+                                 {prop.buildYear && (
+                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
+                                     준{String(prop.buildYear).slice(0,4)}
+                                   </span>
+                                 )}
+                                 {elev && (
+                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                                     엘리베이터
+                                   </span>
+                                 )}
+                                 {petAllowed && (
+                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
+                                     반려동물가능
+                                   </span>
+                                 )}
+                                 {petNo && (
+                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                     애완동물불가
+                                   </span>
+                                 )}
+                                 {!prop.buildYear && !elev && !petAllowed && !petNo && (
+                                   <span className="text-[11px] text-muted-foreground">-</span>
+                                 )}
+                               </Row>
+                               <Row label="옵션">
+                                 {allChips.length > 0 ? (
+                                   <GuestOptionsButton chips={allChips} />
+                                 ) : (
+                                   <span className="text-[11px] text-muted-foreground">-</span>
+                                 )}
+                               </Row>
+                               <Row label="특이사항">
+                                 {noteParts.length > 0 ? (
+                                   <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">
+                                     {noteParts.join(" · ")}
+                                   </span>
+                                 ) : (
+                                   <span className="text-[11px] text-muted-foreground">-</span>
+                                 )}
+                               </Row>
+                             </div>
+                           );
+                         }
                          return (
                            <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
                              {/* 모바일: 웹 확인일 아이콘 스타일 — 게스트/일반회원에게는 숨김 */}
