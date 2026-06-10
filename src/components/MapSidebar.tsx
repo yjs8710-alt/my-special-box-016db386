@@ -3389,7 +3389,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
           <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
-            {(prop.type || floorShort || prop.unitNumber) && (
+            {(prop.type || floorShort || prop.unitNumber) && !(isMobile && limitAddress) && (
               <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
                 {prop.type && <span>{prop.type}</span>}
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
@@ -3399,20 +3399,22 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </span>
             )}
             {/* 가격 */}
-            {(wolseMatch || halfMatch || jeonseMatch) ? (
-              <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
-                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
-                {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
-                {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
-              </span>
-            ) : (
-              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
-                {isSaleProp ? (
-                  <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
-                ) : (
-                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
-                )}
-              </span>
+            {!(isMobile && limitAddress) && (
+              (wolseMatch || halfMatch || jeonseMatch) ? (
+                <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
+                  {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
+                  {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                  {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+                </span>
+              ) : (
+                <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
+                  {isSaleProp ? (
+                    <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                  ) : (
+                    <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
+                  )}
+                </span>
+              )
             )}
             {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 (모바일 일반회원/게스트는 좌측 썸네일로 대체, 카메라 숨김) */}
             {!(isMobile && limitAddress) && (
