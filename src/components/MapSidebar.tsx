@@ -3438,7 +3438,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 />
               </button>
             )}
-            {prop.area && (
+            {prop.area && !(isMobile && limitAddress) && (
               <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
                 {(() => {
                   const a = prop.area;
