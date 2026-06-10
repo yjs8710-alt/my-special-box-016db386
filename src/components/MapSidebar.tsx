@@ -3709,24 +3709,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   >
                     <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-8 h-8 object-contain" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                        detail: {
-                          propertyDbId: prop.dbId,
-                          propertyRegNo: prop.regNo,
-                          agentUserId: prop.registeredBy,
-                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                        },
-                      }));
-                    }}
-                    className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-                    style={{ background: "hsl(var(--primary))", color: "white" }}
-                  >
-                    협력 공인중개사
-                  </button>
+                  {/* 문의하기 버튼은 상단 가격 행으로 이동 */}
                 </>
               )}
             </div>
