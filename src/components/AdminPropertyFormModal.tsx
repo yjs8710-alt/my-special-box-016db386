@@ -182,7 +182,7 @@ function ImageCarouselPreview({
               draggable
               onDragStart={(e) => handleDragStart(e, i)}
               onDragOver={(e) => handleDragOver(e, i)}
-              onDrop={(e) => handleDrop(e, i)}
+              onDrop={handleDrop}
               onDragEnd={handleDragEnd}
               onPointerDown={(e) => onPointerDown(e, i)}
               onPointerMove={onPointerMove}
