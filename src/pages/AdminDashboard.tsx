@@ -2007,11 +2007,12 @@ const AdminDashboard = () => {
                 <h2 className="text-xl font-extrabold text-foreground mb-1">안녕하세요, 관리자님 👋</h2>
                 <p className="text-sm text-muted-foreground">집다 플랫폼 현황을 확인하세요.</p>
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 {[
                   { label: "전체 회원", value: members.length, sub: `승인 대기 ${pendingCount}건`, icon: Users, color: "hsl(var(--primary))" },
                   { label: "승인된 회원", value: approvedCount, sub: "활성 중개사", icon: CheckCircle2, color: "hsl(var(--chart-2))" },
                   { label: "등록 매물(DB)", value: dbProperties.length, sub: `노출종료 ${dbProperties.filter((p) => p.status === "hidden").length}건`, icon: Building2, color: "hsl(var(--accent))" },
+                  { label: "매물 총 조회수", value: allProperties.reduce((s, p) => s + (p.views || 0), 0).toLocaleString(), sub: `평균 ${allProperties.length ? Math.round(allProperties.reduce((s, p) => s + (p.views || 0), 0) / allProperties.length).toLocaleString() : 0}회/건`, icon: Eye, color: "hsl(var(--chart-3))" },
                   { label: "커뮤니티 게시글", value: posts.length, sub: `신고 게시글 ${reportedPosts}건`, icon: MessageSquare, color: "hsl(var(--chart-4))" },
                 ].map(({ label, value, sub, icon: Icon, color }) => (
                   <div key={label} className="bg-card border border-border rounded-xl p-5 flex flex-col gap-3">
