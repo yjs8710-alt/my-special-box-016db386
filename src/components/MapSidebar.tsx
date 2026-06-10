@@ -3512,6 +3512,25 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   </span>
                 )}
               </div>
+              <span className="flex-1" />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: {
+                      propertyDbId: prop.dbId,
+                      propertyRegNo: prop.regNo,
+                      agentUserId: prop.registeredBy,
+                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                style={{ background: "hsl(var(--primary))", color: "white" }}
+              >
+                문의하기
+              </button>
             </div>
           )}
 
