@@ -12,6 +12,9 @@ interface PropertyData {
   title: string;
   building_name: string | null;
   address: string;
+  district: string | null;
+  dong: string | null;
+  lot_number: string | null;
   type: string;
   room_type: string | null;
   area: string;
@@ -32,9 +35,18 @@ interface PropertyData {
   is_hot: boolean;
   registered_date: string;
   registered_by: string | null;
+  reg_no: string | null;
+  note: string | null;
   lat: number;
   lng: number;
 }
+
+// 집합건물/공동주택 여부 (번지수까지 표기)
+function isCollectiveBuilding(type: string | null | undefined): boolean {
+  if (!type) return false;
+  return /아파트|오피스텔|빌라|다세대|연립|도시형생활주택|주상복합|타운하우스/.test(type);
+}
+
 
 interface BuildingSummaryData {
   building_name: string | null;
@@ -189,7 +201,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
 
       const { data, error } = await supabase
         .from("properties")
-        .select("id,title,building_name,address,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,vacate_date,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,lat,lng")
+        .select("id,title,building_name,address,district,dong,lot_number,type,room_type,area,floor,total_floors,deposit,monthly,manage_fee,parking,elevator,available_from,vacate_date,build_year,description,images,options,is_new,is_hot,registered_date,registered_by,reg_no,note,lat,lng")
         .eq("id", id)
         .eq("status", "active")
         .single();
@@ -257,7 +269,16 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   const ownImgs = (property.images || []).filter(Boolean);
   const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
   const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
-  const safeAddress = sanitizeAddress(property.address);
+  // 집합건물/공동주택은 번지수까지 노출 (호수는 미포함)
+  const collective = isCollectiveBuilding(property.type);
+  const safeAddress = collective
+    ? ([property.district, property.dong, property.lot_number].filter((v) => v && String(v).trim()).join(" ").trim() || sanitizeAddress(property.address))
+    : sanitizeAddress(property.address);
+  const regNoNumeric = property.reg_no ? String(parseInt(property.reg_no.replace(/[^0-9]/g, ""), 10) || property.reg_no) : "";
+  const directionText = (() => {
+    const m = (property.note || "").match(/방향:\s*([^\n|]+)/);
+    return m ? m[1].trim() : "";
+  })();
   const prev = () => setImgIdx((i) => (i - 1 + imgs.length) % imgs.length);
   const next = () => setImgIdx((i) => (i + 1) % imgs.length);
   const isSale = property.type?.includes("매매");
@@ -375,7 +396,12 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
         )}
 
         <div className="p-5 flex flex-col gap-5">
-          <div>
+          <div className="flex flex-col gap-1.5">
+            {regNoNumeric && (
+              <span className="self-start inline-flex items-center px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-extrabold tracking-wider shadow-sm">
+                매물번호 NO.{regNoNumeric}
+              </span>
+            )}
             <h1 className="text-xl font-bold text-foreground flex items-center gap-1">
               <MapPin className="w-4 h-4" />
               {safeAddress}
@@ -398,16 +424,19 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: building?.parking_count ? `${building.parking_count}대` : (property.parking || "확인필요") },
               { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : (property.available_from || "즉시") },
+              ...(directionText ? [{ icon: <Building2 className="w-4 h-4" />, label: "방향", value: directionText }] : []),
+              ...(property.vacate_date ? [{ icon: <Calendar className="w-4 h-4" />, label: "퇴거예정일", value: property.vacate_date }] : []),
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
                 <div>
                   <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                  <p className="text-xs font-bold text-foreground">{item.value || "-"}</p>
+                  <p className="text-xs font-extrabold text-primary">{item.value || "-"}</p>
                 </div>
               </div>
             ))}
           </div>
+
 
           {property.options && property.options.length > 0 && (
             <div>
