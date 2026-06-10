@@ -70,6 +70,15 @@ function ImageCarouselPreview({
         setDragIdx(i);
         pressRef.current = { ...p, idx: i, moved: true };
       }
+      return;
+    }
+    // 메인 프리뷰 위에 드롭하면 대표(인덱스 0)로 이동
+    const mainTarget = el?.closest<HTMLElement>("[data-main-drop]");
+    if (mainTarget && curDrag !== 0) {
+      setOverIdx(0);
+      moveItem(curDrag, 0);
+      setDragIdx(0);
+      pressRef.current = { ...p, idx: 0, moved: true };
     }
   };
   const onPointerUp = (e: React.PointerEvent, i: number) => {
