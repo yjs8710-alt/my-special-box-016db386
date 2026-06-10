@@ -274,7 +274,25 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
 
       <div className="max-w-lg mx-auto pb-8">
         {imgs.length > 0 ? (
-          <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+          <div
+            className="relative aspect-[4/3] bg-muted overflow-hidden touch-pan-y select-none"
+            onTouchStart={(e) => {
+              (e.currentTarget as any)._tx = e.touches[0].clientX;
+              (e.currentTarget as any)._ty = e.touches[0].clientY;
+            }}
+            onTouchEnd={(e) => {
+              const startX = (e.currentTarget as any)._tx as number | undefined;
+              const startY = (e.currentTarget as any)._ty as number | undefined;
+              if (startX == null || startY == null) return;
+              const endX = e.changedTouches[0].clientX;
+              const endY = e.changedTouches[0].clientY;
+              const dx = endX - startX;
+              const dy = endY - startY;
+              if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                if (dx < 0) next(); else prev();
+              }
+            }}
+          >
             {imgs.map((src, i) => (
               <img
                 key={i}
@@ -283,7 +301,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                 loading={i === 0 ? "eager" : "lazy"}
                 decoding="async"
                 fetchPriority={i === 0 ? "high" : "low" as any}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+                draggable={false}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 pointer-events-none"
                 style={{ opacity: i === imgIdx ? 1 : 0 }}
               />
             ))}
