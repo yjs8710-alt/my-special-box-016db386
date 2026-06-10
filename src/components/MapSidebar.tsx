@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo, forwardRef } from "react";
-import ReactDOM from "react-dom";
+import ReactDOM, { createPortal } from "react-dom";
 import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
   MapPin,
