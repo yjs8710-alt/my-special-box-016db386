@@ -497,6 +497,57 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     run();
   }, [form.dong, form.lotNumber, form.buildingType, form.detailType, isCollectiveBuilding]);
 
+  // ── 집합건물: 동+번지+호수 입력 시 건축물대장(전유부)에서 해당 호실 면적 자동 기입 ──
+  const autoFilledAreaRef = useRef<string>("");
+  useEffect(() => {
+    if (!isCollectiveBuilding) return;
+    if (!form.dong || !form.lotNumber || !form.unitNo) return;
+    // 사용자가 직접 입력한 면적은 보존 (이전 자동값이거나 비어있을 때만 채움)
+    const currentArea = form.area?.trim() ?? "";
+    if (currentArea && currentArea !== autoFilledAreaRef.current) return;
+
+    const sigunguClean = (form.sigungu || "").replace(/^청주시\s*/, "");
+    const address = ["충북 청주시", sigunguClean, form.dong, form.lotNumber].filter(Boolean).join(" ").trim();
+    const unitDigits = form.unitNo.replace(/[^0-9]/g, "");
+    if (!address || !unitDigits) return;
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("property-summary", {
+          body: { address },
+        });
+        if (cancelled || error || !data) return;
+        const raws: any[] = Array.isArray(data?.building_summary?._raw) ? data.building_summary._raw : [];
+        const dongFilter = (form.buildingDong || "").replace(/동$/, "").trim();
+        // 모든 _raw 항목의 exposFloors를 평탄화 후 hoNm 일치 검색
+        const candidates: any[] = [];
+        for (const r of raws) {
+          if (dongFilter && r.bldNm && !String(r.bldNm).includes(dongFilter)) continue;
+          if (Array.isArray(r.exposFloors)) candidates.push(...r.exposFloors);
+        }
+        // 전유부만 (공용부 제외), hoNm 숫자 일치
+        const match = candidates.find((e) => {
+          const ho = (e?.hoNm ?? "").toString().replace(/[^0-9]/g, "");
+          const gb = (e?.exposPubuseGbCdNm ?? "").toString();
+          const isExpos = !gb || gb.includes("전유");
+          return isExpos && ho && ho === unitDigits && e?.area;
+        });
+        if (!match || cancelled) return;
+        const areaStr = String(match.area).trim();
+        autoFilledAreaRef.current = areaStr;
+        setForm((prev) => {
+          const cur = prev.area?.trim() ?? "";
+          if (cur && cur !== autoFilledAreaRef.current) return prev;
+          return { ...prev, area: areaStr };
+        });
+      } catch {}
+    };
+    const t = setTimeout(run, 600);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.dong, form.lotNumber, form.unitNo, form.buildingDong, form.sigungu, isCollectiveBuilding]);
+
+
   const set = <K extends keyof FormState>(key: K, val: FormState[K]) => {
     setForm((p) => ({ ...p, [key]: val }));
     setErrors((p) => { const n = { ...p }; delete n[key]; return n; });
