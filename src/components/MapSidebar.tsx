@@ -160,6 +160,7 @@ function LightboxModal({
   const isGuestLightbox = useIsGuest();
   const { user: authUserLb } = useAuth();
   const hideUnitNumber = isGuestLightbox || (isMobileView && authUserLb?.memberType === "일반회원");
+  const hideDownload = isGuestLightbox || authUserLb?.memberType === "일반회원";
   const fmtFloor = (f?: string) => {
     const s = (f ?? "").trim();
     if (!s) return "";
@@ -241,6 +242,7 @@ function LightboxModal({
               </div>
             )}
           </div>
+          {!hideDownload && (
           <div className="flex justify-end">
             <button
               onClick={async (e) => {
@@ -258,10 +260,12 @@ function LightboxModal({
               <span>사진저장</span>
             </button>
           </div>
+          )}
         </div>
       ) : (
         <>
           {/* 데스크톱 — 우측 상단 모두저장 버튼 */}
+          {!hideDownload && (
           <button
             onClick={async (e) => {
               e.stopPropagation();
@@ -277,6 +281,7 @@ function LightboxModal({
             <Download className="w-4 h-4" />
             <span>사진저장</span>
           </button>
+          )}
           {hasTabs && (
             <div
               className="absolute top-4 left-1/2 -translate-x-1/2 z-10 max-w-[80vw]"
