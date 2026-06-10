@@ -5521,16 +5521,17 @@ const MapSidebar = ({
                                 e.stopPropagation();
                                 toggleFavorite(prop.id);
                               }}
-                              className="absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110"
+                              className={`absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110 ${favorites.has(prop.id) ? "w-7 h-7 rounded-full" : ""}`}
+                              style={favorites.has(prop.id) ? { background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" } : undefined}
                               title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                               aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
                               <Star
-                                className="w-5 h-5"
+                                className={favorites.has(prop.id) ? "w-4 h-4" : "w-5 h-5"}
                                 style={{
                                   color: "white",
                                   fill: favorites.has(prop.id) ? "white" : "transparent",
-                                  filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
+                                  filter: favorites.has(prop.id) ? undefined : "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
                                 }}
                                 strokeWidth={2}
                               />

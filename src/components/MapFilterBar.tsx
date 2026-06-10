@@ -577,21 +577,21 @@ const MapFilterBar = ({
               onClick={toggleFavoritesOnly}
               title={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
               aria-label={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
-              className="flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all"
+              className={`flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all ${favoritesOnly ? "rounded-l-xl" : ""}`}
               style={{
                 borderRight: "1px solid hsl(var(--primary)/0.3)",
-                background: favoritesOnly ? "hsl(38 95% 50% / 0.10)" : "transparent",
+                background: favoritesOnly ? "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" : "transparent",
               }}
             >
               <Star
-                className="w-3.5 h-3.5"
+                className="w-5 h-5 md:w-3.5 md:h-3.5"
                 style={{
-                  color: favoritesOnly ? "hsl(38 95% 45%)" : "hsl(var(--muted-foreground))",
-                  fill: favoritesOnly ? "hsl(38 95% 50%)" : "transparent",
+                  color: favoritesOnly ? "#fff" : "hsl(var(--muted-foreground))",
+                  fill: favoritesOnly ? "#fff" : "transparent",
                 }}
                 strokeWidth={2}
               />
-              <span className="text-[10px] font-bold hidden md:block" style={{ color: favoritesOnly ? "hsl(38 95% 35%)" : "hsl(var(--muted-foreground))" }}>
+              <span className="text-[10px] font-bold hidden md:block" style={{ color: favoritesOnly ? "#fff" : "hsl(var(--muted-foreground))" }}>
                 관심매물
               </span>
             </button>
