@@ -394,8 +394,8 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             <div>
               <p className="text-xs font-bold text-foreground mb-2">옵션</p>
               <div className="flex flex-wrap gap-1.5">
-                {property.options.map(normalizeDisplayOption).map((opt, i) => (
-                  <span key={`${opt}-${i}`} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground border border-border">
+                {Array.from(new Set(property.options.map(normalizeDisplayOption))).map((opt) => (
+                  <span key={opt} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted text-foreground border border-border">
                     {opt}
                   </span>
                 ))}
