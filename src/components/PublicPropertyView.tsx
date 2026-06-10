@@ -78,6 +78,16 @@ function sanitizeAddress(address: string): string {
   return match ? match[0] : address.split(" ").slice(0, -1).join(" ") || address;
 }
 
+function checkVacant(p: PropertyData): boolean {
+  if (p.vacate_date) {
+    const v = p.vacate_date.replace(/[^0-9\-\/\.]/g, "").replace(/\./g, "-").replace(/\//g, "-");
+    const t = new Date(v).getTime();
+    if (!isNaN(t) && t < Date.now()) return true;
+  }
+  if (p.available_from === "공실") return true;
+  return false;
+}
+
 function KakaoMapPreview({ lat, lng }: { lat: number; lng: number }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
