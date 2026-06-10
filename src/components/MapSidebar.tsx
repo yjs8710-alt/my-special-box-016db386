@@ -3247,6 +3247,45 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {prop.buildingName ?? prop.title}
               </p>
             )}
+            {/* 모바일 일반회원/게스트: 1열에 유형·방형·가격·평수 표시 */}
+            {isMobile && limitAddress && (
+              <div className="flex items-center gap-1 flex-wrap min-w-0">
+                {(prop.type || floorShort) && (
+                  <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
+                    {prop.type && <span>{prop.type}</span>}
+                    {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
+                    {prop.roomType && prop.roomType.includes(",") && Array.from(new Set(prop.roomType.split(",").map((s) => s.trim()).filter((s) => s && s !== prop.type && s !== "오픈형" && s !== "분리형"))).map((s) => (<span key={s} className="opacity-90">·{s}</span>))}
+                    {floorShort && <span className="opacity-80">({floorShort})</span>}
+                  </span>
+                )}
+                {(wolseMatch || halfMatch || jeonseMatch) ? (
+                  <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
+                    {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
+                    {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                    {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+                  </span>
+                ) : (
+                  <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
+                    {isSaleProp ? (
+                      <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                    ) : (
+                      <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
+                    )}
+                  </span>
+                )}
+                {prop.area && (
+                  <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
+                    {(() => {
+                      const a = prop.area;
+                      if (/평/.test(a)) return a;
+                      const n = parseFloat(a.replace(/[^0-9.]/g, ""));
+                      return !isNaN(n) && n > 0 ? `${(n / 3.3058).toFixed(1)}평` : a;
+                    })()}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* 모바일에서 퇴거일/중도퇴거는 카드 선택 시 하단 액션 패널에 표시됨 */}
             {!(isMobile && limitAddress) && (
             <button
@@ -3350,7 +3389,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
           {/* 2행: 방유형(층)호수 · 가격 · 카메라 | 우측: 카카오톡 공유 */}
           <div className="flex items-center gap-1 flex-wrap min-h-[24px]">
-            {(prop.type || floorShort || prop.unitNumber) && (
+            {(prop.type || floorShort || prop.unitNumber) && !(isMobile && limitAddress) && (
               <span className="flex-shrink-0 flex items-center gap-0.5 text-[12px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: isDealCompleted ? "hsl(0 80% 95%)" : "hsl(var(--primary)/0.1)", color: isDealCompleted ? "hsl(0 70% 50%)" : "hsl(var(--primary))", border: `1.5px solid ${isDealCompleted ? "hsl(0 70% 70%)" : "hsl(var(--primary)/0.35)"}`, textDecoration: isDealCompleted ? "line-through" : "none" }}>
                 {prop.type && <span>{prop.type}</span>}
                 {prop.type === "원룸" && (prop.roomType === "오픈형" || prop.roomType === "분리형") && <span className="opacity-90">·{prop.roomType}</span>}
@@ -3360,20 +3399,22 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </span>
             )}
             {/* 가격 */}
-            {(wolseMatch || halfMatch || jeonseMatch) ? (
-              <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
-                {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
-                {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
-                {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
-              </span>
-            ) : (
-              <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
-                {isSaleProp ? (
-                  <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
-                ) : (
-                  <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
-                )}
-              </span>
+            {!(isMobile && limitAddress) && (
+              (wolseMatch || halfMatch || jeonseMatch) ? (
+                <span className="flex-shrink-0 flex items-center gap-1 text-[12px] font-extrabold whitespace-nowrap">
+                  {wolseMatch && <span><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span> {wolseMatch[1]}/<span style={neonGradientTextStyle}>{wolseMatch[2]}</span></span>}
+                  {halfMatch && <span style={{ color: "#1d4ed8" }}>반{halfMatch[1]}/{halfMatch[2]}</span>}
+                  {jeonseMatch && <span style={{ color: "#15803d" }}>전{jeonseMatch[1]}</span>}
+                </span>
+              ) : (
+                <span className="flex-shrink-0 flex items-center gap-0.5 whitespace-nowrap text-[12px] font-extrabold">
+                  {isSaleProp ? (
+                    <><span style={{ color: "hsl(0 85% 55%)" }}>매</span><span style={{ color: "hsl(0 85% 45%)" }}>{prop.deposit}</span></>
+                  ) : (
+                    <><span style={{ color: "hsl(var(--muted-foreground))" }}>월</span><span>{prop.deposit}</span><span style={{ color: "hsl(var(--border))" }}>/</span><span style={neonGradientTextStyle}>{prop.monthly}</span></>
+                  )}
+                </span>
+              )
             )}
             {/* 카메라 아이콘: 사진 있으면 진하게, 없으면 흰색. 클릭 시 사진 라이트박스 (모바일 일반회원/게스트는 좌측 썸네일로 대체, 카메라 숨김) */}
             {!(isMobile && limitAddress) && (
@@ -3397,7 +3438,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 />
               </button>
             )}
-            {prop.area && (
+            {prop.area && !(isMobile && limitAddress) && (
               <span className="flex-shrink-0 text-[11px] font-bold whitespace-nowrap" style={{ color: "hsl(var(--foreground)/0.75)" }}>
                 {(() => {
                   const a = prop.area;
@@ -5723,9 +5764,30 @@ const MapSidebar = ({
                                <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                              </div>
                            );
-                           return (
-                             <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
-                                <Row label="위치">
+                            return (
+                              <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
+                                <Row label="매물정보">
+                                  {prop.buildYear && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
+                                      준{String(prop.buildYear).slice(0,4)}
+                                    </span>
+                                  )}
+                                  {elev && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                                      엘리베이터
+                                    </span>
+                                  )}
+                                  {petAllowed && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
+                                      반려동물가능
+                                    </span>
+                                  )}
+                                  {petNo && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                      애완동물불가
+                                    </span>
+                                  )}
+                                  <span className="flex-1" />
                                   <button
                                     type="button"
                                     onClick={(e) => {
@@ -5753,7 +5815,7 @@ const MapSidebar = ({
                                         },
                                       }));
                                     }}
-                                    className="px-2.5 py-1 rounded-md text-[11px] font-bold border"
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold border"
                                     style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                                   >
                                     상세보기
@@ -5771,37 +5833,13 @@ const MapSidebar = ({
                                         },
                                       }));
                                     }}
-                                    className="px-2.5 py-1 rounded-md text-[11px] font-bold"
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
                                     style={{ background: "hsl(var(--primary))", color: "white" }}
                                   >
                                     문의하기
                                   </button>
                                 </Row>
-                               <Row label="매물정보">
-                                 {prop.buildYear && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
-                                     준{String(prop.buildYear).slice(0,4)}
-                                   </span>
-                                 )}
-                                 {elev && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
-                                     엘리베이터
-                                   </span>
-                                 )}
-                                 {petAllowed && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(142 60% 92%)", color: "hsl(142 60% 30%)", border: "1px solid hsl(142 60% 60%)" }}>
-                                     반려동물가능
-                                   </span>
-                                 )}
-                                 {petNo && (
-                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                     애완동물불가
-                                   </span>
-                                 )}
-                                 {!prop.buildYear && !elev && !petAllowed && !petNo && (
-                                   <span className="text-[11px] text-muted-foreground">-</span>
-                                 )}
-                               </Row>
+
                                <Row label="옵션">
                                  {allChips.length > 0 ? (
                                    <GuestOptionsButton chips={allChips} />

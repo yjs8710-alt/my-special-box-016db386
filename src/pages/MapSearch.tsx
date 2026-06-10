@@ -59,15 +59,30 @@ const MapSearch = () => {
       if (!p.regNo || !landlordHits.has(p.regNo)) return false;
     }
     if (activeType !== "전체" && p.type !== activeType) return false;
+    // 등록번호(숫자)로 직접 검색하는 경우 — 영역/유형 무시하고 해당 매물만 매칭
+    const qTrim = query.trim();
+    const isRegNoQuery =
+      /^\d+$/.test(qTrim) &&
+      allProperties.some(
+        (x) => x.regNo && String(parseInt(x.regNo.replace(/[^0-9]/g, ""), 10)) === qTrim,
+      );
+    const regNoMatch =
+      isRegNoQuery &&
+      p.regNo &&
+      String(parseInt(p.regNo.replace(/[^0-9]/g, ""), 10)) === qTrim;
     if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
-    // 지도 영역 필터 — 지도 줌/이동에 따라 사이드바 매물 자동 동기화
-    const activeBounds = searchBounds ?? currentBounds;
-    if (activeBounds) {
-      if (!p.lat || !p.lng) return false;
-      const { swLat, swLng, neLat, neLng } = activeBounds;
-      if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
+    // 지도 영역 필터 — 등록번호 검색 시에는 무시
+    if (!isRegNoQuery) {
+      const activeBounds = searchBounds ?? currentBounds;
+      if (activeBounds) {
+        if (!p.lat || !p.lng) return false;
+        const { swLat, swLng, neLat, neLng } = activeBounds;
+        if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
+      }
+    } else if (!regNoMatch) {
+      return false;
     }
-    if (query) {
+    if (query && !regNoMatch) {
       const q = query.toLowerCase().trim();
       const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
@@ -90,6 +105,7 @@ const MapSearch = () => {
     }
     return true;
   });
+
 
   // lat/lng가 유효한 매물만 지도에 표시 (0,0은 제외)
   const mappableProperties = filtered.filter(p => p.lat !== 0 && p.lng !== 0);
