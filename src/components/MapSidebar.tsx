@@ -3719,10 +3719,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       },
                     }));
                   }}
-                  className="ml-auto flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                  className="ml-auto flex-shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold whitespace-nowrap border"
                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                 >
-                  협력 공인중개사
+                  협력중개사
                 </button>
               )}
             </div>
