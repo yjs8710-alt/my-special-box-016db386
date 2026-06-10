@@ -99,8 +99,7 @@ function ImageCarouselPreview({
 
   return (
     <div className="flex flex-col gap-2">
-      {/* 메인 캐러셀 */}
-      <div className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
+      <div data-main-drop className="relative w-full rounded-xl overflow-hidden border border-border bg-muted" style={{ height: 200 }}>
         {/* 슬라이드 */}
         <div
           className="flex h-full transition-transform duration-300"
