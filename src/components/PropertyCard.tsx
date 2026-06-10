@@ -253,6 +253,22 @@ const PropertyCard = ({
             <p className="text-[11px] md:text-xs text-muted-foreground">층수</p>
             <p className="text-base md:text-sm font-semibold text-foreground">{floor}</p>
           </div>
+          {isGuest && (
+            <div className="bg-muted rounded-lg px-3 py-2.5 md:hidden col-span-2">
+              <p className="text-[11px] text-muted-foreground">보증금 / 월세</p>
+              <p className="font-bold text-primary text-base">
+                {deposit} / <span style={{ color: "#000", fontWeight: 800 }}>{monthly}</span>
+                {manageFee && manageFee !== "0" && manageFee !== "" && (
+                  <span className="text-xs text-muted-foreground font-normal ml-2">
+                    (관리비 {manageFee})
+                  </span>
+                )}
+              </p>
+              {keyMoney && (
+                <p className="text-xs font-bold text-orange-600 mt-1">권리금 {keyMoney}</p>
+              )}
+            </div>
+          )}
           <div className="bg-muted rounded-lg px-3 py-2 hidden md:block">
             <p className="text-xs text-muted-foreground">퇴거예정일</p>
             <div className="flex items-center justify-between gap-1">
