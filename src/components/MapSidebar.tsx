@@ -3331,42 +3331,80 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 {floorShort && <span className="opacity-80">({floorShort})</span>}
               </span>
             )}
-            {/* 모바일 게스트: 1행 우측 끝에 상세보기 버튼 */}
+            {/* 모바일 게스트: 1행 우측에 상세보기 / 문의하기 / 협력 공인중개사 세로 스택 */}
             {isMobile && limitAddress && isGuest && (
               <>
                 <span className="flex-1" />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-detail", {
-                      detail: {
-                        info: {
-                          image: prop.images?.[0] || prop.image,
-                          address: prop.address,
-                          type: prop.type,
-                          area: prop.area,
-                          floor: prop.floor,
-                          deposit: prop.deposit,
-                          monthly: prop.monthly,
-                          regNo: prop.regNo,
-                          buildYear: prop.buildYear,
-                          dbId: prop.dbId,
+                <div className="flex-shrink-0 flex flex-col gap-1 items-stretch">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                        detail: {
+                          info: {
+                            image: prop.images?.[0] || prop.image,
+                            address: prop.address,
+                            type: prop.type,
+                            area: prop.area,
+                            floor: prop.floor,
+                            deposit: prop.deposit,
+                            monthly: prop.monthly,
+                            regNo: prop.regNo,
+                            buildYear: prop.buildYear,
+                            dbId: prop.dbId,
+                          },
+                          partnerDetail: {
+                            propertyDbId: prop.dbId,
+                            propertyRegNo: prop.regNo,
+                            agentUserId: prop.registeredBy,
+                            propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                          },
                         },
-                        partnerDetail: {
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
+                    style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                  >
+                    상세보기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                        detail: {
                           propertyDbId: prop.dbId,
                           propertyRegNo: prop.regNo,
                           agentUserId: prop.registeredBy,
                           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
                         },
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
-                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                >
-                  상세보기
-                </button>
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                    style={{ background: "hsl(var(--primary))", color: "white" }}
+                  >
+                    문의하기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                        detail: {
+                          propertyDbId: prop.dbId,
+                          propertyRegNo: prop.regNo,
+                          agentUserId: prop.registeredBy,
+                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                        },
+                      }));
+                    }}
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap"
+                    style={{ background: "hsl(var(--accent, 25 90% 55%))", color: "white", backgroundColor: "hsl(25 90% 50%)" }}
+                  >
+                    협력 공인중개사
+                  </button>
+                </div>
               </>
             )}
 
