@@ -696,20 +696,35 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       dong: dongVal,
       lotNumber: lotVal,
       unitNumber: isCollective ? unitVal : null,
+      fallbackFromProperties: !isCollective, // 집합건물은 정확 호수 매칭만 (폴백 X)
     });
+    const prevAuto = autoFilledContactsRef.current;
     if (contacts) {
-      if (contacts.contactOwner || contacts.contactOwner2 || contacts.extraOwners.length > 0 || contacts.contactManager || contacts.contactBroker) {
+      setForm((f) => ({
+        ...f,
+        // 이전 자동값이거나 비어있을 때만 새 값으로 교체 (사용자 입력 보존)
+        contactOwner:   (!f.contactOwner   || f.contactOwner   === prevAuto.contactOwner)   ? (contacts.contactOwner   || "") : f.contactOwner,
+        contactOwner2:  (!f.contactOwner2  || f.contactOwner2  === prevAuto.contactOwner2)  ? (contacts.contactOwner2  || "") : f.contactOwner2,
+        extraOwners:    (f.extraOwners.length === 0 || JSON.stringify(f.extraOwners) === JSON.stringify(prevAuto.extraOwners)) ? contacts.extraOwners : f.extraOwners,
+        contactManager: (!f.contactManager || f.contactManager === prevAuto.contactManager) ? (contacts.contactManager || "") : f.contactManager,
+        contactBroker:  (!f.contactBroker  || f.contactBroker  === prevAuto.contactBroker)  ? (contacts.contactBroker  || "") : f.contactBroker,
+      }));
+      autoFilledContactsRef.current = { ...contacts };
+      setContactAutoFilled(true);
+      setTimeout(() => setContactAutoFilled(false), 4000);
+    } else if (isCollective) {
+      // 집합건물에서 호수 매칭 실패 → 이전에 자동 채운 값만 제거 (사용자 입력 보존)
+      if (prevAuto.contactOwner || prevAuto.contactOwner2 || (prevAuto.extraOwners?.length ?? 0) > 0 || prevAuto.contactManager || prevAuto.contactBroker) {
         setForm((f) => ({
           ...f,
-          contactOwner: (isCollective && unitVal) ? (contacts.contactOwner || f.contactOwner) : (f.contactOwner || contacts.contactOwner),
-          contactOwner2: f.contactOwner2 || contacts.contactOwner2,
-          extraOwners: f.extraOwners.length > 0 ? f.extraOwners : contacts.extraOwners,
-          contactManager: f.contactManager || contacts.contactManager,
-          contactBroker: f.contactBroker || contacts.contactBroker,
+          contactOwner:   f.contactOwner   === prevAuto.contactOwner   ? "" : f.contactOwner,
+          contactOwner2:  f.contactOwner2  === prevAuto.contactOwner2  ? "" : f.contactOwner2,
+          extraOwners:    JSON.stringify(f.extraOwners) === JSON.stringify(prevAuto.extraOwners) ? [] : f.extraOwners,
+          contactManager: f.contactManager === prevAuto.contactManager ? "" : f.contactManager,
+          contactBroker:  f.contactBroker  === prevAuto.contactBroker  ? "" : f.contactBroker,
         }));
-        setContactAutoFilled(true);
-        setTimeout(() => setContactAutoFilled(false), 4000);
       }
+      autoFilledContactsRef.current = {};
     }
   }, []);
 
