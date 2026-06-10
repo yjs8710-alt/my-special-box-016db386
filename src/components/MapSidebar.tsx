@@ -3486,7 +3486,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     공실
                   </span>
                 )}
-                {earlyExit && (
+                {earlyExit && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(0 85% 95%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 70%)" }}>
                     중도퇴거
                   </span>
@@ -3496,21 +3496,22 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     거주중
                   </span>
                 )}
-                {hasDuplexM && (
+                {hasDuplexM && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(270 80% 94%)", color: "hsl(270 70% 40%)", border: "1px solid hsl(270 70% 70%)" }}>
                     복층
                   </span>
                 )}
-                {isShortTerm && (
+                {isShortTerm && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-extrabold px-1 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                     단기
                   </span>
                 )}
-                {hasKeyMoney && (
+                {hasKeyMoney && !(isMobile && limitAddress) && (
                   <span className="flex-shrink-0 text-[10px] font-extrabold px-1.5 py-0.5 rounded whitespace-nowrap" style={{ background: "hsl(25 90% 95%)", color: "hsl(25 90% 40%)", border: "1px solid hsl(25 90% 70%)" }}>
                     권 {keyMoney}
                   </span>
                 )}
+
                 {!(isMobile && limitAddress) && facilityBadges}
               </div>
               <span className="flex-1" />
