@@ -5498,7 +5498,7 @@ const MapSidebar = ({
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
-                    <div key={prop.id} className="flex flex-col">
+                    <div key={prop.id} data-prop-id={prop.id} className="flex flex-col">
                       <div
                         role="button"
                         tabIndex={0}
