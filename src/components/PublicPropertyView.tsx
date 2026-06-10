@@ -306,7 +306,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             </p>
             <div className="flex flex-wrap gap-1.5">
               {otherUnits.map((u) => {
-                const label = u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실";
+                const label = hideDetailInfo
+                  ? (u.floor ? `${u.floor}층` : "호실")
+                  : (u.unit_number ? `${u.unit_number}호` : u.floor ? `${u.floor}` : "호실");
                 const active = u.id === selectedUnitId;
                 return (
                   <button
@@ -321,7 +323,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
                     }`}
                   >
                     {label}
-                    <span className="ml-1 font-normal opacity-70">· 사진 {u.images.length}장</span>
+                    {!hideDetailInfo && (
+                      <span className="ml-1 font-normal opacity-70">· 사진 {u.images.length}장</span>
+                    )}
                   </button>
                 );
               })}
