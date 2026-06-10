@@ -5690,9 +5690,8 @@ const MapSidebar = ({
                            });
                            const allChips = Array.from(new Set([...facilityList, ...opts]));
                            const noteParts: string[] = [];
+                           if (vacateFutureLabel) noteParts.push(`중도퇴거 ${vacateFutureLabel}`);
                            if (direction) noteParts.push(`${direction}향`);
-                           if (vacateFutureLabel) noteParts.push(`퇴거 ${vacateFutureLabel}`);
-                           if (prop.description && prop.description.trim()) noteParts.push(prop.description.trim());
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
                                <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
