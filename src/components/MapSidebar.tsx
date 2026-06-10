@@ -5779,6 +5779,7 @@ const MapSidebar = ({
                             if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
                             if (direction) noteParts.push(`${direction}향`);
                             if (petAllowed) noteParts.push("반려동물가능");
+                            if (petNo) noteParts.push("반려동물불가");
 
                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
@@ -5797,11 +5798,6 @@ const MapSidebar = ({
                                   {elev && !(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                                       엘리베이터
-                                    </span>
-                                  )}
-                                  {petNo && (
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 40%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                      애완동물불가
                                     </span>
                                   )}
                                   <span className="flex-1" />
