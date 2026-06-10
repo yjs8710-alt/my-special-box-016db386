@@ -1772,9 +1772,14 @@ function ImagePreviewCarousel({
               key={src}
               data-thumb-idx={i}
               draggable
-              onDragStart={(e) => { setDragIdx(i); e.dataTransfer.effectAllowed = "move"; }}
-              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setOverIdx(i); }}
-              onDrop={(e) => { e.preventDefault(); if (dragIdx !== null) moveItem(dragIdx, i); setDragIdx(null); setOverIdx(null); }}
+              onDragStart={(e) => { setDragIdx(i); e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", String(i)); } catch {} }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                setOverIdx(i);
+                if (dragIdx !== null && dragIdx !== i) { moveItem(dragIdx, i); setDragIdx(i); }
+              }}
+              onDrop={(e) => { e.preventDefault(); setDragIdx(null); setOverIdx(null); }}
               onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
               onPointerDown={(e) => onPointerDown(e, i)}
               onPointerMove={onPointerMove}
