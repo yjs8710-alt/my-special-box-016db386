@@ -5439,14 +5439,13 @@ const MapSidebar = ({
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
                         }`}
                       >
-                        {/* Row: 3줄 레이아웃 (모바일은 썸네일/연락처 숨겨 정보 잘림 방지) */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "auto" : "96px", minHeight: isMobile ? "72px" : undefined }}>
-                          {/* ①썸네일 — 3열 비율에 맞춰 96px */}
-                          {/* 썸네일: 데스크톱 항상, 모바일은 일반회원/게스트에게도 좌측 사진 표시 */}
+                        {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
+                        <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
+                          {/* ①썸네일 — 정사각 고정 96x96 */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
-                            className={`${isMobile ? "w-[120px]" : "w-[96px]"} flex-shrink-0 overflow-hidden relative group/thumb`}
-                            style={{ minHeight: isMobile ? "80px" : "96px" }}
+                            className="w-[96px] h-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
                           >
+
 
                             {(() => {
                               const hasOwnImage = prop.image && prop.image.length > 0;
