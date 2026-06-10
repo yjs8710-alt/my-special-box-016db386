@@ -5443,6 +5443,21 @@ const MapSidebar = ({
                               />
                             </button>
                             )}
+                            {/* 모바일 게스트/일반회원: 동·호수 표시 (사진 우측 상단) */}
+                            {isMobile && (isGuest || authUser?.memberType === "일반회원") && (() => {
+                              const dongMatch = (prop.note ?? "").match(/동\(棟\)[:\s]+([^\n|]+)/);
+                              const dong = dongMatch?.[1]?.trim().replace(/동+\s*$/, "").trim();
+                              const unit = prop.unitNumber ? prop.unitNumber.replace(/호$/, "") : "";
+                              const label = [dong ? `${dong}동` : "", unit ? `${unit}호` : ""].filter(Boolean).join(" ");
+                              if (!label) return null;
+                              return (
+                                <div className="absolute top-1 right-1 z-10 pointer-events-none">
+                                  <span className="text-[10px] font-extrabold text-white px-1.5 py-0.5 rounded-md tracking-tight" style={{ background: "rgba(0,0,0,0.65)" }}>
+                                    {label}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                             {/* 게스트/일반회원: 매물번호 NO.### */}
                             {isGuest && prop.regNo && (
                               <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pointer-events-none pb-0.5">
