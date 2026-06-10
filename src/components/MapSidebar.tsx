@@ -5764,6 +5764,7 @@ const MapSidebar = ({
                             userId={authUser?.userId}
                             isDealCompleted={isDealCompleted}
                             listScrollRef={listScrollRef}
+                            onCheckedDateUpdated={handleCheckedDateUpdated}
                             agencyInfo={myAgencyInfo}
                             isMobile={isMobile}
                             onOpenPhotos={() => {
