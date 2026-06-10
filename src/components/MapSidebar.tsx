@@ -4575,8 +4575,15 @@ const MapSidebar = ({
   // (사용자가 매물 정보를 클릭하면 시트를 위로 올림 — 카드 onClick에서 처리)
   const listScrollRef = useRef<HTMLDivElement>(null);
   const [checkedDateOverrides, setCheckedDateOverrides] = useState<Record<number, string | null>>({});
+  const [checkedDateBoosts, setCheckedDateBoosts] = useState<Record<number, number>>({});
   const handleCheckedDateUpdated = useCallback((propId: number, checkedDate: string | null) => {
     setCheckedDateOverrides((prev) => ({ ...prev, [propId]: checkedDate }));
+    setCheckedDateBoosts((prev) => {
+      const next = { ...prev };
+      if (checkedDate) next[propId] = Date.now();
+      else delete next[propId];
+      return next;
+    });
     onRefetch?.();
   }, [onRefetch]);
   const propertiesWithCheckedDates = useMemo(() => properties.map((p) => (
@@ -4716,10 +4723,13 @@ const MapSidebar = ({
       const latestA = Math.max(chkA, regA);
       const latestB = Math.max(chkB, regB);
       if (latestA !== latestB) return latestB - latestA;
+      const boostA = checkedDateBoosts[a.id] ?? 0;
+      const boostB = checkedDateBoosts[b.id] ?? 0;
+      if (boostA !== boostB) return boostB - boostA;
       if (chkA !== chkB) return chkB - chkA;
       return regB - regA;
     });
-  }, [displayProperties]);
+  }, [displayProperties, checkedDateBoosts]);
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
