@@ -44,15 +44,20 @@ function ImageCarouselPreview({
   const handleDragStart = (e: React.DragEvent, i: number) => {
     setDragIdx(i);
     e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", String(i)); } catch {}
   };
   const handleDragOver = (e: React.DragEvent, i: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
     setOverIdx(i);
+    // 실시간 정렬: 드래그 위치가 바뀔 때마다 즉시 이동
+    if (dragIdx !== null && dragIdx !== i) {
+      moveItem(dragIdx, i);
+      setDragIdx(i);
+    }
   };
-  const handleDrop = (e: React.DragEvent, dropI: number) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    if (dragIdx !== null) moveItem(dragIdx, dropI);
     setDragIdx(null);
     setOverIdx(null);
   };
@@ -69,12 +74,15 @@ function ImageCarouselPreview({
     const target = el?.closest<HTMLElement>("[data-thumb-idx]");
     if (target) {
       const i = parseInt(target.dataset.thumbIdx ?? "-1", 10);
-      if (!isNaN(i)) setOverIdx(i);
+      if (!isNaN(i) && i !== dragIdx) {
+        setOverIdx(i);
+        moveItem(dragIdx, i);
+        setDragIdx(i);
+      }
     }
   };
   const onPointerUp = (e: React.PointerEvent) => {
     if (dragIdx === null) return;
-    if (e.pointerType !== "mouse" && overIdx !== null) moveItem(dragIdx, overIdx);
     setDragIdx(null); setOverIdx(null);
   };
 
