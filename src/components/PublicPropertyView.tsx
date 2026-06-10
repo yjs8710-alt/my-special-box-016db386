@@ -359,6 +359,32 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
           </div>
         )}
 
+        {imgs.length > 1 && (
+          <div className="px-3 pt-3">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+              {imgs.map((src, i) => (
+                <button
+                  key={i}
+                  onClick={() => setImgIdx(i)}
+                  className={`relative shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition ${
+                    i === imgIdx ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+                  }`}
+                  aria-label={`사진 ${i + 1}`}
+                >
+                  <img
+                    src={src}
+                    alt={`thumb ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {showingOtherUnit && otherUnits.length > 0 && (
           <div className="px-5 pt-4">
             <p className="text-xs font-bold text-foreground mb-2">
