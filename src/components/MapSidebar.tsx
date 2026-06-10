@@ -3314,7 +3314,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       return (
         <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
-          <div className="flex items-center gap-1 min-h-[22px]">
+          <div className={`flex gap-1 min-h-[22px] ${isMobile && limitAddress && isGuest ? "items-start" : "items-center"}`}>
             {/* 확인일 배지 제거 */}
             {/* 모바일 일반회원/게스트는 건물명 숨김 (좌측 사진으로 대체) */}
             {!(isMobile && limitAddress) && (
