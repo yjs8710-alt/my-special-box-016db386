@@ -6056,108 +6056,219 @@ const MapSidebar = ({
                              </div>
                            );
                          }
-                         return (
-                           <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
-                              {/* 확인일 아이콘은 상단(건물메모 좌측)으로 이동됨 */}
-                            <div className="flex items-center justify-between gap-2 flex-wrap">
-                              <div className="flex items-center gap-1 flex-wrap">
-                                {isGuest ? null : (
-                                  <>
-                                    {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
+                          // 중개사(관리자 포함) 모바일: 라벨형 행 레이아웃
+                          if (isMobile) {
+                            const earlyExit = note.includes("중도퇴거:");
+                            const noteParts: string[] = [];
+                            if (earlyExit) noteParts.push("중도퇴거");
+                            if ((prop.options ?? []).includes("복층")) noteParts.push("복층");
+                            if ((prop.options ?? []).includes("단기가능")) noteParts.push("단기가능");
+                            const keyMoneyM2 = note.match(/권리금:\s*([^\n|]+)/);
+                            const keyMoneyV = keyMoneyM2?.[1]?.trim();
+                            if (keyMoneyV && keyMoneyV !== "0" && keyMoneyV !== "없음") noteParts.push(`권리금 ${keyMoneyV}`);
+                            if (direction) noteParts.push(`${direction}향`);
+                            const memoText = [prop.buildingMemo, prop.roomMemo, prop.description].filter((t) => t && t.trim()).join(" / ");
+
+                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
+                                <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
+                                <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
+                              </div>
+                            );
+
+                            return (
+                              <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
+                                {/* 연락처 */}
+                                {hasAnyContact && (
+                                  <Row label="연락처">
                                     {(owner || owner2) && (
-                                      <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                        style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
-                                      >
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}>
                                         <Phone className="w-3 h-3" /> 소유주
                                       </button>
                                     )}
                                     {manager && (
-                                      <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                        style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
-                                      >
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                                         <Phone className="w-3 h-3" /> 관리인
                                       </button>
                                     )}
                                     {tenant && (
-                                      <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
-                                        className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
-                                        style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
-                                      >
+                                      <button type="button" onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                        className="flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[11px]"
+                                        style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
                                         <Phone className="w-3 h-3" /> 세입자
                                       </button>
                                     )}
-                                  </>
+                                  </Row>
                                 )}
+                                {/* 메모 */}
+                                <Row label="메모">
+                                  {memoText ? (
+                                    <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">{memoText}</span>
+                                  ) : (
+                                    <span className="text-[11px] text-muted-foreground">-</span>
+                                  )}
+                                </Row>
+                                {/* 비밀번호 (현관/방 정렬) */}
+                                <Row label="비밀번호">
+                                  {(prop.buildingPassword || prop.password) ? (
+                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
+                                      <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
+                                    </span>
+                                  ) : (
+                                    <span className="px-1.5 py-0.5 rounded text-[11px] text-muted-foreground border border-dashed border-border">현관 -</span>
+                                  )}
+                                  {prop.roomPassword ? (
+                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
+                                      <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
+                                    </span>
+                                  ) : (
+                                    <span className="px-1.5 py-0.5 rounded text-[11px] text-muted-foreground border border-dashed border-border">방 -</span>
+                                  )}
+                                </Row>
+                                {/* 중개보수 (없으면 협의) */}
+                                <Row label="중개보수">
+                                  <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
+                                    {brokerFee || "협의"}
+                                  </span>
+                                  {cleanFee && (
+                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px] bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>
+                                  )}
+                                  {lhVal && lhVal !== "관계없음" && (
+                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>
+                                  )}
+                                </Row>
+                                {/* 퇴거일 */}
+                                <Row label="퇴거일">
+                                  {vacateFutureLabel ? (
+                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                      퇴거예정 {vacateFutureLabel}
+                                    </span>
+                                  ) : prop.availableFrom === "공실" ? (
+                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}>공실</span>
+                                  ) : prop.availableFrom === "세입자 거주중" ? (
+                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(var(--accent)/0.1)", color: "hsl(var(--accent))", border: "1px solid hsl(var(--accent)/0.3)" }}>거주중</span>
+                                  ) : (
+                                    <span className="text-[11px] text-muted-foreground">-</span>
+                                  )}
+                                </Row>
+                                {/* 특이사항 */}
+                                <Row label="특이사항">
+                                  {noteParts.length > 0 ? (
+                                    <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">{noteParts.join(" · ")}</span>
+                                  ) : (
+                                    <span className="text-[11px] text-muted-foreground">-</span>
+                                  )}
+                                </Row>
                               </div>
+                            );
+                          }
 
-                              {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
-                            </div>
-                            {/* 퇴거 정보 행 (퇴거예정) */}
-                            {vacateFutureLabel && (
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                  퇴거예정 {vacateFutureLabel}
-                                </span>
-                              </div>
-                            )}
-                            {/* 게스트/일반회원: 부가시설 & 옵션 — 버튼 클릭 시 모달로 전체 표시 */}
-                            {(isGuest || authUser?.memberType === "일반회원") && (() => {
-                              const opts = prop.options ?? [];
-                              const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
-                              const facilityList: string[] = [];
-                              if (elev) facilityList.push("엘리베이터");
-                              ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
-                                if (opts.some((o) => o.includes(k))) facilityList.push(k);
-                              });
-                              const mappedOpts = opts.map(normalizeDisplayOption);
-                              const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
-                              if (allChips.length === 0) return null;
-                              return <GuestOptionsButton chips={allChips} />;
-                            })()}
-                            {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
-                            {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
-                              <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
-                                {!isGuest && (prop.buildingPassword || prop.password) && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
-                                    <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
-                                  </span>
-                                )}
-                                {!isGuest && prop.roomPassword && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
-                                    <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
-                                  </span>
-                                )}
-                                <span className="flex-1" />
-                                {direction && (
-                                  <span className="px-1.5 py-0.5 rounded font-bold text-[10px]" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>{direction}향</span>
-                                )}
-                              </div>
-                            )}
-                            {/* 3행: 수수료 등 부가 정보 */}
-                            {(brokerFee || cleanFee || lhVal) && (
-                              <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-                                {brokerFee && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>수수료 {brokerFee}</span>}
-                                {cleanFee && <span className="px-1.5 py-0.5 rounded font-bold bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>}
-                                {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
-                              </div>
-                            )}
-                            {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
-                            {!isGuest && prop.description && prop.description.trim() && (
-                              <div className="mt-1 px-1.5 py-0.5 rounded font-bold text-[12px] whitespace-pre-wrap break-words" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
-                                {prop.description}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                          return (
+                            <div className="flex flex-col gap-1.5 px-2 py-2 border-t border-primary/15 bg-muted/30 text-[11px]">
+                               {/* 확인일 아이콘은 상단(건물메모 좌측)으로 이동됨 */}
+                             <div className="flex items-center justify-between gap-2 flex-wrap">
+                               <div className="flex items-center gap-1 flex-wrap">
+                                 {isGuest ? null : (
+                                   <>
+                                     {!hasAnyContact && <span className="text-muted-foreground">연락처 없음</span>}
+                                     {(owner || owner2) && (
+                                       <button
+                                         type="button"
+                                         onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                         className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                         style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}
+                                       >
+                                         <Phone className="w-3 h-3" /> 소유주
+                                       </button>
+                                     )}
+                                     {manager && (
+                                       <button
+                                         type="button"
+                                         onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                         className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                         style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}
+                                       >
+                                         <Phone className="w-3 h-3" /> 관리인
+                                       </button>
+                                     )}
+                                     {tenant && (
+                                       <button
+                                         type="button"
+                                         onClick={(e) => { e.stopPropagation(); setMobileContactsProp(prop); }}
+                                         className="flex items-center gap-1 px-2 py-1 rounded-md font-bold text-[11px]"
+                                         style={{ background: "hsl(25 95% 93%)", color: "hsl(25 95% 35%)", border: "1px solid hsl(25 80% 65%)" }}
+                                       >
+                                         <Phone className="w-3 h-3" /> 세입자
+                                       </button>
+                                     )}
+                                   </>
+                                 )}
+                               </div>
+
+                               {/* 등록일은 1열에서 제거. 확인일은 매물 펼침(확인 버튼)에서 웹과 동일하게 노출됨 */}
+                             </div>
+                             {/* 퇴거 정보 행 (퇴거예정) */}
+                             {vacateFutureLabel && (
+                               <div className="flex items-center gap-1.5 flex-wrap">
+                                 <span className="px-2 py-1 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
+                                   퇴거예정 {vacateFutureLabel}
+                                 </span>
+                               </div>
+                             )}
+                             {/* 게스트/일반회원: 부가시설 & 옵션 — 버튼 클릭 시 모달로 전체 표시 */}
+                             {(isGuest || authUser?.memberType === "일반회원") && (() => {
+                               const opts = prop.options ?? [];
+                               const elev = prop.elevator || opts.some((o) => o.includes("엘리베이터"));
+                               const facilityList: string[] = [];
+                               if (elev) facilityList.push("엘리베이터");
+                               ["수도","인터넷","유선TV","CCTV","리모델링","여성전용"].forEach((k) => {
+                                 if (opts.some((o) => o.includes(k))) facilityList.push(k);
+                               });
+                               const mappedOpts = opts.map(normalizeDisplayOption);
+                               const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
+                               if (allChips.length === 0) return null;
+                               return <GuestOptionsButton chips={allChips} />;
+                             })()}
+                             {/* 2행: 현관비번/방비번(게스트 숨김) | 우측: 방향 */}
+                             {(((!isGuest) && (prop.buildingPassword || prop.password || prop.roomPassword)) || direction) && (
+                               <div className="flex items-center gap-1.5 text-[12px] flex-wrap">
+                                 {!isGuest && (prop.buildingPassword || prop.password) && (
+                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
+                                     <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
+                                   </span>
+                                 )}
+                                 {!isGuest && prop.roomPassword && (
+                                   <span className="px-1.5 py-0.5 rounded font-bold text-[12px]" style={roomPasswordChipStyle}>
+                                     <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
+                                   </span>
+                                 )}
+                                 <span className="flex-1" />
+                                 {direction && (
+                                   <span className="px-1.5 py-0.5 rounded font-bold text-[10px]" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>{direction}향</span>
+                                 )}
+                               </div>
+                             )}
+                             {/* 3행: 수수료 등 부가 정보 */}
+                             {(brokerFee || cleanFee || lhVal) && (
+                               <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
+                                 {brokerFee && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>수수료 {brokerFee}</span>}
+                                 {cleanFee && <span className="px-1.5 py-0.5 rounded font-bold bg-muted text-muted-foreground border border-border">청소비 {cleanFee}만</span>}
+                                 {lhVal && lhVal !== "관계없음" && <span className="px-1.5 py-0.5 rounded font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>}
+                               </div>
+                             )}
+                             {/* 메모 (매물 등록/수정 시 입력한 매물 소개) */}
+                             {!isGuest && prop.description && prop.description.trim() && (
+                               <div className="mt-1 px-1.5 py-0.5 rounded font-bold text-[12px] whitespace-pre-wrap break-words" style={{ background: "hsl(48 100% 88%)", color: "hsl(30 90% 25%)", border: "1px solid hsl(48 90% 65%)" }}>
+                                 {prop.description}
+                               </div>
+                             )}
+                           </div>
+                         );
+                       })()}
                       {expandedCardId === prop.id && (
                         <div className="flex w-full border-t border-primary/20 overflow-hidden rounded-b-xl">
                           {/* 수정 버튼: 관리자 또는 본인이 등록한 매물 */}
