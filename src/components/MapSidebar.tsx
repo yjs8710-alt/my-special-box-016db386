@@ -3521,7 +3521,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                  window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
                     detail: {
                       propertyDbId: prop.dbId,
                       propertyRegNo: prop.regNo,
@@ -5962,56 +5962,60 @@ const MapSidebar = ({
                                     </span>
                                   )}
                                   <span className="flex-1" />
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.dispatchEvent(new CustomEvent("open-guest-detail", {
-                                        detail: {
-                                          info: {
-                                            image: prop.images?.[0] || prop.image,
-                                            address: prop.address,
-                                            type: prop.type,
-                                            area: prop.area,
-                                            floor: prop.floor,
-                                            deposit: prop.deposit,
-                                            monthly: prop.monthly,
-                                            regNo: prop.regNo,
-                                            buildYear: prop.buildYear,
-                                            dbId: prop.dbId,
-                                          },
-                                          partnerDetail: {
-                                            propertyDbId: prop.dbId,
-                                            propertyRegNo: prop.regNo,
-                                            agentUserId: prop.registeredBy,
-                                            propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                                          },
-                                        },
-                                      }));
-                                    }}
-                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold border"
-                                    style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                                  >
-                                    상세보기
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                                        detail: {
-                                          propertyDbId: prop.dbId,
-                                          propertyRegNo: prop.regNo,
-                                          agentUserId: prop.registeredBy,
-                                          propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                                        },
-                                      }));
-                                    }}
-                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold"
-                                    style={{ background: "hsl(var(--primary))", color: "white" }}
-                                  >
-                                    문의하기
-                                  </button>
+                                  {!(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.dispatchEvent(new CustomEvent("open-guest-detail", {
+                                            detail: {
+                                              info: {
+                                                image: prop.images?.[0] || prop.image,
+                                                address: prop.address,
+                                                type: prop.type,
+                                                area: prop.area,
+                                                floor: prop.floor,
+                                                deposit: prop.deposit,
+                                                monthly: prop.monthly,
+                                                regNo: prop.regNo,
+                                                buildYear: prop.buildYear,
+                                                dbId: prop.dbId,
+                                              },
+                                              partnerDetail: {
+                                                propertyDbId: prop.dbId,
+                                                propertyRegNo: prop.regNo,
+                                                agentUserId: prop.registeredBy,
+                                                propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                                              },
+                                            },
+                                          }));
+                                        }}
+                                        className="px-2 py-0.5 rounded-md text-[10px] font-bold border"
+                                        style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                                      >
+                                        상세보기
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
+                                            detail: {
+                                              propertyDbId: prop.dbId,
+                                              propertyRegNo: prop.regNo,
+                                              agentUserId: prop.registeredBy,
+                                              propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                                            },
+                                          }));
+                                        }}
+                                        className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                                        style={{ background: "hsl(var(--primary))", color: "white" }}
+                                      >
+                                        문의하기
+                                      </button>
+                                    </>
+                                  )}
                                 </Row>
 
                                <Row label="옵션">
