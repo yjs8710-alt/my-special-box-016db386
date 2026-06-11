@@ -65,6 +65,9 @@ const PropertyCard = ({
   })();
   const [liked, setLiked] = useState(false);
   const isGuest = useIsGuest();
+  const { user: authUserPC } = useAuth();
+  const isGeneralMember = authUserPC?.memberType === "일반회원";
+  const showGuestButtons = isGuest || isGeneralMember;
   const [showInquiry, setShowInquiry] = useState(false);
   const [showPartner, setShowPartner] = useState(false);
 
