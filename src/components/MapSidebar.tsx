@@ -3521,7 +3521,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                  window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
                     detail: {
                       propertyDbId: prop.dbId,
                       propertyRegNo: prop.regNo,
