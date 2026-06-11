@@ -6067,7 +6067,16 @@ const MapSidebar = ({
                             const keyMoneyV = keyMoneyM2?.[1]?.trim();
                             if (keyMoneyV && keyMoneyV !== "0" && keyMoneyV !== "없음") noteParts.push(`권리금 ${keyMoneyV}`);
                             if (direction) noteParts.push(`${direction}향`);
-                            const memoText = [prop.buildingMemo, prop.roomMemo, prop.description].filter((t) => t && t.trim()).join(" / ");
+                            const vacateMemoPart = vacateFutureLabel
+                              ? `퇴거예정 ${vacateFutureLabel}`
+                              : prop.availableFrom === "공실"
+                                ? "공실"
+                                : prop.availableFrom === "세입자 거주중"
+                                  ? "거주중"
+                                  : "";
+                            const memoText = [vacateMemoPart, prop.buildingMemo, prop.roomMemo, prop.description]
+                              .filter((t) => t && String(t).trim())
+                              .join(" / ");
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
@@ -6104,7 +6113,7 @@ const MapSidebar = ({
                                     )}
                                   </Row>
                                 )}
-                                {/* 메모 */}
+                                {/* 메모 (퇴거일 포함) */}
                                 <Row label="메모">
                                   {memoText ? (
                                     <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">{memoText}</span>
@@ -6112,23 +6121,21 @@ const MapSidebar = ({
                                     <span className="text-[11px] text-muted-foreground">-</span>
                                   )}
                                 </Row>
-                                {/* 비밀번호 (현관/방 정렬) */}
-                                <Row label="비밀번호">
-                                  {(prop.buildingPassword || prop.password) ? (
-                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
-                                      <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
-                                    </span>
-                                  ) : (
-                                    <span className="px-1.5 py-0.5 rounded text-[11px] text-muted-foreground border border-dashed border-border">현관 -</span>
-                                  )}
-                                  {prop.roomPassword ? (
-                                    <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
-                                      <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
-                                    </span>
-                                  ) : (
-                                    <span className="px-1.5 py-0.5 rounded text-[11px] text-muted-foreground border border-dashed border-border">방 -</span>
-                                  )}
-                                </Row>
+                                {/* 비밀번호 (방 비번 없으면 숨김) */}
+                                {(prop.buildingPassword || prop.password || prop.roomPassword) && (
+                                  <Row label="비밀번호">
+                                    {(prop.buildingPassword || prop.password) && (
+                                      <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
+                                        <span className="font-bold mr-0.5">현관</span>{prop.buildingPassword || prop.password}
+                                      </span>
+                                    )}
+                                    {prop.roomPassword && (
+                                      <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={roomPasswordChipStyle}>
+                                        <span className="font-bold mr-0.5">방</span>{prop.roomPassword}
+                                      </span>
+                                    )}
+                                  </Row>
+                                )}
                                 {/* 중개보수 (없으면 협의) */}
                                 <Row label="중개보수">
                                   <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 45%)", border: "1px solid hsl(0 85% 70%)" }}>
@@ -6141,28 +6148,7 @@ const MapSidebar = ({
                                     <span className="px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>{lhVal}</span>
                                   )}
                                 </Row>
-                                {/* 퇴거일 */}
-                                <Row label="퇴거일">
-                                  {vacateFutureLabel ? (
-                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(0 85% 93%)", color: "hsl(0 85% 35%)", border: "1px solid hsl(0 85% 65%)" }}>
-                                      퇴거예정 {vacateFutureLabel}
-                                    </span>
-                                  ) : prop.availableFrom === "공실" ? (
-                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(var(--primary)/0.1)", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.3)" }}>공실</span>
-                                  ) : prop.availableFrom === "세입자 거주중" ? (
-                                    <span className="px-2 py-0.5 rounded-md font-extrabold text-[11px]" style={{ background: "hsl(var(--accent)/0.1)", color: "hsl(var(--accent))", border: "1px solid hsl(var(--accent)/0.3)" }}>거주중</span>
-                                  ) : (
-                                    <span className="text-[11px] text-muted-foreground">-</span>
-                                  )}
-                                </Row>
-                                {/* 특이사항 */}
-                                <Row label="특이사항">
-                                  {noteParts.length > 0 ? (
-                                    <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">{noteParts.join(" · ")}</span>
-                                  ) : (
-                                    <span className="text-[11px] text-muted-foreground">-</span>
-                                  )}
-                                </Row>
+
                               </div>
                             );
                           }
