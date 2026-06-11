@@ -444,14 +444,23 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             )}
           </div>
 
+          {(() => {
+            const formatVacateDate = (d?: string) => {
+              if (!d) return "";
+              const m = String(d).match(/(\d{2,4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+              if (!m) return d;
+              const yy = m[1].length === 4 ? m[1].slice(2) : m[1];
+              return `${yy}-${parseInt(m[2], 10)}-${parseInt(m[3], 10)}`;
+            };
+            return (
           <div className="grid grid-cols-2 gap-3">
             {[
               { icon: <Layers className="w-4 h-4" />, label: "면적", value: formatAreaShort(property.area) },
-              { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor} / ${building?.floors_above || property.total_floors}층` },
+              { icon: <Building2 className="w-4 h-4" />, label: "층", value: `${property.floor}` },
               { icon: <Car className="w-4 h-4" />, label: "주차", value: building?.parking_count ? `${building.parking_count}대` : (property.parking || "확인필요") },
-              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : (property.available_from || "즉시") },
+              { icon: <Calendar className="w-4 h-4" />, label: "입주가능", value: checkVacant(property) ? "즉시입주" : "거주중" },
               ...(directionText ? [{ icon: <Building2 className="w-4 h-4" />, label: "방향", value: directionText }] : []),
-              ...(property.vacate_date ? [{ icon: <Calendar className="w-4 h-4" />, label: "퇴거예정일", value: property.vacate_date }] : []),
+              ...(property.vacate_date ? [{ icon: <Calendar className="w-4 h-4" />, label: "퇴거예정일", value: formatVacateDate(property.vacate_date) }] : []),
             ].map((item, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-3 flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">{item.icon}</div>
