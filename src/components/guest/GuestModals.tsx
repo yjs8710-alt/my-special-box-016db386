@@ -398,10 +398,10 @@ export const GuestDetailModal = ({
                   } as any);
                 }}
                 title="카카오톡 공유"
-                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#fee500] hover:brightness-95 shadow-sm font-bold text-[12px] text-[#3c1e1e] animate-pulse"
+                className="flex items-center gap-1.5 pl-2 pr-3 py-1.5 rounded-full bg-[#fee500] hover:brightness-95 shadow-sm font-bold text-sm text-[#3c1e1e] animate-pulse"
                 style={{ animationDuration: "2.2s" }}
               >
-                <img src={kakaoTalkIcon} alt="" className="w-6 h-6 object-contain" />
+                <img src={kakaoTalkIcon} alt="" className="w-8 h-8 object-contain" />
                 공유
               </button>
             )}
