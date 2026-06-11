@@ -391,9 +391,11 @@ export const GuestDetailModal = ({
                   } as any);
                 }}
                 title="카카오톡 공유"
-                className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center"
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#fee500] hover:brightness-95 shadow-sm font-bold text-[12px] text-[#3c1e1e] animate-pulse"
+                style={{ animationDuration: "2.2s" }}
               >
-                <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-7 h-7 object-contain" />
+                <img src={kakaoTalkIcon} alt="" className="w-6 h-6 object-contain" />
+                공유
               </button>
             )}
             <button

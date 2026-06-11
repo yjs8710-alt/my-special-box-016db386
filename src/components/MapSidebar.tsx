@@ -2653,13 +2653,16 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
     const { user: authUserAddr } = useAuth();
     const isGeneralMember = authUserAddr?.memberType === "일반회원";
     const limitAddress = isGuest || isGeneralMember;
-    // 게스트/일반회원에게는 "구 동"까지만 노출 (모바일은 동만)
+    // 게스트/일반회원에게는 "구 동"까지만 노출. 집합건물(아파트/오피스텔/연립/다세대)은 번지까지.
+    const isCollective = /아파트|오피스텔|연립|다세대|공동주택/.test(prop.type || "");
     const guGuDong = (addr?: string | null) => {
       if (!addr) return "";
       const gu = addr.match(/[가-힣]+구(?![가-힣])/)?.[0];
       const dong = addr.match(/[가-힣]+(동|읍|면|리)(?![가-힣])/)?.[0];
-      if (isMobile) return dong || addressToDong(addr);
-      return [gu, dong].filter(Boolean).join(" ") || addressToDong(addr);
+      // 번지: 동/읍/면/리 뒤에 나오는 숫자(-숫자) 패턴
+      const beonji = addr.match(/(?:동|읍|면|리)\s+(\d+(?:-\d+)?)/)?.[1];
+      const tail = isCollective && beonji ? `${dong ?? ""} ${beonji}`.trim() : (dong ?? "");
+      return [gu, tail].filter(Boolean).join(" ") || addressToDong(addr);
     };
     const buildYearShortAddr = prop.buildYear ? prop.buildYear.replace(/[^0-9]/g, "").slice(0, 4) : "";
     const isChecked = !!chkDate;
