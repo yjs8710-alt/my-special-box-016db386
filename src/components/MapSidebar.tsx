@@ -5953,18 +5953,34 @@ const MapSidebar = ({
                            );
                             return (
                               <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
-                                <Row label="매물정보">
-                                  {prop.buildYear && (
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
-                                      준{String(prop.buildYear).slice(0,4)}
-                                    </span>
-                                  )}
-                                  {elev && !(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
-                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
-                                      엘리베이터
-                                    </span>
-                                  )}
-                                  <span className="flex-1" />
+                                 <Row label="매물정보">
+                                   {prop.buildYear && (
+                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
+                                       준{String(prop.buildYear).slice(0,4)}
+                                     </span>
+                                   )}
+                                   {(() => {
+                                     const addr = prop.address || "";
+                                     const gu = addr.match(/[가-힣]+구(?![가-힣])/)?.[0];
+                                     const dong = addr.match(/[가-힣]+(동|읍|면|리)(?![가-힣])/)?.[0];
+                                     const isCollective = /아파트|오피스텔|연립|다세대|공동주택/.test(prop.type || "");
+                                     const beonji = addr.match(/(?:동|읍|면|리)\s+(\d+(?:-\d+)?)/)?.[1];
+                                     const tail = isCollective && beonji ? `${dong ?? ""} ${beonji}`.trim() : (dong ?? "");
+                                     const label = [gu, tail].filter(Boolean).join(" ");
+                                     if (!label) return null;
+                                     return (
+                                       <span className="text-[11px] font-semibold text-foreground whitespace-nowrap">
+                                         {label}
+                                       </span>
+                                     );
+                                   })()}
+                                   {elev && !(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
+                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                                       엘리베이터
+                                     </span>
+                                   )}
+                                   <span className="flex-1" />
+
                                   {!(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
                                     <>
                                       <button
