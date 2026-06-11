@@ -224,7 +224,7 @@ const PropertyCard = ({
               )}
             </span>
           )}
-          {isGuest && (
+          {showGuestButtons && (
             <div className="flex md:contents flex-col gap-1.5 shrink-0">
               <button
                 onClick={(e) => {
@@ -241,12 +241,17 @@ const PropertyCard = ({
                 상세보기
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); setShowPartner(true); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
+                  }));
+                }}
                 className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-[13px] md:text-[11px] font-bold shadow-sm hover:opacity-90"
               >
-                <span className="md:hidden">문의하기</span>
-                <span className="hidden md:inline">협력 공인중개사 문의</span>
+                문의하기
               </button>
+
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
                 {(checkedDate || registeredDate) && <span>확인 {checkedDate || registeredDate}</span>}
               </div>
