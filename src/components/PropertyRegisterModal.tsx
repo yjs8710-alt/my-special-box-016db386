@@ -1850,16 +1850,40 @@ function ImagePreviewCarousel({
 
   const isMain = safeIdx === 0;
 
+  // 메인 프리뷰 스와이프
+  const swipeRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const onMainTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    swipeRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+  const onMainTouchEnd = (e: React.TouchEvent) => {
+    const s = swipeRef.current;
+    swipeRef.current = null;
+    if (!s) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx < 0) next(); else prev();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
-      <div data-main-drop className="relative w-full rounded-xl overflow-hidden bg-muted border border-border" style={{ height: 280 }}>
+      <div
+        data-main-drop
+        className="relative w-full rounded-xl overflow-hidden bg-muted border border-border"
+        style={{ height: 280, touchAction: "pan-y" }}
+        onTouchStart={onMainTouchStart}
+        onTouchEnd={onMainTouchEnd}
+      >
         <div
           className="flex h-full w-full transition-transform duration-300 ease-in-out"
           style={{ transform: `translateX(-${safeIdx * 100}%)` }}
         >
           {images.map((src, i) => (
             <div key={src} className="h-full w-full flex-shrink-0 relative">
-              <img src={src} alt={`사진 ${i + 1}`} loading="eager" decoding="async" className="w-full h-full object-cover" />
+              <img src={src} alt={`사진 ${i + 1}`} loading="eager" decoding="async" draggable={false} className="w-full h-full object-cover pointer-events-none select-none" />
             </div>
           ))}
         </div>
