@@ -471,6 +471,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               </div>
             ))}
           </div>
+            );
+          })()}
+
 
 
           {property.options && property.options.length > 0 && (
