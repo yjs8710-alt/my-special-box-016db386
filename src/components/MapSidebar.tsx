@@ -3409,7 +3409,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               </button>
             )}
             {!(isMobile && limitAddress) && <span className="flex-1" />}
-            {isGuest && (
+            {(isGuest || isGeneralMember) && (
               <>
                 {!isMobile && (
                 <button
