@@ -164,6 +164,13 @@ export const InquiryModal = ({
             <Building2 className="w-3.5 h-3.5" /> 협력 부동산 정보 보기
           </button>
         )}
+        <div className="mt-3 p-3 rounded-lg bg-muted/60 text-[11px] text-muted-foreground leading-relaxed space-y-1">
+          <p className="font-bold text-foreground">※ 중요 안내</p>
+          <p>집다는 중개대상물에 대한 정보 제공 및 협력 공인중개사 연결 서비스만을 제공합니다.</p>
+          <p>집다는 중개행위를 수행하지 않으며, 매물 상담, 현장 안내, 거래조건 조율 및 계약 체결 등 모든 중개행위는 협력 공인중개사가 직접 수행합니다.</p>
+          <p>집다는 거래의 당사자 또는 중개계약의 주체가 아니며, 이용자는 문의 접수 시 협력 공인중개사를 통해 상담 및 거래를 진행하게 됩니다.</p>
+          <p>상세주소는 임대인의 요청에 따라 공개되지 않으며, 실제 거래 가능 여부 및 최종 거래 조건은 협력 공인중개사를 통해 반드시 확인하시기 바랍니다.</p>
+        </div>
       </div>
     </Overlay>
   );
