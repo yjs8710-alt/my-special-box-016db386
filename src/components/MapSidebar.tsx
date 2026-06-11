@@ -3852,7 +3852,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             </span>
           )}
           <span className="flex-1" />
-          {isGuest && (
+          {!isMobile && limitAddress && (
             <>
               <button
                 type="button"
@@ -3890,7 +3890,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                  window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
                     detail: {
                       propertyDbId: prop.dbId,
                       propertyRegNo: prop.regNo,
@@ -3901,6 +3901,24 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 }}
                 className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
                 style={{ background: "hsl(var(--primary))", color: "white" }}
+              >
+                문의하기
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                    detail: {
+                      propertyDbId: prop.dbId,
+                      propertyRegNo: prop.regNo,
+                      agentUserId: prop.registeredBy,
+                      propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                    },
+                  }));
+                }}
+                className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                style={{ background: "white", color: "hsl(var(--primary))", border: "1px solid hsl(var(--primary)/0.5)" }}
               >
                 협력 공인중개사
               </button>
