@@ -3478,7 +3478,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
                 memoKey="building"
-                icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+                icon={<StickyNote className="w-3.5 h-3.5 text-primary" strokeWidth={2.25} />}
                 label="건물메모"
                 initialText={buildingMemo ?? ""}
                 userId={userId}
@@ -3490,7 +3490,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
                 memoKey="room"
-                icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+                icon={<StickyNote className="w-3.5 h-3.5 text-accent" strokeWidth={2.25} />}
                 label="방메모"
                 initialText={roomMemo ?? ""}
                 userId={userId}
@@ -3929,7 +3929,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+            icon={<StickyNote className="w-3.5 h-3.5 text-primary" strokeWidth={2.25} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -3939,7 +3939,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
+            icon={<StickyNote className="w-3.5 h-3.5 text-accent" strokeWidth={2.25} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
