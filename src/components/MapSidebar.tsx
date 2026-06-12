@@ -4703,15 +4703,17 @@ const MapSidebar = ({
   }, [authUser?.userId]);
   const { favorites, toggleFavorite } = useFavorites();
   const { enabled: favoritesOnly } = useFavoritesOnly();
-  const checkedIds = favorites;
-  const setCheckedIds = (updater: (prev: Set<number>) => Set<number>) => {
-    // 호환 레이어: 인쇄/선택 로직과 별표 토글을 동일 저장소로 사용
-    const next = updater(new Set(favorites));
-    // 단일 토글 케이스만 처리 (size 차이 1)
-    const added = [...next].find((id) => !favorites.has(id));
-    const removed = [...favorites].find((id) => !next.has(id));
-    if (added !== undefined) toggleFavorite(added);
-    else if (removed !== undefined) toggleFavorite(removed);
+  // 중개회원/관리자용 선택 인쇄 체크박스 상태 (일반회원/게스트는 favorites를 그대로 사용)
+  const isAgentForPrint = !isGuest && authUser?.memberType !== "일반회원";
+  const [printCheckedIds, setPrintCheckedIds] = useState<Set<number>>(new Set());
+  const checkedIds = isAgentForPrint ? printCheckedIds : favorites;
+  const togglePrintChecked = (id: number) => {
+    setPrintCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
