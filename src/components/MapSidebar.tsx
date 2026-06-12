@@ -5733,7 +5733,7 @@ const MapSidebar = ({
                                 e.stopPropagation();
                                 toggleFavorite(prop.id);
                               }}
-                              className={`absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110 ${favorites.has(prop.id) ? "w-7 h-7 rounded-full bg-white/90" : ""}`}
+                              className="absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110"
                               title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                               aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
