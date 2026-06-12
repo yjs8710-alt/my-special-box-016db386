@@ -836,6 +836,10 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
   const handleSave = async () => {
     if (!form.type) { alert("유형을 선택해주세요."); return; }
     if (!form.address.trim()) { alert("주소를 입력해주세요."); return; }
+    if (!form.contactOwner?.trim()) {
+      await customAlert("소유주 연락처를 입력해주세요.");
+      return;
+    }
     setSaving(true);
 
     // 좌표가 없거나 도로명 주소이거나 도로명정보가 없는 경우 geocode 호출

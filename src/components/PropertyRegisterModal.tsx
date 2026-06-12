@@ -617,6 +617,10 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (!form.contactOwner.trim()) {
+      await customAlert("소유주 연락처를 입력해주세요.");
+      return;
+    }
     setSaving(true);
     setSaveError("");
 
