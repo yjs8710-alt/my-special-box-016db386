@@ -5728,6 +5728,22 @@ const MapSidebar = ({
     
                               );
                             })()}
+                            {isAgentForPrint && !isMobile && (
+                              <label
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute top-1 left-1 z-20 flex items-center justify-center w-6 h-6 rounded-md bg-white/95 shadow-sm border border-gray-300 cursor-pointer hover:bg-white hover:border-primary transition-colors"
+                                title={printCheckedIds.has(prop.id) ? "선택 해제" : "인쇄 대상으로 선택"}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={printCheckedIds.has(prop.id)}
+                                  onChange={(e) => { e.stopPropagation(); togglePrintChecked(prop.id); }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-4 h-4 accent-primary cursor-pointer"
+                                  aria-label="인쇄 선택"
+                                />
+                              </label>
+                            )}
                             {(isGuest || authUser?.memberType === "일반회원") && (
                             <button
                               type="button"
