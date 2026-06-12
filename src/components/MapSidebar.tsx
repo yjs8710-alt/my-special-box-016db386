@@ -4703,15 +4703,17 @@ const MapSidebar = ({
   }, [authUser?.userId]);
   const { favorites, toggleFavorite } = useFavorites();
   const { enabled: favoritesOnly } = useFavoritesOnly();
-  const checkedIds = favorites;
-  const setCheckedIds = (updater: (prev: Set<number>) => Set<number>) => {
-    // 호환 레이어: 인쇄/선택 로직과 별표 토글을 동일 저장소로 사용
-    const next = updater(new Set(favorites));
-    // 단일 토글 케이스만 처리 (size 차이 1)
-    const added = [...next].find((id) => !favorites.has(id));
-    const removed = [...favorites].find((id) => !next.has(id));
-    if (added !== undefined) toggleFavorite(added);
-    else if (removed !== undefined) toggleFavorite(removed);
+  // 중개회원/관리자용 선택 인쇄 체크박스 상태 (일반회원/게스트는 favorites를 그대로 사용)
+  const isAgentForPrint = !isGuest && authUser?.memberType !== "일반회원";
+  const [printCheckedIds, setPrintCheckedIds] = useState<Set<number>>(new Set());
+  const checkedIds = isAgentForPrint ? printCheckedIds : favorites;
+  const togglePrintChecked = (id: number) => {
+    setPrintCheckedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [modalPos, setModalPos] = useState({ x: 0, y: 97 });
@@ -5615,7 +5617,7 @@ const MapSidebar = ({
                       style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
                     >
                       <Printer className="w-3 h-3" />
-                      선택인쇄
+                      선택인쇄{isAgentForPrint && printCheckedIds.size > 0 ? ` (${printCheckedIds.size})` : ""}
                     </button>
                   </div>
                 )}
@@ -5726,6 +5728,22 @@ const MapSidebar = ({
     
                               );
                             })()}
+                            {isAgentForPrint && !isMobile && (
+                              <label
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute top-1 left-1 z-20 flex items-center justify-center w-6 h-6 rounded-md bg-white/95 shadow-sm border border-gray-300 cursor-pointer hover:bg-white hover:border-primary transition-colors"
+                                title={printCheckedIds.has(prop.id) ? "선택 해제" : "인쇄 대상으로 선택"}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={printCheckedIds.has(prop.id)}
+                                  onChange={(e) => { e.stopPropagation(); togglePrintChecked(prop.id); }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-4 h-4 accent-primary cursor-pointer"
+                                  aria-label="인쇄 선택"
+                                />
+                              </label>
+                            )}
                             {(isGuest || authUser?.memberType === "일반회원") && (
                             <button
                               type="button"
