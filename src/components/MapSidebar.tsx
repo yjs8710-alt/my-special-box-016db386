@@ -5346,11 +5346,11 @@ const MapSidebar = ({
                           style={{ border: "1px solid hsl(var(--border))" }}
                         >
                           {/* Row: 동일 3컬럼 레이아웃 */}
-                          <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
+                          <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "80px" }}>
                             {/* ①썸네일 + 참고용 사진 */}
                             <div
-                              className="w-[96px] flex-shrink-0 overflow-hidden relative"
-                              style={{ minHeight: "96px" }}
+                              className={`flex-shrink-0 overflow-hidden relative ${isMobile ? "w-[120px]" : "w-[96px]"}`}
+                              style={{ minHeight: isMobile ? "120px" : "96px" }}
                             >
                               {(() => {
                                 const hasOwn = item.images && item.images.length > 0 && item.images[0];
