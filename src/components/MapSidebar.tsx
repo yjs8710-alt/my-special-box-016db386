@@ -30,7 +30,6 @@ import {
   FileSearch,
   Download,
   Star,
-  StickyNote,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling_icon-v2-20260427.png";
@@ -3478,7 +3477,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
                 memoKey="building"
-                icon={<StickyNote className="w-3.5 h-3.5 text-primary" strokeWidth={2.25} />}
+                icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
                 label="건물메모"
                 initialText={buildingMemo ?? ""}
                 userId={userId}
@@ -3490,7 +3489,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
                 propId={prop.id}
                 memoKey="room"
-                icon={<StickyNote className="w-3.5 h-3.5 text-accent" strokeWidth={2.25} />}
+                icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
                 label="방메모"
                 initialText={roomMemo ?? ""}
                 userId={userId}
@@ -3929,7 +3928,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="building"
-            icon={<StickyNote className="w-3.5 h-3.5 text-primary" strokeWidth={2.25} />}
+            icon={<img src={memoIcon} alt="건물메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="건물메모"
             initialText={buildingMemo ?? ""}
             userId={userId}
@@ -3939,7 +3938,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             propertyDbId={prop.dbId || (prop.memo && prop.memo.length === 36 ? prop.memo : undefined)}
             propId={prop.id}
             memoKey="room"
-            icon={<StickyNote className="w-3.5 h-3.5 text-accent" strokeWidth={2.25} />}
+            icon={<img src={memoIcon} alt="방메모" className="w-3.5 h-3.5 object-contain" style={{ imageRendering: '-webkit-optimize-contrast' as any }} />}
             label="방메모"
             initialText={roomMemo ?? ""}
             userId={userId}
