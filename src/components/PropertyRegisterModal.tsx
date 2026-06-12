@@ -19,6 +19,7 @@ import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import memoIcon from "@/assets/memo_icon_new-v2-20260427.png";
 import femaleOnlyIcon from "@/assets/female_only_icon-v2-20260427.png";
 import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
+import { customAlert } from "@/lib/customDialogs";
 
 /* ─── Address Data ─── */
 const CHEONGJU_SIGUNGU = [
@@ -617,6 +618,10 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (!form.contactOwner.trim()) {
+      await customAlert("소유주 연락처를 입력해주세요.");
+      return;
+    }
     setSaving(true);
     setSaveError("");
 
