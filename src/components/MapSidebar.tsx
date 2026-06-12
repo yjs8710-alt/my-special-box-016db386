@@ -5729,20 +5729,42 @@ const MapSidebar = ({
                               );
                             })()}
                             {isAgentForPrint && !isMobile && (
-                              <label
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute top-1 left-1 z-20 flex items-center justify-center w-6 h-6 rounded-md bg-white/95 shadow-sm border border-gray-300 cursor-pointer hover:bg-white hover:border-primary transition-colors"
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); togglePrintChecked(prop.id); }}
+                                className="absolute top-1 left-1 z-20 flex items-center justify-center transition-all hover:scale-110"
                                 title={printCheckedIds.has(prop.id) ? "선택 해제" : "인쇄 대상으로 선택"}
+                                aria-label={printCheckedIds.has(prop.id) ? "선택 해제" : "인쇄 대상으로 선택"}
                               >
-                                <input
-                                  type="checkbox"
-                                  checked={printCheckedIds.has(prop.id)}
-                                  onChange={(e) => { e.stopPropagation(); togglePrintChecked(prop.id); }}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="w-4 h-4 accent-primary cursor-pointer"
-                                  aria-label="인쇄 선택"
-                                />
-                              </label>
+                                {printCheckedIds.has(prop.id) ? (
+                                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }}>
+                                    <defs>
+                                      <linearGradient id={`print-grad-${prop.id}`} x1="2.16" y1="2.295" x2="21.01" y2="21.01" gradientUnits="userSpaceOnUse">
+                                        <stop stopColor="#22d3ee" />
+                                        <stop offset="0.5" stopColor="#a855f7" />
+                                        <stop offset="1" stopColor="#ec4899" />
+                                      </linearGradient>
+                                    </defs>
+                                    <path
+                                      d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+                                      fill={`url(#print-grad-${prop.id})`}
+                                      stroke="white"
+                                      strokeWidth="1.5"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                ) : (
+                                  <Star
+                                    className="w-5 h-5"
+                                    style={{
+                                      color: "white",
+                                      fill: "transparent",
+                                      filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
+                                    }}
+                                    strokeWidth={2}
+                                  />
+                                )}
+                              </button>
                             )}
                             {(isGuest || authUser?.memberType === "일반회원") && (
                             <button
