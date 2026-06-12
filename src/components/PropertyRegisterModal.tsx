@@ -1212,6 +1212,7 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">층수</label>
               <Select value={form.floor} onChange={(v) => set("floor", v)} placeholder="선택" options={FLOOR_OPTIONS} />
+              {errors.floor && <p className="text-xs text-destructive">{errors.floor}</p>}
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-foreground/70">
@@ -1220,7 +1221,8 @@ function Step1({ form, set, errors }: { form: FormState; set: <K extends keyof F
                   <span className="ml-1 text-[10px] text-primary font-normal">호수별 소유주 자동로드</span>
                 )}
               </label>
-              <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(false)} />
+              <input type="text" placeholder="직접입력" value={form.unitNo} onChange={(e) => set("unitNo", e.target.value)} className={ic(!!errors.unitNo)} />
+              {errors.unitNo && <p className="text-xs text-destructive">{errors.unitNo}</p>}
               {form.unitNo && (form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType)) && (
                 <p className="text-[10px] text-primary/70">🏠 이 호수의 소유주 연락처를 자동으로 불러옵니다</p>
               )}
