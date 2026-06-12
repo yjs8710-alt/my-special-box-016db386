@@ -4834,11 +4834,11 @@ const MapSidebar = ({
   const handleSelectPrint = () => {
     const list = properties.filter((p) => checkedIds.has(p.id));
     if (list.length === 0) {
-      alert("인쇄할 매물을 선택해주세요.");
+      customAlert("인쇄할 매물을 선택해주세요.");
       return;
     }
     if (list.length > 10) {
-      alert("선택인쇄는 최대 10개까지 가능합니다.");
+      customAlert("선택인쇄는 최대 10개까지 가능합니다.");
       return;
     }
     const today = new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
