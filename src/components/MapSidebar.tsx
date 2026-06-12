@@ -5617,7 +5617,7 @@ const MapSidebar = ({
                       style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 80% 70%)" }}
                     >
                       <Printer className="w-3 h-3" />
-                      선택인쇄
+                      선택인쇄{isAgentForPrint && printCheckedIds.size > 0 ? ` (${printCheckedIds.size})` : ""}
                     </button>
                   </div>
                 )}
