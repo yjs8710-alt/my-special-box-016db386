@@ -5733,20 +5733,39 @@ const MapSidebar = ({
                                 e.stopPropagation();
                                 toggleFavorite(prop.id);
                               }}
-                              className={`absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110 ${favorites.has(prop.id) ? "w-7 h-7 rounded-full" : ""}`}
-                              style={favorites.has(prop.id) ? { background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" } : undefined}
+                              className={`absolute top-1 left-1 z-10 flex items-center justify-center transition-all hover:scale-110 ${favorites.has(prop.id) ? "w-7 h-7 rounded-full bg-white/90" : ""}`}
                               title={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                               aria-label={favorites.has(prop.id) ? "관심매물 해제" : "관심매물 추가"}
                             >
-                              <Star
-                                className={favorites.has(prop.id) ? "w-4 h-4" : "w-5 h-5"}
-                                style={{
-                                  color: "white",
-                                  fill: favorites.has(prop.id) ? "white" : "transparent",
-                                  filter: favorites.has(prop.id) ? undefined : "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
-                                }}
-                                strokeWidth={2}
-                              />
+                              {favorites.has(prop.id) ? (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4">
+                                  <defs>
+                                    <linearGradient id={`fav-grad-${prop.id}`} x1="2.16" y1="2.295" x2="21.01" y2="21.01" gradientUnits="userSpaceOnUse">
+                                      <stop stopColor="#22d3ee" />
+                                      <stop offset="0.5" stopColor="#a855f7" />
+                                      <stop offset="1" stopColor="#ec4899" />
+                                    </linearGradient>
+                                  </defs>
+                                  <path
+                                    d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+                                    fill={`url(#fav-grad-${prop.id})`}
+                                    stroke="white"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              ) : (
+                                <Star
+                                  className="w-5 h-5"
+                                  style={{
+                                    color: "white",
+                                    fill: "transparent",
+                                    filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.4))",
+                                  }}
+                                  strokeWidth={2}
+                                />
+                              )}
                             </button>
                             )}
                             {/* 모바일 게스트/일반회원: 행정동(예: 복대동) 표시 (사진 우측 상단) */}
