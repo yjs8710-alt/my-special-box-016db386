@@ -1871,10 +1871,16 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           )}
           <div className="flex-1" />
           {formStep < 3 ? (
-            <button type="button" onClick={() => {
-              if (formStep === 1 && form.type === "원룸" && form.room_type !== "오픈형" && form.room_type !== "분리형") {
-                setShowOneRoomModal(true);
-                return;
+            <button type="button" onClick={async () => {
+              if (formStep === 1) {
+                if (!isWarehouseSale && form.buildingType !== "토지") {
+                  if (!form.floor) { await customAlert("층수를 선택해주세요."); return; }
+                  if (!form.unit_number?.trim()) { await customAlert("호수를 입력해주세요."); return; }
+                }
+                if (form.type === "원룸" && form.room_type !== "오픈형" && form.room_type !== "분리형") {
+                  setShowOneRoomModal(true);
+                  return;
+                }
               }
               setFormStep((s) => (s + 1) as 2 | 3);
               bodyScrollRef.current?.scrollTo(0, 0);
