@@ -394,9 +394,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               {otherUnits.map((u) => {
                 const floorTxt = (u.floor ?? "").trim();
                 const floorLabel = floorTxt ? (/[층F]/.test(floorTxt) ? floorTxt : `${floorTxt}층`) : "호실";
-                const label = hideDetailInfo
-                  ? floorLabel
-                  : (u.unit_number ? `${u.unit_number}호` : floorLabel);
+                const label = floorLabel;
                 const active = u.id === selectedUnitId;
                 return (
                   <button
