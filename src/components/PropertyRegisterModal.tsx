@@ -582,6 +582,12 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     if (!form.dong) e.dong = "동을 선택해주세요";
     if (form.buildingType !== "토지" && !form.detailType) e.detailType = "세부 종류를 선택해주세요";
     if (form.detailType === "원룸" && !form.oneRoomLayout) e.oneRoomLayout = "원룸 형태(오픈형/분리형)를 선택해주세요";
+    const isBuildingSale = ["건물매매","단독매매","창고/공장매매","구분상가매매","상가주택매매","상가건물매매","다가구매매","다중매매"].includes(form.detailType);
+    const isLand = form.detailType === "토지" || form.buildingType === "토지";
+    if (!isBuildingSale && !isLand) {
+      if (!form.floor) e.floor = "층수를 선택해주세요";
+      if (!form.unitNo.trim()) e.unitNo = "호수를 입력해주세요";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
