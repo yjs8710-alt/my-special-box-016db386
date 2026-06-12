@@ -3315,7 +3315,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       }
 
       return (
-        <div className="flex-1 min-w-0 flex flex-col px-2 py-1.5 gap-1">
+        <div className="flex-1 min-w-0 flex flex-col px-2.5 py-2 gap-1.5 justify-center">
           {/* 1행: 건물명 · 동(棟) · 주소(클릭→로드뷰) | 우측: 건물메모, 방메모, 확인일/등록일 */}
           <div className="flex items-center gap-1 min-h-[22px]">
             {/* 확인일 배지 제거 */}
@@ -5346,11 +5346,11 @@ const MapSidebar = ({
                           style={{ border: "1px solid hsl(var(--border))" }}
                         >
                           {/* Row: 동일 3컬럼 레이아웃 */}
-                          <div className="flex items-stretch" style={{ width: "100%", minHeight: "80px" }}>
+                          <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "80px" }}>
                             {/* ①썸네일 + 참고용 사진 */}
                             <div
-                              className="w-[96px] flex-shrink-0 overflow-hidden relative"
-                              style={{ minHeight: "96px" }}
+                              className={`flex-shrink-0 overflow-hidden relative ${isMobile ? "w-[120px]" : "w-[96px]"}`}
+                              style={{ minHeight: isMobile ? "120px" : "96px" }}
                             >
                               {(() => {
                                 const hasOwn = item.images && item.images.length > 0 && item.images[0];
@@ -5653,10 +5653,10 @@ const MapSidebar = ({
                         }`}
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: "96px" }}>
-                          {/* ①썸네일 — 정사각 고정 96x96 */}
+                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "120px" : "96px" }}>
+                          {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
-                            className="w-[96px] h-[96px] flex-shrink-0 overflow-hidden relative group/thumb"
+                            className={`flex-shrink-0 overflow-hidden relative group/thumb ${isMobile ? "w-[120px] h-[120px]" : "w-[96px] h-[96px]"}`}
                           >
 
 
