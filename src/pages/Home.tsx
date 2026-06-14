@@ -9,6 +9,7 @@ const InstallAppModal = lazy(() => import("@/components/InstallAppModal"));
 const Home = () => {
   const [showInstall, setShowInstall] = useState(false);
   const [hideInstallButton, setHideInstallButton] = useState(false);
+  const { ExitConfirmDialog } = useExitConfirm();
 
   useEffect(() => {
     if (import.meta.env.DEV) {
