@@ -31,8 +31,21 @@ export const useExitConfirm = (enabled: boolean = true) => {
 
   const handleConfirm = useCallback(() => {
     setOpen(false);
-    // 가드 pop + 원래 뒤로가기 (총 2번)
-    window.history.go(-2);
+    // 1) 창 닫기 시도 (스크립트로 열린 창 또는 PWA standalone에서 동작)
+    try { window.close(); } catch {}
+    // 2) about:blank 트릭 — 일부 브라우저에서 자기 자신 close 허용
+    try { window.open("", "_self")?.close(); } catch {}
+    // 3) 마지막 수단: 히스토리 뒤로 (이전 페이지가 있을 때만 의미 있음)
+    setTimeout(() => {
+      try {
+        if (window.history.length > 1) {
+          window.history.go(-2);
+        } else {
+          // 더 이상 갈 곳이 없으면 빈 페이지로 이동 (사실상 종료 효과)
+          window.location.href = "about:blank";
+        }
+      } catch {}
+    }, 50);
   }, []);
 
   const handleCancel = useCallback(() => {
