@@ -6040,7 +6040,7 @@ const MapSidebar = ({
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
-                                <span className={`flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 ${label === "특이사항" || label === "메모" ? "text-black" : "text-muted-foreground"}`}>{label}</span>
+                                 <span className="flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 text-muted-foreground">{label}</span>
                                 <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                               </div>
                             );
@@ -6139,11 +6139,11 @@ const MapSidebar = ({
                                </Row>
                                <Row label="특이사항">
                                  {noteParts.length > 0 ? (
-                                   <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">
-                                     {noteParts.join(" · ")}
-                                   </span>
-                                 ) : (
-                                   <span className="text-[11px] text-muted-foreground">-</span>
+                                     <span className="text-[11px] text-black whitespace-pre-wrap break-words">
+                                       {noteParts.join(" · ")}
+                                     </span>
+                                   ) : (
+                                     <span className="text-[11px] text-muted-foreground">-</span>
                                  )}
                                </Row>
                              </div>
@@ -6173,7 +6173,7 @@ const MapSidebar = ({
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
-                                <span className={`flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 ${label === "특이사항" || label === "메모" ? "text-black" : "text-muted-foreground"}`}>{label}</span>
+                                <span className="flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 text-muted-foreground">{label}</span>
                                 <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                               </div>
                             );
@@ -6209,9 +6209,9 @@ const MapSidebar = ({
                                 {/* 메모 (퇴거일 포함) */}
                                 <Row label="메모">
                                   {memoText ? (
-                                    <span className="text-[11px] text-foreground whitespace-pre-wrap break-words">{memoText}</span>
-                                  ) : (
-                                    <span className="text-[11px] text-muted-foreground">-</span>
+                                     <span className="text-[11px] text-black whitespace-pre-wrap break-words">{memoText}</span>
+                                   ) : (
+                                     <span className="text-[11px] text-muted-foreground">-</span>
                                   )}
                                 </Row>
                                 {/* 비밀번호 (방 비번 없으면 숨김) */}
