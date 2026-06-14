@@ -6038,12 +6038,12 @@ const MapSidebar = ({
                             if (petAllowed) noteParts.push("반려동물 가능");
                             if (petNo && !petAllowed) noteParts.push("반려동물 불가");
 
-                           const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
-                             <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
-                               <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
-                               <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
-                             </div>
-                           );
+                            const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
+                              <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
+                                <span className={`flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 ${label === "특이사항" || label === "메모" ? "text-black" : "text-muted-foreground"}`}>{label}</span>
+                                <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
+                              </div>
+                            );
                             return (
                               <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
                                  <Row label="매물정보">
@@ -6173,7 +6173,7 @@ const MapSidebar = ({
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
-                                <span className="flex-shrink-0 w-14 text-[11px] font-bold text-muted-foreground pt-0.5">{label}</span>
+                                <span className={`flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 ${label === "특이사항" || label === "메모" ? "text-black" : "text-muted-foreground"}`}>{label}</span>
                                 <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                               </div>
                             );
