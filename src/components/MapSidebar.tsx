@@ -2451,8 +2451,8 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-          className="text-[10px] font-extrabold px-2 py-0.5 rounded whitespace-nowrap select-none"
-          style={{ background: "hsl(var(--muted))", color: "hsl(var(--foreground)/0.75)", border: "1.5px solid hsl(var(--border))" }}
+          className="text-[10px] text-black font-bold px-2 py-0.5 rounded whitespace-nowrap select-none"
+          style={{ background: "hsl(var(--muted))", border: "1.5px solid hsl(var(--border))" }}
         >
           옵션·시설 ▾
         </button>
