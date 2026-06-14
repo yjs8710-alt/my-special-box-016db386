@@ -6139,7 +6139,7 @@ const MapSidebar = ({
                                </Row>
                                <Row label="특이사항">
                                  {noteParts.length > 0 ? (
-                                     <span className="text-[11px] text-black whitespace-pre-wrap break-words">
+                                    <span className="text-[11px] text-black font-bold whitespace-pre-wrap break-words">
                                        {noteParts.join(" · ")}
                                      </span>
                                    ) : (
@@ -6209,7 +6209,7 @@ const MapSidebar = ({
                                 {/* 메모 (퇴거일 포함) */}
                                 <Row label="메모">
                                   {memoText ? (
-                                     <span className="text-[11px] text-black whitespace-pre-wrap break-words">{memoText}</span>
+                                     <span className="text-[11px] text-black font-bold whitespace-pre-wrap break-words">{memoText}</span>
                                    ) : (
                                      <span className="text-[11px] text-muted-foreground">-</span>
                                   )}
