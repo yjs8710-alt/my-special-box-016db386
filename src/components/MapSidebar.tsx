@@ -2471,7 +2471,7 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1.5">
               {chips.map((c) => (
-                <span key={c} className="text-[12px] font-semibold text-foreground whitespace-nowrap">· {c}</span>
+                <span key={c} className="text-[12px] text-black font-bold whitespace-nowrap">· {c}</span>
               ))}
             </div>
           </div>
