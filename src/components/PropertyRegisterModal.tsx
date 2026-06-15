@@ -4,7 +4,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn, formatPhone } from "@/lib/utils";
-import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Building2, Phone, MapPin, ChevronDown, ImagePlus, Loader2, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { prefetchPropertySummary } from "@/lib/prefetchPropertySummary";
@@ -1928,37 +1928,52 @@ function ImagePreviewCarousel({
         )}
       </div>
 
-      {/* 썸네일 스트립 — 데스크톱 드래그 + 모바일 길게 누르고 끌기 */}
+      {/* 썸네일 스트립 — 핸들 드래그로 순서 변경, 본체 탭으로 선택, 가로 스와이프 가능 */}
       {images.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5 touch-pan-x">
-          <span className="text-[9px] text-muted-foreground self-center mr-1 flex-shrink-0">↔ 드래그로 순서 변경</span>
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 touch-pan-x">
+          <span className="text-[10px] text-muted-foreground self-center mr-1 flex-shrink-0">↔ 핸들로 순서 변경</span>
           {images.map((src, i) => (
             <div
               key={src}
               data-thumb-idx={i}
-              onPointerDown={(e) => onPointerDown(e, i)}
-              onPointerMove={onPointerMove}
-              onPointerUp={(e) => onPointerUp(e, i)}
-              onPointerCancel={onPointerCancel}
-              className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing select-none"
+              className="relative flex-shrink-0 w-24 rounded-lg overflow-hidden border-2 transition-all select-none bg-muted"
               style={{
                 borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
                 opacity: dragIdx === i ? 0.4 : 1,
-                touchAction: "none",
               }}
             >
-              <img src={src} alt="" className="w-full h-full object-cover pointer-events-none" draggable={false} />
+              {/* 드래그 핸들 (큼직하게 — 모바일 친화) */}
+              <div
+                onPointerDown={(e) => onPointerDown(e, i)}
+                onPointerMove={onPointerMove}
+                onPointerUp={(e) => onPointerUp(e, i)}
+                onPointerCancel={onPointerCancel}
+                className="w-full h-7 flex items-center justify-center bg-black/75 text-white cursor-grab active:cursor-grabbing"
+                style={{ touchAction: "none" }}
+                title="드래그로 순서 변경"
+              >
+                <GripVertical className="w-4 h-4" />
+                <GripVertical className="w-4 h-4 -ml-2" />
+              </div>
+              {/* 본체 — 탭으로 메인 선택 */}
+              <button
+                type="button"
+                onClick={() => setIdx(i)}
+                className="block w-full h-20"
+              >
+                <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover pointer-events-none" draggable={false} />
+              </button>
               {i === 0 && (
-                <span className="absolute bottom-0 left-0 right-0 text-center text-[7px] font-bold bg-primary/80 text-white leading-4 pointer-events-none">대표</span>
+                <span className="absolute bottom-0 left-0 right-0 text-center text-[8px] font-bold bg-primary/85 text-white leading-4 pointer-events-none">대표</span>
               )}
               <button
                 type="button"
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
-                className="absolute top-0 right-0 w-4 h-4 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
+                className="absolute top-0 right-0 w-5 h-5 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
                 title="사진 삭제"
               >
-                <X className="w-2.5 h-2.5 text-white" />
+                <X className="w-3 h-3 text-white" />
               </button>
             </div>
           ))}
