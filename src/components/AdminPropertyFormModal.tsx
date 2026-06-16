@@ -988,6 +988,34 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       agent_name: form.agent_name || "",
     };
 
+    // ── 중복 등록 방지: 같은 주소(동+번지) + 같은 호수 → 등록/수정 차단 ──
+    try {
+      let dupQuery = supabase
+        .from("properties")
+        .select("id")
+        .eq("dong", finalDong ?? "")
+        .eq("lot_number", finalLotNumber ?? "")
+        .eq("status", "active");
+      if (form.unit_number) {
+        dupQuery = dupQuery.eq("unit_number", form.unit_number);
+      } else {
+        dupQuery = dupQuery.is("unit_number", null);
+      }
+      if (initial?.id) dupQuery = dupQuery.neq("id", initial.id);
+      const { data: dupRows } = await dupQuery.limit(1);
+      if (dupRows && dupRows.length > 0) {
+        setSaving(false);
+        await customAlert(
+          form.unit_number
+            ? `이미 등록된 매물입니다.\n같은 주소 · 같은 호수(${form.unit_number})로 등록할 수 없습니다.`
+            : "이미 등록된 매물입니다.\n같은 주소로 중복 등록할 수 없습니다."
+        );
+        return;
+      }
+    } catch (e) {
+      console.warn("[duplicate-check] 실패:", e);
+    }
+
     try {
       if (initial?.id) {
         const { data: updated, error } = await supabase.from("properties").update(payload).eq("id", initial.id).select("id");
