@@ -778,6 +778,34 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       vacate_date: form.vacateDate || null,
     };
 
+    // ── 중복 등록 방지: 같은 주소(동+번지) + 같은 호수 → 등록 차단 ──
+    try {
+      let dupQuery = supabase
+        .from("properties")
+        .select("id, unit_number")
+        .eq("dong", finalDong)
+        .eq("lot_number", finalLotNumber)
+        .eq("status", "active");
+      if (form.unitNo) {
+        dupQuery = dupQuery.eq("unit_number", form.unitNo);
+      } else {
+        dupQuery = dupQuery.is("unit_number", null);
+      }
+      const { data: dupRows } = await dupQuery.limit(1);
+      if (dupRows && dupRows.length > 0) {
+        setSaving(false);
+        await customAlert(
+          form.unitNo
+            ? `이미 등록된 매물입니다.\n같은 주소 · 같은 호수(${form.unitNo})로 등록할 수 없습니다.`
+            : "이미 등록된 매물입니다.\n같은 주소로 중복 등록할 수 없습니다."
+        );
+        return;
+      }
+    } catch (e) {
+      // 조회 실패 시 진행 (네트워크 등)
+      console.warn("[duplicate-check] 실패:", e);
+    }
+
     const { data: insertedRow, error } = await supabase.from("properties").insert(payload).select("id").single();
     setSaving(false);
 
