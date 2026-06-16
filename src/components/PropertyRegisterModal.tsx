@@ -778,6 +778,34 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       vacate_date: form.vacateDate || null,
     };
 
+    // ── 중복 등록 방지: 같은 주소(동+번지) + 같은 호수 → 등록 차단 ──
+    try {
+      let dupQuery = supabase
+        .from("properties")
+        .select("id, unit_number")
+        .eq("dong", finalDong)
+        .eq("lot_number", finalLotNumber)
+        .eq("status", "active");
+      if (form.unitNo) {
+        dupQuery = dupQuery.eq("unit_number", form.unitNo);
+      } else {
+        dupQuery = dupQuery.is("unit_number", null);
+      }
+      const { data: dupRows } = await dupQuery.limit(1);
+      if (dupRows && dupRows.length > 0) {
+        setSaving(false);
+        await customAlert(
+          form.unitNo
+            ? `이미 등록된 매물입니다.\n같은 주소 · 같은 호수(${form.unitNo})로 등록할 수 없습니다.`
+            : "이미 등록된 매물입니다.\n같은 주소로 중복 등록할 수 없습니다."
+        );
+        return;
+      }
+    } catch (e) {
+      // 조회 실패 시 진행 (네트워크 등)
+      console.warn("[duplicate-check] 실패:", e);
+    }
+
     const { data: insertedRow, error } = await supabase.from("properties").insert(payload).select("id").single();
     setSaving(false);
 
@@ -1928,56 +1956,51 @@ function ImagePreviewCarousel({
         )}
       </div>
 
-      {/* 썸네일 스트립 — 핸들 드래그로 순서 변경, 본체 탭으로 선택, 가로 스와이프 가능 */}
+      {/* 썸네일 그리드 — 사진 전체를 누른 채로 끌어 순서 변경, 탭하면 대표 미리보기로 선택 */}
       {images.length > 1 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 touch-pan-x">
-          <span className="text-[10px] text-muted-foreground self-center mr-1 flex-shrink-0">↔ 핸들로 순서 변경</span>
-          {images.map((src, i) => (
-            <div
-              key={src}
-              data-thumb-idx={i}
-              className="relative flex-shrink-0 w-24 rounded-lg overflow-hidden border-2 transition-all select-none bg-muted"
-              style={{
-                borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
-                opacity: dragIdx === i ? 0.4 : 1,
-              }}
-            >
-              {/* 드래그 핸들 (큼직하게 — 모바일 친화) */}
+        <>
+          <p className="text-[11px] text-muted-foreground -mb-1">사진을 길게 눌러 끌면 순서를 바꿀 수 있어요</p>
+          <div className="flex flex-wrap gap-2">
+            {images.map((src, i) => (
               <div
+                key={src}
+                data-thumb-idx={i}
                 onPointerDown={(e) => onPointerDown(e, i)}
                 onPointerMove={onPointerMove}
                 onPointerUp={(e) => onPointerUp(e, i)}
                 onPointerCancel={onPointerCancel}
-                className="w-full h-7 flex items-center justify-center bg-black/75 text-white cursor-grab active:cursor-grabbing"
-                style={{ touchAction: "none" }}
-                title="드래그로 순서 변경"
-              >
-                <GripVertical className="w-4 h-4" />
-                <GripVertical className="w-4 h-4 -ml-2" />
-              </div>
-              {/* 본체 — 탭으로 메인 선택 */}
-              <button
-                type="button"
-                onClick={() => setIdx(i)}
-                className="block w-full h-20"
+                className="relative w-[calc((100%-1.5rem)/4)] sm:w-24 aspect-square rounded-lg overflow-hidden border-2 select-none bg-muted cursor-grab active:cursor-grabbing"
+                style={{
+                  touchAction: "none",
+                  borderColor: i === safeIdx ? "hsl(var(--primary))" : overIdx === i ? "hsl(var(--accent))" : "transparent",
+                  opacity: dragIdx === i ? 0.5 : 1,
+                  transform: dragIdx === i ? "scale(1.05)" : "scale(1)",
+                  boxShadow: dragIdx === i ? "0 6px 16px rgba(0,0,0,0.25)" : "none",
+                  transition: "transform 180ms ease, opacity 180ms ease, border-color 180ms ease, box-shadow 180ms ease",
+                  willChange: "transform",
+                }}
               >
                 <img src={src} alt={`사진 ${i + 1}`} className="w-full h-full object-cover pointer-events-none" draggable={false} />
-              </button>
-              {i === 0 && (
-                <span className="absolute bottom-0 left-0 right-0 text-center text-[8px] font-bold bg-primary/85 text-white leading-4 pointer-events-none">대표</span>
-              )}
-              <button
-                type="button"
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
-                className="absolute top-0 right-0 w-5 h-5 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
-                title="사진 삭제"
-              >
-                <X className="w-3 h-3 text-white" />
-              </button>
-            </div>
-          ))}
-        </div>
+                <div className="absolute top-0 left-0 right-0 h-5 bg-gradient-to-b from-black/55 to-transparent pointer-events-none flex items-center justify-center">
+                  <GripVertical className="w-3.5 h-3.5 text-white/90" />
+                  <GripVertical className="w-3.5 h-3.5 text-white/90 -ml-2" />
+                </div>
+                {i === 0 && (
+                  <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] font-bold bg-primary/85 text-white leading-4 pointer-events-none">대표</span>
+                )}
+                <button
+                  type="button"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => { e.stopPropagation(); handleRemove(src); }}
+                  className="absolute top-0 right-0 w-5 h-5 rounded-bl-md bg-black/70 hover:bg-destructive flex items-center justify-center z-10"
+                  title="사진 삭제"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
