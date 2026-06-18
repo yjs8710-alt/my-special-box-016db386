@@ -520,9 +520,9 @@ const PropertyRow = memo(({
           {/* 등록자 정보는 카드 상단 정보 바에서 노출 */}
         </div>
 
-        <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
-          <span className="font-semibold text-foreground">{prop.deposit}/{prop.monthly || "—"}</span>
-          <span className="text-muted-foreground">
+        <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right w-[140px] tabular-nums">
+          <span className="font-semibold text-foreground truncate w-full">{prop.deposit}/{prop.monthly || "—"}</span>
+          <span className="text-muted-foreground truncate w-full">
             {prop.manage_fee && prop.manage_fee !== "0" && prop.manage_fee !== "-" ? `관${prop.manage_fee} · ` : ""}
             {prop.area}
           </span>
