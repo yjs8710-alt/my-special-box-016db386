@@ -77,15 +77,15 @@ const MapSearch = () => {
       p.regNo &&
       String(parseInt(p.regNo.replace(/[^0-9]/g, ""), 10)) === qTrim;
     if (propertyId && !String(p.id).includes(propertyId) && !(p.regNo ?? "").includes(propertyId)) return false;
-    // 지도 영역 필터 — 등록번호 검색 시에는 무시
-    if (!isRegNoQuery) {
+    // 지도 영역 필터 — 등록번호 검색 / 소유주(landlord) 검색 시에는 무시
+    if (!isRegNoQuery && !landlordHits) {
       const activeBounds = searchBounds ?? currentBounds;
       if (activeBounds) {
         if (!p.lat || !p.lng) return false;
         const { swLat, swLng, neLat, neLng } = activeBounds;
         if (p.lat < swLat || p.lat > neLat || p.lng < swLng || p.lng > neLng) return false;
       }
-    } else if (!regNoMatch) {
+    } else if (isRegNoQuery && !regNoMatch) {
       return false;
     }
     if (query && !regNoMatch) {
