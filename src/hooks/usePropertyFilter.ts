@@ -193,5 +193,5 @@ export function usePropertyFilter(
 
       return true;
     });
-  }, [properties, filters, activeTypes, query, propertyId]);
+  }, [properties, filters, activeTypes, query, propertyId, canSearchByText]);
 }
