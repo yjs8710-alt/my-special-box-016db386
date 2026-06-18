@@ -80,6 +80,9 @@ export function usePropertyFilter(
   query: string,
   propertyId: string
 ): MapProperty[] {
+  const { user } = useAuth();
+  const isGuest = useIsGuest();
+  const canSearchByText = !isGuest && user?.memberType !== "일반회원";
   return useMemo(() => {
     return properties.filter((p) => {
       // 유형 필터
