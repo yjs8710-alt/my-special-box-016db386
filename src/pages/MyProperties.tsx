@@ -609,7 +609,7 @@ const PropertyRow = ({
           {(prop.images?.length ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 flex gap-2 flex-wrap mt-1">
               {prop.images.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-16 h-14 rounded-lg object-cover border border-border" />
+                <img key={i} src={url} alt="" loading="lazy" decoding="async" className="w-16 h-14 rounded-lg object-cover border border-border" />
               ))}
             </div>
           )}
