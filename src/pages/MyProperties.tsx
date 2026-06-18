@@ -946,7 +946,7 @@ const MyProperties = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {filtered.map(prop => (
+            {visibleList.map(prop => (
               <PropertyRow
                 key={prop.id}
                 prop={prop}
@@ -969,6 +969,16 @@ const MyProperties = () => {
                 ) : null}
               />
             ))}
+            {visibleCount < filtered.length && (
+              <div className="flex justify-center pt-2">
+                <button
+                  onClick={() => setVisibleCount(c => c + 30)}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:bg-muted/40 transition-colors"
+                >
+                  더보기 ({filtered.length - visibleCount}개 남음)
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
