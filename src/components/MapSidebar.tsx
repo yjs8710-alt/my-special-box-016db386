@@ -3259,7 +3259,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const note = prop.note ?? "";
       const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
       const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
-      const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+      const jeonseMatch = note.match(/(?<!반)전세: 보증금 ([^\n]+)만원/);
       const isSaleProp = note.includes("매매가:") || (!prop.monthly && !!prop.deposit);
       // 부가시설 아이콘 수집
       const opts = prop.options ?? [];
