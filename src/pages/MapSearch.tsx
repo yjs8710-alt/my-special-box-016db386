@@ -89,6 +89,7 @@ const MapSearch = () => {
       return false;
     }
     if (query && !regNoMatch) {
+      if (!canSearchByText) return false;
       const q = query.toLowerCase().trim();
       const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
