@@ -3259,7 +3259,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       const note = prop.note ?? "";
       const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
       const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
-      const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+      const jeonseMatch = note.match(/(?<!반)전세: 보증금 ([^\n]+)만원/);
       const isSaleProp = note.includes("매매가:") || (!prop.monthly && !!prop.deposit);
       // 부가시설 아이콘 수집
       const opts = prop.options ?? [];
@@ -4048,7 +4048,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
             const note = prop.note ?? "";
             const wolseMatch = note.match(/월세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
             const halfMatch = note.match(/반전세: 보증금 ([^\n/]+)만원 \/ 월세 ([^\n]+)만원/);
-            const jeonseMatch = note.match(/전세: 보증금 ([^\n]+)만원/);
+            const jeonseMatch = note.match(/(?<!반)전세: 보증금 ([^\n]+)만원/);
             const hasMulti = wolseMatch || halfMatch || jeonseMatch;
 
             if (hasMulti) {
@@ -4448,7 +4448,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
           if (!hasChips && !(hasDesc && !isGuest) && !(buildingPw && !isGuest) && !(roomPw && !isGuest) && !vacateDateLabel) return null;
           return (
-            <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
+            <div className="flex items-center gap-1 min-h-[17px] flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
               {chips.map((chip, i) => (
                 <span
@@ -5652,7 +5652,7 @@ const MapSidebar = ({
                         }`}
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
-                        <div className="flex items-stretch" style={{ width: "100%", height: isMobile ? "120px" : "96px" }}>
+                        <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
                             className={`flex-shrink-0 overflow-hidden relative group/thumb ${isMobile ? "w-[120px] h-[120px]" : "w-[96px] h-[96px]"}`}
