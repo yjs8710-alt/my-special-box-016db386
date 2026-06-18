@@ -96,6 +96,7 @@ export function usePropertyFilter(
 
       // 텍스트 검색
       if (query) {
+        if (!canSearchByText) return false;
         const q = query.toLowerCase().trim();
         const qNorm = q.replace(/번지$/, "").trim();
         const addr = p.address.toLowerCase();
