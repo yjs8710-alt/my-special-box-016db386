@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { MapProperty } from "@/data/mapProperties";
 import { FilterState } from "@/components/MapFilterBar";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 // 문자열에서 만원 단위 숫자 파싱 (예: "1억 2,000만원" → 12000, "75만원" → 75)
 function parseAmountToManwon(str: string): number | null {
