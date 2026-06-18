@@ -31,6 +31,10 @@ const MapSearch = () => {
   // "이 지역에서 검색" 버튼 클릭 시 스냅샷된 영역 (사이드바 필터링에 사용)
   const [searchBounds, setSearchBounds] = useState<MapBounds | null>(null);
 
+  const { user } = useAuth();
+  const isGuest = useIsGuest();
+  const canSearchByText = !isGuest && user?.memberType !== "일반회원";
+
   // DB에서 실시간으로 매물 불러오기
   const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
