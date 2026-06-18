@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
