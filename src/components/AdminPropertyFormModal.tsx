@@ -989,31 +989,39 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
     };
 
     // ── 중복 등록 방지: 같은 주소(동+번지) + 같은 호수 → 등록/수정 차단 ──
-    try {
-      let dupQuery = supabase
-        .from("properties")
-        .select("id")
-        .eq("dong", finalDong ?? "")
-        .eq("lot_number", finalLotNumber ?? "")
-        .eq("status", "active");
-      if (form.unit_number) {
-        dupQuery = dupQuery.eq("unit_number", form.unit_number);
-      } else {
-        dupQuery = dupQuery.is("unit_number", null);
+    // 수정 시 주소/호수가 변경되지 않았다면 중복 체크를 건너뜀
+    const norm = (v: unknown) => (v == null ? "" : String(v).trim());
+    const addrUnitUnchanged = !!initial?.id
+      && norm(initial.dong) === norm(finalDong)
+      && norm(initial.lot_number) === norm(finalLotNumber)
+      && norm(initial.unit_number) === norm(form.unit_number);
+    if (!addrUnitUnchanged) {
+      try {
+        let dupQuery = supabase
+          .from("properties")
+          .select("id")
+          .eq("dong", finalDong ?? "")
+          .eq("lot_number", finalLotNumber ?? "")
+          .eq("status", "active");
+        if (form.unit_number) {
+          dupQuery = dupQuery.eq("unit_number", form.unit_number);
+        } else {
+          dupQuery = dupQuery.is("unit_number", null);
+        }
+        if (initial?.id) dupQuery = dupQuery.neq("id", initial.id);
+        const { data: dupRows } = await dupQuery.limit(1);
+        if (dupRows && dupRows.length > 0) {
+          setSaving(false);
+          await customAlert(
+            form.unit_number
+              ? `이미 등록된 매물입니다.\n같은 주소 · 같은 호수(${form.unit_number})로 등록할 수 없습니다.`
+              : "이미 등록된 매물입니다.\n같은 주소로 중복 등록할 수 없습니다."
+          );
+          return;
+        }
+      } catch (e) {
+        console.warn("[duplicate-check] 실패:", e);
       }
-      if (initial?.id) dupQuery = dupQuery.neq("id", initial.id);
-      const { data: dupRows } = await dupQuery.limit(1);
-      if (dupRows && dupRows.length > 0) {
-        setSaving(false);
-        await customAlert(
-          form.unit_number
-            ? `이미 등록된 매물입니다.\n같은 주소 · 같은 호수(${form.unit_number})로 등록할 수 없습니다.`
-            : "이미 등록된 매물입니다.\n같은 주소로 중복 등록할 수 없습니다."
-        );
-        return;
-      }
-    } catch (e) {
-      console.warn("[duplicate-check] 실패:", e);
     }
 
     try {
