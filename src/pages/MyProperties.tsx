@@ -775,17 +775,45 @@ const MyProperties = () => {
     return "(이름없음)";
   };
 
-  // 등록자(개인)별 탭 목록 (관리자 전용)
-  const agentList = isAdminView
-    ? ["전체", ...Array.from(new Set(properties.map(getDisplayAgent))).sort()]
-    : [];
+  // 등록자(개인)별 탭 — 매물 수 많은 순, '봄날부동산'/'관리자'는 항상 최상단
+  const agentList = useMemo(() => {
+    if (!isAdminView) return [];
+    const counts = new Map<string, number>();
+    properties.forEach(p => {
+      const n = getDisplayAgent(p);
+      counts.set(n, (counts.get(n) ?? 0) + 1);
+    });
+    const PRIORITY = ["봄날부동산", "관리자"];
+    const names = Array.from(counts.keys());
+    const priority = PRIORITY.filter(n => counts.has(n));
+    const rest = names
+      .filter(n => !PRIORITY.includes(n) && n !== "(이름없음)")
+      .sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0) || a.localeCompare(b, "ko"));
+    const unknown = counts.has("(이름없음)") ? ["(이름없음)"] : [];
+    return ["전체", ...priority, ...rest, ...unknown];
+  }, [properties, isAdminView, registrantMap]);
 
-  const filtered = useMemo(() => properties.filter(p => {
-    const matchStatus = statusFilter === "all" || p.status === statusFilter;
-    const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
-    const matchAgent = !isAdminView || agentTab === "전체" || getDisplayAgent(p) === agentTab;
-    return matchStatus && matchSearch && matchAgent;
-  }), [properties, statusFilter, search, isAdminView, agentTab, registrantMap]);
+  const filtered = useMemo(() => {
+    const list = properties.filter(p => {
+      const matchStatus = statusFilter === "all" || p.status === statusFilter;
+      const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
+      const matchAgent = !isAdminView || agentTab === "전체" || getDisplayAgent(p) === agentTab;
+      return matchStatus && matchSearch && matchAgent;
+    });
+    // '전체' 탭: 담당자별로 묶어서 정렬 (담당자 우선순위 → 그 안에서 등록일 내림차순)
+    if (isAdminView && agentTab === "전체") {
+      const order = new Map(agentList.map((n, i) => [n, i] as const));
+      list.sort((a, b) => {
+        const oa = order.get(getDisplayAgent(a)) ?? 9999;
+        const ob = order.get(getDisplayAgent(b)) ?? 9999;
+        if (oa !== ob) return oa - ob;
+        const da = a.registered_date ?? "";
+        const db = b.registered_date ?? "";
+        return da > db ? -1 : da < db ? 1 : 0;
+      });
+    }
+    return list;
+  }, [properties, statusFilter, search, isAdminView, agentTab, registrantMap, agentList]);
 
   useEffect(() => { setVisibleCount(30); }, [statusFilter, search, agentTab]);
   const visibleList = filtered.slice(0, visibleCount);
