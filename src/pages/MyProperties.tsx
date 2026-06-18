@@ -385,7 +385,7 @@ const DeleteConfirmModal = ({ title, onConfirm, onCancel, isAdmin }: { title: st
 );
 
 // ─── Property Row ─────────────────────────────────────────────────────────────
-const PropertyRow = ({
+const PropertyRow = memo(({
   prop,
   onEdit,
   onDelete,
