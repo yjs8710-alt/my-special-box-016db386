@@ -618,8 +618,8 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (!form.contactOwner.trim()) {
-      await customAlert("소유주 연락처를 입력해주세요.");
+    if (!form.contactOwner.trim() && !form.contactManager.trim()) {
+      await customAlert("소유주 또는 관리인 연락처 중 하나는 입력해주세요.");
       return;
     }
     setSaving(true);
