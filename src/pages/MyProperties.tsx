@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadPropertyImages } from "@/lib/uploadPropertyImages";
 import {
@@ -385,7 +385,7 @@ const DeleteConfirmModal = ({ title, onConfirm, onCancel, isAdmin }: { title: st
 );
 
 // ─── Property Row ─────────────────────────────────────────────────────────────
-const PropertyRow = ({
+const PropertyRow = memo(({
   prop,
   onEdit,
   onDelete,
@@ -479,7 +479,7 @@ const PropertyRow = ({
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
-          <img src={prop.images[0]} alt="" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
+          <img src={prop.images[0]} alt="" loading="lazy" decoding="async" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
         ) : (
           <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
             <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -609,7 +609,7 @@ const PropertyRow = ({
           {(prop.images?.length ?? 0) > 0 && (
             <div className="col-span-2 sm:col-span-3 flex gap-2 flex-wrap mt-1">
               {prop.images.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-16 h-14 rounded-lg object-cover border border-border" />
+                <img key={i} src={url} alt="" loading="lazy" decoding="async" className="w-16 h-14 rounded-lg object-cover border border-border" />
               ))}
             </div>
           )}
@@ -617,7 +617,8 @@ const PropertyRow = ({
       )}
     </div>
   );
-};
+});
+PropertyRow.displayName = "PropertyRow";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const MyProperties = () => {
@@ -633,6 +634,7 @@ const MyProperties = () => {
   const [deleteTarget, setDeleteTarget] = useState<DBProperty | null>(null);
   const [showRegister, setShowRegister] = useState(false);
   const [reregisterPrefill, setReregisterPrefill] = useState<Record<string, unknown> | null>(null);
+  const [visibleCount, setVisibleCount] = useState(30);
   const [agentName, setAgentName] = useState("");
   // 관리자 전용: user_id → {name, email} 맵
   const [registrantMap, setRegistrantMap] = useState<Record<string, { name: string; agency_name?: string }>>({});
@@ -778,12 +780,15 @@ const MyProperties = () => {
     ? ["전체", ...Array.from(new Set(properties.map(getDisplayAgent))).sort()]
     : [];
 
-  const filtered = properties.filter(p => {
+  const filtered = useMemo(() => properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || getDisplayAgent(p) === agentTab;
     return matchStatus && matchSearch && matchAgent;
-  });
+  }), [properties, statusFilter, search, isAdminView, agentTab, registrantMap]);
+
+  useEffect(() => { setVisibleCount(30); }, [statusFilter, search, agentTab]);
+  const visibleList = filtered.slice(0, visibleCount);
 
   const activeCount = properties.filter(p => p.status === "active").length;
   const hiddenCount = properties.filter(p => p.status === "hidden").length;
@@ -941,7 +946,7 @@ const MyProperties = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {filtered.map(prop => (
+            {visibleList.map(prop => (
               <PropertyRow
                 key={prop.id}
                 prop={prop}
@@ -964,6 +969,16 @@ const MyProperties = () => {
                 ) : null}
               />
             ))}
+            {visibleCount < filtered.length && (
+              <div className="flex justify-center pt-2">
+                <button
+                  onClick={() => setVisibleCount(c => c + 30)}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold border border-border text-muted-foreground hover:bg-muted/40 transition-colors"
+                >
+                  더보기 ({filtered.length - visibleCount}개 남음)
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
