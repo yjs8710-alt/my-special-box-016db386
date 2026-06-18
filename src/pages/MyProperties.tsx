@@ -780,12 +780,15 @@ const MyProperties = () => {
     ? ["전체", ...Array.from(new Set(properties.map(getDisplayAgent))).sort()]
     : [];
 
-  const filtered = properties.filter(p => {
+  const filtered = useMemo(() => properties.filter(p => {
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     const matchSearch = !search || p.title.includes(search) || p.address.includes(search) || p.type.includes(search);
     const matchAgent = !isAdminView || agentTab === "전체" || getDisplayAgent(p) === agentTab;
     return matchStatus && matchSearch && matchAgent;
-  });
+  }), [properties, statusFilter, search, isAdminView, agentTab, registrantMap]);
+
+  useEffect(() => { setVisibleCount(30); }, [statusFilter, search, agentTab]);
+  const visibleList = filtered.slice(0, visibleCount);
 
   const activeCount = properties.filter(p => p.status === "active").length;
   const hiddenCount = properties.filter(p => p.status === "hidden").length;
