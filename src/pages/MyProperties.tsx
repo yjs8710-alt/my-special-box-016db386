@@ -479,7 +479,7 @@ const PropertyRow = ({
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
-          <img src={prop.images[0]} alt="" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
+          <img src={prop.images[0]} alt="" loading="lazy" decoding="async" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
         ) : (
           <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
             <Building2 className="w-4 h-4 text-muted-foreground" />
