@@ -617,7 +617,8 @@ const PropertyRow = memo(({
       )}
     </div>
   );
-};
+});
+PropertyRow.displayName = "PropertyRow";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const MyProperties = () => {
