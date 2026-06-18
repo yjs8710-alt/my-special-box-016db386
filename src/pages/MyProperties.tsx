@@ -900,29 +900,28 @@ const MyProperties = () => {
         {isAdminView && agentList.length > 1 && (
           <div className="mb-4">
             <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid gap-1.5 grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
               {agentList.map(agent => {
                 const count = agent === "전체"
                   ? properties.length
                   : properties.filter(p => getDisplayAgent(p) === agent).length;
                 const isActive = agentTab === agent;
-                const info = Object.values(registrantMap).find(r => r.name === agent);
                 return (
                   <button
                     key={agent}
                     onClick={() => setAgentTab(agent)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all whitespace-nowrap"
+                    title={agent}
+                    className="flex items-center justify-between gap-1 px-2 h-8 rounded-lg text-[11px] font-semibold border transition-all whitespace-nowrap overflow-hidden"
                     style={isActive
                       ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                       : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                     }
                   >
-                    {agent === "전체" ? "👥" : "👤"} {agent}
-                    {info?.agency_name && agent !== "봄날부동산" && (
-                      <span className="text-[9px] opacity-70">({info.agency_name})</span>
-                    )}
+                    <span className="truncate">
+                      {agent === "전체" ? "👥" : "👤"} {agent}
+                    </span>
                     <span
-                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
+                      className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[20px] text-center flex-shrink-0"
                       style={isActive
                         ? { background: "rgba(255,255,255,0.25)", color: "inherit" }
                         : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
