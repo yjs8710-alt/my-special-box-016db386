@@ -520,50 +520,57 @@ const PropertyRow = memo(({
           {/* 등록자 정보는 카드 상단 정보 바에서 노출 */}
         </div>
 
-        <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right">
-          <span className="font-semibold text-foreground">{prop.deposit}/{prop.monthly || "—"}</span>
-          <span className="text-muted-foreground">
+        <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0 text-xs text-right w-[140px] tabular-nums">
+          <span className="font-semibold text-foreground truncate w-full">{prop.deposit}/{prop.monthly || "—"}</span>
+          <span className="text-muted-foreground truncate w-full">
             {prop.manage_fee && prop.manage_fee !== "0" && prop.manage_fee !== "-" ? `관${prop.manage_fee} · ` : ""}
             {prop.area}
           </span>
         </div>
 
-        <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+        <div className="hidden sm:grid grid-cols-[44px_44px_44px_20px] items-center gap-1 flex-shrink-0 ml-1 text-center">
           {prop.status === "ended" ? (
             <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-              className="px-2 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
+              className="w-full px-1 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
               title="이 매물 정보를 그대로 가져와 새로 등록"
               style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
               재등록
             </button>
           ) : (
             <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-              className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+              className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
               title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
               style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
               {prop.status === "active" ? "노출" : "숨김"}
             </button>
           )}
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
-            className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
+            className="w-full px-1 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
           </button>
-          {prop.status !== "ended" && (
+          {prop.status !== "ended" ? (
             <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
-              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              className="w-full px-1 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
               style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
               title={isAdmin ? "삭제" : "종료"}>
               {isAdmin ? "삭제" : "종료"}
             </button>
-          )}
-          {isAdmin && prop.status === "ended" && (
+          ) : isAdmin ? (
             <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
-              className="px-1.5 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
+              className="w-full px-1 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
               style={{ color: "hsl(var(--destructive))" }}
               title="삭제">
               삭제
             </button>
-          )}
+          ) : <span />}
+          {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground mx-auto" /> : <ChevronDown className="w-4 h-4 text-muted-foreground mx-auto" />}
+        </div>
+        {/* 모바일: 액션 버튼 */}
+        <div className="flex sm:hidden items-center gap-1 flex-shrink-0 ml-1">
+          <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
+            className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
+            수정
+          </button>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
       </div>
