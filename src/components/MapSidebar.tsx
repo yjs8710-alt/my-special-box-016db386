@@ -4448,7 +4448,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
 
           if (!hasChips && !(hasDesc && !isGuest) && !(buildingPw && !isGuest) && !(roomPw && !isGuest) && !vacateDateLabel) return null;
           return (
-            <div className="flex items-center gap-1 min-h-[17px] overflow-hidden flex-wrap">
+            <div className="flex items-center gap-1 min-h-[17px] flex-wrap">
               {/* 왼쪽: 칩들과 특이사항 */}
               {chips.map((chip, i) => (
                 <span
