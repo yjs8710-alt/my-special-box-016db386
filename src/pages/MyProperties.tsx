@@ -891,9 +891,9 @@ const MyProperties = () => {
 
         {/* 관리자 전용: 개인별 필터 */}
         {isAdminView && agentList.length > 1 && (
-          <div className="mb-4 -mx-1 px-1 overflow-x-auto">
+          <div className="mb-4">
             <p className="text-[10px] font-bold text-muted-foreground mb-1.5 px-1">👤 회원별</p>
-            <div className="flex gap-1.5 min-w-max pb-1">
+            <div className="flex flex-wrap gap-1.5">
               {agentList.map(agent => {
                 const count = agent === "전체"
                   ? properties.length
@@ -904,15 +904,15 @@ const MyProperties = () => {
                   <button
                     key={agent}
                     onClick={() => setAgentTab(agent)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all whitespace-nowrap flex-shrink-0"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all whitespace-nowrap"
                     style={isActive
                       ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                       : { background: "hsl(var(--card))", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                     }
                   >
                     {agent === "전체" ? "👥" : "👤"} {agent}
-                    {info?.agency_name && (
-                      <span className="text-[10px] opacity-70">({info.agency_name})</span>
+                    {info?.agency_name && agent !== "봄날부동산" && (
+                      <span className="text-[9px] opacity-70">({info.agency_name})</span>
                     )}
                     <span
                       className="text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center"
