@@ -8,6 +8,8 @@ import LandlordSearchModal from "@/components/LandlordSearchModal";
 import { MAP_PROPERTIES } from "@/data/mapProperties";
 import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 import { LayoutGrid, Map, List, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,6 +30,10 @@ const MapSearch = () => {
   const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null);
   // "이 지역에서 검색" 버튼 클릭 시 스냅샷된 영역 (사이드바 필터링에 사용)
   const [searchBounds, setSearchBounds] = useState<MapBounds | null>(null);
+
+  const { user } = useAuth();
+  const isGuest = useIsGuest();
+  const canSearchByText = !isGuest && user?.memberType !== "일반회원";
 
   // DB에서 실시간으로 매물 불러오기
   const { properties: dbProperties, refetch } = useDBProperties();
@@ -83,6 +89,7 @@ const MapSearch = () => {
       return false;
     }
     if (query && !regNoMatch) {
+      if (!canSearchByText) return false;
       const q = query.toLowerCase().trim();
       const qNorm = q.replace(/번지$/, "").trim();
       const addr = p.address.toLowerCase();
