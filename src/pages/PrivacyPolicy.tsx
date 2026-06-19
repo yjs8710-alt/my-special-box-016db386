@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
+
 import Footer from "@/components/Footer";
 import { Shield, User, MessageSquare, Clock, Share2, Trash2, Eye, Mail, FileText } from "lucide-react";
 
@@ -103,8 +103,6 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
-      <Header />
-
       <main className="flex-1">
         {/* Hero */}
         <section
