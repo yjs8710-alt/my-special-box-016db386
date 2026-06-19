@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
+
 import Footer from "@/components/Footer";
 import { Building2, MapPin, Phone, Mail, User, FileText } from "lucide-react";
 
@@ -16,8 +16,6 @@ const CompanyIntroduction = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
-      <Header />
-
       <main className="flex-1">
         {/* Hero */}
         <section
