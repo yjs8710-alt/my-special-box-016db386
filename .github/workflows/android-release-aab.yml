@@ -1,0 +1,96 @@
+name: Build Android release AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Play Console versionCode. Increase by 1 for every new upload.
+        required: true
+        default: '1'
+      version_name:
+        description: User-visible versionName.
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-aab:
+    name: Generate signed app-release.aab
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build web app
+        run: bun run build
+
+      - name: Create Android platform
+        run: |
+          if [ ! -d android ]; then
+            bunx cap add android
+          fi
+          bunx cap sync android
+
+      - name: Decode release keystore
+        run: |
+          printf '%s' "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/zibda-release.keystore
+
+      - name: Prepare Android release settings
+        env:
+          ANDROID_KEYSTORE_PATH: ../zibda-release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_CODE: ${{ github.event.inputs.version_code }}
+          ANDROID_VERSION_NAME: ${{ github.event.inputs.version_name }}
+        run: node android-build/ci/prepare-capacitor-android.mjs
+
+      - name: Generate Android icons and splash assets
+        run: bunx capacitor-assets generate --android
+
+      - name: Build signed release AAB
+        working-directory: android
+        run: ./gradlew --no-daemon bundleRelease
+
+      - name: Collect AAB
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/bundle/release/app-release.aab release/app-release.aab
+          shasum -a 256 release/app-release.aab > release/app-release.aab.sha256
+
+      - name: Upload Google Play AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zibda-google-play-app-release-aab
+          path: |
+            release/app-release.aab
+            release/app-release.aab.sha256
+          retention-days: 14
