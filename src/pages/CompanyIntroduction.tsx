@@ -40,7 +40,7 @@ const CompanyIntroduction = () => {
                 플랫폼 소개
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: "hsl(var(--foreground))" }}>
-                집다(ZIBDA)는 부동산 정보 제공 플랫폼으로 임대인, 공인중개사, 임차인, 예비창업자를 연결하는 온라인 서비스입니다.
+                집다(ZIBDA)는 부동산 정보 제공 플랫폼으로 공인중개사, 고객 연결하는 온라인 서비스입니다.
               </p>
               <p className="text-sm leading-relaxed mt-3" style={{ color: "hsl(var(--foreground))" }}>
                 사용자가 보다 쉽고 편리하게 부동산 정보를 확인하고 문의할 수 있도록 다양한 매물 정보와 지역 부동산 정보를 제공합니다.
