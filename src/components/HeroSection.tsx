@@ -100,6 +100,15 @@ const HeroSection = () => {
             </div>
           </div>
         )}
+        {/* 메인화면 회사소개 링크 */}
+        <div className="mt-4 md:mt-6">
+          <button
+            onClick={() => navigate("/company")}
+            className="text-xs md:text-sm font-semibold text-white/70 hover:text-white transition-colors underline underline-offset-4"
+          >
+            회사소개
+          </button>
+        </div>
       </div>
     </section>
 
