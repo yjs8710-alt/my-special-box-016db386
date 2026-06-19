@@ -40,7 +40,12 @@ const Footer = () => {
               <h4 className="font-semibold text-white/80 mb-3">지원</h4>
               <ul className="flex flex-col gap-2">
                 <li>
-                  <span className="text-white/40 text-xs cursor-default">이용약관</span>
+                  <button
+                    onClick={() => navigate("/terms")}
+                    className="text-white/40 hover:text-white transition-colors text-xs"
+                  >
+                    이용약관
+                  </button>
                 </li>
                 <li>
                   <button
