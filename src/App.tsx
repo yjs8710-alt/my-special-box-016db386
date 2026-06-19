@@ -94,6 +94,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CompanyIntroduction = lazy(() => import("./pages/CompanyIntroduction"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const CustomerService = lazy(() => import("./pages/CustomerService"));
 const PublicProperty = lazy(() => import("./pages/PublicProperty"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const MyProperties = lazy(() => import("./pages/MyProperties"));
@@ -223,6 +224,7 @@ const App = () => {
             <Route path="/company" element={<CompanyIntroduction />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/support" element={<CustomerService />} />
 
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
