@@ -39,13 +39,25 @@ const Footer = () => {
             <div>
               <h4 className="font-semibold text-white/80 mb-3">지원</h4>
               <ul className="flex flex-col gap-2">
-                {["이용약관", "개인정보처리방침", "고객센터"].map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-white/40 hover:text-white transition-colors text-xs">
-                      {link}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <button
+                    onClick={() => navigate("/terms")}
+                    className="text-white/40 hover:text-white transition-colors text-xs"
+                  >
+                    이용약관
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/privacy")}
+                    className="text-white/40 hover:text-white transition-colors text-xs"
+                  >
+                    개인정보처리방침
+                  </button>
+                </li>
+                <li>
+                  <span className="text-white/40 text-xs cursor-default">고객센터</span>
+                </li>
               </ul>
             </div>
           </div>

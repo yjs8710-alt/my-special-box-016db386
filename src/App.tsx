@@ -92,6 +92,8 @@ const NonResidentialRental = lazy(() => import("./pages/NonResidentialRental"));
 const CommercialRental = lazy(() => import("./pages/CommercialRental"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const CompanyIntroduction = lazy(() => import("./pages/CompanyIntroduction"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PublicProperty = lazy(() => import("./pages/PublicProperty"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const MyProperties = lazy(() => import("./pages/MyProperties"));
@@ -219,6 +221,8 @@ const App = () => {
             {/* 첫 화면은 eager */}
             <Route path="/" element={<Home />} />
             <Route path="/company" element={<CompanyIntroduction />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
 
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/apartment" element={<ProtectedRoute><ResidentialRental /></ProtectedRoute>} />
