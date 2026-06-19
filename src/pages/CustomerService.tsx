@@ -57,11 +57,11 @@ const CustomerService = () => {
             </div>
             <div className="pl-11">
               <a
-                href="mailto:dbswotjd09@naver.com"
+                href="mailto:zibda77@naver.com"
                 className="text-sm hover:underline"
                 style={{ color: "hsl(var(--primary))" }}
               >
-                dbswotjd09@naver.com
+                zibda77@naver.com
               </a>
             </div>
           </div>

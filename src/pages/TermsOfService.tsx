@@ -101,8 +101,8 @@ const ARTICLES = [
         <p><span className="font-medium">사업자등록번호</span> : 797-77-00616</p>
         <p>
           <span className="font-medium">이메일</span> :{" "}
-          <a href="mailto:dbswotjd09@naver.com" className="hover:underline" style={{ color: "hsl(var(--primary))" }}>
-            dbswotjd09@naver.com
+          <a href="mailto:zibda77@naver.com" className="hover:underline" style={{ color: "hsl(var(--primary))" }}>
+            zibda77@naver.com
           </a>
         </p>
         <p><span className="font-medium">시행일</span> : 2026년 06월 19일</p>

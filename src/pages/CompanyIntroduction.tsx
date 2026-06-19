@@ -126,11 +126,11 @@ const CompanyIntroduction = () => {
                   <div>
                     <span className="text-xs font-semibold block mb-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>이메일</span>
                     <a
-                      href="mailto:dbswotjd09@naver.com"
+                      href="mailto:zibda77@naver.com"
                       className="text-sm hover:underline"
                       style={{ color: "hsl(var(--primary))" }}
                     >
-                      dbswotjd09@naver.com
+                      zibda77@naver.com
                     </a>
                   </div>
                 </div>
