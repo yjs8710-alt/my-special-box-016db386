@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div>
             <p className="text-sm text-white max-w-sm leading-relaxed">
-              공실 전문 플랫폼
+              청주 부동산 플랫폼
             </p>
             <div className="flex gap-4 mt-4">
               <a href="#" className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors">
@@ -56,7 +56,12 @@ const Footer = () => {
                   </button>
                 </li>
                 <li>
-                  <span className="text-white/40 text-xs cursor-default">고객센터</span>
+                  <button
+                    onClick={() => navigate("/support")}
+                    className="text-white/40 hover:text-white transition-colors text-xs"
+                  >
+                    고객센터
+                  </button>
                 </li>
               </ul>
             </div>
