@@ -22,49 +22,31 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 text-sm">
-            <div>
-              <h4 className="font-semibold text-white/80 mb-3">회사소개</h4>
-              <ul className="flex flex-col gap-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/company")}
-                    className="text-white/60 hover:text-white transition-colors text-xs"
-                  >
-                    집다 소개
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white/80 mb-3">지원</h4>
-              <ul className="flex flex-col gap-2">
-                <li>
-                  <button
-                    onClick={() => navigate("/terms")}
-                    className="text-white/40 hover:text-white transition-colors text-xs"
-                  >
-                    이용약관
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/privacy")}
-                    className="text-white/40 hover:text-white transition-colors text-xs"
-                  >
-                    개인정보처리방침
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => navigate("/support")}
-                    className="text-white/40 hover:text-white transition-colors text-xs"
-                  >
-                    고객센터
-                  </button>
-                </li>
-              </ul>
-            </div>
+          <div className="flex flex-col gap-2 text-sm">
+            <button
+              onClick={() => navigate("/company")}
+              className="text-white hover:text-white/80 transition-colors text-xs text-left"
+            >
+              Zibda소개
+            </button>
+            <button
+              onClick={() => navigate("/terms")}
+              className="text-white hover:text-white/80 transition-colors text-xs text-left"
+            >
+              이용약관
+            </button>
+            <button
+              onClick={() => navigate("/privacy")}
+              className="text-white hover:text-white/80 transition-colors text-xs text-left"
+            >
+              개인정보처리방침
+            </button>
+            <button
+              onClick={() => navigate("/support")}
+              className="text-white hover:text-white/80 transition-colors text-xs text-left"
+            >
+              고객센터
+            </button>
           </div>
         </div>
 
