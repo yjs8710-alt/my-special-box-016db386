@@ -1,9 +1,96 @@
 # Zibda (집다) — Android AAB 빌드 가이드
 
-이 문서는 GitHub Export 후 본인 PC에서 Google Play Console 업로드용
-**서명된 release AAB** 파일을 만들기까지의 전 과정을 단계별로 정리한 것입니다.
+이 문서는 GitHub Export 후 **GitHub Actions 클라우드 빌드** 또는 본인 PC에서
+Google Play Console 업로드용 **서명된 release AAB** 파일을 만들기까지의 전 과정을 정리한 것입니다.
+
+> PC의 Android Studio/Gradle에서 `AEADBadTagException` 다운로드 오류가 반복되면
+> 아래 **A. GitHub Actions 클라우드 빌드**를 사용하세요. 최종 결과물은
+> `app-release.aab` 이며 Google Play Console에 바로 업로드할 수 있습니다.
 
 ---
+
+## A. GitHub Actions로 app-release.aab 생성 (권장)
+
+### A-1. GitHub에 프로젝트 연결
+
+Lovable에서 GitHub Export를 완료하면 저장소에 아래 파일이 포함됩니다.
+
+- `.github/workflows/android-release-aab.yml`
+- `android-build/ci/prepare-capacitor-android.mjs`
+- `resources/icon.png`
+- `resources/splash.png`
+
+워크플로우는 클라우드에서 다음 작업을 자동 수행합니다.
+
+1. 웹 앱 빌드
+2. Capacitor Android 프로젝트 생성/동기화
+3. 패키지명 `com.zibda.app` 적용
+4. 앱 이름 `집다 (Zibda)` 적용
+5. Android 권한 적용: 인터넷, 카메라, 사진, 위치, 전화, 알림
+6. 아이콘/스플래시 생성
+7. release 서명
+8. `app-release.aab` 생성 및 다운로드 아티팩트 업로드
+
+### A-2. release keystore 생성 (1회만)
+
+로컬 PC에서 아래 명령으로 서명 키를 한 번만 생성합니다.
+
+```bash
+keytool -genkey -v \
+  -keystore zibda-release.keystore \
+  -alias zibda \
+  -keyalg RSA -keysize 2048 -validity 10000
+```
+
+⚠️ `zibda-release.keystore` 파일과 비밀번호는 앱 업데이트에 계속 필요하므로 절대 분실하면 안 됩니다.
+
+### A-3. keystore를 Base64로 변환
+
+Mac/Linux:
+
+```bash
+base64 -w 0 zibda-release.keystore > keystore-base64.txt
+```
+
+Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("zibda-release.keystore")) | Set-Content keystore-base64.txt
+```
+
+### A-4. GitHub Secrets 등록
+
+GitHub 저장소 → **Settings → Secrets and variables → Actions → New repository secret** 에 아래 4개를 등록합니다.
+
+| Secret 이름 | 값 |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | `keystore-base64.txt` 안의 전체 문자열 |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore 생성 시 입력한 비밀번호 |
+| `ANDROID_KEY_ALIAS` | `zibda` |
+| `ANDROID_KEY_PASSWORD` | alias/key 비밀번호 |
+
+### A-5. AAB 빌드 실행
+
+GitHub 저장소 → **Actions → Build Android release AAB → Run workflow**
+
+- `version_code`: 처음은 `1`, Play Console에 새 버전을 올릴 때마다 `2`, `3`처럼 증가
+- `version_name`: 예: `1.0.0`
+
+빌드가 끝나면 실행 결과 화면 하단 **Artifacts**에서
+`zibda-google-play-app-release-aab`를 다운로드합니다.
+
+압축을 풀면 아래 파일이 있습니다.
+
+```text
+app-release.aab
+app-release.aab.sha256
+```
+
+`app-release.aab`를 Google Play Console의 앱 번들 업로드 영역에 올리면 됩니다.
+
+---
+
+## B. PC에서 직접 빌드하는 방법
 
 ## 0. 준비물 (PC에 설치)
 
