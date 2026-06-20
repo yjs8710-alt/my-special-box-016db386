@@ -390,7 +390,6 @@ const PropertyRow = memo(({
   onEdit,
   onDelete,
   onToggleStatus,
-  onReregister,
   isAdmin,
   registrantInfo,
   matchedBy,
@@ -399,7 +398,6 @@ const PropertyRow = memo(({
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
-  onReregister: (p: DBProperty) => void;
   isAdmin?: boolean;
   registrantInfo?: { name: string; agency_name?: string } | null;
   matchedBy?: "registered_by" | "agent_name" | null;
