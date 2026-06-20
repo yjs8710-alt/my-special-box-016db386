@@ -845,7 +845,7 @@ const MyProperties = () => {
   const visibleList = filtered.slice(0, visibleCount);
 
   const activeCount = properties.filter(p => p.status === "active").length;
-  const hiddenCount = properties.filter(p => p.status === "hidden").length;
+  const endedCount = properties.filter(p => p.status === "ended" || p.status === "hidden").length;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
