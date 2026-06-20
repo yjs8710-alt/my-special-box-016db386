@@ -20,6 +20,27 @@ const writeIfChanged = (filePath, next) => {
   if (prev !== next) fs.writeFileSync(filePath, next);
 };
 
+const findMatchingBrace = (text, openBraceIndex) => {
+  let depth = 0;
+  for (let i = openBraceIndex; i < text.length; i += 1) {
+    if (text[i] === '{') depth += 1;
+    if (text[i] === '}') depth -= 1;
+    if (depth === 0) return i;
+  }
+  throw new Error('Could not parse android/app/build.gradle block braces.');
+};
+
+const findGradleBlock = (text, blockName, startIndex = 0, endIndex = text.length) => {
+  const blockPattern = new RegExp(`\\b${blockName}\\s*\\{`, 'g');
+  blockPattern.lastIndex = startIndex;
+  const match = blockPattern.exec(text);
+  if (!match || match.index >= endIndex) return null;
+  const open = text.indexOf('{', match.index);
+  if (open < 0 || open >= endIndex) return null;
+  const close = findMatchingBrace(text, open);
+  return { start: match.index, open, close };
+};
+
 const insertAfterManifestOpen = (xml, snippet) => {
   if (xml.includes('android.permission.POST_NOTIFICATIONS')) return xml;
   return xml.replace(/(<manifest\b[^>]*>)/, `$1\n${snippet}`);
@@ -104,14 +125,25 @@ if (!gradle.includes('signingConfigs {')) {
   );
 }
 
-gradle = gradle.replace(/(signingConfigs\s*\{[\s\S]*?release\s*\{)([\s\S]*?)(\n\s*\})/, (match, releaseOpen, body, releaseClose) => {
-  return `${releaseOpen}${body.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '')}${releaseClose}`;
-});
+const signingConfigsBlock = findGradleBlock(gradle, 'signingConfigs');
+const signingConfigReleaseBlock = signingConfigsBlock
+  ? findGradleBlock(gradle, 'release', signingConfigsBlock.open + 1, signingConfigsBlock.close)
+  : null;
+if (signingConfigReleaseBlock) {
+  const body = gradle.slice(signingConfigReleaseBlock.open + 1, signingConfigReleaseBlock.close);
+  const cleanedBody = body.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '');
+  gradle = `${gradle.slice(0, signingConfigReleaseBlock.open + 1)}${cleanedBody}${gradle.slice(signingConfigReleaseBlock.close)}`;
+}
 
-gradle = gradle.replace(/(buildTypes\s*\{[\s\S]*?release\s*\{)([\s\S]*?)(\n\s*\})/, (match, releaseOpen, body, releaseClose) => {
-  if (body.includes('signingConfig signingConfigs.release')) return match;
-  return `${releaseOpen}\n            signingConfig signingConfigs.release${body}${releaseClose}`;
-});
+const buildTypesBlock = findGradleBlock(gradle, 'buildTypes');
+const buildTypeReleaseBlock = buildTypesBlock
+  ? findGradleBlock(gradle, 'release', buildTypesBlock.open + 1, buildTypesBlock.close)
+  : null;
+if (!buildTypeReleaseBlock) throw new Error('Could not find buildTypes.release in android/app/build.gradle.');
+
+const releaseBody = gradle.slice(buildTypeReleaseBlock.open + 1, buildTypeReleaseBlock.close);
+const releaseBodyWithoutSigning = releaseBody.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '');
+gradle = `${gradle.slice(0, buildTypeReleaseBlock.open + 1)}\n            signingConfig signingConfigs.release${releaseBodyWithoutSigning}${gradle.slice(buildTypeReleaseBlock.close)}`;
 
 writeIfChanged(appGradlePath, gradle);
 console.log('Prepared Capacitor Android project for signed Zibda release AAB.');
