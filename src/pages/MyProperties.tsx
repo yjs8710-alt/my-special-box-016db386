@@ -493,6 +493,12 @@ const PropertyRow = memo(({
               style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>
               {prop.type}
             </span>
+            {prop.status === "active" && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
+                광고중
+              </span>
+            )}
             {prop.status === "hidden" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                 style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
