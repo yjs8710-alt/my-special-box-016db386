@@ -20,6 +20,27 @@ const writeIfChanged = (filePath, next) => {
   if (prev !== next) fs.writeFileSync(filePath, next);
 };
 
+const findMatchingBrace = (text, openBraceIndex) => {
+  let depth = 0;
+  for (let i = openBraceIndex; i < text.length; i += 1) {
+    if (text[i] === '{') depth += 1;
+    if (text[i] === '}') depth -= 1;
+    if (depth === 0) return i;
+  }
+  throw new Error('Could not parse android/app/build.gradle block braces.');
+};
+
+const findGradleBlock = (text, blockName, startIndex = 0, endIndex = text.length) => {
+  const blockPattern = new RegExp(`\\b${blockName}\\s*\\{`, 'g');
+  blockPattern.lastIndex = startIndex;
+  const match = blockPattern.exec(text);
+  if (!match || match.index >= endIndex) return null;
+  const open = text.indexOf('{', match.index);
+  if (open < 0 || open >= endIndex) return null;
+  const close = findMatchingBrace(text, open);
+  return { start: match.index, open, close };
+};
+
 const insertAfterManifestOpen = (xml, snippet) => {
   if (xml.includes('android.permission.POST_NOTIFICATIONS')) return xml;
   return xml.replace(/(<manifest\b[^>]*>)/, `$1\n${snippet}`);
@@ -92,10 +113,10 @@ if (!gradle.includes('def keystorePropertiesFile')) {
   gradle = `def keystoreProperties = new Properties()\ndef keystorePropertiesFile = rootProject.file("keystore.properties")\nif (keystorePropertiesFile.exists()) {\n    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n}\n\n${gradle}`;
 }
 
-gradle = gradle.replace(/namespace\s+"[^"]+"/, 'namespace "com.zibda.app"');
-gradle = gradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.zibda.app"');
-gradle = gradle.replace(/versionCode\s+\d+/, `versionCode ${process.env.ANDROID_VERSION_CODE || '1'}`);
-gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${process.env.ANDROID_VERSION_NAME || '1.0.0'}"`);
+gradle = gradle.replace(/namespace\s*=\s*"[^"]+"|namespace\s+"[^"]+"/, 'namespace = "com.zibda.app"');
+gradle = gradle.replace(/applicationId\s*=\s*"[^"]+"|applicationId\s+"[^"]+"/, 'applicationId "com.zibda.app"');
+gradle = gradle.replace(/versionCode\s*=\s*\d+|versionCode\s+\d+/, `versionCode ${process.env.ANDROID_VERSION_CODE || '1'}`);
+gradle = gradle.replace(/versionName\s*=\s*"[^"]+"|versionName\s+"[^"]+"/, `versionName "${process.env.ANDROID_VERSION_NAME || '1.0.0'}"`);
 
 if (!gradle.includes('signingConfigs {')) {
   gradle = gradle.replace(
@@ -104,10 +125,50 @@ if (!gradle.includes('signingConfigs {')) {
   );
 }
 
-gradle = gradle.replace(/release\s*\{([\s\S]*?)\n\s*\}/, (match, body) => {
-  if (body.includes('signingConfig signingConfigs.release')) return match;
-  return match.replace(/release\s*\{/, 'release {\n            signingConfig signingConfigs.release');
-});
+const signingConfigsBlock = findGradleBlock(gradle, 'signingConfigs');
+const signingConfigReleaseBlock = signingConfigsBlock
+  ? findGradleBlock(gradle, 'release', signingConfigsBlock.open + 1, signingConfigsBlock.close)
+  : null;
+if (signingConfigReleaseBlock) {
+  const body = gradle.slice(signingConfigReleaseBlock.open + 1, signingConfigReleaseBlock.close);
+  const cleanedBody = body.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '');
+  gradle = `${gradle.slice(0, signingConfigReleaseBlock.open + 1)}${cleanedBody}${gradle.slice(signingConfigReleaseBlock.close)}`;
+}
+
+const buildTypesBlock = findGradleBlock(gradle, 'buildTypes');
+const buildTypeReleaseBlock = buildTypesBlock
+  ? findGradleBlock(gradle, 'release', buildTypesBlock.open + 1, buildTypesBlock.close)
+  : null;
+if (!buildTypeReleaseBlock) throw new Error('Could not find buildTypes.release in android/app/build.gradle.');
+
+const releaseBody = gradle.slice(buildTypeReleaseBlock.open + 1, buildTypeReleaseBlock.close);
+const releaseBodyWithoutSigning = releaseBody.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '');
+gradle = `${gradle.slice(0, buildTypeReleaseBlock.open + 1)}\n            signingConfig signingConfigs.release${releaseBodyWithoutSigning}${gradle.slice(buildTypeReleaseBlock.close)}`;
+
+const finalSigningConfigsBlock = findGradleBlock(gradle, 'signingConfigs');
+const finalSigningConfigReleaseBlock = finalSigningConfigsBlock
+  ? findGradleBlock(gradle, 'release', finalSigningConfigsBlock.open + 1, finalSigningConfigsBlock.close)
+  : null;
+const finalBuildTypesBlock = findGradleBlock(gradle, 'buildTypes');
+const finalBuildTypeReleaseBlock = finalBuildTypesBlock
+  ? findGradleBlock(gradle, 'release', finalBuildTypesBlock.open + 1, finalBuildTypesBlock.close)
+  : null;
+const finalSigningConfigBody = finalSigningConfigReleaseBlock
+  ? gradle.slice(finalSigningConfigReleaseBlock.open + 1, finalSigningConfigReleaseBlock.close)
+  : '';
+const finalBuildTypeBody = finalBuildTypeReleaseBlock
+  ? gradle.slice(finalBuildTypeReleaseBlock.open + 1, finalBuildTypeReleaseBlock.close)
+  : '';
+
+if (!finalSigningConfigReleaseBlock || !finalBuildTypeReleaseBlock) {
+  throw new Error('Release signing blocks were not created correctly in android/app/build.gradle.');
+}
+if (finalSigningConfigBody.includes('signingConfig signingConfigs.release')) {
+  throw new Error('Invalid Gradle signing syntax: signingConfig was placed inside signingConfigs.release.');
+}
+if (!finalBuildTypeBody.includes('signingConfig signingConfigs.release')) {
+  throw new Error('Invalid Gradle signing syntax: buildTypes.release is missing signingConfig signingConfigs.release.');
+}
 
 writeIfChanged(appGradlePath, gradle);
 console.log('Prepared Capacitor Android project for signed Zibda release AAB.');
