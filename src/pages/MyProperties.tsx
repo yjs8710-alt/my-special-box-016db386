@@ -632,7 +632,7 @@ const MyProperties = () => {
   const [properties, setProperties] = useState<DBProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden" | "ended">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "ended">("all");
   const [agentTab, setAgentTab] = useState<string>("전체");
   const [agencyTab, setAgencyTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
