@@ -493,6 +493,12 @@ const PropertyRow = memo(({
               style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>
               {prop.type}
             </span>
+            {prop.status === "active" && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
+                광고중
+              </span>
+            )}
             {prop.status === "hidden" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                 style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
@@ -567,12 +573,14 @@ const PropertyRow = memo(({
         </div>
         {/* 모바일: 액션 버튼 */}
         <div className="flex sm:hidden items-center gap-1 flex-shrink-0 ml-1">
-          <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-            className="px-1.5 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
-            title="이 매물 정보를 그대로 가져와 새로 등록"
-            style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
-            재등록
-          </button>
+          {prop.status === "ended" && (
+            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
+              className="px-1.5 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
+              title="이 매물 정보를 그대로 가져와 새로 등록"
+              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
+              재등록
+            </button>
+          )}
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
@@ -811,19 +819,21 @@ const MyProperties = () => {
   // 등록자(개인)별 탭 — 매물 수 많은 순, '봄날부동산'/'관리자'는 항상 최상단
   const agentList = useMemo(() => {
     if (!isAdminView) return [];
+    // 담당자 이름으로만 표시: 숫자/하이픈/공백만으로 된 값(전화번호 등) 제외
+    const isValidName = (n: string) => !!n && n !== "(이름없음)" && !/^[\d\s\-+()]+$/.test(n);
     const counts = new Map<string, number>();
     properties.forEach(p => {
       const n = getDisplayAgent(p);
+      if (!isValidName(n)) return;
       counts.set(n, (counts.get(n) ?? 0) + 1);
     });
     const PRIORITY = ["봄날부동산", "관리자"];
     const names = Array.from(counts.keys());
     const priority = PRIORITY.filter(n => counts.has(n));
     const rest = names
-      .filter(n => !PRIORITY.includes(n) && n !== "(이름없음)")
+      .filter(n => !PRIORITY.includes(n))
       .sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0) || a.localeCompare(b, "ko"));
-    const unknown = counts.has("(이름없음)") ? ["(이름없음)"] : [];
-    return ["전체", ...priority, ...rest, ...unknown];
+    return ["전체", ...priority, ...rest];
   }, [properties, isAdminView, registrantMap]);
 
   const filtered = useMemo(() => {
