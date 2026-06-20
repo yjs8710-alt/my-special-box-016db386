@@ -428,7 +428,7 @@ const PropertyRow = memo(({
             {registrantInfo?.agency_name ? (
               <span
                 className="inline-flex items-center gap-1 font-bold px-2 py-0.5 rounded-md"
-                style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}
+                style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))" }}
               >
                 <Store className="w-3.5 h-3.5" /> {registrantInfo.agency_name}
               </span>
@@ -483,12 +483,6 @@ const PropertyRow = memo(({
             <div className="w-12 h-10 rounded-lg border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
               <Building2 className="w-4 h-4 text-muted-foreground" />
             </div>
-          )}
-          {prop.status === "active" && (
-            <span className="absolute left-0 top-0 text-[8px] font-bold px-1 py-[1px] rounded-br-md rounded-tl-md whitespace-nowrap z-10"
-              style={{ background: "hsl(var(--chart-2))", color: "white" }}>
-              광고중
-            </span>
           )}
         </div>
 
