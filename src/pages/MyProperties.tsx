@@ -707,24 +707,43 @@ const MyProperties = () => {
         return;
       }
 
-      // 일반 사용자: agent_profiles에서 이름 조회
-      // 본인 registered_by OR agent_name 기준 매물 조회
-      const { data: profile } = await supabase
+      // 일반 사용자: 본인 + 부모/형제/하위 에이전트 매물까지 모두 조회
+      const { data: myProfile } = await supabase
         .from("agent_profiles")
-        .select("name")
+        .select("name, user_id, parent_user_id")
         .eq("user_id", user.userId)
         .maybeSingle();
 
-      const name = profile?.name ?? "";
+      const name = myProfile?.name ?? "";
       setAgentName(name);
 
-      if (!name && !user.userId) { setLoading(false); return; }
+      const relatedIds = new Set<string>([user.userId]);
+      const relatedNames = new Set<string>();
+      if (name) relatedNames.add(name);
+      if (myProfile?.parent_user_id) relatedIds.add(myProfile.parent_user_id);
 
-      // registered_by = 본인 userId OR agent_name = 본인 이름 (둘 다 커버)
+      const rootId = myProfile?.parent_user_id ?? user.userId;
+      const { data: family } = await supabase
+        .from("agent_profiles")
+        .select("user_id, name")
+        .or(`user_id.eq.${rootId},parent_user_id.eq.${rootId}`);
+      (family ?? []).forEach((f: { user_id: string; name: string }) => {
+        if (f.user_id) relatedIds.add(f.user_id);
+        if (f.name) relatedNames.add(f.name);
+      });
+
+      const idList = Array.from(relatedIds);
+      const nameList = Array.from(relatedNames).filter(Boolean);
+      const orParts: string[] = [];
+      if (idList.length) orParts.push(`registered_by.in.(${idList.join(",")})`);
+      if (nameList.length) orParts.push(`agent_name.in.(${nameList.map(n => `"${n}"`).join(",")})`);
+
+      if (orParts.length === 0) { setLoading(false); return; }
+
       const { data, error } = await supabase
         .from("properties")
         .select("*")
-        .or(`registered_by.eq.${user.userId}${name ? `,agent_name.eq.${name}` : ""}`)
+        .or(orParts.join(","))
         .order("registered_date", { ascending: false });
 
       if (!error && data) setProperties(data as DBProperty[]);
