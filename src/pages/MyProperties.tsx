@@ -784,7 +784,7 @@ const MyProperties = () => {
   };
 
   const handleToggleStatus = async (prop: DBProperty) => {
-    const newStatus = prop.status === "active" ? "hidden" : "active";
+    const newStatus = prop.status === "active" ? "ended" : "active";
     const { error } = await supabase.from("properties").update({ status: newStatus }).eq("id", prop.id);
     if (error) { alert("상태 변경 오류: " + error.message); return; }
     setProperties(prev => prev.map(p => p.id === prop.id ? { ...p, status: newStatus } : p));
