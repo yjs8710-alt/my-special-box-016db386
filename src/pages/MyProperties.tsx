@@ -329,15 +329,15 @@ const EditModal = ({
           <section>
             <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wide">노출 상태</h3>
             <div className="flex gap-3">
-              {(["active", "hidden"] as const).map(s => (
+              {(["active", "ended"] as const).map(s => (
                 <button key={s} type="button" onClick={() => set("status", s)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all"
                   style={form.status === s
-                    ? { background: s === "active" ? "hsl(var(--chart-2) / 0.15)" : "hsl(var(--muted))", borderColor: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--border))", color: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }
+                    ? { background: s === "active" ? "hsl(var(--chart-2) / 0.15)" : "hsl(var(--destructive) / 0.15)", borderColor: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }
                     : { background: "transparent", borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                   }>
                   {s === "active" ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  {s === "active" ? "노출" : "숨김"}
+                  {s === "active" ? "광고중" : "종료"}
                 </button>
               ))}
             </div>
