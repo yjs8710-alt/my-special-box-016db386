@@ -882,7 +882,7 @@ const MyProperties = () => {
       )}
       {deleteTarget && <DeleteConfirmModal title={deleteTarget.title} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} isAdmin={isAdminView} />}
 
-      <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 pb-40 md:pb-12">
+      <div className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 pb-56 md:pb-12">
         {/* 헤더 */}
         <div className="flex items-start justify-between mb-6 gap-4">
           <div>
