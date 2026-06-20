@@ -499,15 +499,9 @@ const PropertyRow = memo(({
                 광고중
               </span>
             )}
-            {prop.status === "hidden" && (
+            {prop.status !== "active" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
-                숨김
-              </span>
-            )}
-            {prop.status === "ended" && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(0 0% 85%)", color: "hsl(0 0% 40%)" }}>
+                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}>
                 종료
               </span>
             )}
