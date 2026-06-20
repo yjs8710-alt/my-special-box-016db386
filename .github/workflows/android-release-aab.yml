@@ -138,6 +138,25 @@ jobs:
           ANDROID_VERSION_NAME: ${{ github.event.inputs.version_name }}
         run: node android-build/ci/prepare-capacitor-android.mjs
 
+      - name: Validate Android release signing config
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const gradle = fs.readFileSync('android/app/build.gradle', 'utf8');
+          const releaseBuildType = gradle.match(/buildTypes\s*\{[\s\S]*?release\s*\{([\s\S]*?)\n\s*\}/);
+          const releaseSigningConfig = gradle.match(/signingConfigs\s*\{[\s\S]*?release\s*\{([\s\S]*?)\n\s*\}/);
+
+          if (!releaseSigningConfig) throw new Error('Missing signingConfigs.release block.');
+          if (!releaseBuildType) throw new Error('Missing buildTypes.release block.');
+          if (!releaseBuildType[1].includes('signingConfig signingConfigs.release')) {
+            throw new Error('buildTypes.release must contain: signingConfig signingConfigs.release');
+          }
+          if (releaseSigningConfig[1].includes('signingConfig signingConfigs.release')) {
+            throw new Error('signingConfig is incorrectly placed inside signingConfigs.release.');
+          }
+          NODE
+
       - name: Generate Android icons and splash assets
         run: bunx capacitor-assets generate --android
 
