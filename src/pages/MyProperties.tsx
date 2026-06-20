@@ -329,15 +329,15 @@ const EditModal = ({
           <section>
             <h3 className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wide">노출 상태</h3>
             <div className="flex gap-3">
-              {(["active", "hidden"] as const).map(s => (
+              {(["active", "ended"] as const).map(s => (
                 <button key={s} type="button" onClick={() => set("status", s)}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all"
                   style={form.status === s
-                    ? { background: s === "active" ? "hsl(var(--chart-2) / 0.15)" : "hsl(var(--muted))", borderColor: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--border))", color: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }
+                    ? { background: s === "active" ? "hsl(var(--chart-2) / 0.15)" : "hsl(var(--destructive) / 0.15)", borderColor: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }
                     : { background: "transparent", borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                   }>
                   {s === "active" ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  {s === "active" ? "노출" : "숨김"}
+                  {s === "active" ? "광고중" : "종료"}
                 </button>
               ))}
             </div>
@@ -390,7 +390,6 @@ const PropertyRow = memo(({
   onEdit,
   onDelete,
   onToggleStatus,
-  onReregister,
   isAdmin,
   registrantInfo,
   matchedBy,
@@ -399,7 +398,6 @@ const PropertyRow = memo(({
   onEdit: (p: DBProperty) => void;
   onDelete: (p: DBProperty) => void;
   onToggleStatus: (p: DBProperty) => void;
-  onReregister: (p: DBProperty) => void;
   isAdmin?: boolean;
   registrantInfo?: { name: string; agency_name?: string } | null;
   matchedBy?: "registered_by" | "agent_name" | null;
@@ -475,7 +473,7 @@ const PropertyRow = memo(({
       {/* 요약 행 */}
       <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpanded(e => !e)}>
         {/* 상태 dot */}
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }} />
+        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }} />
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
@@ -499,15 +497,9 @@ const PropertyRow = memo(({
                 광고중
               </span>
             )}
-            {prop.status === "hidden" && (
+            {prop.status !== "active" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }}>
-                숨김
-              </span>
-            )}
-            {prop.status === "ended" && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(0 0% 85%)", color: "hsl(0 0% 40%)" }}>
+                style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}>
                 종료
               </span>
             )}
@@ -535,26 +527,17 @@ const PropertyRow = memo(({
         </div>
 
         <div className="hidden sm:grid grid-cols-[44px_44px_44px_20px] items-center gap-1 flex-shrink-0 ml-1 text-center">
-          {prop.status === "ended" ? (
-            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-              className="w-full px-1 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
-              title="이 매물 정보를 그대로 가져와 새로 등록"
-              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
-              재등록
-            </button>
-          ) : (
-            <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-              className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-              title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
-              style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
-              {prop.status === "active" ? "노출" : "숨김"}
-            </button>
-          )}
+          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+            className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
+            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
+            {prop.status === "active" ? "광고중" : "종료"}
+          </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="w-full px-1 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
           </button>
-          {prop.status !== "ended" ? (
+          {prop.status === "active" ? (
             <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
               className="w-full px-1 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
               style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
@@ -573,14 +556,12 @@ const PropertyRow = memo(({
         </div>
         {/* 모바일: 액션 버튼 */}
         <div className="flex sm:hidden items-center gap-1 flex-shrink-0 ml-1">
-          {prop.status === "ended" && (
-            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-              className="px-1.5 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
-              title="이 매물 정보를 그대로 가져와 새로 등록"
-              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
-              재등록
-            </button>
-          )}
+          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+            className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
+            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
+            {prop.status === "active" ? "광고중" : "종료"}
+          </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
@@ -649,7 +630,7 @@ const MyProperties = () => {
   const [properties, setProperties] = useState<DBProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden" | "ended">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "ended">("all");
   const [agentTab, setAgentTab] = useState<string>("전체");
   const [agencyTab, setAgencyTab] = useState<string>("전체");
   const [editTarget, setEditTarget] = useState<DBProperty | null>(null);
@@ -801,7 +782,7 @@ const MyProperties = () => {
   };
 
   const handleToggleStatus = async (prop: DBProperty) => {
-    const newStatus = prop.status === "active" ? "hidden" : "active";
+    const newStatus = prop.status === "active" ? "ended" : "active";
     const { error } = await supabase.from("properties").update({ status: newStatus }).eq("id", prop.id);
     if (error) { alert("상태 변경 오류: " + error.message); return; }
     setProperties(prev => prev.map(p => p.id === prop.id ? { ...p, status: newStatus } : p));
@@ -862,7 +843,7 @@ const MyProperties = () => {
   const visibleList = filtered.slice(0, visibleCount);
 
   const activeCount = properties.filter(p => p.status === "active").length;
-  const hiddenCount = properties.filter(p => p.status === "hidden").length;
+  const endedCount = properties.filter(p => p.status === "ended" || p.status === "hidden").length;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "hsl(var(--background))" }}>
@@ -922,8 +903,8 @@ const MyProperties = () => {
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { label: "전체 매물", value: properties.length, color: "hsl(var(--primary))" },
-            { label: "노출 중", value: activeCount, color: "hsl(var(--chart-2))" },
-            { label: "숨김", value: hiddenCount, color: "hsl(var(--muted-foreground))" },
+            { label: "광고중", value: activeCount, color: "hsl(var(--chart-2))" },
+            { label: "종료", value: endedCount, color: "hsl(var(--destructive))" },
           ].map(({ label, value, color }) => (
             <div key={label} className="rounded-xl border border-border p-4 text-center" style={{ background: "hsl(var(--card))" }}>
               <p className="text-2xl font-extrabold" style={{ color }}>{value}</p>
@@ -979,14 +960,14 @@ const MyProperties = () => {
             <Input className="pl-9 h-9 text-sm" placeholder="제목, 주소, 유형 검색" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-1.5">
-            {(["all", "active", "hidden", "ended"] as const).map(s => (
+            {(["all", "active", "ended"] as const).map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all"
                 style={statusFilter === s
                   ? { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", borderColor: "hsl(var(--primary))" }
                   : { background: "transparent", color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))" }
                 }>
-                {s === "all" ? "전체" : s === "active" ? "노출" : s === "hidden" ? "숨김" : "종료"}
+                {s === "all" ? "전체" : s === "active" ? "광고중" : "종료"}
               </button>
             ))}
           </div>
@@ -1023,7 +1004,7 @@ const MyProperties = () => {
                 onEdit={setEditTarget}
                 onDelete={setDeleteTarget}
                 onToggleStatus={handleToggleStatus}
-                onReregister={(p) => { setReregisterPrefill(p as unknown as Record<string, unknown>); setShowRegister(true); }}
+                
                 isAdmin={agentName === "관리자"}
                 registrantInfo={agentName === "관리자" ? (
                   prop.registered_by
