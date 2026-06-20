@@ -4,13 +4,25 @@ on:
   workflow_dispatch:
     inputs:
       version_code:
-        description: Play Console versionCode. Increase by 1 for every new upload.
+        description: Play Console versionCode. 업로드할 때마다 1씩 올리세요.
         required: true
         default: '1'
       version_name:
-        description: User-visible versionName.
+        description: 사용자에게 표시되는 versionName.
         required: true
         default: '1.0.0'
+      keystore_password:
+        description: (선택) keystore 비밀번호. 비워두면 자동 생성됩니다. 첫 빌드 후 반드시 같은 값을 계속 사용해야 합니다.
+        required: false
+        default: ''
+      key_password:
+        description: (선택) key 비밀번호. 비워두면 keystore 비밀번호와 동일하게 사용됩니다.
+        required: false
+        default: ''
+      key_alias:
+        description: (선택) key alias.
+        required: false
+        default: 'zibda'
 
 jobs:
   build-aab:
@@ -59,16 +71,69 @@ jobs:
           fi
           bunx cap sync android
 
-      - name: Decode release keystore
+      - name: Resolve signing credentials
+        id: signing
+        env:
+          SECRET_KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          SECRET_KS_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SECRET_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SECRET_KEY_PW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          INPUT_KS_PW: ${{ github.event.inputs.keystore_password }}
+          INPUT_KEY_PW: ${{ github.event.inputs.key_password }}
+          INPUT_KEY_ALIAS: ${{ github.event.inputs.key_alias }}
         run: |
-          printf '%s' "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/zibda-release.keystore
+          set -e
+          mkdir -p release
+
+          if [ -n "$SECRET_KS_B64" ] && [ -n "$SECRET_KS_PW" ] && [ -n "$SECRET_KEY_ALIAS" ] && [ -n "$SECRET_KEY_PW" ]; then
+            echo "🔐 Using keystore from GitHub Secrets."
+            printf '%s' "$SECRET_KS_B64" | base64 --decode > android/zibda-release.keystore
+            KS_PW="$SECRET_KS_PW"
+            KEY_PW="$SECRET_KEY_PW"
+            KEY_ALIAS="$SECRET_KEY_ALIAS"
+            GENERATED="false"
+          else
+            echo "⚠️  Secrets 가 비어 있어 임시 keystore 를 자동 생성합니다."
+            echo "⚠️  Artifacts 의 zibda-release-keystore 를 반드시 안전한 곳에 보관하세요."
+            echo "⚠️  같은 키로 계속 서명해야 Play Store 업데이트가 가능합니다."
+
+            KS_PW="${INPUT_KS_PW:-zibda$(date +%s)}"
+            KEY_PW="${INPUT_KEY_PW:-$KS_PW}"
+            KEY_ALIAS="${INPUT_KEY_ALIAS:-zibda}"
+
+            keytool -genkeypair -v \
+              -keystore android/zibda-release.keystore \
+              -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$KS_PW" -keypass "$KEY_PW" \
+              -dname "CN=Zibda, OU=Mobile, O=Zibda, L=Cheongju, ST=Chungbuk, C=KR"
+
+            cp android/zibda-release.keystore release/zibda-release.keystore
+            base64 -w0 android/zibda-release.keystore > release/zibda-release.keystore.base64.txt
+            cat > release/KEYSTORE_CREDENTIALS.txt <<EOF
+=== 다음 4개 값을 GitHub Secrets 에 등록하세요 (Settings → Secrets and variables → Actions) ===
+
+ANDROID_KEYSTORE_BASE64   = (zibda-release.keystore.base64.txt 의 내용 전체 복사)
+ANDROID_KEYSTORE_PASSWORD = $KS_PW
+ANDROID_KEY_ALIAS         = $KEY_ALIAS
+ANDROID_KEY_PASSWORD      = $KEY_PW
+
+⚠️  이 keystore 파일(zibda-release.keystore)을 잃어버리면 Play Store 앱을 영영 업데이트할 수 없습니다.
+EOF
+            GENERATED="true"
+          fi
+
+          echo "ks_pw=$KS_PW" >> "$GITHUB_OUTPUT"
+          echo "key_pw=$KEY_PW" >> "$GITHUB_OUTPUT"
+          echo "key_alias=$KEY_ALIAS" >> "$GITHUB_OUTPUT"
+          echo "generated=$GENERATED" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Android release settings
         env:
           ANDROID_KEYSTORE_PATH: ../zibda-release.keystore
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ steps.signing.outputs.ks_pw }}
+          ANDROID_KEY_ALIAS: ${{ steps.signing.outputs.key_alias }}
+          ANDROID_KEY_PASSWORD: ${{ steps.signing.outputs.key_pw }}
           ANDROID_VERSION_CODE: ${{ github.event.inputs.version_code }}
           ANDROID_VERSION_NAME: ${{ github.event.inputs.version_name }}
         run: node android-build/ci/prepare-capacitor-android.mjs
@@ -82,7 +147,6 @@ jobs:
 
       - name: Collect AAB
         run: |
-          mkdir -p release
           cp android/app/build/outputs/bundle/release/app-release.aab release/app-release.aab
           shasum -a 256 release/app-release.aab > release/app-release.aab.sha256
 
@@ -94,3 +158,14 @@ jobs:
             release/app-release.aab
             release/app-release.aab.sha256
           retention-days: 14
+
+      - name: Upload generated keystore (only if auto-generated)
+        if: steps.signing.outputs.generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zibda-release-keystore-SAVE-THIS
+          path: |
+            release/zibda-release.keystore
+            release/zibda-release.keystore.base64.txt
+            release/KEYSTORE_CREDENTIALS.txt
+          retention-days: 90
