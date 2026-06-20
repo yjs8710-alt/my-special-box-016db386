@@ -475,7 +475,7 @@ const PropertyRow = memo(({
       {/* 요약 행 */}
       <div className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setExpanded(e => !e)}>
         {/* 상태 dot */}
-        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }} />
+        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }} />
 
         {/* 썸네일 */}
         {prop.images?.[0] ? (
