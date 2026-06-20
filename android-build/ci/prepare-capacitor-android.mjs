@@ -145,5 +145,30 @@ const releaseBody = gradle.slice(buildTypeReleaseBlock.open + 1, buildTypeReleas
 const releaseBodyWithoutSigning = releaseBody.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '');
 gradle = `${gradle.slice(0, buildTypeReleaseBlock.open + 1)}\n            signingConfig signingConfigs.release${releaseBodyWithoutSigning}${gradle.slice(buildTypeReleaseBlock.close)}`;
 
+const finalSigningConfigsBlock = findGradleBlock(gradle, 'signingConfigs');
+const finalSigningConfigReleaseBlock = finalSigningConfigsBlock
+  ? findGradleBlock(gradle, 'release', finalSigningConfigsBlock.open + 1, finalSigningConfigsBlock.close)
+  : null;
+const finalBuildTypesBlock = findGradleBlock(gradle, 'buildTypes');
+const finalBuildTypeReleaseBlock = finalBuildTypesBlock
+  ? findGradleBlock(gradle, 'release', finalBuildTypesBlock.open + 1, finalBuildTypesBlock.close)
+  : null;
+const finalSigningConfigBody = finalSigningConfigReleaseBlock
+  ? gradle.slice(finalSigningConfigReleaseBlock.open + 1, finalSigningConfigReleaseBlock.close)
+  : '';
+const finalBuildTypeBody = finalBuildTypeReleaseBlock
+  ? gradle.slice(finalBuildTypeReleaseBlock.open + 1, finalBuildTypeReleaseBlock.close)
+  : '';
+
+if (!finalSigningConfigReleaseBlock || !finalBuildTypeReleaseBlock) {
+  throw new Error('Release signing blocks were not created correctly in android/app/build.gradle.');
+}
+if (finalSigningConfigBody.includes('signingConfig signingConfigs.release')) {
+  throw new Error('Invalid Gradle signing syntax: signingConfig was placed inside signingConfigs.release.');
+}
+if (!finalBuildTypeBody.includes('signingConfig signingConfigs.release')) {
+  throw new Error('Invalid Gradle signing syntax: buildTypes.release is missing signingConfig signingConfigs.release.');
+}
+
 writeIfChanged(appGradlePath, gradle);
 console.log('Prepared Capacitor Android project for signed Zibda release AAB.');
