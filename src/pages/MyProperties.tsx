@@ -526,12 +526,12 @@ const PropertyRow = memo(({
           </span>
         </div>
 
-        <div className="hidden sm:grid grid-cols-[44px_44px_44px_20px] items-center gap-1 flex-shrink-0 ml-1 text-center">
+        <div className="hidden sm:grid grid-cols-[52px_44px_44px_20px] items-center gap-1 flex-shrink-0 ml-1 text-center">
           <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
             className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
-            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
-            {prop.status === "active" ? "광고중" : "종료"}
+            title={prop.status === "active" ? "종료 처리" : "재등록"}
+            style={{ color: prop.status === "active" ? "hsl(var(--destructive))" : "hsl(var(--chart-2))" }}>
+            {prop.status === "active" ? "종료" : "재등록"}
           </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="w-full px-1 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
@@ -558,9 +558,9 @@ const PropertyRow = memo(({
         <div className="flex sm:hidden items-center gap-1 flex-shrink-0 ml-1">
           <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
             className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
-            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
-            {prop.status === "active" ? "광고중" : "종료"}
+            title={prop.status === "active" ? "종료 처리" : "재등록"}
+            style={{ color: prop.status === "active" ? "hsl(var(--destructive))" : "hsl(var(--chart-2))" }}>
+            {prop.status === "active" ? "종료" : "재등록"}
           </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
@@ -568,6 +568,7 @@ const PropertyRow = memo(({
           </button>
           {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
         </div>
+
 
       </div>
 
