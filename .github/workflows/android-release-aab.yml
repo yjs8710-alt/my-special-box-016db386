@@ -110,16 +110,16 @@ jobs:
 
             cp android/zibda-release.keystore release/zibda-release.keystore
             base64 -w0 android/zibda-release.keystore > release/zibda-release.keystore.base64.txt
-            cat > release/KEYSTORE_CREDENTIALS.txt <<EOF
-=== 다음 4개 값을 GitHub Secrets 에 등록하세요 (Settings → Secrets and variables → Actions) ===
-
-ANDROID_KEYSTORE_BASE64   = (zibda-release.keystore.base64.txt 의 내용 전체 복사)
-ANDROID_KEYSTORE_PASSWORD = $KS_PW
-ANDROID_KEY_ALIAS         = $KEY_ALIAS
-ANDROID_KEY_PASSWORD      = $KEY_PW
-
-⚠️  이 keystore 파일(zibda-release.keystore)을 잃어버리면 Play Store 앱을 영영 업데이트할 수 없습니다.
-EOF
+            {
+              echo "=== 다음 4개 값을 GitHub Secrets 에 등록하세요 (Settings → Secrets and variables → Actions) ==="
+              echo ""
+              echo "ANDROID_KEYSTORE_BASE64   = (zibda-release.keystore.base64.txt 의 내용 전체 복사)"
+              echo "ANDROID_KEYSTORE_PASSWORD = $KS_PW"
+              echo "ANDROID_KEY_ALIAS         = $KEY_ALIAS"
+              echo "ANDROID_KEY_PASSWORD      = $KEY_PW"
+              echo ""
+              echo "⚠️  이 keystore 파일(zibda-release.keystore)을 잃어버리면 Play Store 앱을 영영 업데이트할 수 없습니다."
+            } > release/KEYSTORE_CREDENTIALS.txt
             GENERATED="true"
           fi
 
