@@ -529,26 +529,17 @@ const PropertyRow = memo(({
         </div>
 
         <div className="hidden sm:grid grid-cols-[44px_44px_44px_20px] items-center gap-1 flex-shrink-0 ml-1 text-center">
-          {prop.status === "ended" ? (
-            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-              className="w-full px-1 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
-              title="이 매물 정보를 그대로 가져와 새로 등록"
-              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
-              재등록
-            </button>
-          ) : (
-            <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
-              className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
-              title={prop.status === "active" ? "숨김 처리" : "노출 처리"}
-              style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
-              {prop.status === "active" ? "노출" : "숨김"}
-            </button>
-          )}
+          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+            className="w-full px-1 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
+            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
+            {prop.status === "active" ? "광고중" : "종료"}
+          </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="w-full px-1 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
           </button>
-          {prop.status !== "ended" ? (
+          {prop.status === "active" ? (
             <button onClick={e => { e.stopPropagation(); onDelete(prop); }}
               className="w-full px-1 py-1 rounded-lg hover:bg-red-50 transition-colors text-[10px] font-bold whitespace-nowrap"
               style={{ color: isAdmin ? "hsl(var(--destructive))" : "hsl(var(--warning, 40 90% 50%))" }}
