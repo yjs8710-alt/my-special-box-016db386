@@ -104,6 +104,10 @@ if (!gradle.includes('signingConfigs {')) {
   );
 }
 
+gradle = gradle.replace(/(signingConfigs\s*\{[\s\S]*?release\s*\{)([\s\S]*?)(\n\s*\})/, (match, releaseOpen, body, releaseClose) => {
+  return `${releaseOpen}${body.replace(/\n\s*signingConfig\s+signingConfigs\.release/g, '')}${releaseClose}`;
+});
+
 gradle = gradle.replace(/(buildTypes\s*\{[\s\S]*?release\s*\{)([\s\S]*?)(\n\s*\})/, (match, releaseOpen, body, releaseClose) => {
   if (body.includes('signingConfig signingConfigs.release')) return match;
   return `${releaseOpen}\n            signingConfig signingConfigs.release${body}${releaseClose}`;
