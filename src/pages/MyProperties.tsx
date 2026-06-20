@@ -476,13 +476,21 @@ const PropertyRow = memo(({
         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }} />
 
         {/* 썸네일 */}
-        {prop.images?.[0] ? (
-          <img src={prop.images[0]} alt="" loading="lazy" decoding="async" className="w-12 h-10 rounded-lg object-cover flex-shrink-0 border border-border" />
-        ) : (
-          <div className="w-12 h-10 rounded-lg flex-shrink-0 border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
-            <Building2 className="w-4 h-4 text-muted-foreground" />
-          </div>
-        )}
+        <div className="relative flex-shrink-0">
+          {prop.images?.[0] ? (
+            <img src={prop.images[0]} alt="" loading="lazy" decoding="async" className="w-12 h-10 rounded-lg object-cover border border-border" />
+          ) : (
+            <div className="w-12 h-10 rounded-lg border border-border flex items-center justify-center" style={{ background: "hsl(var(--muted))" }}>
+              <Building2 className="w-4 h-4 text-muted-foreground" />
+            </div>
+          )}
+          {prop.status === "active" && (
+            <span className="absolute left-0 top-0 text-[8px] font-bold px-1 py-[1px] rounded-br-md rounded-tl-md whitespace-nowrap z-10"
+              style={{ background: "hsl(var(--chart-2))", color: "white" }}>
+              광고중
+            </span>
+          )}
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -491,12 +499,6 @@ const PropertyRow = memo(({
               style={{ background: "hsl(var(--accent) / 0.12)", color: "hsl(var(--accent))" }}>
               {prop.type}
             </span>
-            {prop.status === "active" && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
-                광고중
-              </span>
-            )}
             {prop.status !== "active" && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
                 style={{ background: "hsl(var(--destructive) / 0.15)", color: "hsl(var(--destructive))" }}>
