@@ -92,10 +92,10 @@ if (!gradle.includes('def keystorePropertiesFile')) {
   gradle = `def keystoreProperties = new Properties()\ndef keystorePropertiesFile = rootProject.file("keystore.properties")\nif (keystorePropertiesFile.exists()) {\n    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n}\n\n${gradle}`;
 }
 
-gradle = gradle.replace(/namespace\s+"[^"]+"/, 'namespace "com.zibda.app"');
-gradle = gradle.replace(/applicationId\s+"[^"]+"/, 'applicationId "com.zibda.app"');
-gradle = gradle.replace(/versionCode\s+\d+/, `versionCode ${process.env.ANDROID_VERSION_CODE || '1'}`);
-gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${process.env.ANDROID_VERSION_NAME || '1.0.0'}"`);
+gradle = gradle.replace(/namespace\s*=\s*"[^"]+"|namespace\s+"[^"]+"/, 'namespace = "com.zibda.app"');
+gradle = gradle.replace(/applicationId\s*=\s*"[^"]+"|applicationId\s+"[^"]+"/, 'applicationId "com.zibda.app"');
+gradle = gradle.replace(/versionCode\s*=\s*\d+|versionCode\s+\d+/, `versionCode ${process.env.ANDROID_VERSION_CODE || '1'}`);
+gradle = gradle.replace(/versionName\s*=\s*"[^"]+"|versionName\s+"[^"]+"/, `versionName "${process.env.ANDROID_VERSION_NAME || '1.0.0'}"`);
 
 if (!gradle.includes('signingConfigs {')) {
   gradle = gradle.replace(
@@ -104,9 +104,9 @@ if (!gradle.includes('signingConfigs {')) {
   );
 }
 
-gradle = gradle.replace(/release\s*\{([\s\S]*?)\n\s*\}/, (match, body) => {
+gradle = gradle.replace(/(buildTypes\s*\{[\s\S]*?release\s*\{)([\s\S]*?)(\n\s*\})/, (match, releaseOpen, body, releaseClose) => {
   if (body.includes('signingConfig signingConfigs.release')) return match;
-  return match.replace(/release\s*\{/, 'release {\n            signingConfig signingConfigs.release');
+  return `${releaseOpen}\n            signingConfig signingConfigs.release${body}${releaseClose}`;
 });
 
 writeIfChanged(appGradlePath, gradle);
