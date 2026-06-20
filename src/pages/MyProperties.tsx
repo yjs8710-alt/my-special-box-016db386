@@ -558,14 +558,12 @@ const PropertyRow = memo(({
         </div>
         {/* 모바일: 액션 버튼 */}
         <div className="flex sm:hidden items-center gap-1 flex-shrink-0 ml-1">
-          {prop.status === "ended" && (
-            <button onClick={e => { e.stopPropagation(); onReregister(prop); }}
-              className="px-1.5 py-1 rounded-lg transition-colors text-[10px] font-bold whitespace-nowrap"
-              title="이 매물 정보를 그대로 가져와 새로 등록"
-              style={{ background: "hsl(var(--primary) / 0.12)", color: "hsl(var(--primary))" }}>
-              재등록
-            </button>
-          )}
+          <button onClick={e => { e.stopPropagation(); onToggleStatus(prop); }}
+            className="px-1.5 py-1 rounded-lg transition-colors hover:bg-muted/60 text-[10px] font-bold whitespace-nowrap"
+            title={prop.status === "active" ? "종료 처리" : "광고중 처리"}
+            style={{ color: prop.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))" }}>
+            {prop.status === "active" ? "광고중" : "종료"}
+          </button>
           <button onClick={e => { e.stopPropagation(); onEdit(prop); }}
             className="px-1.5 py-1 rounded-lg hover:bg-muted/60 transition-colors text-muted-foreground text-[10px] font-bold whitespace-nowrap">
             수정
