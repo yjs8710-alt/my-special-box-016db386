@@ -905,8 +905,8 @@ const MyProperties = () => {
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
             { label: "전체 매물", value: properties.length, color: "hsl(var(--primary))" },
-            { label: "노출 중", value: activeCount, color: "hsl(var(--chart-2))" },
-            { label: "숨김", value: hiddenCount, color: "hsl(var(--muted-foreground))" },
+            { label: "광고중", value: activeCount, color: "hsl(var(--chart-2))" },
+            { label: "종료", value: endedCount, color: "hsl(var(--destructive))" },
           ].map(({ label, value, color }) => (
             <div key={label} className="rounded-xl border border-border p-4 text-center" style={{ background: "hsl(var(--card))" }}>
               <p className="text-2xl font-extrabold" style={{ color }}>{value}</p>
