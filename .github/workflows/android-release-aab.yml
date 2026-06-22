@@ -197,10 +197,11 @@ jobs:
               im = im.resize((1024, 1024), Image.LANCZOS)
               im.save(src)
               print('Resized icon-only.png to 1024x1024')
-          # Adaptive foreground: 1024x1024 canvas, inner icon scaled to ~66% (safe zone)
+          # Adaptive foreground: 1024x1024 canvas, inner icon scaled to ~86% so the
+          # Zibda mark appears noticeably larger on the home screen launcher.
           fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-          inner = im.resize((675, 675), Image.LANCZOS)
-          fg.paste(inner, ((1024 - 675) // 2, (1024 - 675) // 2), inner)
+          inner = im.resize((880, 880), Image.LANCZOS)
+          fg.paste(inner, ((1024 - 880) // 2, (1024 - 880) // 2), inner)
           fg.save('assets/icon-foreground.png')
           # Adaptive background: solid white (Capacitor default)
           bg = Image.new('RGBA', (1024, 1024), (255, 255, 255, 255))
