@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Phone, MessageCircle, Building2, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.pn
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import PublicPropertyView from "@/components/PublicPropertyView";
 import { sharePropertyToKakao } from "@/lib/kakaoShare";
+import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
