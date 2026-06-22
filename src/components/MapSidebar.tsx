@@ -6040,7 +6040,7 @@ const MapSidebar = ({
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
-                                 <span className="flex-shrink-0 w-14 text-[11px] font-bold pt-0.5 text-muted-foreground">{label}</span>
+                                  <span className="flex-shrink-0 w-14 text-xs font-bold pt-0.5 text-muted-foreground">{label}</span>
                                 <div className="flex-1 min-w-0 flex items-center gap-1 flex-wrap">{children}</div>
                               </div>
                             );
@@ -6048,7 +6048,7 @@ const MapSidebar = ({
                               <div className="flex flex-col px-2 py-1.5 border-t border-primary/15 bg-muted/30">
                                  <Row label="매물정보">
                                    {prop.buildYear && (
-                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
+                                     <span className="px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "hsl(25 90% 92%)", color: "hsl(25 90% 35%)", border: "1px solid hsl(25 80% 65%)" }}>
                                        준{String(prop.buildYear).slice(0,4)}
                                      </span>
                                    )}
@@ -6062,13 +6062,13 @@ const MapSidebar = ({
                                      const label = [gu, tail].filter(Boolean).join(" ");
                                      if (!label) return null;
                                      return (
-                                       <span className="text-[11px] font-semibold text-foreground whitespace-nowrap">
+                                       <span className="text-xs font-semibold text-foreground whitespace-nowrap">
                                          {label}
                                        </span>
                                      );
                                    })()}
                                    {elev && !(isMobile && (isGuest || authUser?.memberType === "일반회원")) && (
-                                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
+                                     <span className="px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "hsl(217 91% 93%)", color: "hsl(217 91% 35%)", border: "1px solid hsl(217 91% 65%)" }}>
                                        엘리베이터
                                      </span>
                                    )}
@@ -6103,7 +6103,7 @@ const MapSidebar = ({
                                             },
                                           }));
                                         }}
-                                        className="px-2 py-0.5 rounded-md text-[10px] font-bold border"
+                                        className="px-2 py-0.5 rounded-md text-xs font-bold border"
                                         style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                                       >
                                         상세보기
@@ -6121,7 +6121,7 @@ const MapSidebar = ({
                                             },
                                           }));
                                         }}
-                                        className="px-2 py-0.5 rounded-md text-[10px] font-bold"
+                                        className="px-2 py-0.5 rounded-md text-xs font-bold"
                                         style={{ background: "hsl(var(--primary))", color: "white" }}
                                       >
                                         문의하기
@@ -6134,16 +6134,16 @@ const MapSidebar = ({
                                  {allChips.length > 0 ? (
                                    <GuestOptionsButton chips={allChips} />
                                  ) : (
-                                   <span className="text-[11px] text-muted-foreground">-</span>
+                                    <span className="text-xs text-muted-foreground">-</span>
                                  )}
                                </Row>
                                <Row label="특이사항">
                                  {noteParts.length > 0 ? (
-                                    <span className="text-[11px] text-black font-bold whitespace-pre-wrap break-words">
+                                     <span className="text-xs text-black font-bold whitespace-pre-wrap break-words">
                                        {noteParts.join(" · ")}
                                      </span>
                                    ) : (
-                                     <span className="text-[11px] text-muted-foreground">-</span>
+                                      <span className="text-xs text-muted-foreground">-</span>
                                  )}
                                </Row>
                              </div>
