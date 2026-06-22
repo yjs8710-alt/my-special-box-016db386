@@ -186,15 +186,17 @@ jobs:
         run: |
           set -e
           python3 -m pip install --quiet --disable-pip-version-check Pillow
-          python3 - <<'PY'
+          cat > /tmp/prep_icon.py <<'PY'
           from PIL import Image
           import os
+
           src = 'assets/icon-only.png'
           im = Image.open(src).convert('RGBA')
           if im.size != (1024, 1024):
               im = im.resize((1024, 1024), Image.LANCZOS)
               im.save(src)
               print('Resized icon-only.png to 1024x1024')
+
           # If committed icon-foreground.png exists and is correct size, keep it.
           fg_path = 'assets/icon-foreground.png'
           if os.path.exists(fg_path):
@@ -206,16 +208,17 @@ jobs:
               else:
                   print('Using committed icon-foreground.png as-is')
           else:
-               fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-                # Scale to fill 95% of canvas width while preserving aspect ratio
-                target_w = int(1024 * 0.95)
-                scale = target_w / im.width
-                new_w = int(im.width * scale)
-                new_h = int(im.height * scale)
-                inner = im.resize((new_w, new_h), Image.LANCZOS)
-                fg.paste(inner, ((1024 - new_w) // 2, (1024 - new_h) // 2), inner)
-                fg.save(fg_path)
-                print(f'Generated icon-foreground.png from icon-only.png at {new_w}x{new_h} ({scale*100:.1f}%)')
+              fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
+              # Scale to fill 95% of canvas width while preserving aspect ratio
+              target_w = int(1024 * 0.95)
+              scale = target_w / im.width
+              new_w = int(im.width * scale)
+              new_h = int(im.height * scale)
+              inner = im.resize((new_w, new_h), Image.LANCZOS)
+              fg.paste(inner, ((1024 - new_w) // 2, (1024 - new_h) // 2), inner)
+              fg.save(fg_path)
+              print(f'Generated icon-foreground.png from icon-only.png at {new_w}x{new_h} ({scale*100:.1f}%)')
+
           # Background: use committed icon-background.png if present, else fall back to full-bleed icon
           bg_path = 'assets/icon-background.png'
           if not os.path.exists(bg_path):
@@ -229,6 +232,8 @@ jobs:
               else:
                   print('Using committed icon-background.png as-is')
           PY
+          python3 -m py_compile /tmp/prep_icon.py
+          python3 /tmp/prep_icon.py
           echo "--- assets/ source hashes ---"
           for f in assets/icon-only.png assets/icon-foreground.png assets/icon-background.png; do
             echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")"
