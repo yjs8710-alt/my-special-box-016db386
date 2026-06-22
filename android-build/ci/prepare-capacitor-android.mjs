@@ -113,8 +113,8 @@ if (!gradle.includes('def keystorePropertiesFile')) {
   gradle = `def keystoreProperties = new Properties()\ndef keystorePropertiesFile = rootProject.file("keystore.properties")\nif (keystorePropertiesFile.exists()) {\n    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n}\n\n${gradle}`;
 }
 
-gradle = gradle.replace(/namespace\s*=\s*"[^"]+"|namespace\s+"[^"]+"/, 'namespace = "com.zibda.app"');
-gradle = gradle.replace(/applicationId\s*=\s*"[^"]+"|applicationId\s+"[^"]+"/, 'applicationId "com.zibda.app"');
+gradle = gradle.replace(/namespace\s*=\s*"[^"]+"|namespace\s+"[^"]+"/, 'namespace = "kr.co.zibda.app"');
+gradle = gradle.replace(/applicationId\s*=\s*"[^"]+"|applicationId\s+"[^"]+"/, 'applicationId "kr.co.zibda.app"');
 gradle = gradle.replace(/versionCode\s*=\s*\d+|versionCode\s+\d+/, `versionCode ${process.env.ANDROID_VERSION_CODE || '1'}`);
 gradle = gradle.replace(/versionName\s*=\s*"[^"]+"|versionName\s+"[^"]+"/, `versionName "${process.env.ANDROID_VERSION_NAME || '1.0.0'}"`);
 

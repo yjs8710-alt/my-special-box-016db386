@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.zibda.app',
+  appId: 'kr.co.zibda.app',
   appName: '집다 (Zibda)',
   webDir: 'dist',
   server: {
