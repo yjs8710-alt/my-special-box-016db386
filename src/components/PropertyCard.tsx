@@ -236,7 +236,7 @@ const PropertyCard = ({
                     },
                   }));
                 }}
-                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-white text-primary border border-primary/50 text-[13px] md:text-[11px] font-bold shadow-sm hover:bg-primary/5"
+                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-white text-primary border border-primary/50 text-sm md:text-xs font-bold shadow-sm hover:bg-primary/5"
               >
                 상세보기
               </button>
@@ -247,7 +247,7 @@ const PropertyCard = ({
                     detail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
                   }));
                 }}
-                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-[13px] md:text-[11px] font-bold shadow-sm hover:opacity-90"
+                className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-sm md:text-xs font-bold shadow-sm hover:opacity-90"
               >
                 문의하기
               </button>

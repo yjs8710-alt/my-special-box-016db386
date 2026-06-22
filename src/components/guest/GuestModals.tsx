@@ -160,7 +160,7 @@ export const InquiryModal = ({
         {onOpenPartner && (
           <button
             onClick={() => { onClose(); onOpenPartner(); }}
-            className="w-full py-2 rounded-lg border border-primary text-primary font-semibold text-xs flex items-center justify-center gap-1"
+            className="w-full py-2 rounded-lg border border-primary text-primary font-semibold text-sm flex items-center justify-center gap-1"
           >
             <Building2 className="w-3.5 h-3.5" /> 협력 부동산 정보 보기
           </button>
@@ -440,7 +440,7 @@ export const GuestDetailModal = ({
         <div className="px-4 py-2.5 border-t bg-white">
           <button
             onClick={() => { onClose(); onInquiry?.(); }}
-            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
+            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-base font-bold"
           >
             협력 공인중개사
           </button>
