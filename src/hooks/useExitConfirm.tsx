@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { hasOpenOverlay } from "@/lib/overlayGuard";
 
 /**
  * 모바일에서 뒤로가기 시 "Zibda를 종료하겠습니까?" 커스텀 확인을 띄운다.
@@ -18,6 +19,7 @@ export const useExitConfirm = (enabled: boolean = true) => {
     window.history.pushState({ exitGuard: true }, "");
 
     const onPopState = () => {
+      if (hasOpenOverlay()) return;
       setOpen(true);
       // 다이얼로그를 띄우는 동안에도 가드를 다시 push해서 추가 popstate를 막는다
       window.history.pushState({ exitGuard: true }, "");
@@ -31,11 +33,17 @@ export const useExitConfirm = (enabled: boolean = true) => {
 
   const handleConfirm = useCallback(() => {
     setOpen(false);
-    // 1) 창 닫기 시도 (스크립트로 열린 창 또는 PWA standalone에서 동작)
+    // 1) Capacitor 앱 완전 종료
+    try {
+      const { App } = require("@capacitor/app");
+      App.exitApp();
+      return;
+    } catch {}
+    // 2) 창 닫기 시도 (스크립트로 열린 창 또는 PWA standalone에서 동작)
     try { window.close(); } catch {}
-    // 2) about:blank 트릭 — 일부 브라우저에서 자기 자신 close 허용
+    // 3) about:blank 트릭 — 일부 브라우저에서 자기 자신 close 허용
     try { window.open("", "_self")?.close(); } catch {}
-    // 3) 마지막 수단: 히스토리 뒤로 (이전 페이지가 있을 때만 의미 있음)
+    // 4) 마지막 수단: 히스토리 뒤로 (이전 페이지가 있을 때만 의미 있음)
     setTimeout(() => {
       try {
         if (window.history.length > 1) {
