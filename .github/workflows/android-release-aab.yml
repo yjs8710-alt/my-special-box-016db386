@@ -177,7 +177,35 @@ jobs:
                 android/app/src/main/res/mipmap-*/ic_launcher.webp \
                 android/app/src/main/res/mipmap-*/ic_launcher_round.webp \
                 android/app/src/main/res/mipmap-*/ic_launcher_foreground.webp
+          # Also drop stale adaptive-icon XML so we can regenerate cleanly
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
+                android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           echo "Stale default icons removed."
+
+      - name: Prepare adaptive icon source assets
+        run: |
+          set -e
+          python3 - <<'PY'
+          from PIL import Image, ImageOps
+          import os, shutil
+          src = 'assets/icon-only.png'
+          # Normalize icon-only.png to 1024x1024 RGBA (required by @capacitor/assets)
+          im = Image.open(src).convert('RGBA')
+          if im.size != (1024, 1024):
+              im = im.resize((1024, 1024), Image.LANCZOS)
+              im.save(src)
+              print('Resized icon-only.png to 1024x1024')
+          # Adaptive foreground: 1024x1024 canvas, inner icon scaled to ~66% (safe zone)
+          fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
+          inner = im.resize((675, 675), Image.LANCZOS)
+          fg.paste(inner, ((1024 - 675) // 2, (1024 - 675) // 2), inner)
+          fg.save('assets/icon-foreground.png')
+          # Adaptive background: solid white (Capacitor default)
+          bg = Image.new('RGBA', (1024, 1024), (255, 255, 255, 255))
+          bg.save('assets/icon-background.png')
+          print('Generated icon-foreground.png and icon-background.png')
+          PY
+          ls -la assets/
 
       - name: Generate Android icons and splash assets
         run: bunx capacitor-assets generate --android --assetPath assets
@@ -185,12 +213,25 @@ jobs:
       - name: Verify generated launcher icons
         run: |
           set -e
-          COUNT=$(ls android/app/src/main/res/mipmap-*/ic_launcher* 2>/dev/null | wc -l)
-          echo "Generated launcher icon files: $COUNT"
-          ls -la android/app/src/main/res/mipmap-xxxhdpi/ || true
-          if [ "$COUNT" -lt 4 ]; then
-            echo "❌ Launcher icons were not generated."
+          echo "--- mipmap dirs ---"
+          ls android/app/src/main/res/ | grep mipmap || true
+          for d in android/app/src/main/res/mipmap-*/; do
+            echo "== $d =="
+            ls "$d" || true
+          done
+          LAUNCHERS=$(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null | wc -l)
+          ROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_round.* 2>/dev/null | wc -l)
+          FOREGROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_foreground.* 2>/dev/null | wc -l)
+          echo "ic_launcher=$LAUNCHERS ic_launcher_round=$ROUND ic_launcher_foreground=$FOREGROUND"
+          if [ "$LAUNCHERS" -lt 4 ]; then
+            echo "❌ ic_launcher.* was not generated."
             exit 1
+          fi
+          # Self-heal: if adaptive foreground is missing, drop adaptive XMLs so legacy ic_launcher.png is used
+          if [ "$FOREGROUND" -lt 1 ]; then
+            echo "⚠️ ic_launcher_foreground missing — removing adaptive-icon XMLs to fall back to legacy icons."
+            rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
+                  android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           fi
           MANIFEST=android/app/src/main/AndroidManifest.xml
           grep -q 'android:icon="@mipmap/ic_launcher"' "$MANIFEST" || (echo "❌ android:icon missing"; exit 1)
