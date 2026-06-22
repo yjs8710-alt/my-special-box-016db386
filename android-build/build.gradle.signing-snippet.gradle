@@ -2,11 +2,11 @@
 // (안드로이드 프로젝트 생성 후 수동으로 머지하세요)
 
 android {
-    namespace "com.zibda.app"
+    namespace "kr.co.zibda.app"
     compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.zibda.app"
+        applicationId "kr.co.zibda.app"
         minSdkVersion rootProject.ext.minSdkVersion   // 23
         targetSdkVersion rootProject.ext.targetSdkVersion  // 34
         versionCode 1
