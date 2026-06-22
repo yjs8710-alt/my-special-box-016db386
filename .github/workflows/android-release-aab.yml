@@ -239,7 +239,7 @@ jobs:
           ls android/app/src/main/res/ | grep mipmap || true
           for d in android/app/src/main/res/mipmap-*/; do
             echo "== $d =="
-            ls "$d" || true
+            ls -la "$d" || true
           done
           LAUNCHERS=$(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null | wc -l)
           ROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_round.* 2>/dev/null | wc -l)
@@ -249,7 +249,14 @@ jobs:
             echo "❌ ic_launcher.* was not generated."
             exit 1
           fi
-          # Self-heal: if adaptive foreground is missing, drop adaptive XMLs so legacy ic_launcher.png is used
+          echo "--- ic_launcher_foreground sizes & hashes (to verify new icon applied) ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher_foreground.* 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
+          echo "--- ic_launcher sizes & hashes ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
           if [ "$FOREGROUND" -lt 1 ]; then
             echo "⚠️ ic_launcher_foreground missing — removing adaptive-icon XMLs to fall back to legacy icons."
             rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
