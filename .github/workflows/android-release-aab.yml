@@ -186,29 +186,48 @@ jobs:
         run: |
           set -e
           python3 -m pip install --quiet --disable-pip-version-check Pillow
-          set -e
           python3 - <<'PY'
-          from PIL import Image, ImageOps
-          import os, shutil
+          from PIL import Image
+          import os
           src = 'assets/icon-only.png'
-          # Normalize icon-only.png to 1024x1024 RGBA (required by @capacitor/assets)
           im = Image.open(src).convert('RGBA')
           if im.size != (1024, 1024):
               im = im.resize((1024, 1024), Image.LANCZOS)
               im.save(src)
               print('Resized icon-only.png to 1024x1024')
-          # Adaptive foreground: 1024x1024 canvas, inner icon scaled to ~86% so the
-          # Zibda mark appears noticeably larger on the home screen launcher.
-          fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-          inner = im.resize((880, 880), Image.LANCZOS)
-          fg.paste(inner, ((1024 - 880) // 2, (1024 - 880) // 2), inner)
-          fg.save('assets/icon-foreground.png')
-          # Adaptive background: solid white (Capacitor default)
-          bg = Image.new('RGBA', (1024, 1024), (255, 255, 255, 255))
-          bg.save('assets/icon-background.png')
-          print('Generated icon-foreground.png and icon-background.png')
+          # If committed icon-foreground.png exists and is correct size, keep it.
+          fg_path = 'assets/icon-foreground.png'
+          if os.path.exists(fg_path):
+              fg = Image.open(fg_path).convert('RGBA')
+              if fg.size != (1024, 1024):
+                  fg = fg.resize((1024, 1024), Image.LANCZOS)
+                  fg.save(fg_path)
+                  print('Resized committed icon-foreground.png to 1024x1024')
+              else:
+                  print('Using committed icon-foreground.png as-is')
+          else:
+              fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
+              inner = im.resize((880, 880), Image.LANCZOS)
+              fg.paste(inner, ((1024 - 880) // 2, (1024 - 880) // 2), inner)
+              fg.save(fg_path)
+              print('Generated icon-foreground.png from icon-only.png')
+          # Background: use committed icon-background.png if present, else fall back to full-bleed icon
+          bg_path = 'assets/icon-background.png'
+          if not os.path.exists(bg_path):
+              im.convert('RGB').save(bg_path)
+              print('Generated icon-background.png from icon-only.png (full-bleed)')
+          else:
+              bg = Image.open(bg_path).convert('RGBA')
+              if bg.size != (1024, 1024):
+                  bg.resize((1024, 1024), Image.LANCZOS).save(bg_path)
+                  print('Resized committed icon-background.png to 1024x1024')
+              else:
+                  print('Using committed icon-background.png as-is')
           PY
-          ls -la assets/
+          echo "--- assets/ source hashes ---"
+          for f in assets/icon-only.png assets/icon-foreground.png assets/icon-background.png; do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")"
+          done
 
       - name: Generate Android icons and splash assets
         run: bunx capacitor-assets generate --android --assetPath assets
@@ -220,7 +239,7 @@ jobs:
           ls android/app/src/main/res/ | grep mipmap || true
           for d in android/app/src/main/res/mipmap-*/; do
             echo "== $d =="
-            ls "$d" || true
+            ls -la "$d" || true
           done
           LAUNCHERS=$(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null | wc -l)
           ROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_round.* 2>/dev/null | wc -l)
@@ -230,7 +249,14 @@ jobs:
             echo "❌ ic_launcher.* was not generated."
             exit 1
           fi
-          # Self-heal: if adaptive foreground is missing, drop adaptive XMLs so legacy ic_launcher.png is used
+          echo "--- ic_launcher_foreground sizes & hashes (to verify new icon applied) ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher_foreground.* 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
+          echo "--- ic_launcher sizes & hashes ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
           if [ "$FOREGROUND" -lt 1 ]; then
             echo "⚠️ ic_launcher_foreground missing — removing adaptive-icon XMLs to fall back to legacy icons."
             rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
