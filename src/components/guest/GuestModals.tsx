@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Phone, MessageCircle, Building2, Share2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,7 @@ import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.pn
 import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import PublicPropertyView from "@/components/PublicPropertyView";
 import { sharePropertyToKakao } from "@/lib/kakaoShare";
+import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
@@ -367,6 +368,19 @@ export const GuestDetailModal = ({
   if (!open || !info) return null;
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const canShare = !!info.dbId && uuidRegex.test(info.dbId);
+
+  useEffect(() => {
+    pushOverlay();
+    window.history.pushState({ guestDetail: true }, "");
+    const onPopState = () => {
+      onClose();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      popOverlay();
+    };
+  }, [onClose]);
 
   return createPortal(
     <div

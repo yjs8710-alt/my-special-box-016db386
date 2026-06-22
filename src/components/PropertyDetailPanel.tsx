@@ -36,6 +36,7 @@ import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
 import { formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
+import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -1571,6 +1572,21 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
   // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
   const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
+
+  // 모바일 뒤로가기 → 패널 닫기
+  useEffect(() => {
+    pushOverlay();
+    window.history.pushState({ detailPanel: true }, "");
+    const onPopState = () => {
+      onClose();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      popOverlay();
+    };
+  }, [onClose]);
+
   useEffect(() => {
     if (!property?.address) { setInactiveUnits([]); return; }
     let cancelled = false;
