@@ -185,6 +185,8 @@ jobs:
       - name: Prepare adaptive icon source assets
         run: |
           set -e
+          python3 -m pip install --quiet --disable-pip-version-check Pillow
+          set -e
           python3 - <<'PY'
           from PIL import Image, ImageOps
           import os, shutil
