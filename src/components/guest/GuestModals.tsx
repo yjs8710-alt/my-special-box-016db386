@@ -369,6 +369,19 @@ export const GuestDetailModal = ({
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const canShare = !!info.dbId && uuidRegex.test(info.dbId);
 
+  useEffect(() => {
+    pushOverlay();
+    window.history.pushState({ guestDetail: true }, "");
+    const onPopState = () => {
+      onClose();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      popOverlay();
+    };
+  }, [onClose]);
+
   return createPortal(
     <div
       className="fixed inset-0 z-[10300] flex items-center justify-center p-3 md:p-6"
