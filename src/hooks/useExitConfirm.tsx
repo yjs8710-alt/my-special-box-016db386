@@ -31,12 +31,12 @@ export const useExitConfirm = (enabled: boolean = true) => {
     };
   }, [enabled]);
 
-  const handleConfirm = useCallback(() => {
+  const handleConfirm = useCallback(async () => {
     setOpen(false);
     // 1) Capacitor 앱 완전 종료
     try {
-      const { App } = require("@capacitor/app");
-      App.exitApp();
+      const { App } = await import("@capacitor/app");
+      await App.exitApp();
       return;
     } catch {}
     // 2) 창 닫기 시도 (스크립트로 열린 창 또는 PWA standalone에서 동작)
