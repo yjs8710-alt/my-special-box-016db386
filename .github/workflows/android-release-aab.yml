@@ -182,65 +182,77 @@ jobs:
                 android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
           echo "Stale default icons removed."
 
-      - name: Prepare adaptive icon source assets
+      - name: Ensure icon-only.png is 1024x1024 (no resize if already correct)
         run: |
           set -e
           python3 -m pip install --quiet --disable-pip-version-check Pillow
-          cat > /tmp/prep_icon.py <<'PY'
+          cat > /tmp/check_icon.py <<'PY'
           from PIL import Image
-          import os
-
-          src = 'assets/icon-only.png'
-          im = Image.open(src).convert('RGBA')
+          im = Image.open('assets/icon-only.png')
+          print('icon-only.png size:', im.size, 'mode:', im.mode)
           if im.size != (1024, 1024):
-              im = im.resize((1024, 1024), Image.LANCZOS)
-              im.save(src)
-              print('Resized icon-only.png to 1024x1024')
-
-          # If committed icon-foreground.png exists and is correct size, keep it.
-          fg_path = 'assets/icon-foreground.png'
-          if os.path.exists(fg_path):
-              fg = Image.open(fg_path).convert('RGBA')
-              if fg.size != (1024, 1024):
-                  fg = fg.resize((1024, 1024), Image.LANCZOS)
-                  fg.save(fg_path)
-                  print('Resized committed icon-foreground.png to 1024x1024')
-              else:
-                  print('Using committed icon-foreground.png as-is')
-          else:
-              fg = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-              # Scale to fill 95% of canvas width while preserving aspect ratio
-              target_w = int(1024 * 0.95)
-              scale = target_w / im.width
-              new_w = int(im.width * scale)
-              new_h = int(im.height * scale)
-              inner = im.resize((new_w, new_h), Image.LANCZOS)
-              fg.paste(inner, ((1024 - new_w) // 2, (1024 - new_h) // 2), inner)
-              fg.save(fg_path)
-              print(f'Generated icon-foreground.png from icon-only.png at {new_w}x{new_h} ({scale*100:.1f}%)')
-
-          # Background: use committed icon-background.png if present, else fall back to full-bleed icon
-          bg_path = 'assets/icon-background.png'
-          if not os.path.exists(bg_path):
-              im.convert('RGB').save(bg_path)
-              print('Generated icon-background.png from icon-only.png (full-bleed)')
-          else:
-              bg = Image.open(bg_path).convert('RGBA')
-              if bg.size != (1024, 1024):
-                  bg.resize((1024, 1024), Image.LANCZOS).save(bg_path)
-                  print('Resized committed icon-background.png to 1024x1024')
-              else:
-                  print('Using committed icon-background.png as-is')
+              raise SystemExit(f'icon-only.png must be 1024x1024, got {im.size}')
           PY
-          python3 -m py_compile /tmp/prep_icon.py
-          python3 /tmp/prep_icon.py
-          echo "--- assets/ source hashes ---"
-          for f in assets/icon-only.png assets/icon-foreground.png assets/icon-background.png; do
-            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")"
-          done
+          python3 -m py_compile /tmp/check_icon.py
+          python3 /tmp/check_icon.py
+          echo "$(stat -c%s assets/icon-only.png) bytes  $(shasum -a 256 assets/icon-only.png)"
 
-      - name: Generate Android icons and splash assets
+      - name: Generate Android icons (legacy only, no adaptive split)
         run: bunx capacitor-assets generate --android --assetPath assets
+
+      - name: Force legacy ic_launcher (remove adaptive XML & foreground/background)
+        run: |
+          set -e
+          # Remove adaptive icon XMLs so Android falls back to legacy ic_launcher.png
+          rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
+                android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          # Remove foreground/background bitmaps so nothing references them
+          rm -f android/app/src/main/res/mipmap-*/ic_launcher_foreground.png \
+                android/app/src/main/res/mipmap-*/ic_launcher_background.png \
+                android/app/src/main/res/mipmap-*/ic_launcher_foreground.webp \
+                android/app/src/main/res/mipmap-*/ic_launcher_background.webp
+          # Drop anydpi-v26 dir if empty
+          if [ -d android/app/src/main/res/mipmap-anydpi-v26 ] && [ -z "$(ls -A android/app/src/main/res/mipmap-anydpi-v26)" ]; then
+            rmdir android/app/src/main/res/mipmap-anydpi-v26
+          fi
+          # Remove any colors that reference ic_launcher_background
+          if [ -f android/app/src/main/res/values/ic_launcher_background.xml ]; then
+            rm -f android/app/src/main/res/values/ic_launcher_background.xml
+          fi
+
+      - name: Overwrite ic_launcher.png with crisp downscale from icon-only.png
+        run: |
+          set -e
+          cat > /tmp/resize_launchers.py <<'PY'
+          from PIL import Image
+          import os, glob
+          src = Image.open('assets/icon-only.png').convert('RGBA')
+          # Standard launcher sizes per density
+          sizes = {
+              'mipmap-mdpi':    48,
+              'mipmap-hdpi':    72,
+              'mipmap-xhdpi':   96,
+              'mipmap-xxhdpi':  144,
+              'mipmap-xxxhdpi': 192,
+          }
+          base = 'android/app/src/main/res'
+          for d, sz in sizes.items():
+              folder = os.path.join(base, d)
+              os.makedirs(folder, exist_ok=True)
+              # Single high-quality LANCZOS downscale from 1024 source (no repeated resize)
+              out = src.resize((sz, sz), Image.LANCZOS)
+              out.save(os.path.join(folder, 'ic_launcher.png'), 'PNG', optimize=True)
+              out.save(os.path.join(folder, 'ic_launcher_round.png'), 'PNG', optimize=True)
+              # Remove any leftover .webp variants so PNG takes effect
+              for ext in ('webp',):
+                  for f in glob.glob(os.path.join(folder, f'ic_launcher.{ext}')):
+                      os.remove(f)
+                  for f in glob.glob(os.path.join(folder, f'ic_launcher_round.{ext}')):
+                      os.remove(f)
+              print(f'wrote {d}/ic_launcher.png at {sz}x{sz}')
+          PY
+          python3 -m py_compile /tmp/resize_launchers.py
+          python3 /tmp/resize_launchers.py
 
       - name: Verify generated launcher icons
         run: |
@@ -251,30 +263,28 @@ jobs:
             echo "== $d =="
             ls -la "$d" || true
           done
-          LAUNCHERS=$(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null | wc -l)
-          ROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_round.* 2>/dev/null | wc -l)
-          FOREGROUND=$(ls android/app/src/main/res/mipmap-*/ic_launcher_foreground.* 2>/dev/null | wc -l)
-          echo "ic_launcher=$LAUNCHERS ic_launcher_round=$ROUND ic_launcher_foreground=$FOREGROUND"
-          if [ "$LAUNCHERS" -lt 4 ]; then
-            echo "❌ ic_launcher.* was not generated."
-            exit 1
+          echo "--- ic_launcher.png sizes & SHA256 ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher.png 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
+          echo "--- ic_launcher_round.png sizes & SHA256 ---"
+          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher_round.png 2>/dev/null); do
+            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
+          done
+          COUNT=$(ls android/app/src/main/res/mipmap-*/ic_launcher.png 2>/dev/null | wc -l)
+          if [ "$COUNT" -lt 5 ]; then
+            echo "❌ Expected 5 ic_launcher.png files, got $COUNT"; exit 1
           fi
-          echo "--- ic_launcher_foreground sizes & hashes (to verify new icon applied) ---"
-          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher_foreground.* 2>/dev/null); do
-            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
-          done
-          echo "--- ic_launcher sizes & hashes ---"
-          for f in $(ls android/app/src/main/res/mipmap-*/ic_launcher.* 2>/dev/null); do
-            echo "$(stat -c%s "$f") bytes  $(shasum -a 256 "$f")  $f"
-          done
-          if [ "$FOREGROUND" -lt 1 ]; then
-            echo "⚠️ ic_launcher_foreground missing — removing adaptive-icon XMLs to fall back to legacy icons."
-            rm -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
-                  android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          if ls android/app/src/main/res/mipmap-anydpi-v26/ic_launcher*.xml 2>/dev/null; then
+            echo "❌ adaptive icon XML still present"; exit 1
           fi
           MANIFEST=android/app/src/main/AndroidManifest.xml
+          # Ensure AndroidManifest references only @mipmap/ic_launcher (round may also point to ic_launcher)
           grep -q 'android:icon="@mipmap/ic_launcher"' "$MANIFEST" || (echo "❌ android:icon missing"; exit 1)
-          echo "✅ AndroidManifest icon references OK"
+          # Rewrite roundIcon to ic_launcher (no separate round adaptive)
+          sed -i 's#android:roundIcon="@mipmap/ic_launcher_round"#android:roundIcon="@mipmap/ic_launcher"#g' "$MANIFEST"
+          echo "✅ Legacy ic_launcher.png in place; adaptive XML removed; manifest OK"
+
 
       - name: Build signed release AAB
         working-directory: android
