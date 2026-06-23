@@ -141,9 +141,17 @@ jobs:
       - name: Force app_name to 집다 in strings.xml
         run: |
           set -e
-          mkdir -p android/app/src/main/res/values
-          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' '    <string name="app_name">집다</string>' '</resources>' > android/app/src/main/res/values/strings.xml
-          cat android/app/src/main/res/values/strings.xml
+          STRINGS_FILE="android/app/src/main/res/values/strings.xml"
+          if [ -f "$STRINGS_FILE" ]; then
+            # Replace app_name value while preserving all other string resources
+            sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">집다<\/string>/g' "$STRINGS_FILE"
+          else
+            echo "Error: strings.xml not found at $STRINGS_FILE"
+            exit 1
+          fi
+          grep 'app_name' "$STRINGS_FILE"
+
+
 
 
       - name: Validate Android release signing config
