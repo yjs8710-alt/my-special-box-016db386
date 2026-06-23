@@ -141,21 +141,10 @@ jobs:
       - name: Force app_name to 집다 in strings.xml
         run: |
           set -e
-          STRINGS=android/app/src/main/res/values/strings.xml
-          python3 - <<'PY'
-          import re, pathlib
-          p = pathlib.Path('android/app/src/main/res/values/strings.xml')
-          s = p.read_text(encoding='utf-8')
-          for key in ('app_name', 'title_activity_main'):
-              s = re.sub(
-                  rf'(<string name="{key}">)[^<]*(</string>)',
-                  rf'\g<1>집다\g<2>',
-                  s,
-              )
-          p.write_text(s, encoding='utf-8')
-          print(s)
-          PY
-          grep app_name "$STRINGS"
+          mkdir -p android/app/src/main/res/values
+          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' '    <string name="app_name">집다</string>' '</resources>' > android/app/src/main/res/values/strings.xml
+          cat android/app/src/main/res/values/strings.xml
+
 
       - name: Validate Android release signing config
         run: |
