@@ -302,6 +302,10 @@ jobs:
           echo "✅ Legacy ic_launcher.png in place; adaptive XML removed; manifest OK"
 
 
+      - name: Clean Android build cache (drop stale icon resources)
+        working-directory: android
+        run: ./gradlew --no-daemon clean
+
       - name: Build signed release AAB
         working-directory: android
         run: ./gradlew --no-daemon bundleRelease
