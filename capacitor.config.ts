@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'kr.co.zibda.app',
-  appName: '집다 (Zibda)',
+  appName: '집다',
   webDir: 'dist',
   server: {
     // 운영 배포 시 실제 사이트를 그대로 로드
