@@ -138,6 +138,25 @@ jobs:
           ANDROID_VERSION_NAME: ${{ github.event.inputs.version_name }}
         run: node android-build/ci/prepare-capacitor-android.mjs
 
+      - name: Force app_name to 집다 in strings.xml
+        run: |
+          set -e
+          STRINGS=android/app/src/main/res/values/strings.xml
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path('android/app/src/main/res/values/strings.xml')
+          s = p.read_text(encoding='utf-8')
+          for key in ('app_name', 'title_activity_main'):
+              s = re.sub(
+                  rf'(<string name="{key}">)[^<]*(</string>)',
+                  rf'\g<1>집다\g<2>',
+                  s,
+              )
+          p.write_text(s, encoding='utf-8')
+          print(s)
+          PY
+          grep app_name "$STRINGS"
+
       - name: Validate Android release signing config
         run: |
           node --input-type=module <<'NODE'
