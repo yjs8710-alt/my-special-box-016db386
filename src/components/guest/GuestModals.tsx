@@ -143,6 +143,11 @@ export const InquiryModal = ({
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
           </div>
         )}
+        {isMember && (
+          <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
+            회원정보로 자동 입력되었습니다
+          </div>
+        )}
         <div>
           <label className="text-xs font-semibold text-foreground">이름 <span className="text-destructive">*</span></label>
           <input
@@ -150,7 +155,8 @@ export const InquiryModal = ({
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            readOnly={isMember}
+            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
             placeholder="홍길동"
           />
         </div>
@@ -160,11 +166,13 @@ export const InquiryModal = ({
             type="tel"
             value={phone}
             onChange={(e) => setPhone(formatPhone(e.target.value))}
-            className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            readOnly={isMember}
+            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
             placeholder="010-0000-0000"
           />
           <p className="text-[10px] text-muted-foreground mt-1">담당자가 입력하신 번호로 연락드립니다</p>
         </div>
+
         <div>
           <label className="text-xs font-semibold text-foreground">문의 내용</label>
           <textarea
