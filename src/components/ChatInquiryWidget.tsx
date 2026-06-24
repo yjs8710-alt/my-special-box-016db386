@@ -198,16 +198,6 @@ const ChatInquiryWidget = () => {
       content: text,
     });
     if (error) console.error("[chat send]", error);
-    // 트리거가 unread_for_agent / 알림 처리. 관리자/에이전트 발신 시에는 unread_for_user를 올린다.
-    if (!error && role !== "user") {
-      const { data: cur } = await supabase
-        .from("chat_conversations").select("unread_for_user").eq("id", cid).single();
-      await supabase.from("chat_conversations").update({
-        last_message: text,
-        last_message_at: new Date().toISOString(),
-        unread_for_user: (cur?.unread_for_user ?? 0) + 1,
-      }).eq("id", cid);
-    }
     setSending(false);
   };
 
