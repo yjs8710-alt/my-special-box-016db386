@@ -17,6 +17,7 @@ type ChatContext = {
   propertyId: string | null;
   propertyTitle?: string;
   agentName?: string;
+  conversationId?: string | null;
 };
 
 const ChatInquiryWidget = () => {
@@ -28,11 +29,18 @@ const ChatInquiryWidget = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  /** 현재 사용자가 이 대화에서 가지는 역할 */
+  const [role, setRole] = useState<"user" | "agent" | "admin">("user");
   const [unread, setUnread] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const ensureConversation = useCallback(async (context: ChatContext) => {
+  const ensureConversation = useCallback(async (context: ChatContext): Promise<string | null> => {
     if (!user) return null;
+    // 알림에서 전달된 대화ID가 있으면 그대로 사용
+    if (context.conversationId) {
+      setConversationId(context.conversationId);
+      return context.conversationId;
+    }
     const agentId = context.agentUserId;
     const propId = context.propertyId;
 
@@ -74,7 +82,7 @@ const ChatInquiryWidget = () => {
     return created.id;
   }, [user]);
 
-  // 헤더 또는 매물카드의 "채팅 문의" 버튼에서 발생하는 전역 이벤트 수신
+  // 헤더 또는 매물카드/알림에서 발생하는 전역 이벤트 수신
   useEffect(() => {
     const handler = (e: Event) => {
       if (!isAuthorized) { navigate("/login"); return; }
@@ -84,12 +92,14 @@ const ChatInquiryWidget = () => {
         propertyId: detail.propertyId || null,
         propertyTitle: detail.propertyTitle,
         agentName: detail.agentName,
+        conversationId: detail.conversationId || null,
       };
-      // 컨텍스트가 바뀌면 메시지/대화ID 초기화
       setCtx((prev) => {
-        const changed = prev.agentUserId !== nextCtx.agentUserId || prev.propertyId !== nextCtx.propertyId;
+        const changed = prev.agentUserId !== nextCtx.agentUserId
+          || prev.propertyId !== nextCtx.propertyId
+          || prev.conversationId !== nextCtx.conversationId;
         if (changed) {
-          setConversationId(null);
+          setConversationId(nextCtx.conversationId ?? null);
           setMessages([]);
         }
         return nextCtx;
@@ -117,33 +127,53 @@ const ChatInquiryWidget = () => {
   useEffect(() => {
     if (!conversationId) return;
     const ch = supabase
-      .channel(`chat-user-${conversationId}`)
+      .channel(`chat-conv-${conversationId}`)
       .on("postgres_changes", {
         event: "INSERT", schema: "public", table: "chat_messages",
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const m = payload.new as Msg;
         setMessages((prev) => prev.some((x) => x.id === m.id) ? prev : [...prev, m]);
-        if (m.sender_role !== "user" && !open) setUnread((u) => u + 1);
+        if (m.sender_role !== role && !open) setUnread((u) => u + 1);
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [conversationId, open]);
+  }, [conversationId, open, role]);
 
-  // 채팅 열리면 메시지 로드
+  // 채팅 열리면 대화 메타 + 메시지 로드, 역할 판정
   useEffect(() => {
     if (!open || !user) return;
     (async () => {
       let cid = conversationId;
       if (!cid) cid = await ensureConversation(ctx);
       if (!cid) return;
+
+      // 역할 판정: 현재 사용자가 대화의 user/agent/admin 중 누구인가
+      const { data: conv } = await supabase
+        .from("chat_conversations")
+        .select("user_id, agent_user_id")
+        .eq("id", cid)
+        .maybeSingle();
+      let r: "user" | "agent" | "admin" = "user";
+      if (user.isAdmin) r = "admin";
+      else if (conv?.agent_user_id === user.userId) r = "agent";
+      else if (conv?.user_id === user.userId) r = "user";
+      setRole(r);
+
       const { data } = await supabase
         .from("chat_messages")
         .select("id, sender_role, content, created_at")
         .eq("conversation_id", cid)
         .order("created_at", { ascending: true });
       setMessages((data ?? []) as Msg[]);
-      await supabase.from("chat_conversations").update({ unread_for_user: 0 }).eq("id", cid);
+      // 본인의 미확인 카운터 초기화
+      const updates: Record<string, number> = {};
+      if (r === "agent") updates.unread_for_agent = 0;
+      else if (r === "user") updates.unread_for_user = 0;
+      else if (r === "admin") updates.unread_for_admin = 0;
+      if (Object.keys(updates).length) {
+        await supabase.from("chat_conversations").update(updates).eq("id", cid);
+      }
       setUnread(0);
     })();
   }, [open, conversationId, ensureConversation, ctx, user]);
@@ -163,30 +193,32 @@ const ChatInquiryWidget = () => {
     const { error } = await supabase.from("chat_messages").insert({
       conversation_id: cid,
       sender_id: user.userId,
-      sender_role: "user",
+      sender_role: role,
       content: text,
     });
     if (error) console.error("[chat send]", error);
-    // 트리거가 chat_conversations.last_message/unread_for_agent 와 중개사 알림을 자동 처리.
-    // 관리자 대화(agent_user_id null)는 별도로 unread_for_admin 증가.
-    if (!error && !ctx.agentUserId) {
+    // 트리거가 unread_for_agent / 알림 처리. 관리자/에이전트 발신 시에는 unread_for_user를 올린다.
+    if (!error && role !== "user") {
       const { data: cur } = await supabase
-        .from("chat_conversations").select("unread_for_admin").eq("id", cid).single();
+        .from("chat_conversations").select("unread_for_user").eq("id", cid).single();
       await supabase.from("chat_conversations").update({
         last_message: text,
         last_message_at: new Date().toISOString(),
-        unread_for_admin: (cur?.unread_for_admin ?? 0) + 1,
+        unread_for_user: (cur?.unread_for_user ?? 0) + 1,
       }).eq("id", cid);
     }
     setSending(false);
   };
 
-  if (user?.isAdmin) return null;
   if (!open) return null;
 
-  const title = ctx.agentUserId
-    ? (ctx.agentName ? `${ctx.agentName} 중개사와 채팅` : "담당 중개사 채팅")
-    : "관리자 채팅 문의";
+  const title = role === "agent"
+    ? "고객 채팅 문의"
+    : role === "admin"
+      ? "관리자 채팅"
+      : ctx.agentUserId
+        ? (ctx.agentName ? `${ctx.agentName} 중개사와 채팅` : "담당 중개사 채팅")
+        : "관리자 채팅 문의";
 
   return (
     <div
@@ -211,25 +243,30 @@ const ChatInquiryWidget = () => {
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2 bg-muted/20">
         {messages.length === 0 && (
           <div className="text-center text-xs text-muted-foreground py-8">
-            {ctx.agentUserId
-              ? "담당 중개사에게 문의 내용을 남겨주세요."
-              : "관리자에게 문의 내용을 남겨주세요."}
+            {role === "agent"
+              ? "고객의 문의에 답변해주세요."
+              : ctx.agentUserId
+                ? "담당 중개사에게 문의 내용을 남겨주세요."
+                : "관리자에게 문의 내용을 남겨주세요."}
             <br />빠르게 답변드리겠습니다.
           </div>
         )}
-        {messages.map((m) => (
-          <div key={m.id} className={`flex ${m.sender_role === "user" ? "justify-end" : "justify-start"}`}>
-            <div
-              className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
-                m.sender_role === "user"
-                  ? "bg-primary text-primary-foreground rounded-br-sm"
-                  : "bg-card border border-border rounded-bl-sm"
-              }`}
-            >
-              {m.content}
+        {messages.map((m) => {
+          const isMine = m.sender_role === role;
+          return (
+            <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+              <div
+                className={`max-w-[75%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
+                  isMine
+                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                    : "bg-card border border-border rounded-bl-sm"
+                }`}
+              >
+                {m.content}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="flex items-center gap-2 p-3 border-t border-border">
         <input
