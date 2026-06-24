@@ -536,6 +536,12 @@ const MyPage = () => {
           </TabsContent>
 
 
+          {/* ─── 관심목록 (일반회원 전용) ─── */}
+          {isGeneralMember && (
+            <TabsContent value="favorites">
+              <FavoritesPanel onGo={() => navigate("/residential")} />
+            </TabsContent>
+          )}
 
           {/* ─── 회원관리 (대표중개사 전용) ─── */}
           {isRepresentative && (
