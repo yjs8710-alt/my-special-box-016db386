@@ -888,6 +888,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_property_passwords: {
+        Args: { _property_id: string }
+        Returns: {
+          building_password: string
+          room_password: string
+        }[]
+      }
       get_public_property_reference_images: {
         Args: { _property_id: string }
         Returns: {
