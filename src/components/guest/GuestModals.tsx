@@ -48,6 +48,7 @@ export const InquiryModal = ({
   agentUserId,
   propertyTitle,
   onOpenPartner,
+  memberInfo,
 }: {
   open: boolean;
   onClose: () => void;
@@ -57,11 +58,23 @@ export const InquiryModal = ({
   agentUserId?: string;
   propertyTitle?: string;
   onOpenPartner?: () => void;
+  /** 로그인한 일반회원의 자동 입력 정보 (있으면 이름/전화 읽기전용) */
+  memberInfo?: { name?: string; phone?: string } | null;
 }) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const isMember = !!(memberInfo && (memberInfo.name || memberInfo.phone));
+
+  // 회원정보 자동 채우기 (모달이 열릴 때마다)
+  useEffect(() => {
+    if (!open) return;
+    if (memberInfo) {
+      if (memberInfo.name) setName(memberInfo.name);
+      if (memberInfo.phone) setPhone(memberInfo.phone);
+    }
+  }, [open, memberInfo]);
 
   // 뒤로가기로 모달 닫기
   useEffect(() => {
@@ -102,8 +115,7 @@ export const InquiryModal = ({
       });
       if (error) throw error;
       toast.success("문의가 접수되었습니다. 담당자가 연락드릴 예정입니다.");
-      setName("");
-      setPhone("");
+      if (!isMember) { setName(""); setPhone(""); }
       setMessage("");
       onClose();
     } catch (e: any) {
@@ -113,6 +125,7 @@ export const InquiryModal = ({
       setSubmitting(false);
     }
   };
+
 
   return (
     <Overlay onClose={onClose}>
