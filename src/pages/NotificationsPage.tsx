@@ -317,12 +317,27 @@ const NotificationsPage = () => {
               <p className="text-[11px] text-muted-foreground text-right">
                 {new Date(detail.created_at).toLocaleString("ko-KR")}
               </p>
-              <a
-                href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
-              >
-                <Phone className="w-4 h-4" /> 바로 전화 걸기
-              </a>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
+                >
+                  <Phone className="w-4 h-4" /> 전화 걸기
+                </a>
+                <button
+                  onClick={() => startChatFromInquiry(detail)}
+                  disabled={!detail.user_id}
+                  title={detail.user_id ? "" : "비회원 게스트는 채팅이 불가합니다"}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-bold text-sm bg-accent text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <MessageCircle className="w-4 h-4" /> 채팅 답변
+                </button>
+              </div>
+              {!detail.user_id && (
+                <p className="text-[11px] text-muted-foreground text-center">
+                  비회원 게스트 문의는 전화로만 답변 가능합니다
+                </p>
+              )}
             </div>
           </div>
         </div>
