@@ -269,6 +269,33 @@ export const InquiryModal = ({
             >
               {submitting ? "전송 중..." : "문의 접수하기"}
             </button>
+            {isMember && (
+              <button
+                onClick={async () => {
+                  try {
+                    const { data: sess } = await supabase.auth.getUser();
+                    if (!sess?.user) {
+                      toast.error("로그인이 필요합니다");
+                      return;
+                    }
+                    onClose();
+                    window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
+                      detail: {
+                        agentUserId: agentUserId || null,
+                        propertyId: propertyDbId || null,
+                        propertyTitle,
+                      },
+                    }));
+                  } catch (e) {
+                    console.error("[chat-inquiry-from-modal]", e);
+                    toast.error("채팅 문의를 열 수 없습니다");
+                  }
+                }}
+                className="w-full py-2.5 rounded-lg border-2 border-primary text-primary font-bold text-sm flex items-center justify-center gap-1.5"
+              >
+                <MessageCircle className="w-4 h-4" /> 채팅 문의 (담당자와 바로 연결)
+              </button>
+            )}
             {onOpenPartner && (
               <button
                 onClick={() => { onClose(); onOpenPartner(); }}
@@ -277,6 +304,7 @@ export const InquiryModal = ({
                 <Building2 className="w-3.5 h-3.5" /> 협력 부동산 정보 보기
               </button>
             )}
+
             <div className="mt-3 p-3 rounded-lg bg-muted/60 text-[11px] text-muted-foreground leading-relaxed space-y-1">
               <p className="font-bold text-foreground">※ 중요 안내</p>
               <p>집다는 중개대상물에 대한 정보 제공 및 협력 공인중개사 연결 서비스만을 제공합니다.</p>
