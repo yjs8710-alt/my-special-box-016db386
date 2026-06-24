@@ -243,7 +243,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                 className="flex items-center justify-center -mr-3"
                 onClick={() => {
                   if (!isAuthorized) { navigate("/login"); return; }
-                  navigate("/my-info");
+                  navigate(isGeneralMember ? "/my-page" : "/my-info");
                 }}
                 aria-label="내 정보"
               >
