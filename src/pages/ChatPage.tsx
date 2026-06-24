@@ -51,8 +51,20 @@ const ChatPage = () => {
       .select("id, user_id, agent_user_id, property_id, user_name, last_message, last_message_at, unread_for_user, unread_for_agent")
       .or(`user_id.eq.${user.userId},agent_user_id.eq.${user.userId}`)
       .order("last_message_at", { ascending: false });
-    const list = (data ?? []) as Conv[];
+    const raw = (data ?? []) as Conv[];
+    // 같은 상대(담당자/회원)와의 대화는 하나로 합쳐서 표시 — 가장 최근 항목만 노출
+    const seen = new Set<string>();
+    const list: Conv[] = [];
+    for (const c of raw) {
+      const otherKey = c.user_id === user.userId
+        ? `agent:${c.agent_user_id ?? "admin"}`
+        : `user:${c.user_id}`;
+      if (seen.has(otherKey)) continue;
+      seen.add(otherKey);
+      list.push(c);
+    }
     setConversations(list);
+
     const propIds = Array.from(new Set(list.map((c) => c.property_id).filter(Boolean))) as string[];
     if (propIds.length) {
       const { data: pp } = await supabase
