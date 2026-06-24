@@ -91,6 +91,11 @@ export const InquiryModal = ({
     };
   }, [open, onClose]);
 
+  // 모달 닫힐 때 채팅 상태 초기화 (early-return 전에 선언해야 hooks 순서 안정)
+  useEffect(() => {
+    if (!open) setChatInquiryId(null);
+  }, [open]);
+
   if (!open) return null;
 
   const formatPhone = (v: string) => {
