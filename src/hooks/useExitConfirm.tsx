@@ -1,63 +1,90 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { hasOpenOverlay } from "@/lib/overlayGuard";
 
 /**
- * 모바일에서 뒤로가기 시 "Zibda를 종료하겠습니까?" 커스텀 확인을 띄운다.
- * window.confirm은 origin(jibda.co.kr)을 자동으로 노출하므로 사용하지 않는다.
+ * 모바일 / Capacitor 네이티브에서 뒤로가기 시 "Zibda를 종료하겠습니까?" 다이얼로그.
+ * - 네이티브: @capacitor/app 의 backButton 리스너로 처리, "종료" 시 App.exitApp() 호출
+ * - 웹/PWA: popstate 가드 사용
  */
 export const useExitConfirm = (enabled: boolean = true) => {
   const [open, setOpen] = useState(false);
+  const isNativeRef = useRef(false);
 
   useEffect(() => {
     if (!enabled) return;
 
-    const ua = navigator.userAgent || "";
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
-    if (!isMobile) return;
+    let cleanupListener: (() => void) | undefined;
+    let cleanupPop: (() => void) | undefined;
 
-    window.history.pushState({ exitGuard: true }, "");
+    (async () => {
+      try {
+        const { Capacitor } = await import("@capacitor/core");
+        if (Capacitor.isNativePlatform()) {
+          isNativeRef.current = true;
+          const { App } = await import("@capacitor/app");
+          const handle = await App.addListener("backButton", () => {
+            if (hasOpenOverlay()) return;
+            if (window.history.length > 1 && window.location.pathname !== "/") {
+              window.history.back();
+              return;
+            }
+            setOpen(true);
+          });
+          cleanupListener = () => {
+            try { handle.remove(); } catch {}
+          };
+          return;
+        }
+      } catch {}
 
-    const onPopState = () => {
-      if (hasOpenOverlay()) return;
-      setOpen(true);
-      // 다이얼로그를 띄우는 동안에도 가드를 다시 push해서 추가 popstate를 막는다
+      // 웹/PWA 경로
+      const ua = navigator.userAgent || "";
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+      if (!isMobile) return;
+
       window.history.pushState({ exitGuard: true }, "");
-    };
+      const onPopState = () => {
+        if (hasOpenOverlay()) return;
+        setOpen(true);
+        window.history.pushState({ exitGuard: true }, "");
+      };
+      window.addEventListener("popstate", onPopState);
+      cleanupPop = () => window.removeEventListener("popstate", onPopState);
+    })();
 
-    window.addEventListener("popstate", onPopState);
     return () => {
-      window.removeEventListener("popstate", onPopState);
+      cleanupListener?.();
+      cleanupPop?.();
     };
   }, [enabled]);
 
   const handleConfirm = useCallback(async () => {
     setOpen(false);
-    // 1) Capacitor 앱 완전 종료
     try {
-      const { App } = await import("@capacitor/app");
-      await App.exitApp();
-      return;
+      const { Capacitor } = await import("@capacitor/core");
+      if (Capacitor.isNativePlatform()) {
+        const { App } = await import("@capacitor/app");
+        await App.exitApp();
+        return;
+      }
     } catch {}
-    // 2) 창 닫기 시도 (스크립트로 열린 창 또는 PWA standalone에서 동작)
     try { window.close(); } catch {}
-    // 3) about:blank 트릭 — 일부 브라우저에서 자기 자신 close 허용
     try { window.open("", "_self")?.close(); } catch {}
-    // 4) 마지막 수단: 히스토리 뒤로 (이전 페이지가 있을 때만 의미 있음)
     setTimeout(() => {
       try {
-        if (window.history.length > 1) {
-          window.history.go(-2);
-        } else {
-          // 더 이상 갈 곳이 없으면 빈 페이지로 이동 (사실상 종료 효과)
-          window.location.href = "about:blank";
-        }
+        if (window.history.length > 1) window.history.go(-2);
+        else window.location.href = "about:blank";
       } catch {}
     }, 50);
   }, []);
 
   const handleCancel = useCallback(() => {
     setOpen(false);
+    // 네이티브에서는 popstate를 사용하지 않으므로 push 불필요. 웹은 다시 가드 push.
+    if (!isNativeRef.current) {
+      try { window.history.pushState({ exitGuard: true }, ""); } catch {}
+    }
   }, []);
 
   const dialog = open

@@ -63,6 +63,19 @@ export const InquiryModal = ({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // 뒤로가기로 모달 닫기
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay();
+    window.history.pushState({ inquiryModal: true }, "");
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      popOverlay();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const formatPhone = (v: string) => {
@@ -182,11 +195,30 @@ export const PartnerAgencyModal = ({
   open,
   onClose,
   onChat,
+  agentUserId,
+  propertyId,
+  propertyTitle,
 }: {
   open: boolean;
   onClose: () => void;
   onChat?: () => void;
+  agentUserId?: string;
+  propertyId?: string;
+  propertyTitle?: string;
 }) => {
+  // 뒤로가기로 모달 닫기
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay();
+    window.history.pushState({ partnerModal: true }, "");
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      popOverlay();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   const a = PARTNER_AGENCY;
   return (
@@ -225,11 +257,28 @@ export const PartnerAgencyModal = ({
             <Phone className="w-4 h-4" /> 전화하기
           </a>
           <button
-            onClick={() => { onClose(); onChat?.(); }}
+            onClick={async () => {
+              // 인증된 사용자: 담당 중개사와 실시간 채팅, 미인증: 기존 폼 모달로 폴백
+              let authed = false;
+              try {
+                const { supabase } = await import("@/integrations/supabase/client");
+                const { data } = await supabase.auth.getUser();
+                authed = !!data.user;
+              } catch {}
+              onClose();
+              if (authed && agentUserId) {
+                window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
+                  detail: { agentUserId, propertyId, propertyTitle, agentName: a.representative },
+                }));
+              } else {
+                onChat?.();
+              }
+            }}
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg border-2 border-primary text-primary font-bold text-sm"
           >
             <MessageCircle className="w-4 h-4" /> 채팅 문의
           </button>
+
         </div>
       </div>
     </Overlay>

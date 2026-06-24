@@ -51,6 +51,22 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean) as Plugin[],
   build: {
     target: "es2020",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("react-dom") || id.includes("/react/") || id.includes("scheduler")) return "react-core";
+          if (id.includes("@supabase")) return "supabase";
+          if (id.includes("@radix-ui")) return "radix";
+          if (id.includes("recharts") || id.includes("d3-")) return "charts";
+          if (id.includes("lucide-react")) return "icons";
+          if (id.includes("date-fns")) return "date";
+          if (id.includes("react-day-picker") || id.includes("embla-carousel") || id.includes("vaul") || id.includes("input-otp") || id.includes("cmdk")) return "ui-extras";
+          if (id.includes("leaflet")) return "maps";
+        },
+      },
+    },
   },
   resolve: {
     alias: {

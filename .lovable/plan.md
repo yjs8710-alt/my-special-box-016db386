@@ -1,57 +1,79 @@
+# 구현 계획
 
+## 1. 네이티브 스플래시 화면 (Zibda 그라데이션)
 
-## 등록자 정보 명확화 계획
+- `@capacitor/splash-screen` 설치 및 `capacitor.config.ts`에 plugins 설정 추가 (1500ms, 자동 숨김, fade out).
+- `assets/splash.png` (2732×2732) 신규 생성: 딥블루→퍼플→핫핑크→오렌지 그라데이션 + 중앙 흰색 "Zibda" 텍스트.
+- GitHub Actions 워크플로우(`.github/workflows/android-release-aab.yml`)에 `capacitor-assets generate --splash` 단계 추가 — 모든 `drawable-*/splash.png` 재생성.
+- `android/app/src/main/res/values/styles.xml` 의 `AppTheme.NoActionBarLaunch` 가 `@drawable/splash` 사용하는지 확인.
 
-현재 관리자가 `/my-properties`에서 전체 매물을 볼 때, 등록자 정보(중개사 이름·소속)가 작은 배지로 주소 아래에 같이 표시되어 있어 눈에 잘 띄지 않습니다. 이를 명확하게 분리/강조합니다.
+## 2. 뒤로가기로 모달/문의 화면 종료
 
-### 변경 사항
+문제: 매물카드의 "문의하기", "협력공인중개사" 모달이 history에 push되지 않아 뒤로가기 시 모달이 닫히지 않고 페이지가 이동함.
 
-**1. `PropertyRow` 카드 (관리자 뷰) — 등록자 영역을 독립 행으로 승격**
+- `src/hooks/useOverlayHistory.tsx` 신규: 모달 열림 시 `history.pushState`, popstate에서 닫기.
+- 적용 대상:
+  - `PropertyDetailPanel` 의 문의하기 모달
+  - `GuestModals` (게스트 문의 모달)
+  - `LandlordSearchModal`
+  - `PublicRecordModal`
+  - `InstallAppModal`
+- 모든 모달의 `onOpenChange(false)` 시 `history.back()` 호출하지 않도록 가드 (popstate에서 닫힐 때는 skip).
 
-현재: 작은 회색 배지 두 개가 주소 줄 아래에 wrap으로 표시됨.
+## 3. 메인/하위 화면에서 뒤로가기 → 앱 종료
 
-변경 후: 카드 상단(또는 썸네일 옆 첫 줄 위)에 **등록자 전용 배너 한 줄**을 분리하여 항상 가장 먼저 노출.
+문제: 설치된 AAB에서 `useExitConfirm` 의 "종료" 버튼이 동작 안 함.
 
-```text
-┌─────────────────────────────────────────────────┐
-│ 🏢 봉명공인중개사  │  👤 홍길동  │  📅 2025-04-22│ ← 새 등록자 바
-├─────────────────────────────────────────────────┤
-│ [썸네일] 건물명 [유형배지] [상태배지]            │
-│         📍 주소 · 호수                          │
-│                          1000/50  관5 · 33㎡  버튼│
-└─────────────────────────────────────────────────┘
-```
+- 원인: `useExitConfirm` 은 `isMobile` (userAgent 기반) 으로만 분기 → Capacitor 환경 감지 누락. `App.exitApp()` import 가 동적 import 라 production에서 fail 가능.
+- 수정: `Capacitor.isNativePlatform()` 으로 가드하고 `@capacitor/app` 정적 import. 네이티브에서는 `App.exitApp()` 직접 호출.
+- 메인뿐 아니라 모든 1단계 라우트(`/`, `/residential`, `/commercial`, `/mypage` 등)에서 `useExitConfirm` 활성화.
+- Capacitor `App.addListener('backButton')` 로 안드로이드 하드웨어 백버튼 직접 처리 (overlay 있으면 pop, 메인이면 종료 다이얼로그, 그 외엔 history.back).
 
-- 배너 배경: 부드러운 primary tint(`hsl(var(--primary) / 0.06)`)로 시각적 구분
-- 사무소명: 좌측, 굵게(font-bold), accent 색
-- 등록자 이름: 중간, primary 색 + 인물 아이콘
-- 등록일: 우측, 작은 회색
-- 등록자 미상인 경우: "👤 등록자 미상 (agent_name: XXX)" 형태로 원본 `agent_name` 노출 → 어떤 데이터에서 식별 실패했는지 즉시 파악 가능
-- `registered_by`로 매칭된 경우 vs `agent_name`으로 매칭된 경우를 색상으로 구분(예: registered_by 매칭은 진한 primary, agent_name fallback은 옅은 색 + "name 매칭" 레이블)
+## 4. 매물 등록 중개사와 1:1 채팅
 
-**2. 회원별 필터 탭 개선**
+현재 `chat_conversations` 는 `user_id` 만 가지고 관리자와의 채팅 전용. 매물별 중개사 채팅으로 확장.
 
-현재 `agent_name` 기준으로만 그룹화 → 동일인이 여러 이름 표기로 들어가 있으면 분리됨.
+### DB 마이그레이션
+- `chat_conversations` 에 컬럼 추가:
+  - `agent_user_id uuid references auth.users` (대화 상대 중개사, null = 관리자)
+  - `property_id uuid references properties` (어느 매물 문의인지)
+  - `unread_for_agent integer default 0`
+- 인덱스: `(user_id, agent_user_id, property_id)` 유니크.
+- RLS 정책 추가: 중개사도 본인이 `agent_user_id` 인 대화의 메시지 read/write 가능.
+- `notify_agent_on_chat_message` 트리거: 새 user 메시지 INSERT 시 `notifications` 에 행 추가 (`type='chat_inquiry'`, link='/agent/chat/:conversationId').
 
-변경 후:
-- 탭에 사무소명(`agency_name`)을 부제로 표시하는 건 유지하되, 각 탭에 **본인이 등록한 매물 수**와 **소속 사무소** 분리 표시
-- "👥 전체" 옆에 "🏢 사무소별" 제2 행 탭 추가(선택): `agency_name` 기준으로도 필터링 가능하도록 토글
+### 프론트엔드
+- `ChatInquiryWidget` 시그니처 확장: `open-chat-inquiry` 이벤트에 `{ agentUserId, propertyId }` 페이로드 전달.
+- `PropertyCard` / `PropertyDetailPanel` 의 "채팅 문의하기" 버튼:
+  ```
+  window.dispatchEvent(new CustomEvent('open-chat-inquiry', { 
+    detail: { agentUserId: property.registered_by, propertyId: property.id }
+  }))
+  ```
+- `ensureConversation` 에서 `(user_id, agent_user_id, property_id)` 키로 조회/생성.
+- 중개사용 채팅 인박스 페이지 `/agent/chat` 신규 — 본인이 받은 문의 대화 목록 + 채팅창.
+- 알림 페이지(`NotificationsPage`) 에서 `chat_inquiry` 클릭 시 해당 대화로 이동.
 
-**3. 상세 확장 영역에 등록자 메타 추가**
+## 5. 초기 로딩 속도 개선 (첫 진입)
 
-확장 시 보이는 정보 그리드에 **등록 담당자 / 사무소 / 등록일시(created_at)** 항목을 명시적으로 표시.
+- `src/App.tsx` 의 라우트들을 `React.lazy` + `Suspense` 로 분리 (현재 일부만 lazy). 모든 페이지 컴포넌트를 lazy 로 전환.
+- `index.html` 에 critical CSS 인라인 + 큰 이미지 `loading="lazy"` 일괄 적용 확인.
+- Vite 빌드 옵션: `build.rollupOptions.output.manualChunks` 로 react/react-dom, supabase, kakao-maps SDK 분리.
+- Kakao Maps SDK 는 `Index`/`MapView` 진입 시에만 동적 로드 (이미 `kakaoMapsLoader` 있음 — 다른 곳에서 prefetch 하지 않는지 확인).
+- `useDBProperties` 첫 fetch 시 `limit(50)` + 페이지네이션 (또는 viewport bounds 기반 로드).
+- 폰트: 시스템 폰트 우선, `@fontsource` 만 사용.
 
-### 기술 세부사항
+## 6. 기술 노트
 
-- 파일: `src/pages/MyProperties.tsx` 만 수정
-- `PropertyRow` 컴포넌트의 헤더 마크업 재구성
-- `registrantInfo` prop 시그니처에 `matchedBy: 'registered_by' | 'agent_name' | null` 추가
-- 부모 컴포넌트(MyProperties)에서 매칭 출처를 함께 전달
-- DB 변경 없음, 신규 쿼리 없음
+- 채팅 RLS 변경 후 기존 데이터 마이그레이션: 기존 `chat_conversations` 행은 `agent_user_id=null` (관리자 채팅) 유지.
+- 스플래시 자산은 PNG 1개 → capacitor-assets 가 모든 mipmap/drawable 사이즈 생성.
+- 백버튼 listener 는 React Router 와 충돌 가능 → Capacitor listener 에서 `event.canGoBack` 로직 우회하고 직접 history 관리.
 
-### 변경되지 않는 사항
+## 7. 검증
 
-- 일반 중개사 뷰(본인 매물만 보는 화면)는 변경 없음 — 본인 것이므로 등록자 표시 불필요
-- 매물 등록·수정·삭제 로직 유지
-- 실시간 동기화(realtime) 유지
-
+- AAB 빌드 후 실기기에서:
+  - 앱 시작 → Zibda 스플래시 1.5초 → 메인
+  - 매물카드 → 문의하기 → 뒤로가기 → 모달만 닫힘
+  - 메인에서 뒤로가기 → "종료하시겠습니까?" → 종료 → 앱 닫힘
+  - 채팅 문의하기 → 매물 중개사와 대화 → 중개사 알림 수신
+- Lighthouse 모바일 점수: 초기 진입 LCP 측정.

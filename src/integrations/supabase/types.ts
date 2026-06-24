@@ -136,39 +136,56 @@ export type Database = {
       }
       chat_conversations: {
         Row: {
+          agent_user_id: string | null
           created_at: string
           id: string
           last_message: string
           last_message_at: string
+          property_id: string | null
           unread_for_admin: number
+          unread_for_agent: number
           unread_for_user: number
           updated_at: string
           user_id: string
           user_name: string
         }
         Insert: {
+          agent_user_id?: string | null
           created_at?: string
           id?: string
           last_message?: string
           last_message_at?: string
+          property_id?: string | null
           unread_for_admin?: number
+          unread_for_agent?: number
           unread_for_user?: number
           updated_at?: string
           user_id: string
           user_name?: string
         }
         Update: {
+          agent_user_id?: string | null
           created_at?: string
           id?: string
           last_message?: string
           last_message_at?: string
+          property_id?: string | null
           unread_for_admin?: number
+          unread_for_agent?: number
           unread_for_user?: number
           updated_at?: string
           user_id?: string
           user_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
