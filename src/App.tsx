@@ -16,6 +16,8 @@ import { useIsGuest } from "./hooks/useIsGuest";
 import { useState } from "react";
 import { InquiryModal, PartnerAgencyModal, GuestDetailModal, type GuestDetailInfo } from "./components/guest/GuestModals";
 import { useExitConfirm } from "./hooks/useExitConfirm";
+import { useAuth } from "./hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 // 모든 페이지에서 안드로이드/모바일 뒤로가기 → 종료 다이얼로그 활성화
 const GlobalExitConfirm = () => {
@@ -32,12 +34,24 @@ const AuthGatedChatInquiry = () => {
 
 // 게스트 문의 모달 — 어디서든 window 이벤트로 호출
 const GlobalGuestInquiry = () => {
+  const { user } = useAuth();
   const [state, setState] = useState<{ open: boolean; detail?: any }>({ open: false });
   const [partner, setPartner] = useState<{ open: boolean; detail?: any }>({ open: false });
   const [detailState, setDetailState] = useState<{ open: boolean; info?: GuestDetailInfo; partnerDetail?: any }>({ open: false });
   useEffect(() => {
-    const handler = (e: Event) => {
+    const handler = async (e: Event) => {
       const detail = (e as CustomEvent).detail || {};
+      if (user?.memberType === "일반회원" && user.userId && !detail.memberInfo) {
+        try {
+          const { data } = await supabase
+            .from("agent_profiles")
+            .select("name, phone")
+            .eq("user_id", user.userId)
+            .maybeSingle();
+          setState({ open: true, detail: { ...detail, memberInfo: { name: data?.name || "", phone: data?.phone || "" } } });
+          return;
+        } catch { /* fallback to manual input */ }
+      }
       setState({ open: true, detail });
     };
     const partnerHandler = (e: Event) => {
@@ -56,7 +70,7 @@ const GlobalGuestInquiry = () => {
       window.removeEventListener("open-guest-partner", partnerHandler);
       window.removeEventListener("open-guest-detail", detailHandler);
     };
-  }, []);
+  }, [user?.memberType, user?.userId]);
   return (
     <>
       <InquiryModal
