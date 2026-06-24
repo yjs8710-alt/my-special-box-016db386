@@ -222,7 +222,7 @@ const AdminGuestInquiriesPanel = () => {
                 </div>
 
                 {/* Table header (desktop) */}
-                <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-bold text-muted-foreground">
+                <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_120px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-bold text-muted-foreground">
                   <div>매물번호</div>
                   <div>문의자</div>
                   <div>연락처</div>
