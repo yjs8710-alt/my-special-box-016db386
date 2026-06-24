@@ -473,7 +473,7 @@ const MyPage = () => {
                 ) : inquiries.length === 0 ? (
                   <div className="text-center py-8">
                     <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">받은 문의가 없습니다.</p>
+                    <p className="text-sm text-muted-foreground">{isGeneralMember ? "보낸 문의가 없습니다." : "받은 문의가 없습니다."}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
