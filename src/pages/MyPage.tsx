@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,11 @@ const MyPage = () => {
   const [subMembers, setSubMembers] = useState<AgentProfile[]>([]);
   const [loadingSubs, setLoadingSubs] = useState(false);
 
+  // 받은 문의 내역
+  type InquiryRow = { id: string; name: string; phone: string; message: string | null; property_reg_no: string | null; created_at: string; is_read: boolean };
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
+  const [loadingInquiries, setLoadingInquiries] = useState(false);
+
   // Email
   const [email, setEmail] = useState("");
 
@@ -115,6 +120,41 @@ const MyPage = () => {
       setLoadingSubs(false);
     })();
   }, [profile]);
+
+  // 받은 문의 내역
+  const loadInquiries = async () => {
+    if (!user?.userId) return;
+    setLoadingInquiries(true);
+    const { data } = await supabase
+      .from("guest_inquiries")
+      .select("id, name, phone, message, property_reg_no, created_at, is_read")
+      .eq("agent_user_id", user.userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setInquiries((data ?? []) as InquiryRow[]);
+    setLoadingInquiries(false);
+  };
+  useEffect(() => {
+    if (!user?.userId) return;
+    loadInquiries();
+    const ch = supabase
+      .channel(`mypage-inquiries-${user.userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `agent_user_id=eq.${user.userId}` }, loadInquiries)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.userId]);
+
+  const deleteInquiry = async (id: string) => {
+    const prev = inquiries;
+    setInquiries((p) => p.filter((i) => i.id !== id));
+    const { error } = await supabase.from("guest_inquiries").delete().eq("id", id);
+    if (error) {
+      setInquiries(prev);
+      toast({ title: "삭제 실패", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "문의가 삭제되었습니다." });
+    }
+  };
 
   const handleSaveAll = async () => {
     if (!profile) return;
@@ -229,12 +269,20 @@ const MyPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="space-y-4">
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "1fr 1fr 1fr" : "1fr 1fr" }}>
+          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "repeat(4, 1fr)" : "repeat(3, 1fr)" }}>
             <TabsTrigger value="info" className="text-xs gap-1">
               <User className="w-3.5 h-3.5" /> 내 정보
             </TabsTrigger>
             <TabsTrigger value="password" className="text-xs gap-1">
               <Lock className="w-3.5 h-3.5" /> 비밀번호
+            </TabsTrigger>
+            <TabsTrigger value="inquiries" className="text-xs gap-1 relative">
+              <MessageCircle className="w-3.5 h-3.5" /> 문의내역
+              {inquiries.filter((i) => !i.is_read).length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+                  {inquiries.filter((i) => !i.is_read).length}
+                </span>
+              )}
             </TabsTrigger>
             {isRepresentative && (
               <TabsTrigger value="members" className="text-xs gap-1">
@@ -391,6 +439,90 @@ const MyPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ─── 문의 내역 ─── */}
+          <TabsContent value="inquiries">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                  받은 문의 내역
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">
+                    {inquiries.length}건
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingInquiries ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : inquiries.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+                    <p className="text-sm text-muted-foreground">받은 문의가 없습니다.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {inquiries.map((i) => (
+                      <div
+                        key={i.id}
+                        className={`p-3 rounded-lg border ${!i.is_read ? "bg-primary/[0.04] border-primary/30" : "border-border"}`}
+                      >
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                          {!i.is_read && (
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground">NEW</span>
+                          )}
+                          {i.property_reg_no && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                              <Hash className="w-2.5 h-2.5" />NO.{i.property_reg_no}
+                            </span>
+                          )}
+                          <span className="text-sm font-bold text-foreground">{i.name}</span>
+                          <a
+                            href={`tel:${i.phone.replace(/[^0-9]/g, "")}`}
+                            className="ml-auto flex items-center gap-1 text-xs font-semibold text-primary"
+                          >
+                            <Phone className="w-3 h-3" /> {i.phone}
+                          </a>
+                        </div>
+                        {i.message && (
+                          <p className="text-xs text-foreground bg-muted/40 rounded px-2 py-1.5 whitespace-pre-wrap line-clamp-3">
+                            {i.message}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(i.created_at).toLocaleString("ko-KR")}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs gap-1"
+                              onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
+                            >
+                              상세
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => deleteInquiry(i.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+
 
           {/* ─── 회원관리 (대표중개사 전용) ─── */}
           {isRepresentative && (

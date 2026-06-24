@@ -43,9 +43,14 @@ export const useExitConfirm = (enabled: boolean = true) => {
       const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
       if (!isMobile) return;
 
-      window.history.pushState({ exitGuard: true }, "");
+      // 홈에 있을 때만 가드 push
+      if (window.location.pathname === "/") {
+        window.history.pushState({ exitGuard: true }, "");
+      }
       const onPopState = () => {
         if (hasOpenOverlay()) return;
+        // 홈이 아닌 곳에서는 정상적인 뒤로가기로 동작 (종료 모달 X)
+        if (window.location.pathname !== "/") return;
         setOpen(true);
         window.history.pushState({ exitGuard: true }, "");
       };
@@ -81,8 +86,7 @@ export const useExitConfirm = (enabled: boolean = true) => {
 
   const handleCancel = useCallback(() => {
     setOpen(false);
-    // 네이티브에서는 popstate를 사용하지 않으므로 push 불필요. 웹은 다시 가드 push.
-    if (!isNativeRef.current) {
+    if (!isNativeRef.current && window.location.pathname === "/") {
       try { window.history.pushState({ exitGuard: true }, ""); } catch {}
     }
   }, []);

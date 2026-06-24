@@ -89,10 +89,16 @@ const AdminGuestInquiriesPanel = () => {
   };
 
   const remove = async (id: string) => {
-    if (!confirm("이 문의를 삭제할까요?")) return;
+    // 낙관적 업데이트 (즉시 반영)
+    const prev = items;
+    setItems((p) => p.filter((i) => i.id !== id));
     const { error } = await supabase.from("guest_inquiries").delete().eq("id", id);
-    if (error) return toast.error("삭제 실패");
-    setItems((prev) => prev.filter((i) => i.id !== id));
+    if (error) {
+      setItems(prev);
+      toast.error("삭제 실패: " + error.message);
+    } else {
+      toast.success("삭제되었습니다");
+    }
   };
 
   const agentOptions = useMemo(() => {

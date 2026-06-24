@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye, MessageCircle, Phone, X, User2 } from "lucide-react";
+import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye, MessageCircle, Phone, X, User2, Building2, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { loadCheongjuContact } from "@/lib/cheongjuContacts";
 
 interface Notification {
   id: string;
@@ -32,8 +33,13 @@ type InquiryDetail = {
   message: string | null;
   created_at: string;
   property_reg_no: string | null;
+  property_id?: string | null;
   property_dong?: string | null;
   property_lot?: string | null;
+  property_unit?: string | null;
+  property_address?: string | null;
+  property_building?: string | null;
+  owner_phone?: string | null;
   user_id?: string | null;
 };
 
@@ -115,15 +121,26 @@ const NotificationsPage = () => {
       .maybeSingle();
     if (!data) return;
     const d: any = data;
-    let dong: string | null = null, lot: string | null = null;
+    let dong: string | null = null, lot: string | null = null, unit: string | null = null;
+    let address: string | null = null, building: string | null = null;
+    let ownerPhone: string | null = null;
     if (d.property_id) {
       const { data: prop } = await supabase
         .from("properties")
-        .select("dong, lot_number")
+        .select("dong, lot_number, unit_number, address, building_name")
         .eq("id", d.property_id)
         .maybeSingle();
       dong = prop?.dong ?? null;
       lot = prop?.lot_number ?? null;
+      unit = (prop as any)?.unit_number ?? null;
+      address = (prop as any)?.address ?? null;
+      building = (prop as any)?.building_name ?? null;
+      if (dong && lot) {
+        try {
+          const c = await loadCheongjuContact({ dong, lotNumber: lot, unitNumber: unit ?? undefined });
+          ownerPhone = c?.contactOwner || null;
+        } catch (e) { console.warn("[owner phone]", e); }
+      }
     }
     setDetail({
       id: d.id,
@@ -132,8 +149,13 @@ const NotificationsPage = () => {
       message: d.message,
       created_at: d.created_at,
       property_reg_no: d.property_reg_no,
+      property_id: d.property_id ?? null,
       property_dong: dong,
       property_lot: lot,
+      property_unit: unit,
+      property_address: address,
+      property_building: building,
+      owner_phone: ownerPhone,
       user_id: d.user_id ?? null,
     });
   }, []);
@@ -295,22 +317,60 @@ const NotificationsPage = () => {
               </button>
             </div>
             <div className="p-4 space-y-3">
-              {(detail.property_reg_no || detail.property_dong) && (
-                <div className="text-[12px] bg-muted rounded-lg px-3 py-2 text-foreground">
-                  {detail.property_reg_no ? <span className="font-bold mr-2">[NO.{detail.property_reg_no}]</span> : null}
-                  <span>{[detail.property_dong, detail.property_lot].filter(Boolean).join(" ")}</span>
+              {/* 매물 헤더 */}
+              {(detail.property_reg_no || detail.property_address || detail.property_dong) && (
+                <div className="rounded-lg border border-border bg-muted/40 p-3 space-y-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    {detail.property_reg_no && (
+                      <span className="text-[11px] font-mono font-extrabold px-2 py-0.5 rounded bg-primary/10 text-primary">
+                        NO.{detail.property_reg_no}
+                      </span>
+                    )}
+                    {detail.property_building && (
+                      <span className="text-xs font-bold text-foreground">{detail.property_building}</span>
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-foreground break-words">
+                    {detail.property_address || [detail.property_dong, detail.property_lot].filter(Boolean).join(" ") || "주소 정보 없음"}
+                    {detail.property_unit ? ` ${detail.property_unit}호` : ""}
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    {detail.property_id && (
+                      <button
+                        onClick={() => window.open(`/share/${detail.property_id}`, "_blank", "noopener,noreferrer")}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-card border border-border hover:bg-muted"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
+                      </button>
+                    )}
+                    {detail.owner_phone ? (
+                      <a
+                        href={`tel:${detail.owner_phone.replace(/[^0-9+]/g, "")}`}
+                        className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-emerald-600 text-white hover:opacity-90"
+                      >
+                        <Phone className="w-3.5 h-3.5" /> 소유주 전화
+                      </a>
+                    ) : (
+                      <span className="flex-1 text-center py-1.5 text-[11px] text-muted-foreground border border-dashed border-border rounded-md">
+                        소유주 연락처 미등록
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
+
+              {/* 문의자 정보 */}
               <div className="flex items-center gap-2 text-sm">
                 <User2 className="w-4 h-4 text-muted-foreground" />
                 <span className="font-semibold">{detail.name}</span>
+                <a
+                  href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
+                  className="ml-auto flex items-center gap-1 text-sm font-bold text-primary"
+                >
+                  <Phone className="w-3.5 h-3.5" /> {detail.phone}
+                </a>
               </div>
-              <a
-                href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
-                className="flex items-center gap-2 text-sm font-bold text-primary"
-              >
-                <Phone className="w-4 h-4" /> {detail.phone}
-              </a>
               <div className="rounded-lg border p-3 text-sm whitespace-pre-wrap bg-muted/40">
                 {detail.message || "문의 메시지 없음"}
               </div>
@@ -322,7 +382,7 @@ const NotificationsPage = () => {
                   href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
                   className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
                 >
-                  <Phone className="w-4 h-4" /> 전화 걸기
+                  <Phone className="w-4 h-4" /> 문의자 전화
                 </a>
                 <button
                   onClick={() => startChatFromInquiry(detail)}
