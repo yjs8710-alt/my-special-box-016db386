@@ -41,6 +41,20 @@ const Index = () => {
 
   const selected = allProperties.find((p) => p.id === selectedId) ?? null;
 
+  // ?propertyId=<dbId> 쿼리 → 자동 상세보기 (관리자/중개사가 알림 등에서 진입)
+  useEffect(() => {
+    const dbId = searchParams.get("propertyId");
+    if (!dbId || allProperties.length === 0) return;
+    const target = allProperties.find((p) => p.dbId === dbId);
+    if (target) {
+      setSelectedId(target.id);
+      const next = new URLSearchParams(searchParams);
+      next.delete("propertyId");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, allProperties, setSearchParams]);
+
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
