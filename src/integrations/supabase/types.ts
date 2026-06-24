@@ -374,6 +374,41 @@ export type Database = {
           },
         ]
       }
+      inquiry_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          inquiry_id: string
+          sender_role: string
+          sender_user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          inquiry_id: string
+          sender_role: string
+          sender_user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          inquiry_id?: string
+          sender_role?: string
+          sender_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inquiry_messages_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "guest_inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       land_summary: {
         Row: {
           created_at: string
