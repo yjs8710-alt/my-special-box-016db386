@@ -86,8 +86,7 @@ export const useExitConfirm = (enabled: boolean = true) => {
 
   const handleCancel = useCallback(() => {
     setOpen(false);
-    // 네이티브에서는 popstate를 사용하지 않으므로 push 불필요. 웹은 다시 가드 push.
-    if (!isNativeRef.current) {
+    if (!isNativeRef.current && window.location.pathname === "/") {
       try { window.history.pushState({ exitGuard: true }, ""); } catch {}
     }
   }, []);
