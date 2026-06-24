@@ -63,6 +63,19 @@ export const InquiryModal = ({
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // 뒤로가기로 모달 닫기
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay();
+    window.history.pushState({ inquiryModal: true }, "");
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      popOverlay();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const formatPhone = (v: string) => {
@@ -182,11 +195,30 @@ export const PartnerAgencyModal = ({
   open,
   onClose,
   onChat,
+  agentUserId,
+  propertyId,
+  propertyTitle,
 }: {
   open: boolean;
   onClose: () => void;
   onChat?: () => void;
+  agentUserId?: string;
+  propertyId?: string;
+  propertyTitle?: string;
 }) => {
+  // 뒤로가기로 모달 닫기
+  useEffect(() => {
+    if (!open) return;
+    pushOverlay();
+    window.history.pushState({ partnerModal: true }, "");
+    const onPop = () => onClose();
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      popOverlay();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   const a = PARTNER_AGENCY;
   return (
