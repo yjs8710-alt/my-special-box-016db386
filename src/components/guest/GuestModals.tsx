@@ -146,6 +146,15 @@ export const InquiryModal = ({
     });
     if (msgError) throw msgError;
 
+    await supabase
+      .from("chat_conversations")
+      .update({
+        last_message: firstMsg.slice(0, 200),
+        last_message_at: new Date().toISOString(),
+        ...(agentUserId ? { unread_for_agent: 1 } : { unread_for_admin: 1 }),
+      } as any)
+      .eq("id", conversationId);
+
     window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
       detail: {
         conversationId,
@@ -181,7 +190,8 @@ export const InquiryModal = ({
         } as any);
       if (error) throw error;
 
-      if (isMember && userId) {
+      if (userId) {
+        await openMemberChat(userId, firstMsg);
         toast.success("문의가 접수되었습니다. 담당자가 답변드릴 예정입니다.");
         setMessage("");
         onClose();
