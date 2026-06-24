@@ -8,13 +8,19 @@ const AdminNotificationBell = () => {
   const [count, setCount] = useState(0);
 
   const refresh = useCallback(async () => {
-    const [chats, reports] = await Promise.all([
+    const { data: au } = await supabase.auth.getUser();
+    const uid = au?.user?.id ?? null;
+    const [chats, reports, notifs] = await Promise.all([
       supabase.from("chat_conversations").select("unread_for_admin"),
       supabase.from("property_reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      uid
+        ? supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("is_read", false)
+        : Promise.resolve({ count: 0 } as any),
     ]);
     const chatUnread = (chats.data ?? []).reduce((s: number, r: any) => s + (r.unread_for_admin ?? 0), 0);
     const reportPending = reports.count ?? 0;
-    setCount(chatUnread + reportPending);
+    const notifUnread = (notifs as any).count ?? 0;
+    setCount(chatUnread + reportPending + notifUnread);
   }, []);
 
   useEffect(() => {
@@ -24,6 +30,7 @@ const AdminNotificationBell = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_conversations" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "property_reports" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, refresh)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [refresh]);
