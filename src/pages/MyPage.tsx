@@ -63,6 +63,11 @@ const MyPage = () => {
   const [subMembers, setSubMembers] = useState<AgentProfile[]>([]);
   const [loadingSubs, setLoadingSubs] = useState(false);
 
+  // 받은 문의 내역
+  type InquiryRow = { id: string; name: string; phone: string; message: string | null; property_reg_no: string | null; created_at: string; is_read: boolean };
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
+  const [loadingInquiries, setLoadingInquiries] = useState(false);
+
   // Email
   const [email, setEmail] = useState("");
 
