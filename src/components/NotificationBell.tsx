@@ -18,7 +18,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   const targetPath = !isAuthorized
     ? "/login"
     : isGeneralMember
-    ? "/my-page?tab=inquiries"
+    ? "/my-page?view=activity&tab=inquiries"
     : "/notifications";
 
   const refresh = useCallback(async () => {
