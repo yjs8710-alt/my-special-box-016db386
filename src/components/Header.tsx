@@ -170,7 +170,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   채팅문의
                 </button>
               )}
-              {!isGuest && <NotificationBell variant="desktop" />}
+              {isAuthorized && <NotificationBell variant="desktop" />}
 
               {isAuthorized ? (
                 <>
