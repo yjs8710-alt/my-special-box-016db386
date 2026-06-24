@@ -484,21 +484,14 @@ const MyPage = () => {
                 >
                   <MessageCircle className="w-4 h-4" /> 채팅 문의 내역 보기
                 </button>
-                {isGeneralMember ? (
-                  <div className="text-center py-6">
-                    <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      모든 채팅 문의는 위의 <span className="font-bold text-primary">채팅 문의 내역 보기</span>에서 한 번에 확인할 수 있습니다.
-                    </p>
-                  </div>
-                ) : loadingInquiries ? (
+                {loadingInquiries ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : inquiries.length === 0 ? (
                   <div className="text-center py-8">
                     <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">받은 문의가 없습니다.</p>
+                    <p className="text-sm text-muted-foreground">{isGeneralMember ? "보낸 문의가 없습니다." : "받은 문의가 없습니다."}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -534,14 +527,16 @@ const MyPage = () => {
                             {new Date(i.created_at).toLocaleString("ko-KR")}
                           </span>
                           <div className="flex items-center gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 text-xs gap-1"
-                              onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
-                            >
-                              상세
-                            </Button>
+                            {!isGeneralMember && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs gap-1"
+                                onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
+                              >
+                                상세
+                              </Button>
+                            )}
 
                             <Button
                               size="sm"

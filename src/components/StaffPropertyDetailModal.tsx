@@ -31,7 +31,6 @@ type PropFull = {
   building_memo: string | null;
   room_memo: string | null;
   agent_name: string | null;
-  landlord_phone: string | null;
 };
 
 const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
@@ -56,11 +55,6 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const visibleOwnerPhone = data?.landlord_phone || ownerPhone || null;
-  const displayNote = data?.note && data?.landlord_phone
-    ? data.note.replace(/\*{2,3}-\*{3,4}-\*{4}/, data.landlord_phone)
-    : data?.note;
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -68,7 +62,7 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
       const { data: p } = await (supabase as any)
         .from("properties")
         .select(
-          "id, reg_no, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name, landlord_phone"
+          "id, reg_no, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name"
         )
         .eq("id", propertyId)
         .maybeSingle();
@@ -161,16 +155,16 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
               </Section>
 
               {/* 특이사항 (매물등록·수정의 description 우선) */}
-              {(data.description || displayNote) && (
+              {(data.description || data.note) && (
                 <Section icon={NotebookPen} title="특이사항">
                   {data.description && (
-                    <p className="text-sm whitespace-pre-wrap text-black font-semibold leading-relaxed">
+                    <p className="text-sm whitespace-pre-wrap text-foreground leading-relaxed">
                       {data.description}
                     </p>
                   )}
-                  {displayNote && (
-                    <p className="text-sm whitespace-pre-wrap text-black font-semibold leading-relaxed mt-2 pt-2 border-t border-border">
-                      {displayNote}
+                  {data.note && (
+                    <p className="text-xs whitespace-pre-wrap text-muted-foreground leading-relaxed mt-2 pt-2 border-t border-border">
+                      {data.note}
                     </p>
                   )}
                 </Section>
@@ -200,9 +194,9 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
               <Section icon={User2} title="담당자 / 소유주">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Row label="담당 중개사" value={data.agent_name} />
-                  <Row label="소유주 연락처" value={visibleOwnerPhone ? (
-                    <a href={`tel:${visibleOwnerPhone.replace(/[^0-9+]/g, "")}`} className="text-emerald-600 inline-flex items-center gap-1 font-bold">
-                      <Phone className="w-3 h-3" />{visibleOwnerPhone}
+                  <Row label="소유주 연락처" value={ownerPhone ? (
+                    <a href={`tel:${ownerPhone.replace(/[^0-9+]/g, "")}`} className="text-emerald-600 inline-flex items-center gap-1 font-bold">
+                      <Phone className="w-3 h-3" />{ownerPhone}
                     </a>
                   ) : "미등록"} />
                 </div>

@@ -569,7 +569,6 @@ export type Database = {
           images: string[]
           is_hot: boolean
           is_new: boolean
-          landlord_phone: string | null
           lat: number
           lng: number
           lot_number: string
@@ -614,7 +613,6 @@ export type Database = {
           images?: string[]
           is_hot?: boolean
           is_new?: boolean
-          landlord_phone?: string | null
           lat?: number
           lng?: number
           lot_number?: string
@@ -659,7 +657,6 @@ export type Database = {
           images?: string[]
           is_hot?: boolean
           is_new?: boolean
-          landlord_phone?: string | null
           lat?: number
           lng?: number
           lot_number?: string

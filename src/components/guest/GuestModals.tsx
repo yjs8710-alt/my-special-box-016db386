@@ -24,12 +24,12 @@ export const PARTNER_AGENCY = {
 const Overlay = ({ onClose, children }: { onClose: () => void; children: React.ReactNode }) =>
   createPortal(
     <div
-      className="fixed inset-0 z-[10300] flex items-start sm:items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.5)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto max-h-[calc(100vh-2rem)] flex flex-col"
+        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -37,7 +37,6 @@ const Overlay = ({ onClose, children }: { onClose: () => void; children: React.R
     </div>,
     document.body
   );
-
 
 // ===== 1. 문의하기 모달 (전화 필수) =====
 export const InquiryModal = ({
@@ -100,19 +99,17 @@ export const InquiryModal = ({
   };
 
   const findExistingConversation = async (userId: string) => {
-    // 같은 회원 ↔ 같은 담당자 ↔ 같은 매물 조합일 때만 기존 대화 재사용 — 매물이 다르면 새 채팅방 생성
+    // 같은 회원 ↔ 같은 담당자(또는 관리자) 대화는 하나로 유지 — 매물별로 분리하지 않음
     let query = supabase
       .from("chat_conversations")
       .select("id")
       .eq("user_id", userId);
     query = agentUserId ? query.eq("agent_user_id", agentUserId) : query.is("agent_user_id", null);
-    query = propertyDbId ? query.eq("property_id", propertyDbId) : query.is("property_id", null);
 
     const { data: existing, error: findError } = await query.order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (findError) throw findError;
     return existing?.id ?? null;
   };
-
 
 
   const openMemberChat = async (userId: string, firstMsg: string) => {
@@ -219,7 +216,7 @@ export const InquiryModal = ({
 
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-primary" /> 매물 문의하기
         </h3>
@@ -227,8 +224,7 @@ export const InquiryModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3 overflow-y-auto flex-1">
-
+      <div className="p-5 space-y-3">
         {propertyTitle && (
           <div className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
@@ -368,7 +364,7 @@ export const PartnerAgencyModal = ({
   const a = PARTNER_AGENCY;
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary" /> 협력 공인중개사
         </h3>
@@ -376,8 +372,7 @@ export const PartnerAgencyModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3 overflow-y-auto flex-1">
-
+      <div className="p-5 space-y-3">
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
           <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
