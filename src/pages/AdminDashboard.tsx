@@ -1521,16 +1521,13 @@ const AdminDashboard = () => {
 
     // 일반회원으로 변경 시: 확인 모달 + 중개사 관련 필드 초기화
     if (member_type === "일반회원") {
-      const ok = await customConfirm({
-        title: "일반회원으로 변경",
-        message:
-          `${target?.name ?? "해당 회원"} 님을 '일반회원'으로 변경합니다.\n\n` +
-          `• 중개사 권한(매물 등록/관리)이 회수됩니다.\n` +
-          `• 등록번호 및 상위(대표) 부동산 연결이 해제됩니다.\n` +
-          `• 즉시 적용되며 되돌리려면 다시 등급을 변경해야 합니다.\n\n계속하시겠습니까?`,
-        confirmText: "일반회원으로 변경",
-        cancelText: "취소",
-      });
+      const ok = await customConfirm(
+        `[일반회원으로 변경]\n\n` +
+        `${target?.name ?? "해당 회원"} 님을 '일반회원'으로 변경합니다.\n\n` +
+        `• 중개사 권한(매물 등록/관리)이 회수됩니다.\n` +
+        `• 등록번호 및 상위(대표) 부동산 연결이 해제됩니다.\n` +
+        `• 즉시 적용되며 되돌리려면 다시 등급을 변경해야 합니다.\n\n계속하시겠습니까?`
+      );
       if (!ok) return;
 
       const { error } = await supabase
@@ -1541,20 +1538,19 @@ const AdminDashboard = () => {
       setMembers((prev) => prev.map((m) => m.id === id
         ? { ...m, member_type, license_number: null, parent_user_id: null, status: "approved", is_active: true }
         : m));
-      await customAlert({ title: "변경 완료", message: "일반회원으로 변경되었습니다." });
+      await customAlert("일반회원으로 변경되었습니다.");
       return;
     }
 
     // 일반회원 → 중개사 유형으로 변경 시에도 확인
     if (current === "일반회원") {
-      const ok = await customConfirm({
-        title: `${member_type}(으)로 변경`,
-        message: `${target?.name ?? "해당 회원"} 님을 '${member_type}'(으)로 변경합니다.\n중개사 권한이 부여됩니다. 계속하시겠습니까?`,
-        confirmText: "변경",
-        cancelText: "취소",
-      });
+      const ok = await customConfirm(
+        `[${member_type}(으)로 변경]\n\n` +
+        `${target?.name ?? "해당 회원"} 님을 '${member_type}'(으)로 변경합니다.\n중개사 권한이 부여됩니다. 계속하시겠습니까?`
+      );
       if (!ok) return;
     }
+
 
     const { error } = await supabase.from("agent_profiles").update({ member_type }).eq("id", id);
     if (error) { alert("등급 변경 오류: " + error.message); return; }
