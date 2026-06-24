@@ -302,9 +302,53 @@ jobs:
           echo "✅ Legacy ic_launcher.png in place; adaptive XML removed; manifest OK"
 
 
+      - name: Generate splash screen drawables
+        run: |
+          set -e
+          if [ ! -f assets/splash.png ]; then
+            echo "❌ assets/splash.png not found"
+            exit 1
+          fi
+          python3 -m pip install --quiet --disable-pip-version-check Pillow
+          cat > /tmp/gen_splash.py <<'PY'
+          from PIL import Image
+          import os
+          src = Image.open('assets/splash.png').convert('RGB')
+          # 정사각형으로 강제 (이미 정사각형이면 그대로)
+          w, h = src.size
+          side = min(w, h)
+          left = (w - side) // 2
+          top = (h - side) // 2
+          src = src.crop((left, top, left + side, top + side))
+          # 표준 splash 사이즈 (px) — Capacitor 기본 splash.png 위치들
+          sizes = {
+              'drawable':           480,
+              'drawable-port-mdpi': 320,
+              'drawable-port-hdpi': 480,
+              'drawable-port-xhdpi': 720,
+              'drawable-port-xxhdpi': 960,
+              'drawable-port-xxxhdpi': 1280,
+              'drawable-land-mdpi': 480,
+              'drawable-land-hdpi': 800,
+              'drawable-land-xhdpi': 1280,
+              'drawable-land-xxhdpi': 1600,
+              'drawable-land-xxxhdpi': 1920,
+          }
+          base = 'android/app/src/main/res'
+          for d, sz in sizes.items():
+              folder = os.path.join(base, d)
+              os.makedirs(folder, exist_ok=True)
+              out = src.resize((sz, sz), Image.LANCZOS)
+              out.save(os.path.join(folder, 'splash.png'), 'PNG', optimize=True)
+              print(f'wrote {d}/splash.png at {sz}x{sz}')
+          PY
+          python3 /tmp/gen_splash.py
+          echo "✅ splash.png drawables generated"
+
       - name: Clean Android build cache (drop stale icon resources)
         working-directory: android
         run: ./gradlew --no-daemon clean
+
 
       - name: Build signed release AAB
         working-directory: android
