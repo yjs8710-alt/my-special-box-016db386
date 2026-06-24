@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Send, MessageCircle, Building2, ExternalLink, Hash } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import StaffPropertyDetailModal from "@/components/StaffPropertyDetailModal";
 
 type Conv = {
   id: string;
@@ -33,6 +34,7 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [peekId, setPeekId] = useState<string | null>(null);
 
   const loadConversations = useCallback(async () => {
     const { data } = await supabase
@@ -192,7 +194,7 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
                 </div>
                 {active.property_id && (
                   <button
-                    onClick={() => navigate(`/?propertyId=${active.property_id}`)}
+                    onClick={() => setPeekId(active.property_id!)}
                     className="text-xs font-bold px-3 py-1.5 rounded-lg bg-card border border-border hover:bg-muted inline-flex items-center gap-1 shrink-0"
                   >
                     <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
@@ -248,6 +250,7 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
           )}
         </div>
       </div>
+      {peekId && <StaffPropertyDetailModal propertyId={peekId} onClose={() => setPeekId(null)} />}
     </div>
   );
 };

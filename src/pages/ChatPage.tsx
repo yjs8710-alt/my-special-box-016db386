@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import StaffPropertyDetailModal from "@/components/StaffPropertyDetailModal";
 
 type Conv = {
   id: string;
@@ -35,6 +36,8 @@ const ChatPage = () => {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [peekId, setPeekId] = useState<string | null>(null);
+  const isStaff = !!user?.isAdmin || (user?.memberType !== "일반회원" && user?.memberType !== "게스트");
 
   useEffect(() => {
     if (!isLoading && !isAuthorized) navigate("/login");
@@ -228,7 +231,10 @@ const ChatPage = () => {
                   </div>
                   {active.property_id && (
                     <button
-                      onClick={() => navigate(`/?propertyId=${active.property_id}`)}
+                      onClick={() => {
+                        if (isStaff) setPeekId(active.property_id!);
+                        else navigate(`/share/${active.property_id}`);
+                      }}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg bg-card border border-border hover:bg-muted inline-flex items-center gap-1 shrink-0"
                     >
                       <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
@@ -291,6 +297,7 @@ const ChatPage = () => {
         </div>
       </div>
       <MobileBottomNav />
+      {peekId && <StaffPropertyDetailModal propertyId={peekId} onClose={() => setPeekId(null)} />}
     </div>
   );
 };

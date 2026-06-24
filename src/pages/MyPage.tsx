@@ -477,6 +477,13 @@ const MyPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                <button
+                  onClick={() => navigate("/chat")}
+                  className="w-full mb-3 h-10 rounded-lg text-white text-sm font-bold inline-flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" }}
+                >
+                  <MessageCircle className="w-4 h-4" /> 채팅 문의 내역 보기
+                </button>
                 {loadingInquiries ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
