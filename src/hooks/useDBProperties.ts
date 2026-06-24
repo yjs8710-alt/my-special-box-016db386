@@ -5,6 +5,7 @@ import { MapProperty } from "@/data/mapProperties";
 // 매물 카드/지도에 필요한 컬럼만 선택 (성능 개선)
 const PROPERTY_COLUMNS = [
   "id", "reg_no", "title", "building_name", "address", "type", "room_type", "unit_number",
+  "dong", "lot_number",
   "area", "floor", "deposit", "monthly", "manage_fee", "parking", "elevator",
   "available_from", "total_floors", "build_year", "description",
   "building_memo", "room_memo", "note", "vacate_date",
