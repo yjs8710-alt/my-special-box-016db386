@@ -6,6 +6,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { loadCheongjuContact } from "@/lib/cheongjuContacts";
+import StaffPropertyDetailModal from "@/components/StaffPropertyDetailModal";
 
 interface Notification {
   id: string;
@@ -50,7 +51,7 @@ const NotificationsPage = () => {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<InquiryDetail | null>(null);
-  const [propPeek, setPropPeek] = useState<any | null>(null);
+  const [peekId, setPeekId] = useState<string | null>(null);
 
 
   const load = useCallback(async () => {
@@ -340,19 +341,8 @@ const NotificationsPage = () => {
                   <div className="flex items-center gap-2 pt-1">
                     {detail.property_id && (
                       <button
-                        onClick={async () => {
-                          const isStaff = !!user?.isAdmin || (user?.memberType !== "일반회원" && user?.memberType !== "게스트");
-                          if (!isStaff) {
-                            setDetail(null);
-                            navigate(`/share/${detail.property_id}`);
-                            return;
-                          }
-                          const { data } = await supabase
-                            .from("properties")
-                            .select("id, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name, reg_no")
-                            .eq("id", detail.property_id)
-                            .maybeSingle();
-                          if (data) setPropPeek({ ...data, owner_phone: detail.owner_phone });
+                        onClick={() => {
+                          setPeekId(detail.property_id!);
                         }}
                         className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-card border border-border hover:bg-muted"
                       >
@@ -420,72 +410,9 @@ const NotificationsPage = () => {
         </div>
       )}
 
-      {/* 매물 간단 상세 (중개사/관리자 전용) */}
-      {propPeek && (
-        <div className="fixed inset-0 z-[10300] flex items-end md:items-center justify-center p-3 md:p-6" style={{ background: "rgba(0,0,0,0.6)" }} onClick={() => setPropPeek(null)}>
-          <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ background: "hsl(var(--header-bg))" }}>
-              <div className="flex items-center gap-2 text-white">
-                <Building2 className="w-4 h-4" />
-                <span className="text-sm font-bold">매물 상세보기</span>
-              </div>
-              <button onClick={() => setPropPeek(null)} className="text-white/80 hover:text-white"><X className="w-4 h-4" /></button>
-            </div>
-            <div className="p-4 space-y-3 text-sm max-h-[75vh] overflow-y-auto">
-              <div className="flex items-center gap-2 flex-wrap">
-                {propPeek.reg_no && (
-                  <span className="text-[11px] font-mono font-extrabold px-2 py-0.5 rounded bg-primary/10 text-primary">NO.{propPeek.reg_no}</span>
-                )}
-                {propPeek.building_name && <span className="font-bold">{propPeek.building_name}</span>}
-                {propPeek.type && <span className="text-xs px-1.5 py-0.5 rounded bg-muted">{propPeek.type}{propPeek.room_type ? ` · ${propPeek.room_type}` : ""}</span>}
-              </div>
-              <div>
-                <div className="text-[11px] text-muted-foreground font-bold">주소</div>
-                <div className="font-semibold break-words">
-                  {propPeek.address || [propPeek.dong, propPeek.lot_number].filter(Boolean).join(" ") || "-"}
-                  {propPeek.unit_number ? ` ${propPeek.unit_number}호` : ""}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {propPeek.floor && <div><span className="text-muted-foreground">층 </span><b>{propPeek.floor}</b></div>}
-                {propPeek.area && <div><span className="text-muted-foreground">면적 </span><b>{propPeek.area}</b></div>}
-                {propPeek.deposit && <div><span className="text-muted-foreground">보증/매매 </span><b>{propPeek.deposit}</b></div>}
-                {propPeek.monthly && <div><span className="text-muted-foreground">월세 </span><b>{propPeek.monthly}</b></div>}
-                {propPeek.manage_fee && <div><span className="text-muted-foreground">관리비 </span><b>{propPeek.manage_fee}</b></div>}
-                {propPeek.parking && <div><span className="text-muted-foreground">주차 </span><b>{propPeek.parking}</b></div>}
-                {propPeek.available_from && <div className="col-span-2"><span className="text-muted-foreground">입주가능 </span><b>{propPeek.available_from}</b></div>}
-              </div>
-              {(propPeek.note || propPeek.description) && (
-                <div>
-                  <div className="text-[11px] text-muted-foreground font-bold">특이사항</div>
-                  <div className="rounded-lg border bg-muted/30 p-2 whitespace-pre-wrap text-xs">{propPeek.note || propPeek.description}</div>
-                </div>
-              )}
-              {propPeek.building_memo && (
-                <div>
-                  <div className="text-[11px] text-muted-foreground font-bold">건물메모</div>
-                  <div className="rounded-lg border bg-muted/30 p-2 whitespace-pre-wrap text-xs">{propPeek.building_memo}</div>
-                </div>
-              )}
-              {propPeek.room_memo && (
-                <div>
-                  <div className="text-[11px] text-muted-foreground font-bold">방메모</div>
-                  <div className="rounded-lg border bg-muted/30 p-2 whitespace-pre-wrap text-xs">{propPeek.room_memo}</div>
-                </div>
-              )}
-              <div className="space-y-1 pt-1 border-t">
-                {propPeek.agent_name && (
-                  <div className="text-xs"><span className="text-muted-foreground">담당 </span><b>{propPeek.agent_name}</b></div>
-                )}
-                {propPeek.owner_phone && (
-                  <a href={`tel:${propPeek.owner_phone.replace(/[^0-9+]/g, "")}`} className="inline-flex items-center gap-1.5 mt-1 py-1.5 px-3 rounded-md bg-emerald-600 text-white font-bold text-xs">
-                    <Phone className="w-3.5 h-3.5" /> 소유주 {propPeek.owner_phone}
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* 매물 상세 (중개사/관리자 전용 통합 모달) */}
+      {peekId && (
+        <StaffPropertyDetailModal propertyId={peekId} onClose={() => setPeekId(null)} />
       )}
 
 
