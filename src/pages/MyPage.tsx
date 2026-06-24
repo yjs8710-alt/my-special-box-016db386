@@ -269,12 +269,20 @@ const MyPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="space-y-4">
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "1fr 1fr 1fr" : "1fr 1fr" }}>
+          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "repeat(4, 1fr)" : "repeat(3, 1fr)" }}>
             <TabsTrigger value="info" className="text-xs gap-1">
               <User className="w-3.5 h-3.5" /> 내 정보
             </TabsTrigger>
             <TabsTrigger value="password" className="text-xs gap-1">
               <Lock className="w-3.5 h-3.5" /> 비밀번호
+            </TabsTrigger>
+            <TabsTrigger value="inquiries" className="text-xs gap-1 relative">
+              <MessageCircle className="w-3.5 h-3.5" /> 문의내역
+              {inquiries.filter((i) => !i.is_read).length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+                  {inquiries.filter((i) => !i.is_read).length}
+                </span>
+              )}
             </TabsTrigger>
             {isRepresentative && (
               <TabsTrigger value="members" className="text-xs gap-1">
