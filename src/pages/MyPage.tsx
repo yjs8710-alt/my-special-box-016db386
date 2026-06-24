@@ -285,7 +285,7 @@ const MyPage = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams({ tab: v }, { replace: true }); }} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams(activityOnly ? { view: "activity", tab: v } : { tab: v }, { replace: true }); }} className="space-y-4">
           <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
             {visibleTabs.includes("info") && <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
               <User className="w-4 h-4" /> 내 정보
