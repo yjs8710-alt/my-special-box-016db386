@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
