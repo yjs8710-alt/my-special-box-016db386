@@ -25,7 +25,7 @@ function stableNumericId(uuid: string, fallbackIdx: number): number {
 }
 
 // 관리자 DB 매물 → MapProperty 변환
-function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
+export function dbToMapProperty(row: Record<string, unknown>, idx: number): MapProperty {
   const noteStr = String(row.note ?? row.agent_name ?? "");
   const vacateDateFromNote = noteStr.match(/퇴거(?:\s*예정)?일[:\s]*([0-9]{4}[-./년\s]*[0-9]{1,2}[-./월\s]*[0-9]{1,2}(?:일)?)/)?.[1]?.trim();
   const parseContact = (key: string) => {
