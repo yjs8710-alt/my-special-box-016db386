@@ -165,7 +165,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   aria-label="채팅 문의"
                   title="채팅 문의"
                 >
-                  <img src={iconChatNeon} alt="" className="w-10 h-10 object-contain" />
+                  <img src={iconChatNeon} alt="" className="w-16 h-16 object-contain" />
                   <span className="text-[12px] font-extrabold text-white whitespace-nowrap">채팅문의</span>
                 </button>
               </div>
@@ -181,10 +181,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   aria-label="채팅 문의"
                   title="채팅 문의"
                 >
-                  <img src={iconChatNeon} alt="" className="w-10 h-10 object-contain" />
+                  <img src={iconChatNeon} alt="" className="w-16 h-16 object-contain" />
                   <span className="text-[12px] font-extrabold text-white whitespace-nowrap">채팅문의</span>
                 </button>
               )}
+
               {isAuthorized && <NotificationBell variant="desktop" />}
 
 
