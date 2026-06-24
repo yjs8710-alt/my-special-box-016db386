@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart, Star,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,13 @@ interface AgentProfile {
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "info";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t && t !== activeTab) setActiveTab(t);
+  }, [searchParams]);
   const { isLoading: authLoading, isAuthorized, user } = useAuth();
   const { toast } = useToast();
 
@@ -274,7 +281,7 @@ const MyPage = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="info" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams({ tab: v }, { replace: true }); }} className="space-y-4">
           <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
             <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
               <User className="w-4 h-4" /> 내 정보
@@ -623,31 +630,73 @@ const MyPage = () => {
 // ─── 관심목록 패널 ───────────────────────────────────────────────────────
 const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   const { favorites, toggleFavorite, clearFavorites } = useFavorites();
-  const items = useMemo(
-    () => MAP_PROPERTIES.filter((p) => favorites.has(p.id)),
-    [favorites]
+  const navigate = useNavigate();
+
+  // 로컬 스토리지에서 즐겨찾기 키 목록 가져오기 (string 변환)
+  const keys = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("jibda:favorites:v1");
+      const arr = raw ? (JSON.parse(raw) as Array<string | number>) : [];
+      return arr.map((v) => String(v));
+    } catch { return []; }
+  }, [favorites]);
+
+  // MAP_PROPERTIES (mock) 매칭
+  const mockItems = useMemo(
+    () => MAP_PROPERTIES.filter((p) => keys.includes(String(p.id))),
+    [keys]
   );
+
+  // DB 매물 매칭 (uuid 또는 reg_no)
+  const [dbItems, setDbItems] = useState<any[]>([]);
+  useEffect(() => {
+    const uuidLike = keys.filter((k) => /^[0-9a-f-]{32,}$/i.test(k));
+    const regNoLike = keys.filter((k) => /^\d+$/.test(k) && k.length > 4);
+    if (uuidLike.length === 0 && regNoLike.length === 0) { setDbItems([]); return; }
+    (async () => {
+      const all: any[] = [];
+      if (uuidLike.length) {
+        const { data } = await supabase
+          .from("properties")
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
+          .in("id", uuidLike);
+        if (data) all.push(...data);
+      }
+      if (regNoLike.length) {
+        const { data } = await supabase
+          .from("properties")
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
+          .in("reg_no", regNoLike);
+        if (data) all.push(...data);
+      }
+      // dedupe by id
+      const seen = new Set<string>();
+      setDbItems(all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))));
+    })();
+  }, [keys]);
+
+  const totalCount = mockItems.length + dbItems.length;
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Heart className="w-4 h-4 text-rose-500" fill="currentColor" />
+          <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />
           관심 매물 목록
           <span className="ml-auto text-xs font-normal text-muted-foreground">
-            {items.length}건 · 자동 저장됨
+            {totalCount}건 · 자동 저장됨
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {items.length === 0 ? (
+        {totalCount === 0 ? (
           <div className="text-center py-10">
-            <Heart className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+            <Star className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
             <p className="text-sm text-muted-foreground mb-3">
               아직 관심 매물이 없습니다.
             </p>
             <p className="text-xs text-muted-foreground mb-4">
-              매물 카드의 하트(♡) 버튼을 누르면 자동으로 저장됩니다.
+              매물 카드의 별(★) 버튼을 누르면 자동으로 저장됩니다.
             </p>
             <Button size="sm" onClick={onGo} className="text-xs">
               매물 둘러보기
@@ -668,11 +717,50 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
               </Button>
             </div>
             <div className="space-y-2">
-              {items.map((p: any) => {
+              {dbItems.map((p) => {
+                const addr = p.address || [p.dong, p.lot_number].filter(Boolean).join(" ");
+                return (
+                  <div
+                    key={`db-${p.id}`}
+                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/30"
+                    style={{ borderColor: "hsl(var(--border))" }}
+                    onClick={() => navigate(`/share/${p.id}`)}
+                  >
+                    <div className="w-12 h-12 rounded bg-muted overflow-hidden flex-shrink-0">
+                      {p.images?.[0] && (
+                        <img src={p.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-foreground truncate">
+                          {p.type || "매물"} {p.reg_no ? `· NO.${parseInt(String(p.reg_no), 10)}` : ""}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{addr || "주소 정보 없음"}</p>
+                      {(p.deposit || p.monthly) && (
+                        <p className="text-xs font-semibold text-primary mt-0.5">
+                          {p.deposit} / {p.monthly}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-yellow-500 hover:bg-yellow-500/10"
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(p.reg_no || p.id); }}
+                      title="관심목록에서 제거"
+                    >
+                      <Star className="w-4 h-4" fill="currentColor" />
+                    </Button>
+                  </div>
+                );
+              })}
+              {mockItems.map((p: any) => {
                 const addr = [p.dong, p.lotNumber, p.buildingName].filter(Boolean).join(" ");
                 return (
                   <div
-                    key={p.id}
+                    key={`mock-${p.id}`}
                     className="flex items-center gap-3 p-3 rounded-lg border"
                     style={{ borderColor: "hsl(var(--border))" }}
                   >
@@ -697,11 +785,11 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-500/10"
+                      className="h-8 w-8 p-0 text-yellow-500 hover:bg-yellow-500/10"
                       onClick={() => toggleFavorite(p.id)}
                       title="관심목록에서 제거"
                     >
-                      <Heart className="w-4 h-4" fill="currentColor" />
+                      <Star className="w-4 h-4" fill="currentColor" />
                     </Button>
                   </div>
                 );

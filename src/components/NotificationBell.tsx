@@ -14,6 +14,12 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   const navigate = useNavigate();
   const { isAuthorized, user } = useAuth();
   const [count, setCount] = useState(0);
+  const isGeneralMember = user?.memberType === "일반회원";
+  const targetPath = !isAuthorized
+    ? "/login"
+    : isGeneralMember
+    ? "/my-page?tab=inquiries"
+    : "/notifications";
 
   const refresh = useCallback(async () => {
     if (!user?.userId) { setCount(0); return; }
@@ -42,7 +48,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   if (variant === "mobile") {
     return (
       <button
-        onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
+        onClick={() => navigate(targetPath)}
         className="relative flex items-center justify-center px-1"
         aria-label="알림"
         title="알림"
@@ -59,7 +65,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
 
   return (
     <button
-      onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
+      onClick={() => navigate(targetPath)}
       className="relative inline-flex items-center justify-center"
       aria-label="알림"
     >

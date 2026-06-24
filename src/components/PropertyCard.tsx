@@ -1,4 +1,5 @@
-import { MapPin, Eye, Heart, X, Building2 } from "lucide-react";
+import { MapPin, Eye, Heart, X, Building2, Star } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 import PhotoWatermark from "./PhotoWatermark";
 import petIcon from "@/assets/pet_icon-v2-20260427.png";
 import zibdaPlaceholder from "@/assets/zibda-placeholder-20260427-v2-20260427.png";
@@ -64,13 +65,15 @@ const PropertyCard = ({
     today.setHours(0, 0, 0, 0);
     return vacate.getTime() <= today.getTime();
   })();
-  const [liked, setLiked] = useState(false);
   const isGuest = useIsGuest();
   const { user: authUserPC } = useAuth();
   const isGeneralMember = authUserPC?.memberType === "일반회원";
   const showGuestButtons = isGuest || isGeneralMember;
   const [showInquiry, setShowInquiry] = useState(false);
   const [showPartner, setShowPartner] = useState(false);
+  const { has: hasFav, toggleFavorite } = useFavorites();
+  const favKey = dbId || regNo || `${title}-${address}`;
+  const liked = hasFav(favKey);
 
   // 건축년도에서 숫자 4자리만 추출
   const buildYearShort = buildYear ? buildYear.replace(/[^0-9]/g, "").slice(0, 4) : null;
@@ -169,11 +172,12 @@ const PropertyCard = ({
             </button>
           )}
           <button
-            onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
-            className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow hover:bg-white transition-colors"
-            style={liked ? { background: "linear-gradient(135deg, #ff6a88, #ff99ac, #ffc3a0)" } : undefined}
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(favKey); }}
+            className="w-8 h-8 rounded-full bg-white/95 flex items-center justify-center shadow hover:bg-white transition-colors"
+            title={liked ? "관심목록에서 제거" : "관심목록에 추가"}
+            aria-label={liked ? "관심목록에서 제거" : "관심목록에 추가"}
           >
-            <Heart className={`w-4 h-4 ${liked ? "fill-white text-white drop-shadow" : "text-muted-foreground"}`} />
+            <Star className={`w-4 h-4 ${liked ? "fill-yellow-400 text-yellow-400 drop-shadow" : "text-muted-foreground"}`} strokeWidth={2} />
           </button>
         </div>
         {/* Type badge */}

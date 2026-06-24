@@ -3,22 +3,28 @@ import { useEffect, useState, useCallback } from "react";
 const FAV_KEY = "jibda:favorites:v1";
 const ONLY_KEY = "jibda:favoritesOnly:v1";
 
-let favCache: Set<number> | null = null;
+type FavId = string | number;
+
+let favCache: Set<string> | null = null;
 const favListeners = new Set<() => void>();
 
-function loadFavorites(): Set<number> {
+function toKey(id: FavId): string {
+  return String(id);
+}
+
+function loadFavorites(): Set<string> {
   if (favCache) return favCache;
   try {
     const raw = localStorage.getItem(FAV_KEY);
-    const arr = raw ? (JSON.parse(raw) as number[]) : [];
-    favCache = new Set(arr);
+    const arr = raw ? (JSON.parse(raw) as Array<string | number>) : [];
+    favCache = new Set(arr.map((v) => String(v)));
   } catch {
     favCache = new Set();
   }
   return favCache;
 }
 
-function saveFavorites(next: Set<number>) {
+function saveFavorites(next: Set<string>) {
   favCache = new Set(next);
   try {
     localStorage.setItem(FAV_KEY, JSON.stringify([...favCache]));
@@ -37,19 +43,31 @@ export function useFavorites() {
       favListeners.delete(l);
     };
   }, []);
-  const favorites = loadFavorites();
+  const favoritesSet = loadFavorites();
 
-  const toggleFavorite = useCallback((id: number) => {
+  const has = useCallback((id: FavId) => favoritesSet.has(toKey(id)), [favoritesSet]);
+
+  const toggleFavorite = useCallback((id: FavId) => {
+    const key = toKey(id);
     const next = new Set(loadFavorites());
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
     saveFavorites(next);
   }, []);
 
   const clearFavorites = useCallback(() => saveFavorites(new Set()), []);
-  const setFavorites = useCallback((next: Set<number>) => saveFavorites(next), []);
+  const setFavorites = useCallback((next: Set<FavId>) => {
+    saveFavorites(new Set([...next].map(toKey)));
+  }, []);
 
-  return { favorites, toggleFavorite, clearFavorites, setFavorites };
+  // Backwards-compatible favorites Set with .has accepting string|number
+  const favorites = {
+    has: (id: FavId) => favoritesSet.has(toKey(id)),
+    get size() { return favoritesSet.size; },
+    [Symbol.iterator]: () => favoritesSet[Symbol.iterator](),
+  } as unknown as Set<string | number>;
+
+  return { favorites, has, toggleFavorite, clearFavorites, setFavorites };
 }
 
 let onlyCache: boolean | null = null;

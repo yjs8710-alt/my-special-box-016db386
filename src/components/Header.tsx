@@ -170,7 +170,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   채팅문의
                 </button>
               )}
-              {!isGuest && <NotificationBell variant="desktop" />}
+              {isAuthorized && <NotificationBell variant="desktop" />}
 
               {isAuthorized ? (
                 <>
@@ -233,7 +233,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {!isHome && (
             <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
-                onClick={() => navigate(isAuthorized ? "/notifications" : "/login")}
+                onClick={() => navigate(!isAuthorized ? "/login" : isGeneralMember ? "/my-page?tab=inquiries" : "/notifications")}
                 className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >
