@@ -121,6 +121,41 @@ const MyPage = () => {
     })();
   }, [profile]);
 
+  // 받은 문의 내역
+  const loadInquiries = async () => {
+    if (!user?.userId) return;
+    setLoadingInquiries(true);
+    const { data } = await supabase
+      .from("guest_inquiries")
+      .select("id, name, phone, message, property_reg_no, created_at, is_read")
+      .eq("agent_user_id", user.userId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setInquiries((data ?? []) as InquiryRow[]);
+    setLoadingInquiries(false);
+  };
+  useEffect(() => {
+    if (!user?.userId) return;
+    loadInquiries();
+    const ch = supabase
+      .channel(`mypage-inquiries-${user.userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `agent_user_id=eq.${user.userId}` }, loadInquiries)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user?.userId]);
+
+  const deleteInquiry = async (id: string) => {
+    const prev = inquiries;
+    setInquiries((p) => p.filter((i) => i.id !== id));
+    const { error } = await supabase.from("guest_inquiries").delete().eq("id", id);
+    if (error) {
+      setInquiries(prev);
+      toast({ title: "삭제 실패", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "문의가 삭제되었습니다." });
+    }
+  };
+
   const handleSaveAll = async () => {
     if (!profile) return;
     setSaving(true);
