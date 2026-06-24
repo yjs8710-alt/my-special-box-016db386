@@ -546,7 +546,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
             </div>
             <button
               onClick={() => {
-                if (!isAuthorized) { window.location.href = "/login"; return; }
+                if (!authUser) { window.location.href = "/login"; return; }
                 window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
                   detail: {
                     propertyId: property.id,
