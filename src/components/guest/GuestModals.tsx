@@ -366,7 +366,7 @@ export const PartnerAgencyModal = ({
   const a = PARTNER_AGENCY;
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b">
+      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary" /> 협력 공인중개사
         </h3>
@@ -374,7 +374,8 @@ export const PartnerAgencyModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-3 overflow-y-auto flex-1">
+
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
           <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
