@@ -4,21 +4,29 @@ import navSearch from "@/assets/nav-1.png";
 import navMy from "@/assets/nav-2.png";
 import navCommunity from "@/assets/nav-3.png";
 import navChat from "@/assets/nav-4.png";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsGuest } from "@/hooks/useIsGuest";
 
 const ITEMS = [
-  { label: "홈", path: "/", icon: navHome, match: (p: string) => p === "/" },
-  { label: "매물찾기", path: "/residential", icon: navSearch, match: (p: string) => p.startsWith("/residential") || p === "/apartment" || p === "/non-residential" || p === "/collective-sale" || p === "/land" || p === "/commercial" },
-  { label: "내매물", path: "/my-properties", icon: navMy, match: (p: string) => p.startsWith("/my-properties") },
-  { label: "커뮤니티", path: "/community", icon: navCommunity, match: (p: string) => p.startsWith("/community") },
-  { label: "채팅문의", path: "/chat", icon: navChat, match: (p: string) => p.startsWith("/chat") },
+  { label: "홈", path: "/", icon: navHome, match: (p: string) => p === "/", agentOnly: false },
+  { label: "매물찾기", path: "/residential", icon: navSearch, match: (p: string) => p.startsWith("/residential") || p === "/apartment" || p === "/non-residential" || p === "/collective-sale" || p === "/land" || p === "/commercial", agentOnly: false },
+  { label: "내매물", path: "/my-properties", icon: navMy, match: (p: string) => p.startsWith("/my-properties"), agentOnly: true },
+  { label: "커뮤니티", path: "/community", icon: navCommunity, match: (p: string) => p.startsWith("/community"), agentOnly: false },
+  { label: "채팅문의", path: "/chat", icon: navChat, match: (p: string) => p.startsWith("/chat"), agentOnly: false },
 ];
+
 
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const isGuest = useIsGuest();
+  const hideAgent = isGuest || user?.memberType === "일반회원";
+  const visibleItems = ITEMS.filter((it) => !(it.agentOnly && hideAgent));
 
   const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property"];
   if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
+
 
   return (
     <nav
@@ -32,7 +40,7 @@ const MobileBottomNav = () => {
       aria-label="모바일 메인 메뉴"
     >
       <ul className="flex items-stretch justify-around px-1 py-2">
-        {ITEMS.map(({ label, path, icon, match }) => {
+        {visibleItems.map(({ label, path, icon, match }) => {
           const active = match(location.pathname);
           return (
             <li key={label} className="flex-1">
