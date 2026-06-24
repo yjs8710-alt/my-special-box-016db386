@@ -3579,16 +3579,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               >
                 문의하기
               </button>
-              {!isGuest && (
-                <button
-                  type="button"
-                  onClick={openMemberChat}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
-                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                >
-                  채팅문의
-                </button>
-              )}
+
+
             </div>
           )}
 
