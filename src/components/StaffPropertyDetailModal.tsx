@@ -60,7 +60,7 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data: p } = await supabase
+      const { data: p } = await (supabase as any)
         .from("properties")
         .select(
           "id, reg_no, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name, contact_owner"
@@ -68,7 +68,7 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
         .eq("id", propertyId)
         .maybeSingle();
       if (cancelled) return;
-      setData((p as unknown) as PropFull | null);
+      setData((p as PropFull | null) ?? null);
       if (p?.dong && p?.lot_number) {
         try {
           const c = await loadCheongjuContact({ dong: p.dong, lotNumber: p.lot_number, unitNumber: p.unit_number ?? undefined });
