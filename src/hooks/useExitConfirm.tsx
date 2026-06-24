@@ -1,68 +1,60 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import { hasOpenOverlay } from "@/lib/overlayGuard";
 
 /**
  * 모바일 / Capacitor 네이티브에서 뒤로가기 시 "Zibda를 종료하겠습니까?" 다이얼로그.
- * - 네이티브: @capacitor/app 의 backButton 리스너로 처리, "종료" 시 App.exitApp() 호출
- * - 웹/PWA: popstate 가드 사용
+ * - 홈("/")에서만 종료 다이얼로그를 띄움
+ * - 다른 경로에서는 일반적인 뒤로가기로 이전 화면으로 이동
  */
 export const useExitConfirm = (enabled: boolean = true) => {
   const [open, setOpen] = useState(false);
   const isNativeRef = useRef(false);
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
 
+  // 네이티브 뒤로가기 (전역) — 홈이 아니면 history.back, 홈이면 종료 모달
   useEffect(() => {
     if (!enabled) return;
-
-    let cleanupListener: (() => void) | undefined;
-    let cleanupPop: (() => void) | undefined;
-
+    let handle: any;
     (async () => {
       try {
         const { Capacitor } = await import("@capacitor/core");
-        if (Capacitor.isNativePlatform()) {
-          isNativeRef.current = true;
-          const { App } = await import("@capacitor/app");
-          const handle = await App.addListener("backButton", () => {
-            if (hasOpenOverlay()) return;
-            if (window.history.length > 1 && window.location.pathname !== "/") {
-              window.history.back();
-              return;
-            }
-            setOpen(true);
-          });
-          cleanupListener = () => {
-            try { handle.remove(); } catch {}
-          };
-          return;
-        }
+        if (!Capacitor.isNativePlatform()) return;
+        isNativeRef.current = true;
+        const { App } = await import("@capacitor/app");
+        handle = await App.addListener("backButton", () => {
+          if (hasOpenOverlay()) return;
+          if (window.location.pathname !== "/") {
+            window.history.back();
+            return;
+          }
+          setOpen(true);
+        });
       } catch {}
-
-      // 웹/PWA 경로
-      const ua = navigator.userAgent || "";
-      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
-      if (!isMobile) return;
-
-      // 홈에 있을 때만 가드 push
-      if (window.location.pathname === "/") {
-        window.history.pushState({ exitGuard: true }, "");
-      }
-      const onPopState = () => {
-        if (hasOpenOverlay()) return;
-        // 홈이 아닌 곳에서는 정상적인 뒤로가기로 동작 (종료 모달 X)
-        if (window.location.pathname !== "/") return;
-        setOpen(true);
-        window.history.pushState({ exitGuard: true }, "");
-      };
-      window.addEventListener("popstate", onPopState);
-      cleanupPop = () => window.removeEventListener("popstate", onPopState);
     })();
-
-    return () => {
-      cleanupListener?.();
-      cleanupPop?.();
-    };
+    return () => { try { handle?.remove(); } catch {} };
   }, [enabled]);
+
+  // 웹/PWA 모바일: 홈에 있을 때만 가드 push & popstate 처리
+  useEffect(() => {
+    if (!enabled) return;
+    if (isNativeRef.current) return;
+    const ua = navigator.userAgent || "";
+    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return;
+    if (!isHome) return;
+
+    try { window.history.pushState({ exitGuard: true }, ""); } catch {}
+    const onPopState = () => {
+      if (hasOpenOverlay()) return;
+      if (window.location.pathname !== "/") return;
+      setOpen(true);
+      try { window.history.pushState({ exitGuard: true }, ""); } catch {}
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [enabled, isHome]);
 
   const handleConfirm = useCallback(async () => {
     setOpen(false);
