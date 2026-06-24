@@ -3579,16 +3579,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               >
                 문의하기
               </button>
-              {!isGuest && (
-                <button
-                  type="button"
-                  onClick={openMemberChat}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap border"
-                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                >
-                  채팅문의
-                </button>
-              )}
+
+
             </div>
           )}
 
@@ -3761,7 +3753,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               {isMobile && limitAddress && (
                 <button
                   type="button"
-                  onClick={isGeneralMember ? openMemberChat : (e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     window.dispatchEvent(new CustomEvent("open-guest-partner", {
                       detail: {
@@ -3775,7 +3767,8 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                   className="ml-auto flex-shrink-0 px-1.5 py-0.5 rounded-md text-[11px] font-bold whitespace-nowrap border"
                   style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
                 >
-                  {isGeneralMember ? "채팅문의" : "협력 공인중개사"}
+                  협력 공인중개사
+
                 </button>
               )}
             </div>
