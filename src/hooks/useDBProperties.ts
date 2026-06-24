@@ -168,9 +168,9 @@ export function useDBProperties(typeFilter?: string[]) {
                   if (!d || !l) return;
                   const hit = (u && map.get(keyExact(d, l, u))) || map.get(keyAny(d, l));
                   if (!hit) return;
-                  if (!p.contactOwner && hit.contact_owner) p.contactOwner = String(hit.contact_owner);
-                  if (!p.contactManager && hit.contact_manager) p.contactManager = String(hit.contact_manager);
-                  if (!p.contact && hit.contact_broker) p.contact = String(hit.contact_broker);
+                  if (hit.contact_owner && String(hit.contact_owner).trim()) p.contactOwner = String(hit.contact_owner).trim();
+                  if (hit.contact_manager && String(hit.contact_manager).trim()) p.contactManager = String(hit.contact_manager).trim();
+                  if (hit.contact_broker && String(hit.contact_broker).trim()) p.contact = String(hit.contact_broker).trim();
                   // EXTRA_OWNERS:[...] → contactOwner2
                   if (!p.contactOwner2 && typeof hit.memo === "string") {
                     const m = hit.memo.match(/EXTRA_OWNERS:\[([^\]]+)\]/);
