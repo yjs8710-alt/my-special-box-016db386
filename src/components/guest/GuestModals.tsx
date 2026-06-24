@@ -24,12 +24,12 @@ export const PARTNER_AGENCY = {
 const Overlay = ({ onClose, children }: { onClose: () => void; children: React.ReactNode }) =>
   createPortal(
     <div
-      className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[10300] flex items-start sm:items-center justify-center p-4 overflow-y-auto"
       style={{ background: "rgba(0,0,0,0.5)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto max-h-[calc(100vh-2rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -37,6 +37,7 @@ const Overlay = ({ onClose, children }: { onClose: () => void; children: React.R
     </div>,
     document.body
   );
+
 
 // ===== 1. 문의하기 모달 (전화 필수) =====
 export const InquiryModal = ({
@@ -216,7 +217,7 @@ export const InquiryModal = ({
 
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b">
+      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-primary" /> 매물 문의하기
         </h3>
@@ -224,7 +225,8 @@ export const InquiryModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-3 overflow-y-auto flex-1">
+
         {propertyTitle && (
           <div className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
@@ -364,7 +366,7 @@ export const PartnerAgencyModal = ({
   const a = PARTNER_AGENCY;
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b">
+      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary" /> 협력 공인중개사
         </h3>
@@ -372,7 +374,8 @@ export const PartnerAgencyModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-3 overflow-y-auto flex-1">
+
         <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-4 flex flex-col gap-2">
           <p className="text-xs font-bold text-primary mb-1">📞 협력 공인중개사</p>
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
