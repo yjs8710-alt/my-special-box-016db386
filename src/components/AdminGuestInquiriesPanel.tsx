@@ -134,13 +134,23 @@ const AdminGuestInquiriesPanel = () => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-extrabold text-foreground">게스트 문의 내역</h2>
+          <h2 className="text-xl font-extrabold text-foreground">문의 내역</h2>
           <p className="text-sm text-muted-foreground mt-1">
             전체 <span className="font-bold text-foreground">{items.length}</span>건 · 미확인{" "}
             <span className="text-destructive font-extrabold">{totalUnread}</span>건
+            <span className="ml-2 text-xs">(게스트 {items.filter(i=>!i.user_id).length} · 회원 {items.filter(i=>!!i.user_id).length})</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value as any)}
+            className="text-sm px-3 py-2 rounded-lg bg-card text-foreground border border-border font-medium"
+          >
+            <option value="all">전체</option>
+            <option value="guest">게스트</option>
+            <option value="member">회원/중개사</option>
+          </select>
           <select
             value={agentFilter}
             onChange={(e) => setAgentFilter(e.target.value)}
@@ -152,6 +162,7 @@ const AdminGuestInquiriesPanel = () => {
               <option key={a.user_id} value={a.user_id}>{a.name}{a.company ? ` (${a.company})` : ""}</option>
             ))}
           </select>
+
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
