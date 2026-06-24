@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, forwardRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -9,12 +10,14 @@ import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
-  
+
   const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
+
 
   const allProperties = useMemo(() => {
     const dbIds = new Set(dbProperties.map((p) => p.id));
