@@ -56,6 +56,11 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
   const [ownerPhone, setOwnerPhone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const visibleOwnerPhone = data?.landlord_phone || ownerPhone || null;
+  const displayNote = data?.note && data?.landlord_phone
+    ? data.note.replace(/\*{2,3}-\*{3,4}-\*{4}/, data.landlord_phone)
+    : data?.note;
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -156,16 +161,16 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
               </Section>
 
               {/* 특이사항 (매물등록·수정의 description 우선) */}
-              {(data.description || data.note) && (
+              {(data.description || displayNote) && (
                 <Section icon={NotebookPen} title="특이사항">
                   {data.description && (
                     <p className="text-sm whitespace-pre-wrap text-black font-semibold leading-relaxed">
                       {data.description}
                     </p>
                   )}
-                  {data.note && (
+                  {displayNote && (
                     <p className="text-sm whitespace-pre-wrap text-black font-semibold leading-relaxed mt-2 pt-2 border-t border-border">
-                      {data.note}
+                      {displayNote}
                     </p>
                   )}
                 </Section>
@@ -195,14 +200,9 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
               <Section icon={User2} title="담당자 / 소유주">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Row label="담당 중개사" value={data.agent_name} />
-                  <Row label="임대인 연락처" value={data.landlord_phone ? (
-                    <a href={`tel:${data.landlord_phone.replace(/[^0-9+]/g, "")}`} className="text-emerald-600 inline-flex items-center gap-1 font-bold">
-                      <Phone className="w-3 h-3" />{data.landlord_phone}
-                    </a>
-                  ) : "미등록"} />
-                  <Row label="소유주 연락처" value={ownerPhone ? (
-                    <a href={`tel:${ownerPhone.replace(/[^0-9+]/g, "")}`} className="text-emerald-600 inline-flex items-center gap-1 font-bold">
-                      <Phone className="w-3 h-3" />{ownerPhone}
+                  <Row label="소유주 연락처" value={visibleOwnerPhone ? (
+                    <a href={`tel:${visibleOwnerPhone.replace(/[^0-9+]/g, "")}`} className="text-emerald-600 inline-flex items-center gap-1 font-bold">
+                      <Phone className="w-3 h-3" />{visibleOwnerPhone}
                     </a>
                   ) : "미등록"} />
                 </div>
