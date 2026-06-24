@@ -273,13 +273,13 @@ const PropertyCard = ({
               >
                 문의하기
               </button>
-              {isGeneralMember && (
+              {!isGuest && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     const propertyTitleLbl = regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title;
                     window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
-                      detail: { agentUserId: registeredBy || null, propertyId: dbId || null, propertyTitle: propertyTitleLbl },
+                      detail: { agentUserId: null, propertyId: dbId || null, propertyTitle: propertyTitleLbl },
                     }));
                   }}
                   className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-white text-primary border border-primary/50 text-sm md:text-xs font-bold shadow-sm hover:bg-primary/5"

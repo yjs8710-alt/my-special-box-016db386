@@ -2655,7 +2655,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       e.stopPropagation();
       window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
         detail: {
-          agentUserId: prop.registeredBy,
+          agentUserId: null,
           propertyId: prop.dbId,
           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
         },
@@ -3474,7 +3474,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     >
                       문의하기
                     </button>
-                    {isGeneralMember && (
+                    {!isGuest && (
                       <button
                         type="button"
                         onClick={openMemberChat}
@@ -3579,7 +3579,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
               >
                 문의하기
               </button>
-              {isGeneralMember && (
+              {!isGuest && (
                 <button
                   type="button"
                   onClick={openMemberChat}
