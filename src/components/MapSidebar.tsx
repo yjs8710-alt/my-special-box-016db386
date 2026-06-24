@@ -3474,7 +3474,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                     >
                       문의하기
                     </button>
-                    {isGeneralMember && (
+                    {!isGuest && (
                       <button
                         type="button"
                         onClick={openMemberChat}
