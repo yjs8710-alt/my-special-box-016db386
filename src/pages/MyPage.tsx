@@ -440,6 +440,90 @@ const MyPage = () => {
             </Card>
           </TabsContent>
 
+          {/* ─── 문의 내역 ─── */}
+          <TabsContent value="inquiries">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                  받은 문의 내역
+                  <span className="ml-auto text-xs font-normal text-muted-foreground">
+                    {inquiries.length}건
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingInquiries ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : inquiries.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+                    <p className="text-sm text-muted-foreground">받은 문의가 없습니다.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {inquiries.map((i) => (
+                      <div
+                        key={i.id}
+                        className={`p-3 rounded-lg border ${!i.is_read ? "bg-primary/[0.04] border-primary/30" : "border-border"}`}
+                      >
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                          {!i.is_read && (
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-destructive text-destructive-foreground">NEW</span>
+                          )}
+                          {i.property_reg_no && (
+                            <span className="inline-flex items-center gap-0.5 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                              <Hash className="w-2.5 h-2.5" />NO.{i.property_reg_no}
+                            </span>
+                          )}
+                          <span className="text-sm font-bold text-foreground">{i.name}</span>
+                          <a
+                            href={`tel:${i.phone.replace(/[^0-9]/g, "")}`}
+                            className="ml-auto flex items-center gap-1 text-xs font-semibold text-primary"
+                          >
+                            <Phone className="w-3 h-3" /> {i.phone}
+                          </a>
+                        </div>
+                        {i.message && (
+                          <p className="text-xs text-foreground bg-muted/40 rounded px-2 py-1.5 whitespace-pre-wrap line-clamp-3">
+                            {i.message}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(i.created_at).toLocaleString("ko-KR")}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs gap-1"
+                              onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
+                            >
+                              상세
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => deleteInquiry(i.id)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+
+
           {/* ─── 회원관리 (대표중개사 전용) ─── */}
           {isRepresentative && (
             <TabsContent value="members">
