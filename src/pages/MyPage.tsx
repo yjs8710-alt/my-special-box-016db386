@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
+import { useFavorites } from "@/hooks/useFavorites";
+import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 interface AgentProfile {
   id: string;
@@ -121,28 +123,31 @@ const MyPage = () => {
     })();
   }, [profile]);
 
-  // 받은 문의 내역
+  // 문의 내역 (일반회원=보낸 문의 / 중개사=받은 문의)
+  const isGeneralMember = profile?.member_type === "일반회원";
   const loadInquiries = async () => {
     if (!user?.userId) return;
     setLoadingInquiries(true);
+    const column = isGeneralMember ? "user_id" : "agent_user_id";
     const { data } = await supabase
       .from("guest_inquiries")
       .select("id, name, phone, message, property_reg_no, created_at, is_read")
-      .eq("agent_user_id", user.userId)
+      .eq(column, user.userId)
       .order("created_at", { ascending: false })
       .limit(100);
     setInquiries((data ?? []) as InquiryRow[]);
     setLoadingInquiries(false);
   };
   useEffect(() => {
-    if (!user?.userId) return;
+    if (!user?.userId || !profile) return;
     loadInquiries();
+    const column = isGeneralMember ? "user_id" : "agent_user_id";
     const ch = supabase
       .channel(`mypage-inquiries-${user.userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `agent_user_id=eq.${user.userId}` }, loadInquiries)
+      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `${column}=eq.${user.userId}` }, loadInquiries)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user?.userId]);
+  }, [user?.userId, profile?.member_type]);
 
   const deleteInquiry = async (id: string) => {
     const prev = inquiries;
@@ -249,6 +254,7 @@ const MyPage = () => {
   }
 
   const isRepresentative = profile?.member_type === "대표중개사";
+  const tabCount = (isRepresentative ? 4 : 3) + (isGeneralMember ? 1 : 0);
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(var(--background))" }}>
@@ -269,27 +275,34 @@ const MyPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="space-y-4">
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "repeat(4, 1fr)" : "repeat(3, 1fr)" }}>
-            <TabsTrigger value="info" className="text-xs gap-1">
-              <User className="w-3.5 h-3.5" /> 내 정보
+          <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
+            <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+              <User className="w-4 h-4" /> 내 정보
             </TabsTrigger>
-            <TabsTrigger value="password" className="text-xs gap-1">
-              <Lock className="w-3.5 h-3.5" /> 비밀번호
+            <TabsTrigger value="password" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+              <Lock className="w-4 h-4" /> 비밀번호
             </TabsTrigger>
-            <TabsTrigger value="inquiries" className="text-xs gap-1 relative">
-              <MessageCircle className="w-3.5 h-3.5" /> 문의내역
+            <TabsTrigger value="inquiries" className="text-sm md:text-base font-bold gap-1.5 py-2.5 relative">
+              <MessageCircle className="w-4 h-4" /> 문의내역
               {inquiries.filter((i) => !i.is_read).length > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
                   {inquiries.filter((i) => !i.is_read).length}
                 </span>
               )}
             </TabsTrigger>
+            {isGeneralMember && (
+              <TabsTrigger value="favorites" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+                <Heart className="w-4 h-4" /> 관심목록
+              </TabsTrigger>
+            )}
             {isRepresentative && (
-              <TabsTrigger value="members" className="text-xs gap-1">
-                <Users className="w-3.5 h-3.5" /> 회원관리
+              <TabsTrigger value="members" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+                <Users className="w-4 h-4" /> 회원관리
               </TabsTrigger>
             )}
           </TabsList>
+
+
 
           {/* ─── 내 정보 ─── */}
           <TabsContent value="info" className="space-y-4">
@@ -446,7 +459,7 @@ const MyPage = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                  받은 문의 내역
+                  문의 내역
                   <span className="ml-auto text-xs font-normal text-muted-foreground">
                     {inquiries.length}건
                   </span>
@@ -460,7 +473,7 @@ const MyPage = () => {
                 ) : inquiries.length === 0 ? (
                   <div className="text-center py-8">
                     <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
-                    <p className="text-sm text-muted-foreground">받은 문의가 없습니다.</p>
+                    <p className="text-sm text-muted-foreground">{isGeneralMember ? "보낸 문의가 없습니다." : "받은 문의가 없습니다."}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -523,6 +536,12 @@ const MyPage = () => {
           </TabsContent>
 
 
+          {/* ─── 관심목록 (일반회원 전용) ─── */}
+          {isGeneralMember && (
+            <TabsContent value="favorites">
+              <FavoritesPanel onGo={() => navigate("/residential")} />
+            </TabsContent>
+          )}
 
           {/* ─── 회원관리 (대표중개사 전용) ─── */}
           {isRepresentative && (
@@ -598,6 +617,100 @@ const MyPage = () => {
         </Tabs>
       </div>
     </div>
+  );
+};
+
+// ─── 관심목록 패널 ───────────────────────────────────────────────────────
+const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
+  const { favorites, toggleFavorite, clearFavorites } = useFavorites();
+  const items = useMemo(
+    () => MAP_PROPERTIES.filter((p) => favorites.has(p.id)),
+    [favorites]
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <Heart className="w-4 h-4 text-rose-500" fill="currentColor" />
+          관심 매물 목록
+          <span className="ml-auto text-xs font-normal text-muted-foreground">
+            {items.length}건 · 자동 저장됨
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {items.length === 0 ? (
+          <div className="text-center py-10">
+            <Heart className="w-10 h-10 mx-auto text-muted-foreground/30 mb-2" />
+            <p className="text-sm text-muted-foreground mb-3">
+              아직 관심 매물이 없습니다.
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              매물 카드의 하트(♡) 버튼을 누르면 자동으로 저장됩니다.
+            </p>
+            <Button size="sm" onClick={onGo} className="text-xs">
+              매물 둘러보기
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-end mb-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs text-muted-foreground"
+                onClick={() => {
+                  if (confirm("관심목록을 전부 비우시겠습니까?")) clearFavorites();
+                }}
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" /> 전체 비우기
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {items.map((p: any) => {
+                const addr = [p.dong, p.lotNumber, p.buildingName].filter(Boolean).join(" ");
+                return (
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border"
+                    style={{ borderColor: "hsl(var(--border))" }}
+                  >
+                    <div className="w-12 h-12 rounded bg-muted overflow-hidden flex-shrink-0">
+                      {p.images?.[0] && (
+                        <img src={p.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-foreground truncate">
+                          {p.propertyType || "매물"} · {p.dealType || ""}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{addr || "주소 정보 없음"}</p>
+                      {(p.price || p.deposit) && (
+                        <p className="text-xs font-semibold text-primary mt-0.5">
+                          {p.price ?? p.deposit}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-rose-500 hover:bg-rose-500/10"
+                      onClick={() => toggleFavorite(p.id)}
+                      title="관심목록에서 제거"
+                    >
+                      <Heart className="w-4 h-4" fill="currentColor" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
