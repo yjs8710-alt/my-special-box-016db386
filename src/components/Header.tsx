@@ -233,7 +233,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {!isHome && (
             <div className="md:hidden flex items-center gap-0 ml-auto">
               <button
-                onClick={() => navigate(!isAuthorized ? "/login" : isGeneralMember ? "/my-page?tab=inquiries" : "/notifications")}
+                  onClick={() => navigate(!isAuthorized ? "/login" : isGeneralMember ? "/my-page?view=activity&tab=inquiries" : "/notifications")}
                 className="flex items-center justify-center -mr-3"
                 aria-label="알림"
               >

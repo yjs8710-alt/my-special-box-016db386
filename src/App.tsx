@@ -29,13 +29,16 @@ const GlobalExitConfirm = () => {
 // 게스트(비로그인)는 채팅 위젯 숨김
 const AuthGatedChatInquiry = () => {
   const isGuest = useIsGuest();
-  if (isGuest) return null;
+  const { user } = useAuth();
+  const canUseChat = !!user && (user.memberType === "일반회원" || user.isAdmin || user.memberType !== "게스트");
+  if (isGuest || !canUseChat) return null;
   return <ChatInquiryWidget />;
 };
 
 // 게스트 문의 모달 — 어디서든 window 이벤트로 호출
 const GlobalGuestInquiry = () => {
   const { user } = useAuth();
+  const isGuest = useIsGuest();
   const [state, setState] = useState<{ open: boolean; detail?: any }>({ open: false });
   const [partner, setPartner] = useState<{ open: boolean; detail?: any }>({ open: false });
   const [detailState, setDetailState] = useState<{ open: boolean; info?: GuestDetailInfo; partnerDetail?: any }>({ open: false });
@@ -90,6 +93,7 @@ const GlobalGuestInquiry = () => {
         agentUserId={partner.detail?.agentUserId}
         propertyId={partner.detail?.propertyDbId}
         propertyTitle={partner.detail?.propertyTitle}
+        showChat={!isGuest}
         onChat={() => {
           setState({ open: true, detail: partner.detail });
           setPartner({ open: false });
@@ -99,8 +103,9 @@ const GlobalGuestInquiry = () => {
         open={detailState.open}
         onClose={() => setDetailState({ open: false })}
         info={detailState.info}
+        inquiryLabel="문의하기"
         onInquiry={() => {
-          setPartner({ open: true, detail: detailState.partnerDetail });
+          setState({ open: true, detail: detailState.partnerDetail });
         }}
       />
     </>

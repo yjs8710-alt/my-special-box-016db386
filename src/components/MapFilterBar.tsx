@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsGuest } from "@/hooks/useIsGuest";
 import { useFavoritesOnly } from "@/hooks/useFavorites";
+import { useNavigate } from "react-router-dom";
 
 // ── 소유주 번호 검색 타입 (export) ─────────────────────────────────────────
 export interface LandlordResult {
@@ -421,6 +422,7 @@ const MapFilterBar = ({
 
   // ── 소유주 번호 통합 검색 상태 ──
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isGuest = useIsGuest();
   const { enabled: favoritesOnly, toggle: toggleFavoritesOnly } = useFavoritesOnly();
   const [searchMode, setSearchMode] = useState<"normal" | "landlord">("normal");
@@ -574,7 +576,10 @@ const MapFilterBar = ({
             {/* 관심매물만 보기 토글 (별표) — 게스트/일반회원만 노출 */}
             {(isGuest || user?.memberType === "일반회원") && (
             <button
-              onClick={toggleFavoritesOnly}
+              onClick={() => {
+                if (user?.memberType === "일반회원") navigate("/my-page?view=activity&tab=favorites");
+                else toggleFavoritesOnly();
+              }}
               title={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
               aria-label={favoritesOnly ? "전체 매물 보기" : "관심매물만 보기"}
               className={`flex items-center gap-1 px-2.5 h-10 flex-shrink-0 transition-all ${favoritesOnly ? "rounded-l-xl" : ""}`}

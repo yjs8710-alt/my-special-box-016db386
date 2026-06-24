@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart, Star,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Star,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ const MyPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "info";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const activityOnly = searchParams.get("view") === "activity";
   useEffect(() => {
     const t = searchParams.get("tab");
     if (t && t !== activeTab) setActiveTab(t);
@@ -261,7 +262,10 @@ const MyPage = () => {
   }
 
   const isRepresentative = profile?.member_type === "대표중개사";
-  const tabCount = (isRepresentative ? 4 : 3) + (isGeneralMember ? 1 : 0);
+  const visibleTabs = activityOnly && isGeneralMember
+    ? ["inquiries", "favorites"]
+    : ["info", "password", "inquiries", ...(isGeneralMember ? ["favorites"] : []), ...(isRepresentative ? ["members"] : [])];
+  const tabCount = visibleTabs.length;
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(var(--background))" }}>
@@ -281,28 +285,28 @@ const MyPage = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams({ tab: v }, { replace: true }); }} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams(activityOnly ? { view: "activity", tab: v } : { tab: v }, { replace: true }); }} className="space-y-4">
           <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
-            <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+            {visibleTabs.includes("info") && <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
               <User className="w-4 h-4" /> 내 정보
-            </TabsTrigger>
-            <TabsTrigger value="password" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+            </TabsTrigger>}
+            {visibleTabs.includes("password") && <TabsTrigger value="password" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
               <Lock className="w-4 h-4" /> 비밀번호
-            </TabsTrigger>
-            <TabsTrigger value="inquiries" className="text-sm md:text-base font-bold gap-1.5 py-2.5 relative">
+            </TabsTrigger>}
+            {visibleTabs.includes("inquiries") && <TabsTrigger value="inquiries" className="text-sm md:text-base font-bold gap-1.5 py-2.5 relative">
               <MessageCircle className="w-4 h-4" /> 문의내역
               {inquiries.filter((i) => !i.is_read).length > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
                   {inquiries.filter((i) => !i.is_read).length}
                 </span>
               )}
-            </TabsTrigger>
-            {isGeneralMember && (
+            </TabsTrigger>}
+            {visibleTabs.includes("favorites") && (
               <TabsTrigger value="favorites" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
-                <Heart className="w-4 h-4" /> 관심목록
+                <Star className="w-4 h-4" /> 관심목록
               </TabsTrigger>
             )}
-            {isRepresentative && (
+            {visibleTabs.includes("members") && (
               <TabsTrigger value="members" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
                 <Users className="w-4 h-4" /> 회원관리
               </TabsTrigger>
@@ -312,7 +316,7 @@ const MyPage = () => {
 
 
           {/* ─── 내 정보 ─── */}
-          <TabsContent value="info" className="space-y-4">
+          {visibleTabs.includes("info") && <TabsContent value="info" className="space-y-4">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-bold">회원/사업자 정보</CardTitle>
@@ -404,10 +408,10 @@ const MyPage = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent>}
 
           {/* ─── 비밀번호 변경 ─── */}
-          <TabsContent value="password">
+          {visibleTabs.includes("password") && <TabsContent value="password">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -458,10 +462,10 @@ const MyPage = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent>}
 
           {/* ─── 문의 내역 ─── */}
-          <TabsContent value="inquiries">
+          {visibleTabs.includes("inquiries") && <TabsContent value="inquiries">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -540,18 +544,18 @@ const MyPage = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent>}
 
 
           {/* ─── 관심목록 (일반회원 전용) ─── */}
-          {isGeneralMember && (
+          {visibleTabs.includes("favorites") && (
             <TabsContent value="favorites">
               <FavoritesPanel onGo={() => navigate("/residential")} />
             </TabsContent>
           )}
 
           {/* ─── 회원관리 (대표중개사 전용) ─── */}
-          {isRepresentative && (
+          {visibleTabs.includes("members") && (
             <TabsContent value="members">
               <Card>
                 <CardHeader className="pb-3">
@@ -632,14 +636,12 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   const { favorites, toggleFavorite, clearFavorites } = useFavorites();
   const navigate = useNavigate();
 
-  // 로컬 스토리지에서 즐겨찾기 키 목록 가져오기 (string 변환)
+  // 관심목록 키 목록 가져오기 (string 변환)
+  const favoriteSignature = Array.from(favorites).map(String).sort().join("|");
   const keys = useMemo(() => {
-    try {
-      const raw = localStorage.getItem("jibda:favorites:v1");
-      const arr = raw ? (JSON.parse(raw) as Array<string | number>) : [];
-      return arr.map((v) => String(v));
-    } catch { return []; }
-  }, [favorites]);
+    if (!favoriteSignature) return [];
+    return favoriteSignature.split("|").filter(Boolean);
+  }, [favoriteSignature]);
 
   // MAP_PROPERTIES (mock) 매칭
   const mockItems = useMemo(
@@ -652,7 +654,14 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   useEffect(() => {
     const uuidLike = keys.filter((k) => /^[0-9a-f-]{32,}$/i.test(k));
     const regNoLike = keys.filter((k) => /^\d+$/.test(k) && k.length > 4);
-    if (uuidLike.length === 0 && regNoLike.length === 0) { setDbItems([]); return; }
+    const numericIds = keys.filter((k) => /^\d+$/.test(k)).map((k) => Number(k));
+    const stableNumericId = (uuid: string, fallbackIdx: number) => {
+      if (!uuid) return 100000 + fallbackIdx;
+      let h = 5381;
+      for (let i = 0; i < uuid.length; i++) h = ((h << 5) + h + uuid.charCodeAt(i)) | 0;
+      return 100000 + (Math.abs(h) % 2000000000);
+    };
+    if (uuidLike.length === 0 && regNoLike.length === 0 && numericIds.length === 0) { setDbItems([]); return; }
     (async () => {
       const all: any[] = [];
       if (uuidLike.length) {
@@ -669,13 +678,26 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
           .in("reg_no", regNoLike);
         if (data) all.push(...data);
       }
+      if (numericIds.length) {
+        const { data } = await supabase
+          .from("properties")
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
+          .eq("status", "active")
+          .order("checked_date", { ascending: false, nullsFirst: false })
+          .order("registered_date", { ascending: false })
+          .limit(2000);
+        if (data) {
+          all.push(...data.filter((p, idx) => numericIds.includes(stableNumericId(String(p.id ?? ""), idx))));
+        }
+      }
       // dedupe by id
       const seen = new Set<string>();
       setDbItems(all.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true))));
     })();
   }, [keys]);
 
-  const totalCount = mockItems.length + dbItems.length;
+  const visibleMockItems = mockItems.filter((p) => !dbItems.some((d) => String(d.id) === String((p as any).dbId) || String(d.reg_no) === String((p as any).regNo)));
+  const totalCount = visibleMockItems.length + dbItems.length;
 
   return (
     <Card>
@@ -756,7 +778,7 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
                   </div>
                 );
               })}
-              {mockItems.map((p: any) => {
+              {visibleMockItems.map((p: any) => {
                 const addr = [p.dong, p.lotNumber, p.buildingName].filter(Boolean).join(" ");
                 return (
                   <div
