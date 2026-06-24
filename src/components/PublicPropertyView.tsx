@@ -544,6 +544,21 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               <span className="text-muted-foreground">개설등록번호</span>
               <span className="text-foreground">43112-2024-00034호</span>
             </div>
+            <button
+              onClick={() => {
+                if (!isAuthorized) { window.location.href = "/login"; return; }
+                window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
+                  detail: {
+                    propertyId: property.id,
+                    propertyTitle: `${property.reg_no ? `[NO.${property.reg_no}] ` : ""}${property.building_name || property.address}`,
+                  },
+                }));
+              }}
+              className="mt-2 w-full h-10 rounded-lg text-white text-sm font-bold inline-flex items-center justify-center gap-2"
+              style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" }}
+            >
+              💬 담당자와 채팅 문의하기
+            </button>
           </div>
         </div>
       </div>
