@@ -50,6 +50,8 @@ const NotificationsPage = () => {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<InquiryDetail | null>(null);
+  const [propPeek, setPropPeek] = useState<any | null>(null);
+
 
   const load = useCallback(async () => {
     if (!user?.userId) return;
