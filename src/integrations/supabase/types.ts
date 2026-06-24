@@ -926,6 +926,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_inquiry_messages: {
+        Args: { _inquiry_id: string }
+        Returns: {
+          content: string
+          created_at: string
+          id: string
+          sender_role: string
+        }[]
+      }
       get_property_passwords: {
         Args: { _property_id: string }
         Returns: {

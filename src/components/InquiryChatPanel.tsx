@@ -38,11 +38,10 @@ export default function InquiryChatPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
-    const { data } = await (supabase as any)
-      .from("inquiry_messages")
-      .select("id, sender_role, content, created_at")
-      .eq("inquiry_id", inquiryId)
-      .order("created_at", { ascending: true });
+    const { data, error } = await (supabase as any).rpc("get_inquiry_messages", {
+      _inquiry_id: inquiryId,
+    });
+    if (error) console.error("[inquiry load]", error);
     setMessages(((data ?? []) as unknown) as Msg[]);
     setLoading(false);
   };
