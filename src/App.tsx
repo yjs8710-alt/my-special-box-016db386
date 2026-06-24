@@ -261,9 +261,10 @@ const App = () => {
             <Route path="/non-residential" element={<ProtectedRoute><NonResidentialRental /></ProtectedRoute>} />
             <Route path="/collective-sale" element={<ProtectedRoute><NonResidentialRental mode="collective-sale" /></ProtectedRoute>} />
             <Route path="/commercial" element={<ProtectedRoute><CommercialRental /></ProtectedRoute>} />
-            <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
-            <Route path="/my-page" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
-            <Route path="/my-info" element={<ProtectedRoute><MyInfoPage /></ProtectedRoute>} />
+            <Route path="/my-properties" element={<AgentOnlyRoute><MyProperties /></AgentOnlyRoute>} />
+            <Route path="/my-page" element={<AgentOnlyRoute><MyPage /></AgentOnlyRoute>} />
+            <Route path="/my-info" element={<AgentOnlyRoute><MyInfoPage /></AgentOnlyRoute>} />
+
             <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
