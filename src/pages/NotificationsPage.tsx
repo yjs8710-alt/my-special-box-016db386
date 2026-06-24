@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye, MessageCircle, Phone, X, User2 } from "lucide-react";
+import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye, MessageCircle, Phone, X, User2, Building2, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { loadCheongjuContact } from "@/lib/cheongjuContacts";
 
 interface Notification {
   id: string;
@@ -32,8 +33,13 @@ type InquiryDetail = {
   message: string | null;
   created_at: string;
   property_reg_no: string | null;
+  property_id?: string | null;
   property_dong?: string | null;
   property_lot?: string | null;
+  property_unit?: string | null;
+  property_address?: string | null;
+  property_building?: string | null;
+  owner_phone?: string | null;
   user_id?: string | null;
 };
 
