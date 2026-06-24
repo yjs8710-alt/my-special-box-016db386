@@ -25,7 +25,9 @@ type Msg = {
 
 
 const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conv[]>([]);
+  const [props, setProps] = useState<Record<string, PropInfo>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -35,10 +37,22 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
   const loadConversations = useCallback(async () => {
     const { data } = await supabase
       .from("chat_conversations")
-      .select("id, user_id, user_name, last_message, last_message_at, unread_for_admin")
+      .select("id, user_id, user_name, last_message, last_message_at, unread_for_admin, property_id, agent_user_id")
       .order("last_message_at", { ascending: false });
-    setConversations((data ?? []) as Conv[]);
+    const list = (data ?? []) as Conv[];
+    setConversations(list);
+    const propIds = Array.from(new Set(list.map((c) => c.property_id).filter(Boolean))) as string[];
+    if (propIds.length) {
+      const { data: pp } = await supabase
+        .from("properties")
+        .select("id, address, building_name, unit_number, reg_no")
+        .in("id", propIds);
+      const pmap: Record<string, PropInfo> = {};
+      (pp ?? []).forEach((p: any) => { pmap[p.id] = p; });
+      setProps(pmap);
+    }
   }, []);
+
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
