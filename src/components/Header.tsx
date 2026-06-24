@@ -175,6 +175,16 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             {/* 우측 액션 (홈에서는 숨김) */}
             {!isHome && (
             <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
+              {isAuthorized && (
+                <button
+                  onClick={() => navigate("/chat")}
+                  className="flex items-center justify-center -mr-1"
+                  aria-label="채팅 문의"
+                  title="채팅 문의"
+                >
+                  <img src={iconChatNeon} alt="채팅문의" className="w-12 h-12 object-contain" />
+                </button>
+              )}
               {isAuthorized && <NotificationBell variant="desktop" />}
 
 
