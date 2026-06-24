@@ -34,6 +34,7 @@ type InquiryDetail = {
   property_reg_no: string | null;
   property_dong?: string | null;
   property_lot?: string | null;
+  user_id?: string | null;
 };
 
 const NotificationsPage = () => {
