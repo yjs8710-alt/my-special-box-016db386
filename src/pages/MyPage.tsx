@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart, Star,
 } from "lucide-react";
@@ -36,6 +36,13 @@ interface AgentProfile {
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "info";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t && t !== activeTab) setActiveTab(t);
+  }, [searchParams]);
   const { isLoading: authLoading, isAuthorized, user } = useAuth();
   const { toast } = useToast();
 
@@ -274,7 +281,7 @@ const MyPage = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="info" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSearchParams({ tab: v }, { replace: true }); }} className="space-y-4">
           <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
             <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
               <User className="w-4 h-4" /> 내 정보
