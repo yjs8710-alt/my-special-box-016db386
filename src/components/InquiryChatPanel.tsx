@@ -87,7 +87,7 @@ export default function InquiryChatPanel({
       const { data } = await supabase.auth.getUser();
       sender_user_id = data.user?.id ?? null;
     } catch {}
-    const { error } = await supabase.from("inquiry_messages" as any).insert({
+    const { error } = await (supabase as any).from("inquiry_messages").insert({
       inquiry_id: inquiryId,
       sender_role: viewerRole,
       sender_user_id,
