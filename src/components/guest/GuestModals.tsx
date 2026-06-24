@@ -9,7 +9,6 @@ import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import PublicPropertyView from "@/components/PublicPropertyView";
 import { sharePropertyToKakao } from "@/lib/kakaoShare";
 import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
-import InquiryChatPanel from "@/components/InquiryChatPanel";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
@@ -66,7 +65,6 @@ export const InquiryModal = ({
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [chatInquiryId, setChatInquiryId] = useState<string | null>(null);
   const isMember = !!(memberInfo && (memberInfo.name || memberInfo.phone));
 
   // 회원정보 자동 채우기 (모달이 열릴 때마다)
@@ -91,11 +89,6 @@ export const InquiryModal = ({
     };
   }, [open, onClose]);
 
-  // 모달 닫힐 때 채팅 상태 초기화 (early-return 전에 선언해야 hooks 순서 안정)
-  useEffect(() => {
-    if (!open) setChatInquiryId(null);
-  }, [open]);
-
   if (!open) return null;
 
   const formatPhone = (v: string) => {
@@ -104,6 +97,57 @@ export const InquiryModal = ({
     if (d.length < 8) return `${d.slice(0, 3)}-${d.slice(3)}`;
     return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
   };
+
+  const openMemberChat = async (userId: string, firstMsg: string) => {
+    let conversationId: string | null = null;
+    let query = supabase
+      .from("chat_conversations")
+      .select("id")
+      .eq("user_id", userId);
+    query = agentUserId ? query.eq("agent_user_id", agentUserId) : query.is("agent_user_id", null);
+    query = propertyDbId ? query.eq("property_id", propertyDbId) : query.is("property_id", null);
+
+    const { data: existing, error: findError } = await query.order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (findError) throw findError;
+    conversationId = existing?.id ?? null;
+
+    if (!conversationId) {
+      const displayName = [trimmedNameForChat(name), phone.trim()].filter(Boolean).join(" · ") || "일반회원";
+      const { data: created, error: createError } = await supabase
+        .from("chat_conversations")
+        .insert({
+          user_id: userId,
+          user_name: displayName,
+          agent_user_id: agentUserId || null,
+          property_id: propertyDbId || null,
+          last_message: firstMsg.slice(0, 200),
+          last_message_at: new Date().toISOString(),
+        } as any)
+        .select("id")
+        .single();
+      if (createError) throw createError;
+      conversationId = created.id;
+    }
+
+    const { error: msgError } = await supabase.from("chat_messages").insert({
+      conversation_id: conversationId,
+      sender_id: userId,
+      sender_role: "user",
+      content: firstMsg,
+    });
+    if (msgError) throw msgError;
+
+    window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
+      detail: {
+        conversationId,
+        agentUserId: agentUserId || null,
+        propertyId: propertyDbId || null,
+        propertyTitle,
+      },
+    }));
+  };
+
+  const trimmedNameForChat = (value: string) => value.trim().replace(/\s+/g, " ");
 
   const submit = async () => {
     const trimmedName = name.trim();
@@ -114,35 +158,29 @@ export const InquiryModal = ({
     try {
       const { data: sess } = await supabase.auth.getUser();
       const firstMsg = message.trim() || (propertyTitle ? `[${propertyTitle}] 문의드립니다` : "매물 문의드립니다");
-      const { data: inserted, error } = await supabase
+      const userId = sess?.user?.id ?? null;
+      const { error } = await supabase
         .from("guest_inquiries")
         .insert({
           property_id: propertyDbId || null,
           property_reg_no: propertyRegNo || null,
           agent_user_id: agentUserId || null,
-          user_id: sess?.user?.id ?? null,
+          user_id: userId,
           name: trimmedName,
           phone: phone.trim(),
           message: firstMsg,
-        } as any)
-        .select("id")
-        .single();
+        } as any);
       if (error) throw error;
-      const inquiryId = (inserted as any)?.id as string | undefined;
-      // 첫 메시지를 채팅 로그에도 기록
-      if (inquiryId) {
-        await (supabase as any).from("inquiry_messages").insert({
-          inquiry_id: inquiryId,
-          sender_role: "user",
-          sender_user_id: sess?.user?.id ?? null,
-          content: firstMsg,
-        });
-        toast.success("문의가 접수되었습니다. 담당자와 실시간 채팅을 시작합니다.");
+
+      if (isMember && userId) {
+        await openMemberChat(userId, firstMsg);
+        toast.success("문의가 접수되었습니다. 채팅창을 열었습니다.");
         setMessage("");
-        setChatInquiryId(inquiryId);
+        onClose();
       } else {
-        toast.success("문의가 접수되었습니다.");
-        if (!isMember) { setName(""); setPhone(""); }
+        toast.success("문의가 접수되었습니다. 담당자가 연락드릴 예정입니다.");
+        setName("");
+        setPhone("");
         setMessage("");
         onClose();
       }
@@ -161,7 +199,7 @@ export const InquiryModal = ({
     <Overlay onClose={onClose}>
       <div className="flex items-center justify-between px-5 py-3 border-b">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-primary" /> 채팅 문의하기
+          <MessageCircle className="w-4 h-4 text-primary" /> 매물 문의하기
         </h3>
         <button onClick={onClose} className="p-1 rounded-full hover:bg-muted">
           <X className="w-4 h-4" />
@@ -174,24 +212,10 @@ export const InquiryModal = ({
           </div>
         )}
 
-        {chatInquiryId ? (
-          <>
-            <div className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
-              담당자와 실시간 채팅이 시작되었습니다. 답변이 오면 이 창에 표시됩니다.
-            </div>
-            <InquiryChatPanel inquiryId={chatInquiryId} viewerRole="user" guestName={name} />
-            <button
-              onClick={onClose}
-              className="w-full py-2 rounded-lg bg-muted text-foreground font-semibold text-sm"
-            >
-              채팅 닫기
-            </button>
-          </>
-        ) : (
-          <>
+        <>
             {isMember && (
               <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
-                회원정보로 자동 입력되었습니다
+                회원정보로 자동 입력되었습니다. 접수 후 담당자 채팅창이 열립니다.
               </div>
             )}
             <div>
@@ -235,7 +259,7 @@ export const InquiryModal = ({
               disabled={submitting}
               className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm disabled:opacity-60"
             >
-              {submitting ? "전송 중..." : "채팅으로 문의 시작"}
+              {submitting ? "전송 중..." : isMember ? "문의 접수 후 채팅 시작" : "문의 접수하기"}
             </button>
             {onOpenPartner && (
               <button
@@ -252,8 +276,7 @@ export const InquiryModal = ({
               <p>집다는 거래의 당사자 또는 중개계약의 주체가 아니며, 이용자는 문의 접수 시 협력 공인중개사를 통해 상담 및 거래를 진행하게 됩니다.</p>
               <p>상세주소는 임대인의 요청에 따라 공개되지 않으며, 실제 거래 가능 여부 및 최종 거래 조건은 협력 공인중개사를 통해 반드시 확인하시기 바랍니다.</p>
             </div>
-          </>
-        )}
+        </>
       </div>
     </Overlay>
   );
