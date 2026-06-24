@@ -26,7 +26,7 @@ import AdminGuestInquiriesPanel from "@/components/AdminGuestInquiriesPanel";
 import VisitorStatsWidget from "@/components/VisitorStatsWidget";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type MemberType = "대표중개사" | "소속중개사" | "중개보조원";
+type MemberType = "대표중개사" | "소속중개사" | "중개보조원" | "일반회원";
 
 type AgentProfile = {
   id: string;
@@ -45,7 +45,7 @@ type AgentProfile = {
   email?: string;
   last_sign_in_at?: string | null;
   role?: "admin" | "user";        // user_roles에서 조회
-  member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원
+  member_type?: MemberType;       // 대표중개사 / 소속중개사 / 중개보조원 / 일반회원
   parent_user_id?: string | null; // 대표중개사 user_id
   is_active?: boolean;            // 사이트 접속 가능 여부
   allowed_pc_ip?: string | null;  // PC 접속 허용 IP (1개, 비어있으면 제한 없음)
@@ -1828,7 +1828,7 @@ const AdminDashboard = () => {
         ? m.role === "admin"
         : memberFilter === "role_user"
         ? m.role !== "admin"
-        : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원"
+        : memberFilter === "대표중개사" || memberFilter === "소속중개사" || memberFilter === "중개보조원" || memberFilter === "일반회원"
         ? mt === memberFilter
         : m.status === memberFilter;
     const q = memberSearch.toLowerCase();
@@ -2102,6 +2102,7 @@ const AdminDashboard = () => {
               "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "💎", Icon: Gem },
               "소속중개사": { label: "소속중개사", color: "hsl(0 0% 0%)", bg: "hsl(0 0% 0% / 0.12)", emoji: "✅", Icon: BadgeCheck },
               "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🧑", Icon: UserCog },
+              "일반회원": { label: "일반회원", color: "hsl(var(--muted-foreground))", bg: "hsl(var(--muted))", emoji: "👤", Icon: Users },
             };
             // 대표중개사 목록 (parent 선택용)
             const mainAgents = members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin");
@@ -2116,6 +2117,7 @@ const AdminDashboard = () => {
                     · 대표 {members.filter(m => (m.member_type ?? "대표중개사") === "대표중개사" && m.role !== "admin").length}명
                     · 소속 {members.filter(m => m.member_type === "소속중개사").length}명
                     · 보조원 {members.filter(m => m.member_type === "중개보조원").length}명
+                    · 일반 {members.filter(m => m.member_type === "일반회원").length}명
                     · 승인대기 {pendingCount}명
                   </p>
                 </div>
@@ -2128,6 +2130,7 @@ const AdminDashboard = () => {
                       { key: "대표중개사", label: "대표", Icon: Gem },
                       { key: "소속중개사", label: "소속", Icon: BadgeCheck },
                       { key: "중개보조원", label: "보조원", Icon: UserCog },
+                      { key: "일반회원", label: "일반", Icon: Users },
                     ].map((f) => {
                       const active = memberFilter === f.key;
                       const FIcon = f.Icon;
@@ -2211,7 +2214,7 @@ const AdminDashboard = () => {
                     const sortedGroups = Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0], "ko"));
                     sortedGroups.forEach(([license, list]) => {
                       const sortedList = [...list].sort((a, b) => {
-                        const order = (x: AgentProfile) => x.role === "admin" ? 0 : (x.member_type ?? "대표중개사") === "대표중개사" ? 1 : x.member_type === "소속중개사" ? 2 : 3;
+                        const order = (x: AgentProfile) => x.role === "admin" ? 0 : (x.member_type ?? "대표중개사") === "대표중개사" ? 1 : x.member_type === "소속중개사" ? 2 : x.member_type === "중개보조원" ? 3 : 4;
                         return order(a) - order(b);
                       });
                       const collapsed = !!collapsedAgencies[license];
@@ -2576,7 +2579,7 @@ const AdminDashboard = () => {
                               <div className="flex gap-2">
                                 {[
                                   { value: "admin" as const, label: "🛡 관리자", color: "hsl(var(--accent))", bg: "hsl(var(--accent) / 0.15)" },
-                                  { value: "user" as const, label: "👤 중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.12)" },
+                                   { value: "user" as const, label: "👤 사용자", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.12)" },
                                 ].map((r) => (
                                   <button
                                     key={r.value}
@@ -2601,9 +2604,9 @@ const AdminDashboard = () => {
                             {/* 멤버 유형 변경 (관리자가 아닐 때만) */}
                             {m.role !== "admin" && (
                               <div className="flex flex-col gap-1.5">
-                                <span className="text-[11px] text-muted-foreground font-medium">중개사 유형</span>
+                                <span className="text-[11px] text-muted-foreground font-medium">회원 유형</span>
                                 <div className="flex gap-2 flex-wrap">
-                                  {(["대표중개사", "소속중개사", "중개보조원"] as MemberType[]).map((t) => {
+                                  {(["대표중개사", "소속중개사", "중개보조원", "일반회원"] as MemberType[]).map((t) => {
                                     const TypeIcon = MEMBER_TYPE_LABELS[t].Icon;
                                     return (
                                       <button key={t}
