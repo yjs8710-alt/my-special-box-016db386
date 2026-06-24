@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash,
+  User, Building2, Lock, Users, Trash2, Loader2, Save, Eye, EyeOff, ChevronRight, MessageCircle, Phone, Hash, Heart,
 } from "lucide-react";
 import logoImg from "@/assets/logo-zibda-house.png";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
 import { formatPhone, formatLicenseNumber } from "@/lib/utils";
+import { useFavorites } from "@/hooks/useFavorites";
+import { MAP_PROPERTIES } from "@/data/mapProperties";
 
 interface AgentProfile {
   id: string;
