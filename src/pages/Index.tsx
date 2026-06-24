@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef, useMemo } from "react";
+import { useState, useEffect, useRef, forwardRef, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
@@ -72,14 +72,14 @@ const Index = () => {
     return () => { cancelled = true; };
   }, [searchParams, allProperties, setSearchParams]);
 
-  const closeDetail = () => {
+  const closeDetail = useCallback(() => {
     setSelectedId(null);
     if (searchParams.has("propertyId")) {
       const next = new URLSearchParams(searchParams);
       next.delete("propertyId");
       setSearchParams(next, { replace: true });
     }
-  };
+  }, [searchParams, setSearchParams]);
 
 
 
