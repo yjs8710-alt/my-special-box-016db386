@@ -197,7 +197,7 @@ const MOCK_POSTS = [
 
 const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }> = {
   pending:  { label: "대기중", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)" },
-  approved: { label: "승인됨", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)" },
+  approved: { label: "승인됨", color: "hsl(0 0% 0%)", bg: "hsl(0 0% 0% / 0.12)" },
   rejected: { label: "거절됨", color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)" },
 };
 
@@ -691,7 +691,7 @@ const PropertyFormModal = ({
                     <button key={s} type="button" onClick={() => set("status", s)}
                       className="px-4 py-2 rounded-full text-xs font-semibold border transition-all"
                       style={form.status === s
-                        ? { background: s === "active" ? "hsl(var(--chart-2))" : "hsl(var(--destructive))", color: "#fff", borderColor: "transparent" }
+                        ? { background: s === "active" ? "hsl(0 0% 0%)" : "hsl(var(--destructive))", color: "#fff", borderColor: "transparent" }
                         : { borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }
                       }>
                       {s === "active" ? "노출중" : "노출종료"}
@@ -850,7 +850,7 @@ const BuildingGroup = ({
               </span>
             )}
             {units.some(u => (u.images ?? []).length > 0) && (
-              <span className="text-[11px] font-medium" style={{ color: "hsl(var(--chart-2))" }}>
+              <span className="text-[11px] font-medium" style={{ color: "hsl(0 0% 0%)" }}>
                 📷 사진 {units.reduce((s, u) => s + (u.images ?? []).length, 0)}장
               </span>
             )}
@@ -865,7 +865,7 @@ const BuildingGroup = ({
             type="button"
             onClick={(e) => { e.stopPropagation(); onAddUnit(rep); }}
             className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold transition-colors"
-            style={{ background: "hsl(var(--chart-2) / 0.13)", color: "hsl(var(--chart-2))" }}
+            style={{ background: "hsl(0 0% 0% / 0.13)", color: "hsl(0 0% 0%)" }}
             title="같은 건물에 호수 추가"
           >
             <Plus className="w-3.5 h-3.5" />호수 추가
@@ -969,7 +969,7 @@ const BuildingGroup = ({
                 <div className="hidden md:flex justify-center">
                   <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                     style={u.status === "active"
-                      ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                      ? { background: "hsl(0 0% 0% / 0.12)", color: "hsl(0 0% 0%)" }
                       : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                     }>
                     {u.status === "active" ? "노출" : "종료"}
@@ -992,7 +992,7 @@ const BuildingGroup = ({
                     className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold"
                     style={u.status === "active"
                       ? { background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }
-                      : { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                      : { background: "hsl(0 0% 0% / 0.12)", color: "hsl(0 0% 0%)" }
                     }
                     title={u.status === "active" ? "노출종료" : "노출재개"}
                   >
@@ -2010,7 +2010,7 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 {[
                   { label: "전체 회원", value: members.length, sub: `승인 대기 ${pendingCount}건`, icon: Users, color: "hsl(var(--primary))" },
-                  { label: "승인된 회원", value: approvedCount, sub: "활성 중개사", icon: CheckCircle2, color: "hsl(var(--chart-2))" },
+                  { label: "승인된 회원", value: approvedCount, sub: "활성 중개사", icon: CheckCircle2, color: "hsl(0 0% 0%)" },
                   { label: "등록 매물(DB)", value: dbProperties.length, sub: `노출종료 ${dbProperties.filter((p) => p.status === "hidden").length}건`, icon: Building2, color: "hsl(var(--accent))" },
                   { label: "매물 총 조회수", value: allProperties.reduce((s, p) => s + (p.views || 0), 0).toLocaleString(), sub: `평균 ${allProperties.length ? Math.round(allProperties.reduce((s, p) => s + (p.views || 0), 0) / allProperties.length).toLocaleString() : 0}회/건`, icon: Eye, color: "hsl(var(--chart-3))" },
                   { label: "커뮤니티 게시글", value: posts.length, sub: `신고 게시글 ${reportedPosts}건`, icon: MessageSquare, color: "hsl(var(--chart-4))" },
@@ -2054,7 +2054,7 @@ const AdminDashboard = () => {
                         <div className="text-xs text-muted-foreground mt-0.5">{m.email ?? m.phone} · 가입 {m.created_at.slice(0, 10)}</div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => updateMemberStatus(m.id, "approved")} disabled={updatingId === m.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }}>
+                        <button onClick={() => updateMemberStatus(m.id, "approved")} disabled={updatingId === m.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "hsl(0 0% 0% / 0.12)", color: "hsl(0 0% 0%)" }}>
                           <CheckCircle2 className="w-3 h-3" /> 승인
                         </button>
                         <button onClick={() => updateMemberStatus(m.id, "rejected")} disabled={updatingId === m.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }}>
@@ -2100,7 +2100,7 @@ const AdminDashboard = () => {
           {tab === "members" && (() => {
             const MEMBER_TYPE_LABELS: Record<string, { label: string; color: string; bg: string; emoji: string; Icon: typeof Gem }> = {
               "대표중개사": { label: "대표중개사", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)", emoji: "💎", Icon: Gem },
-              "소속중개사": { label: "소속중개사", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)", emoji: "✅", Icon: BadgeCheck },
+              "소속중개사": { label: "소속중개사", color: "hsl(0 0% 0%)", bg: "hsl(0 0% 0% / 0.12)", emoji: "✅", Icon: BadgeCheck },
               "중개보조원": { label: "중개보조원", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)", emoji: "🧑", Icon: UserCog },
             };
             // 대표중개사 목록 (parent 선택용)
@@ -2259,7 +2259,7 @@ const AdminDashboard = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-2 text-[10px] font-medium">
-                            <span style={{ color: "hsl(var(--chart-2))" }}>승인 {item.approved}</span>
+                            <span style={{ color: "hsl(0 0% 0%)" }}>승인 {item.approved}</span>
                             <span style={{ color: "hsl(var(--chart-4))" }}>대기 {item.pending}</span>
                           </div>
                         </button>
@@ -2285,7 +2285,7 @@ const AdminDashboard = () => {
                           </div>
                           <div className="text-xs text-muted-foreground">{m.agency_name}</div>
                           {subMembers.length > 0 && (
-                            <div className="text-[10px] mt-0.5" style={{ color: "hsl(var(--chart-2))" }}>하위 {subMembers.length}명</div>
+                            <div className="text-[10px] mt-0.5" style={{ color: "hsl(0 0% 0%)" }}>하위 {subMembers.length}명</div>
                            )}
                            <div className="mt-1 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: "hsl(var(--accent) / 0.10)", color: "hsl(var(--accent))" }} title="접속 허용 IP (PC/모바일 공통, 1개). 비우면 제한 없음.">
@@ -2323,12 +2323,12 @@ const AdminDashboard = () => {
                              {m.email ?? "-"}
                            </div>
                             <div className="text-xs text-muted-foreground hidden md:block">{m.phone}</div>
-                            <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: m.last_sign_in_at ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+                            <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold" style={{ color: m.last_sign_in_at ? "hsl(0 0% 0%)" : "hsl(var(--muted-foreground))" }}>
                               <Clock className="w-3 h-3" />
                               마지막 접속 일: {m.last_sign_in_at ? new Date(m.last_sign_in_at).toLocaleString("ko-KR", { year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "기록 없음"}
                             </div>
                            {parentAgent && (
-                             <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold hidden md:inline-flex" style={{ color: "hsl(var(--chart-2))" }}>
+                             <div className="text-[10px] mt-0.5 inline-flex items-center gap-1 font-semibold hidden md:inline-flex" style={{ color: "hsl(0 0% 0%)" }}>
                                <Building2 className="w-3 h-3" />
                                상위: {(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} ({(parentAgent.name || "").trim() || "-"})
                              </div>
@@ -2400,7 +2400,7 @@ const AdminDashboard = () => {
                         {/* 액션 버튼 (데스크톱) */}
                         <div className="hidden md:flex justify-center items-center gap-1" onClick={(e) => e.stopPropagation()}>
                           {m.status !== "approved" && (
-                            <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
+                            <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md" title="승인" style={{ color: "hsl(0 0% 0%)" }}>
                               <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                           )}
@@ -2409,7 +2409,7 @@ const AdminDashboard = () => {
                               <XCircle className="w-3.5 h-3.5" />
                             </button>
                           )}
-                          <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(var(--chart-2))" }}>
+                          <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(0 0% 0%)" }}>
                             {m.is_active ? <Ban className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
                           </button>
                           <button onClick={() => deleteMember(m)} className="p-1.5 rounded-md" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
@@ -2430,7 +2430,7 @@ const AdminDashboard = () => {
                           )}
                           <div className="ml-auto flex items-center gap-1">
                             {m.status !== "approved" && (
-                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md bg-muted/30" title="승인" style={{ color: "hsl(var(--chart-2))" }}>
+                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="p-1.5 rounded-md bg-muted/30" title="승인" style={{ color: "hsl(0 0% 0%)" }}>
                                 <CheckCircle2 className="w-4 h-4" />
                               </button>
                             )}
@@ -2439,7 +2439,7 @@ const AdminDashboard = () => {
                                 <XCircle className="w-4 h-4" />
                               </button>
                             )}
-                            <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md bg-muted/30" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(var(--chart-2))" }}>
+                            <button onClick={() => toggleIsActive(m)} className="p-1.5 rounded-md bg-muted/30" title={m.is_active ? "접속 차단" : "접속 허용"} style={{ color: m.is_active ? "hsl(var(--chart-4))" : "hsl(0 0% 0%)" }}>
                               {m.is_active ? <Ban className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
                             </button>
                             <button onClick={() => deleteMember(m)} className="p-1.5 rounded-md bg-muted/30" title="삭제" style={{ color: "hsl(var(--destructive))" }}>
@@ -2631,7 +2631,7 @@ const AdminDashboard = () => {
                               <div className="flex items-center justify-between flex-wrap gap-2">
                                 <p className="text-xs font-bold text-foreground">🏢 상위(대표) 부동산 연결</p>
                                 <div className="text-[11px] font-semibold inline-flex items-center gap-1 px-2 py-1 rounded-md"
-                                  style={{ background: parentAgent ? "hsl(var(--chart-2) / 0.12)" : "hsl(var(--muted))", color: parentAgent ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>
+                                  style={{ background: parentAgent ? "hsl(0 0% 0% / 0.12)" : "hsl(var(--muted))", color: parentAgent ? "hsl(0 0% 0%)" : "hsl(var(--muted-foreground))" }}>
                                   <Building2 className="w-3 h-3" />
                                   현재 연결: {parentAgent
                                     ? `${(parentAgent.agency_name || "").trim() || "(사무소 미지정)"} (${(parentAgent.name || "").trim() || "-"})`
@@ -2656,7 +2656,7 @@ const AdminDashboard = () => {
                                       onClick={() => updateParent(m.id, a.user_id)}
                                       className="px-3 py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5"
                                       style={isSelected
-                                        ? { background: "hsl(var(--chart-2))", color: "#ffffff", borderColor: "hsl(var(--chart-2))" }
+                                        ? { background: "hsl(0 0% 0%)", color: "#ffffff", borderColor: "hsl(0 0% 0%)" }
                                         : { borderColor: "hsl(var(--primary) / 0.3)", color: "hsl(var(--foreground))", background: "hsl(var(--card))" }
                                       }
                                     >
@@ -2701,7 +2701,7 @@ const AdminDashboard = () => {
                           {/* 액션 버튼 */}
                           <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
                             {m.status !== "approved" && (
-                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>
+                              <button onClick={() => updateMemberStatus(m.id, "approved")} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs" style={{ background: "hsl(0 0% 0% / 0.15)", color: "hsl(0 0% 0%)" }}>
                                 <CheckCircle2 className="w-3.5 h-3.5" /> 승인하기
                               </button>
                             )}
@@ -2713,7 +2713,7 @@ const AdminDashboard = () => {
                             <button onClick={() => toggleIsActive(m)} className="flex items-center gap-1.5 px-4 py-2 rounded-full font-semibold text-xs"
                               style={m.is_active !== false
                                 ? { background: "hsl(var(--destructive) / 0.10)", color: "hsl(var(--destructive))" }
-                                : { background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }
+                                : { background: "hsl(0 0% 0% / 0.15)", color: "hsl(0 0% 0%)" }
                               }>
                               {m.is_active !== false ? <><Ban className="w-3.5 h-3.5" /> 접속 차단</> : <><Unlock className="w-3.5 h-3.5" /> 접속 허용</>}
                             </button>
@@ -3013,7 +3013,7 @@ const AdminDashboard = () => {
                           <span className="text-sm font-bold text-foreground">{c.dong}</span>
                           {c.lot_number && c.lot_number.trim() && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                              style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>{c.lot_number}</span>
+                              style={{ background: "hsl(0 0% 0% / 0.15)", color: "hsl(0 0% 0%)" }}>{c.lot_number}</span>
                           )}
                           {(c.building_dong || c.unit_number) && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
@@ -3031,7 +3031,7 @@ const AdminDashboard = () => {
                             <div className="flex items-center gap-1 flex-wrap">
                               <span className="text-muted-foreground">소유주:</span>
                               {ownerPhones.map((p) => (
-                                <a key={p} href={`tel:${p}`} className="font-semibold" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
+                                <a key={p} href={`tel:${p}`} className="font-semibold" style={{ color: "hsl(0 0% 0%)" }}>{p}</a>
                               ))}
                             </div>
                           )}
@@ -3056,7 +3056,7 @@ const AdminDashboard = () => {
                             disabled={togglingContactId === c.id}
                             className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold"
                             style={isVisible
-                              ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                              ? { background: "hsl(0 0% 0% / 0.12)", color: "hsl(0 0% 0%)" }
                               : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                             }>
                             {togglingContactId === c.id
@@ -3088,7 +3088,7 @@ const AdminDashboard = () => {
                       <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
                         {c.lot_number && c.lot_number.trim() ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold shrink-0"
-                            style={{ background: "hsl(var(--chart-2) / 0.15)", color: "hsl(var(--chart-2))" }}>{c.lot_number}</span>
+                            style={{ background: "hsl(0 0% 0% / 0.15)", color: "hsl(0 0% 0%)" }}>{c.lot_number}</span>
                         ) : <span className="text-muted-foreground/50">—</span>}
                         {c.building_name && (
                           <span className="truncate font-medium text-foreground" title={c.building_name}>{c.building_name}</span>
@@ -3106,7 +3106,7 @@ const AdminDashboard = () => {
                       <div className="hidden md:flex flex-col items-start gap-0.5 text-xs">
                         {ownerPhones.length > 0 ? (
                           ownerPhones.map((p) => (
-                            <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(var(--chart-2))" }}>{p}</a>
+                            <a key={p} href={`tel:${p}`} className="font-medium whitespace-nowrap" style={{ color: "hsl(0 0% 0%)" }}>{p}</a>
                           ))
                         ) : <span className="text-muted-foreground">—</span>}
                       </div>
@@ -3128,7 +3128,7 @@ const AdminDashboard = () => {
                           disabled={togglingContactId === c.id}
                           className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full font-semibold transition-all"
                           style={isVisible
-                            ? { background: "hsl(var(--chart-2) / 0.12)", color: "hsl(var(--chart-2))" }
+                            ? { background: "hsl(0 0% 0% / 0.12)", color: "hsl(0 0% 0%)" }
                             : { background: "hsl(var(--muted))", color: "hsl(var(--muted-foreground))" }
                           }
                           title={isVisible ? "클릭 시 노출불가" : "클릭 시 노출"}>
@@ -3171,13 +3171,13 @@ const AdminDashboard = () => {
           {tab === "reports" && (() => {
             const REPORT_TYPE_META = {
               error_report:    { label: "오류제보",  color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)", emoji: "⚠️" },
-              deal_complete:   { label: "거래완료",  color: "hsl(var(--chart-2))",     bg: "hsl(var(--chart-2) / 0.12)",    emoji: "✅" },
+              deal_complete:   { label: "거래완료",  color: "hsl(0 0% 0%)",     bg: "hsl(0 0% 0% / 0.12)",    emoji: "✅" },
               rental_proposal: { label: "임대현황", color: "hsl(var(--primary))",     bg: "hsl(var(--primary) / 0.10)",    emoji: "📋" },
             };
             const REPORT_STATUS_META = {
               pending:  { label: "미처리", color: "hsl(var(--chart-4))", bg: "hsl(var(--chart-4) / 0.12)" },
               reviewed: { label: "검토중", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.10)" },
-              resolved: { label: "처리완료", color: "hsl(var(--chart-2))", bg: "hsl(var(--chart-2) / 0.12)" },
+              resolved: { label: "처리완료", color: "hsl(0 0% 0%)", bg: "hsl(0 0% 0% / 0.12)" },
               rejected: { label: "반려", color: "hsl(var(--destructive))", bg: "hsl(var(--destructive) / 0.10)" },
             };
 
@@ -3375,7 +3375,7 @@ const AdminDashboard = () => {
                                           <div><span className="text-muted-foreground">층: </span><span className="font-semibold text-foreground">{matchedProp.floor}</span></div>
                                           {matchedProp.unit_number && <div><span className="text-muted-foreground">호수: </span><span className="font-semibold text-foreground">{matchedProp.unit_number}</span></div>}
                                           <div><span className="text-muted-foreground">담당: </span><span className="font-semibold text-foreground">{matchedProp.agent_name || "—"}</span></div>
-                                          <div><span className="text-muted-foreground">상태: </span><span className="font-semibold" style={{ color: matchedProp.status === "active" ? "hsl(var(--chart-2))" : "hsl(var(--muted-foreground))" }}>{matchedProp.status === "active" ? "노출중" : matchedProp.status === "hidden" ? "숨김" : "종료"}</span></div>
+                                          <div><span className="text-muted-foreground">상태: </span><span className="font-semibold" style={{ color: matchedProp.status === "active" ? "hsl(0 0% 0%)" : "hsl(var(--muted-foreground))" }}>{matchedProp.status === "active" ? "노출중" : matchedProp.status === "hidden" ? "숨김" : "종료"}</span></div>
                                         </div>
                                         {/* 연락처 (note 필드 파싱) */}
                                         {matchedProp.note && (
