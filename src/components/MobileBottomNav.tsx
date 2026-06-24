@@ -40,7 +40,7 @@ const MobileBottomNav = () => {
       aria-label="모바일 메인 메뉴"
     >
       <ul className="flex items-stretch justify-around px-1 py-2">
-        {ITEMS.map(({ label, path, icon, match }) => {
+        {visibleItems.map(({ label, path, icon, match }) => {
           const active = match(location.pathname);
           return (
             <li key={label} className="flex-1">
