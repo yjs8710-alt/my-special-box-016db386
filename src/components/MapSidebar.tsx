@@ -2655,7 +2655,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
       e.stopPropagation();
       window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
         detail: {
-          agentUserId: prop.registeredBy,
+          agentUserId: null,
           propertyId: prop.dbId,
           propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
         },
