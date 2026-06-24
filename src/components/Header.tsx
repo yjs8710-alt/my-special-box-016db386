@@ -161,12 +161,11 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               <div className="hidden md:flex items-center ml-auto">
                 <button
                   onClick={() => navigate("/chat")}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-center"
                   aria-label="채팅 문의"
                   title="채팅 문의"
                 >
-                  <img src={iconChatNeon} alt="" className="w-16 h-16 object-contain" />
-                  <span className="text-[12px] font-extrabold text-white whitespace-nowrap">채팅문의</span>
+                  <img src={iconChatNeon} alt="채팅문의" className="w-12 h-12 object-contain" />
                 </button>
               </div>
             )}
@@ -177,15 +176,13 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
               {isAuthorized && (
                 <button
                   onClick={() => navigate("/chat")}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-center -mr-1"
                   aria-label="채팅 문의"
                   title="채팅 문의"
                 >
-                  <img src={iconChatNeon} alt="" className="w-16 h-16 object-contain" />
-                  <span className="text-[12px] font-extrabold text-white whitespace-nowrap">채팅문의</span>
+                  <img src={iconChatNeon} alt="채팅문의" className="w-12 h-12 object-contain" />
                 </button>
               )}
-
               {isAuthorized && <NotificationBell variant="desktop" />}
 
 

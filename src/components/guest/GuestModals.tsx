@@ -99,18 +99,17 @@ export const InquiryModal = ({
   };
 
   const findExistingConversation = async (userId: string) => {
-    // 같은 회원 ↔ 같은 담당자(또는 관리자) 대화는 하나로 유지 — 매물별로 분리하지 않음
     let query = supabase
       .from("chat_conversations")
       .select("id")
       .eq("user_id", userId);
     query = agentUserId ? query.eq("agent_user_id", agentUserId) : query.is("agent_user_id", null);
+    query = propertyDbId ? query.eq("property_id", propertyDbId) : query.is("property_id", null);
 
     const { data: existing, error: findError } = await query.order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (findError) throw findError;
     return existing?.id ?? null;
   };
-
 
   const openMemberChat = async (userId: string, firstMsg: string) => {
     let conversationId: string | null = null;
@@ -147,15 +146,6 @@ export const InquiryModal = ({
     });
     if (msgError) throw msgError;
 
-    await supabase
-      .from("chat_conversations")
-      .update({
-        last_message: firstMsg.slice(0, 200),
-        last_message_at: new Date().toISOString(),
-        ...(agentUserId ? { unread_for_agent: 1 } : { unread_for_admin: 1 }),
-      } as any)
-      .eq("id", conversationId);
-
     window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
       detail: {
         conversationId,
@@ -191,8 +181,7 @@ export const InquiryModal = ({
         } as any);
       if (error) throw error;
 
-      if (userId) {
-        await openMemberChat(userId, firstMsg);
+      if (isMember && userId) {
         toast.success("문의가 접수되었습니다. 담당자가 답변드릴 예정입니다.");
         setMessage("");
         onClose();
