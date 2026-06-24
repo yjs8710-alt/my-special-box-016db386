@@ -108,20 +108,39 @@ export const InquiryModal = ({
     setSubmitting(true);
     try {
       const { data: sess } = await supabase.auth.getUser();
-      const { error } = await supabase.from("guest_inquiries").insert({
-        property_id: propertyDbId || null,
-        property_reg_no: propertyRegNo || null,
-        agent_user_id: agentUserId || null,
-        user_id: sess?.user?.id ?? null,
-        name: trimmedName,
-        phone: phone.trim(),
-        message: message.trim() || (propertyTitle ? `[${propertyTitle}] 문의드립니다` : "매물 문의드립니다"),
-      } as any);
+      const firstMsg = message.trim() || (propertyTitle ? `[${propertyTitle}] 문의드립니다` : "매물 문의드립니다");
+      const { data: inserted, error } = await supabase
+        .from("guest_inquiries")
+        .insert({
+          property_id: propertyDbId || null,
+          property_reg_no: propertyRegNo || null,
+          agent_user_id: agentUserId || null,
+          user_id: sess?.user?.id ?? null,
+          name: trimmedName,
+          phone: phone.trim(),
+          message: firstMsg,
+        } as any)
+        .select("id")
+        .single();
       if (error) throw error;
-      toast.success("문의가 접수되었습니다. 담당자가 연락드릴 예정입니다.");
-      if (!isMember) { setName(""); setPhone(""); }
-      setMessage("");
-      onClose();
+      const inquiryId = (inserted as any)?.id as string | undefined;
+      // 첫 메시지를 채팅 로그에도 기록
+      if (inquiryId) {
+        await (supabase as any).from("inquiry_messages").insert({
+          inquiry_id: inquiryId,
+          sender_role: "user",
+          sender_user_id: sess?.user?.id ?? null,
+          content: firstMsg,
+        });
+        toast.success("문의가 접수되었습니다. 담당자와 실시간 채팅을 시작합니다.");
+        setMessage("");
+        setChatInquiryId(inquiryId);
+      } else {
+        toast.success("문의가 접수되었습니다.");
+        if (!isMember) { setName(""); setPhone(""); }
+        setMessage("");
+        onClose();
+      }
     } catch (e: any) {
       console.error("[InquiryModal]", e);
       toast.error("문의 접수에 실패했습니다");
@@ -129,6 +148,12 @@ export const InquiryModal = ({
       setSubmitting(false);
     }
   };
+
+  // 모달 닫힐 때 채팅 상태 초기화
+  useEffect(() => {
+    if (!open) setChatInquiryId(null);
+  }, [open]);
+
 
 
   return (
