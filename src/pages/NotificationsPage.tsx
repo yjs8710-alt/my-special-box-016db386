@@ -6,6 +6,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { loadCheongjuContact } from "@/lib/cheongjuContacts";
+import InquiryChatPanel from "@/components/InquiryChatPanel";
 
 interface Notification {
   id: string;
