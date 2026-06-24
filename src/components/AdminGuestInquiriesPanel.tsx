@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { Phone, MessageCircle, Search, Check, Trash2, User, Hash, Clock, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Phone, MessageCircle, Search, Check, Trash2, User, Hash, Clock, Building2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -8,6 +9,7 @@ type Inquiry = {
   property_id: string | null;
   property_reg_no: string | null;
   agent_user_id: string | null;
+  user_id: string | null;
   name: string;
   phone: string;
   message: string | null;
@@ -16,12 +18,16 @@ type Inquiry = {
 };
 
 type AgentInfo = { user_id: string; name: string; phone: string | null; company: string | null };
+type PropInfo = { id: string; address: string | null; building_name: string | null; unit_number: string | null; reg_no: string | null };
 
 const AdminGuestInquiriesPanel = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<Inquiry[]>([]);
   const [agents, setAgents] = useState<Record<string, AgentInfo>>({});
+  const [props, setProps] = useState<Record<string, PropInfo>>({});
   const [filter, setFilter] = useState("");
   const [agentFilter, setAgentFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "guest" | "member">("all");
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -48,8 +54,19 @@ const AdminGuestInquiriesPanel = () => {
       (ap ?? []).forEach((a: any) => { map[a.user_id] = a; });
       setAgents(map);
     }
+    const propIds = Array.from(new Set(list.map((i) => i.property_id).filter(Boolean))) as string[];
+    if (propIds.length) {
+      const { data: pp } = await supabase
+        .from("properties")
+        .select("id, address, building_name, unit_number, reg_no")
+        .in("id", propIds);
+      const pmap: Record<string, PropInfo> = {};
+      (pp ?? []).forEach((p: any) => { pmap[p.id] = p; });
+      setProps(pmap);
+    }
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, []);
 
