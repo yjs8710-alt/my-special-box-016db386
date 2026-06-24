@@ -66,6 +66,7 @@ export const InquiryModal = ({
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [chatInquiryId, setChatInquiryId] = useState<string | null>(null);
   const isMember = !!(memberInfo && (memberInfo.name || memberInfo.phone));
 
   // 회원정보 자동 채우기 (모달이 열릴 때마다)
