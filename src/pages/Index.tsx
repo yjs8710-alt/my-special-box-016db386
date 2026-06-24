@@ -50,7 +50,7 @@ const Index = () => {
   useEffect(() => {
     const dbId = searchParams.get("propertyId");
     if (!dbId) return;
-    if (allProperties.length === 0) return;
+    // 활성 목록에 있으면 즉시 선택
     const target = allProperties.find((p) => p.dbId === dbId);
     if (target) {
       setSelectedId(target.id);
@@ -59,7 +59,7 @@ const Index = () => {
       setSearchParams(next, { replace: true });
       return;
     }
-    // active 목록에 없으면(종료/비활성) 단건 조회 fallback
+    // 없으면 (종료/비활성 포함) 단건 조회 후 임시 주입
     let cancelled = false;
     (async () => {
       const { data, error } = await supabase
@@ -77,6 +77,7 @@ const Index = () => {
     })();
     return () => { cancelled = true; };
   }, [searchParams, allProperties, setSearchParams]);
+
 
 
 
