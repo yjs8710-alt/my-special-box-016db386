@@ -217,7 +217,7 @@ export const InquiryModal = ({
 
   return (
     <Overlay onClose={onClose}>
-      <div className="flex items-center justify-between px-5 py-3 border-b">
+      <div className="flex items-center justify-between px-5 py-3 border-b shrink-0">
         <h3 className="font-bold text-base text-foreground flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-primary" /> 매물 문의하기
         </h3>
@@ -225,7 +225,8 @@ export const InquiryModal = ({
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className="p-5 space-y-3">
+      <div className="p-5 space-y-3 overflow-y-auto flex-1">
+
         {propertyTitle && (
           <div className="text-xs text-muted-foreground bg-muted rounded-lg px-3 py-2">
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
