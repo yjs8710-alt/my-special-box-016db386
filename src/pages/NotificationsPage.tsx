@@ -121,15 +121,26 @@ const NotificationsPage = () => {
       .maybeSingle();
     if (!data) return;
     const d: any = data;
-    let dong: string | null = null, lot: string | null = null;
+    let dong: string | null = null, lot: string | null = null, unit: string | null = null;
+    let address: string | null = null, building: string | null = null;
+    let ownerPhone: string | null = null;
     if (d.property_id) {
       const { data: prop } = await supabase
         .from("properties")
-        .select("dong, lot_number")
+        .select("dong, lot_number, unit_number, address, building_name")
         .eq("id", d.property_id)
         .maybeSingle();
       dong = prop?.dong ?? null;
       lot = prop?.lot_number ?? null;
+      unit = (prop as any)?.unit_number ?? null;
+      address = (prop as any)?.address ?? null;
+      building = (prop as any)?.building_name ?? null;
+      if (dong && lot) {
+        try {
+          const c = await loadCheongjuContact({ dong, lotNumber: lot, unitNumber: unit ?? undefined });
+          ownerPhone = c?.contactOwner || null;
+        } catch (e) { console.warn("[owner phone]", e); }
+      }
     }
     setDetail({
       id: d.id,
@@ -138,8 +149,13 @@ const NotificationsPage = () => {
       message: d.message,
       created_at: d.created_at,
       property_reg_no: d.property_reg_no,
+      property_id: d.property_id ?? null,
       property_dong: dong,
       property_lot: lot,
+      property_unit: unit,
+      property_address: address,
+      property_building: building,
+      owner_phone: ownerPhone,
       user_id: d.user_id ?? null,
     });
   }, []);
