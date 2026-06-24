@@ -148,29 +148,41 @@ export function useDBProperties(typeFilter?: string[]) {
             if (dongs.length > 0) {
               const { data: contacts } = await supabase
                 .from("cheongju_contacts")
-                .select("dong,lot_number,unit_number,contact_owner,contact_manager,contact_broker,memo")
+                .select("dong,lot_number,unit_number,phone,contact_owner,contact_manager,contact_broker,memo")
                 .in("dong", dongs);
               if (Array.isArray(contacts) && contacts.length > 0) {
                 const norm = (v: unknown) => String(v ?? "").trim();
+                const cleanPhone = (v: unknown) => {
+                  const value = norm(v);
+                  return value && !value.includes("***") ? value : "";
+                };
+                const normUnit = (v: unknown) => norm(v).replace(/호$/g, "");
                 const keyExact = (d: string, l: string, u: string) => `${d}|${l}|${u}`;
                 const keyAny = (d: string, l: string) => `${d}|${l}|*`;
                 const map = new Map<string, Record<string, unknown>>();
                 for (const c of contacts as Record<string, unknown>[]) {
-                  const d = norm(c.dong), l = norm(c.lot_number), u = norm(c.unit_number);
+                  const d = norm(c.dong), l = norm(c.lot_number), u = normUnit(c.unit_number);
                   if (!d || !l) continue;
                   if (u) map.set(keyExact(d, l, u), c);
-                  // 호수 미지정 fallback도 저장 (덮어쓰지 않음)
-                  if (!map.has(keyAny(d, l))) map.set(keyAny(d, l), c);
+                  // 호수 미지정 fallback은 대표 소유주 번호(phone/contact_owner)가 있는 행을 우선 저장
+                  const anyKey = keyAny(d, l);
+                  const current = map.get(anyKey);
+                  const hasOwnerPhone = !!(cleanPhone(c.contact_owner) || cleanPhone(c.phone));
+                  const currentHasOwnerPhone = !!(current && (cleanPhone(current.contact_owner) || cleanPhone(current.phone)));
+                  if (!current || (!currentHasOwnerPhone && hasOwnerPhone) || !u) map.set(anyKey, c);
                 }
                 mapped.forEach((p, i) => {
                   const r = rows[i];
-                  const d = norm(r.dong), l = norm(r.lot_number), u = norm(r.unit_number);
+                  const d = norm(r.dong), l = norm(r.lot_number), u = normUnit(r.unit_number);
                   if (!d || !l) return;
                   const hit = (u && map.get(keyExact(d, l, u))) || map.get(keyAny(d, l));
                   if (!hit) return;
-                  if (hit.contact_owner && String(hit.contact_owner).trim()) p.contactOwner = String(hit.contact_owner).trim();
-                  if (hit.contact_manager && String(hit.contact_manager).trim()) p.contactManager = String(hit.contact_manager).trim();
-                  if (hit.contact_broker && String(hit.contact_broker).trim()) p.contact = String(hit.contact_broker).trim();
+                  const ownerPhone = cleanPhone(hit.contact_owner) || cleanPhone(hit.phone);
+                  const managerPhone = cleanPhone(hit.contact_manager);
+                  const brokerPhone = cleanPhone(hit.contact_broker);
+                  if (ownerPhone) p.contactOwner = ownerPhone;
+                  if (managerPhone) p.contactManager = managerPhone;
+                  if (brokerPhone) p.contact = brokerPhone;
                   // EXTRA_OWNERS:[...] → contactOwner2
                   if (!p.contactOwner2 && typeof hit.memo === "string") {
                     const m = hit.memo.match(/EXTRA_OWNERS:\[([^\]]+)\]/);
