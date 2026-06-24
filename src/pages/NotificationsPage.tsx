@@ -384,20 +384,22 @@ const NotificationsPage = () => {
                 >
                   <Phone className="w-4 h-4" /> 문의자 전화
                 </a>
-                <button
-                  onClick={() => startChatFromInquiry(detail)}
-                  disabled={!detail.user_id}
-                  title={detail.user_id ? "" : "비회원 게스트는 채팅이 불가합니다"}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-bold text-sm bg-accent text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MessageCircle className="w-4 h-4" /> 채팅 답변
-                </button>
+                {detail.user_id ? (
+                  <button
+                    onClick={() => startChatFromInquiry(detail)}
+                    className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-bold text-sm bg-accent text-accent-foreground"
+                  >
+                    <MessageCircle className="w-4 h-4" /> 회원 채팅 답변
+                  </button>
+                ) : (
+                  <span className="text-[11px] text-muted-foreground text-center self-center">
+                    게스트 채팅은 아래에서 답변
+                  </span>
+                )}
               </div>
-              {!detail.user_id && (
-                <p className="text-[11px] text-muted-foreground text-center">
-                  비회원 게스트 문의는 전화로만 답변 가능합니다
-                </p>
-              )}
+              {/* 게스트/회원 모두 inquiry_messages 채팅 — 동일 패널로 답변 */}
+              <InquiryChatPanel inquiryId={detail.id} viewerRole="agent" guestName={detail.name} className="mt-2" />
+
             </div>
           </div>
         </div>
