@@ -123,28 +123,31 @@ const MyPage = () => {
     })();
   }, [profile]);
 
-  // 받은 문의 내역
+  // 문의 내역 (일반회원=보낸 문의 / 중개사=받은 문의)
+  const isGeneralMember = profile?.member_type === "일반회원";
   const loadInquiries = async () => {
     if (!user?.userId) return;
     setLoadingInquiries(true);
+    const column = isGeneralMember ? "user_id" : "agent_user_id";
     const { data } = await supabase
       .from("guest_inquiries")
       .select("id, name, phone, message, property_reg_no, created_at, is_read")
-      .eq("agent_user_id", user.userId)
+      .eq(column, user.userId)
       .order("created_at", { ascending: false })
       .limit(100);
     setInquiries((data ?? []) as InquiryRow[]);
     setLoadingInquiries(false);
   };
   useEffect(() => {
-    if (!user?.userId) return;
+    if (!user?.userId || !profile) return;
     loadInquiries();
+    const column = isGeneralMember ? "user_id" : "agent_user_id";
     const ch = supabase
       .channel(`mypage-inquiries-${user.userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `agent_user_id=eq.${user.userId}` }, loadInquiries)
+      .on("postgres_changes", { event: "*", schema: "public", table: "guest_inquiries", filter: `${column}=eq.${user.userId}` }, loadInquiries)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [user?.userId]);
+  }, [user?.userId, profile?.member_type]);
 
   const deleteInquiry = async (id: string) => {
     const prev = inquiries;
