@@ -146,6 +146,15 @@ export const InquiryModal = ({
     });
     if (msgError) throw msgError;
 
+    await supabase
+      .from("chat_conversations")
+      .update({
+        last_message: firstMsg.slice(0, 200),
+        last_message_at: new Date().toISOString(),
+        ...(agentUserId ? { unread_for_agent: 1 } : { unread_for_admin: 1 }),
+      } as any)
+      .eq("id", conversationId);
+
     window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
       detail: {
         conversationId,
