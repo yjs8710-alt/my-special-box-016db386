@@ -167,13 +167,14 @@ const ChatInquiryWidget = () => {
         .order("created_at", { ascending: true });
       setMessages((data ?? []) as Msg[]);
       // 본인의 미확인 카운터 초기화
-      const updates: Record<string, number> = {};
+      const updates: { unread_for_agent?: number; unread_for_user?: number; unread_for_admin?: number } = {};
       if (r === "agent") updates.unread_for_agent = 0;
       else if (r === "user") updates.unread_for_user = 0;
       else if (r === "admin") updates.unread_for_admin = 0;
       if (Object.keys(updates).length) {
         await supabase.from("chat_conversations").update(updates).eq("id", cid);
       }
+
       setUnread(0);
     })();
   }, [open, conversationId, ensureConversation, ctx, user]);
