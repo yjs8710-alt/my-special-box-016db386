@@ -5,7 +5,6 @@ import { MapProperty } from "@/data/mapProperties";
 // 매물 카드/지도에 필요한 컬럼만 선택 (성능 개선)
 const PROPERTY_COLUMNS = [
   "id", "reg_no", "title", "building_name", "address", "type", "room_type", "unit_number",
-  "dong", "lot_number",
   "area", "floor", "deposit", "monthly", "manage_fee", "parking", "elevator",
   "available_from", "total_floors", "build_year", "description",
   "building_memo", "room_memo", "note", "vacate_date",
@@ -137,67 +136,9 @@ export function useDBProperties(typeFilter?: string[]) {
 
       if (!cancelled) {
         if (!error && data) {
-          const rows = data as unknown as Record<string, unknown>[];
-          const mapped = rows.map((row, idx) => dbToMapProperty(row, idx));
-
-          // 청주연락처(cheongju_contacts)에서 소유주/관리인/부동산 번호 보강
-          try {
-            const dongs = Array.from(new Set(
-              rows.map((r) => String(r.dong ?? "").trim()).filter(Boolean)
-            ));
-            if (dongs.length > 0) {
-              const { data: contacts } = await supabase
-                .from("cheongju_contacts")
-                .select("dong,lot_number,unit_number,phone,contact_owner,contact_manager,contact_broker,memo")
-                .in("dong", dongs);
-              if (Array.isArray(contacts) && contacts.length > 0) {
-                const norm = (v: unknown) => String(v ?? "").trim();
-                const cleanPhone = (v: unknown) => {
-                  const value = norm(v);
-                  return value && !value.includes("***") ? value : "";
-                };
-                const normUnit = (v: unknown) => norm(v).replace(/호$/g, "");
-                const keyExact = (d: string, l: string, u: string) => `${d}|${l}|${u}`;
-                const keyAny = (d: string, l: string) => `${d}|${l}|*`;
-                const map = new Map<string, Record<string, unknown>>();
-                for (const c of contacts as Record<string, unknown>[]) {
-                  const d = norm(c.dong), l = norm(c.lot_number), u = normUnit(c.unit_number);
-                  if (!d || !l) continue;
-                  if (u) map.set(keyExact(d, l, u), c);
-                  // 호수 미지정 fallback은 대표 소유주 번호(phone/contact_owner)가 있는 행을 우선 저장
-                  const anyKey = keyAny(d, l);
-                  const current = map.get(anyKey);
-                  const hasOwnerPhone = !!(cleanPhone(c.contact_owner) || cleanPhone(c.phone));
-                  const currentHasOwnerPhone = !!(current && (cleanPhone(current.contact_owner) || cleanPhone(current.phone)));
-                  if (!current || (!currentHasOwnerPhone && hasOwnerPhone) || !u) map.set(anyKey, c);
-                }
-                mapped.forEach((p, i) => {
-                  const r = rows[i];
-                  const d = norm(r.dong), l = norm(r.lot_number), u = normUnit(r.unit_number);
-                  if (!d || !l) return;
-                  const hit = (u && map.get(keyExact(d, l, u))) || map.get(keyAny(d, l));
-                  if (!hit) return;
-                  const ownerPhone = cleanPhone(hit.contact_owner) || cleanPhone(hit.phone);
-                  const managerPhone = cleanPhone(hit.contact_manager);
-                  const brokerPhone = cleanPhone(hit.contact_broker);
-                  if (ownerPhone) p.contactOwner = ownerPhone;
-                  if (managerPhone) p.contactManager = managerPhone;
-                  if (brokerPhone) p.contact = brokerPhone;
-                  // EXTRA_OWNERS:[...] → contactOwner2
-                  if (!p.contactOwner2 && typeof hit.memo === "string") {
-                    const m = hit.memo.match(/EXTRA_OWNERS:\[([^\]]+)\]/);
-                    if (m) {
-                      const first = m[1].split(",").map((s) => s.trim()).filter(Boolean)[0];
-                      if (first) p.contactOwner2 = first;
-                    }
-                  }
-                });
-              }
-            }
-          } catch (e) {
-            console.warn("[useDBProperties] cheongju_contacts merge failed", e);
-          }
-
+          const mapped = (data as unknown as Record<string, unknown>[]).map((row, idx) =>
+            dbToMapProperty(row, idx)
+          );
           cache.set(cacheKey, mapped);
           setProperties(mapped);
         }
