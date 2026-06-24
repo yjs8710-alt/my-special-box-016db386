@@ -340,20 +340,26 @@ const NotificationsPage = () => {
                   <div className="flex items-center gap-2 pt-1">
                     {detail.property_id && (
                       <button
-                        onClick={() => {
-                          setDetail(null);
+                        onClick={async () => {
                           const isStaff = !!user?.isAdmin || (user?.memberType !== "일반회원" && user?.memberType !== "게스트");
-                          if (isStaff) {
-                            navigate(`/?propertyId=${detail.property_id}`);
-                          } else {
+                          if (!isStaff) {
+                            setDetail(null);
                             navigate(`/share/${detail.property_id}`);
+                            return;
                           }
+                          const { data } = await supabase
+                            .from("properties")
+                            .select("id, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name, reg_no")
+                            .eq("id", detail.property_id)
+                            .maybeSingle();
+                          if (data) setPropPeek({ ...data, owner_phone: detail.owner_phone });
                         }}
                         className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-card border border-border hover:bg-muted"
                       >
                         <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
                       </button>
                     )}
+
 
                     {detail.owner_phone ? (
                       <a
