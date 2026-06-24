@@ -9,6 +9,7 @@ import kakaoTalkIcon from "@/assets/kakao-talk-icon-v2-20260427.png";
 import PublicPropertyView from "@/components/PublicPropertyView";
 import { sharePropertyToKakao } from "@/lib/kakaoShare";
 import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
+import InquiryChatPanel from "@/components/InquiryChatPanel";
 
 // ===== 협력 부동산 (하드코딩) =====
 export const PARTNER_AGENCY = {
