@@ -156,10 +156,9 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </nav>
             )}
 
-            {/* 우측 액션 (홈에서는 숨김) */}
-            {!isHome && (
-            <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
-              {!isGuest && isAuthorized && (
+            {/* 채팅문의 - 홈 포함 모든 페이지에서 표시 (일반회원/중개사) */}
+            {!isGuest && isAuthorized && (
+              <div className={`hidden md:flex items-center ${isHome ? "ml-auto" : ""}`}>
                 <button
                   onClick={() => window.dispatchEvent(new Event("open-chat-inquiry"))}
                   className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
@@ -169,8 +168,14 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
                   <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
                   채팅문의
                 </button>
-              )}
+              </div>
+            )}
+
+            {/* 우측 액션 (홈에서는 숨김) */}
+            {!isHome && (
+            <div className="hidden md:flex items-center gap-1 ml-auto flex-shrink-0">
               {isAuthorized && <NotificationBell variant="desktop" />}
+
 
               {isAuthorized ? (
                 <>

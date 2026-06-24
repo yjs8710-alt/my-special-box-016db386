@@ -1721,9 +1721,11 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
             </button>
             <button
               onClick={onClose}
-              className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors"
+              aria-label="닫기"
+              title="닫기"
+              className="w-9 h-9 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center shadow-lg ring-2 ring-white/70 transition-colors"
             >
-              <X className="w-3.5 h-3.5 text-white" />
+              <X className="w-5 h-5 text-white" strokeWidth={3} />
             </button>
           </div>
 
