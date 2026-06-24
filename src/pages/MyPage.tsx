@@ -254,6 +254,7 @@ const MyPage = () => {
   }
 
   const isRepresentative = profile?.member_type === "대표중개사";
+  const tabCount = (isRepresentative ? 4 : 3) + (isGeneralMember ? 1 : 0);
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(var(--background))" }}>
@@ -274,27 +275,34 @@ const MyPage = () => {
         </div>
 
         <Tabs defaultValue="info" className="space-y-4">
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: isRepresentative ? "repeat(4, 1fr)" : "repeat(3, 1fr)" }}>
-            <TabsTrigger value="info" className="text-xs gap-1">
-              <User className="w-3.5 h-3.5" /> 내 정보
+          <TabsList className="grid w-full h-auto" style={{ gridTemplateColumns: `repeat(${tabCount}, 1fr)` }}>
+            <TabsTrigger value="info" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+              <User className="w-4 h-4" /> 내 정보
             </TabsTrigger>
-            <TabsTrigger value="password" className="text-xs gap-1">
-              <Lock className="w-3.5 h-3.5" /> 비밀번호
+            <TabsTrigger value="password" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+              <Lock className="w-4 h-4" /> 비밀번호
             </TabsTrigger>
-            <TabsTrigger value="inquiries" className="text-xs gap-1 relative">
-              <MessageCircle className="w-3.5 h-3.5" /> 문의내역
+            <TabsTrigger value="inquiries" className="text-sm md:text-base font-bold gap-1.5 py-2.5 relative">
+              <MessageCircle className="w-4 h-4" /> 문의내역
               {inquiries.filter((i) => !i.is_read).length > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 rounded-full text-[9px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground">
                   {inquiries.filter((i) => !i.is_read).length}
                 </span>
               )}
             </TabsTrigger>
+            {isGeneralMember && (
+              <TabsTrigger value="favorites" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+                <Heart className="w-4 h-4" /> 관심목록
+              </TabsTrigger>
+            )}
             {isRepresentative && (
-              <TabsTrigger value="members" className="text-xs gap-1">
-                <Users className="w-3.5 h-3.5" /> 회원관리
+              <TabsTrigger value="members" className="text-sm md:text-base font-bold gap-1.5 py-2.5">
+                <Users className="w-4 h-4" /> 회원관리
               </TabsTrigger>
             )}
           </TabsList>
+
+
 
           {/* ─── 내 정보 ─── */}
           <TabsContent value="info" className="space-y-4">
