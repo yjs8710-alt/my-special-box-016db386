@@ -147,7 +147,7 @@ const NotificationsPage = () => {
     }
     setDetail(null);
     await openChatFromConversation(cid as string);
-  }, []);
+  }, [openChatFromConversation]);
 
   // 알림 링크 클릭 시 처리(URL 쿼리)
   useEffect(() => {
