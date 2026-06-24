@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { Phone, MessageCircle, Search, Check, Trash2, User, Hash, Clock, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Phone, MessageCircle, Search, Check, Trash2, User, Hash, Clock, Building2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -8,6 +9,7 @@ type Inquiry = {
   property_id: string | null;
   property_reg_no: string | null;
   agent_user_id: string | null;
+  user_id: string | null;
   name: string;
   phone: string;
   message: string | null;
@@ -16,12 +18,16 @@ type Inquiry = {
 };
 
 type AgentInfo = { user_id: string; name: string; phone: string | null; company: string | null };
+type PropInfo = { id: string; address: string | null; building_name: string | null; unit_number: string | null; reg_no: string | null };
 
 const AdminGuestInquiriesPanel = () => {
+  const navigate = useNavigate();
   const [items, setItems] = useState<Inquiry[]>([]);
   const [agents, setAgents] = useState<Record<string, AgentInfo>>({});
+  const [props, setProps] = useState<Record<string, PropInfo>>({});
   const [filter, setFilter] = useState("");
   const [agentFilter, setAgentFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "guest" | "member">("all");
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -48,8 +54,19 @@ const AdminGuestInquiriesPanel = () => {
       (ap ?? []).forEach((a: any) => { map[a.user_id] = a; });
       setAgents(map);
     }
+    const propIds = Array.from(new Set(list.map((i) => i.property_id).filter(Boolean))) as string[];
+    if (propIds.length) {
+      const { data: pp } = await supabase
+        .from("properties")
+        .select("id, address, building_name, unit_number, reg_no")
+        .in("id", propIds);
+      const pmap: Record<string, PropInfo> = {};
+      (pp ?? []).forEach((p: any) => { pmap[p.id] = p; });
+      setProps(pmap);
+    }
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, []);
 
@@ -65,6 +82,8 @@ const AdminGuestInquiriesPanel = () => {
     const q = filter.trim().toLowerCase();
     const filtered = items.filter((i) => {
       if (agentFilter !== "all" && (i.agent_user_id ?? "_none") !== agentFilter) return false;
+      if (sourceFilter === "guest" && i.user_id) return false;
+      if (sourceFilter === "member" && !i.user_id) return false;
       if (!q) return true;
       return (
         (i.name ?? "").toLowerCase().includes(q) ||
@@ -80,7 +99,8 @@ const AdminGuestInquiriesPanel = () => {
       map.get(key)!.push(i);
     });
     return Array.from(map.entries());
-  }, [items, filter, agentFilter]);
+  }, [items, filter, agentFilter, sourceFilter]);
+
 
   const markRead = async (id: string, is_read: boolean) => {
     const { error } = await supabase.from("guest_inquiries").update({ is_read }).eq("id", id);
@@ -114,13 +134,23 @@ const AdminGuestInquiriesPanel = () => {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-extrabold text-foreground">게스트 문의 내역</h2>
+          <h2 className="text-xl font-extrabold text-foreground">문의 내역</h2>
           <p className="text-sm text-muted-foreground mt-1">
             전체 <span className="font-bold text-foreground">{items.length}</span>건 · 미확인{" "}
             <span className="text-destructive font-extrabold">{totalUnread}</span>건
+            <span className="ml-2 text-xs">(게스트 {items.filter(i=>!i.user_id).length} · 회원 {items.filter(i=>!!i.user_id).length})</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value as any)}
+            className="text-sm px-3 py-2 rounded-lg bg-card text-foreground border border-border font-medium"
+          >
+            <option value="all">전체</option>
+            <option value="guest">게스트</option>
+            <option value="member">회원/중개사</option>
+          </select>
           <select
             value={agentFilter}
             onChange={(e) => setAgentFilter(e.target.value)}
@@ -132,6 +162,7 @@ const AdminGuestInquiriesPanel = () => {
               <option key={a.user_id} value={a.user_id}>{a.name}{a.company ? ` (${a.company})` : ""}</option>
             ))}
           </select>
+
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -191,7 +222,7 @@ const AdminGuestInquiriesPanel = () => {
                 </div>
 
                 {/* Table header (desktop) */}
-                <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-bold text-muted-foreground">
+                <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_120px] gap-3 px-5 py-2.5 bg-muted/40 border-b border-border text-xs font-bold text-muted-foreground">
                   <div>매물번호</div>
                   <div>문의자</div>
                   <div>연락처</div>
@@ -210,10 +241,13 @@ const AdminGuestInquiriesPanel = () => {
                       }`}
                     >
                       {/* Desktop row */}
-                      <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 items-center">
-                        <div className="flex items-center gap-1.5">
+                      <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_120px] gap-3 items-center">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {!i.is_read && (
                             <span className="w-2 h-2 rounded-full bg-destructive" title="미확인" />
+                          )}
+                          {i.user_id && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">회원</span>
                           )}
                           {i.property_reg_no ? (
                             <span className="inline-flex items-center gap-1 text-xs font-mono font-extrabold px-2 py-1 rounded-md bg-primary/10 text-primary">
@@ -223,9 +257,20 @@ const AdminGuestInquiriesPanel = () => {
                             <span className="text-xs text-muted-foreground">-</span>
                           )}
                         </div>
-                        <div className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-muted-foreground" />
-                          {i.name}
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-muted-foreground" />
+                            {i.name}
+                          </div>
+                          {i.property_id && props[i.property_id] && (
+                            <div className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
+                              <Building2 className="w-3 h-3 shrink-0" />
+                              <span className="truncate">
+                                {props[i.property_id].building_name || ""} {props[i.property_id].address || ""}
+                                {props[i.property_id].unit_number ? ` ${props[i.property_id].unit_number}호` : ""}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <a
                           href={`tel:${i.phone.replace(/[^0-9]/g, "")}`}
@@ -244,6 +289,15 @@ const AdminGuestInquiriesPanel = () => {
                           {new Date(i.created_at).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
                         </div>
                         <div className="flex items-center justify-end gap-1">
+                          {i.property_id && (
+                            <button
+                              onClick={() => navigate(`/?propertyId=${i.property_id}`)}
+                              className="p-2 rounded-lg bg-card border border-border text-foreground hover:bg-muted"
+                              title="매물 상세보기"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => markRead(i.id, !i.is_read)}
                             className={`p-2 rounded-lg transition-colors ${
@@ -263,6 +317,7 @@ const AdminGuestInquiriesPanel = () => {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+
                       </div>
 
                       {/* Mobile row */}

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Send, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Send, MessageCircle, Building2, ExternalLink, Hash } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Conv = {
@@ -9,17 +10,24 @@ type Conv = {
   last_message: string;
   last_message_at: string;
   unread_for_admin: number;
+  property_id?: string | null;
+  agent_user_id?: string | null;
 };
+
+type PropInfo = { id: string; address: string | null; building_name: string | null; unit_number: string | null; reg_no: string | null };
 
 type Msg = {
   id: string;
-  sender_role: "user" | "admin";
+  sender_role: "user" | "admin" | "agent";
   content: string;
   created_at: string;
 };
 
+
 const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<Conv[]>([]);
+  const [props, setProps] = useState<Record<string, PropInfo>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -29,10 +37,22 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
   const loadConversations = useCallback(async () => {
     const { data } = await supabase
       .from("chat_conversations")
-      .select("id, user_id, user_name, last_message, last_message_at, unread_for_admin")
+      .select("id, user_id, user_name, last_message, last_message_at, unread_for_admin, property_id, agent_user_id")
       .order("last_message_at", { ascending: false });
-    setConversations((data ?? []) as Conv[]);
+    const list = (data ?? []) as Conv[];
+    setConversations(list);
+    const propIds = Array.from(new Set(list.map((c) => c.property_id).filter(Boolean))) as string[];
+    if (propIds.length) {
+      const { data: pp } = await supabase
+        .from("properties")
+        .select("id, address, building_name, unit_number, reg_no")
+        .in("id", propIds);
+      const pmap: Record<string, PropInfo> = {};
+      (pp ?? []).forEach((p: any) => { pmap[p.id] = p; });
+      setProps(pmap);
+    }
   }, []);
+
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
@@ -112,25 +132,37 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
             {conversations.length === 0 && (
               <div className="text-center text-xs text-muted-foreground py-8">문의가 없습니다.</div>
             )}
-            {conversations.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setActiveId(c.id)}
-                className={`w-full text-left px-3 py-3 border-b border-border last:border-0 transition-colors ${
-                  activeId === c.id ? "bg-muted/50" : "hover:bg-muted/30"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold text-foreground truncate">{c.user_name || "사용자"}</span>
-                  {c.unread_for_admin > 0 && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-destructive-foreground bg-destructive shrink-0">
-                      {c.unread_for_admin}
-                    </span>
+            {conversations.map((c) => {
+              const p = c.property_id ? props[c.property_id] : null;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => setActiveId(c.id)}
+                  className={`w-full text-left px-3 py-3 border-b border-border last:border-0 transition-colors ${
+                    activeId === c.id ? "bg-muted/50" : "hover:bg-muted/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-bold text-foreground truncate">{c.user_name || "사용자"}</span>
+                    {c.unread_for_admin > 0 && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-destructive-foreground bg-destructive shrink-0">
+                        {c.unread_for_admin}
+                      </span>
+                    )}
+                  </div>
+                  {p && (
+                    <div className="text-[11px] text-primary font-semibold truncate mt-1 flex items-center gap-1">
+                      {p.reg_no && <span className="font-mono">NO.{p.reg_no}</span>}
+                      <Building2 className="w-3 h-3 shrink-0" />
+                      <span className="truncate">
+                        {p.building_name || p.address}{p.unit_number ? ` ${p.unit_number}호` : ""}
+                      </span>
+                    </div>
                   )}
-                </div>
-                <div className="text-xs text-muted-foreground truncate mt-0.5">{c.last_message || "(메시지 없음)"}</div>
-              </button>
-            ))}
+                  <div className="text-xs text-muted-foreground truncate mt-0.5">{c.last_message || "(메시지 없음)"}</div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -142,9 +174,32 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
             </div>
           ) : (
             <>
-              <div className="px-4 py-3 border-b border-border">
-                <div className="text-sm font-bold text-foreground">{active.user_name}</div>
+              <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-2 flex-wrap">
+                <div className="min-w-0">
+                  <div className="text-sm font-bold text-foreground truncate">{active.user_name}</div>
+                  {active.property_id && props[active.property_id] && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      {props[active.property_id].reg_no && (
+                        <span className="inline-flex items-center gap-0.5 font-mono font-bold text-primary"><Hash className="w-3 h-3" />{props[active.property_id].reg_no}</span>
+                      )}
+                      <Building2 className="w-3 h-3" />
+                      <span className="truncate">
+                        {props[active.property_id].building_name || ""} {props[active.property_id].address || ""}
+                        {props[active.property_id].unit_number ? ` ${props[active.property_id].unit_number}호` : ""}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                {active.property_id && (
+                  <button
+                    onClick={() => navigate(`/?propertyId=${active.property_id}`)}
+                    className="text-xs font-bold px-3 py-1.5 rounded-lg bg-card border border-border hover:bg-muted inline-flex items-center gap-1 shrink-0"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
+                  </button>
+                )}
               </div>
+
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2 bg-muted/10">
                 {messages.map((m) => (
                   <div key={m.id} className={`flex ${m.sender_role === "admin" ? "justify-end" : "justify-start"}`}>

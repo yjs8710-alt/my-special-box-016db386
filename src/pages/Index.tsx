@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, forwardRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
@@ -9,12 +10,14 @@ import { useDBProperties } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
-  
+
   const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
+
 
   const allProperties = useMemo(() => {
     const dbIds = new Set(dbProperties.map((p) => p.id));
@@ -37,6 +40,20 @@ const Index = () => {
     );
 
   const selected = allProperties.find((p) => p.id === selectedId) ?? null;
+
+  // ?propertyId=<dbId> 쿼리 → 자동 상세보기 (관리자/중개사가 알림 등에서 진입)
+  useEffect(() => {
+    const dbId = searchParams.get("propertyId");
+    if (!dbId || allProperties.length === 0) return;
+    const target = allProperties.find((p) => p.dbId === dbId);
+    if (target) {
+      setSelectedId(target.id);
+      const next = new URLSearchParams(searchParams);
+      next.delete("propertyId");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, allProperties, setSearchParams]);
+
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
