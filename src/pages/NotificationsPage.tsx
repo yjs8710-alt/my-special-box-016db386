@@ -34,6 +34,7 @@ type InquiryDetail = {
   property_reg_no: string | null;
   property_dong?: string | null;
   property_lot?: string | null;
+  user_id?: string | null;
 };
 
 const NotificationsPage = () => {
@@ -109,31 +110,44 @@ const NotificationsPage = () => {
   const openInquiryDetail = useCallback(async (id: string) => {
     const { data } = await supabase
       .from("guest_inquiries")
-      .select("id, name, phone, message, created_at, property_reg_no, property_id")
+      .select("id, name, phone, message, created_at, property_reg_no, property_id, user_id" as any)
       .eq("id", id)
       .maybeSingle();
     if (!data) return;
+    const d: any = data;
     let dong: string | null = null, lot: string | null = null;
-    if ((data as any).property_id) {
+    if (d.property_id) {
       const { data: prop } = await supabase
         .from("properties")
         .select("dong, lot_number")
-        .eq("id", (data as any).property_id)
+        .eq("id", d.property_id)
         .maybeSingle();
       dong = prop?.dong ?? null;
       lot = prop?.lot_number ?? null;
     }
     setDetail({
-      id: data.id,
-      name: data.name,
-      phone: data.phone,
-      message: data.message,
-      created_at: data.created_at,
-      property_reg_no: data.property_reg_no,
+      id: d.id,
+      name: d.name,
+      phone: d.phone,
+      message: d.message,
+      created_at: d.created_at,
+      property_reg_no: d.property_reg_no,
       property_dong: dong,
       property_lot: lot,
+      user_id: d.user_id ?? null,
     });
   }, []);
+
+  const startChatFromInquiry = useCallback(async (inq: InquiryDetail) => {
+    const { data: cid, error } = await (supabase as any).rpc("start_chat_from_inquiry", { _inquiry_id: inq.id });
+    if (error || !cid) {
+      console.error("[start_chat_from_inquiry]", error);
+      alert("이 문의는 비회원 게스트 문의입니다.\n채팅 대신 전화로 연락해주세요.");
+      return;
+    }
+    setDetail(null);
+    await openChatFromConversation(cid as string);
+  }, [openChatFromConversation]);
 
   // 알림 링크 클릭 시 처리(URL 쿼리)
   useEffect(() => {
@@ -303,12 +317,27 @@ const NotificationsPage = () => {
               <p className="text-[11px] text-muted-foreground text-right">
                 {new Date(detail.created_at).toLocaleString("ko-KR")}
               </p>
-              <a
-                href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
-              >
-                <Phone className="w-4 h-4" /> 바로 전화 걸기
-              </a>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
+                >
+                  <Phone className="w-4 h-4" /> 전화 걸기
+                </a>
+                <button
+                  onClick={() => startChatFromInquiry(detail)}
+                  disabled={!detail.user_id}
+                  title={detail.user_id ? "" : "비회원 게스트는 채팅이 불가합니다"}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg font-bold text-sm bg-accent text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <MessageCircle className="w-4 h-4" /> 채팅 답변
+                </button>
+              </div>
+              {!detail.user_id && (
+                <p className="text-[11px] text-muted-foreground text-center">
+                  비회원 게스트 문의는 전화로만 답변 가능합니다
+                </p>
+              )}
             </div>
           </div>
         </div>

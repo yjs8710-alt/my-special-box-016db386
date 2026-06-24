@@ -338,6 +338,7 @@ export type Database = {
           phone: string
           property_id: string | null
           property_reg_no: string | null
+          user_id: string | null
         }
         Insert: {
           agent_user_id?: string | null
@@ -349,6 +350,7 @@ export type Database = {
           phone: string
           property_id?: string | null
           property_reg_no?: string | null
+          user_id?: string | null
         }
         Update: {
           agent_user_id?: string | null
@@ -360,6 +362,7 @@ export type Database = {
           phone?: string
           property_id?: string | null
           property_reg_no?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -924,6 +927,10 @@ export type Database = {
         Returns: boolean
       }
       is_phone_registered: { Args: { _phone: string }; Returns: boolean }
+      start_chat_from_inquiry: {
+        Args: { _inquiry_id: string }
+        Returns: string
+      }
       update_property_images: {
         Args: { _images: string[]; _property_id: string }
         Returns: boolean

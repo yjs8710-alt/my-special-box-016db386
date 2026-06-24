@@ -105,14 +105,16 @@ export const InquiryModal = ({
     if (phoneDigits.length < 9) return toast.error("연락처를 정확히 입력해주세요");
     setSubmitting(true);
     try {
+      const { data: sess } = await supabase.auth.getUser();
       const { error } = await supabase.from("guest_inquiries").insert({
         property_id: propertyDbId || null,
         property_reg_no: propertyRegNo || null,
         agent_user_id: agentUserId || null,
+        user_id: sess?.user?.id ?? null,
         name: trimmedName,
         phone: phone.trim(),
         message: message.trim() || (propertyTitle ? `[${propertyTitle}] 문의드립니다` : "매물 문의드립니다"),
-      });
+      } as any);
       if (error) throw error;
       toast.success("문의가 접수되었습니다. 담당자가 연락드릴 예정입니다.");
       if (!isMember) { setName(""); setPhone(""); }
