@@ -43,9 +43,14 @@ export const useExitConfirm = (enabled: boolean = true) => {
       const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
       if (!isMobile) return;
 
-      window.history.pushState({ exitGuard: true }, "");
+      // 홈에 있을 때만 가드 push
+      if (window.location.pathname === "/") {
+        window.history.pushState({ exitGuard: true }, "");
+      }
       const onPopState = () => {
         if (hasOpenOverlay()) return;
+        // 홈이 아닌 곳에서는 정상적인 뒤로가기로 동작 (종료 모달 X)
+        if (window.location.pathname !== "/") return;
         setOpen(true);
         window.history.pushState({ exitGuard: true }, "");
       };
