@@ -172,69 +172,87 @@ export const InquiryModal = ({
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
           </div>
         )}
-        {isMember && (
-          <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
-            회원정보로 자동 입력되었습니다
-          </div>
-        )}
-        <div>
-          <label className="text-xs font-semibold text-foreground">이름 <span className="text-destructive">*</span></label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={50}
-            readOnly={isMember}
-            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
-            placeholder="홍길동"
-          />
-        </div>
-        <div>
-          <label className="text-xs font-semibold text-foreground">연락처 <span className="text-destructive">*</span></label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(formatPhone(e.target.value))}
-            readOnly={isMember}
-            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
-            placeholder="010-0000-0000"
-          />
-          <p className="text-[10px] text-muted-foreground mt-1">담당자가 입력하신 번호로 연락드립니다</p>
-        </div>
 
-        <div>
-          <label className="text-xs font-semibold text-foreground">문의 내용</label>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            maxLength={1000}
-            rows={3}
-            className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-            placeholder="문의하실 내용을 입력해주세요"
-          />
-        </div>
-        <button
-          onClick={submit}
-          disabled={submitting}
-          className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm disabled:opacity-60"
-        >
-          {submitting ? "전송 중..." : "문의 보내기"}
-        </button>
-        {onOpenPartner && (
-          <button
-            onClick={() => { onClose(); onOpenPartner(); }}
-            className="w-full py-2 rounded-lg border border-primary text-primary font-semibold text-sm flex items-center justify-center gap-1"
-          >
-            <Building2 className="w-3.5 h-3.5" /> 협력 부동산 정보 보기
-          </button>
+        {chatInquiryId ? (
+          <>
+            <div className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+              담당자와 실시간 채팅이 시작되었습니다. 답변이 오면 이 창에 표시됩니다.
+            </div>
+            <InquiryChatPanel inquiryId={chatInquiryId} viewerRole="user" guestName={name} />
+            <button
+              onClick={onClose}
+              className="w-full py-2 rounded-lg bg-muted text-foreground font-semibold text-sm"
+            >
+              채팅 닫기
+            </button>
+          </>
+        ) : (
+          <>
+            {isMember && (
+              <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
+                회원정보로 자동 입력되었습니다
+              </div>
+            )}
+            <div>
+              <label className="text-xs font-semibold text-foreground">이름 <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={50}
+                readOnly={isMember}
+                className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
+                placeholder="홍길동"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground">연락처 <span className="text-destructive">*</span></label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(formatPhone(e.target.value))}
+                readOnly={isMember}
+                className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
+                placeholder="010-0000-0000"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">담당자가 입력하신 번호로 연락드립니다</p>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-foreground">문의 내용</label>
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                placeholder="문의하실 내용을 입력해주세요"
+              />
+            </div>
+            <button
+              onClick={submit}
+              disabled={submitting}
+              className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm disabled:opacity-60"
+            >
+              {submitting ? "전송 중..." : "채팅으로 문의 시작"}
+            </button>
+            {onOpenPartner && (
+              <button
+                onClick={() => { onClose(); onOpenPartner(); }}
+                className="w-full py-2 rounded-lg border border-primary text-primary font-semibold text-sm flex items-center justify-center gap-1"
+              >
+                <Building2 className="w-3.5 h-3.5" /> 협력 부동산 정보 보기
+              </button>
+            )}
+            <div className="mt-3 p-3 rounded-lg bg-muted/60 text-[11px] text-muted-foreground leading-relaxed space-y-1">
+              <p className="font-bold text-foreground">※ 중요 안내</p>
+              <p>집다는 중개대상물에 대한 정보 제공 및 협력 공인중개사 연결 서비스만을 제공합니다.</p>
+              <p>집다는 중개행위를 수행하지 않으며, 매물 상담, 현장 안내, 거래조건 조율 및 계약 체결 등 모든 중개행위는 협력 공인중개사가 직접 수행합니다.</p>
+              <p>집다는 거래의 당사자 또는 중개계약의 주체가 아니며, 이용자는 문의 접수 시 협력 공인중개사를 통해 상담 및 거래를 진행하게 됩니다.</p>
+              <p>상세주소는 임대인의 요청에 따라 공개되지 않으며, 실제 거래 가능 여부 및 최종 거래 조건은 협력 공인중개사를 통해 반드시 확인하시기 바랍니다.</p>
+            </div>
+          </>
         )}
-        <div className="mt-3 p-3 rounded-lg bg-muted/60 text-[11px] text-muted-foreground leading-relaxed space-y-1">
-          <p className="font-bold text-foreground">※ 중요 안내</p>
-          <p>집다는 중개대상물에 대한 정보 제공 및 협력 공인중개사 연결 서비스만을 제공합니다.</p>
-          <p>집다는 중개행위를 수행하지 않으며, 매물 상담, 현장 안내, 거래조건 조율 및 계약 체결 등 모든 중개행위는 협력 공인중개사가 직접 수행합니다.</p>
-          <p>집다는 거래의 당사자 또는 중개계약의 주체가 아니며, 이용자는 문의 접수 시 협력 공인중개사를 통해 상담 및 거래를 진행하게 됩니다.</p>
-          <p>상세주소는 임대인의 요청에 따라 공개되지 않으며, 실제 거래 가능 여부 및 최종 거래 조건은 협력 공인중개사를 통해 반드시 확인하시기 바랍니다.</p>
-        </div>
       </div>
     </Overlay>
   );
