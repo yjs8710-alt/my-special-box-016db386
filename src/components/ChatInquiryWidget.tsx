@@ -52,7 +52,13 @@ const ChatInquiryWidget = () => {
       .eq("user_id", user.userId);
     query = agentId ? query.eq("agent_user_id", agentId) : query.is("agent_user_id", null);
     query = propId ? query.eq("property_id", propId) : query.is("property_id", null);
-    const { data: existing } = await query.maybeSingle();
+    const { data: existingList, error: findErr } = await query.order("created_at", { ascending: false }).limit(1);
+    if (findErr) {
+      console.error("[ChatInquiry] find conv", findErr);
+      toast.error("대화를 불러올 수 없습니다");
+      return null;
+    }
+    const existing = existingList?.[0];
 
     if (existing) {
       setConversationId(existing.id);
@@ -60,29 +66,48 @@ const ChatInquiryWidget = () => {
       return existing.id;
     }
 
-    const { data: prof } = await supabase
-      .from("agent_profiles")
-      .select("name, agency_name")
-      .eq("user_id", user.userId)
-      .maybeSingle();
-    const name = prof ? `${prof.name}${prof.agency_name ? ` (${prof.agency_name})` : ""}` : "사용자";
+    let displayName = "사용자";
+    try {
+      const { data: prof } = await supabase
+        .from("agent_profiles")
+        .select("name, agency_name")
+        .eq("user_id", user.userId)
+        .maybeSingle();
+      if (prof?.name) {
+        displayName = `${prof.name}${prof.agency_name ? ` (${prof.agency_name})` : ""}`;
+      }
+    } catch (e) {
+      console.warn("[ChatInquiry] profile fetch", e);
+    }
     const { data: created, error } = await supabase
       .from("chat_conversations")
       .insert({
         user_id: user.userId,
-        user_name: name,
+        user_name: displayName,
         agent_user_id: agentId,
         property_id: propId,
-      })
+        last_message: "",
+        last_message_at: new Date().toISOString(),
+      } as any)
       .select("id")
       .single();
     if (error) {
+      // 동시성으로 인한 유니크 충돌이면 재조회
+      if ((error as any).code === "23505") {
+        const { data: again } = await query.order("created_at", { ascending: false }).limit(1);
+        if (again?.[0]) {
+          setConversationId(again[0].id);
+          return again[0].id;
+        }
+      }
       console.error("[ChatInquiry] create conv", error);
+      toast.error(`채팅 시작 실패: ${error.message || "권한을 확인해주세요"}`);
       return null;
     }
     setConversationId(created.id);
     return created.id;
   }, [user]);
+
 
   // 헤더 또는 매물카드/알림에서 발생하는 전역 이벤트 수신
   useEffect(() => {
