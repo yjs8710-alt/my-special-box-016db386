@@ -335,7 +335,6 @@ function RevealPhone({ label, phone, itemKey, activeKey, onActivate }: RevealPho
 /* ─── 연락처 그룹 (상호 배타적 노출) ─── */
 function ContactGroup({ property }: { property: MapProperty }) {
   const isGuest = useIsGuest();
-  if (isGuest) return null;
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const groupRef = useRef<HTMLDivElement>(null);
 
@@ -358,7 +357,7 @@ function ContactGroup({ property }: { property: MapProperty }) {
     };
   }, [activeKey]);
 
-  if (!hasOwner && !hasManager && !hasTenant) return null;
+  if (isGuest || (!hasOwner && !hasManager && !hasTenant)) return null;
 
   return (
     <>

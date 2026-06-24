@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "
 import { Suspense, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import Home from "./pages/Home";
+import Index from "./pages/Index";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -150,6 +151,12 @@ const LegacyPropertyRedirect = () => {
   return <Navigate to={`/share/${id ?? ""}${location.search}`} replace />;
 };
 
+const HomeOrPropertyDetail = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  return params.get("propertyId") ? <Index /> : <Home />;
+};
+
 const BOMNAL_LICENSE_NO = "43112-2024-00034";
 
 const useGlobalProtect = () => {
@@ -252,7 +259,7 @@ const App = () => {
             <Route path="/share/:id" element={<PublicProperty />} />
 
             {/* 첫 화면은 eager */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<HomeOrPropertyDetail />} />
             <Route path="/company" element={<CompanyIntroduction />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
