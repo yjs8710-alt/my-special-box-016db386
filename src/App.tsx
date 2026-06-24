@@ -63,6 +63,9 @@ const GlobalGuestInquiry = () => {
       <PartnerAgencyModal
         open={partner.open}
         onClose={() => setPartner({ open: false })}
+        agentUserId={partner.detail?.agentUserId}
+        propertyId={partner.detail?.propertyDbId}
+        propertyTitle={partner.detail?.propertyTitle}
         onChat={() => {
           setState({ open: true, detail: partner.detail });
           setPartner({ open: false });
