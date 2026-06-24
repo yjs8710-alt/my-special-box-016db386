@@ -182,8 +182,7 @@ export const InquiryModal = ({
       if (error) throw error;
 
       if (isMember && userId) {
-        await openMemberChat(userId, firstMsg);
-        toast.success("문의가 접수되었습니다. 채팅창을 열었습니다.");
+        toast.success("문의가 접수되었습니다. 담당자가 답변드릴 예정입니다.");
         setMessage("");
         onClose();
       } else {
@@ -224,7 +223,7 @@ export const InquiryModal = ({
         <>
             {isMember && (
               <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
-                회원정보로 자동 입력되었습니다. 접수 후 담당자 채팅창이 열립니다.
+                회원정보로 자동 입력되었습니다.
               </div>
             )}
             <div>
@@ -268,7 +267,7 @@ export const InquiryModal = ({
               disabled={submitting}
               className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm disabled:opacity-60"
             >
-              {submitting ? "전송 중..." : isMember ? "문의 접수 후 채팅 시작" : "문의 접수하기"}
+              {submitting ? "전송 중..." : "문의 접수하기"}
             </button>
             {onOpenPartner && (
               <button

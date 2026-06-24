@@ -636,14 +636,12 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   const { favorites, toggleFavorite, clearFavorites } = useFavorites();
   const navigate = useNavigate();
 
-  // 로컬 스토리지에서 즐겨찾기 키 목록 가져오기 (string 변환)
+  // 관심목록 키 목록 가져오기 (string 변환)
+  const favoriteSignature = Array.from(favorites).map(String).sort().join("|");
   const keys = useMemo(() => {
-    try {
-      const raw = localStorage.getItem("jibda:favorites:v1");
-      const arr = raw ? (JSON.parse(raw) as Array<string | number>) : [];
-      return arr.map((v) => String(v));
-    } catch { return []; }
-  }, [favorites]);
+    if (!favoriteSignature) return [];
+    return favoriteSignature.split("|").filter(Boolean);
+  }, [favoriteSignature]);
 
   // MAP_PROPERTIES (mock) 매칭
   const mockItems = useMemo(
