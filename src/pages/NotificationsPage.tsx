@@ -338,7 +338,10 @@ const NotificationsPage = () => {
                   <div className="flex items-center gap-2 pt-1">
                     {detail.property_id && (
                       <button
-                        onClick={() => window.open(`/share/${detail.property_id}`, "_blank", "noopener,noreferrer")}
+                        onClick={() => {
+                          setDetail(null);
+                          navigate(`/share/${detail.property_id}`);
+                        }}
                         className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-card border border-border hover:bg-muted"
                       >
                         <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
