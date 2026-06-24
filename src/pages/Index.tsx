@@ -5,15 +5,17 @@ import MapView from "@/components/MapView";
 import MapSidebar from "@/components/MapSidebar";
 import MapSearchBar from "@/components/MapSearchBar";
 import PropertyDetailPanel from "@/components/PropertyDetailPanel";
-import { MAP_PROPERTIES } from "@/data/mapProperties";
-import { useDBProperties } from "@/hooks/useDBProperties";
+import { MAP_PROPERTIES, MapProperty } from "@/data/mapProperties";
+import { useDBProperties, dbToMapProperty } from "@/hooks/useDBProperties";
 import { useHiddenMockIds } from "@/hooks/useHiddenMockIds";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeType, setActiveType] = useState("전체");
   const [query, setQuery] = useState("");
+  const [extraProperty, setExtraProperty] = useState<MapProperty | null>(null);
 
   const { properties: dbProperties, refetch } = useDBProperties();
   const { hiddenIds: hiddenMockIds } = useHiddenMockIds();
@@ -25,13 +27,16 @@ const Index = () => {
       ...dbProperties,
       ...MAP_PROPERTIES.filter((p) => !dbIds.has(p.id) && !hiddenMockIds.has(p.id)),
     ];
+    if (extraProperty && !merged.some((p) => p.dbId === extraProperty.dbId)) {
+      merged.push(extraProperty);
+    }
     // 최근 확인일순 정렬 (확인일 없으면 등록일 fallback)
     return merged.sort((a, b) => {
       const da = a.checkedDate ?? a.registeredDate ?? "";
       const db2 = b.checkedDate ?? b.registeredDate ?? "";
       return da > db2 ? -1 : da < db2 ? 1 : 0;
     });
-  }, [dbProperties, hiddenMockIds]);
+  }, [dbProperties, hiddenMockIds, extraProperty]);
 
   const filtered = allProperties
     .filter((p) => activeType === "전체" || p.type === activeType)
@@ -44,15 +49,35 @@ const Index = () => {
   // ?propertyId=<dbId> 쿼리 → 자동 상세보기 (관리자/중개사가 알림 등에서 진입)
   useEffect(() => {
     const dbId = searchParams.get("propertyId");
-    if (!dbId || allProperties.length === 0) return;
+    if (!dbId) return;
+    if (allProperties.length === 0) return;
     const target = allProperties.find((p) => p.dbId === dbId);
     if (target) {
       setSelectedId(target.id);
       const next = new URLSearchParams(searchParams);
       next.delete("propertyId");
       setSearchParams(next, { replace: true });
+      return;
     }
+    // active 목록에 없으면(종료/비활성) 단건 조회 fallback
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", dbId)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      const mapped = dbToMapProperty(data as Record<string, unknown>, 9999);
+      setExtraProperty(mapped);
+      setSelectedId(mapped.id);
+      const next = new URLSearchParams(searchParams);
+      next.delete("propertyId");
+      setSearchParams(next, { replace: true });
+    })();
+    return () => { cancelled = true; };
   }, [searchParams, allProperties, setSearchParams]);
+
 
 
   return (
