@@ -54,9 +54,6 @@ const Index = () => {
     const target = allProperties.find((p) => p.dbId === dbId);
     if (target) {
       setSelectedId(target.id);
-      const next = new URLSearchParams(searchParams);
-      next.delete("propertyId");
-      setSearchParams(next, { replace: true });
       return;
     }
     // 없으면 (종료/비활성 포함) 단건 조회 후 임시 주입
@@ -71,12 +68,18 @@ const Index = () => {
       const mapped = dbToMapProperty(data as Record<string, unknown>, 9999);
       setExtraProperty(mapped);
       setSelectedId(mapped.id);
-      const next = new URLSearchParams(searchParams);
-      next.delete("propertyId");
-      setSearchParams(next, { replace: true });
     })();
     return () => { cancelled = true; };
   }, [searchParams, allProperties, setSearchParams]);
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    if (searchParams.has("propertyId")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("propertyId");
+      setSearchParams(next, { replace: true });
+    }
+  };
 
 
 
@@ -120,7 +123,7 @@ const Index = () => {
         {selected && (
           <PropertyDetailPanel
             property={selected}
-            onClose={() => setSelectedId(null)}
+            onClose={closeDetail}
             sameProperties={allProperties.filter(p => p.address === selected.address && p.id !== selected.id)}
           />
         )}
