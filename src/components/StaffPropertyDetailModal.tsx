@@ -118,7 +118,12 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
               {/* 기본 정보 */}
               <Section icon={HomeIcon} title="기본 정보">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  <Row label="유형" value={[data.type, data.room_type].filter(Boolean).join(" · ")} />
+                  <Row label="유형" value={(() => {
+                    const parts = Array.from(new Set([data.type, data.room_type].filter(Boolean).map((s) => String(s).trim())));
+                    // room_type이 type을 포함(또는 동일)하면 type 한 번만
+                    const deduped = parts.filter((p, i) => !parts.some((q, j) => j !== i && q !== p && q.includes(p)));
+                    return deduped.join(" · ");
+                  })()} />
                   <Row label="건물명" value={data.building_name} />
                   <Row label="층" value={data.floor} />
                 </div>
@@ -149,12 +154,19 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
                 </div>
               </Section>
 
-              {/* 특이사항 */}
-              {(data.note || data.description) && (
+              {/* 특이사항 (매물등록·수정의 description 우선) */}
+              {(data.description || data.note) && (
                 <Section icon={NotebookPen} title="특이사항">
-                  <p className="text-sm whitespace-pre-wrap text-foreground leading-relaxed">
-                    {data.note || data.description}
-                  </p>
+                  {data.description && (
+                    <p className="text-sm whitespace-pre-wrap text-foreground leading-relaxed">
+                      {data.description}
+                    </p>
+                  )}
+                  {data.note && (
+                    <p className="text-xs whitespace-pre-wrap text-muted-foreground leading-relaxed mt-2 pt-2 border-t border-border">
+                      {data.note}
+                    </p>
+                  )}
                 </Section>
               )}
 

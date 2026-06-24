@@ -106,7 +106,10 @@ const ChatPage = () => {
   }, [activeId, user?.userId, conversations]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    const el = scrollRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (nearBottom) el.scrollTo({ top: el.scrollHeight });
   }, [messages]);
 
   const active = conversations.find((c) => c.id === activeId);

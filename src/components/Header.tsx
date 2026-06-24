@@ -156,19 +156,17 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
             </nav>
             )}
 
-            {/* 채팅문의 - 홈 포함 모든 페이지에서 표시 (일반회원/중개사) */}
-            {!isGuest && isAuthorized && (
-              <div className={`hidden md:flex items-center ${isHome ? "ml-auto" : ""}`}>
+            {/* 홈에서만 채팅 아이콘을 우측으로 밀어주는 공간 */}
+            {isHome && isAuthorized && (
+              <div className="hidden md:flex items-center ml-auto">
                 <button
                   onClick={() => navigate("/chat")}
-                  className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1"
-                  style={{ color: "white" }}
+                  className="flex items-center justify-center"
                   aria-label="채팅 문의"
+                  title="채팅 문의"
                 >
-                  <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
-                  채팅문의
+                  <img src={iconChatNeon} alt="채팅문의" className="w-12 h-12 object-contain" />
                 </button>
-
               </div>
             )}
 
