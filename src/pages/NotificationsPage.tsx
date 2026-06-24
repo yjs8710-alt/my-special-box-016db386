@@ -6,7 +6,6 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { loadCheongjuContact } from "@/lib/cheongjuContacts";
-import InquiryChatPanel from "@/components/InquiryChatPanel";
 
 interface Notification {
   id: string;
@@ -393,13 +392,11 @@ const NotificationsPage = () => {
                     <MessageCircle className="w-4 h-4" /> 회원 채팅 답변
                   </button>
                 ) : (
-                  <span className="text-[11px] text-muted-foreground text-center self-center">
-                    게스트 채팅은 아래에서 답변
+                  <span className="text-[11px] text-muted-foreground text-center self-center leading-relaxed">
+                    게스트 문의는 전화로 연락해주세요
                   </span>
                 )}
               </div>
-              {/* 게스트/회원 모두 inquiry_messages 채팅 — 동일 패널로 답변 */}
-              <InquiryChatPanel inquiryId={detail.id} viewerRole="agent" guestName={detail.name} className="mt-2" />
 
             </div>
           </div>
