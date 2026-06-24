@@ -3455,34 +3455,36 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                 </button>
                 )}
                 {!isMobile && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
-                      detail: {
-                        propertyDbId: prop.dbId,
-                        propertyRegNo: prop.regNo,
-                        agentUserId: prop.registeredBy,
-                        propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
-                      },
-                    }));
-                  }}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
-                  style={{ background: "hsl(var(--primary))", color: "white" }}
-                >
-                  문의하기
-                </button>
-                {isGeneralMember && (
-                <button
-                  type="button"
-                  onClick={openMemberChat}
-                  className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap border"
-                  style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
-                >
-                  채팅문의
-                </button>
-                )}
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
+                          detail: {
+                            propertyDbId: prop.dbId,
+                            propertyRegNo: prop.regNo,
+                            agentUserId: prop.registeredBy,
+                            propertyTitle: addressToDong(prop.address) + (prop.type ? ` ${prop.type}` : ""),
+                          },
+                        }));
+                      }}
+                      className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+                      style={{ background: "hsl(var(--primary))", color: "white" }}
+                    >
+                      문의하기
+                    </button>
+                    {isGeneralMember && (
+                      <button
+                        type="button"
+                        onClick={openMemberChat}
+                        className="flex-shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold transition-all hover:opacity-90 whitespace-nowrap border"
+                        style={{ background: "white", color: "hsl(var(--primary))", borderColor: "hsl(var(--primary)/0.5)" }}
+                      >
+                        채팅문의
+                      </button>
+                    )}
+                  </>
                 )}
               </>
             )}
