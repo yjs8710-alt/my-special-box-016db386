@@ -64,7 +64,8 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
   const location = useLocation();
   const { isAuthorized, user, logout } = useAuth();
   const isGuest = useIsGuest();
-  const NAV_ITEMS = isGuest ? NAV_ITEMS_BASE : NAV_ITEMS_AUTH;
+  const isGeneralMember = user?.memberType === "일반회원";
+  const NAV_ITEMS = isGuest || isGeneralMember ? NAV_ITEMS_BASE : NAV_ITEMS_AUTH;
 
   const openRegister = () => {
     window.dispatchEvent(new Event("close-map-filter"));
