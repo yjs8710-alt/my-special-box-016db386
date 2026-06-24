@@ -340,13 +340,19 @@ const NotificationsPage = () => {
                       <button
                         onClick={() => {
                           setDetail(null);
-                          navigate(`/share/${detail.property_id}`);
+                          const isStaff = !!user?.isAdmin || (user?.memberType !== "일반회원" && user?.memberType !== "게스트");
+                          if (isStaff) {
+                            navigate(`/?propertyId=${detail.property_id}`);
+                          } else {
+                            navigate(`/share/${detail.property_id}`);
+                          }
                         }}
                         className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded-md bg-card border border-border hover:bg-muted"
                       >
                         <ExternalLink className="w-3.5 h-3.5" /> 매물 상세보기
                       </button>
                     )}
+
                     {detail.owner_phone ? (
                       <a
                         href={`tel:${detail.owner_phone.replace(/[^0-9+]/g, "")}`}
