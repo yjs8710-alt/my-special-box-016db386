@@ -277,7 +277,9 @@ const ChatPage = () => {
                   <button
                     onClick={send}
                     disabled={sending || !input.trim()}
-                    className="h-9 px-4 rounded-lg flex items-center gap-1.5 text-white text-sm font-bold disabled:opacity-50 shadow-md bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 hover:from-orange-500 hover:to-orange-700"
+                    className="h-9 px-4 rounded-lg flex items-center gap-1.5 text-white text-sm font-bold disabled:opacity-50 shadow-md hover:opacity-90"
+                    style={{ background: "linear-gradient(90deg, #22d3ee 0%, #a855f7 50%, #ec4899 100%)" }}
+
                   >
                     <Send className="w-4 h-4" /> 보내기
                   </button>
