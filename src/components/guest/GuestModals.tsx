@@ -100,17 +100,19 @@ export const InquiryModal = ({
   };
 
   const findExistingConversation = async (userId: string) => {
-    // 같은 회원 ↔ 같은 담당자(또는 관리자) 대화는 하나로 유지 — 매물별로 분리하지 않음
+    // 같은 회원 ↔ 같은 담당자 ↔ 같은 매물 조합일 때만 기존 대화 재사용 — 매물이 다르면 새 채팅방 생성
     let query = supabase
       .from("chat_conversations")
       .select("id")
       .eq("user_id", userId);
     query = agentUserId ? query.eq("agent_user_id", agentUserId) : query.is("agent_user_id", null);
+    query = propertyDbId ? query.eq("property_id", propertyDbId) : query.is("property_id", null);
 
     const { data: existing, error: findError } = await query.order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (findError) throw findError;
     return existing?.id ?? null;
   };
+
 
 
   const openMemberChat = async (userId: string, firstMsg: string) => {
