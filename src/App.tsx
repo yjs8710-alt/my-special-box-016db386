@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import { PwaUpdatePrompt } from "./components/PwaUpdatePrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import AgentOnlyRoute from "./components/AgentOnlyRoute";
 import ChatInquiryWidget from "./components/ChatInquiryWidget";
 import MobileBottomNav from "./components/MobileBottomNav";
 import { usePageViewTracker } from "./hooks/usePageViewTracker";
