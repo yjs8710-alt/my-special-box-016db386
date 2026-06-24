@@ -241,10 +241,13 @@ const AdminGuestInquiriesPanel = () => {
                       }`}
                     >
                       {/* Desktop row */}
-                      <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_80px] gap-3 items-center">
-                        <div className="flex items-center gap-1.5">
+                      <div className="hidden md:grid grid-cols-[110px_1fr_140px_2fr_140px_120px] gap-3 items-center">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {!i.is_read && (
                             <span className="w-2 h-2 rounded-full bg-destructive" title="미확인" />
+                          )}
+                          {i.user_id && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">회원</span>
                           )}
                           {i.property_reg_no ? (
                             <span className="inline-flex items-center gap-1 text-xs font-mono font-extrabold px-2 py-1 rounded-md bg-primary/10 text-primary">
@@ -254,9 +257,20 @@ const AdminGuestInquiriesPanel = () => {
                             <span className="text-xs text-muted-foreground">-</span>
                           )}
                         </div>
-                        <div className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                          <User className="w-3.5 h-3.5 text-muted-foreground" />
-                          {i.name}
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-muted-foreground" />
+                            {i.name}
+                          </div>
+                          {i.property_id && props[i.property_id] && (
+                            <div className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
+                              <Building2 className="w-3 h-3 shrink-0" />
+                              <span className="truncate">
+                                {props[i.property_id].building_name || ""} {props[i.property_id].address || ""}
+                                {props[i.property_id].unit_number ? ` ${props[i.property_id].unit_number}호` : ""}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <a
                           href={`tel:${i.phone.replace(/[^0-9]/g, "")}`}
@@ -275,6 +289,15 @@ const AdminGuestInquiriesPanel = () => {
                           {new Date(i.created_at).toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
                         </div>
                         <div className="flex items-center justify-end gap-1">
+                          {i.property_id && (
+                            <button
+                              onClick={() => navigate(`/?propertyId=${i.property_id}`)}
+                              className="p-2 rounded-lg bg-card border border-border text-foreground hover:bg-muted"
+                              title="매물 상세보기"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             onClick={() => markRead(i.id, !i.is_read)}
                             className={`p-2 rounded-lg transition-colors ${
@@ -294,6 +317,7 @@ const AdminGuestInquiriesPanel = () => {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
+
                       </div>
 
                       {/* Mobile row */}
