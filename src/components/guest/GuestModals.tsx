@@ -154,10 +154,6 @@ export const InquiryModal = ({
     }
   };
 
-  // 모달 닫힐 때 채팅 상태 초기화
-  useEffect(() => {
-    if (!open) setChatInquiryId(null);
-  }, [open]);
 
 
 
