@@ -15,6 +15,13 @@ import { usePageViewTracker } from "./hooks/usePageViewTracker";
 import { useIsGuest } from "./hooks/useIsGuest";
 import { useState } from "react";
 import { InquiryModal, PartnerAgencyModal, GuestDetailModal, type GuestDetailInfo } from "./components/guest/GuestModals";
+import { useExitConfirm } from "./hooks/useExitConfirm";
+
+// 모든 페이지에서 안드로이드/모바일 뒤로가기 → 종료 다이얼로그 활성화
+const GlobalExitConfirm = () => {
+  const { ExitConfirmDialog } = useExitConfirm(true);
+  return <ExitConfirmDialog />;
+};
 
 // 게스트(비로그인)는 채팅 위젯 숨김
 const AuthGatedChatInquiry = () => {
@@ -252,6 +259,7 @@ const App = () => {
           <AuthGatedChatInquiry />
           <GlobalGuestInquiry />
           <MobileBottomNav />
+          <GlobalExitConfirm />
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>
