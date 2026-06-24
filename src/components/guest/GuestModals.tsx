@@ -98,8 +98,7 @@ export const InquiryModal = ({
     return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
   };
 
-  const openMemberChat = async (userId: string, firstMsg: string) => {
-    let conversationId: string | null = null;
+  const findExistingConversation = async (userId: string) => {
     let query = supabase
       .from("chat_conversations")
       .select("id")
@@ -109,7 +108,12 @@ export const InquiryModal = ({
 
     const { data: existing, error: findError } = await query.order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (findError) throw findError;
-    conversationId = existing?.id ?? null;
+    return existing?.id ?? null;
+  };
+
+  const openMemberChat = async (userId: string, firstMsg: string) => {
+    let conversationId: string | null = null;
+    conversationId = await findExistingConversation(userId);
 
     if (!conversationId) {
       const displayName = [trimmedNameForChat(name), phone.trim()].filter(Boolean).join(" · ") || "일반회원";
@@ -125,8 +129,13 @@ export const InquiryModal = ({
         } as any)
         .select("id")
         .single();
-      if (createError) throw createError;
-      conversationId = created.id;
+      if (createError) {
+        if (createError.code === "23505") {
+          conversationId = await findExistingConversation(userId);
+        }
+        if (!conversationId) throw createError;
+      }
+      else conversationId = created.id;
     }
 
     const { error: msgError } = await supabase.from("chat_messages").insert({
@@ -290,6 +299,7 @@ export const PartnerAgencyModal = ({
   agentUserId,
   propertyId,
   propertyTitle,
+  showChat = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -297,6 +307,7 @@ export const PartnerAgencyModal = ({
   agentUserId?: string;
   propertyId?: string;
   propertyTitle?: string;
+  showChat?: boolean;
 }) => {
   // 뒤로가기로 모달 닫기
   useEffect(() => {
@@ -341,13 +352,14 @@ export const PartnerAgencyModal = ({
             <span className="text-foreground">{a.registration}</span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 pt-1">
+        <div className={`grid gap-2 pt-1 ${showChat ? "grid-cols-2" : "grid-cols-1"}`}>
           <a
             href={`tel:${a.mobile.replace(/[^0-9]/g, "")}`}
             className="flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
           >
             <Phone className="w-4 h-4" /> 전화하기
           </a>
+          {showChat && (
           <button
             onClick={async () => {
               // 인증된 사용자: 담당 중개사와 실시간 채팅, 미인증: 기존 폼 모달로 폴백
@@ -370,6 +382,7 @@ export const PartnerAgencyModal = ({
           >
             <MessageCircle className="w-4 h-4" /> 채팅 문의
           </button>
+          )}
 
         </div>
       </div>
@@ -500,11 +513,13 @@ export const GuestDetailModal = ({
   onClose,
   info,
   onInquiry,
+  inquiryLabel = "문의하기",
 }: {
   open: boolean;
   onClose: () => void;
   info?: GuestDetailInfo;
   onInquiry?: () => void;
+  inquiryLabel?: string;
 }) => {
   if (!open || !info) return null;
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -583,7 +598,7 @@ export const GuestDetailModal = ({
             onClick={() => { onClose(); onInquiry?.(); }}
             className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-base font-bold"
           >
-            협력 공인중개사
+            {inquiryLabel}
           </button>
         </div>
       </div>
