@@ -82,6 +82,8 @@ const AdminGuestInquiriesPanel = () => {
     const q = filter.trim().toLowerCase();
     const filtered = items.filter((i) => {
       if (agentFilter !== "all" && (i.agent_user_id ?? "_none") !== agentFilter) return false;
+      if (sourceFilter === "guest" && i.user_id) return false;
+      if (sourceFilter === "member" && !i.user_id) return false;
       if (!q) return true;
       return (
         (i.name ?? "").toLowerCase().includes(q) ||
@@ -97,7 +99,8 @@ const AdminGuestInquiriesPanel = () => {
       map.get(key)!.push(i);
     });
     return Array.from(map.entries());
-  }, [items, filter, agentFilter]);
+  }, [items, filter, agentFilter, sourceFilter]);
+
 
   const markRead = async (id: string, is_read: boolean) => {
     const { error } = await supabase.from("guest_inquiries").update({ is_read }).eq("id", id);
