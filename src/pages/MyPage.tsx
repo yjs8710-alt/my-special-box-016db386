@@ -667,21 +667,23 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
       if (uuidLike.length) {
         const { data } = await supabase
           .from("properties")
-          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
-          .in("id", uuidLike);
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number, status")
+          .in("id", uuidLike)
+          .eq("status", "active");
         if (data) all.push(...data);
       }
       if (regNoLike.length) {
         const { data } = await supabase
           .from("properties")
-          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
-          .in("reg_no", regNoLike);
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number, status")
+          .in("reg_no", regNoLike)
+          .eq("status", "active");
         if (data) all.push(...data);
       }
       if (numericIds.length) {
         const { data } = await supabase
           .from("properties")
-          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number, status")
           .eq("status", "active")
           .order("checked_date", { ascending: false, nullsFirst: false })
           .order("registered_date", { ascending: false })
