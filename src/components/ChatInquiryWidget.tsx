@@ -224,9 +224,14 @@ const ChatInquiryWidget = () => {
       sender_role: role,
       content: text,
     });
-    if (error) console.error("[chat send]", error);
+    if (error) {
+      console.error("[chat send]", error);
+      toast.error(`전송 실패: ${error.message || "권한 오류"}`);
+      setInput(text);
+    }
     setSending(false);
   };
+
 
   if (!open) return null;
 
