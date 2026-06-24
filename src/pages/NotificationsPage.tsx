@@ -110,30 +110,43 @@ const NotificationsPage = () => {
   const openInquiryDetail = useCallback(async (id: string) => {
     const { data } = await supabase
       .from("guest_inquiries")
-      .select("id, name, phone, message, created_at, property_reg_no, property_id")
+      .select("id, name, phone, message, created_at, property_reg_no, property_id, user_id" as any)
       .eq("id", id)
       .maybeSingle();
     if (!data) return;
+    const d: any = data;
     let dong: string | null = null, lot: string | null = null;
-    if ((data as any).property_id) {
+    if (d.property_id) {
       const { data: prop } = await supabase
         .from("properties")
         .select("dong, lot_number")
-        .eq("id", (data as any).property_id)
+        .eq("id", d.property_id)
         .maybeSingle();
       dong = prop?.dong ?? null;
       lot = prop?.lot_number ?? null;
     }
     setDetail({
-      id: data.id,
-      name: data.name,
-      phone: data.phone,
-      message: data.message,
-      created_at: data.created_at,
-      property_reg_no: data.property_reg_no,
+      id: d.id,
+      name: d.name,
+      phone: d.phone,
+      message: d.message,
+      created_at: d.created_at,
+      property_reg_no: d.property_reg_no,
       property_dong: dong,
       property_lot: lot,
+      user_id: d.user_id ?? null,
     });
+  }, []);
+
+  const startChatFromInquiry = useCallback(async (inq: InquiryDetail) => {
+    const { data: cid, error } = await (supabase as any).rpc("start_chat_from_inquiry", { _inquiry_id: inq.id });
+    if (error || !cid) {
+      console.error("[start_chat_from_inquiry]", error);
+      alert("이 문의는 비회원 게스트 문의입니다.\n채팅 대신 전화로 연락해주세요.");
+      return;
+    }
+    setDetail(null);
+    await openChatFromConversation(cid as string);
   }, []);
 
   // 알림 링크 클릭 시 처리(URL 쿼리)
