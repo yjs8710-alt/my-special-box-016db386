@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Send, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Send, MessageCircle, Building2, ExternalLink, Hash } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type Conv = {
@@ -9,14 +10,19 @@ type Conv = {
   last_message: string;
   last_message_at: string;
   unread_for_admin: number;
+  property_id?: string | null;
+  agent_user_id?: string | null;
 };
+
+type PropInfo = { id: string; address: string | null; building_name: string | null; unit_number: string | null; reg_no: string | null };
 
 type Msg = {
   id: string;
-  sender_role: "user" | "admin";
+  sender_role: "user" | "admin" | "agent";
   content: string;
   created_at: string;
 };
+
 
 const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
   const [conversations, setConversations] = useState<Conv[]>([]);
