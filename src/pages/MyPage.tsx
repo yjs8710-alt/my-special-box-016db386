@@ -459,7 +459,7 @@ const MyPage = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                  받은 문의 내역
+                  문의 내역
                   <span className="ml-auto text-xs font-normal text-muted-foreground">
                     {inquiries.length}건
                   </span>
