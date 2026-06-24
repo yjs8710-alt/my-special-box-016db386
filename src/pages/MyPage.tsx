@@ -657,7 +657,13 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
     const uuidLike = keys.filter((k) => /^[0-9a-f-]{32,}$/i.test(k));
     const regNoLike = keys.filter((k) => /^\d+$/.test(k) && k.length > 4);
     const numericIds = keys.filter((k) => /^\d+$/.test(k)).map((k) => Number(k));
-    if (uuidLike.length === 0 && regNoLike.length === 0) { setDbItems([]); return; }
+    const stableNumericId = (uuid: string, fallbackIdx: number) => {
+      if (!uuid) return 100000 + fallbackIdx;
+      let h = 5381;
+      for (let i = 0; i < uuid.length; i++) h = ((h << 5) + h + uuid.charCodeAt(i)) | 0;
+      return 100000 + (Math.abs(h) % 2000000000);
+    };
+    if (uuidLike.length === 0 && regNoLike.length === 0 && numericIds.length === 0) { setDbItems([]); return; }
     (async () => {
       const all: any[] = [];
       if (uuidLike.length) {
@@ -673,6 +679,18 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
           .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
           .in("reg_no", regNoLike);
         if (data) all.push(...data);
+      }
+      if (numericIds.length) {
+        const { data } = await supabase
+          .from("properties")
+          .select("id, reg_no, title, building_name, address, type, deposit, monthly, images, dong, lot_number")
+          .eq("status", "active")
+          .order("checked_date", { ascending: false, nullsFirst: false })
+          .order("registered_date", { ascending: false })
+          .limit(2000);
+        if (data) {
+          all.push(...data.filter((p, idx) => numericIds.includes(stableNumericId(String(p.id ?? ""), idx))));
+        }
       }
       // dedupe by id
       const seen = new Set<string>();
