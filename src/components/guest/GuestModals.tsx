@@ -24,12 +24,12 @@ export const PARTNER_AGENCY = {
 const Overlay = ({ onClose, children }: { onClose: () => void; children: React.ReactNode }) =>
   createPortal(
     <div
-      className="fixed inset-0 z-[10300] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[10300] flex items-start sm:items-center justify-center p-4 overflow-y-auto"
       style={{ background: "rgba(0,0,0,0.5)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto max-h-[calc(100vh-2rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -37,6 +37,7 @@ const Overlay = ({ onClose, children }: { onClose: () => void; children: React.R
     </div>,
     document.body
   );
+
 
 // ===== 1. 문의하기 모달 (전화 필수) =====
 export const InquiryModal = ({
