@@ -182,6 +182,7 @@ export const InquiryModal = ({
       if (error) throw error;
 
       if (isMember && userId) {
+        await openMemberChat(userId, firstMsg);
         toast.success("문의가 접수되었습니다. 담당자가 답변드릴 예정입니다.");
         setMessage("");
         onClose();
