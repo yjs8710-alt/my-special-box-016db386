@@ -19,9 +19,14 @@ const ITEMS = [
 const MobileBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const isGuest = useIsGuest();
+  const hideAgent = isGuest || user?.memberType === "일반회원";
+  const visibleItems = ITEMS.filter((it) => !(it.agentOnly && hideAgent));
 
   const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property"];
   if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
+
 
   return (
     <nav
