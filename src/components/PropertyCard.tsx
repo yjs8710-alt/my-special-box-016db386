@@ -241,16 +241,35 @@ const PropertyCard = ({
                 상세보기
               </button>
               <button
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("open-guest-partner", {
-                    detail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title },
-                  }));
+                  const propertyTitleLbl = regNoNumeric ? `[NO.${regNoNumeric}] ${title}` : title;
+                  if (isGeneralMember && authUserPC?.userId) {
+                    // 일반회원: 프로필에서 이름/연락처 가져와 자동입력 문의 폼 열기
+                    let memberInfo: { name?: string; phone?: string } | null = null;
+                    try {
+                      const { supabase } = await import("@/integrations/supabase/client");
+                      const { data } = await supabase
+                        .from("agent_profiles")
+                        .select("name, phone")
+                        .eq("user_id", authUserPC.userId)
+                        .maybeSingle();
+                      memberInfo = { name: data?.name || "", phone: data?.phone || "" };
+                    } catch {}
+                    window.dispatchEvent(new CustomEvent("open-guest-inquiry", {
+                      detail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: propertyTitleLbl, memberInfo },
+                    }));
+                  } else {
+                    window.dispatchEvent(new CustomEvent("open-guest-partner", {
+                      detail: { propertyDbId: dbId, propertyRegNo: regNoNumeric || regNo, agentUserId: registeredBy, propertyTitle: propertyTitleLbl },
+                    }));
+                  }
                 }}
                 className="shrink-0 px-3 py-1.5 md:px-2.5 md:py-1 rounded-full bg-primary text-primary-foreground text-sm md:text-xs font-bold shadow-sm hover:opacity-90"
               >
                 문의하기
               </button>
+
 
               <div className="hidden md:flex items-center gap-2 text-[10px] text-muted-foreground shrink-0">
                 {(checkedDate || registeredDate) && <span>확인 {checkedDate || registeredDate}</span>}

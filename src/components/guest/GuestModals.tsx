@@ -48,6 +48,7 @@ export const InquiryModal = ({
   agentUserId,
   propertyTitle,
   onOpenPartner,
+  memberInfo,
 }: {
   open: boolean;
   onClose: () => void;
@@ -57,11 +58,23 @@ export const InquiryModal = ({
   agentUserId?: string;
   propertyTitle?: string;
   onOpenPartner?: () => void;
+  /** 로그인한 일반회원의 자동 입력 정보 (있으면 이름/전화 읽기전용) */
+  memberInfo?: { name?: string; phone?: string } | null;
 }) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const isMember = !!(memberInfo && (memberInfo.name || memberInfo.phone));
+
+  // 회원정보 자동 채우기 (모달이 열릴 때마다)
+  useEffect(() => {
+    if (!open) return;
+    if (memberInfo) {
+      if (memberInfo.name) setName(memberInfo.name);
+      if (memberInfo.phone) setPhone(memberInfo.phone);
+    }
+  }, [open, memberInfo]);
 
   // 뒤로가기로 모달 닫기
   useEffect(() => {
@@ -102,8 +115,7 @@ export const InquiryModal = ({
       });
       if (error) throw error;
       toast.success("문의가 접수되었습니다. 담당자가 연락드릴 예정입니다.");
-      setName("");
-      setPhone("");
+      if (!isMember) { setName(""); setPhone(""); }
       setMessage("");
       onClose();
     } catch (e: any) {
@@ -113,6 +125,7 @@ export const InquiryModal = ({
       setSubmitting(false);
     }
   };
+
 
   return (
     <Overlay onClose={onClose}>
@@ -130,6 +143,11 @@ export const InquiryModal = ({
             매물: <span className="font-semibold text-foreground">{propertyTitle}</span>
           </div>
         )}
+        {isMember && (
+          <div className="text-[11px] font-semibold text-primary bg-primary/10 rounded-lg px-3 py-2">
+            회원정보로 자동 입력되었습니다
+          </div>
+        )}
         <div>
           <label className="text-xs font-semibold text-foreground">이름 <span className="text-destructive">*</span></label>
           <input
@@ -137,7 +155,8 @@ export const InquiryModal = ({
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            readOnly={isMember}
+            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
             placeholder="홍길동"
           />
         </div>
@@ -147,11 +166,13 @@ export const InquiryModal = ({
             type="tel"
             value={phone}
             onChange={(e) => setPhone(formatPhone(e.target.value))}
-            className="mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            readOnly={isMember}
+            className={`mt-1 w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-primary ${isMember ? "bg-muted cursor-not-allowed" : ""}`}
             placeholder="010-0000-0000"
           />
           <p className="text-[10px] text-muted-foreground mt-1">담당자가 입력하신 번호로 연락드립니다</p>
         </div>
+
         <div>
           <label className="text-xs font-semibold text-foreground">문의 내용</label>
           <textarea

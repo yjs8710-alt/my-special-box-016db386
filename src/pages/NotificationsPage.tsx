@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Bell, Check, Trash2, ChevronLeft, AlertCircle, FileText, CheckCircle2, Eye, MessageCircle, Phone, X, User2 } from "lucide-react";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface Notification {
   id: string;
-  type: "report" | "proposal" | "transaction" | "view";
+  type: "report" | "proposal" | "transaction" | "view" | "guest_inquiry" | "chat_inquiry" | string;
   title: string;
   body: string | null;
   link: string | null;
@@ -17,17 +17,32 @@ interface Notification {
 }
 
 const TYPE_META: Record<string, { label: string; Icon: any; color: string }> = {
-  report:      { label: "신고",     Icon: AlertCircle,  color: "#f97316" },
-  proposal:    { label: "제안",     Icon: FileText,     color: "#a78bfa" },
-  transaction: { label: "거래완료", Icon: CheckCircle2, color: "#22c55e" },
-  view:        { label: "조회",     Icon: Eye,          color: "#60a5fa" },
+  report:         { label: "신고",       Icon: AlertCircle,  color: "#f97316" },
+  proposal:       { label: "제안",       Icon: FileText,     color: "#a78bfa" },
+  transaction:    { label: "거래완료",   Icon: CheckCircle2, color: "#22c55e" },
+  view:           { label: "조회",       Icon: Eye,          color: "#60a5fa" },
+  guest_inquiry:  { label: "매물문의",   Icon: MessageCircle, color: "#e11d48" },
+  chat_inquiry:   { label: "채팅문의",   Icon: MessageCircle, color: "#0ea5e9" },
+};
+
+type InquiryDetail = {
+  id: string;
+  name: string;
+  phone: string;
+  message: string | null;
+  created_at: string;
+  property_reg_no: string | null;
+  property_dong?: string | null;
+  property_lot?: string | null;
 };
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthorized, user, isLoading } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [detail, setDetail] = useState<InquiryDetail | null>(null);
 
   const load = useCallback(async () => {
     if (!user?.userId) return;
@@ -60,6 +75,79 @@ const NotificationsPage = () => {
     return () => { supabase.removeChannel(ch); };
   }, [user?.userId, load]);
 
+  const openChatFromConversation = useCallback(async (cid: string) => {
+    const { data: conv } = await supabase
+      .from("chat_conversations")
+      .select("id, agent_user_id, property_id, user_name")
+      .eq("id", cid)
+      .maybeSingle();
+    if (!conv) return;
+    let propertyTitle: string | undefined;
+    if (conv.property_id) {
+      const { data: prop } = await supabase
+        .from("properties")
+        .select("reg_no, dong, lot_number")
+        .eq("id", conv.property_id)
+        .maybeSingle();
+      if (prop) {
+        const reg = prop.reg_no ? `[NO.${prop.reg_no}] ` : "";
+        const addr = [prop.dong, prop.lot_number].filter(Boolean).join(" ");
+        propertyTitle = `${reg}${addr}`.trim() || undefined;
+      }
+    }
+    window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
+      detail: {
+        conversationId: cid,
+        agentUserId: conv.agent_user_id,
+        propertyId: conv.property_id,
+        propertyTitle,
+        agentName: conv.user_name,
+      },
+    }));
+  }, []);
+
+  const openInquiryDetail = useCallback(async (id: string) => {
+    const { data } = await supabase
+      .from("guest_inquiries")
+      .select("id, name, phone, message, created_at, property_reg_no, property_id")
+      .eq("id", id)
+      .maybeSingle();
+    if (!data) return;
+    let dong: string | null = null, lot: string | null = null;
+    if ((data as any).property_id) {
+      const { data: prop } = await supabase
+        .from("properties")
+        .select("dong, lot_number")
+        .eq("id", (data as any).property_id)
+        .maybeSingle();
+      dong = prop?.dong ?? null;
+      lot = prop?.lot_number ?? null;
+    }
+    setDetail({
+      id: data.id,
+      name: data.name,
+      phone: data.phone,
+      message: data.message,
+      created_at: data.created_at,
+      property_reg_no: data.property_reg_no,
+      property_dong: dong,
+      property_lot: lot,
+    });
+  }, []);
+
+  // 알림 링크 클릭 시 처리(URL 쿼리)
+  useEffect(() => {
+    const chat = searchParams.get("chat");
+    const inquiry = searchParams.get("inquiry");
+    if (chat) {
+      openChatFromConversation(chat);
+      setSearchParams({}, { replace: true });
+    } else if (inquiry) {
+      openInquiryDetail(inquiry);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams, openChatFromConversation, openInquiryDetail]);
+
   const markRead = async (id: string) => {
     await (supabase.from("notifications") as any).update({ is_read: true }).eq("id", id);
   };
@@ -72,6 +160,23 @@ const NotificationsPage = () => {
   };
   const remove = async (id: string) => {
     await (supabase.from("notifications") as any).delete().eq("id", id);
+  };
+
+  const handleClick = async (n: Notification) => {
+    if (!n.is_read) await markRead(n.id);
+    if (!n.link) return;
+    // 링크가 외부/다른 경로면 그대로 이동
+    if (!n.link.startsWith("/notifications")) {
+      navigate(n.link);
+      return;
+    }
+    // /notifications?chat=... 또는 ?inquiry=...
+    const qs = n.link.includes("?") ? n.link.slice(n.link.indexOf("?") + 1) : "";
+    const params = new URLSearchParams(qs);
+    const cid = params.get("chat");
+    const iid = params.get("inquiry");
+    if (cid) await openChatFromConversation(cid);
+    else if (iid) await openInquiryDetail(iid);
   };
 
   const unread = items.filter(i => !i.is_read).length;
@@ -134,10 +239,7 @@ const NotificationsPage = () => {
                   </div>
                   <button
                     className="flex-1 text-left min-w-0"
-                    onClick={async () => {
-                      if (!n.is_read) await markRead(n.id);
-                      if (n.link) navigate(n.link);
-                    }}
+                    onClick={() => handleClick(n)}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${meta.color}22`, color: meta.color }}>
@@ -164,6 +266,53 @@ const NotificationsPage = () => {
           </ul>
         )}
       </div>
+
+      {/* 게스트 매물 문의 상세 */}
+      {detail && (
+        <div className="fixed inset-0 z-[10200] flex items-end md:items-center justify-center p-3 md:p-6" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setDetail(null)}>
+          <div className="bg-card rounded-2xl w-full max-w-md shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b" style={{ background: "hsl(var(--header-bg))" }}>
+              <div className="flex items-center gap-2 text-white">
+                <MessageCircle className="w-4 h-4" />
+                <span className="text-sm font-bold">매물 문의 상세</span>
+              </div>
+              <button onClick={() => setDetail(null)} className="text-white/80 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              {(detail.property_reg_no || detail.property_dong) && (
+                <div className="text-[12px] bg-muted rounded-lg px-3 py-2 text-foreground">
+                  {detail.property_reg_no ? <span className="font-bold mr-2">[NO.{detail.property_reg_no}]</span> : null}
+                  <span>{[detail.property_dong, detail.property_lot].filter(Boolean).join(" ")}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-sm">
+                <User2 className="w-4 h-4 text-muted-foreground" />
+                <span className="font-semibold">{detail.name}</span>
+              </div>
+              <a
+                href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
+                className="flex items-center gap-2 text-sm font-bold text-primary"
+              >
+                <Phone className="w-4 h-4" /> {detail.phone}
+              </a>
+              <div className="rounded-lg border p-3 text-sm whitespace-pre-wrap bg-muted/40">
+                {detail.message || "문의 메시지 없음"}
+              </div>
+              <p className="text-[11px] text-muted-foreground text-right">
+                {new Date(detail.created_at).toLocaleString("ko-KR")}
+              </p>
+              <a
+                href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm"
+              >
+                <Phone className="w-4 h-4" /> 바로 전화 걸기
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       <MobileBottomNav />
     </div>

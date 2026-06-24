@@ -66,7 +66,9 @@ const GlobalGuestInquiry = () => {
         propertyRegNo={state.detail?.propertyRegNo}
         agentUserId={state.detail?.agentUserId}
         propertyTitle={state.detail?.propertyTitle}
+        memberInfo={state.detail?.memberInfo}
       />
+
       <PartnerAgencyModal
         open={partner.open}
         onClose={() => setPartner({ open: false })}
