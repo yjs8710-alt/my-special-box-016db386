@@ -97,13 +97,20 @@ const ChatPage = () => {
   // 활성 대화의 메시지 로드 + 미확인 초기화
   useEffect(() => {
     if (!activeId || !user?.userId) { setMessages([]); return; }
+    let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from("chat_messages")
         .select("id, sender_role, content, created_at")
         .eq("conversation_id", activeId)
         .order("created_at", { ascending: true });
+      if (cancelled) return;
       setMessages((data ?? []) as Msg[]);
+      // 활성 대화 진입 시 최신 메시지(맨 아래)부터 보이도록 스크롤
+      requestAnimationFrame(() => {
+        const el = scrollRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
       const conv = conversations.find((c) => c.id === activeId);
       if (conv) {
         const updates: any = {};
@@ -114,14 +121,18 @@ const ChatPage = () => {
         }
       }
     })();
-  }, [activeId, user?.userId, conversations]);
+    return () => { cancelled = true; };
+    // conversations는 실시간으로 자주 갱신되므로 의존성에서 제외 — 스크롤이 위로 안 올라가는 문제 방지
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, user?.userId]);
 
+  // 새 메시지가 도착했을 때만(하단 근처에 있을 때) 자동으로 따라 내려가기
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
     if (nearBottom) el.scrollTo({ top: el.scrollHeight });
-  }, [messages]);
+  }, [messages.length]);
 
   const active = conversations.find((c) => c.id === activeId);
   const myRole: "user" | "agent" = active && active.agent_user_id === user?.userId ? "agent" : "user";
