@@ -139,13 +139,8 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
-const RouteFallback = () => (
-  <div
-    className="fixed inset-0 z-[1500] flex items-center justify-center"
-    style={{ background: "hsl(var(--header-bg))" }}
-    aria-hidden="true"
-  />
-);
+const RouteFallback = () => null;
+
 
 const LegacyPropertyRedirect = () => {
   const { id } = useParams<{ id: string }>();
