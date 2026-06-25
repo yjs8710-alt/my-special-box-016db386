@@ -5664,7 +5664,7 @@ const MapSidebar = ({
                       key={prop.id}
                       data-prop-id={prop.id}
                       className="flex flex-col"
-                      style={isMobile ? { contentVisibility: "auto", containIntrinsicSize: "120px" } : undefined}
+                      style={isMobile ? ({ contentVisibility: "auto", containIntrinsicSize: "120px" } as any) : undefined}
                     >
                       <div
                         role="button"
