@@ -2449,14 +2449,14 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
       <div className="flex items-center">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
           className="text-xs text-black font-bold px-2 py-0.5 rounded whitespace-nowrap select-none"
           style={{ background: "hsl(var(--muted))", border: "1.5px solid hsl(var(--border))" }}
         >
           옵션·시설 ▾
         </button>
       </div>
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
           onClick={(e) => { e.stopPropagation(); setOpen(false); }}
@@ -2474,9 +2474,11 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
+
   );
 };
 
@@ -3728,7 +3730,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </span>
                     )}
                   </div>
-                  {showOptPopup && (
+                  {showOptPopup && createPortal(
                     <div
                       className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
                       onClick={(e) => { e.stopPropagation(); setShowOptPopup(false); }}
@@ -3746,8 +3748,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                           ))}
                         </div>
                       </div>
-                    </div>
+                    </div>,
+                    document.body
                   )}
+
                 </>
               )}
               {isMobile && limitAddress && (
@@ -5685,9 +5689,10 @@ const MapSidebar = ({
                         }}
                         className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
                           selectedId === prop.id
-                            ? "ring-2 ring-primary shadow-lg"
-                            : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
+                            ? "ring-[3px] ring-inset ring-primary shadow-lg"
+                            : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-inset hover:ring-primary/30"
                         }`}
+
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
                         <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>

@@ -36,7 +36,7 @@ import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
 import { formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
-import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
+import { pushOverlay, popOverlay, getOverlayCount } from "@/lib/overlayGuard";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
@@ -1580,11 +1580,13 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
   const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
 
-  // 모바일 뒤로가기 → 패널 닫기
+  // 모바일 뒤로가기 → 패널 닫기 (단, 위에 다른 오버레이/채팅이 열려 있으면 무시)
   useEffect(() => {
     pushOverlay();
     window.history.pushState({ detailPanel: true }, "");
     const onPopState = () => {
+      // 채팅 등 더 위에 푸시된 오버레이가 있으면, 그 오버레이가 먼저 닫혀야 함
+      if (getOverlayCount() > 1) return;
       onClose();
     };
     window.addEventListener("popstate", onPopState);
@@ -1593,6 +1595,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
       popOverlay();
     };
   }, [onClose]);
+
 
   useEffect(() => {
     if (!property?.address) { setInactiveUnits([]); return; }
