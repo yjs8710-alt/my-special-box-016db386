@@ -14,12 +14,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
   const navigate = useNavigate();
   const { isAuthorized, user } = useAuth();
   const [count, setCount] = useState(0);
-  const isGeneralMember = user?.memberType === "일반회원";
-  const targetPath = !isAuthorized
-    ? "/login"
-    : isGeneralMember
-    ? "/my-page?view=activity&tab=inquiries"
-    : "/notifications";
+  const targetPath = !isAuthorized ? "/login" : "/notifications";
 
   const refresh = useCallback(async () => {
     if (!user?.userId) { setCount(0); return; }
