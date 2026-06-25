@@ -3730,7 +3730,7 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                       </span>
                     )}
                   </div>
-                  {showOptPopup && (
+                  {showOptPopup && createPortal(
                     <div
                       className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
                       onClick={(e) => { e.stopPropagation(); setShowOptPopup(false); }}
@@ -3748,8 +3748,10 @@ const AddressToggleCard = forwardRef<HTMLDivElement, AddressToggleCardProps & { 
                           ))}
                         </div>
                       </div>
-                    </div>
+                    </div>,
+                    document.body
                   )}
+
                 </>
               )}
               {isMobile && limitAddress && (
