@@ -140,9 +140,11 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const queryClient = new QueryClient();
 
 const RouteFallback = () => (
-  <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
-    불러오는 중…
-  </div>
+  <div
+    className="fixed inset-0 z-[1500] flex items-center justify-center"
+    style={{ background: "hsl(var(--header-bg))" }}
+    aria-hidden="true"
+  />
 );
 
 const LegacyPropertyRedirect = () => {
