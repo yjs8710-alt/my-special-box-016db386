@@ -124,16 +124,6 @@ const CustomerService = () => {
         <Footer />
       </div>
 
-      {/* Mobile back button */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[900] p-4" style={{ background: "hsl(var(--header-bg) / 0.95)" }}>
-        <button
-          onClick={() => navigate(-1)}
-          className="w-full py-3 rounded-xl text-sm font-bold text-white"
-          style={{ background: "hsl(var(--primary))" }}
-        >
-          뒤로 가기
-        </button>
-      </div>
     </div>
   );
 };
