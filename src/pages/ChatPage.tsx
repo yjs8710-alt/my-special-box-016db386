@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, MessageCircle, Send, Building2, Hash, ExternalLink, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import StaffPropertyDetailModal from "@/components/StaffPropertyDetailModal";
+
 
 type Conv = {
   id: string;
@@ -141,25 +143,29 @@ const ChatPage = () => {
     const text = input.trim();
     if (!text || !activeId || !user?.userId || sending) return;
     setSending(true);
+    const prevInput = input;
     setInput("");
+    // 관리자는 항상 'admin' 역할로 전송 (RLS 통과 보장)
+    const effectiveRole: "user" | "agent" | "admin" = user.isAdmin ? "admin" : myRole;
     const { error } = await supabase.from("chat_messages").insert({
       conversation_id: activeId,
       sender_id: user.userId,
-      sender_role: myRole,
+      sender_role: effectiveRole,
       content: text,
     });
-    if (!error && active) {
-      const updates: any = {
-        last_message: text,
-        last_message_at: new Date().toISOString(),
-      };
-      // 상대 미확인 +1
-      if (myRole === "user") updates.unread_for_agent = (active.unread_for_agent ?? 0) + 1;
-      else updates.unread_for_user = (active.unread_for_user ?? 0) + 1;
-      await supabase.from("chat_conversations").update(updates).eq("id", activeId);
+    if (error) {
+      console.error("[chat send]", error);
+      toast.error(`전송 실패: ${error.message || "권한 오류"}`);
+      setInput(prevInput);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        { id: `tmp-${Date.now()}`, sender_role: effectiveRole, content: text, created_at: new Date().toISOString() },
+      ]);
     }
     setSending(false);
   };
+
 
   return (
     <div className="min-h-screen pb-28 md:pb-0" style={{ background: "hsl(var(--background))" }}>

@@ -810,17 +810,13 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
     setSaving(false);
 
     if (!error && form.dong) {
-      // ── cheongju_contacts 동기화 ──
+      // ── cheongju_contacts 동기화 (소유주/관리인 등 연락처는 필히 저장) ──
       const contactDistrict = districtVal ?? "";
-      const hasContact = form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker;
+      const hasContact = !!(form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker);
       const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
       const unitVal = form.unitNo || null;
 
-      // 집합건물 타입이면 호수가 있어야만 저장 (호수 없으면 skip → 단독건물 연락처 오염 방지)
-      const canSaveContact = hasContact && (isCollective ? !!unitVal : true);
-
-      if (canSaveContact) {
-        // 추가 소유주들(2번째 이후) memo에 보존
+      if (hasContact) {
         const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
         const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
         const upsertPayload: Record<string, unknown> = {
@@ -828,14 +824,13 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
           dong: finalDong,
           lot_number: finalLotNumber || "",
           unit_number: isCollective ? unitVal : null,
-          phone: form.contactOwner || "",
+          phone: form.contactOwner || form.contactManager || "",
           contact_owner: form.contactOwner || null,
           contact_manager: form.contactManager || null,
           contact_broker: form.contactBroker || null,
           memo: extraMemo,
           is_visible: true,
         };
-        // 건물명이 입력된 경우에만 저장 (빈 값으로 기존 데이터를 덮어쓰지 않도록)
         if (form.buildingName && form.buildingName.trim()) {
           upsertPayload.building_name = form.buildingName.trim();
         }
@@ -843,6 +838,7 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
         if (contactErr) console.error("[청주연락처] upsert 오류:", contactErr.message);
       }
     }
+
 
     if (error) {
       setSaveError("저장 중 오류가 발생했습니다: " + error.message);

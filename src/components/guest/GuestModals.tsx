@@ -78,18 +78,23 @@ export const InquiryModal = ({
     }
   }, [open, memberInfo]);
 
-  // 뒤로가기로 모달 닫기
+  // 뒤로가기로 모달 닫기 (X 닫기 시에도 pushState를 소비하여 한 번 뒤로가면 이전 화면 복귀)
   useEffect(() => {
     if (!open) return;
     pushOverlay();
     window.history.pushState({ inquiryModal: true }, "");
-    const onPop = () => onClose();
+    let popped = false;
+    const onPop = () => { popped = true; onClose(); };
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
       popOverlay();
+      if (!popped) {
+        try { window.history.back(); } catch { /* noop */ }
+      }
     };
   }, [open, onClose]);
+
 
   if (!open) return null;
 
@@ -338,18 +343,23 @@ export const PartnerAgencyModal = ({
   propertyTitle?: string;
   showChat?: boolean;
 }) => {
-  // 뒤로가기로 모달 닫기
+  // 뒤로가기로 모달 닫기 (X 닫기 시에도 pushState를 소비)
   useEffect(() => {
     if (!open) return;
     pushOverlay();
     window.history.pushState({ partnerModal: true }, "");
-    const onPop = () => onClose();
+    let popped = false;
+    const onPop = () => { popped = true; onClose(); };
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
       popOverlay();
+      if (!popped) {
+        try { window.history.back(); } catch { /* noop */ }
+      }
     };
   }, [open, onClose]);
+
 
   if (!open) return null;
   const a = PARTNER_AGENCY;

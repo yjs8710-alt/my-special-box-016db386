@@ -286,7 +286,11 @@ const NotificationsPage = () => {
               return (
                 <li
                   key={n.id}
-                  className="flex items-start gap-3 p-3 rounded-xl border bg-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleClick(n)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(n); } }}
+                  className="flex items-start gap-3 p-3 rounded-xl border bg-card cursor-pointer hover:bg-muted/40 transition-colors"
                   style={{
                     borderColor: n.is_read ? "hsl(var(--border))" : "hsl(var(--accent) / 0.5)",
                     background: n.is_read ? "hsl(var(--card))" : "hsl(var(--accent) / 0.06)",
@@ -298,10 +302,7 @@ const NotificationsPage = () => {
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <button
-                    className="flex-1 text-left min-w-0"
-                    onClick={() => handleClick(n)}
-                  >
+                  <div className="flex-1 text-left min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: `${meta.color}22`, color: meta.color }}>
                         {meta.label}
@@ -313,15 +314,16 @@ const NotificationsPage = () => {
                     <p className="text-[10px] text-muted-foreground mt-1">
                       {new Date(n.created_at).toLocaleString("ko-KR")}
                     </p>
-                  </button>
+                  </div>
                   <button
-                    onClick={() => remove(n.id)}
+                    onClick={(e) => { e.stopPropagation(); remove(n.id); }}
                     className="p-1 text-muted-foreground hover:text-destructive flex-shrink-0"
                     aria-label="삭제"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </li>
+
               );
             })}
           </ul>

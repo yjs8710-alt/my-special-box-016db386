@@ -1040,15 +1040,12 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
         }
       }
 
-      // 청주 연락처 동기화
+      // 청주 연락처 동기화 (소유주/관리인 등 연락처는 필히 저장)
       const hasAnyContact = !!(form.contactOwner || form.contactOwner2 || form.extraOwners.some(Boolean) || form.contactManager || form.contactBroker);
       const isCollectiveType = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
       const unitVal = form.unit_number || null;
 
-      // 집합건물 타입이면 반드시 호수가 있어야 저장 (호수 없으면 단독건물 연락처 오염 방지)
-      const canSaveContact = finalDong && hasAnyContact && (isCollectiveType ? !!unitVal : true);
-
-      if (canSaveContact) {
+      if (finalDong && hasAnyContact) {
         const contactDistrict = form.district ?? "";
         const lotNum = finalLotNumber ?? "";
 
@@ -1067,13 +1064,13 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
           memo: extraMemo,
           is_visible: true,
         };
-        // 건물명이 입력된 경우에만 저장 (빈 값으로 기존 데이터를 덮어쓰지 않도록)
         if (form.building_name && form.building_name.trim()) {
           upsertPayload.building_name = form.building_name.trim();
         }
         const { error: upsertErr } = await saveCheongjuContact(upsertPayload as never);
         if (upsertErr) console.error("[청주연락처] upsert 오류:", upsertErr.message);
       }
+
 
       onSaved?.();
       onClose();

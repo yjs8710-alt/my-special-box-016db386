@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Send, MessageCircle, Building2, ExternalLink, Hash } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import StaffPropertyDetailModal from "@/components/StaffPropertyDetailModal";
+
 
 type Conv = {
   id: string;
@@ -97,6 +99,7 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
     const text = input.trim();
     if (!text || !activeId || sending) return;
     setSending(true);
+    const prevInput = input;
     setInput("");
     const { error } = await supabase.from("chat_messages").insert({
       conversation_id: activeId,
@@ -104,17 +107,20 @@ const AdminChatPanel = ({ adminUserId }: { adminUserId: string }) => {
       sender_role: "admin",
       content: text,
     });
-    if (!error) {
-      const { data: cur } = await supabase
-        .from("chat_conversations").select("unread_for_user").eq("id", activeId).single();
-      await supabase.from("chat_conversations").update({
-        last_message: text,
-        last_message_at: new Date().toISOString(),
-        unread_for_user: (cur?.unread_for_user ?? 0) + 1,
-      }).eq("id", activeId);
+    if (error) {
+      console.error("[admin chat send]", error);
+      toast.error(`전송 실패: ${error.message || "권한 오류"}`);
+      setInput(prevInput);
+    } else {
+      // 메시지 즉시 화면에 반영 (realtime 도착 전)
+      setMessages((prev) => prev.some((m) => m.content === text && m.sender_role === "admin" && Date.now() - new Date(m.created_at).getTime() < 5000) ? prev : [
+        ...prev,
+        { id: `tmp-${Date.now()}`, sender_role: "admin", content: text, created_at: new Date().toISOString() },
+      ]);
     }
     setSending(false);
   };
+
 
   const active = conversations.find((c) => c.id === activeId);
 
