@@ -1722,9 +1722,9 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 sharePropertyToKakao(property, myAgencyInfo, fallback);
               }}
               title="카카오톡 공유"
-              className="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors"
+              className="w-10 h-10 md:w-7 md:h-7 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center backdrop-blur-sm transition-colors"
             >
-              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-5 h-5" />
+              <img src={kakaoTalkIcon} alt="카카오톡 공유" className="w-6 h-6 md:w-5 md:h-5 pointer-events-none select-none" />
             </button>
             <button
               onClick={onClose}
