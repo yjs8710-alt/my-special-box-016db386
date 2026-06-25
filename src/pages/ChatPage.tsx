@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, MessageCircle, Send, Building2, Hash, ExternalLink, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
