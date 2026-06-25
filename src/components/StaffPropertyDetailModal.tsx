@@ -163,14 +163,27 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
                 <Section icon={NotebookPen} title="특이사항">
                   {data.description && (
                     <p className="text-sm whitespace-pre-wrap text-foreground leading-relaxed">
-                      {data.description}
+                      {replaceOwnerTerm(data.description)}
                     </p>
                   )}
                   {data.note && (
                     <p className="text-xs whitespace-pre-wrap text-muted-foreground leading-relaxed mt-2 pt-2 border-t border-border">
-                      {data.note}
+                      {replaceOwnerTerm(data.note)}
                     </p>
                   )}
+                </Section>
+              )}
+
+              {/* 사진 */}
+              {Array.isArray(data.images) && data.images.length > 0 && (
+                <Section icon={ImageIcon} title={`사진 (${data.images.length})`}>
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                    {data.images.map((src, i) => (
+                      <a key={i} href={src} target="_blank" rel="noreferrer" className="block aspect-square overflow-hidden rounded-md border border-border bg-muted">
+                        <img src={src} alt={`매물 사진 ${i + 1}`} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                      </a>
+                    ))}
+                  </div>
                 </Section>
               )}
 
