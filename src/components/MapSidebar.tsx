@@ -6032,6 +6032,7 @@ const MapSidebar = ({
                           />
                         </div>
                       </div>
+                    </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
                       {expandedCardId === prop.id && isMobile && (() => {
