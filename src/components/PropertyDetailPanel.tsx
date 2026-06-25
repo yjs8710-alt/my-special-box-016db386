@@ -95,16 +95,24 @@ function Lightbox({
     return () => window.removeEventListener("keydown", handler);
   }, [prev, next, onClose]);
 
-  // 라이트박스 열릴 때 모든 호실 이미지 미리 가져오기 (브라우저 캐시에 적재)
+  // 라이트박스 열릴 때 현재 호실 이미지만 우선 미리 가져오기 (첫 클릭 지연 방지)
   useEffect(() => {
-    const all = units.flatMap((u) => u.images);
-    all.forEach((src) => {
-      if (!src) return;
-      const img = new Image();
-      img.decoding = "async";
-      img.src = src;
-    });
-  }, [units]);
+    const current = units[unitIdx]?.images ?? [];
+    const run = () => {
+      current.slice(0, 6).forEach((src) => {
+        if (!src) return;
+        const img = new Image();
+        img.decoding = "async";
+        img.src = src;
+      });
+    };
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(run, { timeout: 500 });
+    } else {
+      setTimeout(run, 0);
+    }
+  }, [units, unitIdx]);
+
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/95 flex flex-col items-center justify-center" onClick={onClose}>
