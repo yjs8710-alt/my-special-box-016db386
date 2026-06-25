@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Building2, MapPin, Phone, User2, FileText, NotebookPen, Home as HomeIcon, Loader2 } from "lucide-react";
+import { X, Building2, MapPin, Phone, User2, FileText, NotebookPen, Home as HomeIcon, Loader2, Image as ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadCheongjuContact } from "@/lib/cheongjuContacts";
 
