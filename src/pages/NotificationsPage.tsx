@@ -42,6 +42,7 @@ type InquiryDetail = {
   property_building?: string | null;
   owner_phone?: string | null;
   user_id?: string | null;
+  inquirer_kind?: "게스트" | "일반회원" | "중개사" | "관리자" | null;
 };
 
 const NotificationsPage = () => {
