@@ -390,9 +390,19 @@ const NotificationsPage = () => {
               )}
 
               {/* 문의자 정보 */}
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-sm flex-wrap">
                 <User2 className="w-4 h-4 text-muted-foreground" />
                 <span className="font-semibold">{detail.name}</span>
+                {detail.inquirer_kind && (
+                  <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                    detail.inquirer_kind === "게스트" ? "bg-amber-100 text-amber-700 border border-amber-300"
+                    : detail.inquirer_kind === "일반회원" ? "bg-sky-100 text-sky-700 border border-sky-300"
+                    : detail.inquirer_kind === "중개사" ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                    : "bg-rose-100 text-rose-700 border border-rose-300"
+                  }`}>
+                    {detail.inquirer_kind}
+                  </span>
+                )}
                 <a
                   href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
                   className="ml-auto flex items-center gap-1 text-sm font-bold text-primary"
