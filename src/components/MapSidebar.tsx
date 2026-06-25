@@ -5694,7 +5694,7 @@ const MapSidebar = ({
                         }`}
 
                       >
-                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-primary to-accent rounded-xl' : 'bg-white rounded-xl'}`}>
+                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-muted-foreground to-muted-foreground rounded-xl' : 'bg-white rounded-xl'}`}>
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
                         <div className="flex items-stretch bg-white rounded-[9px] overflow-hidden" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
