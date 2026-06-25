@@ -4642,6 +4642,7 @@ const MapSidebar = ({
   // 모바일 시트 단계: 0=닫힘(헤더만), 1=2/4(50%), 2=4/4(100%)
   // 매물정보 바를 누르면 0 → 1 → 2 → 0 순환
   const [mobileStep, setMobileStep] = useState<0 | 1 | 2>(0);
+  const [mobileListLimit, setMobileListLimit] = useState(60);
   const [mobileClosing, setMobileClosing] = useState(false);
   const handleMobileClose = () => {
     // 시트만 닫고 선택된 매물 핀은 유지 (사용자 요청)
@@ -4727,6 +4728,9 @@ const MapSidebar = ({
   }, [authUser?.userId]);
   const { favorites, toggleFavorite } = useFavorites();
   const { enabled: favoritesOnly } = useFavoritesOnly();
+  useEffect(() => {
+    if (isMobile) setMobileListLimit(60);
+  }, [isMobile, mobileStep, properties, pinnedIds, favoritesOnly]);
   // 중개회원/관리자용 선택 인쇄 체크박스 상태 (일반회원/게스트는 favorites를 그대로 사용)
   const isAgentForPrint = !isGuest && authUser?.memberType !== "일반회원";
   const [printCheckedIds, setPrintCheckedIds] = useState<Set<number>>(new Set());
@@ -4757,7 +4761,7 @@ const MapSidebar = ({
         .filter((a, i, arr) => !!a && arr.indexOf(a) === i);
       if (allAddrs.length === 0) return;
 
-      const { data } = await supabase.rpc("get_reference_images", { _addresses: allAddrs });
+      const { data } = await supabase.rpc("get_reference_images", { _addresses: isMobile ? allAddrs.slice(0, 80) : allAddrs });
 
       if (!cancelled && data) {
         const map = new Map<string, InactiveUnit[]>();
@@ -4779,7 +4783,7 @@ const MapSidebar = ({
     };
     fetchInactiveRefs();
     return () => { cancelled = true; };
-  }, [properties, referencePool]);
+  }, [properties, referencePool, isMobile]);
 
   // 참고용 사진 찾기 헬퍼: 동일주소 active 매물(전체 풀) → inactive 매물 순
   const findRefImage = useCallback((prop: MapProperty, pool: MapProperty[]) => {
@@ -4853,6 +4857,10 @@ const MapSidebar = ({
       return regB - regA;
     });
   }, [displayProperties, checkedDateBoosts]);
+  const visibleOrderedDisplayProperties = useMemo(
+    () => (isMobile ? orderedDisplayProperties.slice(0, mobileListLimit) : orderedDisplayProperties),
+    [isMobile, orderedDisplayProperties, mobileListLimit],
+  );
 
   // 선택 인쇄: 체크된 매물만, 상세 인쇄: 모든 매물 상세
   const handleSelectPrint = () => {
@@ -5220,7 +5228,8 @@ const MapSidebar = ({
                 borderTopRightRadius: 16,
                 boxShadow: "0 -8px 24px rgba(0,0,0,0.18)",
                 transform: mobileClosing ? "translateY(100%)" : "translateY(0)",
-                transition: "height 0.3s ease, transform 0.3s ease",
+                transition: "transform 0.18s ease",
+                willChange: "transform",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
@@ -5642,7 +5651,7 @@ const MapSidebar = ({
                     </button>
                   </div>
                 )}
-                {orderedDisplayProperties.map((prop, idx) => {
+                {visibleOrderedDisplayProperties.map((prop, idx) => {
                   const buildingMemo = prop.buildingMemo;
                   const roomMemo = prop.roomMemo;
                   const buildingPw = prop.buildingPassword ?? prop.password;
@@ -5651,7 +5660,12 @@ const MapSidebar = ({
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
-                    <div key={prop.id} data-prop-id={prop.id} className="flex flex-col">
+                    <div
+                      key={prop.id}
+                      data-prop-id={prop.id}
+                      className="flex flex-col"
+                      style={isMobile ? ({ contentVisibility: "auto", containIntrinsicSize: "120px" } as any) : undefined}
+                    >
                       <div
                         role="button"
                         tabIndex={0}
@@ -5696,10 +5710,10 @@ const MapSidebar = ({
                                     <img
                                       src={thumbUrl(showImage, 320, 88)}
                                       alt={prop.title}
-                                      loading="eager"
+                                      loading={isMobile ? "lazy" : "eager"}
                                       decoding="async"
                                       referrerPolicy="no-referrer"
-                                      className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isRef ? "opacity-70" : ""}`}
+                                      className={`w-full h-full object-cover ${!isMobile ? "group-hover:scale-105 transition-transform duration-500" : ""} ${isRef ? "opacity-70" : ""}`}
                                       style={{
                                         imageRendering: "auto",
                                         WebkitBackfaceVisibility: "hidden",
@@ -6486,6 +6500,15 @@ const MapSidebar = ({
                     </div>
                   );
                 })}
+                {isMobile && visibleOrderedDisplayProperties.length < orderedDisplayProperties.length && (
+                  <button
+                    type="button"
+                    onClick={() => setMobileListLimit((prev) => prev + 60)}
+                    className="mx-3 mb-4 rounded-lg border border-border bg-white py-2 text-xs font-bold text-foreground shadow-sm"
+                  >
+                    더 보기 ({orderedDisplayProperties.length - visibleOrderedDisplayProperties.length}개)
+                  </button>
+                )}
               </div>
             )}
           </div>

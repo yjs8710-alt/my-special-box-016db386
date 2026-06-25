@@ -9,6 +9,8 @@ const MOBILE_QUERY = "(max-width: 767px)";
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_MAX_DURATION_MS = 420;
 const GESTURE_SETTLE_MS = 80;
+const MOBILE_MAX_RENDER_PROPS = 260;
+const DESKTOP_MAX_RENDER_PROPS = 900;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -163,25 +165,43 @@ function buildClusters(
     });
   }
 
-  // 클러스터 결과가 선택 상태와 무관하게 안정적으로 유지되도록 id 기준 정렬
-  pts.sort((a, b) => a.p.id - b.p.id);
-
   const singles: MapProperty[] = [];
   const clusters: Cluster[] = [];
   const used = new Array(pts.length).fill(false);
   const r2 = radiusPx * radiusPx;
+  const cellSize = Math.max(radiusPx, 1);
+  const grid = new Map<string, number[]>();
+  const cellKey = (x: number, y: number) => `${Math.floor(x / cellSize)}:${Math.floor(y / cellSize)}`;
 
-  for (let i = 0; i < pts.length; i++) {
+  pts.forEach((pt, idx) => {
+    const key = cellKey(pt.x, pt.y);
+    const bucket = grid.get(key);
+    if (bucket) bucket.push(idx);
+    else grid.set(key, [idx]);
+  });
+
+  // id 기준 순회 + 공간 그리드로 주변 셀만 검사해 모바일 줌/드래그 중 O(n²) 렉 방지
+  const order = pts.map((_, i) => i).sort((a, b) => pts[a].p.id - pts[b].p.id);
+  for (const i of order) {
     if (used[i]) continue;
+    const base = pts[i];
     used[i] = true;
-    const group: Pt[] = [pts[i]];
-    for (let j = i + 1; j < pts.length; j++) {
-      if (used[j]) continue;
-      const dx = pts[j].x - pts[i].x;
-      const dy = pts[j].y - pts[i].y;
-      if (dx * dx + dy * dy <= r2) {
-        used[j] = true;
-        group.push(pts[j]);
+    const group: Pt[] = [base];
+    const cx = Math.floor(base.x / cellSize);
+    const cy = Math.floor(base.y / cellSize);
+    for (let gx = cx - 1; gx <= cx + 1; gx++) {
+      for (let gy = cy - 1; gy <= cy + 1; gy++) {
+        const bucket = grid.get(`${gx}:${gy}`);
+        if (!bucket) continue;
+        for (const j of bucket) {
+          if (j === i || used[j]) continue;
+          const dx = pts[j].x - base.x;
+          const dy = pts[j].y - base.y;
+          if (dx * dx + dy * dy <= r2) {
+            used[j] = true;
+            group.push(pts[j]);
+          }
+        }
       }
     }
     if (group.length === 1) {
@@ -405,130 +425,29 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
       } catch (_) {}
 
-      const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
-
-      const handlePinClick = (event: Event, prop: MapProperty) => {
-        if (isMobile && isGestureBlocked()) return;
-        stopMarkerEvent(event);
-        // 겹쳐 있는(픽셀상 핀 반경 내) 매물들을 모두 함께 선택
+      const maxRenderProps = isMobile ? MOBILE_MAX_RENDER_PROPS : DESKTOP_MAX_RENDER_PROPS;
+      if (renderProps.length > maxRenderProps) {
         try {
-          const proj = map.getProjection?.();
-          const pinPx = getPinSize(zoom, isMobile);
-          const threshold = pinPx * 0.9; // 핀 직경에 가까운 영역을 같은 위치로 간주
-          if (proj && proj.pointFromCoords) {
-            const base = proj.pointFromCoords(new window.kakao.maps.LatLng(prop.lat, prop.lng));
-            const overlapIds: number[] = [];
-            renderProps.forEach((p) => {
-              if (!p.lat || !p.lng) return;
-              const pt = proj.pointFromCoords(new window.kakao.maps.LatLng(p.lat, p.lng));
-              if (Math.hypot(pt.x - base.x, pt.y - base.y) <= threshold) {
-                overlapIds.push(p.id);
-              }
-            });
-            if (overlapIds.length > 1 && propsRef.current.onClusterSelect) {
-              propsRef.current.onClusterSelect(overlapIds);
-              return;
-            }
-          }
-        } catch (_) {}
-        propsRef.current.onSelect(prop.id);
-      };
-
-      const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
-        content.style.touchAction = "manipulation";
-        content.style.overflow = "visible";
-        content.onmousedown = stopMarkerEvent;
-        let startX = 0;
-        let startY = 0;
-        let startTime = 0;
-        let startTouchCount = 0;
-        let moved = false;
-        let touchHandled = false;
-        content.ontouchstart = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startX = point.x;
-          startY = point.y;
-          startTime = Date.now();
-          startTouchCount = event.touches.length;
-          moved = false;
-        };
-        content.ontouchmove = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startTouchCount = Math.max(startTouchCount, event.touches.length);
-          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
-            moved = true;
-          }
-        };
-        content.ontouchend = (event) => {
-          touchHandled = true;
-          const point = getTouchPoint(event);
-          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
-          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
-          if (isTap) handlePinClick(event, prop);
-          setTimeout(() => { touchHandled = false; }, 500);
-        };
-        content.onclick = (event) => {
-          if (touchHandled) { event.stopPropagation(); return; }
-          handlePinClick(event, prop);
-        };
-      };
-
-      const handleClusterClick = (cluster: Cluster) => {
-        const ids = cluster.items.map((item) => item.id);
-        if (ids.length === 0) return;
-        if (propsRef.current.onClusterSelect && ids.length > 1) {
-          propsRef.current.onClusterSelect(ids);
-          return;
+          const center = map.getCenter?.();
+          const cLat = center?.getLat?.() ?? 36.6285;
+          const cLng = center?.getLng?.() ?? 127.4568;
+          const selectedProps = renderProps.filter((p) => selSet.has(p.id));
+          const selectedSet = new Set(selectedProps.map((p) => p.id));
+          const nearest = renderProps
+            .filter((p) => !selectedSet.has(p.id))
+            .sort((a, b) => {
+              const da = (a.lat - cLat) ** 2 + (a.lng - cLng) ** 2;
+              const db = (b.lat - cLat) ** 2 + (b.lng - cLng) ** 2;
+              return da - db;
+            })
+            .slice(0, Math.max(0, maxRenderProps - selectedProps.length));
+          renderProps = [...selectedProps, ...nearest];
+        } catch (_) {
+          renderProps = renderProps.slice(0, maxRenderProps);
         }
-        propsRef.current.onSelect(ids[0]);
-      };
+      }
 
-      const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
-        content.style.touchAction = "manipulation";
-        content.style.overflow = "visible";
-        content.onmousedown = stopMarkerEvent;
-        let startX = 0;
-        let startY = 0;
-        let startTime = 0;
-        let startTouchCount = 0;
-        let moved = false;
-        let touchHandled = false;
-        content.ontouchstart = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startX = point.x;
-          startY = point.y;
-          startTime = Date.now();
-          startTouchCount = event.touches.length;
-          moved = false;
-        };
-        content.ontouchmove = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startTouchCount = Math.max(startTouchCount, event.touches.length);
-          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
-            moved = true;
-          }
-        };
-        content.ontouchend = (event) => {
-          touchHandled = true;
-          const point = getTouchPoint(event);
-          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
-          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
-          if (isTap) {
-            stopMarkerEvent(event);
-            handleClusterClick(cluster);
-          }
-          setTimeout(() => { touchHandled = false; }, 500);
-        };
-        content.onclick = (event) => {
-          if (touchHandled) { event.stopPropagation(); return; }
-          stopMarkerEvent(event);
-          handleClusterClick(cluster);
-        };
-      };
+      const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
 
       // 개별 핀 렌더
       singles.forEach((prop) => {
@@ -552,7 +471,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.dataset.sig = sig;
             }
             content.dataset.mapMarkerIds = String(prop.id);
-            bindPinClick(content, prop);
           }
           try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
           return;
@@ -563,7 +481,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
         content.dataset.mapMarkerIds = String(prop.id);
-        bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
@@ -603,7 +520,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
             content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
-            bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
           return;
@@ -615,7 +531,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
         content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
-        bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(posLat, posLng),
