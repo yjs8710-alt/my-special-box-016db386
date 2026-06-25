@@ -36,7 +36,7 @@ import { downloadPropertyImage } from "@/lib/downloadImageWithWatermark";
 import { notifySelf } from "@/lib/notifications";
 import { toast } from "sonner";
 import { formatUnitCount, pickPrimaryCountKey } from "@/lib/buildingUtils";
-import { pushOverlay, popOverlay } from "@/lib/overlayGuard";
+import { pushOverlay, popOverlay, getOverlayCount } from "@/lib/overlayGuard";
 
 interface PropertyDetailPanelProps {
   property: MapProperty | null;
