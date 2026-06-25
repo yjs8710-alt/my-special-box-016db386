@@ -1586,7 +1586,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
     window.history.pushState({ detailPanel: true }, "");
     const onPopState = () => {
       // 채팅 등 더 위에 푸시된 오버레이가 있으면, 그 오버레이가 먼저 닫혀야 함
-      if (hasOpenOverlay && hasOpenOverlay() > 1) return;
+      if (getOverlayCount() > 1) return;
       onClose();
     };
     window.addEventListener("popstate", onPopState);
