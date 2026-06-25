@@ -42,7 +42,9 @@ export const useExitConfirm = (enabled: boolean = true) => {
     if (!enabled) return;
     if (isNativeRef.current) return;
     const ua = navigator.userAgent || "";
-    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return;
+    const isMobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth <= 768;
+    if (!isMobileUA && !isMobileViewport) return;
     if (!isHome) return;
 
     try { window.history.pushState({ exitGuard: true }, ""); } catch {}

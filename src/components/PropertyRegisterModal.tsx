@@ -816,7 +816,9 @@ export default function PropertyRegisterModal({ onClose, prefill }: Props) {
       const isCollective = form.buildingType === "집합건물" || COLLECTIVE_DETAIL_TYPES.some((t) => t === form.detailType);
       const unitVal = form.unitNo || null;
 
-      if (hasContact) {
+      // 집합건물은 호수별로 저장되도록 호수 필수
+      const canSaveContact = hasContact && (!isCollective || !!unitVal);
+      if (canSaveContact) {
         const extraList = [form.contactOwner2, ...form.extraOwners].filter(Boolean);
         const extraMemo = extraList.length > 0 ? `EXTRA_OWNERS:[${extraList.join(",")}]` : null;
         const upsertPayload: Record<string, unknown> = {

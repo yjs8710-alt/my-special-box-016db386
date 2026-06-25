@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
@@ -644,6 +648,7 @@ const MyPage = () => {
 const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   const { favorites, toggleFavorite, clearFavorites } = useFavorites();
   const navigate = useNavigate();
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   // 관심목록 키 목록 가져오기 (string 변환)
   const favoriteSignature = Array.from(favorites).map(String).sort().join("|");
@@ -742,13 +747,32 @@ const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
                 size="sm"
                 variant="ghost"
                 className="text-xs text-muted-foreground"
-                onClick={() => {
-                  if (confirm("관심목록을 전부 비우시겠습니까?")) clearFavorites();
-                }}
+                onClick={() => setConfirmClearOpen(true)}
               >
                 <Trash2 className="w-3.5 h-3.5 mr-1" /> 전체 비우기
               </Button>
             </div>
+            <AlertDialog open={confirmClearOpen} onOpenChange={setConfirmClearOpen}>
+              <AlertDialogContent className="max-w-sm">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>관심목록을 전부 비우시겠습니까?</AlertDialogTitle>
+                  <AlertDialogDescription className="sr-only">
+                    저장된 모든 관심 매물이 삭제됩니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-row gap-2 sm:gap-2">
+                  <AlertDialogCancel className="flex-1 m-0 bg-gradient-to-r from-slate-200 to-slate-300 hover:from-slate-300 hover:to-slate-400 text-slate-800 border-0">
+                    취소
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                    onClick={() => clearFavorites()}
+                  >
+                    확인
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <div className="space-y-2">
               {dbItems.map((p) => {
                 const addr = p.address || [p.dong, p.lot_number].filter(Boolean).join(" ");
