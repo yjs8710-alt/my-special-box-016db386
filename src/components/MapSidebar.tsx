@@ -5687,9 +5687,9 @@ const MapSidebar = ({
                             setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                           }
                         }}
-                        className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
+                        className={`w-full text-left transition-all group overflow-hidden rounded-[9px] bg-white cursor-pointer ${
                           selectedId === prop.id
-                            ? "ring-[3px] ring-inset ring-primary shadow-lg"
+                            ? "shadow-lg"
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-inset hover:ring-primary/30"
                         }`}
 
