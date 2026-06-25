@@ -31,7 +31,11 @@ type PropFull = {
   building_memo: string | null;
   room_memo: string | null;
   agent_name: string | null;
+  images: string[] | null;
 };
+
+const replaceOwnerTerm = (s: string | null | undefined) =>
+  (s ?? "").replace(/건물주/g, "소유주");
 
 const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="flex flex-col gap-0.5 min-w-0">
