@@ -65,10 +65,12 @@
     <script>
       (function(){
         var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+        var isCapacitor = !!(window.Capacitor || /Capacitor/i.test(navigator.userAgent||''));
         var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
         var el = document.getElementById('zibda-splash');
         if (!el) return;
-        if (!isMobile || isStandalone) { el.parentNode && el.parentNode.removeChild(el); return; }
+        // 설치된 앱(PWA/Capacitor) 또는 데스크톱에서는 스플래시 즉시 제거
+        if (!isMobile || isStandalone || isCapacitor) { el.parentNode && el.parentNode.removeChild(el); return; }
         var hide = function(){ el.classList.add('hide'); setTimeout(function(){ el.parentNode && el.parentNode.removeChild(el); }, 400); };
         window.addEventListener('load', function(){ setTimeout(hide, 600); });
         setTimeout(hide, 2500);
