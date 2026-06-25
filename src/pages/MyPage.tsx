@@ -527,14 +527,16 @@ const MyPage = () => {
                             {new Date(i.created_at).toLocaleString("ko-KR")}
                           </span>
                           <div className="flex items-center gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 text-xs gap-1"
-                              onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
-                            >
-                              상세
-                            </Button>
+                            {!isGeneralMember && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs gap-1"
+                                onClick={() => navigate(`/notifications?inquiry=${i.id}`)}
+                              >
+                                상세
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="ghost"
