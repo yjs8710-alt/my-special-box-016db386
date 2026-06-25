@@ -71,7 +71,7 @@ const NotificationBell = ({ variant = "desktop" }: Props) => {
     >
       <img src={iconBellNeon} alt="알림" className="w-16 h-16 object-contain" />
       {count > 0 && (
-        <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground ring-2 ring-[hsl(var(--header-bg))]">
+        <span className="absolute top-3 right-2 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center bg-destructive text-destructive-foreground ring-2 ring-[hsl(var(--header-bg))]">
           {count > 99 ? "99+" : count}
         </span>
       )}
