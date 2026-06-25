@@ -146,6 +146,26 @@ const NotificationsPage = () => {
         } catch (e) { console.warn("[owner phone]", e); }
       }
     }
+    let inquirerKind: InquiryDetail["inquirer_kind"] = d.user_id ? "일반회원" : "게스트";
+    if (d.user_id) {
+      try {
+        const { data: prof } = await supabase
+          .from("agent_profiles")
+          .select("member_type")
+          .eq("user_id", d.user_id)
+          .maybeSingle();
+        const mt = (prof as any)?.member_type as string | undefined;
+        if (mt === "대표중개사" || mt === "소속중개사" || mt === "중개보조원") inquirerKind = "중개사";
+        else if (mt === "일반회원") inquirerKind = "일반회원";
+        const { data: roleRow } = await (supabase as any)
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", d.user_id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleRow) inquirerKind = "관리자";
+      } catch (e) { /* noop */ }
+    }
     setDetail({
       id: d.id,
       name: d.name,
@@ -161,6 +181,7 @@ const NotificationsPage = () => {
       property_building: building,
       owner_phone: ownerPhone,
       user_id: d.user_id ?? null,
+      inquirer_kind: inquirerKind,
     });
   }, []);
 
