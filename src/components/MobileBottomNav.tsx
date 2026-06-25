@@ -24,7 +24,7 @@ const MobileBottomNav = () => {
   const hideAgent = isGuest || user?.memberType === "일반회원";
   const visibleItems = ITEMS.filter((it) => !(it.agentOnly && hideAgent));
 
-  const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property"];
+  const HIDDEN_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/admin", "/share", "/property", "/company", "/terms", "/privacy", "/support"];
   if (HIDDEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
 
 

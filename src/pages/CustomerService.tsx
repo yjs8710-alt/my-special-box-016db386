@@ -16,7 +16,7 @@ const CustomerService = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex flex-col pb-20 md:pb-0" style={{ background: "hsl(var(--background))" }}>
+    <div className="min-h-screen flex flex-col pb-36 md:pb-0" style={{ background: "hsl(var(--background))" }}>
       <main className="flex-1">
         {/* Hero */}
         <section
