@@ -2449,14 +2449,14 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
       <div className="flex items-center">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+          onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
           className="text-xs text-black font-bold px-2 py-0.5 rounded whitespace-nowrap select-none"
           style={{ background: "hsl(var(--muted))", border: "1.5px solid hsl(var(--border))" }}
         >
           옵션·시설 ▾
         </button>
       </div>
-      {open && (
+      {open && createPortal(
         <div
           className="fixed inset-x-0 top-0 bottom-[calc(86px+env(safe-area-inset-bottom,0px))] sm:inset-0 z-[10400] flex items-end sm:items-center justify-center bg-black/40"
           onClick={(e) => { e.stopPropagation(); setOpen(false); }}
@@ -2474,9 +2474,11 @@ const GuestOptionsButton = ({ chips }: { chips: string[] }) => {
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
+
   );
 };
 
