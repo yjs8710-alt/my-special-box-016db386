@@ -1045,7 +1045,9 @@ const AdminPropertyFormModal = ({ initial, onClose, onSaved }: AdminPropertyForm
       const isCollectiveType = form.buildingType === "집합건물" || COLLECTIVE_TYPES.some((t) => t === form.type);
       const unitVal = form.unit_number || null;
 
-      if (finalDong && hasAnyContact) {
+      // 집합건물은 호수별로 저장되도록 호수 필수
+      const canSaveCheongju = finalDong && hasAnyContact && (!isCollectiveType || !!unitVal);
+      if (canSaveCheongju) {
         const contactDistrict = form.district ?? "";
         const lotNum = finalLotNumber ?? "";
 
