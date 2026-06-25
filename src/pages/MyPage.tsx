@@ -648,6 +648,7 @@ const MyPage = () => {
 const FavoritesPanel = ({ onGo }: { onGo: () => void }) => {
   const { favorites, toggleFavorite, clearFavorites } = useFavorites();
   const navigate = useNavigate();
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   // 관심목록 키 목록 가져오기 (string 변환)
   const favoriteSignature = Array.from(favorites).map(String).sort().join("|");
