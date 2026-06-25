@@ -5694,6 +5694,7 @@ const MapSidebar = ({
                         }`}
 
                       >
+                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-primary to-accent rounded-xl' : 'rounded-xl'}`}>
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
                         <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
