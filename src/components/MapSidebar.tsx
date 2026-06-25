@@ -5687,13 +5687,14 @@ const MapSidebar = ({
                             setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                           }
                         }}
-                        className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
+                        className={`w-full text-left transition-all group overflow-hidden rounded-[9px] bg-white cursor-pointer ${
                           selectedId === prop.id
-                            ? "ring-[3px] ring-inset ring-primary shadow-lg"
+                            ? "shadow-lg"
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-inset hover:ring-primary/30"
                         }`}
 
                       >
+                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-primary to-accent rounded-xl' : 'rounded-xl'}`}>
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
                         <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
@@ -6031,6 +6032,7 @@ const MapSidebar = ({
                           />
                         </div>
                       </div>
+                    </div>
 
                       {/* 선택 시 액션 버튼들 — 카드 너비에 균등 배분 */}
                       {expandedCardId === prop.id && isMobile && (() => {
