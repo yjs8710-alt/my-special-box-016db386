@@ -158,17 +158,7 @@ const Header = ({ onRegisterChange, onMenuOpenChange }: HeaderProps) => {
 
             {/* 홈에서만 채팅 아이콘을 우측으로 밀어주는 공간 */}
             {isHome && isAuthorized && (
-              <div className="hidden md:flex items-center ml-auto">
-                <button
-                  onClick={() => navigate("/chat")}
-                  className="flex items-center gap-1"
-                  aria-label="채팅 문의"
-                  title="채팅 문의"
-                >
-                  <img src={iconChatNeon} alt="채팅문의" className="w-16 h-16 object-contain" />
-                  <span className="text-[12px] font-bold text-white">채팅문의</span>
-                </button>
-              </div>
+              <div className="hidden md:flex items-center ml-auto" />
             )}
 
             {/* 우측 액션 (홈에서는 숨김) */}
