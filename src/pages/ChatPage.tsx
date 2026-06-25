@@ -28,6 +28,7 @@ type PropInfo = { id: string; address: string | null; building_name: string | nu
 
 const ChatPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthorized, isLoading, user } = useAuth();
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [props, setProps] = useState<Record<string, PropInfo>>({});
