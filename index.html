@@ -54,7 +54,27 @@
 </head>
 
   <body>
+    <style>
+      #zibda-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0b1e4d 0%,#1e3a8a 45%,#f97316 100%);transition:opacity .35s ease;}
+      #zibda-splash.hide{opacity:0;pointer-events:none;}
+      #zibda-splash .z-logo{font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;font-weight:800;font-size:54px;letter-spacing:-0.02em;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.25);animation:zPulse 1.4s ease-in-out infinite;}
+      @keyframes zPulse{0%,100%{transform:scale(1);opacity:.95;}50%{transform:scale(1.05);opacity:1;}}
+      @media (min-width: 768px){#zibda-splash{display:none;}}
+    </style>
+    <div id="zibda-splash"><div class="z-logo">Zibda</div></div>
+    <script>
+      (function(){
+        var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
+        var el = document.getElementById('zibda-splash');
+        if (!el) return;
+        if (!isMobile) { el.parentNode && el.parentNode.removeChild(el); return; }
+        var hide = function(){ el.classList.add('hide'); setTimeout(function(){ el.parentNode && el.parentNode.removeChild(el); }, 400); };
+        window.addEventListener('load', function(){ setTimeout(hide, 600); });
+        setTimeout(hide, 2500);
+      })();
+    </script>
     <div id="root"></div>
+
     <script>
       (function () {
         try {

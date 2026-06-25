@@ -21,26 +21,60 @@ const Home = () => {
   useEffect(() => {
     const ua = navigator.userAgent || "";
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+    const INSTALLED_KEY = "jibda_pwa_installed_v1";
 
-    const checkInstalled = () => {
+    const markInstalled = () => {
+      try { localStorage.setItem(INSTALLED_KEY, "1"); } catch {}
+      setHideInstallButton(true);
+    };
+
+    const checkInstalled = async () => {
       const isStandalone =
         window.matchMedia?.("(display-mode: standalone)").matches ||
         window.matchMedia?.("(display-mode: fullscreen)").matches ||
         window.matchMedia?.("(display-mode: minimal-ui)").matches ||
-        // iOS Safari
         (window.navigator as any).standalone === true ||
-        // Android TWA
         document.referrer.startsWith("android-app://");
 
-      // 모바일이면서 앱(스탠드얼론)으로 실행 중이면 버튼 숨김
-      setHideInstallButton(isMobile && isStandalone);
+      if (isStandalone) {
+        markInstalled();
+        return;
+      }
+
+      // 과거에 설치 감지된 적이 있으면 계속 숨김
+      try {
+        if (localStorage.getItem(INSTALLED_KEY) === "1") {
+          setHideInstallButton(true);
+          return;
+        }
+      } catch {}
+
+      // Chrome/Android: 설치된 관련 PWA 조회
+      try {
+        const nav: any = navigator;
+        if (typeof nav.getInstalledRelatedApps === "function") {
+          const apps = await nav.getInstalledRelatedApps();
+          if (Array.isArray(apps) && apps.length > 0) {
+            markInstalled();
+            return;
+          }
+        }
+      } catch {}
+
+      // 데스크톱은 버튼 노출 의미 없음 → 숨김
+      setHideInstallButton(!isMobile);
     };
 
     checkInstalled();
     const mql = window.matchMedia?.("(display-mode: standalone)");
     mql?.addEventListener?.("change", checkInstalled);
-    return () => mql?.removeEventListener?.("change", checkInstalled);
+    window.addEventListener("appinstalled", markInstalled);
+    return () => {
+      mql?.removeEventListener?.("change", checkInstalled);
+      window.removeEventListener("appinstalled", markInstalled);
+    };
   }, []);
+
 
 
   return (
