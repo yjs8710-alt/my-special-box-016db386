@@ -66,7 +66,7 @@ const StaffPropertyDetailModal = ({ propertyId, onClose }: Props) => {
       const { data: p } = await (supabase as any)
         .from("properties")
         .select(
-          "id, reg_no, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name"
+          "id, reg_no, address, dong, lot_number, unit_number, building_name, type, room_type, floor, area, deposit, monthly, manage_fee, parking, elevator, available_from, note, description, building_memo, room_memo, agent_name, images"
         )
         .eq("id", propertyId)
         .maybeSingle();
