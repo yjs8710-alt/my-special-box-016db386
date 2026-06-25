@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, MessageCircle, Send, Building2, Hash, ExternalLink, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -28,6 +28,7 @@ type PropInfo = { id: string; address: string | null; building_name: string | nu
 
 const ChatPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthorized, isLoading, user } = useAuth();
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [props, setProps] = useState<Record<string, PropInfo>>({});
@@ -66,6 +67,16 @@ const ChatPage = () => {
   }, [user?.userId]);
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
+
+  // 알림에서 ?c=<conversation_id>로 진입 시 해당 대화 자동 열기
+  useEffect(() => {
+    const cid = searchParams.get("c");
+    if (!cid) return;
+    if (conversations.some((c) => c.id === cid)) {
+      setActiveId(cid);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, conversations, setSearchParams]);
 
   // 실시간
   useEffect(() => {

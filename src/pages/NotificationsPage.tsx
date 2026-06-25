@@ -42,6 +42,7 @@ type InquiryDetail = {
   property_building?: string | null;
   owner_phone?: string | null;
   user_id?: string | null;
+  inquirer_kind?: "게스트" | "일반회원" | "중개사" | "관리자" | null;
 };
 
 const NotificationsPage = () => {
@@ -145,6 +146,26 @@ const NotificationsPage = () => {
         } catch (e) { console.warn("[owner phone]", e); }
       }
     }
+    let inquirerKind: InquiryDetail["inquirer_kind"] = d.user_id ? "일반회원" : "게스트";
+    if (d.user_id) {
+      try {
+        const { data: prof } = await supabase
+          .from("agent_profiles")
+          .select("member_type")
+          .eq("user_id", d.user_id)
+          .maybeSingle();
+        const mt = (prof as any)?.member_type as string | undefined;
+        if (mt === "대표중개사" || mt === "소속중개사" || mt === "중개보조원") inquirerKind = "중개사";
+        else if (mt === "일반회원") inquirerKind = "일반회원";
+        const { data: roleRow } = await (supabase as any)
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", d.user_id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleRow) inquirerKind = "관리자";
+      } catch (e) { /* noop */ }
+    }
     setDetail({
       id: d.id,
       name: d.name,
@@ -160,6 +181,7 @@ const NotificationsPage = () => {
       property_building: building,
       owner_phone: ownerPhone,
       user_id: d.user_id ?? null,
+      inquirer_kind: inquirerKind,
     });
   }, []);
 
@@ -368,9 +390,19 @@ const NotificationsPage = () => {
               )}
 
               {/* 문의자 정보 */}
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-sm flex-wrap">
                 <User2 className="w-4 h-4 text-muted-foreground" />
                 <span className="font-semibold">{detail.name}</span>
+                {detail.inquirer_kind && (
+                  <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
+                    detail.inquirer_kind === "게스트" ? "bg-amber-100 text-amber-700 border border-amber-300"
+                    : detail.inquirer_kind === "일반회원" ? "bg-sky-100 text-sky-700 border border-sky-300"
+                    : detail.inquirer_kind === "중개사" ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+                    : "bg-rose-100 text-rose-700 border border-rose-300"
+                  }`}>
+                    {detail.inquirer_kind}
+                  </span>
+                )}
                 <a
                   href={`tel:${detail.phone.replace(/[^0-9]/g, "")}`}
                   className="ml-auto flex items-center gap-1 text-sm font-bold text-primary"
