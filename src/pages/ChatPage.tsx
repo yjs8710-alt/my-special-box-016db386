@@ -68,6 +68,16 @@ const ChatPage = () => {
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
+  // 알림에서 ?c=<conversation_id>로 진입 시 해당 대화 자동 열기
+  useEffect(() => {
+    const cid = searchParams.get("c");
+    if (!cid) return;
+    if (conversations.some((c) => c.id === cid)) {
+      setActiveId(cid);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, conversations, setSearchParams]);
+
   // 실시간
   useEffect(() => {
     if (!user?.userId) return;
