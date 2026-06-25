@@ -29,7 +29,7 @@ const Overlay = ({ onClose, children }: { onClose: () => void; children: React.R
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
