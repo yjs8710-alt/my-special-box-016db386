@@ -54,12 +54,20 @@
 </head>
 
   <body>
+    <script>
+      (function(){
+        var ua = navigator.userAgent || '';
+        var skip = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true || !!(window.Capacitor || /Capacitor|wv|; wv\)/i.test(ua)) || location.protocol === 'capacitor:' || location.protocol === 'ionic:';
+        if (skip) document.documentElement.classList.add('zibda-no-splash');
+      })();
+    </script>
     <style>
       #zibda-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22d3ee 0%,#a855f7 52%,#ec4899 100%);transition:opacity .25s ease;}
       #zibda-splash.hide{opacity:0;pointer-events:none;}
       #zibda-splash .z-logo{font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;font-weight:800;font-size:54px;letter-spacing:-0.02em;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.25);animation:zPulse 1.4s ease-in-out infinite;}
       @keyframes zPulse{0%,100%{transform:scale(1);opacity:.95;}50%{transform:scale(1.05);opacity:1;}}
       @media (min-width: 768px){#zibda-splash{display:none;}}
+      html.zibda-no-splash #zibda-splash{display:none!important;}
       @media (display-mode: standalone){#zibda-splash{display:none!important;}}
     </style>
     <div id="zibda-splash"><div class="z-logo">Zibda</div></div>
