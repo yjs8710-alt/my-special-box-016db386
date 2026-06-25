@@ -5228,7 +5228,8 @@ const MapSidebar = ({
                 borderTopRightRadius: 16,
                 boxShadow: "0 -8px 24px rgba(0,0,0,0.18)",
                 transform: mobileClosing ? "translateY(100%)" : "translateY(0)",
-                transition: "height 0.3s ease, transform 0.3s ease",
+                transition: "transform 0.18s ease",
+                willChange: "transform",
                 overflow: "hidden",
                 display: "flex",
                 flexDirection: "column",
@@ -5659,7 +5660,12 @@ const MapSidebar = ({
                   const chkDate = prop.checkedDate;
                   const isDealCompleted = dealCompletedIds.has(prop.dbId || String(prop.id));
                   return (
-                    <div key={prop.id} data-prop-id={prop.id} className="flex flex-col">
+                    <div
+                      key={prop.id}
+                      data-prop-id={prop.id}
+                      className="flex flex-col"
+                      style={isMobile ? { contentVisibility: "auto", containIntrinsicSize: "120px" } : undefined}
+                    >
                       <div
                         role="button"
                         tabIndex={0}
