@@ -9,6 +9,8 @@ const MOBILE_QUERY = "(max-width: 767px)";
 const TAP_MOVE_THRESHOLD_PX = 10;
 const TAP_MAX_DURATION_MS = 420;
 const GESTURE_SETTLE_MS = 80;
+const MOBILE_MAX_RENDER_PROPS = 260;
+const DESKTOP_MAX_RENDER_PROPS = 900;
 
 const TYPE_COLORS: Record<string, string> = {
   "상가": "#1e40af",
@@ -163,25 +165,44 @@ function buildClusters(
     });
   }
 
-  // 클러스터 결과가 선택 상태와 무관하게 안정적으로 유지되도록 id 기준 정렬
-  pts.sort((a, b) => a.p.id - b.p.id);
-
   const singles: MapProperty[] = [];
   const clusters: Cluster[] = [];
+  const groups = new Map<number, Pt[]>();
   const used = new Array(pts.length).fill(false);
   const r2 = radiusPx * radiusPx;
+  const cellSize = Math.max(radiusPx, 1);
+  const grid = new Map<string, number[]>();
+  const cellKey = (x: number, y: number) => `${Math.floor(x / cellSize)}:${Math.floor(y / cellSize)}`;
 
-  for (let i = 0; i < pts.length; i++) {
+  pts.forEach((pt, idx) => {
+    const key = cellKey(pt.x, pt.y);
+    const bucket = grid.get(key);
+    if (bucket) bucket.push(idx);
+    else grid.set(key, [idx]);
+  });
+
+  // id 기준 순회 + 공간 그리드로 주변 셀만 검사해 모바일 줌/드래그 중 O(n²) 렉 방지
+  const order = pts.map((_, i) => i).sort((a, b) => pts[a].p.id - pts[b].p.id);
+  for (const i of order) {
     if (used[i]) continue;
+    const base = pts[i];
     used[i] = true;
-    const group: Pt[] = [pts[i]];
-    for (let j = i + 1; j < pts.length; j++) {
-      if (used[j]) continue;
-      const dx = pts[j].x - pts[i].x;
-      const dy = pts[j].y - pts[i].y;
-      if (dx * dx + dy * dy <= r2) {
-        used[j] = true;
-        group.push(pts[j]);
+    const group: Pt[] = [base];
+    const cx = Math.floor(base.x / cellSize);
+    const cy = Math.floor(base.y / cellSize);
+    for (let gx = cx - 1; gx <= cx + 1; gx++) {
+      for (let gy = cy - 1; gy <= cy + 1; gy++) {
+        const bucket = grid.get(`${gx}:${gy}`);
+        if (!bucket) continue;
+        for (const j of bucket) {
+          if (j === i || used[j]) continue;
+          const dx = pts[j].x - base.x;
+          const dy = pts[j].y - base.y;
+          if (dx * dx + dy * dy <= r2) {
+            used[j] = true;
+            group.push(pts[j]);
+          }
+        }
       }
     }
     if (group.length === 1) {
@@ -405,6 +426,28 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         }
       } catch (_) {}
 
+      const maxRenderProps = isMobile ? MOBILE_MAX_RENDER_PROPS : DESKTOP_MAX_RENDER_PROPS;
+      if (renderProps.length > maxRenderProps) {
+        try {
+          const center = map.getCenter?.();
+          const cLat = center?.getLat?.() ?? 36.6285;
+          const cLng = center?.getLng?.() ?? 127.4568;
+          const selectedProps = renderProps.filter((p) => selSet.has(p.id));
+          const selectedSet = new Set(selectedProps.map((p) => p.id));
+          const nearest = renderProps
+            .filter((p) => !selectedSet.has(p.id))
+            .sort((a, b) => {
+              const da = (a.lat - cLat) ** 2 + (a.lng - cLng) ** 2;
+              const db = (b.lat - cLat) ** 2 + (b.lng - cLng) ** 2;
+              return da - db;
+            })
+            .slice(0, Math.max(0, maxRenderProps - selectedProps.length));
+          renderProps = [...selectedProps, ...nearest];
+        } catch (_) {
+          renderProps = renderProps.slice(0, maxRenderProps);
+        }
+      }
+
       const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
 
       const handlePinClick = (event: Event, prop: MapProperty) => {
@@ -552,7 +595,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
               content.dataset.sig = sig;
             }
             content.dataset.mapMarkerIds = String(prop.id);
-            bindPinClick(content, prop);
           }
           try { prev.setZIndex(isSelected ? 1000 : 0); } catch (_) {}
           return;
@@ -563,7 +605,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.style.cssText = `cursor:pointer;touch-action:${isMobile ? "auto" : "manipulation"};`;
         content.dataset.sig = `pin|${isSelected ? 1 : 0}|${zoom}|${prop.type}|${isMobile ? 1 : 0}`;
         content.dataset.mapMarkerIds = String(prop.id);
-        bindPinClick(content, prop);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(prop.lat, prop.lng),
@@ -603,7 +644,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
             }
             content.dataset.ids = c.items.map(it => it.id).join(",");
             content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
-            bindClusterClick(content, c);
           }
           try { prev.setZIndex(isClusterSelected ? 1000 : 500); } catch (_) {}
           return;
@@ -615,7 +655,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
         content.dataset.sig = `cluster|${count}|${zoom}|${isClusterSelected ? 1 : 0}|${isMobile ? 1 : 0}`;
         content.dataset.ids = c.items.map(it => it.id).join(",");
         content.dataset.mapMarkerIds = c.items.map(it => it.id).join(",");
-        bindClusterClick(content, c);
 
         const overlay = new window.kakao.maps.CustomOverlay({
           position: new window.kakao.maps.LatLng(posLat, posLng),

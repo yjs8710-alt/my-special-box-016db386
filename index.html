@@ -55,25 +55,26 @@
 
   <body>
     <style>
-      #zibda-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#081d42 0%,#0d2347 55%,#f97316 100%);transition:opacity .35s ease;}
+      #zibda-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22d3ee 0%,#a855f7 52%,#ec4899 100%);transition:opacity .25s ease;}
       #zibda-splash.hide{opacity:0;pointer-events:none;}
       #zibda-splash .z-logo{font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;font-weight:800;font-size:54px;letter-spacing:-0.02em;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.25);animation:zPulse 1.4s ease-in-out infinite;}
       @keyframes zPulse{0%,100%{transform:scale(1);opacity:.95;}50%{transform:scale(1.05);opacity:1;}}
       @media (min-width: 768px){#zibda-splash{display:none;}}
+      @media (display-mode: standalone){#zibda-splash{display:none!important;}}
     </style>
     <div id="zibda-splash"><div class="z-logo">Zibda</div></div>
     <script>
       (function(){
         var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-        var isCapacitor = !!(window.Capacitor || /Capacitor/i.test(navigator.userAgent||''));
+        var isCapacitor = !!(window.Capacitor || /Capacitor|wv|; wv\)/i.test(navigator.userAgent||'') || location.protocol === 'capacitor:' || location.protocol === 'ionic:');
         var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
         var el = document.getElementById('zibda-splash');
         if (!el) return;
         // 설치된 앱(PWA/Capacitor) 또는 데스크톱에서는 스플래시 즉시 제거
         if (!isMobile || isStandalone || isCapacitor) { el.parentNode && el.parentNode.removeChild(el); return; }
         var hide = function(){ el.classList.add('hide'); setTimeout(function(){ el.parentNode && el.parentNode.removeChild(el); }, 400); };
-        window.addEventListener('load', function(){ setTimeout(hide, 600); });
-        setTimeout(hide, 2500);
+        window.addEventListener('load', function(){ setTimeout(hide, 250); });
+        setTimeout(hide, 1200);
       })();
     </script>
     <div id="root"></div>
