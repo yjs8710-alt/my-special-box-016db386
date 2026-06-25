@@ -5689,9 +5689,10 @@ const MapSidebar = ({
                         }}
                         className={`w-full text-left transition-all group rounded-xl overflow-hidden bg-white cursor-pointer ${
                           selectedId === prop.id
-                            ? "ring-2 ring-primary shadow-lg"
-                            : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-primary/30"
+                            ? "ring-[3px] ring-inset ring-primary shadow-lg"
+                            : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-inset hover:ring-primary/30"
                         }`}
+
                       >
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
                         <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
