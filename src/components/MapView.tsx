@@ -167,7 +167,6 @@ function buildClusters(
 
   const singles: MapProperty[] = [];
   const clusters: Cluster[] = [];
-  const groups = new Map<number, Pt[]>();
   const used = new Array(pts.length).fill(false);
   const r2 = radiusPx * radiusPx;
   const cellSize = Math.max(radiusPx, 1);
@@ -449,129 +448,6 @@ const MapView = ({ properties, selectedId, selectedIds, onSelect, onBoundsChange
       }
 
       const { clusters, singles } = buildClusters(renderProps, zoom, selSet, map, isMobile);
-
-      const handlePinClick = (event: Event, prop: MapProperty) => {
-        if (isMobile && isGestureBlocked()) return;
-        stopMarkerEvent(event);
-        // 겹쳐 있는(픽셀상 핀 반경 내) 매물들을 모두 함께 선택
-        try {
-          const proj = map.getProjection?.();
-          const pinPx = getPinSize(zoom, isMobile);
-          const threshold = pinPx * 0.9; // 핀 직경에 가까운 영역을 같은 위치로 간주
-          if (proj && proj.pointFromCoords) {
-            const base = proj.pointFromCoords(new window.kakao.maps.LatLng(prop.lat, prop.lng));
-            const overlapIds: number[] = [];
-            renderProps.forEach((p) => {
-              if (!p.lat || !p.lng) return;
-              const pt = proj.pointFromCoords(new window.kakao.maps.LatLng(p.lat, p.lng));
-              if (Math.hypot(pt.x - base.x, pt.y - base.y) <= threshold) {
-                overlapIds.push(p.id);
-              }
-            });
-            if (overlapIds.length > 1 && propsRef.current.onClusterSelect) {
-              propsRef.current.onClusterSelect(overlapIds);
-              return;
-            }
-          }
-        } catch (_) {}
-        propsRef.current.onSelect(prop.id);
-      };
-
-      const bindPinClick = (content: HTMLDivElement, prop: MapProperty) => {
-        content.style.touchAction = "manipulation";
-        content.style.overflow = "visible";
-        content.onmousedown = stopMarkerEvent;
-        let startX = 0;
-        let startY = 0;
-        let startTime = 0;
-        let startTouchCount = 0;
-        let moved = false;
-        let touchHandled = false;
-        content.ontouchstart = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startX = point.x;
-          startY = point.y;
-          startTime = Date.now();
-          startTouchCount = event.touches.length;
-          moved = false;
-        };
-        content.ontouchmove = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startTouchCount = Math.max(startTouchCount, event.touches.length);
-          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
-            moved = true;
-          }
-        };
-        content.ontouchend = (event) => {
-          touchHandled = true;
-          const point = getTouchPoint(event);
-          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
-          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
-          if (isTap) handlePinClick(event, prop);
-          setTimeout(() => { touchHandled = false; }, 500);
-        };
-        content.onclick = (event) => {
-          if (touchHandled) { event.stopPropagation(); return; }
-          handlePinClick(event, prop);
-        };
-      };
-
-      const handleClusterClick = (cluster: Cluster) => {
-        const ids = cluster.items.map((item) => item.id);
-        if (ids.length === 0) return;
-        if (propsRef.current.onClusterSelect && ids.length > 1) {
-          propsRef.current.onClusterSelect(ids);
-          return;
-        }
-        propsRef.current.onSelect(ids[0]);
-      };
-
-      const bindClusterClick = (content: HTMLDivElement, cluster: Cluster) => {
-        content.style.touchAction = "manipulation";
-        content.style.overflow = "visible";
-        content.onmousedown = stopMarkerEvent;
-        let startX = 0;
-        let startY = 0;
-        let startTime = 0;
-        let startTouchCount = 0;
-        let moved = false;
-        let touchHandled = false;
-        content.ontouchstart = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startX = point.x;
-          startY = point.y;
-          startTime = Date.now();
-          startTouchCount = event.touches.length;
-          moved = false;
-        };
-        content.ontouchmove = (event) => {
-          const point = getTouchPoint(event);
-          if (!point) return;
-          startTouchCount = Math.max(startTouchCount, event.touches.length);
-          if (event.touches.length > 1 || Math.hypot(point.x - startX, point.y - startY) > TAP_MOVE_THRESHOLD_PX) {
-            moved = true;
-          }
-        };
-        content.ontouchend = (event) => {
-          touchHandled = true;
-          const point = getTouchPoint(event);
-          const distance = point ? Math.hypot(point.x - startX, point.y - startY) : 999;
-          const isTap = startTouchCount === 1 && !moved && distance <= TAP_MOVE_THRESHOLD_PX && Date.now() - startTime <= TAP_MAX_DURATION_MS && !isGestureBlocked();
-          if (isTap) {
-            stopMarkerEvent(event);
-            handleClusterClick(cluster);
-          }
-          setTimeout(() => { touchHandled = false; }, 500);
-        };
-        content.onclick = (event) => {
-          if (touchHandled) { event.stopPropagation(); return; }
-          stopMarkerEvent(event);
-          handleClusterClick(cluster);
-        };
-      };
 
       // 개별 핀 렌더
       singles.forEach((prop) => {
