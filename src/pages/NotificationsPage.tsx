@@ -86,36 +86,10 @@ const NotificationsPage = () => {
     return () => { supabase.removeChannel(ch); };
   }, [user?.userId, load]);
 
-  const openChatFromConversation = useCallback(async (cid: string) => {
-    const { data: conv } = await supabase
-      .from("chat_conversations")
-      .select("id, agent_user_id, property_id, user_name")
-      .eq("id", cid)
-      .maybeSingle();
-    if (!conv) return;
-    let propertyTitle: string | undefined;
-    if (conv.property_id) {
-      const { data: prop } = await supabase
-        .from("properties")
-        .select("reg_no, dong, lot_number")
-        .eq("id", conv.property_id)
-        .maybeSingle();
-      if (prop) {
-        const reg = prop.reg_no ? `[NO.${prop.reg_no}] ` : "";
-        const addr = [prop.dong, prop.lot_number].filter(Boolean).join(" ");
-        propertyTitle = `${reg}${addr}`.trim() || undefined;
-      }
-    }
-    window.dispatchEvent(new CustomEvent("open-chat-inquiry", {
-      detail: {
-        conversationId: cid,
-        agentUserId: conv.agent_user_id,
-        propertyId: conv.property_id,
-        propertyTitle,
-        agentName: conv.user_name,
-      },
-    }));
-  }, []);
+  const openChatFromConversation = useCallback((cid: string) => {
+    // 우측 떠있는 채팅 위젯이 아닌, 채팅 페이지로 이동하여 해당 대화를 표시
+    navigate(`/chat?c=${cid}`);
+  }, [navigate]);
 
   const openInquiryDetail = useCallback(async (id: string) => {
     const { data } = await supabase
