@@ -5687,16 +5687,16 @@ const MapSidebar = ({
                             setExpandedCardId((prev) => (prev === prop.id ? null : prop.id));
                           }
                         }}
-                        className={`w-full text-left transition-all group overflow-hidden rounded-[9px] bg-white cursor-pointer ${
+                        className={`w-full text-left transition-all group cursor-pointer ${
                           selectedId === prop.id
                             ? "shadow-lg"
                             : "shadow-sm hover:shadow-md hover:ring-1 hover:ring-inset hover:ring-primary/30"
                         }`}
 
                       >
-                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-primary to-accent rounded-xl' : 'rounded-xl'}`}>
+                      <div className={`${selectedId === prop.id ? 'p-[3px] bg-gradient-to-br from-primary to-accent rounded-xl' : 'bg-white rounded-xl'}`}>
                         {/* Row: 3줄 레이아웃 — 모바일 게스트/일반회원도 고정 높이로 통일 */}
-                        <div className="flex items-stretch" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
+                        <div className="flex items-stretch bg-white rounded-[9px] overflow-hidden" style={{ width: "100%", minHeight: isMobile ? "120px" : "96px" }}>
                           {/* ①썸네일 — 정사각 고정 96x96 (모바일 게스트·일반회원 120x120) */}
                           {(!isMobile || isGuest || authUser?.memberType === "일반회원") && <div
                             className={`flex-shrink-0 overflow-hidden relative group/thumb ${isMobile ? "w-[120px] h-[120px]" : "w-[96px] h-[96px]"}`}
