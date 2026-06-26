@@ -6178,15 +6178,43 @@ const MapSidebar = ({
                                     <span className="text-xs text-muted-foreground">-</span>
                                  )}
                                </Row>
-                               <Row label="특이사항">
-                                 {noteParts.length > 0 ? (
-                                     <span className="text-xs text-black font-bold whitespace-pre-wrap break-words">
-                                       {noteParts.join(" · ")}
-                                     </span>
-                                   ) : (
+                                <Row label="특이사항">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    {/* 반려동물 아이콘 */}
+                                    {petAllowed && (
+                                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full" style={{ background: "#fff7ed", border: "1px solid #fdba74" }} title="반려동물 가능">
+                                        <img src={petIcon} alt="반려동물 가능" className="w-3.5 h-3.5 object-contain" />
+                                      </span>
+                                    )}
+                                    {petNo && !petAllowed && (
+                                      <span className="relative inline-flex items-center justify-center w-5 h-5 rounded-full" style={{ background: "#fef2f2", border: "1px solid #fca5a5" }} title="반려동물 불가">
+                                        <img src={petIcon} alt="반려동물 불가" className="w-3.5 h-3.5 object-contain" />
+                                        <span className="absolute inset-0 flex items-center justify-center text-red-600 font-extrabold text-xs leading-none">✕</span>
+                                      </span>
+                                    )}
+                                    {/* 단기 아이콘 */}
+                                    {opts.includes("단기가능") && (
+                                      <span className="inline-flex items-center justify-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd" }}>
+                                        <Clock className="w-3 h-3" /> 단기
+                                      </span>
+                                    )}
+                                    {/* 방향 아이콘 */}
+                                    {direction && (
+                                      <span className="inline-flex items-center justify-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac" }}>
+                                        <Compass className="w-3 h-3" /> {direction}향
+                                      </span>
+                                    )}
+                                    {/* 나머지 텍스트 */}
+                                    {noteParts.length > 0 && (
+                                      <span className="text-xs text-black font-bold whitespace-pre-wrap break-words">
+                                        {noteParts.join(" · ")}
+                                      </span>
+                                    )}
+                                    {!(petAllowed || (petNo && !petAllowed) || opts.includes("단기가능") || direction) && noteParts.length === 0 && (
                                       <span className="text-xs text-muted-foreground">-</span>
-                                 )}
-                               </Row>
+                                    )}
+                                  </div>
+                                </Row>
                              </div>
                            );
                          }
