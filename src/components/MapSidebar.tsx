@@ -6182,18 +6182,22 @@ const MapSidebar = ({
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                      {/* 반려동물 아이콘 */}
                                      {petAllowed && (
-                                       <img src={petIcon} alt="반려동물 가능" className="w-5 h-5 object-contain" title="반려동물 가능" style={{ imageRendering: '-webkit-optimize-contrast' }} />
+                                       <span className="inline-flex items-center justify-center w-6 h-6 rounded select-none" style={{ background: "#fff7ed", border: "1px solid #fdba74" }}>
+                                         <img src={petIcon} alt="반려동물 가능" className="w-5 h-5 object-contain" title="반려동물 가능" style={{ imageRendering: '-webkit-optimize-contrast' }} />
+                                       </span>
                                      )}
                                      {petNo && !petAllowed && (
-                                       <div className="relative w-5 h-5">
+                                       <span className="inline-flex items-center justify-center w-6 h-6 rounded select-none relative" style={{ background: "#fef2f2", border: "1px solid #fca5a5" }}>
                                          <img src={petIcon} alt="반려동물 불가" className="w-5 h-5 object-contain" title="반려동물 불가" style={{ imageRendering: '-webkit-optimize-contrast' }} />
-                                         <span className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-[15px] leading-none pointer-events-none" style={{ textShadow: '0 0 2px white' }}>\</span>
-                                       </div>
+                                         <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                           <svg width="20" height="20" viewBox="0 0 20 20"><line x1="3" y1="3" x2="17" y2="17" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" /></svg>
+                                         </span>
+                                       </span>
                                      )}
-                                    {/* 단기 아이콘 */}
+                                    {/* 단기 배지 */}
                                     {opts.includes("단기가능") && (
-                                      <span className="inline-flex items-center justify-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd" }}>
-                                        <Clock className="w-3 h-3" /> 단기
+                                      <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd" }}>
+                                        단기
                                       </span>
                                     )}
                                     {/* 방향 아이콘 */}
