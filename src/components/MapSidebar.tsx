@@ -6072,18 +6072,12 @@ const MapSidebar = ({
                            });
                             const mappedOpts = opts.map(normalizeDisplayOption);
                            const allChips = Array.from(new Set([...facilityList, ...mappedOpts]));
-                            const noteParts: string[] = [];
-                            const earlyExitG = note.includes("중도퇴거:");
-                            if (earlyExitG) noteParts.push("중도퇴거");
-                            if (vacateFutureLabel) noteParts.push(`퇴거예정 ${vacateFutureLabel}`);
-                            if (opts.includes("복층")) noteParts.push("복층");
-                            if (opts.includes("단기가능")) noteParts.push("단기가능");
-                            const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
-                            const keyMoneyG = keyMoneyM?.[1]?.trim();
-                            if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
-                            if (direction) noteParts.push(`${direction}향`);
-                            if (petAllowed) noteParts.push("반려동물 가능");
-                            if (petNo && !petAllowed) noteParts.push("반려동물 불가");
+                             const noteParts: string[] = [];
+                             if (vacateFutureLabel) noteParts.push(`퇴거예정 ${vacateFutureLabel}`);
+                             if (opts.includes("복층")) noteParts.push("복층");
+                             const keyMoneyM = note.match(/권리금:\s*([^\n|]+)/);
+                             const keyMoneyG = keyMoneyM?.[1]?.trim();
+                             if (keyMoneyG && keyMoneyG !== "0" && keyMoneyG !== "없음") noteParts.push(`권리금 ${keyMoneyG}`);
 
                             const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
                               <div className="flex items-start gap-2 py-1 border-b border-primary/10 last:border-0">
