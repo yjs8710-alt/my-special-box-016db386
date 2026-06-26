@@ -6180,13 +6180,16 @@ const MapSidebar = ({
                                </Row>
                                 <Row label="특이사항">
                                   <div className="flex items-center gap-1.5 flex-wrap">
-                                    {/* 반려동물 아이콘 */}
-                                    {petAllowed && (
-                                      <img src={petIcon} alt="반려동물 가능" className="w-5 h-5 object-contain" title="반려동물 가능" style={{ imageRendering: '-webkit-optimize-contrast' }} />
-                                    )}
-                                    {petNo && !petAllowed && (
-                                      <img src={petIcon} alt="반려동물 불가" className="w-5 h-5 object-contain" title="반려동물 불가" style={{ imageRendering: '-webkit-optimize-contrast' }} />
-                                    )}
+                                     {/* 반려동물 아이콘 */}
+                                     {petAllowed && (
+                                       <img src={petIcon} alt="반려동물 가능" className="w-5 h-5 object-contain" title="반려동물 가능" style={{ imageRendering: '-webkit-optimize-contrast' }} />
+                                     )}
+                                     {petNo && !petAllowed && (
+                                       <div className="relative w-5 h-5">
+                                         <img src={petIcon} alt="반려동물 불가" className="w-5 h-5 object-contain" title="반려동물 불가" style={{ imageRendering: '-webkit-optimize-contrast' }} />
+                                         <span className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-[15px] leading-none pointer-events-none" style={{ textShadow: '0 0 2px white' }}>\</span>
+                                       </div>
+                                     )}
                                     {/* 단기 아이콘 */}
                                     {opts.includes("단기가능") && (
                                       <span className="inline-flex items-center justify-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold" style={{ background: "#dbeafe", color: "#2563eb", border: "1px solid #93c5fd" }}>
