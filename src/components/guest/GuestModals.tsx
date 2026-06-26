@@ -560,11 +560,11 @@ export const GuestDetailModal = ({
   onInquiry?: () => void;
   inquiryLabel?: string;
 }) => {
-  if (!open || !info) return null;
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const canShare = !!info.dbId && uuidRegex.test(info.dbId);
+  const canShare = !!info?.dbId && uuidRegex.test(info.dbId);
 
   useEffect(() => {
+    if (!open) return;
     pushOverlay();
     window.history.pushState({ guestDetail: true }, "");
     const onPopState = () => {
@@ -575,7 +575,9 @@ export const GuestDetailModal = ({
       window.removeEventListener("popstate", onPopState);
       popOverlay();
     };
-  }, [onClose]);
+  }, [open, onClose]);
+
+  if (!open || !info) return null;
 
   return createPortal(
     <div
