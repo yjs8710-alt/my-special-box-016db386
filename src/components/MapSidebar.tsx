@@ -29,6 +29,8 @@ import {
   FileSearch,
   Download,
   Star,
+  Clock,
+  Compass,
 } from "lucide-react";
 import cctvIcon from "@/assets/cctv_icon-v2-20260427.png";
 import remodelingIcon from "@/assets/remodeling_icon-v2-20260427.png";
