@@ -116,6 +116,8 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
           title,
           description: fullDescription,
           imageUrl,
+          imageWidth: 800,
+          imageHeight: 400,
           link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
         },
         buttons: [
