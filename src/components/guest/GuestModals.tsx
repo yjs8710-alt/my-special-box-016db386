@@ -553,6 +553,12 @@ export const GuestDetailModal = ({
   info,
   onInquiry,
   inquiryLabel = "문의하기",
+}: {
+  open: boolean;
+  onClose: () => void;
+  info?: GuestDetailInfo;
+  onInquiry?: () => void;
+  inquiryLabel?: string;
 }) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const canShare = !!info?.dbId && uuidRegex.test(info.dbId);
