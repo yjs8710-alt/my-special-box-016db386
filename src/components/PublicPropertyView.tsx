@@ -223,7 +223,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
         });
 
       const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
-      if (!hasImages && data.address) {
+      if (data.address) {
         (supabase as any)
           .rpc("get_public_property_reference_images", { _property_id: data.id })
           .then(({ data: siblings }: any) => {
@@ -239,8 +239,11 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               .filter((u: any) => u.images.length > 0);
             if (units.length > 0) {
               setOtherUnits(units);
-              setSelectedUnitId(units[0].id);
-              setFallbackImages(units[0].images);
+              // 본 호실에 사진이 없는 경우에만 다른 호실 사진을 기본 노출
+              if (!hasImages) {
+                setSelectedUnitId(units[0].id);
+                setFallbackImages(units[0].images);
+              }
             }
           });
       }
