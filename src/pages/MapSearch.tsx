@@ -89,26 +89,32 @@ const MapSearch = () => {
       return false;
     }
     if (query && !regNoMatch) {
-      if (!canSearchByText) return false;
       const q = query.toLowerCase().trim();
-      const qNorm = q.replace(/번지$/, "").trim();
-      const addr = p.address.toLowerCase();
-      const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
-      const dongLotMatch = dongLotPattern !== null &&
-        addr.includes(dongLotPattern[1]) &&
-        addr.includes(dongLotPattern[2]);
-      const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
-      const lotOnlyMatch = lotOnlyPattern !== null &&
-        new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
-      const matchText =
-        addr.includes(qNorm) ||
-        addr.includes(q) ||
-        p.title.toLowerCase().includes(qNorm) ||
-        (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
-        (p.regNo ?? "").includes(qNorm) ||
-        dongLotMatch ||
-        lotOnlyMatch;
-      if (!matchText) return false;
+      const isDongSearch = /[가-힣]+동$/.test(q);
+      if (!canSearchByText && !isDongSearch) return false;
+
+      if (isDongSearch && !canSearchByText) {
+        if (!p.address.toLowerCase().includes(q)) return false;
+      } else {
+        const qNorm = q.replace(/번지$/, "").trim();
+        const addr = p.address.toLowerCase();
+        const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+        const dongLotMatch = dongLotPattern !== null &&
+          addr.includes(dongLotPattern[1]) &&
+          addr.includes(dongLotPattern[2]);
+        const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
+        const lotOnlyMatch = lotOnlyPattern !== null &&
+          new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
+        const matchText =
+          addr.includes(qNorm) ||
+          addr.includes(q) ||
+          p.title.toLowerCase().includes(qNorm) ||
+          (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
+          (p.regNo ?? "").includes(qNorm) ||
+          dongLotMatch ||
+          lotOnlyMatch;
+        if (!matchText) return false;
+      }
     }
     return true;
   });
