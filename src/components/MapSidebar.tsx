@@ -147,8 +147,9 @@ function LightboxModal({
 
   const hasTabs = units.length > 1 || units.some((u) => u.isReference);
   const [showMoreUnits, setShowMoreUnits] = useState(false);
-  // 모바일에서는 한 줄에 보여줄 탭 수를 제한 (현재방 + 다른방 1개)
-  const MOBILE_VISIBLE_TABS = 2;
+  // 모바일에서는 한 줄에 보여줄 탭 수를 제한 — 같은 주소 다른 호실(종료 포함)을 보기 쉽게 4개까지 노출
+  const MOBILE_VISIBLE_TABS = 4;
+
   const visibleUnits = isMobileView && units.length > MOBILE_VISIBLE_TABS
     ? units.slice(0, MOBILE_VISIBLE_TABS)
     : units;
