@@ -6014,7 +6014,7 @@ const MapSidebar = ({
                             onCheckedDateUpdated={handleCheckedDateUpdated}
                             agencyInfo={myAgencyInfo}
                             isMobile={isMobile}
-                            onOpenPhotos={() => {
+                            onOpenPhotos={async () => {
                               const hasOwnImages = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               const sameAddr = properties.filter(
                                 (p) => p.address === prop.address && ((p.images && p.images.length > 0) || p.image),
@@ -6055,11 +6055,46 @@ const MapSidebar = ({
                               if (!hasOwnImages) {
                                 exclude.add(`${prop.unitNumber || "?"}|${prop.roomType || ""}`);
                               }
-                              const inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
+                              let inactiveUnits = getInactiveUnitsForAddress(prop.address, exclude);
+                              if (inactiveUnits.length === 0 && !inactiveRefMap.has(prop.address)) {
+                                try {
+                                  const { data } = await supabase.rpc("get_reference_images", { _addresses: [prop.address] });
+                                  const fetched: InactiveUnit[] = [];
+                                  for (const row of (data as Array<{ address: string; unit_number: string; room_type: string; floor?: string; images: string[] }> | null) ?? []) {
+                                    if (!row.images || row.images.length === 0 || !row.images[0]) continue;
+                                    fetched.push({
+                                      image: row.images[0],
+                                      images: row.images,
+                                      unitNumber: row.unit_number || "?",
+                                      roomType: row.room_type || "",
+                                      floor: row.floor || "",
+                                      address: row.address,
+                                    });
+                                  }
+                                  if (fetched.length > 0) {
+                                    setInactiveRefMap((prev) => {
+                                      const next = new Map(prev);
+                                      next.set(prop.address, fetched);
+                                      return next;
+                                    });
+                                    inactiveUnits = fetched
+                                      .filter((u) => !exclude.has(`${u.unitNumber}|${u.roomType}`))
+                                      .map((u) => ({
+                                        unitNumber: u.unitNumber ? `${u.unitNumber}호` : undefined,
+                                        roomType: u.roomType || undefined,
+                                        floor: u.floor || undefined,
+                                        label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
+                                        images: u.images,
+                                        isReference: true,
+                                      }));
+                                  }
+                                } catch { /* noop */ }
+                              }
                               const allUnits = [...activeUnits, ...inactiveUnits];
                               if (allUnits.length === 0) return;
                               setLightbox({ units: allUnits, unitIdx: 0 });
                             }}
+
                             fallbackImage={(() => {
                               const hasOwn = (prop.images && prop.images.length > 0) || (prop.image && prop.image.length > 0);
                               if (hasOwn) return undefined;
