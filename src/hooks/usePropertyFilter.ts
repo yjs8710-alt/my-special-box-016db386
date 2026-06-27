@@ -96,26 +96,33 @@ export function usePropertyFilter(
 
       // 텍스트 검색
       if (query) {
-        if (!canSearchByText) return false;
         const q = query.toLowerCase().trim();
-        const qNorm = q.replace(/번지$/, "").trim();
-        const addr = p.address.toLowerCase();
-        const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
-        const dongLotMatch = dongLotPattern !== null &&
-          addr.includes(dongLotPattern[1]) &&
-          addr.includes(dongLotPattern[2]);
-        const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
-        const lotOnlyMatch = lotOnlyPattern !== null &&
-          new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
-        const matchText =
-          addr.includes(qNorm) ||
-          addr.includes(q) ||
-          p.title.toLowerCase().includes(qNorm) ||
-          (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
-          (p.regNo ?? "").includes(qNorm) ||
-          dongLotMatch ||
-          lotOnlyMatch;
-        if (!matchText) return false;
+        const isDongSearch = /[가-힣]+동$/.test(q);
+        if (!canSearchByText && !isDongSearch) return false;
+
+        if (isDongSearch && !canSearchByText) {
+          // 일반회원/게스트 동 검색: 주소에 해당 동명이 포함되어야 함
+          if (!p.address.toLowerCase().includes(q)) return false;
+        } else {
+          const qNorm = q.replace(/번지$/, "").trim();
+          const addr = p.address.toLowerCase();
+          const dongLotPattern = qNorm.match(/([가-힣]+동)\s+(\d[\d\-]*)/);
+          const dongLotMatch = dongLotPattern !== null &&
+            addr.includes(dongLotPattern[1]) &&
+            addr.includes(dongLotPattern[2]);
+          const lotOnlyPattern = qNorm.match(/^(\d[\d\-]*)$/);
+          const lotOnlyMatch = lotOnlyPattern !== null &&
+            new RegExp(`(^|\\s)${lotOnlyPattern[1]}(\\s|$)`).test(addr);
+          const matchText =
+            addr.includes(qNorm) ||
+            addr.includes(q) ||
+            p.title.toLowerCase().includes(qNorm) ||
+            (p.buildingName ?? "").toLowerCase().includes(qNorm) ||
+            (p.regNo ?? "").includes(qNorm) ||
+            dongLotMatch ||
+            lotOnlyMatch;
+          if (!matchText) return false;
+        }
       }
 
       // 거래 유형 (월세/전세/단기임대/임대/매매)
