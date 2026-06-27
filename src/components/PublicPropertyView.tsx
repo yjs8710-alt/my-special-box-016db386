@@ -270,8 +270,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   }
 
   const ownImgs = (property.images || []).filter(Boolean);
-  const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
-  const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
+  const viewingOtherUnit = selectedUnitId !== "" && fallbackImages.length > 0;
+  const imgs = viewingOtherUnit ? fallbackImages : (ownImgs.length > 0 ? ownImgs : fallbackImages);
+  const showingOtherUnit = viewingOtherUnit || (ownImgs.length === 0 && fallbackImages.length > 0);
   // 집합건물/공동주택은 번지수까지 노출 (호수는 미포함)
   const collective = isCollectiveBuilding(property.type);
   const safeAddress = collective
