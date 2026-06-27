@@ -389,12 +389,28 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
           </div>
         )}
 
-        {showingOtherUnit && otherUnits.length > 0 && (
+        {otherUnits.length > 0 && (
           <div className="px-5 pt-4">
             <p className="text-xs font-bold text-foreground mb-2">
-              📷 사진이 등록되지 않아 같은 건물 다른 호실 사진을 보여드립니다.
+              {ownImgs.length === 0
+                ? "📷 사진이 등록되지 않아 같은 건물 다른 호실 사진을 보여드립니다."
+                : "📷 같은 건물 다른 호실 사진도 참고해보세요."}
             </p>
             <div className="flex flex-wrap gap-1.5">
+              {ownImgs.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSelectedUnitId("");
+                    setFallbackImages([]);
+                    setImgIdx(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
+                    !viewingOtherUnit ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border hover:border-primary/50"
+                  }`}
+                >
+                  본 호실
+                </button>
+              )}
               {otherUnits.map((u) => {
                 const floorTxt = (u.floor ?? "").trim();
                 const floorLabel = floorTxt ? (/[층F]/.test(floorTxt) ? floorTxt : `${floorTxt}층`) : "호실";
