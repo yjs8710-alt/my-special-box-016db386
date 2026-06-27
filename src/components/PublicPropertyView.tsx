@@ -223,7 +223,7 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
         });
 
       const hasImages = Array.isArray(data.images) && data.images.filter(Boolean).length > 0;
-      if (!hasImages && data.address) {
+      if (data.address) {
         (supabase as any)
           .rpc("get_public_property_reference_images", { _property_id: data.id })
           .then(({ data: siblings }: any) => {
@@ -239,8 +239,11 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
               .filter((u: any) => u.images.length > 0);
             if (units.length > 0) {
               setOtherUnits(units);
-              setSelectedUnitId(units[0].id);
-              setFallbackImages(units[0].images);
+              // 본 호실에 사진이 없는 경우에만 다른 호실 사진을 기본 노출
+              if (!hasImages) {
+                setSelectedUnitId(units[0].id);
+                setFallbackImages(units[0].images);
+              }
             }
           });
       }
@@ -267,8 +270,9 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
   }
 
   const ownImgs = (property.images || []).filter(Boolean);
-  const imgs = ownImgs.length > 0 ? ownImgs : fallbackImages;
-  const showingOtherUnit = ownImgs.length === 0 && fallbackImages.length > 0;
+  const viewingOtherUnit = selectedUnitId !== "" && fallbackImages.length > 0;
+  const imgs = viewingOtherUnit ? fallbackImages : (ownImgs.length > 0 ? ownImgs : fallbackImages);
+  const showingOtherUnit = viewingOtherUnit || (ownImgs.length === 0 && fallbackImages.length > 0);
   // 집합건물/공동주택은 번지수까지 노출 (호수는 미포함)
   const collective = isCollectiveBuilding(property.type);
   const safeAddress = collective
@@ -385,12 +389,28 @@ export default function PublicPropertyView({ id, sharedBy, showHeader = true, cl
           </div>
         )}
 
-        {showingOtherUnit && otherUnits.length > 0 && (
+        {otherUnits.length > 0 && (
           <div className="px-5 pt-4">
             <p className="text-xs font-bold text-foreground mb-2">
-              📷 사진이 등록되지 않아 같은 건물 다른 호실 사진을 보여드립니다.
+              {ownImgs.length === 0
+                ? "📷 사진이 등록되지 않아 같은 건물 다른 호실 사진을 보여드립니다."
+                : "📷 같은 건물 다른 호실 사진도 참고해보세요."}
             </p>
             <div className="flex flex-wrap gap-1.5">
+              {ownImgs.length > 0 && (
+                <button
+                  onClick={() => {
+                    setSelectedUnitId("");
+                    setFallbackImages([]);
+                    setImgIdx(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold border transition ${
+                    !viewingOtherUnit ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border hover:border-primary/50"
+                  }`}
+                >
+                  본 호실
+                </button>
+              )}
               {otherUnits.map((u) => {
                 const floorTxt = (u.floor ?? "").trim();
                 const floorLabel = floorTxt ? (/[층F]/.test(floorTxt) ? floorTxt : `${floorTxt}층`) : "호실";
