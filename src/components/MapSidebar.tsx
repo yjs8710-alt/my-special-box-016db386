@@ -4755,7 +4755,7 @@ const MapSidebar = ({
 
   // 동일 주소 참고용 사진 (RLS 우회 RPC 사용 — 일반 사용자도 inactive/타카테고리 사진 조회 가능)
   // 주소별 모든 호실(active 풀에 없는 종료 매물 포함)을 보관 → 사진 보기 시 함께 노출
-  type InactiveUnit = { image: string; images: string[]; unitNumber: string; roomType: string; address: string };
+  type InactiveUnit = { image: string; images: string[]; unitNumber: string; roomType: string; floor: string; address: string };
   const [inactiveRefMap, setInactiveRefMap] = useState<Map<string, InactiveUnit[]>>(new Map());
   useEffect(() => {
     let cancelled = false;
@@ -4771,7 +4771,7 @@ const MapSidebar = ({
 
       if (!cancelled && data) {
         const map = new Map<string, InactiveUnit[]>();
-        for (const row of data as Array<{ address: string; unit_number: string; room_type: string; images: string[] }>) {
+        for (const row of data as Array<{ address: string; unit_number: string; room_type: string; floor?: string; images: string[] }>) {
           const imgs = row.images;
           if (!imgs || imgs.length === 0 || !imgs[0]) continue;
           const list = map.get(row.address) ?? [];
@@ -4780,6 +4780,7 @@ const MapSidebar = ({
             images: imgs,
             unitNumber: row.unit_number || "?",
             roomType: row.room_type || "",
+            floor: row.floor || "",
             address: row.address,
           });
           map.set(row.address, list);
@@ -4827,6 +4828,7 @@ const MapSidebar = ({
       .map((u) => ({
         unitNumber: u.unitNumber ? `${u.unitNumber}호` : undefined,
         roomType: u.roomType || undefined,
+        floor: u.floor || undefined,
         label: `${u.unitNumber}호${u.roomType ? ` ${u.roomType}` : ""} (종료)`,
         images: u.images,
         isReference: true,

@@ -961,6 +961,7 @@ export type Database = {
         Args: { _addresses: string[] }
         Returns: {
           address: string
+          floor: string
           images: string[]
           room_type: string
           unit_number: string
