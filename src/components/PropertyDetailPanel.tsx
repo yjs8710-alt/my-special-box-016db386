@@ -1628,6 +1628,23 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
       });
   }, [authUser?.userId]);
 
+  // 게스트/일반회원에게 보여줄 등록자(중개사) 사무소명 조회
+  useEffect(() => {
+    const regBy = (property as { registeredBy?: string } | null)?.registeredBy;
+    if (!showAgencyOnly || !regBy) { setRegistrarAgencyName(""); return; }
+    let cancelled = false;
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name")
+      .eq("user_id", regBy)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setRegistrarAgencyName(data?.agency_name?.trim() || data?.name?.trim() || "");
+      });
+    return () => { cancelled = true; };
+  }, [showAgencyOnly, (property as { registeredBy?: string } | null)?.registeredBy]);
+
   if (!property) return null;
 
   const typeStyle = TYPE_STYLE[property.type] ?? { bg: "bg-primary", text: "text-white" };
