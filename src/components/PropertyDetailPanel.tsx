@@ -1579,6 +1579,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
   // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
   const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
+  // 게스트/일반회원에게 표시할 담당 부동산 사무소명 (등록자 user_id 기준)
+  const [registrarAgencyName, setRegistrarAgencyName] = useState<string>("");
+  const isGeneralMember = authUser?.memberType === "일반회원";
+  const showAgencyOnly = isGuest || isGeneralMember;
 
   // 모바일 뒤로가기 → 패널 닫기 (단, 위에 다른 오버레이/채팅이 열려 있으면 무시)
   useEffect(() => {
@@ -1623,6 +1627,23 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
         if (data) setMyAgencyInfo({ userId: authUser.userId, agencyName: data.agency_name, name: data.name, phone: data.phone, agencyPhone: data.agency_phone ?? "", representativeName: data.representative_name ?? "", agencyAddress: data.agency_address ?? "", licenseNumber: data.license_number ?? "" });
       });
   }, [authUser?.userId]);
+
+  // 게스트/일반회원에게 보여줄 등록자(중개사) 사무소명 조회
+  useEffect(() => {
+    const regBy = (property as { registeredBy?: string } | null)?.registeredBy;
+    if (!showAgencyOnly || !regBy) { setRegistrarAgencyName(""); return; }
+    let cancelled = false;
+    supabase
+      .from("agent_profiles")
+      .select("agency_name, name")
+      .eq("user_id", regBy)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        setRegistrarAgencyName(data?.agency_name?.trim() || data?.name?.trim() || "");
+      });
+    return () => { cancelled = true; };
+  }, [showAgencyOnly, (property as { registeredBy?: string } | null)?.registeredBy]);
 
   if (!property) return null;
 
@@ -2037,7 +2058,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 <Building2 className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-foreground">{property.agentName}</p>
+                <p className="text-sm font-bold text-foreground">{showAgencyOnly ? (registrarAgencyName || "봄날부동산공인중개사사무소") : property.agentName}</p>
                 <p className="text-xs text-muted-foreground">공인중개사</p>
               </div>
               {!isGuest && property.contact && (
