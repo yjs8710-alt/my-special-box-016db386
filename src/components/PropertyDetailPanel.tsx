@@ -2058,7 +2058,7 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
                 <Building2 className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-foreground">{property.agentName}</p>
+                <p className="text-sm font-bold text-foreground">{showAgencyOnly ? (registrarAgencyName || "봄날부동산공인중개사사무소") : property.agentName}</p>
                 <p className="text-xs text-muted-foreground">공인중개사</p>
               </div>
               {!isGuest && property.contact && (
