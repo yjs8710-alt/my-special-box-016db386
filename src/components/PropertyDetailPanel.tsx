@@ -1579,6 +1579,10 @@ const PropertyDetailPanel = ({ property, onClose, sameProperties = [] }: Propert
   const [myAgencyInfo, setMyAgencyInfo] = useState<AgencyInfo | undefined>(undefined);
   // 동일주소의 종료(inactive) 호실 사진들도 라이트박스에 표시
   const [inactiveUnits, setInactiveUnits] = useState<Array<{ unitNumber: string; roomType: string; images: string[] }>>([]);
+  // 게스트/일반회원에게 표시할 담당 부동산 사무소명 (등록자 user_id 기준)
+  const [registrarAgencyName, setRegistrarAgencyName] = useState<string>("");
+  const isGeneralMember = authUser?.memberType === "일반회원";
+  const showAgencyOnly = isGuest || isGeneralMember;
 
   // 모바일 뒤로가기 → 패널 닫기 (단, 위에 다른 오버레이/채팅이 열려 있으면 무시)
   useEffect(() => {
