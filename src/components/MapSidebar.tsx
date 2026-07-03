@@ -5334,7 +5334,7 @@ const MapSidebar = ({
               ? "flex-1 w-full min-h-0"
               : collapsed
                 ? "hidden"
-                : "border-l border-border opacity-100"
+                : "opacity-100"
           }`}
           style={
             isMobile
