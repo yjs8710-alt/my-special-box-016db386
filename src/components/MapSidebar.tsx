@@ -6360,8 +6360,16 @@ const MapSidebar = ({
                                    ) : (
                                      <span className="text-[11px] text-muted-foreground">-</span>
                                   )}
-                                </Row>
-                                {/* 비밀번호 (방 비번 없으면 숨김) */}
+                                 </Row>
+                                 {/* 방향 뱃지 */}
+                                 {direction && (
+                                   <Row label="방향">
+                                     <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>
+                                       {direction}향
+                                     </span>
+                                   </Row>
+                                 )}
+                                 {/* 비밀번호 (방 비번 없으면 숨김) */}
                                 {(prop.buildingPassword || prop.password || prop.roomPassword) && (
                                   <Row label="비밀번호">
                                     {(prop.buildingPassword || prop.password) && (
