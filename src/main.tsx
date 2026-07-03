@@ -3,9 +3,13 @@ import App from "./App.tsx";
 import "./index.css";
 
 if (typeof window !== "undefined") {
-  import("@capacitor/splash-screen")
-    .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 0 }))
-    .catch(() => {});
+  // Splash는 capacitor.config.ts의 launchShowDuration(1500ms) 동안 노출된 뒤 자동 페이드아웃.
+  // 앱 첫 렌더 완료 시점에 안전하게 hide() 호출 (이미 자동 숨김되었다면 no-op).
+  window.addEventListener("load", () => {
+    import("@capacitor/splash-screen")
+      .then(({ SplashScreen }) => SplashScreen.hide({ fadeOutDuration: 300 }))
+      .catch(() => {});
+  });
 }
 
 // SW unregister는 index.html의 인라인 스크립트에서 1회 처리합니다.
