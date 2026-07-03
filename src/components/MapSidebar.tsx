@@ -6306,7 +6306,7 @@ const MapSidebar = ({
                             const keyMoneyM2 = note.match(/권리금:\s*([^\n|]+)/);
                             const keyMoneyV = keyMoneyM2?.[1]?.trim();
                             if (keyMoneyV && keyMoneyV !== "0" && keyMoneyV !== "없음") noteParts.push(`권리금 ${keyMoneyV}`);
-                            if (direction) noteParts.push(`${direction}향`);
+                            // 방향은 별도 뱃지로 표시, noteParts 텍스트 중복 방지
                             const vacateMemoPart = vacateFutureLabel
                               ? `퇴거예정 ${vacateFutureLabel}`
                               : prop.availableFrom === "공실"
