@@ -5256,13 +5256,14 @@ const MapSidebar = ({
       >
         {/* Toggle tab — 사이드바 왼쪽 (데스크톱 전용) */}
         {!isMobile && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="self-start bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors flex-shrink-0"
-            style={{ marginTop: "32px" }}
-          >
-            {collapsed ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-          </button>
+          <div className="flex-shrink-0 self-stretch flex items-start bg-primary" style={{ paddingTop: "32px" }}>
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="bg-primary text-primary-foreground border-0 rounded-l-xl px-1.5 py-4 shadow-lg hover:bg-primary/90 transition-colors"
+            >
+              {collapsed ? <ChevronLeft className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         )}
 
         {/* 모바일 전용 peek 헤더 — 탭하면 단계적 확장 */}
