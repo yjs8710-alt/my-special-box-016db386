@@ -6306,7 +6306,7 @@ const MapSidebar = ({
                             const keyMoneyM2 = note.match(/권리금:\s*([^\n|]+)/);
                             const keyMoneyV = keyMoneyM2?.[1]?.trim();
                             if (keyMoneyV && keyMoneyV !== "0" && keyMoneyV !== "없음") noteParts.push(`권리금 ${keyMoneyV}`);
-                            if (direction) noteParts.push(`${direction}향`);
+                            // 방향은 별도 뱃지로 표시, noteParts 텍스트 중복 방지
                             const vacateMemoPart = vacateFutureLabel
                               ? `퇴거예정 ${vacateFutureLabel}`
                               : prop.availableFrom === "공실"
@@ -6360,8 +6360,16 @@ const MapSidebar = ({
                                    ) : (
                                      <span className="text-[11px] text-muted-foreground">-</span>
                                   )}
-                                </Row>
-                                {/* 비밀번호 (방 비번 없으면 숨김) */}
+                                 </Row>
+                                 {/* 방향 뱃지 */}
+                                 {direction && (
+                                   <Row label="방향">
+                                     <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded font-bold text-[11px]" style={{ background: "#fff3e0", color: "#e65100", border: "1px solid #ffcc80" }}>
+                                       {direction}향
+                                     </span>
+                                   </Row>
+                                 )}
+                                 {/* 비밀번호 (방 비번 없으면 숨김) */}
                                 {(prop.buildingPassword || prop.password || prop.roomPassword) && (
                                   <Row label="비밀번호">
                                     {(prop.buildingPassword || prop.password) && (
