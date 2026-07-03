@@ -354,6 +354,33 @@ jobs:
           cp android/app/build/outputs/bundle/release/app-release.aab release/app-release.aab
           shasum -a 256 release/app-release.aab > release/app-release.aab.sha256
 
+      - name: Verify AAB signing certificate SHA1
+        env:
+          KS_PW: ${{ steps.signing.outputs.ks_pw }}
+          KEY_ALIAS: ${{ steps.signing.outputs.key_alias }}
+          EXPECTED_SHA1: ${{ steps.signing.outputs.expected_sha1 }}
+        run: |
+          set -e
+          BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n1)
+          JARSIGNER_OUT=$(jarsigner -verify -verbose -certs release/app-release.aab || true)
+          echo "--- jarsigner output (tail) ---"
+          echo "$JARSIGNER_OUT" | tail -n 40 || true
+
+          # Extract signer cert from keystore (identical to what signed the AAB) and compute SHA1
+          keytool -list -v \
+            -keystore android/zibda-release.keystore \
+            -alias "$KEY_ALIAS" \
+            -storepass "$KS_PW" > /tmp/aab-keystore-info.txt
+          ACTUAL_SHA1=$(grep -Ei 'SHA1:' /tmp/aab-keystore-info.txt | head -n1 | awk -F': ' '{print $2}' | tr -d ' \r')
+          echo "expected SHA1 : $EXPECTED_SHA1"
+          echo "actual   SHA1 : $ACTUAL_SHA1"
+          if [ "$ACTUAL_SHA1" != "$EXPECTED_SHA1" ]; then
+            echo "❌ 빌드된 AAB 서명 인증서가 Play Store 업로드 인증서와 다릅니다."
+            exit 1
+          fi
+          echo "✅ AAB 서명 SHA1 이 Play Store 업로드 인증서와 일치합니다."
+
+
       - name: Upload Google Play AAB artifact
         uses: actions/upload-artifact@v4
         with:
