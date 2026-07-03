@@ -193,3 +193,17 @@ input::-webkit-list-button { display: none !important; }
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.25; transform: scale(1.35); }
 }
+
+/* 설치된 앱(Capacitor/PWA standalone)에서 상단 상태바(시간·배터리)와 헤더 겹침 방지 */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  header {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+html.capacitor-app header {
+  padding-top: env(safe-area-inset-top);
+}
+html.capacitor-app body {
+  background-color: hsl(var(--header-bg));
+}
+
