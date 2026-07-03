@@ -105,44 +105,55 @@ export async function sharePropertyToKakao(property: MapProperty, agencyInfo?: A
   const imageUrl =
     property.images?.[0] || property.image || fallbackImageUrl || defaultShareLogo;
 
-  // 1) 카카오톡 SDK 시도
-  let kakaoOk = false;
-  try {
-    await ensureKakaoSdk();
-    if (window.Kakao?.Share) {
-      window.Kakao.Share.sendDefault({
-        objectType: "feed",
-        content: {
-          title,
-          description: fullDescription,
-          imageUrl,
-          imageWidth: 800,
-          imageHeight: 400,
-          link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
-        },
-        buttons: [
-          { title: "매물 보기", link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
-        ],
-      });
-      kakaoOk = true;
-      return;
-    }
-  } catch (e) {
-    console.warn("[kakaoShare] SDK 실패, 대체 공유 사용:", e);
-  }
-
-  if (kakaoOk) return;
-
-  // 2) Web Share API (모바일 OS 기본 공유 시트 → 카톡 선택 가능)
+  // 모바일(Capacitor/모바일 브라우저)에서는 OS 공유 시트가 카톡 포함 가장 안정적
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  const isCapacitor = typeof window !== "undefined" && !!(window as any).Capacitor?.isNativePlatform?.();
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || isCapacitor;
   const shareText = `${title}\n${fullDescription}\n${shareUrl}`;
-  try {
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      await (navigator as any).share({ title, text: `${title}\n${fullDescription}`, url: shareUrl });
-      return;
+
+  if (isMobile) {
+    // 1) Web Share API (사용자가 카카오톡 선택 가능)
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share({ title, text: `${title}\n${fullDescription}`, url: shareUrl });
+        return;
+      }
+    } catch (e: any) {
+      if (e?.name === "AbortError") return; // 사용자 취소
     }
-  } catch (e) {
-    // 사용자 취소 또는 실패 → 클립보드로 폴백
+    // 2) 카카오톡 앱 스킴 직접 호출 (설치되어 있으면 앱으로 열림)
+    try {
+      const kakaoScheme = `kakaolink://send?msg=${encodeURIComponent(shareText)}`;
+      window.location.href = kakaoScheme;
+      // 스킴이 실패해도 3번으로 폴백되도록 잠깐 대기
+      await new Promise((r) => setTimeout(r, 400));
+    } catch {}
+  } else {
+    // 데스크톱: 카카오 SDK 우선
+    try {
+      await ensureKakaoSdk();
+      if (window.Kakao?.Share) {
+        window.Kakao.Share.sendDefault({
+          objectType: "feed",
+          content: {
+            title,
+            description: fullDescription,
+            imageUrl,
+            imageWidth: 800,
+            imageHeight: 400,
+            link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+          },
+          buttons: [
+            { title: "매물 보기", link: { mobileWebUrl: shareUrl, webUrl: shareUrl } },
+          ],
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("[kakaoShare] SDK 실패, 대체 공유 사용:", e);
+    }
   }
+
 
   // 3) 최종 폴백: 클립보드 복사
   try {
