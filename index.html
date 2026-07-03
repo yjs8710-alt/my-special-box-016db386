@@ -57,14 +57,10 @@
     <script>
       (function(){
         var ua = navigator.userAgent || '';
-        var isCapacitor = !!(window.Capacitor || /Capacitor|wv|; wv\)/i.test(ua)) || location.protocol === 'capacitor:' || location.protocol === 'ionic:';
-        var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-        if (isCapacitor || isStandalone) document.documentElement.classList.add('capacitor-app');
-        var skip = isStandalone || isCapacitor;
+        var skip = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true || !!(window.Capacitor || /Capacitor|wv|; wv\)/i.test(ua)) || location.protocol === 'capacitor:' || location.protocol === 'ionic:';
         if (skip) document.documentElement.classList.add('zibda-no-splash');
       })();
     </script>
-
     <style>
       #zibda-splash{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#22d3ee 0%,#a855f7 52%,#ec4899 100%);transition:opacity .25s ease;}
       #zibda-splash.hide{opacity:0;pointer-events:none;}
